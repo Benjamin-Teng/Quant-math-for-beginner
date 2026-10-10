@@ -74,7 +74,7 @@ period. YAML strings with backslashes need double escaping inside double quotes 
 | `> [!deepdive]- Title` | optional rigorous proof, collapsed |
 | `> [!kc]` + nested `> > [!answer]-` | knowledge check (one per numbered section) |
 | `> [!case] Title`, `> [!note] Title`, `> [!python] Title` | motivating case, side note, pointer to code/lab |
-| `[[LM14]]`, `[[LM14|text]]` | link to another module (rendered as "coming" until it is published) |
+| `[[LM14]]`, `[[LM14\|text]]` | link to another module (rendered as "coming" until it is published) |
 | `[[ex:label]]`, `[[eg:label]]` | "Exhibit k" / "Example k" with automatic numbering; never type exhibit or example numbers by hand, not even in code comments or widget notes |
 | `<div data-chart="lmNN-name"></div>` | chart from `src/data/lmNN-name.json` (inside an exhibit) |
 | `<div class="widget" data-widget="name"></div>` | interactive figure defined in `src/lmNN.js` |

@@ -13,20 +13,19 @@
 
 ## Owner action (not for Claude Code)
 
-- Ask GitHub Support (https://support.github.com/request, "Remove sensitive data") to remove cached views and
+- Ask GitHub Support (<https://support.github.com/request>, "Remove sensitive data") to remove cached views and
   pull-request references for commits purged on 2026-10-10 because they contained raw FinMind data: PR #1 head
   `e3ed88b`, and the old `main` commits `cfc45f0`, `a9de9cf`, `44d199c`, `8ec5034`, `f959c26`, `49b0748`, `5b56679`.
   They are no longer in any branch but GitHub still serves them by SHA.
 
 ## Tasks, in order
 
-0. **Rebuild the raw data on the owner's computer.** Raw FinMind files are no longer in the repo. Run
-   `export FINMIND_TOKEN=…; ./build.sh --fetch` once: it downloads every file listed in `data/raw_manifest.json`,
-   checks each byte for byte, and builds the labs' `data/` folders. The download code could not be tested from the
-   cloud container (no route to FinMind); its parsing was tested against real FinMind rows. Fix any problem before
-   task 1, and never commit `data/raw/` or `labs/*/data/`.
+0. ~~Rebuild the raw data on the owner's computer.~~ **Done 2026-10-10** on the owner's Windows computer: a clean
+   checkout fetched all 34 manifest files from FinMind and matched each byte for byte, and the 28 lab data files built
+   from them match. One fix: the `00679B_dividends.csv` filter (FinMind labels that ETF's cash dividends `除息`, not
+   `息`); `fetch_finmind.py --add` now test-fetches before registering. Never commit `data/raw/` or `labs/*/data/`.
 1. **Verify LM1 and LM2.** Run the verifier template (`reviews/REVIEW_PROMPT.md` §3) on each, with the reviewed commit
-   `44d199c`. Update the status column in `reviews/lm01.md` and `reviews/lm02.md`. Reopened findings go back to a
+   `390c790` (the 2026-10-10 history rewrite renamed every commit; `44d199c` is the same tree). Update the status column in `reviews/lm01.md` and `reviews/lm02.md`. Reopened findings go back to a
    writer (template §2), then verify again.
 2. **Revise LM4** from `reviews/lm04.md`: the critical skewness error, the eight major findings, the notation renaming
    (binary bet gain b / loss a, fractional Kelly c, Π, r_f, y; widget labels in `src/lm04.js`), the exact 95% band

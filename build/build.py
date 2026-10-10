@@ -12,13 +12,21 @@ Markdown dialect (Obsidian-compatible):
   * <div data-chart="id"></div>       chart, spec from src/data/<id>.json
   * <div class="widget" data-widget="name"></div>   interactive figure (page JS)
 """
-import argparse, html, json, re, subprocess, sys, shutil
+import argparse
+import html
+import json
+import re
+import shutil
+import subprocess
+import sys
 from pathlib import Path
+
 import yaml
 from markdown_it import MarkdownIt
 from pygments import highlight
+from pygments.formatters.html import HtmlFormatter
 from pygments.lexers import get_lexer_by_name
-from pygments.formatters import HtmlFormatter
+from pygments.util import ClassNotFound
 
 ROOT = Path(__file__).resolve().parents[1]
 SRC, BUILD = ROOT / "src", ROOT / "build"
@@ -95,7 +103,7 @@ class MathStore:
     def render(self):
         if not self.items: return []
         out = subprocess.run(["node", str(BUILD / "katex_render.js")], input=json.dumps(self.items),
-                             capture_output=True, text=True, check=True).stdout
+                             capture_output=True, text=True, encoding="utf-8", check=True).stdout
         res = json.loads(out)
         errs = [(self.items[i]["tex"], r["error"]) for i, r in enumerate(res) if isinstance(r, dict)]
         if errs:
@@ -125,17 +133,17 @@ def fence_html(code, lang):
     lang = (lang or "text").strip().split()[0]
     try:
         body = highlight(code, get_lexer_by_name(lang), HtmlFormatter(nowrap=True))
-    except Exception:
+    except ClassNotFound:                                  # unknown fence language: plain text
         body = html.escape(code)
     label = {"python": "Python", "bash": "Shell", "sh": "Shell", "text": "Text"}.get(lang, lang)
     return (f'<div class="code"><div class="code-h"><span>{label}</span><button class="copy" type="button">Copy</button></div>'
             f'<pre class="hl"><code>{body}</code></pre></div>')
 
 MD = MarkdownIt("commonmark", {"html": True, "typographer": True}).enable(["table", "strikethrough"])
-def _fence(tokens, idx, options, env):
+def _fence(self, tokens, idx, options, env):
     t = tokens[idx]
     return fence_html(t.content, t.info)
-MD.renderer.rules["fence"] = _fence
+MD.add_render_rule("fence", _fence)
 
 def md_to_html(md):
     return MD.render(md)
@@ -171,7 +179,9 @@ def render_blocks(md, ctx):
     return "\n".join(out)
 
 def render_callout(block, ctx):
-    typ, fold, title = CO_HEAD.match(block[0].strip()).groups()
+    m = CO_HEAD.match(block[0].strip())
+    if not m: raise SystemExit(f"bad callout header: {block[0]!r}")
+    typ, fold, title = m.groups()
     typ = typ.lower(); inner = "\n".join(block[1:]).strip("\n")
     label = CO_LABEL.get(typ, typ.title())
     if typ in ctx.n:
@@ -275,7 +285,9 @@ def pager(n):
 # ---------------------------------------------------------------- module page
 def build_lm(path):
     raw = path.read_text(encoding="utf-8")
-    fm_txt, body = re.match(r"(?s)^---\n(.*?)\n---\n(.*)$", raw).groups()
+    m = re.match(r"(?s)^---\n(.*?)\n---\n(.*)$", raw)
+    if not m: raise SystemExit(f"{path.name}: no front matter")
+    fm_txt, body = m.groups()
     fm = yaml.safe_load(fm_txt)
     n = int(fm["lm"]); meta = next(x for x in ALL_LMS if x["n"] == n)
     ms, ctx = MathStore(), Ctx()
@@ -297,10 +309,11 @@ def build_lm(path):
         a = attrs.group(1) if attrs else ""
         title = head[:attrs.start()].strip() if attrs else head
         numbered = a.strip() != "-"
-        lo_ids = [int(x) for x in re.findall(r"\d+", re.search(r"lo=([\d,]+)", a).group(1))] if "lo=" in a else []
+        lo = re.search(r"lo=([\d,]+)", a)
+        if "lo=" in a and not lo: raise SystemExit(f"bad lo= in heading: {head!r}")
+        lo_ids = [int(x) for x in re.findall(r"\d+", lo.group(1))] if lo else []
         if numbered: secno += 1
         sid = f"s{secno}" if numbered else re.sub(r"[^a-z0-9]+", "-", title.lower()).strip("-")
-        h3s = re.findall(r"(?m)^### (.+)$", md)
         sub = []
         def h3rep(m, _sid=sid, _sub=sub):
             t = m.group(1).strip(); hid = f"{_sid}-{len(_sub)+1}"; _sub.append((hid, t))
@@ -313,7 +326,7 @@ def build_lm(path):
         h2 = f'<h2>{no}<span class="ttl">{md_inline(title)}</span></h2>' if numbered else f'<h2 class="plain"><span class="ttl">{md_inline(title)}</span></h2>'
         if sid == "practice-problems":
             sec_html = sec_html.replace("<ol>", '<ol class="pp">', 1).replace("<ul>", '<ul class="opts">')
-            sec_html = re.sub(r"<li>\s*<strong>([A-D])\.</strong>\s*(.*?)</li>", r"<li><b>\1.</b><span>\2</span></li>", sec_html, flags=re.S)
+            sec_html = re.sub(r"<li>\s*<strong>([A-D])\.</strong>\s*(.*?)</li>", r"<li><b>\1.</b><span>\2</span></li>", sec_html, flags=re.DOTALL)
         elif sid == "solutions":
             sec_html = sec_html.replace("<ol>", '<ol class="sol-list">', 1)
         elif sid == "glossary":
@@ -321,7 +334,7 @@ def build_lm(path):
         elif sid == "references":
             sec_html = sec_html.replace("<ul>", '<ul class="refs">', 1)
         if "<table" in sec_html:
-            sec_html = re.sub(r"(<table(?: class=\"[^\"]*\")?>.*?</table>)", r'<div class="table-wrap">\1</div>', sec_html, flags=re.S)
+            sec_html = re.sub(r"(<table(?: class=\"[^\"]*\")?>.*?</table>)", r'<div class="table-wrap">\1</div>', sec_html, flags=re.DOTALL)
         sections.append(f'<section class="{cls}" id="{sid}">{h2}{lo_html}{sec_html}</section>')
         outline.append((sid, (f"{secno}. " if numbered else "") + title, sub))
     # learning outcomes + overview
@@ -416,6 +429,7 @@ if __name__ == "__main__":
     for t in (args.modules or [f"lm{n:02d}" for n in sorted(AVAILABLE)] + ["index"]):
         if t == "index":
             sys.modules.setdefault("build", sys.modules[__name__])   # let build_index see this run's target
-            import build_index; build_index.build()
+            import build_index
+            build_index.build()
         else:
             build_lm(SRC / f"{t}.md")

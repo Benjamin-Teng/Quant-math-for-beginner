@@ -552,7 +552,7 @@
     "cash_dividend": "float"
    },
    "filter": {
-    "stock_or_cache_dividend": "^息$"
+    "stock_or_cache_dividend": "^除息$"
    },
    "sort": [
     "date"

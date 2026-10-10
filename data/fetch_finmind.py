@@ -13,7 +13,10 @@ never change silently.
     python3 data/fetch_finmind.py --only 00679B  # restrict to manifest paths containing a substring
     python3 data/make_lab_data.py                # then rebuild every lab's data/ folder
 
-Register a new raw file (after verifying it with data/check_chunk.py):
+Register a new raw file (after verifying it with data/check_chunk.py). --add re-fetches the query (it needs
+FINMIND_TOKEN) and refuses to register it unless the result matches the file byte for byte: FinMind's labels differ
+between instruments, so a filter copied from another entry can drop every row. --no-check skips the test fetch for a
+session without API access; run the full fetch in a clean checkout before relying on such an entry.
 
     python3 data/fetch_finmind.py --add TX__2025-04-01__2025-10-31.csv --dataset TaiwanFuturesDaily --data-id TX \
         --start 2025-04-01 --end 2025-10-31 --filter trading_session=^position$ --filter 'contract_date=^\\d{6}$'
@@ -22,13 +25,24 @@ Columns are kept under the FinMind names unless mapped with --map out=source (fo
 --map cash_dividend=stock_and_cache_dividend). Daily data can also come through the FinMind MCP server in windows
 under 500 rows; intraday datasets need this script (one day per request).
 """
-import argparse, csv, hashlib, io, json, os, re, sys, time, urllib.parse, urllib.request
+import argparse
+import csv
+import hashlib
+import io
+import json
+import os
+import re
+import sys
+import time
+import urllib.parse
+import urllib.request
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 RAW = ROOT / "data" / "raw"
 MANIFEST = ROOT / "data" / "raw_manifest.json"
-API = "https://api.finmindtrade.com/api/v4/data"
+LOCK = ROOT / "data" / "raw_manifest.lock"
+API ="https://api.finmindtrade.com/api/v4/data"
 
 def sha256(b: bytes) -> str:
     return hashlib.sha256(b).hexdigest()
@@ -38,7 +52,27 @@ def load_manifest():
 
 def save_manifest(m):
     m["files"].sort(key=lambda e: e["path"])
-    MANIFEST.write_text(json.dumps(m, indent=1, ensure_ascii=False) + "\n", encoding="utf-8")
+    tmp = MANIFEST.with_name(MANIFEST.name + ".tmp")
+    tmp.write_text(json.dumps(m, indent=1, ensure_ascii=False) + "\n", encoding="utf-8")
+    os.replace(tmp, MANIFEST)                              # a reader never sees a half-written manifest
+
+def register(entry):
+    """Add or replace one manifest entry under a lock, so parallel --add runs cannot drop each other's entries."""
+    for _ in range(300):                                   # wait up to 30 s for another --add to finish writing
+        try:
+            fd = os.open(LOCK, os.O_CREAT | os.O_EXCL | os.O_WRONLY)
+            break
+        except FileExistsError:
+            time.sleep(0.1)
+    else:
+        raise SystemExit(f"not registered: data/{LOCK.name} exists (another --add is writing, or delete a stale lock)")
+    try:
+        m = load_manifest()
+        m["files"] = [e for e in m["files"] if e["path"] != entry["path"]] + [entry]
+        save_manifest(m)
+    finally:
+        os.close(fd)
+        LOCK.unlink()
 
 def fmt(value, kind):
     if kind == "float":
@@ -78,7 +112,6 @@ def verify_local(entry):
     return f.exists() and sha256(f.read_bytes()) == entry["sha256"]
 
 def add(args):
-    m = load_manifest()
     f = RAW / args.add
     if not f.exists():
         raise SystemExit(f"no such file: data/raw/{args.add}")
@@ -97,8 +130,17 @@ def add(args):
              "end_date": args.end, "columns": {c: mapping.get(c, c) for c in header}, "kinds": kinds,
              "filter": dict(s.split("=", 1) for s in args.filter), "sort": args.sort or ["date"],
              "rows": len(rows), "sha256": sha256(f.read_bytes())}
-    m["files"] = [e for e in m["files"] if e["path"] != args.add] + [entry]
-    save_manifest(m)
+    token = os.environ.get("FINMIND_TOKEN")
+    if args.no_check:
+        print("warning: registered without a test fetch; run fetch_finmind.py in a clean checkout before relying on it")
+    elif not token:
+        raise SystemExit("not registered: set FINMIND_TOKEN so --add can test-fetch the query (or pass --no-check)")
+    else:                                                  # the query must rebuild the file byte for byte
+        data, n = render(entry, fetch(entry, token))
+        if sha256(data) != entry["sha256"]:
+            raise SystemExit(f"not registered: this query re-fetches {n} rows that differ from data/raw/{args.add} "
+                             f"({len(rows)} rows); check --filter, --map, --sort and the dates")
+    register(entry)
     print(f"registered data/raw/{args.add}: {len(rows)} rows")
 
 def main():
@@ -111,6 +153,7 @@ def main():
     ap.add_argument("--filter", action="append", default=[], help="column=regex (records must match)")
     ap.add_argument("--map", action="append", default=[], help="output_column=finmind_column")
     ap.add_argument("--sort", action="append", help="sort keys (default: date)")
+    ap.add_argument("--no-check", action="store_true", help="--add without test-fetching the query (offline only)")
     args = ap.parse_args()
     if args.add:
         return add(args)

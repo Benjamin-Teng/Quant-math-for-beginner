@@ -9,6 +9,7 @@
 # A module is published when its entry in src/syllabus.yaml has `status: published` (see AUTHORING.md §11).
 set -euo pipefail
 cd "$(dirname "$0")"
+export PYTHONUTF8=1   # UTF-8 text I/O on every OS (a Windows locale such as cp950 breaks the scripts otherwise)
 PDF=0; DATA=0; LABS=0; PREVIEW=0; FETCH=0
 for a in "$@"; do case "$a" in --pdf) PDF=1;; --data) DATA=1;; --labs) LABS=1;; --preview) PREVIEW=1;; --fetch) FETCH=1;;
   *) echo "unknown option $a"; exit 2;; esac; done

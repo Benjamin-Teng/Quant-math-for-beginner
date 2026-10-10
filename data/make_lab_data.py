@@ -8,7 +8,9 @@ re-formatted, so the lab files match the raw files exactly.
     python3 data/make_lab_data.py            # write labs/LMNN_lab/data/*
     python3 data/make_lab_data.py --check    # compare with existing files, write nothing
 """
-import csv, io, sys
+import csv
+import io
+import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -35,6 +37,7 @@ def merged(pattern, drop=()):
             if r[0] in rows and rows[r[0]] != r:
                 raise SystemExit(f"conflicting rows for {r[0]} in {pattern}")
             rows[r[0]] = r
+    assert header is not None                              # files is not empty
     keep = [i for i, c in enumerate(header) if c not in drop]
     return [header[i] for i in keep], [[r[i] for i in keep] for _, r in sorted(rows.items())]
 
@@ -93,7 +96,7 @@ if __name__ == "__main__":
                 bad += not same
                 print(f"{'ok  ' if same else 'DIFF'} labs/{lab}/data/{name}")
             else:
-                d.mkdir(parents=True, exist_ok=True); f.write_text(content, encoding="utf-8")
+                d.mkdir(parents=True, exist_ok=True); f.write_text(content, encoding="utf-8", newline="\n")
     if check and bad:
         sys.exit(1)
     print("lab data: " + ("all identical" if check else "written"))

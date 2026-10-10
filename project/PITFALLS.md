@@ -38,11 +38,21 @@ unless stated.
   prints a "repository moved" notice.
 - **WebFetch cannot reach some sites** (MacTutor timed out once; law.moj.gov.tw was unreachable from the sandbox).
   Cite an equivalent official page, and say in the reference when a link could not be opened.
+- **The owner's Windows computer changes bytes and encodings.** Git for Windows checks text files out with CRLF
+  (`core.autocrlf=true`), so a copy of a file taken from a checkout fails a SHA-256 check that a fresh fetch or
+  `git show <commit>:<path>` passes; compare LF bytes. The default Python encoding there is cp950, which broke
+  `build.py` reading KaTeX's UTF-8 output: run Python with `PYTHONUTF8=1` (`build.sh` sets it) and give every text
+  read, write and subprocess an explicit `encoding="utf-8"` (and `newline="\n"` for data files). In Git Bash, set
+  `MSYS_NO_PATHCONV=1` before `git show <rev>:<path>`, or the path is rewritten as a Windows path.
 
 ## 3. Data semantics (Taiwan)
 
 - **Ex-dividend days:** FinMind prints `spread = 0.0`, so `close[t] − close[t−1] ≠ spread[t]`. Accept the mismatch only
   on a dividend date whose previous close equals `before_price` in `TaiwanStockDividendResult`.
+- **FinMind's labels differ between instruments.** `TaiwanStockDividendResult.stock_or_cache_dividend` is `息` for
+  0050 but `除息` for 00679B. The 00679B manifest entry carried 0050's filter `^息$`, so the first real re-fetch kept 0 of
+  its 37 rows. Write a filter from the instrument's own records; `fetch_finmind.py --add` now re-fetches the query and
+  refuses to register a file it cannot rebuild byte for byte (it needs `FINMIND_TOKEN`).
 - **Ex-dates the checksum cannot see:** 00679B went ex on 2019-03-05 and 2025-08-21 with an unchanged close. The dividend
   file, not the checksum, is the authority for ex-dates.
 - **Splits:** 0050 split 4-for-1 effective 2025-06-18 after a halt from 11 to 17 June, so that day's return spans six

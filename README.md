@@ -16,7 +16,7 @@ A module goes on the site only after an independent review has recomputed its nu
 
 ## Repository layout
 
-```
+```text
 docs/            built static site, published modules only — upload as-is to any host (GitHub Pages: main /docs)
   index.html       roadmap and contents
   lm/              one page per learning module

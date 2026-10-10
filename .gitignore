@@ -11,7 +11,14 @@ data/processed/
 .DS_Store
 Thumbs.db
 .vscode/
+*.code-workspace
 *.zip
+# local Python environment (uv) and Claude Code settings
+.venv/
+.python-version
+.claude/
 # FinMind's licence forbids redistributing raw data: rebuild with data/fetch_finmind.py + data/make_lab_data.py
 data/raw/
 labs/*/data/
+data/raw_manifest.lock
+data/raw_manifest.json.tmp

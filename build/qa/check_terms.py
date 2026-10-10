@@ -9,12 +9,14 @@ professional-certification curriculum or exam body. Run from the repository root
 Notebooks are scanned in their cell sources and text outputs only, because base64 images match short
 terms by accident.
 """
-import json, re, sys
+import json
+import re
+import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
-BANNED = re.compile(r"\bCFA\b|Chartered Financial Analyst|candidate should be able", re.I)
-SKIP_DIRS = {"node_modules", ".git", "dist", "__pycache__", ".ipynb_checkpoints"}
+BANNED = re.compile(r"\bCFA\b|Chartered Financial Analyst|candidate should be able", re.IGNORECASE)
+SKIP_DIRS = {"node_modules", ".venv", ".git", "dist", "__pycache__", ".ipynb_checkpoints"}
 SUFFIXES = {".md", ".py", ".js", ".css", ".html", ".yaml", ".yml", ".json", ".txt", ".sh", ".ipynb"}
 
 def text_of(p: Path) -> str:

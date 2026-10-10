@@ -1,0 +1,18 @@
+// markdownlint-cli2 settings for the repository's documentation. Run from the repository root:
+//   markdownlint-cli2 "**/*.md"
+{
+  "config": {
+    // prose lines run to about 120 characters, and tables are not pipe-aligned
+    "MD013": false,
+    "MD060": false
+  },
+  // skip git-ignored folders (build/node_modules, .venv, dist, data/raw, ...)
+  "gitignore": true,
+  "ignores": [
+    // module sources use the book's own Markdown dialect (callouts, inline HTML for charts and widgets),
+    // checked by build/build.py and build/qa/
+    "src/**",
+    // generated site
+    "docs/**"
+  ]
+}

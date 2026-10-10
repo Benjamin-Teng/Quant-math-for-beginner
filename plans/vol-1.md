@@ -11,6 +11,7 @@ dividend season for LM6.
 ---
 
 ## LM1 Exponentials, Logarithms and Compounding
+
 **Prereq:** none. **Leads:** 3, 6, 19, 29.
 **Owns:** laws of exponents/logs; change of base; log scale charts; compounding frequency, EAR, the limit
 $(1+r/n)^n\to e^r$ and the definition of $e$; holding-period and annualized returns; continuously compounded
@@ -34,6 +35,7 @@ drawdown.
 **Lab:** return conversions and annualization on 0050; compounding table; drawdown and recovery statistics.
 
 ## LM2 Limits and Derivatives
+
 **Prereq:** 1. **Leads:** 3, 4, 7, 31.
 **Owns:** limits and continuity (including the derivative as a limit and $\lim (1+1/n)^n$ revisited briefly),
 differentiation rules (power, exponential, logarithmic, product, quotient, chain), derivatives as marginal rates,
@@ -54,6 +56,7 @@ return of a TWD investor in a USD asset via chain rule) · 6 Differentials and w
 levered position from 0050 data.
 
 ## LM4 Optimization in One Variable
+
 **Prereq:** 2, 3. **Leads:** 7, 20, 41, 42.
 **Owns:** critical points, first- and second-order conditions, concavity/convexity and global optima, corner
 solutions on intervals (leverage caps, long-only), root finding (bisection, Newton) for equations without closed
@@ -76,6 +79,7 @@ point.
 **Lab:** empirical Kelly on 0050 (full sample and rolling windows), Newton vs bisection iteration counts, YTM solver.
 
 ## LM5 Integration
+
 **Prereq:** 1, 2. **Leads:** 14, 15, 17, 18.
 **Owns:** definite integral as accumulation and area, Riemann sums, fundamental theorem of calculus, substitution,
 integration by parts, improper integrals and convergence, the Gaussian integral, continuous discounting and the PV of
@@ -96,6 +100,7 @@ returns, with a shaded density.
 **Lab:** Riemann/trapezoid/Simpson convergence, normal fit vs empirical tails on 0050, continuous annuity PV.
 
 ## LM6 Sequences, Series and the Time Value of Money
+
 **Prereq:** 1. **Leads:** 3, 7, 25, 31.
 **Owns:** arithmetic and geometric sequences, finite and infinite geometric sums, PV/FV, annuities (ordinary and due),
 perpetuities, growing annuities and perpetuities, loan amortization, bond pricing and YTM (numerically — link
@@ -118,6 +123,7 @@ basis explorer (r, q, T) — choose one.
 dividend yield through the 2025 season.
 
 ## LM7 Multivariable Calculus and Lagrange Multipliers
+
 **Prereq:** 2, 3, 4. **Leads:** 10, 32, 33, 43.
 **Owns:** functions of several variables, partial derivatives, gradient, Hessian, multivariate Taylor to second
 order, unconstrained optima and the 2×2 definiteness test, Lagrange multipliers and the multiplier as shadow price,
