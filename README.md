@@ -33,7 +33,11 @@ build/           build.py (Markdown → HTML, KaTeX at build time), build_index.
 data/            raw/ verified FinMind files + scripts that compute every number, table and chart
 labs/            LMNN_lab/ notebooks (saved with outputs) + offline data snapshots
 plans/           module briefs
+reviews/         independent review records: findings, decisions, fix status, prompt templates
+project/         SPEC.md (agreed decisions), PITFALLS.md (mistakes not to repeat), SOURCES.md (sites consulted)
 AUTHORING.md     how a module is written, checked, reviewed and published
+TODO.md          the current work queue (handoff)
+CLAUDE.md        orientation for Claude Code sessions
 build.sh         one-shot build
 ```
 

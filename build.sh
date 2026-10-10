@@ -49,4 +49,5 @@ if [ "$LABS" = 1 ]; then
     (cd "labs/LM${nn}_lab" && jupyter nbconvert --to notebook --execute "LM${nn}_lab.ipynb" --output "LM${nn}_lab.ipynb")
   done
 fi
+python3 build/qa/check_terms.py     # the book cites no certification curriculum (project/PITFALLS.md)
 echo "done: open docs/index.html"

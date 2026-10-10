@@ -1,0 +1,90 @@
+# Sources consulted
+
+Every website and data service used while building edition 0.1 and the Volume I drafts (2026-10-10), extracted from
+the session logs of the editor and all writer, reviewer and data agents. Each module's own References section is the
+authoritative citation list; this file shows where facts were checked, so the next session can go straight to the
+right page. Four pages about a professional-certification curriculum, consulted before the owner's 2026-10-10
+decision, are deliberately left out (see PITFALLS §1).
+
+## Market data
+
+| Service | Used for |
+|:--|:--|
+| FinMind `TaiwanStockPrice` | 0050, 00631L, 00679B daily closes and spreads; TAIEX daily closes; 2330 and 2317 around 30 June 2025 |
+| FinMind `TaiwanStockDividendResult` | 0050 and 00679B ex-dates, before/after prices, cash dividends |
+| FinMind `TaiwanFuturesDaily` | TX (and MTX for a cross-check), every contract month, April–October 2025 |
+| FinMind `TaiwanStockTotalReturnIndex` | TAIEX total-return index (LM6 dividend measurement) |
+| FinMind `USStockPrice` | QQQ and TQQQ, calendar 2022 (LM3) |
+| FinMind `InterestRate` | tried for Taiwan's policy rate: not available (Fed, ECB and others only) |
+| FinMind `TaiwanVariousIndicators5Seconds` | tried for TAIEX intraday on 2025-06-30 |
+| TWSE `rwd/zh/TAIEX/MI_5MINS_HIST` (JSON) | TAIEX daily high/low around 27–30 June 2025 |
+
+All FinMind queries ran through the FinMind MCP server on the owner's computer, in windows under 500 rows.
+
+## Taiwan exchanges, regulators and official pages
+
+| Page | Used for |
+|:--|:--|
+| [TAIFEX TX](https://www.taifex.com.tw/cht/2/tX), [MTX](https://www.taifex.com.tw/cht/2/mTX), [TMF](https://www.taifex.com.tw/cht/2/tMF) contract specifications | multipliers NT$200/50/10, ticks, ±10% limit, session hours, expiry, settlement |
+| [TAIFEX index margins](https://www.taifex.com.tw/cht/5/indexMarging) (also `indexMargingDetail`, `indexMargingDown`; English [indexMargining](https://www.taifex.com.tw/enl/eng5/indexMargining), [marginAdj](https://www.taifex.com.tw/enl/eng5/marginAdj)) | margins effective 2026-08-12; how margins are adjusted |
+| TAIFEX [announcements](https://www.taifex.com.tw/cht/11/announcement) and [press releases](https://www.taifex.com.tw/cht/11/pressRelease) | search for 2025 margin changes (none found officially) |
+| TAIFEX [final settlement price formula](https://www.taifex.com.tw/cht/5/formulaIndex) and its training PDF (最後結算價計算方式) | final settlement as an average of index values 13:00–13:25 plus the close |
+| [TWSE trading system](https://www.twse.com.tw/zh/products/system/trading.html) | 09:00–13:30 session, closing call auction from 13:25 |
+| TWSE [index compilation rules IndexS03.pdf](https://www.twse.com.tw/downloads/zh/products/indices/IndexS03.pdf), IndexS07.pdf | TAIEX and total-return index methodology |
+| TWSE [company history](https://www.twse.com.tw/en/about/company/history.html) and 60th-anniversary book, [p. 181](https://www.twse.com.tw/staticFiles/product/publication/twse60/html/181/) (also pp. 256, 429) | daily limit widened from 7% to 10% on 2015-06-01 |
+| [TPEx fluctuation limits](https://www.tpex.org.tw/zh-tw/mainboard/trading/rules/fluctuation-limit.html) | cross-check of the 10% limit |
+| 全國法規資料庫: [Banking Act Art. 47-1](https://law.moj.gov.tw/LawClass/LawSingle.aspx?pcode=G0380001&flno=47-1), 信用卡業務機構管理辦法 Art. 48 | 15% cap on card revolving interest from 2015-09-01; no compounding of revolving interest |
+| [Bank of Taiwan rates](https://rate.bot.com.tw/twd) | one-year 定期儲蓄存款 1.725% and 定期存款 1.700%, posted 2026-10-10 |
+
+## Banks, issuers and firms
+
+| Page | Used for |
+|:--|:--|
+| COTA Bank revolving-credit disclosure (cotabank.com.tw, card_pdf_revolvingCredit.pdf) | revolving interest = balance × rate × days/365 |
+| DBS Taiwan NTD deposit terms (dbs.com.tw, DBS_NTD_Deposit.pdf) | 整存整付 compounds monthly; 存本取息 accrues daily; actual/365 |
+| [Yuanta 00679B fund page](https://www.yuantaetfs.com/product/detail/00679B/Basic_information) and holdings ratio page | tracked index (ICE US Treasury 20+ Year), set-up 2017-01-11, listing 2017-01-17, no currency hedge |
+| Yahoo Taiwan quote profile for 00679B (tw.stock.yahoo.com) | quoted in TWD |
+| Lee and Li newsletter 5323 (leeandli.com) | Banking Act Art. 47-1 cap |
+| 法律百科 (legis-pedia.com, consumer-loan article) | card-rate rules (secondary) |
+| 6laws.net | unofficial statute mirror; replaced by 全國法規資料庫 |
+
+## News (Taiwan)
+
+| Source | Used for |
+|:--|:--|
+| TechNews [2026-05-26 weight gap](https://finance.technews.tw/2026/05/26/weight-gap/) and SETN news 1844764 (2026-05-27) | 00631L replication: TAIEX futures 160.87%, TSMC 39.63%; TSMC weight 43.7% in TAIEX vs 60.9% in Taiwan 50 (as of 2026-05-19) |
+| TechNews 2025-04-07 (black Monday records), Taiwan News zh/news/6078269 | 7 April 2025 tariff sell-off |
+| TechNews 2022-12-30 (TWD depreciation), 2025-05-05 (TWD surge); FTV News 2025505W0BEA | USD/TWD 30.708 at end-2022; 31.064 on 2 May 2025; 30.145 on 5 May 2025 |
+| TechNews 2025-06-10 (0050 one-into-four) | 0050 split timing |
+| TechNews 2025-02-04, ctee.com.tw exchange/792949 and 20250204700571 | bond ETF background (LM7) |
+| [money.udn.com story 9194923](https://money.udn.com/money/story/5607/9194923) (also 9006502) | TSMC ex-dividend effect on TAIEX, 40.34 points on 11 Dec 2025 |
+| [旺得富 2026-09-17](https://wantrich.chinatimes.com/news/20260917900492-420501) | central-bank discount rate 2%, ten quarters unchanged |
+| [NOWnews 6766337](https://www.nownews.com/news/6766337) | discount rate 2% through 2025 |
+| PTS news 298694 and 743164 | 2015 limit change (superseded by TWSE's own pages) |
+| ctee.com.tw 20250520701689, 20250617701663; hao.cnyes.com posts 141707, 177118 | third-party reports of 2025 TX margins |
+| newtalk 2025-07-01/979200 | 30 June 2025 market close |
+| acnnewswire (TWSE press release) | 2015 limit change |
+
+## Standards, software and references
+
+| Page | Used for |
+|:--|:--|
+| GIPS 2020 advertising guidelines comparison (gipsstandards.org PDF) | provision 8.A.4: periods under one year are not annualized |
+| Spaulding Group, "Why don't we annualize returns of less than one year" | background for the same rule |
+| [Microsoft Support: LOG function](https://support.microsoft.com/en-us/excel/functions/log-function) | Excel LOG defaults to base 10 |
+| SciPy docs: [`integrate.quad`](https://docs.scipy.org/doc/scipy/reference/generated/scipy.integrate.quad.html), [SLSQP](https://docs.scipy.org/doc/scipy/reference/optimize.minimize-slsqp.html), [1.16.0 release notes](https://docs.scipy.org/doc/scipy/release/1.16.0-notes.html) | QUADPACK description; SLSQP returns multipliers |
+| MacTutor, [History of e](https://mathshistory.st-andrews.ac.uk/HistTopics/e/); Britannica; Wikipedia (e, Mills ratio, Descartes' rule of signs, William Karush) | history and secondary checks |
+
+## Papers and books (where bibliographic details were verified)
+
+- Kelly (1956), *BSTJ* 35(4): 917–926 — archive.org `bstj35-4-917`.
+- Breiman (1961), Fourth Berkeley Symposium, Vol. 1: 65–78; Kuhn & Tucker (1951), Second Berkeley Symposium: 481–492 — projecteuclid.org.
+- Thorp (2006), *Handbook of Asset and Liability Management*, Vol. 1: 385–428 — PDF on gwern.net, sites.oxy.edu; Elsevier catalogue.
+- MacLean, Thorp & Ziemba (2010), *Quantitative Finance* 10(7): 681–687, and the 2011 World Scientific volume — ideas.repec.org, arXiv 1112.0829.
+- Almgren & Chriss (2000), *Journal of Risk* 3(2): 5–39 — risk.net, ideas.repec.org.
+- Gopikrishnan et al. (1999), *PRE* 60: 5305–5316 — arXiv cond-mat/9905305, amaral.northwestern.edu; Gabaix et al. (2003), *Nature* 423: 267–270; Mandelbrot (1963), *J. Business* 36(4): 394–419 (PDF via williams.edu); Cont (2001), *QF* 1(2): 223–236 — ideas.repec.org.
+- Gordon (1941), *Ann. Math. Stat.* 12(3): 364–366 — projecteuclid.org; Rosenlicht (1972), *AMM* 79: 963–972 (math.ucr.edu notes); Dowd et al. (2008), *JPM* 34(4): 76–80 — research.aston.ac.uk.
+- Gordon (1959), *RES* 41(2): 99–105 — JSTOR 1927792; MacKinlay & Ramaswamy (1988), *RFS* 1(2): 137–158 — academic.oup.com, ideas.repec.org; Wang (2004), *AMM* 111(6): 525.
+- Markowitz (1952), *JF* 7(1): 77–91; Merton (1972), *JFQA* 7(4): 1851–1872 — ideas.repec.org; Kjeldsen (2000), *Historia Mathematica* 27: 331–361 (PDF via u-szeged.hu); Chopra & Ziemba (1993), *JPM* 19 — pm-research.com; Boyd & Vandenberghe (2004) — Stanford PDF; Kraft (1988).
+- Press et al., *Numerical Recipes* 3rd ed., §5.7 — PDF via drexel.edu; Burden, Faires & Burden, *Numerical Analysis* 10th ed.; Brent (1973); Stewart (Clegg, Watson), *Calculus: Early Transcendentals* 9th ed.; Simon & Blume (1994); Cover & Thomas (2006); Hull, *Options, Futures, and Other Derivatives* 11th ed. — publisher and library catalogues (Cengage, Pearson, Wiley, Elsevier, abebooks, university libraries) and course notes (NYCU, NTU, Villanova, UCSC, ETSU) for editions, ISBNs and chapter titles.
+- Virtanen et al. (2020), "SciPy 1.0", *Nature Methods* 17(3): 261–272.

@@ -24,7 +24,7 @@ All files are exactly as returned by FinMind (retrieved 2026-10-10), in windows 
 - `00679B__<start>__<end>.csv`: `date,close,spread`, 2017-01-17 → 2026-10-09. `00679B_dividends.csv`: 37 quarterly ex-dates with before/after prices and cash dividends from `TaiwanStockDividendResult`; on 2019-03-05 and 2025-08-21 the close was unchanged, so the spread check cannot flag them and the dividend file is the authority.
 - `0050_dividends.csv`: ex-dividend dates, before/after prices and cash dividends from `TaiwanStockDividendResult`.
 - `TAIEX__2025-04-01__2025-10-31.csv`: TAIEX daily closes (146 rows).
-- `TX__2025-04-01__2025-10-31.csv`: `TaiwanFuturesDaily` for TX, regular session only, every listed contract month (876 rows). On expiry day the `close` can print 0.0; use `settlement_price`.
+- `TX__2025-04-01__2025-10-31.csv`: `TaiwanFuturesDaily` for TX, regular session only, every listed contract month (876 rows). On its last trading day the expiring contract's `settlement_price` prints 0.0 (the final settlement price is not in this field; use `close` or TAIFEX's published final settlement price). On days a contract does not trade, `close` and `volume` print 0 while `settlement_price` is set by the exchange.
 - `lm06/`: TAIEX total-return index and further TAIEX windows used by LM6 (see its README).
 - `QQQ__us_2022.csv`, `TQQQ__us_2022.csv`: `date,adj_close,close` from `USStockPrice`. Adjusted closes depend on the retrieval date; returns within the window do not.
 
