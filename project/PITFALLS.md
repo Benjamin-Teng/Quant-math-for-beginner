@@ -163,3 +163,22 @@ unless stated.
   "how many-fold" (use 翻了幾番 for doublings).
 - Facts to keep straight: TWSE's daily limit widened from 7% to 10% on 2015-06-01; 7 April 2025 was the first session
   after the Qingming holiday and closed at the −10% limit for TX; TAIFEX margins change after sessions, so date them.
+- Found by the 2026-10-11 gates (blind solving and full audits) after the first revisions; check these too:
+  - The dominant error is still a printed figure computed from unrounded inputs: a reader multiplying the printed
+    factors, summing the printed parts or plugging the printed rate gets a different last digit (LM1's six block returns
+    compound to 902.18%, not the printed 902.25%; LM6 printed qτ to two decimals while its other columns used six).
+    Carry the digit, round the output to what the printed inputs support, or say the figure uses unrounded inputs.
+  - A question must state its conventions: which five annualizations, which recovery time, effective or continuous
+    rates, a 365-day year, a bracket width or a midpoint error, how a mix is rebalanced. A blind solver who has to
+    guess will find a second valid answer.
+  - Undiscounted totals are not savings: at the loan's own rate every repayment schedule is worth the principal, so
+    "equal principal saves NT$360,064 of interest" teaches the opposite of the time value of money.
+  - A sign read backwards: a negative partial derivative g_{f2} means that selling the asset raises growth, so the
+    short adds value at the margin. Check the sign of every marginal-value sentence against the formula.
+  - Exchange limits make ratios: on 7 April 2025 0050 (−10%) and 00631L (−19.995%) both closed limit-down, so their
+    ratio of 2.000 shows the limits, not the fund's leverage. Check limit days before reading a one-day ratio.
+  - Averages of annualized rates near expiry are noise: a few days with τ of one or two days dominate a monthly mean
+    of daily implied rates. Annualize the averaged components instead, or leave the column out.
+  - A chart that plots values near machine precision differs between Windows and Linux; floor it well above 1e-16.
+  - Notation peculiar to one certification curriculum's formula sheet (for example "ΔCurve") counts as a reference to
+    it: use the module's own symbols.
