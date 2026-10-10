@@ -133,6 +133,14 @@ unless stated.
 - **A lab must read only its own `data/` folder** (LM7's read a processed parquet that is not shipped).
 - **Commit notebooks executed**, after `uv run jupyter nbconvert --to notebook --execute --inplace LMNN_lab.ipynb` from
   inside the lab folder.
+- **Round returns are exact ties, and float division splits them** (2026-10-11, LM5). Prices have two decimals, so
+  limit moves and round returns are exact: 90.00 → 89.10 is −1% and 176.00 → 158.40 is −10% exactly. In float64 the
+  first gives −0.010000000000000009, the second −0.09999999999999998, so `R <= -0.10` and `(R > lo) & (R <= hi)` put
+  ties on either side of the edge. LM5 printed 351/435 for band counts that are 352/434, its printed Polars snippet
+  counted 0 days at −10% where the exhibit shows 1, and its widget, storing returns to six decimals, rounded one
+  return onto a slider step. Every count against a threshold or band edge uses one guard (`<= k + 1e-12`, `> lo + 1e-12`)
+  in the scripts, the lab and the printed code alike, or exact arithmetic; stored values keep enough decimals (ten)
+  not to land on an edge; an audit recounts with `fractions.Fraction` from the raw closes.
 
 ## 6. Working with agents
 
