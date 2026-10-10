@@ -55,6 +55,8 @@ uv run ruff check <files> && uv run ty check <files>   # Python gates (dev group
   shared files (`build/`, `src/assets/`, `src/syllabus.yaml`, `AUTHORING.md`, `README.md`, `build.sh`,
   `data/README.md`, `reviews/`, `project/`, `TODO.md`, `CLAUDE.md`).
 - Reviewers and verifiers are fresh, read-only agents that recompute from raw data; use `reviews/REVIEW_PROMPT.md`.
+- Reviews of diffs and code also go to fresh Opus subagents, never to Codex (the owner's instruction, 2026-10-10):
+  do not run `codex-companion` or enable the Codex review gate in this repository.
 - Launch independent agents together in one message; do the editor's quick work before launching a batch.
 - Data: raw FinMind files are never committed (licence); `data/raw_manifest.json` lists them and `fetch_finmind.py`
   rebuilds them. New data come from FinMind (MCP server or API token), in windows under 500 rows, each checked with

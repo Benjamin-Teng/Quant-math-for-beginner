@@ -111,7 +111,7 @@ for something else.
 | $\mathrm{SR}$ | Sharpe ratio $(\mu-r_f)/\sigma$ of a return; say the period (per day, or annualized) |
 | $w$, $\mathbf w$, $\mathbf f$, $\Sigma$, $\rho$ | portfolio weights summing to 1; vector of exposures; covariance matrix; correlation |
 | $\varphi$, $\Phi$ | standard normal density and distribution function |
-| $B_t$ | standard Brownian motion ($W$ stays wealth, so $dW_t=W_t(\mu\,dt+\sigma\,dB_t)$ reads unambiguously) |
+| $B_t$ | standard Brownian motion ($W$ stays wealth, so $dW_t=W_t(\mu\,dt+\sigma\,dB_t)$ reads unambiguously); a module without Brownian motion may use $B$ for a balance, declared in its notation note |
 | $y$, $i$, $v$, $k$, $\gamma$ | yield to maturity or IRR; periodic interest rate; discount factor $1/(1+i)$; required return; growth rate of dividends or cash flows (simple, per period) |
 | $\lambda$, $\nu$, $\mathcal L$ | multiplier of an equality constraint; multipliers of inequality constraints (KKT), or in a module about distributions a Student $t$'s degrees of freedom (a module uses one of the two); Lagrangian |
 | $h$, $u$; $\psi$ | generic functions in modules where $f$ or $g$ already have their book-wide meaning ($f$, $g$, $h$ are fine in purely mathematical modules); constraint functions, $\psi(x)=b$ or $\psi_i(x)\le b_i$ (there $b$ is a constraint level, not a bet's gain: a module uses one of the two) |
@@ -198,8 +198,7 @@ optional live refresh, not `requests`); add a new one with `uv add` after asking
 Standard wording, the same in every module (FinMind's licence forbids redistributing its data, so nothing is bundled):
 
 - The module's companion-lab box keeps the sentence that says what the notebook rebuilds, minus any claim about bundled
-  data or a snapshot, and then says: "The notebook
-  reads FinMind files that you download once with your own token. From the repository root, run
+  data or a snapshot, and then, in a paragraph of its own (four sentences), says: "The notebook reads FinMind files that you download once with your own token. From the repository root, run
   `uv run python data/fetch_finmind.py`, then `uv run python data/make_lab_data.py`. FinMind's licence does not allow
   the book to redistribute the data. After that, the notebook runs offline."
 - The notebook's first cell: "**Environment.** From the repository root, `uv sync` installs the locked Python
