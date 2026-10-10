@@ -52,7 +52,7 @@ volumes:
     title: Stochastic Calculus
     blurb: The continuous-time tools behind GBM, Itô's lemma and the continuous Kelly result.
     lms:
-      - {n: 27, title: "From Random Walk to Brownian Motion", desc: "Scaling limits, quadratic variation, and what (dW)² = dt really means."}
+      - {n: 27, title: "From Random Walk to Brownian Motion", desc: "Scaling limits, quadratic variation, and what (dB)² = dt really means."}
       - {n: 28, title: "The Itô Integral and Itô's Lemma", desc: "Itô's lemma derived as a Taylor expansion that keeps its second-order term."}
       - {n: 29, title: "Geometric Brownian Motion", desc: "Solving the SDE; lognormal prices; mean, median and mode."}
       - {n: 30, title: "Beyond GBM", desc: "Ornstein–Uhlenbeck spreads, Merton jumps for Taiwan gap days, stochastic volatility."}

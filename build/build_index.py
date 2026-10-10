@@ -140,7 +140,7 @@ def build():
         (M(r"\mu = \mathbb{E}[R],\ \ \sigma^2 = \operatorname{Var}(R)"), "mean and variance of simple returns"),
         (M(r"g = \mathbb{E}[\ln(1+R)]"), "log growth rate per period; what compounding delivers"),
         (M(r"G = W_T / W_0"), "growth factor over a holding period"),
-        (M(r"f,\ L"), "Kelly fraction and leverage: position value divided by equity"),
+        (M(r"f,\ f^*"), "exposure, position value divided by equity (above 1 it is leverage); its growth-maximizing (Kelly) value"),
         (M(r"=,\ \approx,\ :="), "exact; approximate with the neglected order stated; defined as"),
     ]
     notation_html = "".join(f"<tr><td>{a}</td><td>{esc(b)}</td></tr>" for a, b in notation)

@@ -111,6 +111,7 @@ for something else.
 | $\mathrm{SR}$ | Sharpe ratio $(\mu-r_f)/\sigma$ of a return; say the period (per day, or annualized) |
 | $w$, $\mathbf w$, $\mathbf f$, $\Sigma$, $\rho$ | portfolio weights summing to 1; vector of exposures; covariance matrix; correlation |
 | $\varphi$, $\Phi$ | standard normal density and distribution function |
+| $B_t$ | standard Brownian motion ($W$ stays wealth, so $dW_t=W_t(\mu\,dt+\sigma\,dB_t)$ reads unambiguously) |
 | $y$, $i$, $v$, $k$, $\gamma$ | yield to maturity or IRR; periodic interest rate; discount factor $1/(1+i)$; required return; growth rate of dividends or cash flows (simple, per period) |
 | $\lambda$, $\nu$, $\mathcal L$ | multiplier of an equality constraint; multipliers of inequality constraints (KKT), or in a module about distributions a Student $t$'s degrees of freedom (a module uses one of the two); Lagrangian |
 | $h$, $u$; $\psi$ | generic functions in modules where $f$ or $g$ already have their book-wide meaning ($f$, $g$, $h$ are fine in purely mathematical modules); constraint functions, $\psi(x)=b$ or $\psi_i(x)\le b_i$ (there $b$ is a constraint level, not a bet's gain: a module uses one of the two) |
@@ -124,6 +125,8 @@ for something else.
   not book-wide symbols, but each still has one meaning in a module, and a module that also uses the letter's table
   meaning ($k$ a required return, $n$ a number of periods, $i$ a periodic rate) picks another letter for the index.
   The notation note lists the counts a module uses.
+- In a module without bets, $a$ and $b$ may be generic constants (an expansion point, the ends of an interval),
+  declared in the notation note.
 - In a purely mathematical passage $x$ and $y$ may be generic coordinates, declared in the notation note and
   instantiated per example, as $f$, $g$, $h$ may be generic functions; a module that also uses $y$ as a yield picks
   other letters.
