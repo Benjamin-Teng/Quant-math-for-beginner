@@ -1,0 +1,14 @@
+# Site build
+pyyaml>=6
+markdown-it-py>=3
+pygments>=2.17
+# Data pipeline and labs
+polars>=1.0
+pyarrow>=15
+numpy>=1.26
+matplotlib>=3.8
+nbformat>=5.9
+nbconvert>=7.16
+ipykernel>=6.29
+# PDF export (then run: playwright install chromium)
+playwright>=1.44

@@ -1,0 +1,14 @@
+# build tooling
+build/node_modules/
+dist/
+__pycache__/
+*.pyc
+.ipynb_checkpoints/
+qa_shots/
+# derived data (rebuild with ./build.sh --data)
+data/processed/
+# OS / editor
+.DS_Store
+Thumbs.db
+.vscode/
+*.zip
