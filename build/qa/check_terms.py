@@ -4,7 +4,7 @@
 The book is an independent personal-study project (owner's decision, 2026-10-10): it must not reference any
 professional-certification curriculum or exam body. Run from the repository root:
 
-    python3 build/qa/check_terms.py          # exit 1 and list hits if any banned term is found
+    uv run python build/qa/check_terms.py          # exit 1 and list hits if any banned term is found
 
 Notebooks are scanned in their cell sources and text outputs only, because base64 images match short
 terms by accident.

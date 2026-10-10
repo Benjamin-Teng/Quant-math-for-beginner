@@ -1,13 +1,20 @@
-import asyncio, sys
-from playwright.async_api import async_playwright
+import asyncio
 import os
+import sys
+from pathlib import Path
+
+from playwright.async_api import async_playwright
+
+
+def to_url(a): return a if "://" in a else Path(a).resolve().as_uri()   # accept a file path or a URL
 OUTDIR = os.environ.get("QA_OUT", "qa_shots"); os.makedirs(OUTDIR, exist_ok=True)
-URL = sys.argv[1]; tag = sys.argv[2]; scheme = sys.argv[3] if len(sys.argv) > 3 else "light"; width = int(sys.argv[4]) if len(sys.argv) > 4 else 1400
+URL = to_url(sys.argv[1]); tag = sys.argv[2]; scheme = sys.argv[3] if len(sys.argv) > 3 else "light"; width = int(sys.argv[4]) if len(sys.argv) > 4 else 1400
 sels = sys.argv[5].split("|") if len(sys.argv) > 5 else []
 async def main():
     async with async_playwright() as p:
         b = await p.chromium.launch()
-        pg = await b.new_page(viewport={"width": width, "height": 1000}, color_scheme=scheme, device_scale_factor=1)
+        pg = await b.new_page(viewport={"width": width, "height": 1000},
+                              color_scheme="dark" if scheme == "dark" else "light", device_scale_factor=1)
         msgs = []
         pg.on("console", lambda m: msgs.append(f"{m.type}: {m.text}"))
         pg.on("pageerror", lambda e: msgs.append(f"PAGEERROR: {e}"))

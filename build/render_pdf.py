@@ -1,6 +1,12 @@
-import asyncio, sys
+import asyncio
+import sys
+from pathlib import Path
+
 from playwright.async_api import async_playwright
-SRC, OUT, TITLE = sys.argv[1], sys.argv[2], sys.argv[3]
+
+
+def to_url(a): return a if "://" in a else Path(a).resolve().as_uri()   # accept a file path or a URL
+SRC, OUT, TITLE = to_url(sys.argv[1]), sys.argv[2], sys.argv[3]   # page (path or URL), PDF path, footer title
 FOOT = ('<div style="width:100%;font-family:Archivo,Arial,sans-serif;font-size:7.5pt;color:#69707a;padding:0 15mm;display:flex;justify-content:space-between">'
         f'<span>From Calculus to Kelly · {TITLE}</span><span><span class="pageNumber"></span> / <span class="totalPages"></span></span></div>')
 async def main():

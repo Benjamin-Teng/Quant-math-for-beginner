@@ -6,7 +6,7 @@
 
 - `main` is pushed and clean. The site (`docs/`) has edition 0.1: roadmap, contents and the published module LM3.
 - Volume I drafts LM1, LM2, LM4, LM5, LM6, LM7 are committed with executed labs but are **not published**
-  (`status: published` is set only for LM3 in `src/syllabus.yaml`). Preview them with `python3 build/build.py --preview`.
+  (`status: published` is set only for LM3 in `src/syllabus.yaml`). Preview them with `uv run python build/build.py --preview`.
 - Independent reviews: LM1, LM2, LM4, LM6, LM7 done (116 findings, 6 critical); LM5 still to review.
   LM1 and LM2 are revised (writer-reported, unverified). LM4, LM6, LM7 revisions have not started.
   Records with every finding and the editor's decisions: [`reviews/`](reviews/README.md).
@@ -24,6 +24,11 @@
    checkout fetched all 34 manifest files from FinMind and matched each byte for byte, and the 28 lab data files built
    from them match. One fix: the `00679B_dividends.csv` filter (FinMind labels that ETF's cash dividends `除息`, not
    `息`); `fetch_finmind.py --add` now test-fetches before registering. Never commit `data/raw/` or `labs/*/data/`.
+   **uv (2026-10-11):** the Python environment is now uv-managed (`pyproject.toml`, `uv.lock`, Python 3.13; run
+   `uv sync`, then `uv run python …`). Shared files are converted. Every module gets a writer pass in round 2, reopened findings or not,
+   and that pass also switches its companion-lab box, notebook Environment cell, lab README, script docstrings and any
+   live-refresh helper to the standard wording of AUTHORING §9 (LM3: the editor, in the cross-module pass); until then
+   they still show the old `uv pip install` setup.
 1. **Verify LM1 and LM2.** Run the verifier template (`reviews/REVIEW_PROMPT.md` §3) on each, with the reviewed commit
    `390c790` (the 2026-10-10 history rewrite renamed every commit; `44d199c` is the same tree). Update the status column in `reviews/lm01.md` and `reviews/lm02.md`. Reopened findings go back to a
    writer (template §2), then verify again.
@@ -42,17 +47,18 @@
 6. **Cross-module pass** (editor): every Volume I module against AUTHORING §6; "about 243" wording in LM3 l.259 and LM5
    (A = 243.1 for the aligned sample; TWSE 243.8); LM5's stale remark that r(t) is used "because φ is taken"; prereq
    and leads consistent across front matter (no cycles); every `[[LMn]]` link resolves in the preview; run
-   `python3 build/qa/check_terms.py`.
+   `uv run python build/qa/check_terms.py`; LM3's lab, companion box and front-matter leads (add 5) get the
+   AUTHORING §9 wording and the LM5 record's finding 19.
 7. **Publish Volume I** (AUTHORING §11): add `status: published` to LM1, LM2, LM4–LM7 in `src/syllabus.yaml`; add an
    edition note ("0.2", date, "Volume I complete: LM1–LM7 with labs"); update the status table in `README.md`; run
-   `./build.sh --pdf` (needs `playwright install chromium`); check every page at 400 px with `build/qa/overflow.py`,
+   `./build.sh --pdf` (needs `uv run playwright install chromium`); check every page at 400 px with `build/qa/overflow.py`,
    look at light and dark screenshots (`build/qa/shoot.py`), and confirm no KaTeX errors and no dead links in `docs/`;
-   commit `src/`, `data/`, `labs/` and `docs/` together and push to `main`.
+   confirm that `git grep -nE "uv pip install|python3 |bundled|source \.venv|import requests" --untracked -- src labs build data`
+   finds nothing; commit `src/`, `data/`, `labs/` and `docs/` together and push to `main`.
 8. **Report to Benjamin** (in Traditional Chinese): a table with, for each chapter, the review findings by severity
    (critical / major / minor), how many were fixed, and the reason for each one not fixed. Source: `reviews/README.md`
    and the module records — update them first.
-9. **Optional:** add sub-year date ticks to `Book.lineChart` and an `x.tickLabels` option (requested by the LM1 and LM6
-   writers); refresh the private claude.ai artifact preview (needs a Claude session with the artifact tool);
+9. **Optional:** ~~sub-year date ticks and `x.tickLabels` in `Book.lineChart`~~ (done 2026-10-11, `6ddde98`); refresh the private claude.ai artifact preview (needs a Claude session with the artifact tool);
    update the project progress note on claude.ai.
 
 ## Then: the remaining volumes

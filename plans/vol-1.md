@@ -4,7 +4,7 @@ Scope boundaries matter: each brief lists what the module owns and what it leave
 volatility drag, leveraged ETFs, duration–convexity) is written; do not repeat its results, link to them with [[LM3]].
 
 Shared data already verified in the repo: `data/raw/0050__*.csv`, `00631L__*.csv`, `0050_dividends.csv`
-(2014-10-31 → 2026-10-08) and `data/processed/etf_daily_returns.parquet` (run `python3 data/build_series.py`).
+(2014-10-31 → 2026-10-08) and `data/processed/etf_daily_returns.parquet` (run `uv run python data/build_series.py`).
 New data for this volume: `data/raw/00679B__*.csv` (+ dividends) for LM7; TX futures and TAIEX around the 2025
 dividend season for LM6.
 

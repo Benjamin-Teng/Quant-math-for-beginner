@@ -10,9 +10,9 @@ repository. [`raw_manifest.json`](raw_manifest.json) records, for every raw file
 
 ```bash
 export FINMIND_TOKEN=...            # your FinMind API token
-python3 data/fetch_finmind.py       # rebuild data/raw/ and verify every file byte for byte (or ./build.sh --fetch)
-python3 data/make_lab_data.py       # build labs/LMNN_lab/data/ from data/raw/
-python3 data/fetch_finmind.py --verify   # later: confirm local files still match, no network
+uv run python data/fetch_finmind.py       # rebuild data/raw/ and verify every file byte for byte (or ./build.sh --fetch)
+uv run python data/make_lab_data.py       # build labs/LMNN_lab/data/ from data/raw/
+uv run python data/fetch_finmind.py --verify   # later: confirm local files still match, no network
 ```
 
 If FinMind has revised a series, the fetched file is written as `<name>.new` and the script stops, so the book's

@@ -2,11 +2,11 @@
 """Build every lab's data/ folder from data/raw/ (run from the repository root).
 
 Raw FinMind files are not committed (FinMind's licence forbids redistributing raw data), so a fresh clone first runs
-`python3 data/fetch_finmind.py` (needs FINMIND_TOKEN) and then this script. Values are copied as text, never
+`uv run python data/fetch_finmind.py` (needs FINMIND_TOKEN) and then this script. Values are copied as text, never
 re-formatted, so the lab files match the raw files exactly.
 
-    python3 data/make_lab_data.py            # write labs/LMNN_lab/data/*
-    python3 data/make_lab_data.py --check    # compare with existing files, write nothing
+    uv run python data/make_lab_data.py            # write labs/LMNN_lab/data/*
+    uv run python data/make_lab_data.py --check    # compare with existing files, write nothing
 """
 import csv
 import io
@@ -25,7 +25,7 @@ def merged(pattern, drop=()):
     """Concatenate raw chunks matching pattern (sorted by date, exact duplicates removed), dropping columns."""
     files = sorted(RAW.glob(pattern))
     if not files:
-        raise SystemExit(f"missing data/raw/{pattern}: run python3 data/fetch_finmind.py first")
+        raise SystemExit(f"missing data/raw/{pattern}: run uv run python data/fetch_finmind.py first")
     header, rows = None, {}
     for f in files:
         h, body = read(f)

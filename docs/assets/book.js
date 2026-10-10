@@ -36,9 +36,12 @@
     return (neg ? "−" : "") + s;
   }
   Book.fmt = fmt;
+  var MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
   function fmtDate(t, mode) {
     var d = new Date(t);
     if (mode === "year") return String(d.getUTCFullYear());
+    if (mode === "month") return MONTHS[d.getUTCMonth()];
+    if (mode === "monthyear") return MONTHS[d.getUTCMonth()] + " " + d.getUTCFullYear();
     var m = String(d.getUTCMonth() + 1).padStart(2, "0"), dd = String(d.getUTCDate()).padStart(2, "0");
     return d.getUTCFullYear() + "-" + m + "-" + dd;
   }
@@ -66,6 +69,25 @@
     for (var y = a; y <= b + 1; y += step) { var ts = Date.UTC(y, 0, 1); if (ts >= lo && ts <= hi) t.push(ts); }
     return t;
   }
+  function monthTicks(lo, hi, maxN) {   // first days of months, every 1, 2, 3 or 6 months, aligned to January
+    var d = new Date(lo), y = d.getUTCFullYear(), mo = d.getUTCMonth(), all = [];
+    for (var ts = Date.UTC(y, mo, 1); ts <= hi; ts = Date.UTC(y, ++mo, 1)) if (ts >= lo) all.push(ts);
+    var steps = [1, 2, 3, 6], t = all;
+    for (var i = 0; i < steps.length; i++) {
+      t = all.filter(function (v) { return new Date(v).getUTCMonth() % steps[i] === 0; });
+      if (t.length <= maxN) break;
+    }
+    return t;
+  }
+  // a date axis shows years when at least three year starts fall inside it, else month starts, else its two ends
+  function dateTicks(lo, hi, narrow) {
+    var starts = 0;
+    for (var y = new Date(lo).getUTCFullYear(); Date.UTC(y, 0, 1) <= hi; y++) if (Date.UTC(y, 0, 1) >= lo) starts++;
+    if (starts >= 3) return { t: yearTicks(lo, hi, narrow ? 5 : 12), mode: "year" };
+    var t = monthTicks(lo, hi, narrow ? 4 : 8);
+    if (t.length >= 2) return { t: t, mode: "month" };
+    return { t: [lo, hi], mode: "day" };
+  }
 
   var NS = "http://www.w3.org/2000/svg";
   function el(tag, attrs, parent) {
@@ -77,7 +99,7 @@
   function color(c) { return /^\d$/.test(String(c)) ? "var(--series-" + c + ")" : c; }
 
   /* ---------------- line chart ---------------- */
-  // spec: {x:{type:'num'|'date',label,fmt,min,max}, y:{type:'lin'|'log',label,fmt,min,max,ticks},
+  // spec: {x:{type:'num'|'date',label,fmt,min,max,ticks,tickLabels}, y:{type:'lin'|'log',label,fmt,min,max,ticks},
   //        series:[{name,color,dash,area,x:[],y:[]}], ann:[{type:'vline'|'hline'|'point'|'band',...}], height}
   Book.lineChart = function (host, spec) {
     host.innerHTML = "";
@@ -123,12 +145,16 @@
       var t = el("text", { x: m.l - 8, y: Y(v) + 3.5, "text-anchor": "end" }, svg); t.textContent = fmt(v, spec.y.tfmt || spec.y.fmt);
     });
     if (!isLog && y0 < 0 && y1 > 0) el("line", { class: "zero", x1: m.l, x2: W - m.r, y1: Y(0), y2: Y(0) }, svg);
-    var xt = spec.x.type === "date" ? yearTicks(x0, x1, narrow ? 5 : 12) : (spec.x.ticks || linTicks(x0, x1, narrow ? 4 : 7));
+    var dt = spec.x.type === "date" ? dateTicks(x0, x1, narrow) : null;
+    var xt = dt ? dt.t : (spec.x.ticks || linTicks(x0, x1, narrow ? 4 : 7));
+    var xl = !dt && spec.x.ticks && spec.x.tickLabels;   // optional text for each of x.ticks
     el("line", { x1: m.l, x2: W - m.r, y1: H - m.b, y2: H - m.b }, ax);
-    xt.forEach(function (v) {
+    xt.forEach(function (v, i) {
       el("line", { x1: X(v), x2: X(v), y1: H - m.b, y2: H - m.b + 4 }, ax);
       var t = el("text", { x: X(v), y: H - m.b + 16, "text-anchor": "middle" }, svg);
-      t.textContent = spec.x.type === "date" ? fmtDate(v, "year") : fmt(v, spec.x.fmt);
+      if (dt && dt.mode === "month") t.textContent = fmtDate(v, i === 0 || new Date(v).getUTCMonth() === 0 ? "monthyear" : "month");
+      else if (dt) t.textContent = fmtDate(v, dt.mode === "year" ? "year" : null);
+      else t.textContent = xl && xl[i] != null ? xl[i] : fmt(v, spec.x.fmt);
     });
     if (spec.x.label) { var tx = el("text", { class: "ttl-y", x: m.l + (W - m.l - m.r) / 2, y: H - 6, "text-anchor": "middle" }, svg); tx.textContent = spec.x.label; }
     if (spec.y.label) { var ty = el("text", { class: "ttl-y", x: m.l, y: m.t - 2 + 0, "text-anchor": "start" }, svg); ty.textContent = ""; host.setAttribute("data-ylabel", spec.y.label); }

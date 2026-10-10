@@ -8,7 +8,7 @@ unless stated.
 - **References to a professional-certification curriculum.** The first edition borrowed one's structure and cited it
   (a crosswalk table, header chips, exam-style wording of the outcomes, references and a trademark note). The owner had all of it removed:
   the book is an independent personal-study project. Never add such references, mappings or comparisons, in text,
-  code comments, front matter or docs. `python3 build/qa/check_terms.py` (run by `build.sh`) fails the build if any
+  code comments, front matter or docs. `uv run python build/qa/check_terms.py` (run by `build.sh`) fails the build if any
   appear. Also never commit third-party course material the owner shares for reference (licensed PDFs marked not for
   distribution).
 - **Shioaji for historical data.** The syllabus once planned LM26's realized volatility "from Shioaji ticks". The
@@ -31,7 +31,15 @@ unless stated.
   without that server, use a FinMind API token instead, and never invent or estimate data.
 - **FinMind returns at most 500 rows per query.** Query in windows (about 18 months of daily data for one stock), and
   check every window with `data/check_chunk.py`.
-- **`pip install` can time out** in the container; install in the background, and pass `--break-system-packages`.
+- **The Python environment is uv-managed** (`pyproject.toml` + `uv.lock`, since 2026-10-11): `uv sync`, then
+  `uv run python <script>`; add a package with `uv add`, never `pip install`. The old `build/requirements.txt` lacked
+  scipy and sympy, which the LM2/4/5/7 scripts import, and only running every step in a fresh environment showed it.
+  After any dependency change, run `./build.sh --data --labs --preview` with
+  `UV_PROJECT_ENVIRONMENT=<empty folder>` and inspect every change to `src/data/` and to the labs' text outputs: only
+  last-digit floating-point noise is expected there (Windows and Linux differ at machine precision even with the same
+  locked versions; a chart that plots values near 1e-16 shows it). Notebook images and metadata change whenever
+  Matplotlib or the interpreter's patch version does. Installs can time out in a cloud container: run them in the
+  background.
 - **`gh` GraphQL calls were refused (HTTP 403).** Use REST through `gh api` (for example
   `gh api repos/Benjamin-Teng/Quant-math-for-beginner/pulls/1`).
 - **The repo's canonical URL has a capital Q** (`Quant-math-for-beginner`); the lower-case remote works but GitHub
@@ -117,7 +125,8 @@ unless stated.
 - **Row order after a join is not guaranteed** in Polars 2.0; sort (or pass `maintain_order`) before `shift`, `cum_max`
   or anything order-dependent.
 - **A lab must read only its own `data/` folder** (LM7's read a processed parquet that is not shipped).
-- **Commit notebooks executed**, after `jupyter nbconvert --execute` from inside the lab folder.
+- **Commit notebooks executed**, after `uv run jupyter nbconvert --to notebook --execute --inplace LMNN_lab.ipynb` from
+  inside the lab folder.
 
 ## 6. Working with agents
 

@@ -1,7 +1,8 @@
 """Landing page: roadmap, contents, conventions, edition notes. Output is content-only (the artifact
 publisher wraps the main page in its own document skeleton)."""
-import html, re
-from pathlib import Path
+import html
+import re
+
 import build as B
 
 ROOT = B.ROOT; SYL = B.SYL; AVAIL = B.AVAILABLE
@@ -42,12 +43,12 @@ def roadmap_svg():
         ("VII", "VIII", "uncertainty in μ", "down"),
         ("VIII", "IX", "sizing rules", "down"),
     ]
-    out = [f'<svg viewBox="0 0 {W} {H}" role="img" aria-label="Prerequisite map: calculus feeds linear algebra and probability; '
-           'probability feeds statistics and stochastic calculus; linear algebra and statistics feed portfolio optimization; '
-           'statistics feeds risk measurement; stochastic calculus, portfolio optimization and risk measurement all feed the Kelly volume, which feeds the capstone." '
-           'class="roadmap-svg">',
-           '<defs><marker id="rm-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">'
-           '<path d="M0,0 L10,5 L0,10 z" fill="currentColor"/></marker></defs>']
+    out = [(f'<svg viewBox="0 0 {W} {H}" role="img" aria-label="Prerequisite map: calculus feeds linear algebra and probability; '
+            'probability feeds statistics and stochastic calculus; linear algebra and statistics feed portfolio optimization; '
+            'statistics feeds risk measurement; stochastic calculus, portfolio optimization and risk measurement all feed the Kelly volume, which feeds the capstone." '
+            'class="roadmap-svg">'),
+           ('<defs><marker id="rm-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">'
+            '<path d="M0,0 L10,5 L0,10 z" fill="currentColor"/></marker></defs>')]
     labels = []
     for a, b, lab, route in edges:
         ax, ay = anchor(a, "bottom"); bx, by = anchor(b, "top")
@@ -115,7 +116,6 @@ def build():
         start_link = f'<a class="start" href="lm/lm{first:02d}.html">{verb}: LM{first} {esc(first_t)} →</a>'
     else:
         start_link = ""
-    rendered_hero_note = ""
     goals = [
         ("Build statistical models", "Return distributions, regressions and factor models, GARCH volatility, cointegrated spreads — estimated, diagnosed and stated with their uncertainty.", "Vol III–V"),
         ("Optimize portfolios under estimation error", "Mean–variance, risk parity and Kelly portfolios with realistic constraints, shrinkage estimators, and walk-forward evaluation.", "Vol II, VI"),
@@ -255,11 +255,14 @@ table.toc .lm-d {{ color: var(--ink-2); font-size: 0.86rem; margin-top: 0.1rem; 
 {"".join(vols)}
 
 <h2 class="sh" id="labs">Labs, data and environment</h2>
-<p>Each module ships with a Jupyter notebook that rebuilds its exhibits. Labs are Polars-first and use NumPy, SciPy and Matplotlib; later volumes add statsmodels, cvxpy and arch. Taiwan data come from FinMind and US data from FinMind's US price tables; each lab bundles a verified offline snapshot and can refresh it with your own FinMind token.</p>
-<div class="code"><div class="code-h"><span>Shell</span><button class="copy" type="button">Copy</button></div><pre class="hl"><code>cd ~/projects &amp;&amp; source .venv/bin/activate
-uv pip install polars pyarrow numpy scipy matplotlib statsmodels cvxpy arch jupyter
-# optional: live refresh of lab data
-export FINMIND_TOKEN="your-token"</code></pre></div>
+<p>Each module ships with a Jupyter notebook that rebuilds its exhibits. Labs are Polars-first and use NumPy, SciPy and Matplotlib; later volumes add statsmodels, cvxpy and arch. Taiwan data come from FinMind and US data from FinMind's US price tables. FinMind's licence does not allow its raw data to be redistributed, so the repository lists every file the book uses with a checksum: download them once with your own FinMind token, and the labs then run offline. The Python environment is managed by uv and pinned in <code>uv.lock</code>.</p>
+<div class="code"><div class="code-h"><span>Shell</span><button class="copy" type="button">Copy</button></div><pre class="hl"><code>git clone https://github.com/Benjamin-Teng/Quant-math-for-beginner.git
+cd Quant-math-for-beginner
+uv sync                                  # Python 3.13 environment, versions pinned by uv.lock
+export FINMIND_TOKEN="your-token"
+uv run python data/fetch_finmind.py      # download the raw data and check every file
+uv run python data/make_lab_data.py      # build each lab's data/ folder
+uv run --with jupyterlab jupyter lab labs/</code></pre></div>
 
 <h2 class="sh" id="edition">Edition notes</h2>
 {edition_html}

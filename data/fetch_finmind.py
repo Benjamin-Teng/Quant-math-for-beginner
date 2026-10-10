@@ -8,17 +8,17 @@ the new file is written next to the old path as <name>.new and the script exits 
 never change silently.
 
     export FINMIND_TOKEN=...                     # your FinMind API token
-    python3 data/fetch_finmind.py                # fetch missing or changed files, verify all
-    python3 data/fetch_finmind.py --verify       # verify local files only (no network)
-    python3 data/fetch_finmind.py --only 00679B  # restrict to manifest paths containing a substring
-    python3 data/make_lab_data.py                # then rebuild every lab's data/ folder
+    uv run python data/fetch_finmind.py                # fetch missing or changed files, verify all
+    uv run python data/fetch_finmind.py --verify       # verify local files only (no network)
+    uv run python data/fetch_finmind.py --only 00679B  # restrict to manifest paths containing a substring
+    uv run python data/make_lab_data.py                # then rebuild every lab's data/ folder
 
 Register a new raw file (after verifying it with data/check_chunk.py). --add re-fetches the query (it needs
 FINMIND_TOKEN) and refuses to register it unless the result matches the file byte for byte: FinMind's labels differ
 between instruments, so a filter copied from another entry can drop every row. --no-check skips the test fetch for a
 session without API access; run the full fetch in a clean checkout before relying on such an entry.
 
-    python3 data/fetch_finmind.py --add TX__2025-04-01__2025-10-31.csv --dataset TaiwanFuturesDaily --data-id TX \
+    uv run python data/fetch_finmind.py --add TX__2025-04-01__2025-10-31.csv --dataset TaiwanFuturesDaily --data-id TX \
         --start 2025-04-01 --end 2025-10-31 --filter trading_session=^position$ --filter 'contract_date=^\\d{6}$'
 
 Columns are kept under the FinMind names unless mapped with --map out=source (for example
@@ -180,7 +180,7 @@ def main():
         time.sleep(0.7)                                    # stay far below the hourly API limit
     if changed:
         sys.exit(f"{changed} file(s) differ from the manifest: inspect the .new files before replacing anything")
-    print("data/raw matches the manifest; next: python3 data/make_lab_data.py")
+    print("data/raw matches the manifest; next: uv run python data/make_lab_data.py")
 
 if __name__ == "__main__":
     main()

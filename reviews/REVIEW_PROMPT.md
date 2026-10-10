@@ -23,7 +23,7 @@ RULES
 REFERENCE FILES: AUTHORING.md (house style; §6 is the book-wide notation table), project/PITFALLS.md (known traps),
 src/lm03.md (published reference module), {NEIGHBOUR DRAFTS}, data: {DATA FILES}, author scripts: {SCRIPTS},
 executed lab: labs/LM{NN}_lab/LM{NN}_lab.ipynb, rendered page: dist/preview/lm/lm{NN}.html
-(build it first with `python3 build/build.py --preview` if it is missing).
+(build it first with `uv run python build/build.py --preview` if it is missing).
 
 WHAT TO CHECK
 1. Mathematics: every definition, theorem, derivation and Deep Dive; conditions stated; "=" vs "≈".
@@ -55,9 +55,12 @@ editor's decisions (they override the reviewer where they differ) and the review
 RULES: edit only LM{N}'s own files (src/lm{NN}.md, src/lm{NN}.js, data/lm{NN}_*.py and their outputs,
 build/make_lab{NN}.py, labs/LM{NN}_lab/); do not edit shared files or other modules; do not commit.
 
-Fix every finding, or say in your report why you decline it. Then re-run your data scripts, rebuild
-(`python3 build/build.py lm{NN}` writes dist/preview/), run `python3 build/qa/overflow.py
-file://$PWD/dist/preview/lm/lm{NN}.html 400`, regenerate and execute the lab, and re-check every number you changed
+Fix every finding, or say in your report why you decline it. Also bring the module to the standard wording of
+AUTHORING §9 (uv, nothing bundled): the companion-lab box, the notebook's first cell and the lab README (edit
+build/make_lab{NN}.py where it generates them), the script docstrings, and any live-refresh helper (urllib, not
+requests). Before handing back, run `git grep -nE "uv pip install|python3 |bundled|source \.venv|import requests"` on your files and clear every hit. Then re-run your data scripts, rebuild
+(`uv run python build/build.py lm{NN}` writes dist/preview/), run `uv run python build/qa/overflow.py
+dist/preview/lm/lm{NN}.html 400`, regenerate and execute the lab, and re-check every number you changed
 against script output.
 
 HAND-BACK: each finding → fixed or declined (with the reason); numbers that changed; new word count (and page count
@@ -74,7 +77,7 @@ sources).
 For every finding: confirm that the current src/lm{NN}.md (and lab, widget, chart data where relevant) resolves it,
 and recompute any number the fix changed. Then look for new errors the revision introduced: re-run the number audit
 on every section that changed (`git diff {REVIEWED_COMMIT} -- src/lm{NN}.md`), check notation against AUTHORING §6,
-build the preview and run the overflow check, and confirm `python3 build/qa/check_terms.py` passes.
+build the preview and run the overflow check, and confirm `uv run python build/qa/check_terms.py` passes.
 
 OUTPUT: a table with one row per finding — verified / reopened (with the reason) — then any new findings with
 severity, location and correction.

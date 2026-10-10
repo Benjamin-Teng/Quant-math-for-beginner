@@ -83,9 +83,9 @@ lab notebook that reproduces every number. Details: AUTHORING §4–§5.
 
 | Target | Command | Output |
 |:--|:--|:--|
-| Published site | `python3 build/build.py` (or `./build.sh`) | `docs/` (published modules only) |
-| Preview with drafts | `python3 build/build.py --preview` | `dist/preview/` (git-ignored) |
-| claude.ai artifact bundle | `python3 build/build.py --target artifact` | `dist/artifact/` (content-only index; git-ignored) |
+| Published site | `uv run python build/build.py` (or `./build.sh`) | `docs/` (published modules only) |
+| Preview with drafts | `uv run python build/build.py --preview` | `dist/preview/` (git-ignored) |
+| claude.ai artifact bundle | `uv run python build/build.py --target artifact` | `dist/artifact/` (content-only index; git-ignored) |
 | PDFs | `./build.sh --pdf` | `docs/pdf/LMnn_Title.pdf` |
 
 A private claude.ai artifact preview of the site exists; updating it needs a Claude session with the artifact tool and

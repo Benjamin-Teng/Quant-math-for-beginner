@@ -150,7 +150,7 @@ for something else.
   windows of fewer than 500 rows. Intraday history (`TaiwanVariousIndicators5Seconds`, minute bars, ticks) is too large
   for those windows: download it with a FinMind API token and a logged script (see `plans/ROADMAP.md`).
 - Store raw files in `data/raw/` exactly as returned (`date,close,spread` for prices) and register each one in
-  `data/raw_manifest.json` with `python3 data/fetch_finmind.py --add …`. `data/raw/` is git-ignored: FinMind's licence
+  `data/raw_manifest.json` with `uv run python data/fetch_finmind.py --add …`. `data/raw/` is git-ignored: FinMind's licence
   forbids redistributing raw data, so the repository keeps only the manifest and the scripts. Verify every close against
   FinMind's `spread` column with `data/check_chunk.py`; accept mismatches only on ex-dividend days (spread printed as
   0.0) and split days, and handle those explicitly in the script that builds returns. Around a split, restate the
@@ -174,12 +174,29 @@ expression exists, and never rely on row order after a join (pass `maintain_orde
 module's exhibits and computational examples, solves the computational practice problems, and ends with one
 extension exercise. It reads only files in its own `data/` folder, which is git-ignored and built from `data/raw/` by
 `data/make_lab_data.py` (add the lab's files there). Commit it executed (`./build.sh --labs` or
-`jupyter nbconvert --execute`).
+`uv run jupyter nbconvert --to notebook --execute --inplace LMNN_lab.ipynb` inside the lab folder). Use only packages in `pyproject.toml` (the standard library's `urllib` for an
+optional live refresh, not `requests`); add a new one with `uv add` after asking the owner.
+
+Standard wording, the same in every module (FinMind's licence forbids redistributing its data, so nothing is bundled):
+
+- The module's companion-lab box keeps the sentence that says what the notebook rebuilds, minus any claim about bundled
+  data or a snapshot, and then says: "The notebook
+  reads FinMind files that you download once with your own token: from the repository root, run
+  `uv run python data/fetch_finmind.py`, then `uv run python data/make_lab_data.py`. FinMind's licence does not allow
+  the book to redistribute the data. After that, the notebook runs offline."
+- The notebook's first cell: "**Environment.** From the repository root, `uv sync` installs the locked Python
+  environment (`uv.lock`). Open this notebook with the `.venv` kernel, or run `uv run --with jupyterlab jupyter lab`."
+- The lab's README runs `uv sync` and `uv run --with jupyterlab jupyter lab labs/LMNN_lab/LMNN_lab.ipynb` from the
+  repository root, re-executes with `uv run jupyter nbconvert --to notebook --execute --inplace LMNN_lab.ipynb` inside the lab folder,
+  and builds `data/` with the two commands above.
+- `build/make_labNN.py` writes the notebook, including its first cell, and for some labs the README: change the
+  generator and regenerate, because `./build.sh --labs` overwrites edits made to the generated files.
+- Script docstrings show how to run the script: `uv run python data/lmNN_x.py`.
 
 ## 10. Checks before a module goes to review
 
-1. `python3 build/build.py lmNN` runs without KaTeX errors (a draft builds into `dist/preview/`).
-2. No horizontal overflow at 400 px: `python3 build/qa/overflow.py file://$PWD/dist/preview/lm/lmNN.html 400`.
+1. `uv run python build/build.py lmNN` runs without KaTeX errors (a draft builds into `dist/preview/`).
+2. No horizontal overflow at 400 px: `uv run python build/qa/overflow.py dist/preview/lm/lmNN.html 400`.
 3. Screenshots in light and dark mode look right (`build/qa/shoot.py`).
 4. Every number reproduced by the scripts; every `[[ex:…]]`/`[[eg:…]]` points where the prose intends.
 5. The lab executes from a clean kernel.
@@ -188,7 +205,7 @@ extension exercise. It reads only files in its own `data/` folder, which is git-
 
 1. **Draft.** The writer delivers the files in §2. Drafts are committed to `main` but stay off the site: only
    modules whose entry in `src/syllabus.yaml` has `status: published` are built into `docs/`. Preview the whole site,
-   drafts included, with `python3 build/build.py --preview` and open `dist/preview/index.html`.
+   drafts included, with `uv run python build/build.py --preview` and open `dist/preview/index.html`.
 2. **Independent review.** Someone who did not write the module recomputes every number from the raw data, solves
    every problem, checks the mathematics, facts, notation (§6) and Chinese, and reports findings by severity.
 3. **Fixes.** The writer fixes every finding or explains in writing why not, then re-runs §10.
