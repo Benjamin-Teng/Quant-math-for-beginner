@@ -75,7 +75,7 @@
       controlsHTML([
         { id: "dw-mu", label: "Arithmetic mean μ per period", min: -0.05, max: 0.15, step: 0.0025, value: 0.08 },
         { id: "dw-s", label: "Volatility σ per period", min: 0, max: 0.8, step: 0.01, value: 0.2 },
-        { id: "dw-n", label: "Periods N", min: 2, max: 60, step: 2, value: 20 }
+        { id: "dw-n", label: "Periods T", min: 2, max: 60, step: 2, value: 20 }
       ]) + '<div class="dw-chart"></div><div class="readout" aria-live="polite"></div>' +
       '<p class="w-note">Each period the return is μ + σ or μ − σ with equal probability, so σ is exactly the standard deviation. The exact geometric return is √((1+μ)² − σ²) − 1.</p>';
     var smu = host.querySelector("#dw-mu"), ss = host.querySelector("#dw-s"), sn = host.querySelector("#dw-n");
@@ -108,8 +108,8 @@
           "<div><span>μ − σ²/2</span><b>" + fmt(a1, "pct3") + "</b></div>" +
           "<div><span>Approx. error</span><b" + (Math.abs(a1 - gx) > 0.0025 ? ' class="bad"' : "") + ">" + fmt(a1 - gx, "bp") + "</b></div>" +
           "<div><span>Log growth g</span><b>" + fmt(g, "pct3") + "</b></div>" +
-          "<div><span>Mean wealth after N</span><b>" + fmt(Math.pow(1 + mu, N), "x2") + "</b></div>" +
-          "<div><span>Median wealth after N</span><b>" + fmt(Math.exp(g * N), "x2") + "</b></div>";
+          "<div><span>Mean wealth after T periods</span><b>" + fmt(Math.pow(1 + mu, N), "x2") + "</b></div>" +
+          "<div><span>Median wealth after T periods</span><b>" + fmt(Math.exp(g * N), "x2") + "</b></div>";
     }
     [smu, ss, sn].forEach(function (c) { c.addEventListener("input", draw); });
     host.__redraw = draw; draw();
