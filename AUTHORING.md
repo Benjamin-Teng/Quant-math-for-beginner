@@ -132,11 +132,13 @@ for something else.
   sub-samples are excluded.
 - A chart must show every value the text cites from it (do not thin a series past the extremes you quote).
 - Chart spec (`src/data/*.json`, produced by `data/lmNN_charts.py`):
-  `{"alt", "height", "x": {"type": "date"|"num", "fmt", "label", "tipLabel", "min", "max"},
-  "y": {"type": "lin"|"log", "fmt", "tfmt", "label", "min", "max"}, "series": [{"name", "endLabel", "color": "1".."4"
-  or a CSS colour, "dash", "area", "x": [...], "y": [...]}], "ann": [{"type": "vline"|"hline"|"point"|"band", ...}],
-  "endLabels", "endValue", "endMargin"}`.
-  On a date axis, series and annotation dates may be ISO strings or epoch milliseconds.
+  `{"alt", "height", "x": {"type": "date"|"num", "fmt", "label", "tipLabel", "min", "max", "ticks", "tickLabels"},
+  "y": {"type": "lin"|"log", "fmt", "tfmt", "label", "min", "max", "ticks"}, "series": [{"name", "endLabel", "color":
+  "1".."4" or a CSS colour, "dash", "area", "x": [...], "y": [...]}], "ann": [{"type": "vline"|"hline"|"point"|"band",
+  ...}], "endLabels", "endValue", "endMargin"}`.
+  On a date axis, series and annotation dates may be ISO strings or epoch milliseconds; ticks fall on year starts when
+  at least three are in range, otherwise on month starts (every 1, 2, 3 or 6 months, labelled "Jan 2026", "Apr", …).
+  On a numeric axis, `ticks` fixes the tick values and `tickLabels` (one string per tick) replaces their text.
   Format codes: `pct0..pct3`, `bp`, `x0..x2` (multiples), `n0..n5`. At most four series; legend is automatic.
 - Widgets use `Book.lineChart(host, spec)` and `Book.fmt(v, code)` from `src/assets/book.js`; they must render a
   meaningful initial state (it is what the PDF shows) and must not depend on external libraries.
