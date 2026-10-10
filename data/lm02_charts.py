@@ -3,21 +3,19 @@
   lm02-leverage : leverage of one TX contract held from 10 June to 31 October 2025 (accounts A and B)
   lm02-fderror  : relative error of forward and central differences for the bond's P'(2%) versus step size
 
-Run:  python3 data/lm02_charts.py
+Run:  uv run python data/lm02_charts.py
 """
 import json
 import math
-import sys
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 
+import lm02_case as case  # data/lm02_case.py: Python puts the script's own folder first on sys.path
 import numpy as np
 import sympy as sp
 
 HERE = Path(__file__).resolve().parent
 OUT = HERE.parent / "src" / "data"
-sys.path.insert(0, str(HERE))
-import lm02_case as case                      # noqa: E402  (same folder)
 
 
 def bond_price(y, c=0.02, n=10, face=100.0):
@@ -39,7 +37,7 @@ pa = case.account_path(df, "2025-06-10", case.EQ_A)
 pb = case.account_path(df, "2025-06-10", case.EQ_B)
 assert [p["date"] for p in pa] == [p["date"] for p in pb]
 xs = [p["date"] for p in pa]
-ts0 = int(datetime(*map(int, xs[0].split("-")), tzinfo=timezone.utc).timestamp() * 1000)   # date axis: ms since epoch
+ts0 = int(datetime(*map(int, xs[0].split("-")), tzinfo=UTC).timestamp() * 1000)   # date axis: ms since epoch
 leverage = {
     "alt": "Leverage of one TX contract held from 10 June to 31 October 2025 in two accounts", "height": 300,
     "endLabels": True, "endValue": False, "endMargin": 90,
@@ -55,12 +53,14 @@ leverage = {
 # ---------------------------------------------------------------- finite-difference error
 EPS = np.finfo(float).eps
 y0 = 0.02
-P0, d1, d2, d3 = bond_derivs(y0)
-ks = [round(-16 + 0.25 * i, 2) for i in range(0, 61)]          # log10 h from -16 to -1
+P0, d1, d2, d3 = bond_derivs(y0)        # exact values: the reference P'(2%) = d1 and the two error models
+P0_float = bond_price(y0)               # the base of the forward quotient is the computed price (99.99999999999997),
+                                        # as in the module's code, its tables and the lab, not the exact 100
+ks = [round(-16 + 0.25 * i, 2) for i in range(61)]          # log10 h from -16 to -1
 fw, ce, fw_m, ce_m = [], [], [], []
 for k in ks:
     h = 10.0 ** k
-    efw = abs((bond_price(y0 + h) - P0) / h - d1) / abs(d1)
+    efw = abs((bond_price(y0 + h) - P0_float) / h - d1) / abs(d1)
     ece = abs((bond_price(y0 + h) - bond_price(y0 - h)) / (2 * h) - d1) / abs(d1)
     fw.append(round(math.log10(efw), 3) if efw > 0 else None)
     ce.append(round(math.log10(ece), 3) if ece > 0 else None)
@@ -87,3 +87,6 @@ jmin = int(np.nanargmin([v if v is not None else np.nan for v in ce]))
 imin = int(np.nanargmin([v if v is not None else np.nan for v in fw]))
 print(f"leverage: A {pa[0]['f']:.3f} -> {pa[-1]['f']:.3f}; B {pb[0]['f']:.3f} -> {pb[-1]['f']:.3f}; points {len(xs)}")
 print(f"fderror: forward min log10 rel err {fw[imin]} at log10 h = {ks[imin]}; central min {ce[jmin]} at {ks[jmin]}")
+# the decade steps of the fdtable exhibit, read off the chart series (must match lm02_numbers.py)
+print("fderror forward relative error at decade steps: "
+      + ", ".join(f"1e{k:.0f}: {10 ** v:.2e}" for k, v in zip(ks, fw) if v is not None and k == int(k) and k >= -12))

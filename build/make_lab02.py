@@ -1,28 +1,17 @@
-"""Generate LM02_lab.ipynb (Polars-first) and its offline data snapshot.
+"""Generate labs/LM02_lab/LM02_lab.ipynb (Polars-first).
 
-    python3 build/make_lab02.py
-    cd labs/LM02_lab && jupyter nbconvert --to notebook --execute LM02_lab.ipynb --output LM02_lab.ipynb
+The lab's data/ folder is not written here: data/make_lab_data.py builds it from data/raw/ (FinMind's licence forbids
+redistributing the data, so the folder is git-ignored). From the repository root:
+
+    uv run python build/make_lab02.py
+    cd labs/LM02_lab && uv run jupyter nbconvert --to notebook --execute --inplace LM02_lab.ipynb
 """
-import glob
-import shutil
 from pathlib import Path
 
 import nbformat as nbf
 
 ROOT = Path(__file__).resolve().parents[1]
 LAB = ROOT / "labs" / "LM02_lab"
-RAW = ROOT / "data" / "raw"
-
-# ---------------------------------------------------------------- data snapshot (copies of verified raw files)
-(LAB / "data").mkdir(parents=True, exist_ok=True)
-for name in ("TX__2025-04-01__2025-10-31.csv", "TAIEX__2025-04-01__2025-10-31.csv", "0050_dividends.csv"):
-    shutil.copy(RAW / name, LAB / "data" / name)
-for sym in ("0050", "00631L"):                      # FinMind chunks concatenated as returned, one header
-    lines = []
-    for f in sorted(glob.glob(str(RAW / f"{sym}__*.csv"))):
-        rows = Path(f).read_text(encoding="utf-8").strip().splitlines()
-        lines += rows if not lines else rows[1:]
-    (LAB / "data" / f"{sym}_daily_raw.csv").write_text("\n".join(lines) + "\n", encoding="utf-8")
 
 # ---------------------------------------------------------------- notebook
 cells = []
@@ -44,11 +33,13 @@ Companion notebook to **From Calculus to Kelly, LM2**. It rebuilds the module's 
 | 6 | "Duration by bumping the yield"; symbolic checks with SymPy |
 | 7 | Practice-problem solutions and an extension exercise |
 
-**Notation** as in the module: $h$ and $u$ are generic functions, $\Delta x$ a step ($\Delta y$ for a yield), $f$ exposure ÷ equity, $N$ contracts with multiplier $m$, $F$ the futures price, $S$ the index and $E$ equity.
+**Notation** as in the module: $h$ and $u$ are generic functions, $\Delta x$ a step ($\Delta y$ for a yield), $f$ exposure ÷ equity, $N$ contracts with multiplier $m$, $F$ the futures price, $S$ the index, $E$ equity and $F_{\mathrm z}$ the futures price at which equity is zero.
 
-**Data.** `data/` holds a snapshot of FinMind data retrieved 2026-10-10: `TaiwanFuturesDaily` for TX (regular session; columns `date, contract_date, close, settlement_price, volume, open_interest`), `TaiwanStockPrice` closes for TAIEX, 0050 and 00631L (`date, close, spread`), and 0050 cash dividends from `TaiwanStockDividendResult`. Every close was checked against FinMind's own `spread` column. In the TX file the expiring contract shows `settlement_price = 0.0` on its expiry day, and thinly traded back months can show `close = 0.0`; the notebook therefore uses settlement prices and rolls one session before expiry. The folder is not in the repository (FinMind's licence forbids redistributing raw data): build it from the repository root with `python3 data/fetch_finmind.py` and `python3 data/make_lab_data.py` (needs `FINMIND_TOKEN`).
+**Environment.** From the repository root, `uv sync` installs the locked Python environment (`uv.lock`). Open this notebook with the `.venv` kernel, or run `uv run --with jupyterlab jupyter lab`.
 
-**Environment.** `uv pip install polars pyarrow numpy matplotlib sympy`.
+**Data.** The notebook reads FinMind files that you download once with your own token (`FINMIND_TOKEN`). From the repository root, run `uv run python data/fetch_finmind.py`, then `uv run python data/make_lab_data.py`, which writes this lab's `data/` folder. FinMind's licence does not allow the book to redistribute the data, so the folder is not in the repository. After that, the notebook runs offline.
+
+The files are the ones the module uses (FinMind, retrieved 2026-10-10): `TaiwanFuturesDaily` for TX (regular session; columns `date, contract_date, close, settlement_price, volume, open_interest`), `TaiwanStockPrice` closes for TAIEX, 0050 and 00631L (`date, close, spread`), and 0050 cash dividends from `TaiwanStockDividendResult`. Every close was checked against FinMind's own `spread` column. In the TX file the expiring contract shows `settlement_price = 0.0` on its expiry day, and thinly traded back months can show `close = 0.0`; the notebook therefore uses settlement prices and rolls one session before expiry.
 """)
 
 code(r"""
@@ -118,6 +109,11 @@ for dy_bp in (100, 10, 1, 0.1, 0.01):
     ce = (bond_price(y0 + dy) - bond_price(y0 - dy)) / (2 * dy)
     rows.append({"dy_bp": dy_bp, "forward": fw, "err_fwd": fw - dP, "central": ce, "err_cen": ce - dP})
 print(f"P(2%) = {P0:.4f}   P'(2%) = {dP:.8f}")
+print(f"mean value theorem: P(3%) = {bond_price(0.03):.6f}, average slope from 2% to 3% = {(bond_price(0.03) - P0) / 0.01:.4f}")
+print("each tenfold cut divides the forward error by",
+      [round(a["err_fwd"] / b["err_fwd"], 2) for a, b in zip(rows, rows[1:])])
+print("and the central error by", [round(a["err_cen"] / b["err_cen"], 1) for a, b in zip(rows, rows[1:])],
+      "(at 0.01 bp rounding takes over)")
 pl.DataFrame(rows)   # exhibit "Difference quotients of a bond price at y0 = 2%"
 """)
 
@@ -130,6 +126,7 @@ Dmod = -dP / P0
 print(f"Dmod = {Dmod:.6f}   Dmac = 1.02 x {Dmod:.6f} = {(1 + y0) * Dmod:.4f} = sum t*w = {(t * w).sum():.4f}   w_10 = {w[-1]:.4f}")
 print(f"DV01 per 100 face {-dP * 1e-4:.5f};  per NT$100 million face {-dP * 1e-4 * 1e6:,.0f}")
 print(f"annuity factor a_10 at 2% = {(1 - 1.02**-10) / 0.02:.4f}  (= Dmod of a par bond, Practice Problem 9)")
+print(f"first-order estimate for +25 bp: -{Dmod:.6f} x 0.0025 = {-Dmod * 0.0025:.4%}")
 pl.DataFrame([{"dy_bp": d, "exact": bond_price(y0 + d / 1e4) / P0 - 1, "linear": -Dmod * d / 1e4}
               for d in (1, 10, 25, -25, 100, -100)]).with_columns((pl.col("exact") - pl.col("linear")).alias("error"))
 """)
@@ -244,7 +241,7 @@ F0, f0 = crash["F"][0], crash["f"][0]
 crash = crash.with_columns((pl.col("F") / F0 - 1).alias("move"),
                            (f0 - f0 * (f0 - 1) / F0 * (pl.col("F") - F0)).alias("f_linear"))
 crashA = account_path("2025-04-02", 600_000).head(4)
-print(f"zero-equity level B: {F0 - 900_000 / M_TX:,.0f};  A: {F0 - 600_000 / M_TX:,.0f}")
+print(f"zero-equity level F_z = F0 - E0/(N m): B {F0 - 900_000 / M_TX:,.0f};  A {F0 - 600_000 / M_TX:,.0f}")
 print(crashA)
 for lab, p in (("A", crashA), ("B", crash)):
     below = p.filter((pl.col("date") > "2025-04-02") & (pl.col("E") < MM))
@@ -307,7 +304,25 @@ by_year = (ret.with_columns(pl.col("date").str.slice(0, 4).cast(pl.Int32).alias(
               .sort("year"))
 full = by_year.filter(pl.col("year").is_between(2015, 2025)).sort("slope")
 print(f"full calendar years 2015-2025: lowest {full['slope'][0]:.3f} ({full['year'][0]}), highest {full['slope'][-1]:.3f} ({full['year'][-1]})")
-print(ret.filter(pl.col("date") == "2025-04-07").with_columns((pl.col("R_00631L") / pl.col("R_0050")).alias("ratio")))
+
+# each fund split after a trading halt, so the two common-date pairs across the halts span several sessions
+sessions = sorted(set(load_raw("0050")["date"]) | set(load_raw("00631L")["date"]))
+dates = ret["date"].to_list()
+for d in ("2025-06-18", "2026-03-31"):
+    prev = dates[dates.index(d) - 1]
+    print(f"pair {prev} -> {d} spans {sum(prev < s <= d for s in sessions)} sessions")
+keep = (~ret["date"].is_in(["2025-06-18", "2026-03-31"])).to_numpy()
+print(f"without the two halt pairs: slope {np.polyfit(R[keep], RL[keep], 1)[0]:.3f}, correlation {np.corrcoef(R[keep], RL[keep])[0, 1]:.3f}")
+# the same regression on unadjusted closes (no split restatement, no dividends)
+u = (pl.read_csv(DATA / "0050_daily_raw.csv").select("date", pl.col("close").alias("c0"))
+       .join(pl.read_csv(DATA / "00631L_daily_raw.csv").select("date", pl.col("close").alias("c1")), on="date")
+       .sort("date").with_columns(pl.col("c0").pct_change().alias("u0"), pl.col("c1").pct_change().alias("u1")).drop_nulls())
+print(f"unadjusted closes, {u.height} pairs: slope {np.polyfit(u['u0'].to_numpy(), u['u1'].to_numpy(), 1)[0]:.3f}")
+
+# 7 April 2025: both funds closed at their daily limits (0050 at 10%; 00631L at 10% x its multiple 2 = 20%, TWSE),
+# so that day's ratio reflects the limits; the next session shows the distortion
+print(ret.filter(pl.col("date").is_in(["2025-04-07", "2025-04-08", "2025-04-10"]))
+         .with_columns((pl.col("R_00631L") / pl.col("R_0050")).alias("ratio")))
 fig, ax = plt.subplots(figsize=(6, 5))
 ax.scatter(R, RL, s=4, alpha=0.4); xx = np.linspace(R.min(), R.max(), 2)
 ax.plot(xx, b[0] * xx + b[1], color="black", label=f"slope {b[0]:.3f}"); ax.plot(xx, 2 * xx, "--", color="grey", label="designed: L = 2")
@@ -388,15 +403,15 @@ for dx in (0.1, 0.001):
 md(r"""
 ## Part 6 — Duration by bumping yields
 
-A desk prices with code and bumps the yield. The central bump is the effective duration $(PV_--PV_+)/(2\,\Delta\text{Curve}\,PV_0)$, here with the bond's own yield as the curve.
+A desk prices with code and bumps the yield. The central bump is the effective duration $[P(y-\Delta y)-P(y+\Delta y)]/[2\,\Delta y\,P(y)]$, here with the bond's own yield shifted in place of a whole yield curve.
 """)
 
 code(r"""
 for bump_bp in (100, 25, 1, 0.01):
     dy = bump_bp / 1e4
     Df = -fwd(bond_price, y0, dy) / P0; Dc = -cen(bond_price, y0, dy) / P0
-    print(f"bump {bump_bp:>6} bp: forward {Df:.6f} (err {Df - Dmod:+.2e})   central {Dc:.6f} (err {Dc - Dmod:+.2e}, relative {abs(Dc - Dmod) / Dmod:.1e})")
-print(f"exact D_mod {Dmod:.6f};  SymPy: {sp.N((-sp.diff(Ps, y_) / Ps).subs(y_, sp.Rational(1, 50)), 8)}")
+    print(f"bump {bump_bp:>6} bp: forward {Df:.6f} (err {Df - Dmod:+.2e})   central {Dc:.7f} (err {Dc - Dmod:+.2e}, relative {abs(Dc - Dmod) / Dmod:.1e})")
+print(f"exact D_mod {Dmod:.7f};  SymPy: {sp.N((-sp.diff(Ps, y_) / Ps).subs(y_, sp.Rational(1, 50)), 8)}")
 F_, E0_, F0_, N_, m_ = sp.symbols("F E_0 F_0 N m", positive=True)
 f_ = N_ * m_ * F_ / (E0_ + N_ * m_ * (F_ - F0_))
 print("check f'(F) = -f(f-1)/F:", sp.simplify(sp.diff(f_, F_) + f_ * (f_ - 1) / F_) == 0)
@@ -415,7 +430,7 @@ print("PP8 ", f"annual Dmod {5 / 1.02:.4f}; continuous {5:.4f}")
 y_par, n_par = 0.02, 10
 print("PP9 ", f"a_(n,y0) = {(1 - (1 + y_par)**-n_par) / y_par:.4f};  -P'/P = {-bond_dprice(y_par) / bond_price(y_par):.4f}")
 print("PP10", f"exact {1.08 * 0.95 - 1:+.4%}; first order {0.08 - 0.05:+.2%}; cross {0.08 * -0.05:+.4%}")
-print("PP11", f"forward {fwd(math.log, 2, 0.01):.6f} (err {fwd(math.log, 2, 0.01) - 0.5:+.7f});  central {cen(math.log, 2, 0.01):.7f} (err {cen(math.log, 2, 0.01) - 0.5:+.3e})")
+print("PP11", f"forward {fwd(math.log, 2, 0.01):.7f} (err {fwd(math.log, 2, 0.01) - 0.5:+.7f});  central {cen(math.log, 2, 0.01):.9f} (err {cen(math.log, 2, 0.01) - 0.5:+.3e})")
 g1 = lambda f: 0.01 / (1 + 0.02 * f) - 0.005 / (1 - 0.01 * f)          # g'(f)
 print("PP13", {f: round(g1(f), 6) for f in (0, 10, 25, 40)})
 CY = 2 / P0
@@ -449,4 +464,4 @@ nb["metadata"] = {"kernelspec": {"display_name": "Python 3", "language": "python
                   "language_info": {"name": "python"}}
 out = LAB / "LM02_lab.ipynb"
 nbf.write(nb, out)
-print("wrote", out.relative_to(ROOT), "and data snapshot in", (LAB / "data").relative_to(ROOT))
+print("wrote", out.relative_to(ROOT))

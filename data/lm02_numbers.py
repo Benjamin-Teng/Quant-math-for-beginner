@@ -1,8 +1,9 @@
 """Every number quoted in LM2 that does not come from the TX/TAIEX case (see lm02_case.py).
 
-Run:  python3 data/lm02_numbers.py        (needs data/processed/etf_daily_returns.parquet from build_series.py)
+Run:  uv run python data/lm02_numbers.py    (needs data/processed/etf_daily_returns.parquet from build_series.py)
 """
 import math
+from itertools import pairwise
 from pathlib import Path
 
 import numpy as np
@@ -10,6 +11,7 @@ import polars as pl
 import sympy as sp
 
 HERE = Path(__file__).resolve().parent
+RAW = HERE / "raw"
 P = print
 EPS = np.finfo(float).eps
 
@@ -49,12 +51,20 @@ y0 = 0.02
 P0 = bond_price(y0); dP = bond_dprice(y0)
 P(f"P(2%) = {P0:.6f}   P'(2%) exact = {dP:.4f}")
 P("difference quotients [P(y0+h)-P(y0)]/h and central [P(y0+h)-P(y0-h)]/(2h):")
+q_err = []
 for hbp in (100, 10, 1, 0.1, 0.01):
     h = hbp / 1e4
     fw = (bond_price(y0 + h) - P0) / h
     ce = (bond_price(y0 + h) - bond_price(y0 - h)) / (2 * h)
-    P(f"  h={hbp:>6} bp  forward {fw:10.4f}  err {fw-dP:+9.4f}   central {ce:10.4f}  err {ce-dP:+.6f}")
-P(f"P'(2%) exact to 8 decimals: {dP:.8f};  P(3%) = {bond_price(0.03):.4f}; MVT average slope 2%->3% = {(bond_price(0.03)-P0)/0.01:.4f}")
+    q_err.append((fw - dP, ce - dP))
+    P(f"  h={hbp:>6} bp  forward {fw:10.4f}  err {fw-dP:+9.4f}   central {ce:10.4f}  err {ce-dP:+.6f} ({ce-dP:+.2e})")
+# AUTHORING 6: the cuts are about tenfold and a hundredfold, not exactly. The last central cut (0.1 bp -> 0.01 bp)
+# is no hundredfold: the error changes sign because rounding takes over at 0.01 bp (model components in S8 below)
+P("  each tenfold cut divides the forward error by "
+  + ", ".join(f"{a[0] / b[0]:.2f}" for a, b in pairwise(q_err))
+  + " and the central error by " + ", ".join(f"{a[1] / b[1]:.1f}" for a, b in pairwise(q_err)))
+P(f"P'(2%) exact to 8 decimals: {dP:.8f};  P(3%) = {bond_price(0.03):.4f} ({bond_price(0.03):.6f}); "
+  f"MVT average slope 2%->3% = {(bond_price(0.03)-P0)/0.01:.4f}; from the printed 91.469797: {(91.469797 - 100) / 0.01:.4f}")
 # 1-year and T-year zero from the definition
 for y in (0.02,):
     P(f"zero 1y: P=100/(1+y), P'(y) = -100/(1+y)^2 = {-100/(1+y)**2:.4f} at y={y:.0%}; DV01 per 100 = {100/(1+y)**2*1e-4:.6f}; "
@@ -109,7 +119,7 @@ Dmac = Dmod * (1 + y0)
 w = [(t, (0.02 * 100 + (100 if t == 10 else 0)) / 1.02 ** t / P0) for t in range(1, 11)]
 P(f"  P={P0:.4f}  P'={dP:.4f}  Dmod={Dmod:.4f} ({Dmod:.6f})  Dmac={Dmac:.4f}  sum t*w = {sum(t*wt for t, wt in w):.4f}; "
   f"from printed: 1.02 x 8.982585 = {1.02*8.982585:.7f}")
-P(f"  weights: " + ", ".join(f"{t}:{wt:.4f}" for t, wt in w))
+P("  weights: " + ", ".join(f"{t}:{wt:.4f}" for t, wt in w))
 P(f"  annuity factor (1-1.02^-10)/0.02 = {(1-1.02**-10)/0.02:.4f} (= Dmod of a par bond)")
 P(f"  DV01 per 100 face = {-dP*1e-4:.5f}; per NT$100 million face = {-dP*1e-4*1e6:,.0f}")
 for dbp in (1, 10, 25, 100):
@@ -119,7 +129,9 @@ for dbp in (1, 10, 25, 100):
 for dbp in (-25, -100):
     dy = dbp / 1e4
     ex = bond_price(y0 + dy) / P0 - 1; lin = -Dmod * dy
-    P(f"  dy={dbp:>4}bp exact {ex:+.4%} linear {lin:+.4%} error {ex-lin:+.4%}")
+    P(f"  dy={dbp:>4}bp exact {ex:+.4%} linear {lin:+.4%} error {ex-lin:+.4%} ({(ex-lin)*1e4:+.3f} bp of price)")
+# the printed first-order estimate uses the six-decimal D_mod (8.9826 x 0.25 = 2.24565 would be a rounding tie)
+P(f"  from the printed 8.982585: 8.982585 x 0.0025 = {8.982585 * 0.0025:.8%} -> {8.982585 * 0.0025:.4%}")
 section("S5 PV of a 5-year zero: continuous vs annual compounding")
 for rr in (0.02,):
     pv_c = 1e6 * math.exp(-5 * rr); pv_a = 1e6 / (1 + rr) ** 5
@@ -147,12 +159,40 @@ yr = np.array([int(d[:4]) for d in dates]); by = {}
 for yv in sorted(set(yr)):
     k = yr == yv; by[yv] = np.polyfit(R[k], RL[k], 1)[0]
 full_years = {k: v for k, v in by.items() if 2015 <= k <= 2025}
-lo = min(full_years, key=full_years.get); hi = max(full_years, key=full_years.get)
+lo = min(full_years, key=lambda k: full_years[k]); hi = max(full_years, key=lambda k: full_years[k])
 P(f"  by full calendar year 2015-2025: min {full_years[lo]:.3f} ({lo}), max {full_years[hi]:.3f} ({hi})")
 P("  " + ", ".join(f"{k}:{v:.3f}" for k, v in by.items()))
 for d in ("2025-04-07", "2024-08-05"):
     i = dates.index(d)
     P(f"  {d}: 0050 {R[i]:+.3%}  00631L {RL[i]:+.3%}  ratio {RL[i]/R[i]:.3f}")
+# price limits around the April 2025 crash. TWSE, Rules Governing Trading of Beneficial Certificates, art. 8: a
+# leveraged or inverse ETF on an all-domestic index has a daily limit of 10% times its multiple (20% for 00631L).
+# Limit prices sit on the 0.05 tick inside the limit (ETFs priced from 50 upward).
+p0, p1 = df["p0050"].to_list(), df["p00631L"].to_list()
+for d in ("2025-04-07", "2025-04-08", "2025-04-10"):
+    i = dates.index(d)
+    lim0 = (math.floor(p0[i - 1] * 1.1 / 0.05 + 1e-9) * 0.05 if R[i] > 0 else math.ceil(p0[i - 1] * 0.9 / 0.05 - 1e-9) * 0.05)
+    lim1 = (math.floor(p1[i - 1] * 1.2 / 0.05 + 1e-9) * 0.05 if RL[i] > 0 else math.ceil(p1[i - 1] * 0.8 / 0.05 - 1e-9) * 0.05)
+    P(f"  {d}: 0050 {p0[i-1]:.2f} -> {p0[i]:.2f} ({R[i]:+.3%}, limit price {lim0:.2f}); "
+      f"00631L {p1[i-1]:.2f} -> {p1[i]:.2f} ({RL[i]:+.3%}, limit price {lim1:.2f}); ratio {RL[i]/R[i]:.4f}; "
+      f"from 2-dp returns {round(100 * RL[i], 2) / round(100 * R[i], 2):.3f}")
+# both funds split inside the sample, each after a trading halt: the two common-date pairs that span the halts.
+# A session is a date on which either fund traded (the other fund was halted).
+raw = {sym: pl.concat([pl.read_csv(f) for f in sorted(RAW.glob(f"{sym}__*.csv"))]).unique("date").select("date", "close")
+       for sym in ("0050", "00631L")}
+sessions_all = sorted(set(raw["0050"]["date"].to_list()) | set(raw["00631L"]["date"].to_list()))
+for d in ("2025-06-18", "2026-03-31"):
+    i = dates.index(d)
+    span = [s for s in sessions_all if dates[i - 1] < s <= d]
+    P(f"  pair {dates[i - 1]} -> {d} spans {len(span)} sessions: {span}")
+keep = ~np.isin(np.array(dates), ["2025-06-18", "2026-03-31"])
+P(f"  without the two halt pairs: n={keep.sum()}, slope {np.polyfit(R[keep], RL[keep], 1)[0]:.4f}, "
+  f"corr {np.corrcoef(R[keep], RL[keep])[0, 1]:.4f} (all pairs: {slope:.4f}, {np.corrcoef(R, RL)[0, 1]:.4f})")
+# the same regression on unadjusted closes (no split restatement, no dividends), from the raw FinMind chunks
+ua = raw["0050"].join(raw["00631L"], on="date", suffix="_L").sort("date")
+U0 = (ua["close"] / ua["close"].shift(1) - 1).to_numpy()[1:]
+U1 = (ua["close_L"] / ua["close_L"].shift(1) - 1).to_numpy()[1:]
+P(f"  unadjusted closes on the {len(U0):,} common-date pairs: slope {np.polyfit(U0, U1, 1)[0]:.3f}")
 # FX example (illustrative)
 Ru, Rx = 0.06, -0.06
 P(f"  FX: exact TWD return {(1+Ru)*(1+Rx)-1:+.4%}; first order {Ru+Rx:+.2%}; cross term {Ru*Rx:+.4%}; "
@@ -202,6 +242,9 @@ Ef = 2 * math.sqrt(EPS * P0 * abs(d2)); Ec = (abs(d3) / 6) * hc ** 2 + EPS * P0 
 for hh in (1e-8, 1e-9, 1e-10):
     P(f"  model components at h={hh:.0e}: forward truncation {abs(d2)/2*hh/abs(d1):.2e}, forward rounding {2*EPS*P0/hh/abs(d1):.2e}")
 P(f"  crossover of forward truncation and rounding: h = 2 sqrt(eps P/|P''|) = {2*math.sqrt(EPS*P0/abs(d2)):.2e}")
+for hh in (1e-5, 1e-6):     # the 0.1 bp and 0.01 bp steps of the quotients exhibit
+    P(f"  model components at h={hh:.0e}: central truncation {abs(d3)/6*hh**2/abs(d1):.2e}, "
+      f"central rounding {EPS*P0/hh/abs(d1):.2e}")
 P(f"  optimal h forward ~ {hf:.2e} (min err ~ {Ef:.2e}, rel {Ef/abs(dP):.1e}); central ~ {hc:.2e} (min err ~ {Ec:.2e}, rel {Ec/abs(dP):.1e})")
 # best observed on a fine grid
 ks = np.arange(-16, 0.001, 0.25); best = {}
@@ -221,10 +264,17 @@ Dm_ce = -((bond_price(y0 + h) - bond_price(y0 - h)) / (2 * h)) / P0
 P(f"  1bp bump: Dmod forward {Dm_fw:.6f} (err {Dm_fw-Dmod:+.6f}), central {Dm_ce:.6f} (err {Dm_ce-Dmod:+.2e}); exact {Dmod:.6f}; "
   f"accuracy ratio {abs(Dm_fw-Dmod)/abs(Dm_ce-Dmod):,.0f} (about {round(abs(Dm_fw-Dmod)/abs(Dm_ce-Dmod), -2):,.0f}); "
   f"central relative error {abs(Dm_ce-Dmod)/Dmod:.1e}")
+P(f"  1bp bump at seven decimals: central {Dm_ce:.7f}, exact {Dmod:.7f}, difference of the printed values "
+  f"{round(Dm_ce, 7) - round(Dmod, 7):+.1e}; forward {Dm_fw:.6f} - exact {Dmod:.6f} = {round(Dm_fw, 6) - round(Dmod, 6):+.6f}")
 dec = [(t[0], abs(t[2]), abs(t[4])) for t in tab]          # (k, |rel err forward|, |rel err central|) for h = 1e-k
 P(f"  decade grid: forward min |rel| at 1e-{min(dec, key=lambda z: z[1])[0]} ({min(z[1] for z in dec):.2e}); "
   f"central min at 1e-{min(dec, key=lambda z: z[2])[0]} ({min(z[2] for z in dec):.2e}); "
-  f"forward |rel| at 1e-8..1e-10: {[f'{z[1]:.2e}' for z in dec if 8 <= z[0] <= 10]}")
+  f"forward |rel| at 1e-8..1e-10: {[f'{z[1]:.2e}' for z in dec if 8 <= z[0] <= 10]}; "
+  f"largest/smallest of these three {max(z[1] for z in dec if 8 <= z[0] <= 10) / min(z[1] for z in dec if 8 <= z[0] <= 10):.2f}")
+# below the crossover the ranking is rounding noise: the exact base 100 instead of the computed P(2%) reorders it
+dec_exact = [(k, abs((bond_price(y0 + 10.0 ** -k) - 100.0) / 10.0 ** -k - dP) / abs(dP)) for k in range(1, 13)]
+P(f"  with the exact base 100: forward |rel| at 1e-8..1e-10: {[f'{e:.2e}' for k, e in dec_exact if 8 <= k <= 10]}; "
+  f"decade-grid minimum at 1e-{min(dec_exact, key=lambda z: z[1])[0]}")
 # kink: call payoff max(x-1,0) at x=1
 call = lambda v: max(v - 1.0, 0.0)
 for h in (0.1, 0.001):
@@ -234,7 +284,8 @@ lnerr = []
 for h in (0.01, 0.005):
     fw = (math.log(2 + h) - math.log(2)) / h; ce = (math.log(2 + h) - math.log(2 - h)) / (2 * h)
     lnerr.append((fw - 0.5, ce - 0.5))
-    P(f"  ln at 2, h={h}: forward {fw:.6f} err {fw-0.5:+.7f}; central {ce:.7f} err {ce-0.5:+.3e}")
+    P(f"  ln at 2, h={h}: forward {fw:.7f} err {fw-0.5:+.7f}; central {ce:.9f} err {ce-0.5:+.3e}; "
+      f"from the printed quotients: {round(fw, 7) - 0.5:+.7f}, {round(ce, 9) - 0.5:+.3e}")
 P(f"  ln ratios when halving: forward {lnerr[0][0]/lnerr[1][0]:.2f}, central {lnerr[0][1]/lnerr[1][1]:.2f}; "
   f"central vs forward accuracy at h=0.01: {abs(lnerr[0][0])/abs(lnerr[0][1]):.0f}x")
 # TAIFEX margin table effective 2026-08-12 (official figures quoted in Section 6): check the proportionality
@@ -249,8 +300,8 @@ for h in (0.1, 0.05, 0.025):
 
 # ------------------------------------------------------------------ Practice problems
 section("Practice problems")
-P(f"  PP1 lim (e^(2h)-1)/h = 2")
-P(f"  PP2 d/dx ln(1+3x) at 0 = 3")
+P("  PP1 lim (e^(2h)-1)/h = 2")
+P("  PP2 d/dx ln(1+3x) at 0 = 3")
 P(f"  PP3 sqrt at 4 = {1/(2*math.sqrt(4)):.4f}")
 # PP5 position delta
 d5 = 1 * 200 - 3 * 50 + 7 * 10

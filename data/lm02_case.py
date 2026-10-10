@@ -4,10 +4,11 @@ Inputs (verified FinMind files, regular session only):
   raw/TX__2025-04-01__2025-10-31.csv     date,contract_date,close,settlement_price,volume,open_interest
   raw/TAIEX__2025-04-01__2025-10-31.csv  date,close,spread
 Output: processed/lm02_case.json and a printed report of every number quoted in LM2 from these files.
-Run:  python3 data/lm02_case.py
+Run:  uv run python data/lm02_case.py
 """
 import json
 from pathlib import Path
+from typing import Any
 
 import numpy as np
 import polars as pl
@@ -66,7 +67,8 @@ def account_path(df, start_date, E0, n=1):
     """Equity and leverage of an account holding n contracts from the close of start_date (inclusive)."""
     sub = df.filter(pl.col("date") > start_date)
     first = df.filter(pl.col("date") == start_date)
-    F_open = first["F_next"][0] if first.height else None
+    assert first.height == 1, f"no session {start_date} in the sample"
+    F_open = float(first["F_next"][0])
     E, out = float(E0), []
     out.append({"date": start_date, "F": F_open, "E": E, "f": n * M_TX * F_open / E})
     for r in sub.iter_rows(named=True):
@@ -84,16 +86,17 @@ def main():
     print(f"daily returns: {df.height}  ({df['date'][0]} -> {df['date'][-1]})")
 
     # ---- the two case days
-    case = {}
+    case: dict[str, dict[str, Any]] = {}
     for d in ("2025-06-11", "2025-04-07"):
         r = df.filter(pl.col("date") == d).row(0, named=True)
         pnl = M_TX * (r["F1"] - r["F0"])
         notional0 = M_TX * r["F0"]
-        row = dict(date=d, contract=r["contract"], S0=r["S0"], S1=r["S1"], RS=r["RS"], F0=r["F0"], F1=r["F1"],
-                   RF=r["RF"], points=r["F1"] - r["F0"], pnl=pnl, notional0=notional0,
-                   fA=notional0 / EQ_A, fB=notional0 / EQ_B, RA=pnl / EQ_A, RB=pnl / EQ_B,
-                   ratioA=(pnl / EQ_A) / r["RS"], ratioB=(pnl / EQ_B) / r["RS"], eps_FS=r["RF"] / r["RS"],
-                   limit_down=round(r["F0"] * 0.9, 1))
+        row: dict[str, Any] = {
+            "date": d, "contract": r["contract"], "S0": r["S0"], "S1": r["S1"], "RS": r["RS"], "F0": r["F0"],
+            "F1": r["F1"], "RF": r["RF"], "points": r["F1"] - r["F0"], "pnl": pnl, "notional0": notional0,
+            "fA": notional0 / EQ_A, "fB": notional0 / EQ_B, "RA": pnl / EQ_A, "RB": pnl / EQ_B,
+            "ratioA": (pnl / EQ_A) / r["RS"], "ratioB": (pnl / EQ_B) / r["RS"], "eps_FS": r["RF"] / r["RS"],
+            "limit_down": round(r["F0"] * 0.9, 1)}
         case[d] = row
         print(f"\nCASE {d}: contract {r['contract']}")
         print(f"  TAIEX {r['S0']:,.2f} -> {r['S1']:,.2f}  RS = {r['RS']:+.4%}")
@@ -106,7 +109,7 @@ def main():
         print(f"  max leverage at illustrative IM {IM_ILLUS:,}: {notional0/IM_ILLUS:.2f}")
     res["case"] = case
 
-    # ---- Exhibit 1 at its printed precision, and the ratios recomputed from the printed values
+    # ---- the case exhibit (label case) at its printed precision, and the ratios recomputed from the printed values
     for d in ("2025-06-11", "2025-04-07"):
         c = case[d]
         RSp, RFp = round(100 * c["RS"], 3), round(100 * c["RF"], 3)
@@ -125,15 +128,16 @@ def main():
     print(f"TYPICAL: {n_bigger} of {df.height} sessions moved more than |{case['2025-06-11']['RS']:.4%}|; "
           f"median |RS| {float(absRS.median()):.3%}; largest fall {worst['date']} {worst['RS']:+.3%}; "
           f"largest absolute move {largest_abs['date']} {largest_abs['RS']:+.3%}")
-    res["typical"] = dict(n_bigger=n_bigger, worst=worst["date"], largest_abs=largest_abs["date"])
+    res["typical"] = {"n_bigger": n_bigger, "worst": worst["date"], "largest_abs": largest_abs["date"]}
 
     # ---- typical day and futures-vs-index statistics over the window
     RS, RF = df["RS"].to_numpy(), df["RF"].to_numpy()
     beta = np.polyfit(RS, RF, 1)[0]
-    stats = dict(med_abs_RS=float(np.median(np.abs(RS))), med_abs_RF=float(np.median(np.abs(RF))),
-                 corr=float(np.corrcoef(RS, RF)[0, 1]), slope_RF_on_RS=float(beta),
-                 sd_RS=float(RS.std(ddof=1)), sd_RF=float(RF.std(ddof=1)),
-                 n_roll_days=int((df["contract"] != df["held_next"]).sum()))
+    stats: dict[str, Any] = {
+        "med_abs_RS": float(np.median(np.abs(RS))), "med_abs_RF": float(np.median(np.abs(RF))),
+        "corr": float(np.corrcoef(RS, RF)[0, 1]), "slope_RF_on_RS": float(beta),
+        "sd_RS": float(RS.std(ddof=1)), "sd_RF": float(RF.std(ddof=1)),
+        "n_roll_days": int((df["contract"] != df["held_next"]).sum())}
     near1 = df.filter(pl.col("RS").abs().is_between(0.009, 0.011))
     stats["n_near_1pct"] = near1.height
     stats["near1_ratio_RF_RS_min"] = float((near1["RF"] / near1["RS"]).min())
@@ -171,8 +175,8 @@ def main():
     lev_after = M_TX * case["2025-06-11"]["F1"] / a1["E"]
     print(f"  eps(f,F)=1-f check (A, 11 Jun): f0={a0['f']:.4f} -> exact {lev_after:.4f}; log-linear prediction {pred:.4f}; "
           f"linear prediction {a0['f']*(1+(1-a0['f'])*case['2025-06-11']['RF']):.4f}")
-    res["lev_check_0611"] = dict(f0=a0["f"], f1=lev_after, pred_log=float(pred),
-                                 pred_lin=a0["f"] * (1 + (1 - a0["f"]) * case["2025-06-11"]["RF"]))
+    res["lev_check_0611"] = {"f0": a0["f"], "f1": lev_after, "pred_log": float(pred),
+                             "pred_lin": a0["f"] * (1 + (1 - a0["f"]) * case["2025-06-11"]["RF"])}
     # cumulative: account A from 10 Jun to 31 Oct
     pa = paths["A"]; pb = paths["B"]
     gainA = pa[-1]["E"] - EQ_A
@@ -195,9 +199,9 @@ def main():
     b0, b1 = F_first - S_06_10, F_last - S_end
     print(f"  basis (near-month settlement - TAIEX close): 2025-06-10 {b0:+.2f}, 2025-10-31 {b1:+.2f}; change {b1-b0:+.2f}; "
           f"excess of futures points over TAIEX points {pts-(S_end-S_06_10):+.2f} = basis change {b1-b0:+.2f} + rolls {-roll_after:+.0f}")
-    res["cum"] = dict(S0=S_06_10, S1=S_end, RS=S_end / S_06_10 - 1, RA=pa[-1]["E"] / EQ_A - 1, RB=pb[-1]["E"] / EQ_B - 1,
-                      gainA=gainA, gainB=pb[-1]["E"] - EQ_B, roll_pts=roll_after, pts=pts, F_first=F_first, F_last=F_last,
-                      basis0=b0, basis1=b1)
+    res["cum"] = {"S0": S_06_10, "S1": S_end, "RS": S_end / S_06_10 - 1, "RA": pa[-1]["E"] / EQ_A - 1,
+                  "RB": pb[-1]["E"] / EQ_B - 1, "gainA": gainA, "gainB": pb[-1]["E"] - EQ_B, "roll_pts": roll_after,
+                  "pts": pts, "F_first": F_first, "F_last": F_last, "basis0": b0, "basis1": b1}
 
     # ---- April 2025: leverage near wipe-out (Section 7)
     crash = {}
@@ -214,7 +218,7 @@ def main():
     for x in crash["B"][1:5]:
         dF = x["F"] - F0
         df_lin = -f0 * (f0 - 1) / F0 * dF
-        lin.append(dict(date=x["date"], F=x["F"], move=x["F"] / F0 - 1, f_exact=x["f"], f_lin=f0 + df_lin))
+        lin.append({"date": x["date"], "F": x["F"], "move": x["F"] / F0 - 1, "f_exact": x["f"], "f_lin": f0 + df_lin})
         print(f"  B first-order from 2 Apr: {x['date']} cum move {x['F']/F0-1:+.2%}  f exact {x['f']:.3f}  f linear {f0+df_lin:.3f}")
     # margin calls against an ILLUSTRATIVE maintenance margin: the illustrative initial margin scaled by the ratio
     # of TAIFEX's official TX maintenance and initial margins (NT$538,000 / NT$701,000, table effective 2026-08-12)
@@ -230,7 +234,7 @@ def main():
     lin1 = f0 + (-f0 * (f0 - 1) / F0) * (F1 - F0)
     print(f"  B hypothetical -1% from 2 Apr: f exact {f1:.4f}, linear {lin1:.4f}, error {f1-lin1:.4f}")
     res["crash_lin"] = lin
-    res["crash_1pct"] = dict(f_exact=f1, f_lin=lin1)
+    res["crash_1pct"] = {"f_exact": f1, "f_lin": lin1}
 
     def conv(o):
         if isinstance(o, dict): return {k: conv(v) for k, v in o.items()}
