@@ -219,6 +219,9 @@ Standard wording, the same in every module (FinMind's licence forbids redistribu
 3. Screenshots in light and dark mode look right (`build/qa/shoot.py`).
 4. Every number reproduced by the scripts; every `[[ex:…]]`/`[[eg:…]]` points where the prose intends.
 5. The lab executes from a clean kernel.
+6. The PDF (`build/render_pdf.py`) has at most 40 pages and is not shrunk: `uv run python build/qa/pdf_scale.py
+   <pdf>`. Chromium shrinks the whole document when anything is wider than the A4 text width, so a page count from a
+   shrunk PDF is too low.
 
 ## 11. Review and publishing
 

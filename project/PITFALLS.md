@@ -122,6 +122,15 @@ unless stated.
 - **Editing code with `sed` broke an f-string** in `build/qa/shoot.py`, and a greedy regex (DOTALL) once matched to the
   end of `syllabus.yaml`; an assertion stopped the write. Edit with an editor tool or a script that asserts the exact
   number of replacements before writing.
+- **One wide element shrinks the whole PDF** (2026-10-11). Chromium scales the entire printed document down when any
+  element is wider than the A4 text width (680 px), and exhibit bodies and table wrappers that scroll on screen used to
+  clip on paper. LM2's equation (2.11), 36 px too wide, printed every page at 95%: the module read 36–37 pages and is 40
+  at full size. Page counts come only from unshrunk PDFs (`build/qa/pdf_scale.py`, run by `build.sh --pdf`); find what
+  sticks out with print media at 680 px. A wide display formula gets a line break (`gathered`/`aligned`), not a smaller
+  font.
+- **Chrome breaks a line after an inline-block, even before a full stop** (KaTeX's boxes), and a word joiner does not
+  stop it. `build.py` wraps the last box of an inline formula followed by punctuation in a nowrap span; it holds
+  `. , ; : ! ? ) ] ’ ” " '` and CJK closing punctuation, not `% - –` or fullwidth `；：`.
 
 ## 5. Python, Polars and notebooks
 

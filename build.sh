@@ -55,7 +55,7 @@ if [ "$PDF" = 1 ]; then
   mkdir -p docs/pdf
   py build/build.py --list-pdfs | while IFS='|' read -r html pdf title; do
     py build/render_pdf.py "docs/$html" "docs/$pdf" "$title"
-    echo "rendered docs/$pdf"
+    py build/qa/pdf_scale.py "docs/$pdf" || { echo "docs/$pdf was shrunk to fit: find what is wider than the page"; exit 1; }
   done
 fi
 
