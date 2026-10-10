@@ -62,7 +62,9 @@ for y in (0.02,):
 # secant of e^x at 0 (widget initial state)
 q = math.expm1(0.5) / 0.5
 P(f"widget: (e^0.5-1)/0.5 = {q:.5f}; error {q-1:.5f}; error/h {(q-1)/0.5:.5f}; central (e^0.5-e^-0.5)/1 = {(math.exp(0.5)-math.exp(-0.5))/1:.5f}")
-P(f"annuity: 50 - a_100 = {50-(1-1.02**-100)/0.02:.4f}")
+a100, a1000 = (1 - 1.02**-100) / 0.02, (1 - 1.02**-1000) / 0.02
+P(f"annuity: 50 - a_100 = {50-a100:.4f} = {(50-a100)/50:.2%} of 50; a_1000 - a_100 = {a1000-a100:.5f}; "
+  f"gap 50*1.02^-n shrinks by the factor 1/1.02 = {1/1.02:.4f} a year")
 
 # ------------------------------------------------------------------ Section 4: rules
 section("S4 rules")
@@ -105,7 +107,8 @@ section("S5 bond duration (10y 2% annual coupon at par)")
 Dmod = -dP / P0
 Dmac = Dmod * (1 + y0)
 w = [(t, (0.02 * 100 + (100 if t == 10 else 0)) / 1.02 ** t / P0) for t in range(1, 11)]
-P(f"  P={P0:.4f}  P'={dP:.4f}  Dmod={Dmod:.4f}  Dmac={Dmac:.4f}  sum t*w = {sum(t*wt for t, wt in w):.4f}")
+P(f"  P={P0:.4f}  P'={dP:.4f}  Dmod={Dmod:.4f} ({Dmod:.6f})  Dmac={Dmac:.4f}  sum t*w = {sum(t*wt for t, wt in w):.4f}; "
+  f"from printed: 1.02 x 8.982585 = {1.02*8.982585:.7f}")
 P(f"  weights: " + ", ".join(f"{t}:{wt:.4f}" for t, wt in w))
 P(f"  annuity factor (1-1.02^-10)/0.02 = {(1-1.02**-10)/0.02:.4f} (= Dmod of a par bond)")
 P(f"  DV01 per 100 face = {-dP*1e-4:.5f}; per NT$100 million face = {-dP*1e-4*1e6:,.0f}")
@@ -196,6 +199,9 @@ d1 = float(sp.diff(Psym, ysym, 1).subs(ysym, sp.Rational(1, 50)))
 P(f"  sympy P'={d1:.4f} P''={d2:.4f} P'''={d3:.4f}  (P''/P = {d2/100:.4f} = convexity)")
 hf = 2 * math.sqrt(EPS * P0 / abs(d2)); hc = (3 * EPS * P0 / abs(d3)) ** (1 / 3)
 Ef = 2 * math.sqrt(EPS * P0 * abs(d2)); Ec = (abs(d3) / 6) * hc ** 2 + EPS * P0 / hc
+for hh in (1e-8, 1e-9, 1e-10):
+    P(f"  model components at h={hh:.0e}: forward truncation {abs(d2)/2*hh/abs(d1):.2e}, forward rounding {2*EPS*P0/hh/abs(d1):.2e}")
+P(f"  crossover of forward truncation and rounding: h = 2 sqrt(eps P/|P''|) = {2*math.sqrt(EPS*P0/abs(d2)):.2e}")
 P(f"  optimal h forward ~ {hf:.2e} (min err ~ {Ef:.2e}, rel {Ef/abs(dP):.1e}); central ~ {hc:.2e} (min err ~ {Ec:.2e}, rel {Ec/abs(dP):.1e})")
 # best observed on a fine grid
 ks = np.arange(-16, 0.001, 0.25); best = {}
@@ -213,7 +219,8 @@ h = 1e-4
 Dm_fw = -((bond_price(y0 + h) - P0) / h) / P0
 Dm_ce = -((bond_price(y0 + h) - bond_price(y0 - h)) / (2 * h)) / P0
 P(f"  1bp bump: Dmod forward {Dm_fw:.6f} (err {Dm_fw-Dmod:+.6f}), central {Dm_ce:.6f} (err {Dm_ce-Dmod:+.2e}); exact {Dmod:.6f}; "
-  f"accuracy ratio {abs(Dm_fw-Dmod)/abs(Dm_ce-Dmod):,.0f}")
+  f"accuracy ratio {abs(Dm_fw-Dmod)/abs(Dm_ce-Dmod):,.0f} (about {round(abs(Dm_fw-Dmod)/abs(Dm_ce-Dmod), -2):,.0f}); "
+  f"central relative error {abs(Dm_ce-Dmod)/Dmod:.1e}")
 dec = [(t[0], abs(t[2]), abs(t[4])) for t in tab]          # (k, |rel err forward|, |rel err central|) for h = 1e-k
 P(f"  decade grid: forward min |rel| at 1e-{min(dec, key=lambda z: z[1])[0]} ({min(z[1] for z in dec):.2e}); "
   f"central min at 1e-{min(dec, key=lambda z: z[2])[0]} ({min(z[2] for z in dec):.2e}); "

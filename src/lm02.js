@@ -21,7 +21,7 @@
     return out;
   }
 
-  /* 10-year bond with a 2% annual coupon (the bond of Sections 3, 5 and 8) */
+  /* 10-year bond with a 2% annual coupon (the bond used throughout the module) */
   function bondP(y) { var s = 0; for (var t = 1; t <= 10; t++) s += 2 / Math.pow(1 + y, t); return s + 100 / Math.pow(1 + y, 10); }
   function bondD(y) { var s = 0; for (var t = 1; t <= 10; t++) s -= t * 2 / Math.pow(1 + y, t + 1); return s - 1000 / Math.pow(1 + y, 11); }
   /* account A of the motivating case: one TX contract, NT$600,000 of equity when F = 22,116 */
@@ -46,7 +46,7 @@
     call: { name: "Call payoff max(x − 1, 0)", f: function (x) { return Math.max(x - 1, 0); }, d: null, x0: 1, lo: 0, hi: 2,
       ylo: -0.2, yhi: 1.1, hs: ladder(0.5, 0.001), h0: 0.5, elo: -16, xfmt: "n1", yfmt: "n2", dd: 5,
       hfmt: function (h) { return String(h); },
-      note: "At the strike the left slope is 0 and the right slope is 1: no tangent exists, and the central quotient is 0.5 for every h." }
+      note: "At the strike the left slope is 0 and the right slope is 1: no tangent exists, and the central quotient is 0.5 for every Δx." }
   };
 
   function controlsHTML() {
@@ -55,9 +55,9 @@
       '<option value="exp">eˣ at x₀ = 0</option><option value="ln">ln x at x₀ = 1</option>' +
       '<option value="bond">Bond price P(y) at y₀ = 2%</option><option value="lev">Leverage f(F) of account A</option>' +
       '<option value="call">Call payoff at the strike</option></select></label>' +
-      '<label for="sw-m">Difference quotient<select id="sw-m"><option value="fwd">Forward [g(x₀+h) − g(x₀)]/h</option>' +
-      '<option value="bwd">Backward [g(x₀) − g(x₀−h)]/h</option><option value="cen">Central [g(x₀+h) − g(x₀−h)]/(2h)</option></select></label>' +
-      '<label for="sw-h">Step h, slide right to shrink <span class="v" id="sw-h-v"></span>' +
+      '<label for="sw-m">Difference quotient<select id="sw-m"><option value="fwd">Forward [h(x₀+Δx) − h(x₀)]/Δx</option>' +
+      '<option value="bwd">Backward [h(x₀) − h(x₀−Δx)]/Δx</option><option value="cen">Central [h(x₀+Δx) − h(x₀−Δx)]/(2Δx)</option></select></label>' +
+      '<label for="sw-h">Step Δx, slide right to shrink <span class="v" id="sw-h-v"></span>' +
       '<input type="range" id="sw-h" min="0" max="9" step="1" value="1"></label></div>';
   }
 
@@ -73,7 +73,7 @@
       controlsHTML() + '<div class="sw-chart"></div><div class="sw-err"></div><div class="readout" aria-live="polite"></div>' +
       '<p class="w-note sw-note"></p>' +
       '<p class="w-note">Upper panel — grey: the function; dashed: the tangent at x₀, whose slope is the derivative (when one exists); solid: the secant, whose slope is the difference quotient. ' +
-      'Lower panel — error of the quotient against h on log–log axes, computed live in double precision: slope 1 means first order, slope 2 second order, and the rise on the left is rounding error.</p>';
+      'Lower panel — error of the quotient against the step Δx on log–log axes, computed live in double precision: slope 1 means first order, slope 2 second order, and the rise on the left is rounding error.</p>';
     var sf = host.querySelector("#sw-f"), sm = host.querySelector("#sw-m"), sh = host.querySelector("#sw-h");
     var chart = host.querySelector(".sw-chart"), errc = host.querySelector(".sw-err"), out = host.querySelector(".readout");
     var cur = null;
@@ -125,7 +125,7 @@
         for (var t = Math.ceil(F.elo / st) * st; t <= khi + 1e-9; t += st) xt.push(t);
         B.lineChart(errc, {
           alt: "Relative error of the difference quotient against step size, log-log", height: 210,
-          x: { type: "num", fmt: "n0", label: "log₁₀ h", tipLabel: "log₁₀ h = ", min: F.elo, max: khi, ticks: xt },
+          x: { type: "num", fmt: "n0", label: "log₁₀ Δx", tipLabel: "log₁₀ Δx = ", min: F.elo, max: khi, ticks: xt },
           y: { type: "lin", fmt: "n1", tfmt: "n0", label: "log₁₀ relative error", min: -16, max: 1, ticks: [-16, -12, -8, -4, 0] },
           series: [{ name: nm[m] + " (selected)", color: "1", x: ks, y: e1 }, { name: nm[other], color: "var(--muted)", dash: true, x: ks, y: e2 }],
           ann: rc > 0 ? [{ type: "point", x: Math.log10(h), y: Math.max(-16, Math.log10(rc)), color: "1" }] : []
@@ -134,9 +134,9 @@
       var err = d == null ? null : q - d, ord = m === "cen" ? 2 : 1;
       out.innerHTML =
         "<div><span>Difference quotient</span><b>" + (Math.abs(q) < 1e5 ? fmt(q, F.dd === 4 ? "n4" : "n5") : sci(q)) + "</b></div>" +
-        "<div><span>Derivative g′(x₀)</span><b>" + (d == null ? "none (kink)" : fmt(d, F.dd === 4 ? "n4" : "n5")) + "</b></div>" +
+        "<div><span>Derivative h′(x₀)</span><b>" + (d == null ? "none (kink)" : fmt(d, F.dd === 4 ? "n4" : "n5")) + "</b></div>" +
         "<div><span>Error</span><b" + (err != null && Math.abs(err) > 0.01 * Math.abs(d) ? ' class="bad"' : "") + ">" + (err == null ? "—" : sci(err, F.dd)) + "</b></div>" +
-        "<div><span>" + (ord === 1 ? "Error ÷ h" : "Error ÷ h²") + "</span><b>" + (err == null ? "—" : sci(err / Math.pow(h, ord), F.dd)) + "</b></div>";
+        "<div><span>" + (ord === 1 ? "Error ÷ Δx" : "Error ÷ Δx²") + "</span><b>" + (err == null ? "—" : sci(err / Math.pow(h, ord), F.dd)) + "</b></div>";
       host.querySelector(".sw-note").textContent = F.note;
     }
     [sf, sm, sh].forEach(function (c) { c.addEventListener("input", draw); });

@@ -91,7 +91,7 @@
       var R = ear(r, n), gap = R - lim;
       out.innerHTML =
         "<div><span>Quote</span><b>" + fmt(r, "pct2") + ", " + F.name + "</b></div>" +
-        "<div><span>Periodic rate r/n</span><b>" + (n === Infinity ? "—" : fmt(r / n, "pct3")) + "</b></div>" +
+        "<div><span>Periodic rate i = r/n</span><b>" + (n === Infinity ? "—" : fmt(r / n, "pct3")) + "</b></div>" +
         "<div><span>Effective annual rate</span><b>" + fmt(R, "pct3") + "</b></div>" +
         "<div><span>Continuous limit eʳ − 1</span><b>" + fmt(lim, "pct3") + "</b></div>" +
         "<div><span>EAR − limit</span><b>" + (Math.abs(gap) < 0.01 ? fmt(gap, "bp") : fmt(gap, "pct2") + " pts") + "</b></div>" +

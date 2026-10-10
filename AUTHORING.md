@@ -102,11 +102,11 @@ for something else.
 | $g$, $G$ | log growth rate per unit time ($g(f)$: growth as a function of exposure); growth factor, end value ÷ start value |
 | $\mathrm{RV}$ | $\sum_t R_t^2$, realized variance |
 | $A$ | periods per year used to annualize, e.g. $A=243.1$ trading sessions; always say which sample it comes from |
-| $T$, $t$, $\tau$, $n$ | number of returns in a sample; time index; a span in years (maturity, expiry, horizon); number of compounding or payment periods |
+| $T$, $t$, $\tau$, $n$ | either a sample size (number of returns) or a horizon or maturity in years: a module uses one of the two and says which; time index; time to maturity or expiry, or any span in years when $T$ is a count; number of compounding or payment periods |
 | $P$, $W$, $D$, $\mathrm{DD}$ | price; wealth; cash dividend ($D_1$ the next dividend); drawdown |
 | $f$, $f^*$, $c$ | exposure ÷ equity of a position ($f>1$ is leverage); its growth-maximizing (Kelly) value; $c:=f/f^*$, the fraction of full Kelly |
 | $L$ | a leveraged fund's fixed daily multiple (00631L: $L=2$); for a portfolio, total exposure $\sum_i f_i$ |
-| $p$, $q$, $b$, $a$ | binary bet: win probability, $q=1-p$, gain $b$ and loss $a$ per unit staked, so $f^*=p/a-q/b$ |
+| $p$, $q$, $b$, $a$ | binary bet: win probability, $q=1-p$, gain $b$ and loss $a$ per unit staked, so $f^*=p/a-q/b$. In futures pricing $q$ is instead the continuous dividend yield; a module uses one of the two |
 | $r_f$ | risk-free or financing rate (state the compounding) |
 | $w$, $\mathbf w$, $\mathbf f$, $\Sigma$, $\rho$ | portfolio weights summing to 1; vector of exposures; covariance matrix; correlation |
 | $\varphi$, $\Phi$ | standard normal density and distribution function |
@@ -114,6 +114,8 @@ for something else.
 | $\lambda$, $\nu$, $\mathcal L$ | multiplier of an equality constraint; multipliers of inequality constraints (KKT); Lagrangian |
 | $h$, $u$; $\psi$ | generic functions in modules where $f$ or $g$ already have their book-wide meaning ($f$, $g$, $h$ are fine in purely mathematical modules); constraint functions, $\psi(x)=b$ or $\psi_i(x)\le b_i$ |
 
+- Subscripted standard symbols are distinct symbols and may sit beside the table: $D_{\text{mod}}$, $D_{\text{Mac}}$,
+  $D_{\mathrm{KL}}$, $a_{n,i}$, $s_{n,i}$, $T_1(x)$.
 - `=` only for exact statements; `≈` comes with the order or size of what was dropped; `:=` for definitions.
 - State the conditions of every theorem (differentiability, convexity, sign or sum constraints on weights).
 - Every formula the reader is asked to use is either derived or explicitly labelled *stated without proof* with a

@@ -55,7 +55,8 @@ def held_series(tx, ta):
         (pl.col("F1") / pl.col("F0") - 1).alias("RF"),
         (pl.col("S1") / pl.col("S0") - 1).alias("RS"))
     # settlement of the contract held from this close onwards (differs from F1 only on roll days)
-    nxt = tx.select("date", pl.col("contract_date").alias("held_next"), pl.col("settlement_price").alias("F_next"))
+    nxt = tx.select("date", pl.col("contract_date").alias("held_next"), pl.col("settlement_price").alias("F_next"),
+                    pl.col("volume").alias("vol_next"))
     df = df.join(nxt, on=["date", "held_next"], how="left").sort("date")
     assert df["F_next"].null_count() == 0 and (df["F_next"] > 0).all()
     return df, expiry
@@ -105,6 +106,27 @@ def main():
         print(f"  max leverage at illustrative IM {IM_ILLUS:,}: {notional0/IM_ILLUS:.2f}")
     res["case"] = case
 
+    # ---- Exhibit 1 at its printed precision, and the ratios recomputed from the printed values
+    for d in ("2025-06-11", "2025-04-07"):
+        c = case[d]
+        RSp, RFp = round(100 * c["RS"], 3), round(100 * c["RF"], 3)
+        RAp, RBp = round(100 * c["RA"], 3), round(100 * c["RB"], 3)
+        print(f"EXHIBIT {d}: RS {RSp:+.3f}%  RF {RFp:+.3f}%  RA {RAp:+.3f}%  RB {RBp:+.3f}%  "
+              f"ratios from printed values {RAp/RSp:.3f}, {RBp/RSp:.3f} -> 1 dp {RAp/RSp:.1f}, {RBp/RSp:.1f}; "
+              f"unrounded {c['ratioA']:.4f}, {c['ratioB']:.4f}")
+        print(f"   4-dp returns: RS {100*c['RS']:+.4f}%  RF {100*c['RF']:+.4f}%;  RA/RS(4dp) = {RAp/round(100*c['RS'],4):.3f}, "
+              f"RB/RS(4dp) = {RBp/round(100*c['RS'],4):.3f};  fA*RF = {c['fA']*100*c['RF']:.3f}%, fB*RF = {c['fB']*100*c['RF']:.3f}%")
+
+    # ---- is the case day typical? (AUTHORING 8: back a one-day case with a multi-day figure)
+    absRS = df["RS"].abs()
+    n_bigger = int((absRS > abs(case["2025-06-11"]["RS"])).sum())
+    worst = df.sort("RS").row(0, named=True)
+    largest_abs = df.with_columns(pl.col("RS").abs().alias("a")).sort("a", descending=True).row(0, named=True)
+    print(f"TYPICAL: {n_bigger} of {df.height} sessions moved more than |{case['2025-06-11']['RS']:.4%}|; "
+          f"median |RS| {float(absRS.median()):.3%}; largest fall {worst['date']} {worst['RS']:+.3%}; "
+          f"largest absolute move {largest_abs['date']} {largest_abs['RS']:+.3%}")
+    res["typical"] = dict(n_bigger=n_bigger, worst=worst["date"], largest_abs=largest_abs["date"])
+
     # ---- typical day and futures-vs-index statistics over the window
     RS, RF = df["RS"].to_numpy(), df["RF"].to_numpy()
     beta = np.polyfit(RS, RF, 1)[0]
@@ -124,8 +146,12 @@ def main():
     print(f"  roll days: {stats['n_roll_days']}")
     # roll gains: settlement of the new contract minus the old one at each roll close (negative = new is cheaper)
     rolls = df.filter(pl.col("contract") != pl.col("held_next")).select(
-        "date", "contract", "held_next", "F1", "F_next", (pl.col("F_next") - pl.col("F1")).alias("new_minus_old"))
+        "date", "contract", "held_next", "F1", "F_next", (pl.col("F_next") - pl.col("F1")).alias("new_minus_old"),
+        "vol_next")
     print(rolls)
+    # AUTHORING 8: back months trade thinly, so report the new contract's volume on each roll day
+    print(f"  volume of the new contract on roll days: at least {rolls['vol_next'].min():,} contracts "
+          f"(after 10 June: at least {rolls.filter(pl.col('date') > '2025-06-10')['vol_next'].min():,})")
     res["rolls"] = rolls.to_dicts()
 
     # ---- leverage path from the case day to the end of the window (Section 6 chart)
@@ -152,9 +178,15 @@ def main():
     gainA = pa[-1]["E"] - EQ_A
     print(f"  A: equity gain {gainA:,.0f} (= {gainA/M_TX:,.0f} points) ; B: {pb[-1]['E']-EQ_B:,.0f}")
     S_06_10 = df.filter(pl.col("date") == "2025-06-11")["S0"][0]; S_end = df["S1"][-1]
-    print(f"  TAIEX 2025-06-10 {S_06_10:,.2f} -> 2025-10-31 {S_end:,.2f}: {S_end/S_06_10-1:+.2%}; "
-          f"account A {pa[-1]['E']/EQ_A-1:+.2%}, B {pb[-1]['E']/EQ_B-1:+.2%}; f0*index = {pa[0]['f']*(S_end/S_06_10-1):+.2%}")
+    print(f"  TAIEX 2025-06-10 {S_06_10:,.2f} -> 2025-10-31 {S_end:,.2f}: {S_end/S_06_10-1:+.3%}; "
+          f"account A {pa[-1]['E']/EQ_A-1:+.2%}, B {pb[-1]['E']/EQ_B-1:+.2%}; f0*index = {pa[0]['f']*(S_end/S_06_10-1):+.2%} "
+          f"(from printed 7.3720 x 26.94% = {7.3720*26.94:.2f}%)")
     roll_after = rolls.filter(pl.col("date") > "2025-06-10")["new_minus_old"].sum()
+    ra = rolls.filter(pl.col("date") > "2025-06-10")
+    gains = ra.filter(pl.col("new_minus_old") < 0)["new_minus_old"].sum()      # rolls into cheaper contracts
+    costs = ra.filter(pl.col("new_minus_old") > 0)["new_minus_old"].sum()
+    print(f"  rolls after 10 June (old - new, points gained by a long): {dict(zip(ra['date'].to_list(), (-ra['new_minus_old']).to_list()))}; "
+          f"gains {-gains:+,.0f}, costs {-costs:+,.0f}, net {-roll_after:+,.0f}")
     F_first = pa[0]["F"]; F_last = pa[-1]["F"]
     pts = gainA / M_TX
     print(f"  near-month price {F_first:,.0f} -> {F_last:,.0f} ({F_last-F_first:+,.0f} pts); roll adjustments {roll_after:+,.0f} pts; "
@@ -184,6 +216,15 @@ def main():
         df_lin = -f0 * (f0 - 1) / F0 * dF
         lin.append(dict(date=x["date"], F=x["F"], move=x["F"] / F0 - 1, f_exact=x["f"], f_lin=f0 + df_lin))
         print(f"  B first-order from 2 Apr: {x['date']} cum move {x['F']/F0-1:+.2%}  f exact {x['f']:.3f}  f linear {f0+df_lin:.3f}")
+    # margin calls against an ILLUSTRATIVE maintenance margin: the illustrative initial margin scaled by the ratio
+    # of TAIFEX's official TX maintenance and initial margins (NT$538,000 / NT$701,000, table effective 2026-08-12)
+    MM_ILLUS = IM_ILLUS * 538_000 / 701_000
+    print(f"  illustrative maintenance margin = 350,000 x 538/701 = {MM_ILLUS:,.0f} (about {round(MM_ILLUS, -2):,.0f})")
+    for lab in ("A", "B"):
+        calls = [(x["date"], x["E"]) for x in crash[lab][1:4] if x["E"] < MM_ILLUS]
+        print(f"  {lab}: equity after each session {[(x['date'], round(x['E'])) for x in crash[lab][1:4]]}; "
+              f"first session with equity below the illustrative maintenance margin: {calls[0] if calls else None}")
+    res["mm_illus"] = MM_ILLUS
     # a hypothetical 1% fall from 2 April for comparison
     F1 = F0 * 0.99; E1 = EQ_B + M_TX * (F1 - F0); f1 = M_TX * F1 / E1
     lin1 = f0 + (-f0 * (f0 - 1) / F0) * (F1 - F0)

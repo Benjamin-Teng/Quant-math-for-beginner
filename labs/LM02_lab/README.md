@@ -18,11 +18,11 @@ The notebook is saved with its outputs, so you can read it before running it. It
 
 | Part | Topic |
 |:--|:--|
-| 1 | Limits: the squeeze on $(e^h-1)/h$, the perpetuity limit |
+| 1 | Limits: the squeeze on $(e^x-1)/x$, the perpetuity limit |
 | 2 | Difference quotients and the exact derivative of a 10-year 2% bond; duration |
-| 3 | The TX account: near-month roll, the motivating case, leverage path, April 2025 |
+| 3 | The TX account: near-month roll, the motivating case, leverage path, April 2025 and margin calls |
 | 4 | Elasticity of levered positions from 0050 data: 00631L and a margin-financed account |
-| 5 | Finite differences: error versus step on a log–log grid, orders of convergence, rounding |
+| 5 | Finite differences: error versus step $\Delta y$ on a log–log grid, orders of convergence, rounding |
 | 6 | Duration by bumping yields; SymPy checks |
 | 7 | Computational practice problems; extension: Richardson extrapolation |
 
@@ -45,4 +45,5 @@ mismatches are 0050's ex-dividend days and the two split days (0050 4-for-1 on 2
 2026-03-31); Part 4 re-runs this check.
 
 The TX contract multiplier (NT$200 per index point) is from the TAIFEX contract specification. The NT$350,000 initial
-margin used in Part 3 is an illustrative assumption, not a TAIFEX figure.
+margin used in Part 3 is an illustrative assumption, not a TAIFEX figure; the illustrative maintenance margin
+scales it by the ratio of TAIFEX's official TX maintenance and initial margins (538,000 / 701,000, effective 2026-08-12).

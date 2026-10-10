@@ -22,4 +22,11 @@ The notebook is saved with its outputs, so you can read it before running it. It
 
 Every close was verified against FinMind's own `spread` column (close − previous close). The only mismatches are 0050's 22 ex-dividend days in the window and the two split days: 0050 4-for-1 on 2025-06-18 and 00631L 22-for-1 on 2026-03-31. Part 1 of the notebook re-runs this check.
 
-Two daily series are built. The module's case series aligns 0050 with 00631L on their 2,902 common trading days, as in LM3; 0050's own series has 2,906 returns because it keeps four March 2026 sessions on which 00631L did not trade. Growth factors, drawdowns and recovery dates are identical in both. 00631L is needed only for the portfolio example (Part 5) and the extension exercise.
+Two daily series are built. The module's case series aligns 0050 with 00631L on their common trading days, as in LM3, and has $T=2{,}902$ daily returns; 0050's own series has 2,906 returns because it keeps four March 2026 sessions on which 00631L did not trade. Growth factors, drawdowns and recovery dates are identical in both. 00631L is needed only for the portfolio example (Part 5) and the extension exercise.
+
+## Conventions (as in the module)
+
+- A span in years is $\tau=$ calendar days ÷ 365.25; NTD deposits accrue on an actual/365 basis.
+- $A$ is the number of returns per year used to annualize, quoted from the sample in use: $A=T/\tau=243.1$ for the case series; the exchange averaged 243.8 sessions a year in 2015–2025.
+- A drawdown $\mathrm{DD}=1-W/\text{running peak}$ is a positive number; the running peak includes the starting value.
+- Exhibit and example numbers in the notebook are generated from the labels in `src/lm01.md`, so they always match the module.

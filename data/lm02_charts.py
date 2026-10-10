@@ -69,15 +69,15 @@ for k in ks:
 fderror = {
     "alt": "Relative error of forward and central difference estimates of a bond price derivative versus step size, log-log",
     "height": 320,
-    "x": {"type": "num", "fmt": "n0", "label": "log₁₀ h  (step in units of yield)", "tipLabel": "log₁₀ h = ",
+    "x": {"type": "num", "fmt": "n0", "label": "log₁₀ Δy  (step in units of yield)", "tipLabel": "log₁₀ Δy = ",
           "min": -16, "max": -1, "ticks": [-16, -14, -12, -10, -8, -6, -4, -2]},
     "y": {"type": "lin", "fmt": "n1", "tfmt": "n0", "label": "log₁₀ of relative error in P′(2%)", "min": -12, "max": 0,
           "ticks": [-12, -10, -8, -6, -4, -2, 0]},
     "series": [
         {"name": "Forward difference", "color": "2", "x": ks, "y": fw},
         {"name": "Central difference", "color": "1", "x": ks, "y": ce},
-        {"name": "Model: ½|P″|h + 2ε|P|/h", "color": "2", "dash": True, "x": ks, "y": fw_m},
-        {"name": "Model: |P‴|h²/6 + ε|P|/h", "color": "1", "dash": True, "x": ks, "y": ce_m}],
+        {"name": "Model: ½|P″|Δy + 2εₘ|P|/Δy", "color": "2", "dash": True, "x": ks, "y": fw_m},
+        {"name": "Model: |P‴|Δy²/6 + εₘ|P|/Δy", "color": "1", "dash": True, "x": ks, "y": ce_m}],
 }
 
 for name, spec in (("lm02-leverage", leverage), ("lm02-fderror", fderror)):
