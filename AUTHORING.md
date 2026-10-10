@@ -151,6 +151,9 @@ for something else.
   at least three are in range, otherwise on month starts (every 1, 2, 3 or 6 months, labelled "Jan 2026", "Apr", …).
   On a numeric axis, `ticks` fixes the tick values and `tickLabels` (one string per tick) replaces their text.
   Format codes: `pct0..pct3`, `bp`, `x0..x2` (multiples), `n0..n5`. At most four series; legend is automatic.
+- Chart text (legends, labels, end labels) uses no combining marks: the chart font has no Greek, so a hat drifts off
+  its letter (write "sample mean", or keep μ̂ for the exhibit note, which renders in the body font).
+- Code blocks keep lines to 80 characters: longer lines are cut off at A4 print width.
 - Widgets use `Book.lineChart(host, spec)` and `Book.fmt(v, code)` from `src/assets/book.js`; they must render a
   meaningful initial state (it is what the PDF shows) and must not depend on external libraries.
 
@@ -192,7 +195,7 @@ Standard wording, the same in every module (FinMind's licence forbids redistribu
 
 - The module's companion-lab box keeps the sentence that says what the notebook rebuilds, minus any claim about bundled
   data or a snapshot, and then says: "The notebook
-  reads FinMind files that you download once with your own token: from the repository root, run
+  reads FinMind files that you download once with your own token. From the repository root, run
   `uv run python data/fetch_finmind.py`, then `uv run python data/make_lab_data.py`. FinMind's licence does not allow
   the book to redistribute the data. After that, the notebook runs offline."
 - The notebook's first cell: "**Environment.** From the repository root, `uv sync` installs the locked Python

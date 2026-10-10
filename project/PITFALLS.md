@@ -46,6 +46,10 @@ unless stated.
   prints a "repository moved" notice.
 - **WebFetch cannot reach some sites** (MacTutor timed out once; law.moj.gov.tw was unreachable from the sandbox).
   Cite an equivalent official page, and say in the reference when a link could not be opened.
+- **The Bash tool collapses a double backslash to a single one**, even inside single quotes and quoted heredocs, so a
+  Python or regex patch passed inline loses its escapes (a negative lookbehind for a backslash became invalid; a
+  JavaScript escaped quote lost its backslash; this very bullet was mangled the first time). Write the patch to a file
+  with the file-writing tool, or build backslashes with `chr(92)`, and check the result.
 - **The owner's Windows computer changes bytes and encodings.** Git for Windows checks text files out with CRLF
   (`core.autocrlf=true`), so a copy of a file taken from a checkout fails a SHA-256 check that a fresh fetch or
   `git show <commit>:<path>` passes; compare LF bytes. The default Python encoding there is cp950, which broke
