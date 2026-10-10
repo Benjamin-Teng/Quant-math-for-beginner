@@ -108,14 +108,25 @@ for something else.
 | $L$ | a leveraged fund's fixed daily multiple (00631L: $L=2$); for a portfolio, total exposure $\sum_i f_i$ |
 | $p$, $q$, $b$, $a$ | binary bet: win probability, $q=1-p$, gain $b$ and loss $a$ per unit staked, so $f^*=p/a-q/b$. In futures pricing $q$ is instead the continuous dividend yield; a module uses one of the two |
 | $r_f$ | risk-free or financing rate (state the compounding) |
+| $\mathrm{SR}$ | Sharpe ratio $(\mu-r_f)/\sigma$ of a return; say the period (per day, or annualized) |
 | $w$, $\mathbf w$, $\mathbf f$, $\Sigma$, $\rho$ | portfolio weights summing to 1; vector of exposures; covariance matrix; correlation |
 | $\varphi$, $\Phi$ | standard normal density and distribution function |
 | $y$, $i$, $v$, $k$, $\gamma$ | yield to maturity or IRR; periodic interest rate; discount factor $1/(1+i)$; required return; growth rate of dividends or cash flows (simple, per period) |
-| $\lambda$, $\nu$, $\mathcal L$ | multiplier of an equality constraint; multipliers of inequality constraints (KKT); Lagrangian |
-| $h$, $u$; $\psi$ | generic functions in modules where $f$ or $g$ already have their book-wide meaning ($f$, $g$, $h$ are fine in purely mathematical modules); constraint functions, $\psi(x)=b$ or $\psi_i(x)\le b_i$ |
+| $\lambda$, $\nu$, $\mathcal L$ | multiplier of an equality constraint; multipliers of inequality constraints (KKT), or in a module about distributions a Student $t$'s degrees of freedom (a module uses one of the two); Lagrangian |
+| $h$, $u$; $\psi$ | generic functions in modules where $f$ or $g$ already have their book-wide meaning ($f$, $g$, $h$ are fine in purely mathematical modules); constraint functions, $\psi(x)=b$ or $\psi_i(x)\le b_i$ (there $b$ is a constraint level, not a bet's gain: a module uses one of the two) |
 
 - Subscripted standard symbols are distinct symbols and may sit beside the table: $D_{\text{mod}}$, $D_{\text{Mac}}$,
   $D_{\mathrm{KL}}$, $a_{n,i}$, $s_{n,i}$, $T_1(x)$.
+- A Deep Dive may use the standard variables of its argument even if the table gives them another meaning (for
+  example $\rho,\theta$ as polar coordinates), provided it declares them in its first sentence; the main text may not.
+- A star marks an optimum or a solution ($f^*$, $x^*$, $\Delta x^*$); do not use it for other special values.
+- Integer indices and counts ($i$, $j$, $k$, $m$, $n$ as a summation index, a step number, an order or a count) are
+  not book-wide symbols, but each still has one meaning in a module, and a module that also uses the letter's table
+  meaning ($k$ a required return, $n$ a number of periods, $i$ a periodic rate) picks another letter for the index.
+  The notation note lists the counts a module uses.
+- In a purely mathematical passage $x$ and $y$ may be generic coordinates, declared in the notation note and
+  instantiated per example, as $f$, $g$, $h$ may be generic functions; a module that also uses $y$ as a yield picks
+  other letters.
 - `=` only for exact statements; `≈` comes with the order or size of what was dropped; `:=` for definitions.
 - State the conditions of every theorem (differentiability, convexity, sign or sum constraints on weights).
 - Every formula the reader is asked to use is either derived or explicitly labelled *stated without proof* with a

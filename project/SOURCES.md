@@ -88,3 +88,6 @@ All FinMind queries ran through the FinMind MCP server on the owner's computer, 
 - Markowitz (1952), *JF* 7(1): 77–91; Merton (1972), *JFQA* 7(4): 1851–1872 — ideas.repec.org; Kjeldsen (2000), *Historia Mathematica* 27: 331–361 (PDF via u-szeged.hu); Chopra & Ziemba (1993), *JPM* 19 — pm-research.com; Boyd & Vandenberghe (2004) — Stanford PDF; Kraft (1988).
 - Press et al., *Numerical Recipes* 3rd ed., §5.7 — PDF via drexel.edu; Burden, Faires & Burden, *Numerical Analysis* 10th ed.; Brent (1973); Stewart (Clegg, Watson), *Calculus: Early Transcendentals* 9th ed.; Simon & Blume (1994); Cover & Thomas (2006); Hull, *Options, Futures, and Other Derivatives* 11th ed. — publisher and library catalogues (Cengage, Pearson, Wiley, Elsevier, abebooks, university libraries) and course notes (NYCU, NTU, Villanova, UCSC, ETSU) for editions, ISBNs and chapter titles.
 - Virtanen et al. (2020), "SciPy 1.0", *Nature Methods* 17(3): 261–272.
+- Stewart, Clegg & Watson, *Calculus: Early Transcendentals*, 9th ed., Cengage, ISBN 9781337613927: the publisher's
+  product page gives copyright 2021 (retailers list January 2020 as the release); every module cites it as
+  Stewart, J., Clegg, D. K. and Watson, S. (2021) (checked 2026-10-11).
