@@ -46,7 +46,7 @@ Companion notebook to **From Calculus to Kelly, LM5**. It rebuilds the module's 
 | 7 | Numerical integration: trapezoid vs Simpson error ratios, Richardson, whole-line trapezoid, `scipy.integrate.quad` (Example 10, Exhibit 8) |
 | 8 | Computational practice problems and an extension exercise |
 
-**Data.** `data/` holds a snapshot of FinMind `TaiwanStockPrice` closes for 0050 and 00631L (2014-10-31 → 2026-10-08) and 0050's cash dividends from `TaiwanStockDividendResult`, retrieved 2026-10-10. Every close was checked against FinMind's own `spread` column (close − previous close); the only mismatches are ex-dividend and split days, which Part 1 handles explicitly.
+**Data.** `data/` holds a snapshot of FinMind `TaiwanStockPrice` closes for 0050 and 00631L (2014-10-31 → 2026-10-08) and 0050's cash dividends from `TaiwanStockDividendResult`, retrieved 2026-10-10. Every close was checked against FinMind's own `spread` column (close − previous close); the only mismatches are ex-dividend and split days, which Part 1 handles explicitly. The folder is not in the repository (FinMind's licence forbids redistributing raw data): build it from the repository root with `python3 data/fetch_finmind.py` and `python3 data/make_lab_data.py` (needs `FINMIND_TOKEN`).
 
 **Environment.** `uv pip install polars pyarrow numpy scipy matplotlib`.
 """)

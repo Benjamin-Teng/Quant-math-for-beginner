@@ -13,6 +13,11 @@
 
 ## Tasks, in order
 
+0. **Rebuild the raw data on the owner's computer.** Raw FinMind files are no longer in the repo. Run
+   `export FINMIND_TOKEN=…; ./build.sh --fetch` once: it downloads every file listed in `data/raw_manifest.json`,
+   checks each byte for byte, and builds the labs' `data/` folders. The download code could not be tested from the
+   cloud container (no route to FinMind); its parsing was tested against real FinMind rows. Fix any problem before
+   task 1, and never commit `data/raw/` or `labs/*/data/`.
 1. **Verify LM1 and LM2.** Run the verifier template (`reviews/REVIEW_PROMPT.md` §3) on each, with the reviewed commit
    `44d199c`. Update the status column in `reviews/lm01.md` and `reviews/lm02.md`. Reopened findings go back to a
    writer (template §2), then verify again.

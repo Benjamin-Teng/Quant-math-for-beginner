@@ -12,3 +12,6 @@ data/processed/
 Thumbs.db
 .vscode/
 *.zip
+# FinMind's licence forbids redistributing raw data: rebuild with data/fetch_finmind.py + data/make_lab_data.py
+data/raw/
+labs/*/data/

@@ -12,7 +12,17 @@ cd LM03_lab && jupyter lab LM03_lab.ipynb
 
 The notebook is saved with its outputs, so you can read it before running it.
 
-## Data (offline snapshot, retrieved 2026-10-10 from FinMind)
+## Data (FinMind, retrieved 2026-10-10; not in the repository)
+
+FinMind's licence does not allow its raw data in a public repository, so `data/` is git-ignored. Build it from the repository root with your own FinMind token:
+
+```bash
+export FINMIND_TOKEN=...           # your FinMind API token
+python3 data/fetch_finmind.py      # rebuilds data/raw/ and checks every file against data/raw_manifest.json
+python3 data/make_lab_data.py      # writes this folder and every other lab's
+```
+
+The folder then holds:
 
 | File | Content |
 |:--|:--|

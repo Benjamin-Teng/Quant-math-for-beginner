@@ -25,7 +25,17 @@ The notebook is saved with its outputs, so you can read it before running it. Ea
 | 7 | Trapezoid and Simpson errors and ratios, Richardson extrapolation, the whole-line trapezoid rule, `scipy.integrate.quad`: Example 10, Exhibit 8 |
 | 8 | Computational practice problems (1, 2, 4, 5, 7, 8, 9, 10, 11, 13, 14, 15, 16) and an extension on volatility clustering |
 
-## Data (offline snapshot, retrieved 2026-10-10 from FinMind)
+## Data (FinMind, retrieved 2026-10-10; not in the repository)
+
+FinMind's licence does not allow its raw data in a public repository, so `data/` is git-ignored. Build it from the repository root with your own FinMind token:
+
+```bash
+export FINMIND_TOKEN=...           # your FinMind API token
+python3 data/fetch_finmind.py      # rebuilds data/raw/ and checks every file against data/raw_manifest.json
+python3 data/make_lab_data.py      # writes this folder and every other lab's
+```
+
+The folder then holds:
 
 | File | Content |
 |:--|:--|

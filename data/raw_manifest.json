@@ -1,0 +1,810 @@
+{
+ "files": [
+  {
+   "path": "0050__2014-10-31__2016-06-30.csv",
+   "dataset": "TaiwanStockPrice",
+   "data_id": "0050",
+   "start_date": "2014-10-31",
+   "end_date": "2016-06-30",
+   "columns": {
+    "date": "date",
+    "close": "close",
+    "spread": "spread"
+   },
+   "kinds": {
+    "date": "date",
+    "close": "float",
+    "spread": "float"
+   },
+   "filter": {},
+   "sort": [
+    "date"
+   ],
+   "rows": 407,
+   "sha256": "289fb0f75108c0014c8abc574260d2bf8a1668e3618ee25091aedc89d6ef6c55"
+  },
+  {
+   "path": "0050__2016-07-01__2018-02-28.csv",
+   "dataset": "TaiwanStockPrice",
+   "data_id": "0050",
+   "start_date": "2016-07-01",
+   "end_date": "2018-02-28",
+   "columns": {
+    "date": "date",
+    "close": "close",
+    "spread": "spread"
+   },
+   "kinds": {
+    "date": "date",
+    "close": "float",
+    "spread": "float"
+   },
+   "filter": {},
+   "sort": [
+    "date"
+   ],
+   "rows": 407,
+   "sha256": "09bb40ef8ed708078253004e728de78c9be1eee277ab03194740c8ee4a24dbee"
+  },
+  {
+   "path": "0050__2018-03-01__2019-10-31.csv",
+   "dataset": "TaiwanStockPrice",
+   "data_id": "0050",
+   "start_date": "2018-03-01",
+   "end_date": "2019-10-31",
+   "columns": {
+    "date": "date",
+    "close": "close",
+    "spread": "spread"
+   },
+   "kinds": {
+    "date": "date",
+    "close": "float",
+    "spread": "float"
+   },
+   "filter": {},
+   "sort": [
+    "date"
+   ],
+   "rows": 411,
+   "sha256": "b9a082dda919e7dce7be9a6bbcfd7922ad5f5c26defeef193f155a8fb1d90734"
+  },
+  {
+   "path": "0050__2019-11-01__2021-06-30.csv",
+   "dataset": "TaiwanStockPrice",
+   "data_id": "0050",
+   "start_date": "2019-11-01",
+   "end_date": "2021-06-30",
+   "columns": {
+    "date": "date",
+    "close": "close",
+    "spread": "spread"
+   },
+   "kinds": {
+    "date": "date",
+    "close": "float",
+    "spread": "float"
+   },
+   "filter": {},
+   "sort": [
+    "date"
+   ],
+   "rows": 404,
+   "sha256": "9c8a7418c3e6e95d0b9c12d189f4eff40eb4e62a8d6ebee6fc51b0c93a478c70"
+  },
+  {
+   "path": "0050__2021-07-01__2023-02-28.csv",
+   "dataset": "TaiwanStockPrice",
+   "data_id": "0050",
+   "start_date": "2021-07-01",
+   "end_date": "2023-02-28",
+   "columns": {
+    "date": "date",
+    "close": "close",
+    "spread": "spread"
+   },
+   "kinds": {
+    "date": "date",
+    "close": "float",
+    "spread": "float"
+   },
+   "filter": {},
+   "sort": [
+    "date"
+   ],
+   "rows": 405,
+   "sha256": "5ec95c75e7e5d475f9b4a6ef71ea76266d0af585af8dd000beb52ed75026c26b"
+  },
+  {
+   "path": "0050__2023-03-01__2024-10-31.csv",
+   "dataset": "TaiwanStockPrice",
+   "data_id": "0050",
+   "start_date": "2023-03-01",
+   "end_date": "2024-10-31",
+   "columns": {
+    "date": "date",
+    "close": "close",
+    "spread": "spread"
+   },
+   "kinds": {
+    "date": "date",
+    "close": "float",
+    "spread": "float"
+   },
+   "filter": {},
+   "sort": [
+    "date"
+   ],
+   "rows": 407,
+   "sha256": "8361eacc4fabef17deabad909be1ce77928fe5c1f23dea418f3cf65eba13552f"
+  },
+  {
+   "path": "0050__2024-11-01__2025-10-31.csv",
+   "dataset": "TaiwanStockPrice",
+   "data_id": "0050",
+   "start_date": "2024-11-01",
+   "end_date": "2025-10-31",
+   "columns": {
+    "date": "date",
+    "close": "close",
+    "spread": "spread"
+   },
+   "kinds": {
+    "date": "date",
+    "close": "float",
+    "spread": "float"
+   },
+   "filter": {},
+   "sort": [
+    "date"
+   ],
+   "rows": 239,
+   "sha256": "0aec922c6f0f4bbdd1fa92a97ee2e003e7a156cebf54602c6a1460500159fd3a"
+  },
+  {
+   "path": "0050__2025-11-01__2026-10-09.csv",
+   "dataset": "TaiwanStockPrice",
+   "data_id": "0050",
+   "start_date": "2025-11-01",
+   "end_date": "2026-10-09",
+   "columns": {
+    "date": "date",
+    "close": "close",
+    "spread": "spread"
+   },
+   "kinds": {
+    "date": "date",
+    "close": "float",
+    "spread": "float"
+   },
+   "filter": {},
+   "sort": [
+    "date"
+   ],
+   "rows": 227,
+   "sha256": "6500e6c715cf1976fd1ea3fc1cd0a401d7f616bc3decd4e7986b2c0e8e9172cd"
+  },
+  {
+   "path": "0050_dividends.csv",
+   "dataset": "TaiwanStockDividendResult",
+   "data_id": "0050",
+   "start_date": "2014-10-24",
+   "end_date": "2026-07-21",
+   "columns": {
+    "date": "date",
+    "before_price": "before_price",
+    "after_price": "after_price",
+    "cash_dividend": "stock_and_cache_dividend"
+   },
+   "kinds": {
+    "date": "date",
+    "before_price": "float",
+    "after_price": "float",
+    "cash_dividend": "float"
+   },
+   "filter": {
+    "stock_or_cache_dividend": "^息$"
+   },
+   "sort": [
+    "date"
+   ],
+   "rows": 23,
+   "sha256": "2171382f34b73725f370f2eadad9556fccf82f12a3cf18025ca369d6c4612e03"
+  },
+  {
+   "path": "00631L__2014-10-31__2016-06-30.csv",
+   "dataset": "TaiwanStockPrice",
+   "data_id": "00631L",
+   "start_date": "2014-10-31",
+   "end_date": "2016-06-30",
+   "columns": {
+    "date": "date",
+    "close": "close",
+    "spread": "spread"
+   },
+   "kinds": {
+    "date": "date",
+    "close": "float",
+    "spread": "float"
+   },
+   "filter": {},
+   "sort": [
+    "date"
+   ],
+   "rows": 407,
+   "sha256": "299115641140a0ec61ed81b08e837f6b188dc630b085bfb06573919e1cd5da4d"
+  },
+  {
+   "path": "00631L__2016-07-01__2018-02-28.csv",
+   "dataset": "TaiwanStockPrice",
+   "data_id": "00631L",
+   "start_date": "2016-07-01",
+   "end_date": "2018-02-28",
+   "columns": {
+    "date": "date",
+    "close": "close",
+    "spread": "spread"
+   },
+   "kinds": {
+    "date": "date",
+    "close": "float",
+    "spread": "float"
+   },
+   "filter": {},
+   "sort": [
+    "date"
+   ],
+   "rows": 407,
+   "sha256": "0106f3fd09719ec1c269ec22e3a805ada7122f9576515d8070b787010eb73090"
+  },
+  {
+   "path": "00631L__2018-03-01__2019-10-31.csv",
+   "dataset": "TaiwanStockPrice",
+   "data_id": "00631L",
+   "start_date": "2018-03-01",
+   "end_date": "2019-10-31",
+   "columns": {
+    "date": "date",
+    "close": "close",
+    "spread": "spread"
+   },
+   "kinds": {
+    "date": "date",
+    "close": "float",
+    "spread": "float"
+   },
+   "filter": {},
+   "sort": [
+    "date"
+   ],
+   "rows": 411,
+   "sha256": "78c56353f533a78e1e97796706d0652635bf8375c03aae406c6b42e0c5c0df6f"
+  },
+  {
+   "path": "00631L__2019-11-01__2021-06-30.csv",
+   "dataset": "TaiwanStockPrice",
+   "data_id": "00631L",
+   "start_date": "2019-11-01",
+   "end_date": "2021-06-30",
+   "columns": {
+    "date": "date",
+    "close": "close",
+    "spread": "spread"
+   },
+   "kinds": {
+    "date": "date",
+    "close": "float",
+    "spread": "float"
+   },
+   "filter": {},
+   "sort": [
+    "date"
+   ],
+   "rows": 404,
+   "sha256": "b1781b055386264be32380127297ce4cc3b06877b016539c0a28c4b88baac955"
+  },
+  {
+   "path": "00631L__2021-07-01__2023-02-28.csv",
+   "dataset": "TaiwanStockPrice",
+   "data_id": "00631L",
+   "start_date": "2021-07-01",
+   "end_date": "2023-02-28",
+   "columns": {
+    "date": "date",
+    "close": "close",
+    "spread": "spread"
+   },
+   "kinds": {
+    "date": "date",
+    "close": "float",
+    "spread": "float"
+   },
+   "filter": {},
+   "sort": [
+    "date"
+   ],
+   "rows": 405,
+   "sha256": "522b5df5311726f0c471c473bd5b4f078bb8365916818978f58087fe1764f48e"
+  },
+  {
+   "path": "00631L__2023-03-01__2024-10-31.csv",
+   "dataset": "TaiwanStockPrice",
+   "data_id": "00631L",
+   "start_date": "2023-03-01",
+   "end_date": "2024-10-31",
+   "columns": {
+    "date": "date",
+    "close": "close",
+    "spread": "spread"
+   },
+   "kinds": {
+    "date": "date",
+    "close": "float",
+    "spread": "float"
+   },
+   "filter": {},
+   "sort": [
+    "date"
+   ],
+   "rows": 407,
+   "sha256": "ba9c184e560124acf0706e399a06616eb9ee45655c22547089c6c7afb09a0951"
+  },
+  {
+   "path": "00631L__2024-11-01__2025-10-31.csv",
+   "dataset": "TaiwanStockPrice",
+   "data_id": "00631L",
+   "start_date": "2024-11-01",
+   "end_date": "2025-10-31",
+   "columns": {
+    "date": "date",
+    "close": "close",
+    "spread": "spread"
+   },
+   "kinds": {
+    "date": "date",
+    "close": "float",
+    "spread": "float"
+   },
+   "filter": {},
+   "sort": [
+    "date"
+   ],
+   "rows": 244,
+   "sha256": "03aeec716cf1cbfc63298ace4ccf4f1a2166a4a69988809973ff9ce76324247c"
+  },
+  {
+   "path": "00631L__2025-11-01__2026-10-09.csv",
+   "dataset": "TaiwanStockPrice",
+   "data_id": "00631L",
+   "start_date": "2025-11-01",
+   "end_date": "2026-10-09",
+   "columns": {
+    "date": "date",
+    "close": "close",
+    "spread": "spread"
+   },
+   "kinds": {
+    "date": "date",
+    "close": "float",
+    "spread": "float"
+   },
+   "filter": {},
+   "sort": [
+    "date"
+   ],
+   "rows": 223,
+   "sha256": "0d8fd398f25a0b009502193e7422bce951d6672e4308670d6e6f03629e3052a2"
+  },
+  {
+   "path": "00679B__2017-01-17__2018-08-31.csv",
+   "dataset": "TaiwanStockPrice",
+   "data_id": "00679B",
+   "start_date": "2017-01-17",
+   "end_date": "2018-08-31",
+   "columns": {
+    "date": "date",
+    "close": "close",
+    "spread": "spread"
+   },
+   "kinds": {
+    "date": "date",
+    "close": "float",
+    "spread": "float"
+   },
+   "filter": {},
+   "sort": [
+    "date"
+   ],
+   "rows": 399,
+   "sha256": "92d093b4ec1a62f6400f814c14f2ff13f100a15d82cbb32b3b1a9742162b6a7d"
+  },
+  {
+   "path": "00679B__2018-09-03__2020-04-30.csv",
+   "dataset": "TaiwanStockPrice",
+   "data_id": "00679B",
+   "start_date": "2018-09-03",
+   "end_date": "2020-04-30",
+   "columns": {
+    "date": "date",
+    "close": "close",
+    "spread": "spread"
+   },
+   "kinds": {
+    "date": "date",
+    "close": "float",
+    "spread": "float"
+   },
+   "filter": {},
+   "sort": [
+    "date"
+   ],
+   "rows": 402,
+   "sha256": "11715bbfb81f44f52c06105e6742b9f789757fadb10ee8079bfe7a44b1f3e31e"
+  },
+  {
+   "path": "00679B__2020-05-04__2021-12-31.csv",
+   "dataset": "TaiwanStockPrice",
+   "data_id": "00679B",
+   "start_date": "2020-05-04",
+   "end_date": "2021-12-31",
+   "columns": {
+    "date": "date",
+    "close": "close",
+    "spread": "spread"
+   },
+   "kinds": {
+    "date": "date",
+    "close": "float",
+    "spread": "float"
+   },
+   "filter": {},
+   "sort": [
+    "date"
+   ],
+   "rows": 413,
+   "sha256": "9e35d869adf093cb1f0adbbd7567e32e38990a8141c5f67fc1f14a9bcac6d666"
+  },
+  {
+   "path": "00679B__2022-01-01__2023-08-31.csv",
+   "dataset": "TaiwanStockPrice",
+   "data_id": "00679B",
+   "start_date": "2022-01-01",
+   "end_date": "2023-08-31",
+   "columns": {
+    "date": "date",
+    "close": "close",
+    "spread": "spread"
+   },
+   "kinds": {
+    "date": "date",
+    "close": "float",
+    "spread": "float"
+   },
+   "filter": {},
+   "sort": [
+    "date"
+   ],
+   "rows": 402,
+   "sha256": "dec049fd17b70cf1a2ce86d326122d87252231e3b99b2af46e89a9088180bd82"
+  },
+  {
+   "path": "00679B__2023-09-01__2025-04-30.csv",
+   "dataset": "TaiwanStockPrice",
+   "data_id": "00679B",
+   "start_date": "2023-09-01",
+   "end_date": "2025-04-30",
+   "columns": {
+    "date": "date",
+    "close": "close",
+    "spread": "spread"
+   },
+   "kinds": {
+    "date": "date",
+    "close": "float",
+    "spread": "float"
+   },
+   "filter": {},
+   "sort": [
+    "date"
+   ],
+   "rows": 400,
+   "sha256": "9274ffeac9abd2ae8dcaa32bb27c83a7db9703c830dbb70807dfffc875375db1"
+  },
+  {
+   "path": "00679B__2025-05-01__2026-10-09.csv",
+   "dataset": "TaiwanStockPrice",
+   "data_id": "00679B",
+   "start_date": "2025-05-01",
+   "end_date": "2026-10-09",
+   "columns": {
+    "date": "date",
+    "close": "close",
+    "spread": "spread"
+   },
+   "kinds": {
+    "date": "date",
+    "close": "float",
+    "spread": "float"
+   },
+   "filter": {},
+   "sort": [
+    "date"
+   ],
+   "rows": 353,
+   "sha256": "d5030c55618edac23b0847523374ed254ce11cf881c55178c05aa68a16da306c"
+  },
+  {
+   "path": "00679B_dividends.csv",
+   "dataset": "TaiwanStockDividendResult",
+   "data_id": "00679B",
+   "start_date": "2017-08-23",
+   "end_date": "2026-08-21",
+   "columns": {
+    "date": "date",
+    "before_price": "before_price",
+    "after_price": "after_price",
+    "cash_dividend": "stock_and_cache_dividend"
+   },
+   "kinds": {
+    "date": "date",
+    "before_price": "float",
+    "after_price": "float",
+    "cash_dividend": "float"
+   },
+   "filter": {
+    "stock_or_cache_dividend": "^息$"
+   },
+   "sort": [
+    "date"
+   ],
+   "rows": 37,
+   "sha256": "5b238f42e58a52dd9c458869aa0e18e860e6008bf4052cb1a9b2ea383f1f5f72"
+  },
+  {
+   "path": "QQQ__us_2022.csv",
+   "dataset": "USStockPrice",
+   "data_id": "QQQ",
+   "start_date": "2021-12-30",
+   "end_date": "2023-01-03",
+   "columns": {
+    "date": "date",
+    "adj_close": "Adj_Close",
+    "close": "Close"
+   },
+   "kinds": {
+    "date": "date",
+    "adj_close": "float",
+    "close": "float"
+   },
+   "filter": {},
+   "sort": [
+    "date"
+   ],
+   "rows": 254,
+   "sha256": "1bafe4ae9d2cb709365a01d4504b1411d8f9743e13505339b821fefb9d00cbc3"
+  },
+  {
+   "path": "TAIEX__2025-04-01__2025-10-31.csv",
+   "dataset": "TaiwanStockPrice",
+   "data_id": "TAIEX",
+   "start_date": "2025-04-01",
+   "end_date": "2025-10-31",
+   "columns": {
+    "date": "date",
+    "close": "close",
+    "spread": "spread"
+   },
+   "kinds": {
+    "date": "date",
+    "close": "float",
+    "spread": "float"
+   },
+   "filter": {},
+   "sort": [
+    "date"
+   ],
+   "rows": 146,
+   "sha256": "38b130f7e4ac9db741d4e6fa3ea5f5dc9178338919b2a2bb4f2a220c2949140e"
+  },
+  {
+   "path": "TQQQ__us_2022.csv",
+   "dataset": "USStockPrice",
+   "data_id": "TQQQ",
+   "start_date": "2021-12-30",
+   "end_date": "2023-01-03",
+   "columns": {
+    "date": "date",
+    "adj_close": "Adj_Close",
+    "close": "Close"
+   },
+   "kinds": {
+    "date": "date",
+    "adj_close": "float",
+    "close": "float"
+   },
+   "filter": {},
+   "sort": [
+    "date"
+   ],
+   "rows": 254,
+   "sha256": "c9607dac1e615487030e447de25e0b22a0a4e03b4b498e75101d64aa16c2af94"
+  },
+  {
+   "path": "TX__2025-04-01__2025-10-31.csv",
+   "dataset": "TaiwanFuturesDaily",
+   "data_id": "TX",
+   "start_date": "2025-04-01",
+   "end_date": "2025-10-31",
+   "columns": {
+    "date": "date",
+    "contract_date": "contract_date",
+    "close": "close",
+    "settlement_price": "settlement_price",
+    "volume": "volume",
+    "open_interest": "open_interest"
+   },
+   "kinds": {
+    "date": "date",
+    "contract_date": "int",
+    "close": "float",
+    "settlement_price": "float",
+    "volume": "int",
+    "open_interest": "int"
+   },
+   "filter": {
+    "trading_session": "^position$",
+    "contract_date": "^\\d{6}$"
+   },
+   "sort": [
+    "date",
+    "contract_date"
+   ],
+   "rows": 876,
+   "sha256": "add94b34c960e62ae58dc5d463bd3aeb3184a99431127a114483cd031e063251"
+  },
+  {
+   "path": "lm06/TAIEX_OHLC__2025-06-26__2025-07-01.csv",
+   "dataset": "TaiwanStockPrice",
+   "data_id": "TAIEX",
+   "start_date": "2025-06-26",
+   "end_date": "2025-07-01",
+   "columns": {
+    "date": "date",
+    "open": "open",
+    "max": "max",
+    "min": "min",
+    "close": "close",
+    "spread": "spread"
+   },
+   "kinds": {
+    "date": "date",
+    "open": "float",
+    "max": "float",
+    "min": "float",
+    "close": "float",
+    "spread": "float"
+   },
+   "filter": {},
+   "sort": [
+    "date"
+   ],
+   "rows": 4,
+   "sha256": "2cb45cd39bb66d23a515352571e7d1cb07b3e73c805e3667a2c19479c34ff0c1"
+  },
+  {
+   "path": "lm06/TAIEX_TR__2024-12-31__2025-03-31.csv",
+   "dataset": "TaiwanStockTotalReturnIndex",
+   "data_id": "TAIEX",
+   "start_date": "2024-12-31",
+   "end_date": "2025-03-31",
+   "columns": {
+    "date": "date",
+    "stock_id": "stock_id",
+    "price": "price"
+   },
+   "kinds": {
+    "date": "date",
+    "stock_id": "str",
+    "price": "float"
+   },
+   "filter": {},
+   "sort": [
+    "date"
+   ],
+   "rows": 56,
+   "sha256": "6c6ed0c3b60ac2a80df3161faa85762ebd56287c5b91146bbe68b01fca062619"
+  },
+  {
+   "path": "lm06/TAIEX_TR__2025-04-01__2025-10-31.csv",
+   "dataset": "TaiwanStockTotalReturnIndex",
+   "data_id": "TAIEX",
+   "start_date": "2025-04-01",
+   "end_date": "2025-10-31",
+   "columns": {
+    "date": "date",
+    "stock_id": "stock_id",
+    "price": "price"
+   },
+   "kinds": {
+    "date": "date",
+    "stock_id": "str",
+    "price": "float"
+   },
+   "filter": {},
+   "sort": [
+    "date"
+   ],
+   "rows": 146,
+   "sha256": "3555f22423c71adb1b4dd6698e771f5bbdd42f9de514925da8f9d29cf5d872c2"
+  },
+  {
+   "path": "lm06/TAIEX_TR__2025-11-03__2025-12-31.csv",
+   "dataset": "TaiwanStockTotalReturnIndex",
+   "data_id": "TAIEX",
+   "start_date": "2025-11-03",
+   "end_date": "2025-12-31",
+   "columns": {
+    "date": "date",
+    "stock_id": "stock_id",
+    "price": "price"
+   },
+   "kinds": {
+    "date": "date",
+    "stock_id": "str",
+    "price": "float"
+   },
+   "filter": {},
+   "sort": [
+    "date"
+   ],
+   "rows": 42,
+   "sha256": "4ea2ac78b9ff8c2171316048579296cd15e356f6e82dd6ffdc4f43f0727fd47a"
+  },
+  {
+   "path": "lm06/TAIEX__2024-12-31__2025-03-31.csv",
+   "dataset": "TaiwanStockPrice",
+   "data_id": "TAIEX",
+   "start_date": "2024-12-31",
+   "end_date": "2025-03-31",
+   "columns": {
+    "date": "date",
+    "close": "close",
+    "spread": "spread"
+   },
+   "kinds": {
+    "date": "date",
+    "close": "float",
+    "spread": "float"
+   },
+   "filter": {},
+   "sort": [
+    "date"
+   ],
+   "rows": 56,
+   "sha256": "f7569db8fc72adbe982e835e93d9faf2caedeae3469d637dc17e8cfb4cec811e"
+  },
+  {
+   "path": "lm06/TAIEX__2025-11-03__2025-12-31.csv",
+   "dataset": "TaiwanStockPrice",
+   "data_id": "TAIEX",
+   "start_date": "2025-11-03",
+   "end_date": "2025-12-31",
+   "columns": {
+    "date": "date",
+    "close": "close",
+    "spread": "spread"
+   },
+   "kinds": {
+    "date": "date",
+    "close": "float",
+    "spread": "float"
+   },
+   "filter": {},
+   "sort": [
+    "date"
+   ],
+   "rows": 42,
+   "sha256": "d6566300b2edabe3d70399c138bf1899951f17b7686e06679ed8721efc58c7c3"
+  }
+ ]
+}

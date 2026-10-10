@@ -37,12 +37,14 @@ python3 build/build.py lm04                       # one module (a draft goes to 
 python3 build/qa/overflow.py file://$PWD/dist/preview/lm/lm04.html 400   # horizontal overflow check
 python3 build/qa/check_terms.py                   # banned-terms check
 python3 data/check_chunk.py data/raw/<file>.csv   # verify a raw FinMind chunk against its spread column
+FINMIND_TOKEN=... python3 data/fetch_finmind.py  # rebuild data/raw/ (git-ignored) from FinMind; --verify checks offline
+python3 data/make_lab_data.py                     # build every lab's data/ folder from data/raw/
 ```
 
 ## Layout
 
 `src/` module sources (`lmNN.md`, `lmNN.js`, `data/*.json`, `assets/`, `syllabus.yaml`) · `build/` builders and QA ·
-`data/` raw FinMind files and the scripts that compute every number · `labs/` executed notebooks with data snapshots ·
+`data/` the raw-data manifest, fetch script and the scripts that compute every number · `labs/` executed notebooks (data built locally) ·
 `docs/` the published site (GitHub Pages, `main` `/docs`) · `plans/` module briefs · `reviews/` review records ·
 `project/` spec, pitfalls, sources.
 
@@ -53,5 +55,6 @@ python3 data/check_chunk.py data/raw/<file>.csv   # verify a raw FinMind chunk a
   `data/README.md`, `reviews/`, `project/`, `TODO.md`, `CLAUDE.md`).
 - Reviewers and verifiers are fresh, read-only agents that recompute from raw data; use `reviews/REVIEW_PROMPT.md`.
 - Launch independent agents together in one message; do the editor's quick work before launching a batch.
-- Data: the raw files in `data/raw/` are verified. New data come from FinMind (MCP server or API token), in windows
-  under 500 rows, each checked with `data/check_chunk.py`; never invent or estimate data.
+- Data: raw FinMind files are never committed (licence); `data/raw_manifest.json` lists them and `fetch_finmind.py`
+  rebuilds them. New data come from FinMind (MCP server or API token), in windows under 500 rows, each checked with
+  `data/check_chunk.py` and registered with `fetch_finmind.py --add`; never invent or estimate data.

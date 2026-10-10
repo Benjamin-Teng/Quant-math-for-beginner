@@ -5,11 +5,12 @@
 #   ./build.sh --pdf      also render each published module to docs/pdf/ (needs: playwright install chromium)
 #   ./build.sh --data     first rebuild data/processed and src/data/*.json from data/raw
 #   ./build.sh --labs     also regenerate and execute every lab notebook
+#   ./build.sh --fetch    first rebuild data/raw/ from FinMind (needs FINMIND_TOKEN) and every lab's data/ folder
 # A module is published when its entry in src/syllabus.yaml has `status: published` (see AUTHORING.md §11).
 set -euo pipefail
 cd "$(dirname "$0")"
-PDF=0; DATA=0; LABS=0; PREVIEW=0
-for a in "$@"; do case "$a" in --pdf) PDF=1;; --data) DATA=1;; --labs) LABS=1;; --preview) PREVIEW=1;;
+PDF=0; DATA=0; LABS=0; PREVIEW=0; FETCH=0
+for a in "$@"; do case "$a" in --pdf) PDF=1;; --data) DATA=1;; --labs) LABS=1;; --preview) PREVIEW=1;; --fetch) FETCH=1;;
   *) echo "unknown option $a"; exit 2;; esac; done
 
 command -v node >/dev/null || { echo "Node.js is required (KaTeX renders math at build time)"; exit 1; }
@@ -26,6 +27,15 @@ DATA_STEPS=(
   data/lm06_basis.py data/lm06_numbers.py data/lm06_charts.py
   data/lm07_series.py data/lm07_stats.py data/lm07_numbers.py data/lm07_tables.py data/lm07_charts.py
 )
+# Raw FinMind data are not committed (licence): fetch them with your token and verify against data/raw_manifest.json.
+if [ "$FETCH" = 1 ]; then
+  python3 data/fetch_finmind.py
+  python3 data/make_lab_data.py
+fi
+
+if [ "$DATA" = 1 ] || [ "$LABS" = 1 ]; then
+  python3 data/fetch_finmind.py --verify > /dev/null || { echo "data/raw is missing or differs from the manifest: run ./build.sh --fetch"; exit 1; }
+fi
 if [ "$DATA" = 1 ]; then
   for s in "${DATA_STEPS[@]}"; do echo "data: $s"; python3 "$s" > /dev/null; done
 fi
@@ -43,6 +53,7 @@ if [ "$PDF" = 1 ]; then
 fi
 
 if [ "$LABS" = 1 ]; then
+  python3 data/make_lab_data.py
   for gen in build/make_lab[0-9][0-9].py; do
     nn=${gen#build/make_lab}; nn=${nn%.py}
     python3 "$gen"

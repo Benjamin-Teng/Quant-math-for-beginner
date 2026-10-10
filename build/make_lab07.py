@@ -46,7 +46,7 @@ Companion notebook to **From Calculus to Kelly, LM7**. It rebuilds the module's 
 | 9 | Numerical gradients, Newton vs gradient ascent (Exhibit 12) |
 | 10 | Practice-problem solutions and an extension exercise |
 
-**Data.** `data/` holds a snapshot of FinMind `TaiwanStockPrice` closes (with FinMind's `spread` column) for 0050 and 00679B, and the cash dividends from `TaiwanStockDividendResult`, retrieved 2026-10-10. Prices are unadjusted; Part 1 handles dividends and the 0050 split explicitly.
+**Data.** `data/` holds a snapshot of FinMind `TaiwanStockPrice` closes (with FinMind's `spread` column) for 0050 and 00679B, and the cash dividends from `TaiwanStockDividendResult`, retrieved 2026-10-10. Prices are unadjusted; Part 1 handles dividends and the 0050 split explicitly. The folder is not in the repository (FinMind's licence forbids redistributing raw data): build it from the repository root with `python3 data/fetch_finmind.py` and `python3 data/make_lab_data.py` (needs `FINMIND_TOKEN`).
 
 **Environment.** `uv pip install polars pyarrow numpy scipy sympy matplotlib`.
 
@@ -506,7 +506,17 @@ cd LM07_lab && jupyter lab LM07_lab.ipynb
 
 The notebook is saved with its outputs, so you can read it before running it.
 
-## Data (offline snapshot, retrieved 2026-10-10 from FinMind)
+## Data (FinMind, retrieved 2026-10-10; not in the repository)
+
+FinMind's licence does not allow its raw data in a public repository, so `data/` is git-ignored. Build it from the repository root with your own FinMind token:
+
+```bash
+export FINMIND_TOKEN=...           # your FinMind API token
+python3 data/fetch_finmind.py      # rebuilds data/raw/ and checks every file against data/raw_manifest.json
+python3 data/make_lab_data.py      # writes this folder and every other lab's
+```
+
+The folder then holds:
 
 | File | Content |
 |:--|:--|

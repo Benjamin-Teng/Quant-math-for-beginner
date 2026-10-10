@@ -25,9 +25,9 @@ How a learning module (LM) is written, checked, reviewed and published. The refe
 | `src/lmNN.js` | optional interactive figures (`Book.widgets.<name> = function (host) {…}`) |
 | `src/data/lmNN-*.json` | chart specs, written by a script, never by hand |
 | `data/lmNN_*.py` | scripts that compute every number quoted in the module (add them to `DATA_STEPS` in `build.sh`) |
-| `data/raw/…` | verified raw data (see §8) |
+| `data/raw/…` | verified raw data, git-ignored and registered in `data/raw_manifest.json` (see §8) |
 | `build/make_labNN.py` | generates `labs/LMNN_lab/LMNN_lab.ipynb` |
-| `labs/LMNN_lab/` | notebook (saved with outputs), `data/` snapshot, `README.md` |
+| `labs/LMNN_lab/` | notebook (saved with outputs), `README.md`; its `data/` is built locally by `data/make_lab_data.py` |
 
 ## 3. Front matter
 
@@ -147,7 +147,9 @@ for something else.
   `TaiwanFuturesDaily`, `TaiwanStockTotalReturnIndex`, `USStockPrice`, …), fetched through the FinMind MCP tool in
   windows of fewer than 500 rows. Intraday history (`TaiwanVariousIndicators5Seconds`, minute bars, ticks) is too large
   for those windows: download it with a FinMind API token and a logged script (see `plans/ROADMAP.md`).
-- Store raw files in `data/raw/` exactly as returned (`date,close,spread` for prices). Verify every close against
+- Store raw files in `data/raw/` exactly as returned (`date,close,spread` for prices) and register each one in
+  `data/raw_manifest.json` with `python3 data/fetch_finmind.py --add …`. `data/raw/` is git-ignored: FinMind's licence
+  forbids redistributing raw data, so the repository keeps only the manifest and the scripts. Verify every close against
   FinMind's `spread` column with `data/check_chunk.py`; accept mismatches only on ex-dividend days (spread printed as
   0.0) and split days, and handle those explicitly in the script that builds returns. Around a split, restate the
   previous price per new share.
@@ -168,7 +170,8 @@ Polars-first notebooks (NumPy/SciPy at the numerical edge, Matplotlib for plots)
 pass literals to expressions with `pl.lit(...)` (strings are column names), avoid `map_elements` when a native
 expression exists, and never rely on row order after a join (pass `maintain_order` or sort). A lab rebuilds the
 module's exhibits and computational examples, solves the computational practice problems, and ends with one
-extension exercise. It reads only files in its own `data/` folder. Commit it executed (`./build.sh --labs` or
+extension exercise. It reads only files in its own `data/` folder, which is git-ignored and built from `data/raw/` by
+`data/make_lab_data.py` (add the lab's files there). Commit it executed (`./build.sh --labs` or
 `jupyter nbconvert --execute`).
 
 ## 10. Checks before a module goes to review

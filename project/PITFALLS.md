@@ -14,6 +14,11 @@ unless stated.
 - **Shioaji for historical data.** The syllabus once planned LM26's realized volatility "from Shioaji ticks". The
   owner's rule: all historical data come from FinMind, which has intraday history too
   (`TaiwanVariousIndicators5Seconds` for TAIEX every 5 seconds, free; minute bars and ticks on paid plans).
+- **Raw FinMind data in a public repo.** FinMind's licence (every plan) forbids redistributing raw data, yet the first
+  editions committed 63 raw files (`data/raw/`, lab snapshots). On 2026-10-10 they were removed, git history was
+  rewritten and force-pushed at the owner's request, and `.gitignore` now excludes `data/raw/` and `labs/*/data/`.
+  Commit only the manifest, scripts and derived results (statistics, chart specs, executed notebooks); rebuild raw
+  files with `data/fetch_finmind.py`. PR #1's old commits stay reachable on GitHub until GitHub Support removes them.
 - **Pull requests.** The owner wants commits pushed straight to `main`. Before pushing, `git fetch` and rebase: the
   owner may change `main` on GitHub (he merged PR #1 there while work continued locally).
 - **Asking too late.** The owner interrupted a large batch of agent launches twice to change course. Say what a big

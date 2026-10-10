@@ -30,8 +30,8 @@ src/             sources (Obsidian-compatible Markdown)
   assets/          book.css, book.js, favicon
 build/           build.py (Markdown → HTML, KaTeX at build time), build_index.py, render_pdf.py,
                  make_labNN.py, katex_render.js, package.json, requirements.txt, qa/ (screenshots, overflow check)
-data/            raw/ verified FinMind files + scripts that compute every number, table and chart
-labs/            LMNN_lab/ notebooks (saved with outputs) + offline data snapshots
+data/            scripts that compute every number, table and chart; raw_manifest.json + fetch_finmind.py rebuild raw/
+labs/            LMNN_lab/ notebooks (saved with outputs); their data/ is built by data/make_lab_data.py
 plans/           module briefs
 reviews/         independent review records: findings, decisions, fix status, prompt templates
 project/         SPEC.md (agreed decisions), PITFALLS.md (mistakes not to repeat), SOURCES.md (sites consulted)
@@ -49,6 +49,7 @@ uv pip install -r build/requirements.txt
 ./build.sh                        # docs/ (web) and dist/artifact/ (claude.ai artifact bundle)
 ./build.sh --preview              # also dist/preview/: the whole site with drafts, for local review
 ./build.sh --pdf                  # also render docs/pdf/ (first: playwright install chromium)
+./build.sh --fetch                # rebuild data/raw/ and the labs' data/ from FinMind (needs FINMIND_TOKEN)
 ./build.sh --data                 # rebuild data/processed and src/data/*.json from data/raw
 ./build.sh --labs                 # regenerate and execute the lab notebooks
 ```
@@ -85,7 +86,7 @@ Taiwan prices, dividends, index and futures data come from FinMind (`TaiwanStock
 
 ## License
 
-Text, code and notebooks are released under the [MIT License](LICENSE). The market data in `data/raw/` and the lab snapshots come from FinMind and remain subject to FinMind's terms of use.
+Text, code and notebooks are released under the [MIT License](LICENSE). Market data come from FinMind and are not redistributed here: `data/raw/` and the labs' `data/` folders are rebuilt with your own FinMind token (`./build.sh --fetch`), and only derived results are committed.
 
 ## Disclaimer
 

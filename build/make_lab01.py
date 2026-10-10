@@ -70,7 +70,7 @@ Companion notebook to **From Calculus to Kelly, LM1**. It rebuilds every exhibit
 | 6 | Growth equations, doubling, drawdowns and recovery ([[ex:doubling..episodes]], [[eg:retire..recover]]) |
 | 7 | Practice-problem solutions and an extension exercise |
 
-**Data.** `data/` holds a snapshot of FinMind `TaiwanStockPrice` closes for 0050 and 00631L (2014-10-31 → 2026-10-08) and 0050 cash dividends from `TaiwanStockDividendResult`, retrieved 2026-10-10. Every close was checked against FinMind's own `spread` column (close − previous close); the only mismatches are ex-dividend days and the two split days, which Part 1 handles explicitly.
+**Data.** `data/` holds a snapshot of FinMind `TaiwanStockPrice` closes for 0050 and 00631L (2014-10-31 → 2026-10-08) and 0050 cash dividends from `TaiwanStockDividendResult`, retrieved 2026-10-10. Every close was checked against FinMind's own `spread` column (close − previous close); the only mismatches are ex-dividend days and the two split days, which Part 1 handles explicitly. The folder is not in the repository (FinMind's licence forbids redistributing raw data): build it from the repository root with `python3 data/fetch_finmind.py` and `python3 data/make_lab_data.py` (needs `FINMIND_TOKEN`).
 
 **Conventions (as in the module).** A span in years is $\tau=$ calendar days ÷ 365.25; NTD deposits accrue on an actual/365 basis. $T$ counts returns, and $A$ is the number of returns per year used to annualize, quoted from the sample in use. A drawdown $\mathrm{DD}=1-W/\text{running peak}$ is a positive number.
 
