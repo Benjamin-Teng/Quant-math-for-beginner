@@ -47,12 +47,20 @@
   }
 
   /* ---------------- scales & ticks ---------------- */
-  function niceStep(span, n) {
+  // the finest step each tick format can print; 2.5 units of it, or a finer step, would print rounded labels
+  // (0.025 in pct0 as "3%"), so niceStep takes 2 units, or the format's own unit, instead
+  var RES = { pct0: 1e-2, pct1: 1e-3, pct2: 1e-4, pct3: 1e-5, bp: 1e-5, x0: 1, x1: 0.1, x2: 1e-2,
+              n0: 1, n1: 0.1, n2: 1e-2, n3: 1e-3, n4: 1e-4, n5: 1e-5 };
+  function niceStep(span, n, res) {
     var raw = span / Math.max(1, n), p = Math.pow(10, Math.floor(Math.log10(raw))), r = raw / p;
-    return (r <= 1 ? 1 : r <= 2 ? 2 : r <= 2.5 ? 2.5 : r <= 5 ? 5 : 10) * p;
+    var st = (r <= 1 ? 1 : r <= 2 ? 2 : r <= 2.5 ? 2.5 : r <= 5 ? 5 : 10) * p;
+    if (res && Math.abs(st / res - Math.round(st / res)) > 1e-6) st = 2 * p;
+    if (res && st < res * (1 - 1e-9)) st = res;
+    return st;
   }
-  function linTicks(lo, hi, n) {
-    var st = niceStep(hi - lo, n), t = [], v = Math.ceil(lo / st - 1e-9) * st;
+  function linTicks(lo, hi, n, f) {
+    var res = f === "x1" && Math.max(Math.abs(lo), Math.abs(hi)) >= 10 ? 1 : RES[f];   // x1 prints whole numbers from 10
+    var st = niceStep(hi - lo, n, res), t = [], v = Math.ceil(lo / st - 1e-9) * st;
     for (; v <= hi + st * 1e-9; v += st) t.push(Math.abs(v) < st * 1e-9 ? 0 : v);
     return t;
   }
@@ -138,7 +146,7 @@
     });
     // grid + y ticks
     var g = el("g", { class: "grid" }, svg), ax = el("g", { class: "axis" }, svg);
-    var yt = spec.y.ticks || (isLog ? logTicks(y0, y1) : linTicks(y0, y1, narrow ? 4 : 6));
+    var yt = spec.y.ticks || (isLog ? logTicks(y0, y1) : linTicks(y0, y1, narrow ? 4 : 6, spec.y.tfmt || spec.y.fmt));
     yt.forEach(function (v) {
       if (v < y0 || v > y1) return;
       el("line", { x1: m.l, x2: W - m.r, y1: Y(v), y2: Y(v) }, g);
@@ -146,7 +154,7 @@
     });
     if (!isLog && y0 < 0 && y1 > 0) el("line", { class: "zero", x1: m.l, x2: W - m.r, y1: Y(0), y2: Y(0) }, svg);
     var dt = spec.x.type === "date" ? dateTicks(x0, x1, narrow) : null;
-    var xt = dt ? dt.t : (spec.x.ticks || linTicks(x0, x1, narrow ? 4 : 7));
+    var xt = dt ? dt.t : (spec.x.ticks || linTicks(x0, x1, narrow ? 4 : 7, spec.x.fmt));
     var xl = !dt && spec.x.ticks && spec.x.tickLabels;   // optional text for each of x.ticks
     el("line", { x1: m.l, x2: W - m.r, y1: H - m.b, y2: H - m.b }, ax);
     xt.forEach(function (v, i) {
@@ -264,6 +272,28 @@
   }
   Book.renderCharts = renderCharts;
 
+  /* KaTeX pins an equation tag to the right edge of its display. When the centred formula and the tag do not both
+     fit, the tag would print over the formula, so it moves to a line of its own below, as in amsmath. width: the
+     main column's width to lay out for (the A4 text width when printing); default, the current one. */
+  var A4_TEXT_WIDTH = 680.3, PRINT_FONT_PX = 13.8667;   // 180 mm at 96 px/in; the body's 10.4 pt in print (book.css)
+  function layoutTags(width) {
+    var page = document.querySelector(".page"), dw = width && page ? width - page.clientWidth : 0;
+    // from the screen layout (beforeprint fires before print styles apply), formulas shrink to the print font
+    var k = width && !printing() ? PRINT_FONT_PX / parseFloat(getComputedStyle(document.body).fontSize) : 1;
+    document.querySelectorAll(".katex-display").forEach(function (d) {
+      var tag = d.querySelector(".katex-html > .tag"), bases = tag ? tag.parentElement.querySelectorAll(":scope > .base") : [];
+      if (!bases.length) return;
+      if (!d.clientWidth) { d.classList.add("tag-below"); return; }   // hidden: below until shown; toggle re-decides
+      d.classList.remove("tag-below");
+      var f = bases[bases.length - 1].getBoundingClientRect().right - bases[0].getBoundingClientRect().left;
+      var gap = 0.5 * parseFloat(getComputedStyle(tag).fontSize);
+      if (k * (f + 2 * (tag.getBoundingClientRect().width + gap)) > d.clientWidth + dw) d.classList.add("tag-below");
+    });
+  }
+  Book.layoutTags = layoutTags;
+  Book.A4_TEXT_WIDTH = A4_TEXT_WIDTH;
+  function printing() { return !!(window.matchMedia && window.matchMedia("print").matches); }
+
   function initWidgets() {
     document.querySelectorAll("[data-widget]").forEach(function (h) {
       var f = Book.widgets[h.getAttribute("data-widget")];
@@ -309,12 +339,20 @@
   function selectPre(pre) { var r = document.createRange(); r.selectNodeContents(pre); var s = window.getSelection(); s.removeAllRanges(); s.addRange(r); }
 
   function boot() {
-    chrome(); renderCharts(); initWidgets();
+    chrome(); renderCharts(); initWidgets(); layoutTags();
+    if (document.fonts && document.fonts.ready) document.fonts.ready.then(function () { if (!printing()) layoutTags(); });
     var lastW = window.innerWidth, t;
     window.addEventListener("resize", function () {
       clearTimeout(t);
-      t = setTimeout(function () { if (Math.abs(window.innerWidth - lastW) > 40) { lastW = window.innerWidth; renderCharts(); document.querySelectorAll("[data-widget]").forEach(function (h) { if (h.__redraw) h.__redraw(); }); } }, 180);
+      t = setTimeout(function () {
+        if (!printing()) layoutTags();
+        if (Math.abs(window.innerWidth - lastW) > 40) { lastW = window.innerWidth; renderCharts(); document.querySelectorAll("[data-widget]").forEach(function (h) { if (h.__redraw) h.__redraw(); }); }
+      }, 180);
     });
+    // printing: lay the tags out for the A4 text width, then back for the screen; an opened <details> may show a display
+    window.addEventListener("beforeprint", function () { layoutTags(A4_TEXT_WIDTH); });
+    window.addEventListener("afterprint", function () { layoutTags(); });
+    document.addEventListener("toggle", function () { if (!printing()) layoutTags(); }, true);
   }
   Book.boot = boot;
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", boot); else setTimeout(boot, 0);

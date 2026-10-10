@@ -19,6 +19,8 @@ async def main():
         await pg.emulate_media(media="print")
         await pg.wait_for_timeout(800)
         await pg.evaluate("window.Book && window.Book.renderCharts && window.Book.renderCharts()")
+        # equation tags that do not fit beside their formula at the A4 text width (180 mm) go below it
+        await pg.evaluate("window.Book && window.Book.layoutTags && window.Book.layoutTags(window.Book.A4_TEXT_WIDTH)")
         await pg.wait_for_timeout(400)
         await pg.pdf(path=OUT, format="A4", print_background=True, display_header_footer=True,
                      header_template="<div></div>", footer_template=FOOT,

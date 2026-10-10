@@ -111,6 +111,18 @@ class MathStore:
             raise SystemExit(1)
         return res
 
+# punctuation that glue_end keeps on an inline formula's line (tested in Chrome); it does not hold % – - ； ：, which
+# are left out. GLUE_NEXT finds the character after the formula, past closing inline tags.
+GLUE = set(".,;:!?)]’”\"'，。、」』）】》！？")
+GLUE_NEXT = re.compile(r"(?:</(?:em|strong|a)>)*(&quot;|&#39;|.)", re.DOTALL)
+def glue_end(h):
+    """Wrap the last box of an inline KaTeX formula in .mi-end (white-space: nowrap). Chrome may break a line after
+    an inline-block (KaTeX's .base boxes) even before a full stop, word joiner or not; it does not when the box's
+    parent is nowrap. The punctuation stays outside the formula, in the body font."""
+    i, tail = h.rfind('<span class="base">'), "</span></span>"   # tail closes .katex-html and .katex
+    if i < 0 or not h.endswith(tail): return h
+    return h[:i] + '<span class="mi-end">' + h[i:-len(tail)] + "</span>" + tail
+
 def protect_code(md):
     """Replace fenced code and inline code with tokens so math extraction skips them."""
     vault = []
@@ -361,6 +373,8 @@ def build_lm(path):
     def mrep(m):
         i, kind = int(m.group(1)), m.group(2)
         h = rendered[i]
+        nxt = GLUE_NEXT.match(m.string, m.end()) if kind == "I" else None
+        if nxt and (nxt.group(1) in ("&quot;", "&#39;") or nxt.group(1) in GLUE): h = glue_end(h)
         if kind == "I": return f'<span class="math-inline" role="math" aria-label="{html.escape(ms.items[i]["tex"])}">{h}</span>'
         return f'<div class="math-display" role="math" aria-label="{html.escape(ms.items[i]["tex"])}">{h}</div>'
     main = re.sub(r"<p>\s*MATHPH(\d+)(D)X\s*</p>", mrep, main)
