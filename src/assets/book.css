@@ -213,7 +213,8 @@ hr { border: 0; border-top: 1px solid var(--rule); margin-block: 2rem; }
 .katex-display { margin: 1.1rem 0; overflow-x: auto; overflow-y: hidden; padding: 0.15rem 0; scrollbar-width: thin; }
 .katex-display > .katex { font-size: 1.12em; }
 /* a tag that does not fit beside its formula goes below it, flush right (book.js layoutTags) */
-.katex-display.tag-below > .katex > .katex-html > .tag { position: static; display: block; text-align: right; }
+.katex-display.tag-below > .katex > .katex-html > .tag { position: static; display: block; text-align: right;
+  margin-top: 0.25em; }
 .katex-display.tag-below > .katex > .katex-html > .tag > .strut { display: none; }
 .math-inline { white-space: normal; }
 .math-inline .mi-end { white-space: nowrap; }   /* keeps the punctuation after a formula on its line (build.py glue_end) */

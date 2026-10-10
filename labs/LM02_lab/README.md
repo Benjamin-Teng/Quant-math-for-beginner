@@ -39,7 +39,7 @@ book to redistribute the data, so `data/` is git-ignored. From the repository ro
 export FINMIND_TOKEN=...              # your FinMind API token
 uv run python data/fetch_finmind.py   # rebuild data/raw/, checked against
                                       # data/raw_manifest.json
-uv run python data/make_lab_data.py   # write this folder and every
+uv run python data/make_lab_data.py   # write this lab's data/ and every
                                       # other lab's
 ```
 

@@ -12,7 +12,8 @@ How a learning module (LM) is written, checked, reviewed and published. The refe
   per one or two sections, 3–6 sentences, never a translation of the paragraph above it but the intuition behind it.
   Keep English terms in the Chinese text where they help (e.g. 波動拖累 volatility drag). Use Taiwan usage
   (最適, not 最優; 權益歸零 for zero equity, since 斷頭 means forced liquidation).
-- **Voice:** textbook register, concise. Sentences under 25 words; paragraphs of at most four sentences.
+- **Voice:** textbook register, concise. Sentences under 25 words; paragraphs of at most four sentences. The
+  limits are for prose: the symbol lists of a notation note and an exhibit's source note may run longer.
   Active voice, concrete numbers, no filler ("it is worth noting", "in today's world"), no emoji, no questions as
   headings.
 - **Length:** 30–40 A4 pages when printed (roughly 8,000–11,000 words including examples, problems and solutions).
