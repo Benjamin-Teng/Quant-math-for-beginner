@@ -11,6 +11,13 @@
   LM1 and LM2 are revised (writer-reported, unverified). LM4, LM6, LM7 revisions have not started.
   Records with every finding and the editor's decisions: [`reviews/`](reviews/README.md).
 
+## Owner action (not for Claude Code)
+
+- Ask GitHub Support (https://support.github.com/request, "Remove sensitive data") to remove cached views and
+  pull-request references for commits purged on 2026-10-10 because they contained raw FinMind data: PR #1 head
+  `e3ed88b`, and the old `main` commits `cfc45f0`, `a9de9cf`, `44d199c`, `8ec5034`, `f959c26`, `49b0748`, `5b56679`.
+  They are no longer in any branch but GitHub still serves them by SHA.
+
 ## Tasks, in order
 
 0. **Rebuild the raw data on the owner's computer.** Raw FinMind files are no longer in the repo. Run
