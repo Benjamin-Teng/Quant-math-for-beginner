@@ -33,7 +33,9 @@ All FinMind queries ran through the FinMind MCP server on the owner's computer, 
 | TWSE [index compilation rules IndexS03.pdf](https://www.twse.com.tw/downloads/zh/products/indices/IndexS03.pdf), IndexS07.pdf | TAIEX and total-return index methodology |
 | TWSE [company history](https://www.twse.com.tw/en/about/company/history.html) and 60th-anniversary book, [p. 181](https://www.twse.com.tw/staticFiles/product/publication/twse60/html/181/) (also pp. 256, 429) | daily limit widened from 7% to 10% on 2015-06-01 |
 | [TPEx fluctuation limits](https://www.tpex.org.tw/zh-tw/mainboard/trading/rules/fluctuation-limit.html) | cross-check of the 10% limit |
-| 全國法規資料庫: [Banking Act Art. 47-1](https://law.moj.gov.tw/LawClass/LawSingle.aspx?pcode=G0380001&flno=47-1), 信用卡業務機構管理辦法 Art. 48 | 15% cap on card revolving interest from 2015-09-01; no compounding of revolving interest |
+| TWSE Rules Governing Trading of Beneficial Certificates (受益憑證買賣辦法), Art. 8 ¶2, [EN](https://twse-regulation.twse.com.tw/EN/law/DAT0201.aspx?FLCODE=FL007114), [ZH](https://twse-regulation.twse.com.tw/TW/law/DAT0201.aspx?FLCODE=FL007114) | a leveraged or inverse ETF on a domestic index has a daily limit of 10% times its multiple (version amended 2025-09-30, read 2026-10-11; 00631L's −19.995% and +19.968% limit closes of April 2025 fit 20%); the Operating Rules (營業細則) Art. 63 have no ETF clause |
+| TWSE Holiday Schedule 2025 (JSON endpoint `twse.com.tw/rwd/en/holidaySchedule/holidaySchedule?response=json&date=20250101`; the page is rendered by JavaScript) | 3 April 2025 adjusted holiday; 4 April Children's Day and Tomb-sweeping Day (read 2026-10-11) |
+| 全國法規資料庫: [Banking Act Art. 47-1](https://law.moj.gov.tw/LawClass/LawSingle.aspx?pcode=G0380001&flno=47-1), 信用卡業務機構管理辦法 [Art. 48](https://law.moj.gov.tw/LawClass/LawSingle.aspx?pcode=G0380055&flno=48) | 15% cap on card revolving interest from 2015-09-01; no compounding of revolving interest (Art. 48 item 1, read 2026-10-11) |
 | [Bank of Taiwan rates](https://rate.bot.com.tw/twd) | one-year 定期儲蓄存款 1.725% and 定期存款 1.700%, posted 2026-10-10 |
 
 ## Banks, issuers and firms
@@ -41,7 +43,8 @@ All FinMind queries ran through the FinMind MCP server on the owner's computer, 
 | Page | Used for |
 |:--|:--|
 | COTA Bank revolving-credit disclosure (cotabank.com.tw, card_pdf_revolvingCredit.pdf) | revolving interest = balance × rate × days/365 |
-| DBS Taiwan NTD deposit terms (dbs.com.tw, DBS_NTD_Deposit.pdf) | 整存整付 compounds monthly; 存本取息 accrues daily; actual/365 |
+| DBS Taiwan NTD deposit terms (dbs.com.tw, DBS_NTD_Deposit.pdf; 新台幣存款計息方式, updated 2024-04-10; read by local text extraction, 2026-10-11) | 整存整付 compounds monthly; 存本取息 accrues daily; actual days over 365, leap years included |
+| Bank of Taiwan 存戶須知重要內容說明書 (version 2017-01-26, hosted on gov.tw) | whole months credited monthly, part months by day; 整存整付 compounded, 存本取息 simple: not the same convention as DBS |
 | [Yuanta 00679B fund page](https://www.yuantaetfs.com/product/detail/00679B/Basic_information) and holdings ratio page | tracked index (ICE US Treasury 20+ Year), set-up 2017-01-11, listing 2017-01-17, no currency hedge |
 | Yahoo Taiwan quote profile for 00679B (tw.stock.yahoo.com) | quoted in TWD |
 | Lee and Li newsletter 5323 (leeandli.com) | Banking Act Art. 47-1 cap |
@@ -52,6 +55,7 @@ All FinMind queries ran through the FinMind MCP server on the owner's computer, 
 
 | Source | Used for |
 |:--|:--|
+| White House fact sheet, 2 April 2025 (whitehouse.gov; official, US) | the reciprocal tariffs behind the April 2025 sell-off: a 10% baseline from 5 April, higher country rates from 9 April (read 2026-10-11) |
 | TechNews [2026-05-26 weight gap](https://finance.technews.tw/2026/05/26/weight-gap/) and SETN news 1844764 (2026-05-27) | 00631L replication: TAIEX futures 160.87%, TSMC 39.63%; TSMC weight 43.7% in TAIEX vs 60.9% in Taiwan 50 (as of 2026-05-19) |
 | TechNews 2025-04-07 (black Monday records), Taiwan News zh/news/6078269 | 7 April 2025 tariff sell-off |
 | TechNews 2022-12-30 (TWD depreciation), 2025-05-05 (TWD surge); FTV News 2025505W0BEA | USD/TWD 30.708 at end-2022; 31.064 on 2 May 2025; 30.145 on 5 May 2025 |
@@ -89,5 +93,5 @@ All FinMind queries ran through the FinMind MCP server on the owner's computer, 
 - Press et al., *Numerical Recipes* 3rd ed., §5.7 — PDF via drexel.edu; Burden, Faires & Burden, *Numerical Analysis* 10th ed.; Brent (1973); Stewart (Clegg, Watson), *Calculus: Early Transcendentals* 9th ed.; Simon & Blume (1994); Cover & Thomas (2006); Hull, *Options, Futures, and Other Derivatives* 11th ed. — publisher and library catalogues (Cengage, Pearson, Wiley, Elsevier, abebooks, university libraries) and course notes (NYCU, NTU, Villanova, UCSC, ETSU) for editions, ISBNs and chapter titles.
 - Virtanen et al. (2020), "SciPy 1.0", *Nature Methods* 17(3): 261–272.
 - Stewart, Clegg & Watson, *Calculus: Early Transcendentals*, 9th ed., Cengage, ISBN 9781337613927: the publisher's
-  product page gives copyright 2021 (retailers list January 2020 as the release); every module cites it as
-  Stewart, J., Clegg, D. K. and Watson, S. (2021) (checked 2026-10-11).
+  product page gives copyright 2021 (released 2020-01-09); every module cites it with these fields (Stewart, Clegg and
+  Watson; 2021; 9th ed.; Cengage) in its own reference style (checked 2026-10-11).

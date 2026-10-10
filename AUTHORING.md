@@ -171,8 +171,9 @@ for something else.
   previous price per new share.
 - Every number in the text, tables, examples, knowledge checks, problems and solutions must be produced by a script
   in `data/` or by the lab, and re-checked after the last edit.
-- Conventions: a horizon in years is calendar days ÷ 365.25 unless an instrument has its own day count (actual/365
-  for NTD deposits); quote the annualization factor $A$ of the sample in use.
+- Conventions: a horizon in years is calendar days ÷ 365.25 unless an instrument has its own day count, which is the
+  issuer's: name the bank or issuer whose terms you quote (DBS Taiwan accrues NTD deposits on actual/365; Bank of
+  Taiwan credits whole months and only part months by day). Quote the annualization factor $A$ of the sample in use.
 - A motivating case built on one day says whether that day is typical or the extreme of the sample, and backs the
   claim with a multi-day figure.
 - Futures: TAIEX closes on a 13:25–13:30 call auction while the TX daily settlement is set from the last minute of
