@@ -64,7 +64,9 @@ if [ "$LABS" = 1 ]; then
   for gen in build/make_lab[0-9][0-9].py; do
     nn=${gen#build/make_lab}; nn=${nn%.py}
     py "$gen"
-    (cd "labs/LM${nn}_lab" && uvr jupyter nbconvert --to notebook --execute "LM${nn}_lab.ipynb" --output "LM${nn}_lab.ipynb")
+    (cd "labs/LM${nn}_lab" && uvr jupyter nbconvert --to notebook --execute "LM${nn}_lab.ipynb" --output "LM${nn}_lab.ipynb" \
+      && uvr jupyter nbconvert --to notebook --inplace --CoalesceStreamsPreprocessor.enabled=True "LM${nn}_lab.ipynb")
+    # second pass: merge a print the kernel flushed in two pieces (in one pass the merge would run before execution)
   done
 fi
 py build/qa/check_terms.py     # the book cites no certification curriculum (project/PITFALLS.md)

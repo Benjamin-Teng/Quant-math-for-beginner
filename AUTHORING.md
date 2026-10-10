@@ -83,6 +83,8 @@ period. YAML strings with backslashes need double escaping inside double quotes 
 - Write `NT\$` for New Taiwan dollars: an unescaped `$` starts math. Inside math, `\text{NT\$}` works.
 - Every exhibit is cited in the prose at least once.
 - In References, give every URL link text (`[site, page](https://…)`); bare URLs are hard to read in print.
+- Every book in References gives the edition cited and its year, the publisher's copyright year (Stewart 2021,
+  Spivak 2008, Hull 2022); `project/SOURCES.md` records the check.
 
 Practice problems are an ordered list; multiple-choice options are a nested list `- **A.** …` (three options, A–C,
 "*closest* to" for numeric answers; vary which letter is correct). Solutions are an ordered list with the same

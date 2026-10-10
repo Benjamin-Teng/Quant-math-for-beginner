@@ -76,8 +76,6 @@ All FinMind queries ran through the FinMind MCP server on the owner's computer, 
 
 | Page | Used for |
 |:--|:--|
-| GIPS 2020 advertising guidelines comparison (gipsstandards.org PDF) | provision 8.A.4: periods under one year are not annualized |
-| Spaulding Group, "Why don't we annualize returns of less than one year" | background for the same rule |
 | [Microsoft Support: LOG function](https://support.microsoft.com/en-us/excel/functions/log-function) | Excel LOG defaults to base 10 |
 | SciPy docs: [`integrate.quad`](https://docs.scipy.org/doc/scipy/reference/generated/scipy.integrate.quad.html), [SLSQP](https://docs.scipy.org/doc/scipy/reference/optimize.minimize-slsqp.html), [1.16.0 release notes](https://docs.scipy.org/doc/scipy/release/1.16.0-notes.html) | QUADPACK description; SLSQP returns multipliers |
 | MacTutor, [History of e](https://mathshistory.st-andrews.ac.uk/HistTopics/e/); Britannica; Wikipedia (e, Mills ratio, Descartes' rule of signs, William Karush) | history and secondary checks |
@@ -98,3 +96,7 @@ All FinMind queries ran through the FinMind MCP server on the owner's computer, 
 - Stewart, Clegg & Watson, *Calculus: Early Transcendentals*, 9th ed., Cengage, ISBN 9781337613927: the publisher's
   product page gives copyright 2021 (released 2020-01-09); every module cites it with these fields (Stewart, Clegg and
   Watson; 2021; 9th ed.; Cengage) in its own reference style (checked 2026-10-11).
+- Spivak, *Calculus*, 4th ed., Publish or Perish, 2008, ISBN 978-0-914098-91-1 — the publisher's page
+  (mathpop.com) and bookseller listings. Hull, *Options, Futures, and Other Derivatives*, 11th ed. (Global Edition),
+  Pearson, print ISBN 9781292410654 — Pearson's catalogue gives copyright 2022 (published 5 July 2021). Modules cite
+  them as Spivak (2008) and Hull (2022) (checked 2026-10-11).

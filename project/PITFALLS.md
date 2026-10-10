@@ -9,7 +9,9 @@ unless stated.
   (a crosswalk table, header chips, exam-style wording of the outcomes, references and a trademark note). The owner had all of it removed:
   the book is an independent personal-study project. Never add such references, mappings or comparisons, in text,
   code comments, front matter or docs. `uv run python build/qa/check_terms.py` (run by `build.sh`) fails the build if any
-  appear. Also never commit third-party course material the owner shares for reference (licensed PDFs marked not for
+  appear. What such a body owns or runs counts too: its standards, codes and credentials (2026-10-11: LM1 cited a
+  performance-presentation standard that one of them owns; the citation was removed and check_terms bans its names).
+  Also never commit third-party course material the owner shares for reference (licensed PDFs marked not for
   distribution).
 - **Shioaji for historical data.** The syllabus once planned LM26's realized volatility "from Shioaji ticks". The
   owner's rule: all historical data come from FinMind, which has intraday history too
