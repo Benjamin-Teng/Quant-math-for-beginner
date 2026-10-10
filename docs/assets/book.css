@@ -164,8 +164,8 @@ hr { border: 0; border-top: 1px solid var(--rule); margin-block: 2rem; }
 .lm-title { font-family: var(--f-head); font-size: clamp(1.7rem, 4vw, 2.35rem); font-weight: 750; font-stretch: 88%; margin: 1rem 0 0.35rem; letter-spacing: -0.005em; }
 .lm-sub { color: var(--ink-2); font-size: 1.05rem; margin: 0 0 0.9rem; font-style: italic; }
 .lm-meta { display: flex; flex-wrap: wrap; gap: 0.4rem 0.5rem; font-family: var(--f-head); font-size: 0.78rem; margin-top: 0.4rem; }
-.chip { display: inline-flex; align-items: baseline; gap: 0.35rem; border: 1px solid var(--rule); background: var(--surface);
-  border-radius: 999px; padding: 0.16rem 0.6rem; color: var(--ink-2); line-height: 1.4; }
+.chip { display: inline-flex; flex-wrap: wrap; align-items: baseline; gap: 0.35rem; border: 1px solid var(--rule);
+  background: var(--surface); border-radius: 0.9rem; padding: 0.16rem 0.6rem; color: var(--ink-2); line-height: 1.4; }
 .chip b { font-weight: 700; color: var(--muted); letter-spacing: 0.06em; text-transform: uppercase; font-size: 0.68rem; }
 .chip a { text-decoration: none; }
 .chip .soon { color: var(--muted); }
@@ -212,7 +212,12 @@ hr { border: 0; border-top: 1px solid var(--rule); margin-block: 2rem; }
 .katex { font-size: 1.06em; }
 .katex-display { margin: 1.1rem 0; overflow-x: auto; overflow-y: hidden; padding: 0.15rem 0; scrollbar-width: thin; }
 .katex-display > .katex { font-size: 1.12em; }
+/* a tag that does not fit beside its formula goes below it, flush right (book.js layoutTags) */
+.katex-display.tag-below > .katex > .katex-html > .tag { position: static; display: block; text-align: right;
+  margin-top: 0.25em; }
+.katex-display.tag-below > .katex > .katex-html > .tag > .strut { display: none; }
 .math-inline { white-space: normal; }
+.math-inline .mi-end { white-space: nowrap; }   /* keeps the punctuation after a formula on its line (build.py glue_end) */
 
 /* ---------- callouts (shared shell) ---------- */
 .co { margin: 1.4rem 0; padding: 0.85rem 1.1rem 0.25rem; border-left: 3px solid var(--rule); background: var(--surface); }
@@ -394,6 +399,8 @@ details.co.answer .tag { color: var(--good); }
   details > summary::before { content: "" !important; width: 0 !important; }
   .widget .controls { display: none; }
   .katex-display { overflow: visible; }
+  .exhibit > .ex-body, .table-wrap { overflow: visible; }   /* a scroll box would clip a wide table on paper */
+  .page table th, .page table td { padding-left: 0.4rem; padding-right: 0.4rem; }
 }
 .ex-body .table-wrap { margin: 0; }
 .co .table-wrap { margin: 0.6rem 0 0.9rem; }

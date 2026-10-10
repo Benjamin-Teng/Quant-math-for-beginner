@@ -4,13 +4,18 @@
 
 *A nine-volume quantitative curriculum that starts from first-year calculus, statistics and linear algebra and ends with statistical models, optimized portfolios and growth-optimal (Kelly) leverage. English text with Traditional Chinese reading guides; every module ships with a lab notebook on real Taiwan and US market data. A personal study project.*
 
-## Status — Edition 0.1 (2026-10-10)
+## Status — Edition 0.2 (2026-10-11)
 
 | Module | State | HTML | PDF | Lab |
 |:--|:--|:--|:--|:--|
 | Roadmap, contents, notation | published | [`docs/index.html`](docs/index.html) | — | — |
+| LM1 Exponentials, Logarithms and Compounding | published | [`docs/lm/lm01.html`](docs/lm/lm01.html) | [`docs/pdf/LM01_…pdf`](docs/pdf/LM01_Exponentials_Logarithms_and_Compounding.pdf) | [`labs/LM01_lab`](labs/LM01_lab) |
+| LM2 Limits and Derivatives | published | [`docs/lm/lm02.html`](docs/lm/lm02.html) | [`docs/pdf/LM02_…pdf`](docs/pdf/LM02_Limits_and_Derivatives.pdf) | [`labs/LM02_lab`](labs/LM02_lab) |
 | LM3 Taylor Series and Approximation | published | [`docs/lm/lm03.html`](docs/lm/lm03.html) | [`docs/pdf/LM03_…pdf`](docs/pdf/LM03_Taylor_Series_and_Approximation.pdf) | [`labs/LM03_lab`](labs/LM03_lab) |
-| LM1, LM2, LM4, LM5, LM6, LM7 (rest of Volume I) | draft, in review | `src/lm0N.md` | — | `labs/LM0N_lab` |
+| LM4 Optimization in One Variable | published | [`docs/lm/lm04.html`](docs/lm/lm04.html) | [`docs/pdf/LM04_…pdf`](docs/pdf/LM04_Optimization_in_One_Variable.pdf) | [`labs/LM04_lab`](labs/LM04_lab) |
+| LM5 Integration | published | [`docs/lm/lm05.html`](docs/lm/lm05.html) | [`docs/pdf/LM05_…pdf`](docs/pdf/LM05_Integration.pdf) | [`labs/LM05_lab`](labs/LM05_lab) |
+| LM6 Sequences, Series and the Time Value of Money | published | [`docs/lm/lm06.html`](docs/lm/lm06.html) | [`docs/pdf/LM06_…pdf`](docs/pdf/LM06_Sequences_Series_and_the_Time_Value_of_Money.pdf) | [`labs/LM06_lab`](labs/LM06_lab) |
+| LM7 Multivariable Calculus and Lagrange Multipliers | published | [`docs/lm/lm07.html`](docs/lm/lm07.html) | [`docs/pdf/LM07_…pdf`](docs/pdf/LM07_Multivariable_Calculus_and_Lagrange_Multipliers.pdf) | [`labs/LM07_lab`](labs/LM07_lab) |
 
 A module goes on the site only after an independent review has recomputed its numbers and checked its mathematics; drafts are kept in `src/` and `labs/` but are not linked from the site. The full syllabus lives in [`src/syllabus.yaml`](src/syllabus.yaml).
 

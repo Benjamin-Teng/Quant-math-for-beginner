@@ -4,30 +4,18 @@
 
 ## Where things stand
 
-- `main` is pushed. The site (`docs/`) has edition 0.1: roadmap, contents and the published module LM3. Since the
-  handoff of 2026-10-10: the raw data were rebuilt on the owner's computer and verified byte for byte (`aab55c4`);
-  short date axes get month ticks (`6ddde98`); the Python environment is uv-managed (`38131a2`: `uv sync`, then
-  `uv run python …`); the round-1 review results and the editor's notation decisions are recorded (`b4b8cf6`,
-  `bc3db65`).
+- **Volume I is published (edition 0.2, 2026-10-11).** LM1–LM7 are on the site (`docs/`) with A4 PDFs and executed
+  labs. Each module went through an independent review, a verifier, the editor's gates (a blind solve of every
+  question with a key check, and a full audit of its numbers from `data/raw/`), revision rounds and a closing
+  verification; the editor's fixes after closing passed fresh checks. Every finding in [`reviews/`](reviews/README.md)
+  is verified fixed. The records hold the decisions; `project/PITFALLS.md` holds the lessons.
 - Reviews and verifications use fresh Opus subagents, never Codex (the owner's instruction, 2026-10-10). The editor
-  (main session) recomputes every major finding before accepting it and must not pass agent claims through unchecked.
-- **Volume I is in its closing rounds.** The work happens on local branches `rev/lm01` … `rev/lm07` in the owner's
-  repository (not pushed), one per module; each round is committed on its branch. A module is squash-merged into
-  `main` only after it closes (below). Each module's record in [`reviews/`](reviews/README.md) lists every finding,
-  its status and the editor's decisions.
-- The per-module cycle: writer → fresh verifier → the editor's gates (a blind solver answers every knowledge check,
-  example and problem from a copy with all answers removed, a fresh agent checks the keys against it, and a full
-  audit recomputes every number from `data/raw/`) → writer → verifier → closed.
-
-| Module | Round 1 | Gates | Stage (2026-10-11) |
-|:--|:--|:--|:--|
-| LM1 | 21 fixes verified | 31 questions, 628 claims: V1–V5, K1–K10, A1–A14 | **closed**, merged `7129c5a` |
-| LM2 | 19 fixes verified | 33 questions, 503 claims: V1–V8, K1–K7, A1–A10 | **closed**, merged `8ac0f31` |
-| LM3 | published in 0.1 | 29 questions, 543 claims: K1–K16, A1–A27 | round 2 (writer + verifier) running |
-| LM4 | 24 fixes, 23 verified (12 reopened) | 28 questions, 656 claims: V1–V5, K1–K6, A1–A11 | rounds 2–3 verified; closing pass running |
-| LM5 | review: 21 findings (5 major); fixes verified, V1–V7 | 33 questions, 681 claims: K1–K6, A1–A11 | round 2 (writer + verifier) running |
-| LM6 | 29 fixes verified | 28 questions, 753 claims: V1–V10, K1–K8, A1–A14 | rounds 2–3 verified; closing pass running |
-| LM7 | 23 fixes, 22 verified (1 reopened) | 27 questions, 695 claims: V1–V5, K1–K9, A1–A15 | round 2 verified; closing pass running |
+  (main session) recomputes every major finding before accepting it and passes no agent claim through unchecked.
+- Shared changes made while closing Volume I: inline formulas keep their punctuation and equation tags never print
+  over formulas (`58c148c`); wide tables are not clipped on paper (`fc976e9`); `build.sh --pdf` fails on a PDF that
+  Chromium shrank to fit (`build/qa/pdf_scale.py`; `build/qa/print_width.py` finds the cause). LM1, LM2, LM5 and LM6 are
+  at the 40-page limit and LM4 and LM6 at or near 11,000 words: any addition needs a cut.
+- The local branches `rev/lm01` … `rev/lm07` and their worktrees are merged (squash) and can be deleted.
 
 ## Owner action (not for Claude Code)
 
@@ -35,41 +23,28 @@
   data") to remove cached views and pull-request references for commits purged on 2026-10-10 because they contained
   raw FinMind data: PR #1 head `e3ed88b`, and the old `main` commits `cfc45f0`, `a9de9cf`, `44d199c`, `8ec5034`,
   `f959c26`, `49b0748`, `5b56679`.
+- Decisions asked of the owner in the 0.2 report: (1) AUTHORING §1's limits (sentences under 25 words, paragraphs of
+  at most four sentences) were enforced on text the reviews touched, not swept through every older paragraph; sweep
+  Volume I, or apply them from Volume II on? (2) Fullwidth `；` `：`, `-`, `%` and the en dash after an inline formula
+  can still start a line at some screen widths (the renderer cannot hold them); accept, or rewrite those spots?
 
 ## Tasks, in order
 
-1. **Close each module.** A module closes when every finding in its record is verified fixed or declined with a reason
-   the verifier accepted; the gates have run on its current text (rerun the blind solve and the audit on any module
-   whose round changed many numbers); `ruff` and `ty` are clean on its scripts; its lab executes from a clean kernel;
-   it builds without KaTeX errors and overflow at 400 px; and it is within 40 A4 pages and 11,000 words. Reopened or new
-   findings go back to a writer (`reviews/REVIEW_PROMPT.md` §2) and a fresh verifier (§3). Squash-merge the branch
-   into `main`, update the record's statuses, push.
-2. **LM5:** after its round-1 revision is verified, run the gates on it, then round 2 as above.
-3. **LM3:** after its gates, a writer pass for the gate findings plus the task-4 items for LM3, then verification.
-   LM3 is published, so build it with `uv run python build/build.py --preview` (building it alone writes `docs/`).
-4. **Cross-module pass** (editor): every Volume I module against AUTHORING §6 (including the rules added on
-   2026-10-10/11); "about 243" wording (A = 243.1 for the aligned sample; TWSE 243.8); prereq and leads consistent
-   across front matter, no cycles (LM3's leads add 5); every `[[LMn]]` link resolves; LM7 cites LM4's envelope theorem
-   as (4.16): check it after LM4 closes; Stewart cited as Stewart, Clegg and Watson (2021) everywhere
-   (`project/SOURCES.md`); the site's notation table (`build/build_index.py`) matches §6; LM3's lab and companion box
-   use the AUTHORING §9 wording; `uv run python build/qa/check_terms.py`.
-5. **Publish Volume I** (AUTHORING §11): add `status: published` to LM1, LM2, LM4–LM7 in `src/syllabus.yaml`; add an
-   edition note ("0.2", date, "Volume I complete: LM1–LM7 with labs"); update the status table in `README.md` and
-   `reviews/README.md`; run `./build.sh --pdf` (needs `uv run playwright install chromium`); check every page at 400 px
-   with `build/qa/overflow.py`, look at light and dark screenshots (`build/qa/shoot.py`), and confirm no KaTeX errors
-   and no dead links in `docs/`; confirm that
-   `git grep -nE "uv pip install|python3 |bundled|source \.venv|import requests" --untracked -- src labs build data`
-   finds nothing; commit `src/`, `data/`, `labs/` and `docs/` together and push to `main`.
-6. **Report to Benjamin** (in Traditional Chinese): a table with, for each chapter, the findings by severity
-   (critical / major / minor) from the review, the verifications and the gates, how many were fixed, and the reason
-   for each one not fixed. Source: `reviews/README.md` and the module records — update them first.
-7. **Optional:** refresh the private claude.ai artifact preview (needs a Claude session with the artifact tool);
+1. **Optional:** refresh the private claude.ai artifact preview (needs a Claude session with the artifact tool);
    update the project progress note on claude.ai.
+2. **Volumes II and III** (below), after the owner's answers to the two decisions above.
 
 ## Then: the remaining volumes
 
 Follow [`plans/ROADMAP.md`](plans/ROADMAP.md): batch 1 is Volumes II and III (LM8–LM18), then IV + V, VI + VII,
 VIII and IX. For each batch, write the briefs (`plans/vol-N.md`, same format as `plans/vol-1.md`), collect and verify
 the data (historical data from FinMind only), give writers AUTHORING §6 and `project/PITFALLS.md` up front, then
-write → review → revise → verify → gates → publish as above, bumping the edition. Ask the owner about the open
+write → review → revise → verify → gates → publish as Volume I did, bumping the edition. Ask the owner about the open
 decisions listed at the end of the roadmap before the batch that needs them.
+
+The cycle that closed Volume I, per module on its own branch and worktree: writer → fresh verifier → the editor's
+gates → writer → verifier → closing pass (writer + a verifier scoped to the fixes and the changed lines) → the
+editor's small fixes → a fresh check → squash-merge. Before publishing: AUTHORING §10 (including the unshrunk PDF of
+at most 40 pages), `build/qa/overflow.py` at 400 px and `build/qa/print_width.py` on every page, no dead links, and
+`git grep --untracked -nE "uv pip install|python3 |bundled|source \.venv|import requests" -- src labs build data`
+finds nothing (options before the pattern).

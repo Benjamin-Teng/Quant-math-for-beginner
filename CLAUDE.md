@@ -36,6 +36,8 @@ uv run python build/build.py lm04                 # one module (a draft goes to 
 ./build.sh [--data] [--labs] [--pdf] [--preview]  # full pipeline; --pdf needs `uv run playwright install chromium`
 uv run python build/qa/overflow.py dist/preview/lm/lm04.html 400   # horizontal overflow check (path or URL)
 uv run python build/qa/check_terms.py             # banned-terms check
+uv run python build/qa/print_width.py <html>      # what is wider than the A4 text width in print
+uv run python build/qa/pdf_scale.py <pdf>         # fail if Chromium shrank a PDF (its page count would be too low)
 uv run python data/check_chunk.py data/raw/<file>.csv  # verify a raw FinMind chunk against its spread column
 FINMIND_TOKEN=... uv run python data/fetch_finmind.py  # rebuild data/raw/ (git-ignored) from FinMind; --verify: offline
 uv run python data/make_lab_data.py               # build every lab's data/ folder from data/raw/

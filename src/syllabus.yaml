@@ -2,6 +2,9 @@ title: From Calculus to Kelly
 subtitle: A quantitative curriculum for statistical modeling, portfolio optimization and optimal leverage
 # Edition notes, newest first. A module is linked from the site only when its entry below has `status: published`.
 editions:
+  - version: "0.2"
+    date: 11 October 2026
+    notes: "Volume I complete: LM1–LM7 with their labs. Each module passed an independent review, a blind solve of every question with a key check, a full audit of its numbers from the raw data and verified revision rounds; LM3 was revised the same way. Wide formulas and tables now fit the printed page, and equation numbers and punctuation no longer collide with formulas."
   - version: "0.1"
     date: 10 October 2026
     notes: "Roadmap, contents and conventions, and the sample module LM3 with its lab. Volumes are released in order, starting with Volume I."
@@ -10,13 +13,13 @@ volumes:
     title: Calculus for Finance
     blurb: Compounding, approximation and optimization — the language every later volume is written in.
     lms:
-      - {n: 1, title: "Exponentials, Logarithms and Compounding", desc: "Discrete vs continuous compounding; simple vs log returns; why logs make time additive."}
-      - {n: 2, title: "Limits and Derivatives", desc: "Marginal thinking, the chain rule, elasticity; duration as a derivative."}
+      - {n: 1, title: "Exponentials, Logarithms and Compounding", desc: "Discrete vs continuous compounding; simple vs log returns; why logs make time additive.", status: published}
+      - {n: 2, title: "Limits and Derivatives", desc: "Marginal thinking, the chain rule, elasticity; duration as a derivative.", status: published}
       - {n: 3, title: "Taylor Series and Approximation", desc: "Local polynomial models, error bounds, volatility drag, leveraged-ETF decay, duration–convexity.", status: published}
-      - {n: 4, title: "Optimization in One Variable", desc: "First- and second-order conditions, concavity, the binary Kelly bet, Newton's method."}
-      - {n: 5, title: "Integration", desc: "Areas, accumulation and expectation as an integral; the Gaussian integral."}
-      - {n: 6, title: "Sequences, Series and the Time Value of Money", desc: "Geometric series, annuities, perpetuities, bond and dividend-discount pricing."}
-      - {n: 7, title: "Multivariable Calculus and Lagrange Multipliers", desc: "Gradients, Hessians, multivariate Taylor, constrained optimization; the two-asset minimum-variance portfolio."}
+      - {n: 4, title: "Optimization in One Variable", desc: "First- and second-order conditions, concavity, the binary Kelly bet, Newton's method.", status: published}
+      - {n: 5, title: "Integration", desc: "Areas, accumulation and expectation as an integral; the Gaussian integral.", status: published}
+      - {n: 6, title: "Sequences, Series and the Time Value of Money", desc: "Geometric series, annuities, perpetuities, bond and dividend-discount pricing.", status: published}
+      - {n: 7, title: "Multivariable Calculus and Lagrange Multipliers", desc: "Gradients, Hessians, multivariate Taylor, constrained optimization; the two-asset minimum-variance portfolio.", status: published}
   - id: II
     title: Linear Algebra for Portfolios
     blurb: Portfolios are vectors and risk is a quadratic form; this volume makes that literal.

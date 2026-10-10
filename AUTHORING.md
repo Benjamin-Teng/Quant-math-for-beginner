@@ -223,7 +223,7 @@ Standard wording, the same in every module (FinMind's licence forbids redistribu
 5. The lab executes from a clean kernel.
 6. The PDF (`build/render_pdf.py`) has at most 40 pages and is not shrunk: `uv run python build/qa/pdf_scale.py
    <pdf>`. Chromium shrinks the whole document when anything is wider than the A4 text width, so a page count from a
-   shrunk PDF is too low.
+   shrunk PDF is too low; `build/qa/print_width.py <html>` lists what sticks out.
 
 ## 11. Review and publishing
 
