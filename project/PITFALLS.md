@@ -11,6 +11,9 @@ unless stated.
   code comments, front matter or docs. `python3 build/qa/check_terms.py` (run by `build.sh`) fails the build if any
   appear. Also never commit third-party course material the owner shares for reference (licensed PDFs marked not for
   distribution).
+- **Shioaji for historical data.** The syllabus once planned LM26's realized volatility "from Shioaji ticks". The
+  owner's rule: all historical data come from FinMind, which has intraday history too
+  (`TaiwanVariousIndicators5Seconds` for TAIEX every 5 seconds, free; minute bars and ticks on paid plans).
 - **Pull requests.** The owner wants commits pushed straight to `main`. Before pushing, `git fetch` and rebase: the
   owner may change `main` on GitHub (he merged PR #1 there while work continued locally).
 - **Asking too late.** The owner interrupted a large batch of agent launches twice to change course. Say what a big

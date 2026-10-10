@@ -47,7 +47,7 @@ volumes:
       - {n: 23, title: "Linear Regression", desc: "From simple to multiple OLS in matrix form; HAC errors; CAPM beta and factor models."}
       - {n: 24, title: "Bayesian Inference and Shrinkage", desc: "Priors, posteriors, James–Stein; fractional Kelly as a Bayesian answer."}
       - {n: 25, title: "Time Series I: ARMA, Unit Roots and Cointegration", desc: "Stationarity, mean reversion, the futures–spot basis."}
-      - {n: 26, title: "Time Series II: Volatility Models", desc: "EWMA, GARCH, realized volatility from Shioaji ticks."}
+      - {n: 26, title: "Time Series II: Volatility Models", desc: "EWMA, GARCH, and realized volatility from 5-second TAIEX data."}
   - id: V
     title: Stochastic Calculus
     blurb: The continuous-time tools behind GBM, Itô's lemma and the continuous Kelly result.

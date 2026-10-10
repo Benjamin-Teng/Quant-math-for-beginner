@@ -6,7 +6,7 @@ An independent personal-study project.
 
 ## Read first, in this order
 
-1. [`TODO.md`](TODO.md) — the current work queue and its order.
+1. [`TODO.md`](TODO.md) — the current work queue and its order; [`plans/ROADMAP.md`](plans/ROADMAP.md) for the volumes after Volume I.
 2. [`project/SPEC.md`](project/SPEC.md) — what the owner decided (format, language, rigor, hosting, rules).
 3. [`project/PITFALLS.md`](project/PITFALLS.md) — mistakes already made and the rule that prevents each. Do not repeat them.
 4. [`AUTHORING.md`](AUTHORING.md) — how a module is written, checked, reviewed and published; §6 is the book-wide notation table.
@@ -19,6 +19,7 @@ An independent personal-study project.
 - **Commit and push directly to `main`**; no pull requests. `git fetch` and rebase before every push.
 - **No references to any professional-certification curriculum or exam body**, anywhere. `build/qa/check_terms.py`
   must pass (`build.sh` runs it).
+- **Historical market data come only from FinMind** (daily and intraday); never Shioaji for history.
 - Never commit third-party course material he shares for reference.
 - Publish a module only after an independent review and verified fixes (AUTHORING §11).
 

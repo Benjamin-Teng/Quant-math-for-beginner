@@ -44,7 +44,10 @@
    writers); refresh the private claude.ai artifact preview (needs a Claude session with the artifact tool);
    update the project progress note on claude.ai.
 
-## Then: Volume II
+## Then: the remaining volumes
 
-Write briefs for LM8–LM12 in `plans/vol-2.md` (same format as `plans/vol-1.md`), give writers the AUTHORING §6
-notation table and `project/PITFALLS.md` up front, then write → review → revise → verify → publish as above.
+Follow [`plans/ROADMAP.md`](plans/ROADMAP.md): batch 1 is Volumes II and III (LM8–LM18), then IV + V, VI + VII,
+VIII and IX. For each batch, write the briefs (`plans/vol-N.md`, same format as `plans/vol-1.md`), collect and verify
+the data (historical data from FinMind only), give writers AUTHORING §6 and `project/PITFALLS.md` up front, then
+write → review → revise → verify → publish as above, bumping the edition. Ask the owner about the open decisions
+listed at the end of the roadmap before the batch that needs them.

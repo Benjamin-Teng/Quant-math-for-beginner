@@ -143,9 +143,10 @@ for something else.
 
 ## 8. Data
 
-- Real Taiwan and US data from FinMind (`TaiwanStockPrice`, `TaiwanStockDividendResult`, `TaiwanFuturesDaily`,
-  `TaiwanStockTotalReturnIndex`, `USStockPrice`, …), fetched through the FinMind MCP tool in windows of fewer than
-  500 rows.
+- Real Taiwan and US data, and for historical data FinMind only (`TaiwanStockPrice`, `TaiwanStockDividendResult`,
+  `TaiwanFuturesDaily`, `TaiwanStockTotalReturnIndex`, `USStockPrice`, …), fetched through the FinMind MCP tool in
+  windows of fewer than 500 rows. Intraday history (`TaiwanVariousIndicators5Seconds`, minute bars, ticks) is too large
+  for those windows: download it with a FinMind API token and a logged script (see `plans/ROADMAP.md`).
 - Store raw files in `data/raw/` exactly as returned (`date,close,spread` for prices). Verify every close against
   FinMind's `spread` column with `data/check_chunk.py`; accept mismatches only on ex-dividend days (spread printed as
   0.0) and split days, and handle those explicitly in the script that builds returns. Around a split, restate the
