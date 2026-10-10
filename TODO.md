@@ -11,7 +11,7 @@
   `bc3db65`).
 - Reviews and verifications use fresh Opus subagents, never Codex (the owner's instruction, 2026-10-10). The editor
   (main session) recomputes every major finding before accepting it and must not pass agent claims through unchecked.
-- **Volume I is in revision round 2.** The work happens on local branches `rev/lm01` … `rev/lm07` in the owner's
+- **Volume I is in its closing rounds.** The work happens on local branches `rev/lm01` … `rev/lm07` in the owner's
   repository (not pushed), one per module; each round is committed on its branch. A module is squash-merged into
   `main` only after it closes (below). Each module's record in [`reviews/`](reviews/README.md) lists every finding,
   its status and the editor's decisions.
@@ -19,15 +19,15 @@
   example and problem from a copy with all answers removed, a fresh agent checks the keys against it, and a full
   audit recomputes every number from `data/raw/`) → writer → verifier → closed.
 
-| Module | Round 1 | Gates | Round 2 (2026-10-11) |
+| Module | Round 1 | Gates | Stage (2026-10-11) |
 |:--|:--|:--|:--|
-| LM1 | 21 fixes verified | 31 questions, 628 claims: V1–V5, K1–K10, A1–A14 | writer + verifier running |
-| LM2 | 19 fixes verified | 33 questions, 503 claims: V1–V8, K1–K7, A1–A10 | writer + verifier running |
-| LM3 | published in 0.1 | blind solve and audit running | then a pass for its gate findings and the items in task 4 |
-| LM4 | 24 fixes, 23 verified (12 reopened) | 28 questions, 656 claims: V1–V5, K1–K6, A1–A11 | writer + verifier running |
-| LM5 | review: 21 findings (5 major) | after round 1 | round-1 writer + verifier running |
-| LM6 | 29 fixes verified | 28 questions, 753 claims: V1–V10, K1–K8, A1–A14 | writer + verifier running |
-| LM7 | 23 fixes, 22 verified (1 reopened) | 27 questions, 695 claims: V1–V5, K1–K9, A1–A15 | writer + verifier running |
+| LM1 | 21 fixes verified | 31 questions, 628 claims: V1–V5, K1–K10, A1–A14 | **closed**, merged `7129c5a` |
+| LM2 | 19 fixes verified | 33 questions, 503 claims: V1–V8, K1–K7, A1–A10 | **closed**, merged `8ac0f31` |
+| LM3 | published in 0.1 | 29 questions, 543 claims: K1–K16, A1–A27 | round 2 (writer + verifier) running |
+| LM4 | 24 fixes, 23 verified (12 reopened) | 28 questions, 656 claims: V1–V5, K1–K6, A1–A11 | rounds 2–3 verified; closing pass running |
+| LM5 | review: 21 findings (5 major); fixes verified, V1–V7 | 33 questions, 681 claims: K1–K6, A1–A11 | round 2 (writer + verifier) running |
+| LM6 | 29 fixes verified | 28 questions, 753 claims: V1–V10, K1–K8, A1–A14 | rounds 2–3 verified; closing pass running |
+| LM7 | 23 fixes, 22 verified (1 reopened) | 27 questions, 695 claims: V1–V5, K1–K9, A1–A15 | round 2 verified; closing pass running |
 
 ## Owner action (not for Claude Code)
 

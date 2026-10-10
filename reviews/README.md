@@ -11,15 +11,15 @@ against a blind solution) and A1… (full number audit) for the editor's gates.
 
 | Module | Review | Round 1 | Gates | Stage |
 |:--|:--|:--|:--|:--|
-| [LM1](lm01.md) Exponentials, Logarithms and Compounding | 21 (2 critical, 4 major) | all 21 verified; V1–V5 | K1–K10, A1–A14 (3 major) | round 2 |
-| [LM2](lm02.md) Limits and Derivatives | 19 (5 major) | all 19 verified; V1–V8 | K1–K7 (2 major), A1–A10 (1 major) | round 2 |
-| LM3 Taylor Series and Approximation | 34 (edition 0.1, all fixed) | — | running | published; gates before Volume I |
-| [LM4](lm04.md) Optimization in One Variable | 24 (1 critical, 8 major) and length | 23 verified, 12 reopened; V1–V5 | K1–K6, A1–A11 | round 2 |
-| [LM5](lm05.md) Integration | 21 (5 major) | in progress | after round 1 | round 1 |
-| [LM6](lm06.md) Sequences, Series and the Time Value of Money | 29 (2 critical, 5 major) | all 29 verified; V1–V10 (2 major) | K1–K8 (2 major), A1–A14 (1 major) | round 2 |
-| [LM7](lm07.md) Multivariable Calculus and Lagrange Multipliers | 23 (1 critical, 5 major) and 2 editor items | 22 and both items verified, 1 reopened; V1–V5 (1 major) | K1–K9 (1 critical = finding 1, 1 major), A1–A15 (1 major) | round 2 |
+| [LM1](lm01.md) Exponentials, Logarithms and Compounding | 21 (2 critical, 4 major) | all 21 verified; V1–V5 | K1–K10, A1–A14 (3 major) | **closed** after round 3 (V6–V13 verified); merged `7129c5a` |
+| [LM2](lm02.md) Limits and Derivatives | 19 (5 major) | all 19 verified; V1–V8 | K1–K7 (2 major), A1–A10 (1 major) | **closed** after round 3 (V9–V13 verified); merged `8ac0f31` |
+| [LM3](lm03.md) Taylor Series and Approximation | 34 (edition 0.1, all fixed) | — | K1–K16 (3 major), A1–A27 (4 major) | published in 0.1; round 2 |
+| [LM4](lm04.md) Optimization in One Variable | 24 (1 critical, 8 major) and length | 23 verified, 12 reopened; V1–V5 | K1–K6, A1–A11 | closing pass (round 4) |
+| [LM5](lm05.md) Integration | 21 (5 major) | fixes verified; V1–V7 (V5 raised to major) | K1–K6 (1 major), A1–A11 (2 major) | round 2 |
+| [LM6](lm06.md) Sequences, Series and the Time Value of Money | 29 (2 critical, 5 major) | all 29 verified; V1–V10 (2 major) | K1–K8 (2 major), A1–A14 (1 major) | closing pass (round 4) |
+| [LM7](lm07.md) Multivariable Calculus and Lagrange Multipliers | 23 (1 critical, 5 major) and 2 editor items | 22 and both items verified, 1 reopened; V1–V5 (1 major) | K1–K9 (1 critical = finding 1, 1 major), A1–A15 (1 major) | closing pass (round 3) |
 
-LM3's 34 findings (edition 0.1) were fixed before the first push; they have no separate record.
+LM3's 34 findings of edition 0.1 were fixed before the first push; its record starts with the gates on that text.
 
 When everything is done, report this table to the owner with the final counts and the reason for every finding
 left unfixed.
