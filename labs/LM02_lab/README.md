@@ -7,7 +7,7 @@ Companion to *From Calculus to Kelly*, Learning Module 2.
 From the repository root, after building `data/` (see below):
 
 ```bash
-uv sync                                                    # installs the locked Python environment (uv.lock)
+uv sync                  # install the locked Python environment (uv.lock)
 uv run --with jupyterlab jupyter lab labs/LM02_lab/LM02_lab.ipynb
 ```
 
@@ -36,9 +36,11 @@ The notebook reads FinMind files that you download once with your own token. Fin
 book to redistribute the data, so `data/` is git-ignored. From the repository root:
 
 ```bash
-export FINMIND_TOKEN=...                   # your FinMind API token
-uv run python data/fetch_finmind.py        # rebuilds data/raw/ and checks every file against data/raw_manifest.json
-uv run python data/make_lab_data.py        # writes this folder and every other lab's
+export FINMIND_TOKEN=...              # your FinMind API token
+uv run python data/fetch_finmind.py   # rebuild data/raw/, checked against
+                                      # data/raw_manifest.json
+uv run python data/make_lab_data.py   # write this folder and every
+                                      # other lab's
 ```
 
 After that, the notebook runs offline. The folder then holds the files the module uses (FinMind, retrieved
