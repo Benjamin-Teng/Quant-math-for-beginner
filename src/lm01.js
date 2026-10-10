@@ -94,7 +94,7 @@
         "<div><span>Periodic rate i = r/n</span><b>" + (n === Infinity ? "—" : fmt(r / n, "pct3")) + "</b></div>" +
         "<div><span>Effective annual rate</span><b>" + fmt(R, "pct3") + "</b></div>" +
         "<div><span>Continuous limit eʳ − 1</span><b>" + fmt(lim, "pct3") + "</b></div>" +
-        "<div><span>EAR − limit</span><b>" + (Math.abs(gap) < 0.01 ? fmt(gap, "bp") : fmt(gap, "pct2") + " pts") + "</b></div>" +
+        "<div><span>EAR − limit</span><b>" + (Math.abs(gap) < 0.01 ? fmt(gap, "bp") : fmt(gap * 100, "n2") + " pts") + "</b></div>" +
         "<div><span>Continuous rate ln(1 + EAR)</span><b>" + fmt(Math.log1p(R), "pct3") + "</b></div>";
     }
     [sr, sn].forEach(function (c) { c.addEventListener("input", draw); });

@@ -15,7 +15,8 @@ import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
-BANNED = re.compile(r"\bCFA\b|Chartered Financial Analyst|candidate should be able", re.IGNORECASE)
+BANNED = re.compile(r"\bCFA\b|Chartered Financial Analyst|candidate should be able"
+                    r"|\bGIPS\b|Global Investment Performance Standards", re.IGNORECASE)
 SKIP_DIRS = {"node_modules", ".venv", ".git", "dist", "__pycache__", ".ipynb_checkpoints"}
 SUFFIXES = {".md", ".py", ".js", ".css", ".html", ".yaml", ".yml", ".json", ".txt", ".sh", ".ipynb"}
 

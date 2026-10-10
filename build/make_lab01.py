@@ -1,22 +1,22 @@
-"""Generate labs/LM01_lab/LM01_lab.ipynb (Polars-first) and its offline data snapshot.
+"""Generate labs/LM01_lab/LM01_lab.ipynb (Polars-first).
 
-Run from the repository root:  python3 build/make_lab01.py
-Then execute inside the lab folder:
-  cd labs/LM01_lab && jupyter nbconvert --to notebook --execute LM01_lab.ipynb --output LM01_lab.ipynb
+Run from the repository root:  uv run python build/make_lab01.py
+Then execute inside the lab folder (labs/LM01_lab):
+  uv run jupyter nbconvert --to notebook --execute --inplace LM01_lab.ipynb
+
+The notebook reads labs/LM01_lab/data/, which is git-ignored (FinMind's licence forbids redistributing its data)
+and built from data/raw/ by data/make_lab_data.py; this script writes only the notebook.
 
 Exhibit and example numbers are never typed by hand: cells write [[ex:label]] / [[eg:label]], and the
 generator resolves them from the labels in src/lm01.md, numbered in document order as build/build.py does.
 """
-import glob
 import re
 from pathlib import Path
 
 import nbformat as nbf
-import polars as pl
 
 ROOT = Path(__file__).resolve().parents[1]
 LAB = ROOT / "labs" / "LM01_lab"
-(LAB / "data").mkdir(parents=True, exist_ok=True)
 
 # ---------------------------------------------------------------- exhibit / example numbers from the module's labels
 NUM, _count = {}, {"exhibit": 0, "example": 0}
@@ -43,14 +43,6 @@ def refs(s):
     return out
 
 
-# ---------------------------------------------------------------- data snapshot (copies of the verified raw files)
-for sym in ("0050", "00631L"):
-    files = sorted(glob.glob(str(ROOT / "data" / "raw" / f"{sym}__*.csv")))
-    df = pl.concat([pl.read_csv(f, schema_overrides={"close": pl.Utf8, "spread": pl.Utf8}) for f in files]).sort("date")
-    assert df["date"].is_unique().all()
-    df.write_csv(LAB / "data" / f"{sym}_daily_raw.csv")
-(LAB / "data" / "0050_dividends.csv").write_text((ROOT / "data" / "raw" / "0050_dividends.csv").read_text(encoding="utf-8"), encoding="utf-8")
-
 cells = []
 md = lambda s: cells.append(nbf.v4.new_markdown_cell(refs(s.strip("\n"))))
 code = lambda s: cells.append(nbf.v4.new_code_cell(refs(s.strip("\n"))))
@@ -70,11 +62,11 @@ Companion notebook to **From Calculus to Kelly, LM1**. It rebuilds every exhibit
 | 6 | Growth equations, doubling, drawdowns and recovery ([[ex:doubling..episodes]], [[eg:retire..recover]]) |
 | 7 | Practice-problem solutions and an extension exercise |
 
-**Data.** `data/` holds a snapshot of FinMind `TaiwanStockPrice` closes for 0050 and 00631L (2014-10-31 → 2026-10-08) and 0050 cash dividends from `TaiwanStockDividendResult`, retrieved 2026-10-10. Every close was checked against FinMind's own `spread` column (close − previous close); the only mismatches are ex-dividend days and the two split days, which Part 1 handles explicitly. The folder is not in the repository (FinMind's licence forbids redistributing raw data): build it from the repository root with `python3 data/fetch_finmind.py` and `python3 data/make_lab_data.py` (needs `FINMIND_TOKEN`).
+**Environment.** From the repository root, `uv sync` installs the locked Python environment (`uv.lock`). Open this notebook with the `.venv` kernel, or run `uv run --with jupyterlab jupyter lab`.
 
-**Conventions (as in the module).** A span in years is $\tau=$ calendar days ÷ 365.25; NTD deposits accrue on an actual/365 basis. $T$ counts returns, and $A$ is the number of returns per year used to annualize, quoted from the sample in use. A drawdown $\mathrm{DD}=1-W/\text{running peak}$ is a positive number.
+**Data.** The notebook reads FinMind files that you download once with your own token. From the repository root, run `uv run python data/fetch_finmind.py`, then `uv run python data/make_lab_data.py`. FinMind's licence does not allow the book to redistribute the data. After that, the notebook runs offline. `data/` then holds FinMind `TaiwanStockPrice` closes for 0050 and 00631L (2014-10-31 → 2026-10-08) and 0050 cash dividends from `TaiwanStockDividendResult`, the files the module was computed from (retrieved 2026-10-10; `fetch_finmind.py` checks each one against `data/raw_manifest.json`). Every close matches FinMind's own `spread` column (close − previous close) except on ex-dividend days and the two split days, which Part 1 handles explicitly.
 
-**Environment.** `uv pip install polars pyarrow numpy matplotlib`.
+**Conventions (as in the module).** The span between two dated closes is $\tau=$ calendar days ÷ 365.25; the deposit and card interest of Section 3 accrue on an actual/365 basis. $T$ counts returns, and $A$ is the number of returns per year used to annualize, quoted from the sample in use. A drawdown $\mathrm{DD}=1-W/\text{running peak}$ is a positive number.
 """)
 
 code(r"""
@@ -166,11 +158,26 @@ print(f"P0 = {P0}, P1 (pre-split shares) = {P1:.2f}, G_P = {G_price:.4f}, price 
 print(f"ln G_P = {math.log(G_price):.4f} + dividends {div_log:.4f} = {math.log(G_price) + div_log:.4f}  (ln G = {lnG:.4f})")
 print(f"{exd.height} dividends; share of log growth {div_log / lnG:.1%}; doublings {math.log(G_price)/math.log(2):.3f} + {div_log/math.log(2):.3f} = {lnG/math.log(2):.3f}")
 assert abs(math.log(G_price) + div_log - lnG) < 1e-12
+fd6 = round(math.exp(round(div_log, 6)), 6)                                     # the dividend factor as the module prints it
+print(f"dividend factor e^{div_log:.6f} = {fd6:.6f} (+{fd6 - 1:.2%}; unrounded {math.exp(div_log):.7f}); "
+      f"G_P x factor = {G_price:.6f} x {fd6:.6f} = {round(G_price, 6) * fd6:.4f}")
 
 # the price factors P_t / P~_{t-1} multiply to G_P; without restating the split day they multiply to G_P / 4
 pf = raw0050.select((pl.col("P_0050") / (pl.col("P_0050").shift(1) / pl.col("ratio_0050"))).alias("restated"),
                     (pl.col("P_0050") / pl.col("P_0050").shift(1)).alias("unrestated")).drop_nulls()
 print(f"product of price factors: restated {pf['restated'].product():.4f}; without the restatement {pf['unrestated'].product():.4f}")
+
+# Section 4: dividends taken in cash and held idle; a post-split dividend counts four times per 2014 share
+cash = exd.select((pl.col("D_0050") * pl.when(pl.col("date") >= pl.lit(date(2025, 6, 18))).then(pl.lit(4.0)).otherwise(pl.lit(1.0))).sum()).item()
+print(f"cash dividends NT${cash:.2f} per 2014 share; HPR without reinvestment (P_T - P_0 + sum D) / P_0 = {(P1 - P0 + cash) / P0:.2%}")
+""")
+
+code(r"""
+# Section 7 knowledge check: deleting the split-day row instead of restating the previous close
+c = dict(zip(raw0050["date"].to_list(), raw0050["P_0050"].to_list()))
+r18 = c["2025-06-18"] / (c["2025-06-10"] / 4) - 1
+print(f"real split-day return {r18:+.2%}; G without it {G / (1 + r18):.3f}; "
+      f"19 June against the 10 June close {c['2025-06-19'] / c['2025-06-10'] - 1:.1%}")
 """)
 
 md(r"""
@@ -288,6 +295,8 @@ G90 = W[IDX[b90]] / W[IDX[a90]]; T90 = IDX[b90] - IDX[a90]; d90 = (b90 - a90).da
 print(f"{d90} days, T = {T90} sessions, HPR {G90 - 1:.4%}")
 print(f"calendar {G90 ** (YEAR / d90) - 1:.2%} (with 365: {G90 ** (365 / d90) - 1:.2%}) | A=252 {G90 ** (252 / T90) - 1:.2%} | "
       f"A=243.8 {G90 ** (243.8 / T90) - 1:.2%} | cont. {math.log(G90) * YEAR / d90:.2%} | simple {(G90 - 1) * YEAR / d90:.2%}")
+A90 = round(T90 / (d90 / YEAR), 2)                    # the window's own A, as the module prints it
+print(f"the window's own A = T/tau = {A90:.2f} gives {round(G90, 6) ** (A90 / T90) - 1:.2%}, the calendar figure")
 
 # TWSE sessions per year: days on which 0050 or 00631L traded
 u = (pl.concat([pl.read_csv(DATA / "0050_daily_raw.csv").select("date"), pl.read_csv(DATA / "00631L_daily_raw.csv").select("date")])
@@ -321,7 +330,8 @@ bounds = [BASE] + [on_or_before(date(y, 10, 31)) for y in (2016, 2018, 2020, 202
 blocks = pl.DataFrame([{"start": a, "end": b, "days": (b - a).days, "R": W[IDX[b]] / W[IDX[a]] - 1,
                         "r": math.log(W[IDX[b]] / W[IDX[a]])} for a, b in zip(bounds[:-1], bounds[1:])])
 print("sum of r:", round(blocks["r"].sum(), 6), " ln G:", round(lnG, 6), " sum of printed r (4 dp):", round(blocks["r"].round(4).sum(), 4))
-print("sum of printed simple returns (2 dp, %):", round((blocks["R"] * 100).round(2).sum(), 2))
+R3 = (blocks["R"] * 100).round(3) / 100                                      # simple returns as printed (3 dp, %)
+print(f"printed simple returns (3 dp): compounded {float((1 + R3).product()) - 1:.2%}, summed {float(R3.sum()):.2%}")
 blocks
 """)
 
@@ -400,6 +410,8 @@ for d0 in ("2024-08-02", "2024-08-05", "2025-04-02", "2025-04-07", "2025-04-08",
 i7, i9 = IDX[date(2025, 4, 7)], IDX[date(2025, 4, 9)]
 print(f"log split: {math.log1p(-DD[i7 - 1]):.4f} + {math.log(W[i9] / W[i7 - 1]):.4f} = {math.log1p(-DD[i9]):.4f};  "
       f"at g: {-math.log1p(-DD[i9]) / g:.2f} years vs actual {99 / YEAR:.2f}")
+i5 = IDX[date(2024, 8, 5)]
+print(f"2024: at g {-math.log1p(-DD[i5]) / g:.2f} years ({-math.log1p(-DD[i5]) / g * YEAR:.0f} days) vs actual {154 / YEAR:.2f} (154 days)")
 """)
 
 md(r"""
@@ -414,10 +426,11 @@ ear3 = 1.006 ** 4 - 1
 print("PP3 ", f"EAR {ear3:.4%}  r(12) {12 * ((1 + ear3) ** (1 / 12) - 1):.4%}  cc {math.log1p(ear3):.4%}")
 print("PP4 ", f"{math.expm1(0.08):.2%}  (wrong direction {math.log(1.08):.2%})")
 print("PP6 ", f"price-only annualized {G_price ** (1 / tau) - 1:.2%}  g_P {math.log(G_price) / tau:.2%}  dividends {div_log / tau:.2%}")
-print("PP7 ", f"{1.06 ** 3 - 1:.2%}  | 4 x 6% = {4 * 0.06:.2%}  | 1.06^4 - 1 = {1.06 ** 4 - 1:.2%}")
+print("PP7 ", f"{1.06 ** 3 - 1:.2%}  | 3 x 6% = {3 * 0.06:.2%}  | 1.06^4 - 1 = {1.06 ** 4 - 1:.2%}")
 yr = [0.2740, 0.4867, 0.3685]; G3 = np.prod([1 + v for v in yr])
-print("PP8 ", f"cum {G3 - 1:.2%}  ann {G3 ** (1 / 3) - 1:.2%}  logs {[round(math.log1p(v), 5) for v in yr]} sum {sum(math.log1p(v) for v in yr):.5f}  "
-      f"cc {math.log(G3) / 3:.2%}  sum simple {sum(yr):.2%}")
+c22 = max(d for d in dates if d.year == 2022); c25 = max(d for d in dates if d.year == 2025); tau3 = (c25 - c22).days / YEAR
+print("PP8 ", f"{c22} -> {c25}: {(c25 - c22).days} days, tau {tau3:.4f}; cum {G3 - 1:.2%}  ann {G3 ** (1 / tau3) - 1:.2%}  "
+      f"logs {[round(math.log1p(v), 5) for v in yr]} sum {sum(math.log1p(v) for v in yr):.5f}  cc {math.log(G3) / tau3:.2%}  sum simple {sum(yr):.2%}")
 pp9 = 0.5 * (math.exp(0.3) + math.exp(-0.1))
 print("PP9 ", f"r_p {math.log(pp9):.2%}  | average log {0.5 * 0.3 + 0.5 * -0.1:.1%}  | e^0.10 - 1 = {math.expm1(0.1):.1%}")
 print("PP10", f"{1.04 * 1.05 - 1:.2%}  logs {math.log(1.04) + math.log(1.05):.5f}")

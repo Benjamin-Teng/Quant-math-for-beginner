@@ -1,8 +1,9 @@
 """Chart data for LM1 (src/data/lm01-*.json), computed from the verified 0050 total-return series.
-Run after build_series.py:  python3 data/lm01_charts.py"""
-import json
+Run after build_series.py:  uv run python data/lm01_charts.py"""
 import datetime as dt
+import json
 from pathlib import Path
+from typing import Any
 
 import numpy as np
 import polars as pl
@@ -55,7 +56,7 @@ for lev, lab, anchor, dx, dy in ((2, "×2 · Nov 2020", "start", 8, 16), (4, "×
     marks.append({"type": "point", "x": str(dates[first_cross(lev)]), "y": lev, "label": lab, "color": "1", "anchor": anchor, "dx": dx, "dy": dy})
 
 
-def growth_chart(kind):
+def growth_chart(kind: str) -> dict[str, Any]:
     return {
         "alt": f"0050 total-return index on a {'logarithmic' if kind == 'log' else 'linear'} axis, Nov 2014 to Oct 2026, with the constant-rate path",
         "height": 300,
@@ -70,7 +71,7 @@ def growth_chart(kind):
 
 
 t24, t25 = dates.index(dt.date(2024, 8, 5)), dates.index(dt.date(2025, 4, 9))
-drawdown = {
+drawdown: dict[str, Any] = {
     "alt": "Drawdown of the 0050 total-return index from its running peak, plotted as W over the peak minus one, Nov 2014 to Oct 2026",
     "height": 280,
     "x": {"type": "date"},

@@ -1,7 +1,8 @@
 """Every number quoted in LM1 (Exponentials, Logarithms and Compounding).
 
-Run after build_series.py:  python3 data/lm01_numbers.py
-Prints each quantity at the precision used in src/lm01.md, grouped by the place it appears.
+Run after build_series.py:  uv run python data/lm01_numbers.py
+Prints each quantity at the precision used in src/lm01.md, grouped by the place it appears. Where the text derives
+a value from printed (rounded) inputs, the script recomputes it from those printed inputs as well.
 
 Notation follows AUTHORING.md section 6: T = number of returns (or periods), tau = a span in years
 (calendar days / 365.25), A = periods per year used to annualize, DD = drawdown, D = cash dividend.
@@ -11,12 +12,15 @@ values such as 15.5625% print as 15.563% rather than suffering binary floating-p
 Inputs: processed/etf_daily_returns.parquet (0050 and 00631L total returns on common dates, base close
 2014-10-31), raw/0050__*.csv and raw/00631L__*.csv (trading calendars), raw/0050_dividends.csv.
 """
+import datetime as dt
 import glob
 import json
 import math
-import datetime as dt
-from decimal import Decimal as Dec, ROUND_HALF_UP, getcontext
+from decimal import ROUND_HALF_UP, getcontext
+from decimal import Decimal as Dec
+from itertools import pairwise
 from pathlib import Path
+from typing import Any
 
 import numpy as np
 import polars as pl
@@ -26,7 +30,7 @@ HERE = Path(__file__).resolve().parent
 LN2, E = math.log(2), math.e
 BASE = dt.date(2014, 10, 31)                      # last close before the first daily return
 YEAR = 365.25                                     # a horizon in years is calendar days / 365.25 (AUTHORING 8)
-OUT = {}
+OUT: dict[str, Any] = {}
 
 
 def P(label, *vals):
@@ -88,7 +92,8 @@ P("annualized R_G = G^(1/tau)-1", f"{RG:.4%} -> {RG:.2%} ({RG:.1%})")
 P("log growth ln G", f"{lnG:.5f} -> {lnG:.4f}")
 P("continuously compounded g = lnG/tau", f"{g:.4%} -> {g:.2%} ({g:.1%})")
 P("check ln(1+R_G) = g", f"{math.log1p(RG):.6f} vs {g:.6f}")
-P("simple annualization (G-1)/tau", f"{(G - 1) / tau:.2%}", f"check 1+0.7558*11.94={1 + 0.7558 * 11.94:.2f}")
+P("simple annualization (G-1)/tau", f"{(G - 1) / tau:.2%}", f"from printed: 902.25%/11.94={9.0225 / 11.94:.4%} ({9.0225 / 11.94:.1%})",
+  f"check 1+0.7557*11.94={1 + 0.7557 * 11.94:.2f}")
 P("simple annualization / R_G (1 dp)", f"{(G - 1) / tau / RG:.1f}")
 
 # ================================================================ 2. Exponents and logarithms
@@ -105,7 +110,15 @@ P("exact check lnG - lnGp - div", f"{lnG - math.log(Gp) - div_log:.2e}")
 P("price factor product with restated split day", f"{np.prod([W[i] / W[i - 1] / (1 + (df['d0050'][i - 1] / df['p0050'][i - 1])) for i in range(1, len(W))]):.4f}")
 P("price product WITHOUT restating split day (wrong)", f"{Gp / 4:.4f}")
 P("dividend share of log growth", f"{div_log / lnG:.1%}")
-P("dividend effect e^0.3530 - 1, factor", f"{math.exp(div_log) - 1:.1%}", f"{math.exp(div_log):.3f}")
+fd = math.exp(div_log)                              # dividend factor G / G_P
+P("dividend log growth (6 dp), factor e^that (6 dp), effect", f"{div_log:.6f}", f"e^{round(div_log, 6):.6f}={math.exp(round(div_log, 6)):.6f}",
+  f"exact factor {fd:.6f}", f"effect +{fd - 1:.2%}")
+P("G_P x dividend factor, printed 6 dp", f"{Gp:.6f} x {fd:.6f} = {round(Gp, 6) * round(fd, 6):.4f}", f"(G = {G:.4f})")
+# cash dividends taken, not reinvested: HPR = (P_T - P_0 + sum D) / P_0 per original share (post-split dividends x 4)
+SPLIT = dt.date(2025, 6, 18)
+cash = sum(d * (4 if day >= SPLIT else 1) for day, d in zip(dv["date"].to_list(), dv["d0050"].to_list()))
+P("cash dividends per original share, cash HPR", f"NT${cash:.2f}", f"({p1:.2f}-{p0:.2f}+{cash:.2f})/{p0:.2f} = {(p1 - p0 + cash) / p0:.2%}",
+  f"from printed: {(459.80 - 65.30 + round(cash, 2)) / 65.30:.2%}")
 P("doublings: total, price, dividends", f"{lnG / LN2:.3f}", f"{math.log(Gp) / LN2:.3f}", f"{div_log / LN2:.3f}")
 P("tenfold increases log10 G; ln 10", f"{lnG / math.log(10):.3f}", f"{math.log(10):.4f}")
 P("price-only annualized, cc; dividends per year (log)", f"{Gp ** (1 / tau) - 1:.2%}", f"{math.log(Gp) / tau:.2%}", f"{div_log / tau:.2%}")
@@ -150,12 +163,12 @@ for n in (1, 2, 4, 12, 52, 365, 8760, 525600):
 P("   e", hu(Dec(1).exp(), 9))
 s = Dec(0)
 sums = []
-for j in range(0, 7):
+for j in range(7):
     s += Dec(1) / math.factorial(j)
     sums.append(hu(s, 6))
 P("partial sums of sum 1/j!, j<=1..6", sums[1:])
-P("widget default r=100%, n=4: EAR, limit, gap, ln(1+EAR)", pct(Dec("1.25") ** 4 - 1, 3), pct(Dec(1).exp() - 1, 3),
-  pct(Dec("1.25") ** 4 - Dec(1).exp(), 2), pct((Dec("1.25") ** 4).ln(), 3))
+P("widget default r=100%, n=4: EAR, limit, gap (pts), ln(1+EAR)", pct(Dec("1.25") ** 4 - 1, 3), pct(Dec(1).exp() - 1, 3),
+  hu((Dec("1.25") ** 4 - Dec(1).exp()) * 100, 2).replace("-", "−") + " pts", pct((Dec("1.25") ** 4).ln(), 3))
 eb = (1 + Dec("0.0585") / 12) ** 12 - 1
 P("KC: EAR 5.85% monthly; cc of each", pct(eb, 4), pct(12 * (1 + Dec("0.0585") / 12).ln(), 4), pct(Dec("1.06").ln(), 4))
 P("stated rates with the same EAR as R_G (0050):", *[f"r^({n})={n * ((1 + RG) ** (1 / n) - 1):.2%}" for _, n in FREQ], f"r={math.log1p(RG):.2%}")
@@ -170,14 +183,21 @@ P("trailing windows to", END, " (start = last close on or before the same calend
 WIN = [("3 months", dt.date(2026, 7, 8)), ("6 months", dt.date(2026, 4, 8)), ("1 year", dt.date(2025, 10, 8)),
        ("3 years", dt.date(2023, 10, 8)), ("5 years", dt.date(2021, 10, 8)), ("10 years", dt.date(2016, 10, 8)),
        ("Since 31 Oct 2014", BASE)]
-trail = []
+trail: list[dict[str, Any]] = []
 for lab, nominal in WIN:
     s0 = on_or_before(nominal)
     Gw = growth(s0, END)
     tw = (END - s0).days / YEAR
-    row = dict(window=lab, start=str(s0), days=(END - s0).days, tau=tw, hpr=Gw - 1, ann=Gw ** (1 / tw) - 1, cc=math.log(Gw) / tw)
+    row: dict[str, Any] = {"window": lab, "start": str(s0), "days": (END - s0).days, "tau": tw, "hpr": Gw - 1,
+                           "ann": Gw ** (1 / tw) - 1, "cc": math.log(Gw) / tw}
     trail.append(row)
     P(f"   {lab:<18s} from {s0}", f"days={row['days']}", f"tau={tw:.4f}", f"HPR={Gw - 1:.2%}", f"ann={row['ann']:.2%}", f"cc={row['cc']:.2%}")
+P("trailing, recomputed from the printed HPR (92-day window at 3 dp, the others at 2 dp)")
+for row in trail:
+    dp = 3 if row["window"] == "3 months" else 2
+    h = float(hu(row["hpr"] * 100, dp)) / 100
+    P(f"   {row['window']:<18s}", f"HPR {h:.{dp}%}", f"ann {(1 + h) ** (1 / row['tau']) - 1:.2%}", f"cc {math.log1p(h) / row['tau']:.2%}",
+      "OK" if f"{(1 + h) ** (1 / row['tau']) - 1:.2%}" == f"{row['ann']:.2%}" and f"{math.log1p(h) / row['tau']:.2%}" == f"{row['cc']:.2%}" else "MISMATCH")
 P("pitfall: 6-month annualized / best full calendar year", f"{trail[1]['ann']:.2%}", f"ratio {trail[1]['ann'] / float(np.prod(1 + R[yrs == 2024]) - 1):.2f}",
   f"best 2015-2025 {max(float(np.prod(1 + R[yrs == y]) - 1) for y in range(2015, 2026)):.2%} (2024)")
 # 90-day example
@@ -198,6 +218,9 @@ P("  cc per year ln(1+R)*365.25/90", f"{math.log(G90) / t90:.2%}", f"ln({q90})={
   f"product of the printed factors {round(math.log(q90), 6) * round(1 / t90, 4):.2%}")
 P("  simple R*365.25/90", f"{(G90 - 1) / t90:.2%}", f"from {q90 - 1:.6f}: {(q90 - 1) / t90:.2%}")
 P("  range of the five figures", f"{min(math.log(G90) / t90, (G90 - 1) / t90):.1%} to {G90 ** (252 / T90) - 1:.1%}")
+A90 = T90 / t90                                                # the window's own annualization factor
+P("  the window's own A = 61/(90/365.25); A/61 = 365.25/90", f"{A90:.2f}", f"{A90 / T90:.4f} = {1 / t90:.4f}",
+  f"from the printed A={round(A90, 2):.2f}: {q90 ** (round(A90, 2) / T90) - 1:.4%} -> {q90 ** (round(A90, 2) / T90) - 1:.2%}")
 # daily mean log return and the annualization factor A
 lr = np.log1p(R)
 A_sample = len(R) / tau
@@ -230,13 +253,15 @@ P("KC: 18% over 30 months (tau=2.5)", f"{1.18 ** (1 / 2.5) - 1:.2%}", f"{math.lo
 # ================================================================ 5. Aggregation
 head("5. ADDING RETURNS ACROSS TIME AND ASSETS")
 bounds = [BASE] + [on_or_before(dt.date(y, 10, 31)) for y in (2016, 2018, 2020, 2022, 2024)] + [END]
-blocks = []
-for a, b in zip(bounds[:-1], bounds[1:]):
+blocks: list[dict[str, Any]] = []
+for a, b in pairwise(bounds):
     Gb = growth(a, b)
-    blocks.append(dict(start=str(a), end=str(b), days=(b - a).days, R=Gb - 1, r=math.log(Gb)))
-    P(f"   {a} -> {b}", f"days={(b - a).days}", f"R={Gb - 1:.2%}", f"r={math.log(Gb):.4f}")
+    blocks.append({"start": str(a), "end": str(b), "days": (b - a).days, "R": Gb - 1, "r": math.log(Gb)})
+    P(f"   {a} -> {b}", f"days={(b - a).days}", f"R={Gb - 1:.3%}", f"r={math.log(Gb):.4f}")
 P("sum of printed r (4dp) vs ln G (4dp)", f"{sum(round(x['r'], 4) for x in blocks):.4f}", f"{lnG:.4f}")
-P("sum of printed simple R (2dp)", f"{sum(round(x['R'] * 100, 2) for x in blocks):.2f}%", " days", sum(x["days"] for x in blocks))
+R3 = [float(hu(x["R"] * 100, 3)) / 100 for x in blocks]                  # simple returns as printed, 3 dp
+P("printed simple R (3dp): compounded, summed", f"{float(np.prod([1 + v for v in R3])) - 1:.4%}", f"{sum(R3):.3%} -> {sum(R3):.2%}",
+  " [2dp compounded would give", f"{float(np.prod([1 + round(x['R'], 4) for x in blocks])) - 1:.2%}]", " days", sum(x["days"] for x in blocks))
 P("last two blocks share of log growth", f"{(blocks[-1]['r'] + blocks[-2]['r']) / lnG:.0%}", " last/second ratios", f"{blocks[-1]['R'] / blocks[1]['R']:.1f}", f"{blocks[-1]['r'] / blocks[1]['r']:.2f}")
 GL = WL[-1]
 Gport = 0.5 * G + 0.5 * GL
@@ -269,10 +294,11 @@ P("retire: time at 6%: 1.8971/0.05827, age", f"{math.log(Wtau / W0) / math.log(1
 P("retire: wealth at 60 if 6%", f"NT${W0 * 1.06 ** 25:,.0f}")
 P("retire: nominal: 7.59%+1.98%=9.57% -> e^0.0957-1; 1.0788*1.02-1", f"{math.log(1.02):.2%}", f"{math.expm1(0.0957):.2%}", f"{1.0788 * 1.02 - 1:.2%}",
   f"exact {(1 + req) * 1.02 - 1:.2%}")
-P("recovery table: DD | gain DD/(1-DD) | -ln(1-DD) | years at 8% | years at R_G")
+P("recovery table: DD | gain DD/(1-DD) | -ln(1-DD) | years at 8% | years at R_G | same with the printed g=19.308%, R_G=21.298%")
 for DDv in (Dec("0.10"), Dec("0.20"), Dec("0.25"), Dec(1) / 3, Dec("0.50"), Dec("0.75"), Dec("0.90")):
     ld = -(1 - DDv).ln()
-    P(f"   DD={pct(DDv, 1)}", pct(DDv / (1 - DDv), 1), hu(ld, 4), hu(ld / Dec("1.08").ln(), 2), hu(ld / Dec(repr(g)), 2))
+    P(f"   DD={pct(DDv, 1)}", pct(DDv / (1 - DDv), 1), hu(ld, 4), hu(ld / Dec("1.08").ln(), 2), hu(ld / Dec(repr(g)), 2),
+      hu(ld / Dec("0.19308"), 2), hu(ld / Dec("1.21298").ln(), 2))
 # drawdown episodes; DD_t = 1 - W_t / running peak (positive), the running peak includes W_0 = 1
 peak = np.maximum.accumulate(W)
 DD = 1 - W / peak
@@ -284,18 +310,22 @@ for k in range(1, len(W)):
         t = s0 + int(np.argmax(DD[s0:k]))
         eps.append((s0, t, k))
         in_dd = False
-episodes = []
+episodes: list[dict[str, Any]] = []
 P("drawdown episodes with DD > 15% (calendar days; at-g days = -ln(1-DD)/g x 365.25)")
 for s, t, r in eps:
     if DD[t] <= 0.15:
         continue
     D_ = DD[t]
-    row = dict(peak=str(dates[s]), trough=str(dates[t]), recovered=str(dates[r]), DD=D_, gain=D_ / (1 - D_),
-               pt_days=(dates[t] - dates[s]).days, tr_days=(dates[r] - dates[t]).days, tr_sessions=r - t,
-               log_dist=-math.log1p(-D_), longrun_days=-math.log1p(-D_) / g * YEAR)
+    row = {"peak": str(dates[s]), "trough": str(dates[t]), "recovered": str(dates[r]), "DD": D_, "gain": D_ / (1 - D_),
+           "pt_days": (dates[t] - dates[s]).days, "tr_days": (dates[r] - dates[t]).days, "tr_sessions": r - t,
+           "log_dist": -math.log1p(-D_), "longrun_days": -math.log1p(-D_) / g * YEAR}
     episodes.append(row)
-    P(f"   {dates[s]} {dates[t]} {dates[r]}", f"DD={D_:.2%}", f"gain={row['gain']:.2%}", f"pk->tr={row['pt_days']}d",
+    P(f"   {dates[s]} {dates[t]} {dates[r]}", f"DD={D_:.3%}", f"gain={row['gain']:.2%}", f"pk->tr={row['pt_days']}d",
       f"tr->rec={row['tr_days']}d/{row['tr_sessions']}s", f"log={row['log_dist']:.4f}", f"at g {row['longrun_days']:.0f}d")
+    d3 = float(hu(D_ * 100, 3)) / 100                               # DD as printed, 3 dp
+    P("      from the printed DD: gain, days at g=19.31% and at 19.308%", f"{d3 / (1 - d3):.2%}",
+      f"{-math.log1p(-d3) / 0.1931 * YEAR:.0f}", f"{-math.log1p(-d3) / 0.19308 * YEAR:.0f}",
+      "OK" if f"{d3 / (1 - d3):.2%}" == f"{row['gain']:.2%}" and f"{-math.log1p(-d3) / 0.1931 * YEAR:.0f}" == f"{row['longrun_days']:.0f}" else "MISMATCH")
 P("max drawdown in sample", f"{DD.max():.2%}", dates[int(np.argmax(DD))])
 for x in ("2025-04-02", "2025-04-07", "2025-04-08", "2025-04-09", "2025-04-10"):
     i = IDX[dt.date.fromisoformat(x)]
@@ -310,13 +340,22 @@ for e in episodes:
     if e["peak"][:4] in ("2022", "2024", "2025"):
         P(f"   intermediates {e['peak'][:4]}: DD/(1-DD), -ln(1-DD)", f"{e['DD']:.5f}/{1 - e['DD']:.5f} = {e['gain']:.2%}", f"{e['log_dist']:.4f}")
 P("2025: at-g years 0.3214/0.1931; actual 99 days in years", f"{0.3214 / 0.1931:.2f}", f"{99 / YEAR:.2f}")
+P("2024: at-g years 0.2396/0.1931 (days); actual 154 days in years", f"{0.2396 / 0.1931:.2f} ({0.2396 / 0.1931 * YEAR:.0f})", f"{154 / YEAR:.2f}")
+P("2025 recovery 2025-04-09 -> 2025-07-17: 0050 sessions, exchange sessions",
+  sum(1 for x in d0050 if "2025-04-09" < x <= "2025-07-17"), sum(1 for x in union if "2025-04-09" < x <= "2025-07-17"))
+# Section 7 knowledge check: deleting the split-day row instead of restating the previous close
+raw0050 = pl.concat([pl.read_csv(f) for f in sorted(glob.glob(str(HERE / "raw" / "0050__*.csv")))]).sort("date")
+cl = dict(zip(raw0050["date"].to_list(), raw0050["close"].to_list()))
+P("KC6: closes 06-10, 06-18, 06-19", cl["2025-06-10"], cl["2025-06-18"], cl["2025-06-19"],
+  f"19 June vs 10 June {cl['2025-06-19'] / cl['2025-06-10'] - 1:.2%} ({cl['2025-06-19'] / cl['2025-06-10'] - 1:.1%})",
+  f"dropped return {cl['2025-06-18'] / (cl['2025-06-10'] / 4) - 1:+.2%}", f"G without it {G / (cl['2025-06-18'] / (cl['2025-06-10'] / 4)):.3f}")
 P("2025-04-10 return", f"{R[i9]:+.2%}")
 P("0050 suspended sessions inside the 2025 recovery", sorted(x for x in d631 - d0050 if "2025-04-09" < x < "2025-07-17"))
 i18 = IDX[dt.date(2025, 6, 18)]
 P("split-day return 2025-06-18 spans", f"from {dates[i18 - 1]} close", f"{sum(1 for x in union if str(dates[i18 - 1]) < x <= '2025-06-18')} market sessions",
   f"R={R[i18 - 1]:+.3%}", f"check 47.57/(188.65/4)-1={47.57 / (188.65 / 4) - 1:+.3%}")
 P("KC: DD=40%: gain, years at 15%: 0.5108/0.1398", f"{0.4 / 0.6:.2%}", f"{-math.log(0.6) / math.log(1.15):.2f}")
-P("Sec 6 text: 2022 peak->trough days", [e for e in episodes if e["peak"].startswith("2022")][0]["pt_days"])
+P("Sec 6 text: 2022 peak->trough days", next(e for e in episodes if e["peak"].startswith("2022"))["pt_days"])
 
 # ================================================================ Practice problems
 head("PRACTICE PROBLEMS")
@@ -324,17 +363,25 @@ P("PP1 log2(25) | ln25/log10(2) | 25/2", f"{math.log(25) / LN2:.2f}", f"{math.lo
 P("PP2 EAR 12% monthly | continuous", pct((1 + Dec("0.01")) ** 12 - 1, 2), pct(Dec("0.12").exp() - 1, 2))
 q4 = (1 + Dec("0.006")) ** 4 - 1
 P("PP3 2.4% quarterly: EAR, r^(12), cc", pct(q4, 4), pct(12 * ((1 + q4).ln() / 12).exp() - 12, 4), pct((1 + q4).ln(), 4), f"1.006^4={hu(1 + q4, 6)}")
+P("PP3 (b) as 12(1.006^(1/3)-1); (c) as 4 ln1.006", pct(12 * ((Dec("1.006").ln() / 3).exp() - 1), 4), pct(4 * Dec("1.006").ln(), 4))
 P("PP4 e^0.08-1 | ln1.08", pct(Dec("0.08").exp() - 1, 2), pct(Dec("1.08").ln(), 2))
+for x in (0.1, -0.5, -3.0):                                       # PP5: e^x >= (1+x/2)^2 > 1+x for x >= -2, x != 0; 1+x < 0 < e^x for x < -2
+    P(f"PP5 strict check x={x}: e^x, (1+x/2)^2, 1+x", f"{math.exp(x):.6f}", f"{(1 + x / 2) ** 2:.6f}", f"{1 + x:.6f}")
 P("PP6 price-only R_G, g_P, dividends (log/yr)", f"{Gp ** (1 / tau) - 1:.2%}", f"{math.log(Gp) / tau:.2%}", f"{div_log / tau:.2%}",
   f"check 1.9518/11.937={1.9518 / 11.937:.2%}", f"0.3530/11.937={0.3530 / 11.937:.2%}")
-P("PP7 6% in 4 months: 1.06^3-1 | 6%x4 | 1.06^4-1", pct(Dec("1.06") ** 3 - 1, 2), "24.00%", pct(Dec("1.06") ** 4 - 1, 2))
+P("PP7 6% in 4 months: 1.06^3-1 | 6%x3 | 1.06^4-1", pct(Dec("1.06") ** 3 - 1, 2), pct(Dec("0.06") * 3, 2), pct(Dec("1.06") ** 4 - 1, 2))
 y3x = [float(np.prod(1 + R[yrs == y]) - 1) for y in (2023, 2024, 2025)]
 y3 = [round(v, 4) for v in y3x]                       # stated to 0.01% in the problem; the solution uses the stated values
 G3 = float(np.prod([1 + v for v in y3]))
 l3 = [math.log1p(v) for v in y3]
-P("PP8 stated returns", [f"{v:.2%}" for v in y3], f"cum {G3 - 1:.2%}", f"ann {G3 ** (1 / 3) - 1:.2%}", f"G3={G3:.5f}")
+c0 = max(d for d in dates if d.year == 2022)          # last close of 2022 and of 2025: the module's calendar-day rule
+c1 = max(d for d in dates if d.year == 2025)
+t3 = (c1 - c0).days / YEAR
+P("PP8 span", c0, "->", c1, f"days={(c1 - c0).days}", f"tau={t3:.4f}", f"check: G3 from the data {W[IDX[c1]] / W[IDX[c0]]:.5f}")
+P("PP8 stated returns", [f"{v:.2%}" for v in y3], f"cum {G3 - 1:.2%}", f"ann {G3 ** (1 / round(t3, 4)) - 1:.2%}", f"G3={G3:.5f}",
+  f"[with tau=3: {G3 ** (1 / 3) - 1:.2%}]")
 P("PP8 logs 5dp, printed sum, ln G3, cc, sum simple", [f"{v:.5f}" for v in l3], f"{sum(round(v, 5) for v in l3):.5f}", f"{math.log(G3):.5f}",
-  f"{math.log(G3) / 3:.2%}", f"{sum(y3):.2%}")
+  f"{math.log(G3) / round(t3, 4):.2%}", f"from printed 0.95244/{t3:.4f}={0.95244 / round(t3, 4):.2%}", f"[with tau=3: {math.log(G3) / 3:.2%}]", f"{sum(y3):.2%}")
 pp9 = 0.5 * math.exp(0.30) + 0.5 * math.exp(-0.10)
 P("PP9 e^.3, e^-.1, mean, r_p | avg log | e^0.1-1 | R_p", f"{math.exp(0.3):.6f}", f"{math.exp(-0.1):.6f}", f"{pp9:.6f}", f"{math.log(pp9):.2%} ({math.log(pp9):.1%})",
   "10.0%", f"{math.expm1(0.1):.1%}", f"{pp9 - 1:.2%}")
@@ -343,7 +390,7 @@ P("PP11 ln4/ln1.06 | ln4/0.06 | difference (years, months)", f"{math.log(4):.4f}
   f"{math.log(4) / math.log(1.06) - math.log(4) / 0.06:.2f}", f"{(math.log(4) / math.log(1.06) - math.log(4) / 0.06) * 12:.1f}")
 P("PP12 5^(1/15)-1 | ln5/15 | 400%/15", f"{5 ** (1 / 15) - 1:.2%}", f"{math.log(5) / 15:.2%}", f"{4 / 15:.2%}")
 P("PP13 0.35/0.65 | -ln0.65/ln1.10 | 0.65x1.30", f"{0.35 / 0.65:.2%}", f"{-math.log(0.65):.4f}/{math.log(1.10):.4f}={-math.log(0.65) / math.log(1.10):.2f}", f"{0.65 * 1.3:.3f}", f"{0.65 * 1.3 - 1:.2%}")
-e22 = [x for x in episodes if x["peak"].startswith("2022")][0]
+e22 = next(x for x in episodes if x["peak"].startswith("2022"))
 P("PP14 0.33929/0.66071 | -ln0.66071 | /0.19308 | days | actual/at-g", f"{0.33929 / 0.66071:.2%}", f"{-math.log(0.66071):.4f}",
   f"{-math.log(0.66071) / 0.19308:.3f}", f"{-math.log(0.66071) / 0.19308 * YEAR:.0f}", f"{e22['tr_days'] / e22['longrun_days']:.0%}")
 b0, b1 = on_or_before(dt.date(2014, 12, 31)), on_or_before(dt.date(2024, 12, 31))
