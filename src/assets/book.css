@@ -164,8 +164,8 @@ hr { border: 0; border-top: 1px solid var(--rule); margin-block: 2rem; }
 .lm-title { font-family: var(--f-head); font-size: clamp(1.7rem, 4vw, 2.35rem); font-weight: 750; font-stretch: 88%; margin: 1rem 0 0.35rem; letter-spacing: -0.005em; }
 .lm-sub { color: var(--ink-2); font-size: 1.05rem; margin: 0 0 0.9rem; font-style: italic; }
 .lm-meta { display: flex; flex-wrap: wrap; gap: 0.4rem 0.5rem; font-family: var(--f-head); font-size: 0.78rem; margin-top: 0.4rem; }
-.chip { display: inline-flex; align-items: baseline; gap: 0.35rem; border: 1px solid var(--rule); background: var(--surface);
-  border-radius: 999px; padding: 0.16rem 0.6rem; color: var(--ink-2); line-height: 1.4; }
+.chip { display: inline-flex; flex-wrap: wrap; align-items: baseline; gap: 0.35rem; border: 1px solid var(--rule);
+  background: var(--surface); border-radius: 0.9rem; padding: 0.16rem 0.6rem; color: var(--ink-2); line-height: 1.4; }
 .chip b { font-weight: 700; color: var(--muted); letter-spacing: 0.06em; text-transform: uppercase; font-size: 0.68rem; }
 .chip a { text-decoration: none; }
 .chip .soon { color: var(--muted); }
