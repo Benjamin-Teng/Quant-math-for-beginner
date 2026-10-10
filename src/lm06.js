@@ -13,18 +13,18 @@
     }).join("") + "</div>";
   }
 
-  /* Monthly schedule. Level payment: eq. (6.16), principal A v^(n-k+1) as in (6.18).
-     Equal principal: L/(n-m) a month plus interest. Grace: m interest-only months first. */
-  function schedule(L, apr, years, graceYears, method) {
+  /* Monthly schedule for a loan of B0. Level payment PMT: eq. (6.16), principal PMT v^(n-t+1) as in (6.18).
+     Equal principal: Q = B0/(n-m) a month plus interest. Grace: m interest-only months first. */
+  function schedule(B0, apr, years, graceYears, method) {
     var i = apr / 12, n = Math.round(years * 12);
     var m = Math.min(Math.round(graceYears * 12), n - 12);
-    var N = n - m, A = i === 0 ? L / N : L * i / (1 - Math.pow(1 + i, -N)), P = L / N;
-    var rows = [], bal = L;
+    var N = n - m, PMT = i === 0 ? B0 / N : B0 * i / (1 - Math.pow(1 + i, -N)), Q = B0 / N;
+    var rows = [], bal = B0;
     for (var k = 1; k <= n; k++) {
       var I = bal * i, prin;
       if (k <= m) prin = 0;
       else if (k === n) prin = bal;
-      else prin = method === "level" ? A - I : P;
+      else prin = method === "level" ? PMT - I : Q;
       bal -= prin;
       rows.push({ k: k, pay: I + prin, I: I, P: prin, bal: Math.abs(bal) < 1e-6 ? 0 : bal });
     }
@@ -40,17 +40,17 @@
         { id: "am-g", label: "Grace period, interest only (years)", min: 0, max: 5, step: 1, value: 0 },
         { type: "select", id: "am-m", label: "Repayment method", options: [["level", "Level payment (本息平均攤還)"], ["equal", "Equal principal (本金平均攤還)"]] }
       ]) + '<div class="am-chart"></div><div class="readout" aria-live="polite"></div>' +
-      '<p class="w-note">Monthly rate = annual rate ÷ 12. Level payment: every payment is equal and its principal part grows by the factor 1 + i each month (6.18). Equal principal: the same principal every month, so payments fall in a straight line (6.19). Initial setting: the illustrative NT$10 million, 30-year, 2.2% mortgage of Example 8.</p>';
+      '<p class="w-note">Monthly rate = annual rate ÷ 12. Level payment: every payment is equal and its principal part grows by the factor 1 + i each month (6.18). Equal principal: the same principal every month, so payments fall in a straight line (6.19). Initial setting: the illustrative NT$10 million, 30-year, 2.2% mortgage of the worked example below.</p>';
     var sL = host.querySelector("#am-L"), sr = host.querySelector("#am-r"), sy = host.querySelector("#am-y"),
         sg = host.querySelector("#am-g"), sm = host.querySelector("#am-m");
     var chart = host.querySelector(".am-chart"), out = host.querySelector(".readout");
     function draw() {
-      var L = +sL.value * 1e6, apr = +sr.value, yrs = +sy.value, g = +sg.value, method = sm.value;
+      var B0 = +sL.value * 1e6, apr = +sr.value, yrs = +sy.value, g = +sg.value, method = sm.value;
       host.querySelector("#am-L-v").textContent = fmt(+sL.value, "n1");
       host.querySelector("#am-r-v").textContent = fmt(apr, "pct2");
       host.querySelector("#am-y-v").textContent = yrs;
       host.querySelector("#am-g-v").textContent = g;
-      var S = schedule(L, apr, yrs, g, method), rows = S.rows;
+      var S = schedule(B0, apr, yrs, g, method), rows = S.rows;
       var xs = [], pay = [], ints = [], prin = [];
       rows.forEach(function (r) { xs.push(r.k / 12); pay.push(r.pay); ints.push(r.I); prin.push(r.P); });
       var ann = S.m > 0 ? [{ type: "vline", x: S.m / 12, label: "grace ends" }] : [];
@@ -74,7 +74,7 @@
         "<div><span>Largest payment</span><b>" + fmt(maxPay, "n0") + "</b></div>" +
         "<div><span>Last payment</span><b>" + fmt(rows[rows.length - 1].pay, "n0") + "</b></div>" +
         "<div><span>Total interest</span><b>" + fmt(totI, "n0") + "</b></div>" +
-        "<div><span>Interest ÷ loan</span><b>" + fmt(totI / L, "pct1") + "</b></div>" +
+        "<div><span>Interest ÷ loan</span><b>" + fmt(totI / B0, "pct1") + "</b></div>" +
         "<div><span>Balance after 5 years</span><b>" + fmt(bal5, "n0") + "</b></div>" +
         "<div><span>Principal &gt; interest from</span><b>" + (cross ? "month " + cross : "—") + "</b></div>" +
         "<div><span>Effective annual rate</span><b>" + fmt(Math.pow(1 + S.i, 12) - 1, "pct3") + "</b></div>";
