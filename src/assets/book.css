@@ -1,7 +1,7 @@
 /* =====================================================================
    From Calculus to Kelly — book stylesheet
    Layout: textbook spread — sticky contents rail left, 46rem reading
-   column with CFA-style numbered section blocks, page outline right.
+   column with numbered section blocks, page outline right.
    ===================================================================== */
 
 @font-face { font-family: "Source Serif 4"; font-style: normal; font-weight: 200 900; font-display: swap;
@@ -32,9 +32,9 @@
   --muted: #69707a;
   --rule: #d6dbe0;
   --rule-soft: #e6e9ec;
-  --panel: #edf0f3;          /* CFA-grey example plate */
+  --panel: #edf0f3;          /* grey example plate */
   --panel-head: #dfe4e9;
-  --bar: #15181c;            /* CFA black header bars */
+  --bar: #15181c;            /* black header bars */
   --bar-ink: #ffffff;
   --accent: #1c5aa6;         /* ledger blue: links, outcome marks */
   --accent-soft: #e3edf8;
@@ -156,7 +156,7 @@ hr { border: 0; border-top: 1px solid var(--rule); margin-block: 2rem; }
   .topbar .crumb { display: none; }
 }
 
-/* ---------- module head (CFA cover band) ---------- */
+/* ---------- module head (cover band) ---------- */
 .lm-head { margin: 0 0 1.75rem; }
 .lm-band { background: var(--panel); margin-inline: calc(-1 * var(--gutter, 1.25rem)); padding: 1.4rem 1.25rem 1.2rem; border-radius: 0 0 2px 2px; }
 .lm-kicker { font-family: var(--f-head); font-size: 0.82rem; letter-spacing: 0.32em; text-transform: uppercase; color: var(--ink-2); font-weight: 500; }
@@ -169,6 +169,8 @@ hr { border: 0; border-top: 1px solid var(--rule); margin-block: 2rem; }
 .chip b { font-weight: 700; color: var(--muted); letter-spacing: 0.06em; text-transform: uppercase; font-size: 0.68rem; }
 .chip a { text-decoration: none; }
 .chip .soon { color: var(--muted); }
+.chip.draft-chip { border-color: var(--amber); background: var(--amber-soft); }
+.chip.draft-chip b { color: var(--amber); }
 
 /* ---------- learning outcomes ---------- */
 .lo { margin: 0 0 1.8rem; max-width: 40rem; }
@@ -238,7 +240,7 @@ hr { border: 0; border-top: 1px solid var(--rule); margin-block: 2rem; }
 .co.zh p { margin-bottom: 0.6rem; }
 .co.zh .katex { font-size: 1.02em; }
 
-/* example — CFA grey plate */
+/* example — grey plate */
 .co.example { border-left: 0; padding: 0; background: var(--panel); margin: 1.8rem 0; }
 .co.example > .co-h { display: block; background: var(--panel-head); padding: 0.45rem 1.1rem 0.5rem; margin: 0; }
 .co.example > .co-h .tag { display: block; color: var(--ink-2); font-size: 0.76rem; }
@@ -360,6 +362,7 @@ details.co.answer .tag { color: var(--good); }
 .gloss td:nth-child(2) { font-family: var(--f-zh); white-space: nowrap; }
 .refs { font-size: 0.92rem; }
 .refs li { margin-bottom: 0.5rem; }
+.refs a { overflow-wrap: anywhere; }
 
 /* ---------- pager ---------- */
 .pager { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-top: 4rem; border-top: 1px solid var(--rule); padding-top: 1.2rem; font-family: var(--f-head); }

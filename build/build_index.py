@@ -1,4 +1,4 @@
-"""Landing page: roadmap, contents, conventions, CFA crosswalk. Output is content-only (the artifact
+"""Landing page: roadmap, contents, conventions, edition notes. Output is content-only (the artifact
 publisher wraps the main page in its own document skeleton)."""
 import html, re
 from pathlib import Path
@@ -91,21 +91,30 @@ def build():
         for lm in v["lms"]:
             n = lm["n"]; ok = n in AVAIL
             title = f'<a href="lm/lm{n:02d}.html">{esc(lm["title"])}</a>' if ok else esc(lm["title"])
-            cfa = " ".join(f'<span class="tag-cfa" title="{esc(SYL["cfa"][c])}">{c}</span>' for c in lm.get("cfa", []))
-            status = '<span class="st ok">Available</span>' if ok else '<span class="st">Planned</span>'
-            if ok and B.TARGET == "web":
-                status += f'<br><a class="st-pdf" href="pdf/{B.pdf_name(n)}">PDF</a>'
+            if n in B.PUBLISHED:
+                status = '<span class="st ok">Available</span>'
+                if B.TARGET == "web" and not B.PREVIEW:
+                    status += f'<br><a class="st-pdf" href="pdf/{B.pdf_name(n)}">PDF</a>'
+            elif n in B.DRAFTS:
+                status = '<span class="st rv">In review</span>'
+            else:
+                status = '<span class="st">Planned</span>'
             rows.append(f'<tr class="{"hl" if ok else ""}"><td class="n">LM{n}</td><td><div class="lm-t">{title}</div>'
-                        f'<div class="lm-d">{B.md_inline(lm["desc"])}</div></td><td class="cfa-c">{cfa}</td><td>{status}</td></tr>')
+                        f'<div class="lm-d">{B.md_inline(lm["desc"])}</div></td><td>{status}</td></tr>')
         vols.append(f'<section class="vol" id="vol-{v["id"]}"><h3><span class="vk">Volume {v["id"]}</span>{esc(v["title"])}</h3>'
                     f'<p class="vb">{esc(v["blurb"])}</p><div class="table-wrap"><table class="toc"><thead><tr><th>LM</th><th>Module</th>'
-                    f'<th>CFA L1</th><th>Status</th></tr></thead><tbody>{"".join(rows)}</tbody></table></div></section>')
-    # CFA crosswalk
-    cfa_rows = []
-    for code, name in SYL["cfa"].items():
-        hits = [lm["n"] for v in SYL["volumes"] for lm in v["lms"] if code in lm.get("cfa", [])]
-        links = ", ".join((f'<a href="lm/lm{n:02d}.html">LM{n}</a>' if n in AVAIL else f"LM{n}") for n in hits)
-        cfa_rows.append(f'<tr><td class="n">{code}</td><td>{esc(name)}</td><td>{links}</td></tr>')
+                    f'<th>Status</th></tr></thead><tbody>{"".join(rows)}</tbody></table></div></section>')
+    # edition notes (newest first in syllabus.yaml) and the reading entry point
+    editions = SYL.get("editions", [])
+    ed_now = editions[0] if editions else {"version": "0.1"}
+    edition_html = "".join(f'<p><strong>Edition {esc(str(e["version"]))} ({esc(str(e["date"]))}).</strong> {B.md_inline(e["notes"])}</p>'
+                           for e in editions)
+    if AVAIL:
+        first = min(AVAIL); first_t = next(lm["title"] for v in SYL["volumes"] for lm in v["lms"] if lm["n"] == first)
+        verb = "Read the sample module" if len(AVAIL) == 1 else "Start reading"
+        start_link = f'<a class="start" href="lm/lm{first:02d}.html">{verb}: LM{first} {esc(first_t)} →</a>'
+    else:
+        start_link = ""
     rendered_hero_note = ""
     goals = [
         ("Build statistical models", "Return distributions, regressions and factor models, GARCH volatility, cointegrated spreads — estimated, diagnosed and stated with their uncertainty.", "Vol III–V"),
@@ -116,7 +125,7 @@ def build():
     goal_html = "".join(f'<div class="goal"><div class="gk">{esc(k)}</div><h3>{esc(t)}</h3><p>{esc(d)}</p></div>' for t, d, k in goals)
     legend = [
         ("definition", "Definition", "The precise statement of a term, in English."),
-        ("example", "Example", "A worked problem with its full solution, CFA style."),
+        ("example", "Example", "A worked problem with its full solution."),
         ("pitfall", "Pitfall", "A common mistake and how to avoid it."),
         ("zh", "導讀", "中文導讀：用中文把最難的直覺講清楚。"),
         ("deepdive", "Deep Dive", "Optional proofs and rigorous detail, collapsed by default."),
@@ -189,11 +198,11 @@ a:focus-visible .rm-node rect {{ stroke: var(--focus); stroke-width: 3; }}
 table.toc td.n {{ font-family: var(--f-head); font-weight: 700; color: var(--muted); white-space: nowrap; width: 3.6rem; }}
 table.toc .lm-t {{ font-weight: 650; }}
 table.toc .lm-d {{ color: var(--ink-2); font-size: 0.86rem; margin-top: 0.1rem; }}
-table.toc td.cfa-c {{ white-space: nowrap; width: 5.5rem; }}
-.tag-cfa {{ font-family: var(--f-head); font-size: 0.72rem; font-weight: 700; color: var(--ink-2); border: 1px solid var(--rule); border-radius: 3px; padding: 0 0.3rem; margin-right: 0.15rem; }}
 .st {{ font-family: var(--f-head); font-size: 0.74rem; font-weight: 700; color: var(--muted); white-space: nowrap; }}
 .st.ok {{ color: var(--good); }}
 .st.ok::before {{ content: "● "; }}
+.st.rv {{ color: var(--amber); }}
+.st.rv::before {{ content: "◐ "; }}
 .st-pdf {{ font-family: var(--f-head); font-size: 0.74rem; font-weight: 700; }}
 .notation td:first-child {{ white-space: nowrap; width: 15rem; }}
 @media (max-width: 640px) {{ .goals {{ grid-template-columns: minmax(0, 1fr); }} }}
@@ -211,10 +220,11 @@ table.toc td.cfa-c {{ white-space: nowrap; width: 5.5rem; }}
 <p class="sub">A quantitative curriculum that starts from first-year calculus, statistics and linear algebra, and ends with statistical models, optimized portfolios and growth-optimal leverage you can build and defend yourself.</p>
 <p class="zh">從大一的微積分、統計學與線性代數開始，一路推進到自建統計模型、投資組合統計最佳化、計算真正的風險報酬，以及在估計誤差下求最適凱利槓桿。內文以英文為主，難懂之處附中文導讀。</p>
 <div class="facts"><span class="chip"><b>Scope</b> {len(SYL["volumes"])} volumes · {total} learning modules</span>
-<span class="chip"><b>Covers</b> all of CFA Level I Quantitative Methods</span>
+<span class="chip"><b>Published</b> {len(B.PUBLISHED)} of {total}</span>
 <span class="chip"><b>Data</b> Taiwan &amp; US markets</span>
-<span class="chip"><b>Edition</b> 0.1 · sample module</span></div>
-<a class="start" href="lm/lm03.html">Read the sample module: LM3 Taylor Series and Approximation →</a>
+<span class="chip"><b>Edition</b> {esc(str(ed_now["version"]))}</span>
+<span class="chip"><b>License</b> MIT</span></div>
+{start_link}
 </header>
 
 <h2 class="sh" id="goals">What you will be able to do</h2>
@@ -225,7 +235,7 @@ table.toc td.cfa-c {{ white-space: nowrap; width: 5.5rem; }}
 <figure class="roadmap">{roadmap_svg()}<figcaption class="cap">Prerequisite map of the nine volumes. Select a volume to jump to its modules.</figcaption></figure>
 
 <h2 class="sh" id="how">How each module works</h2>
-<p>Modules follow the architecture of the CFA Program curriculum, adapted for self-study with code.</p>
+<p>Every module follows the same architecture, built for self-study with code.</p>
 <ol class="steps">
 <li><span><strong>Learning Outcomes</strong> with mastery boxes you can tick; your ticks are remembered in this browser.</span></li>
 <li><span><strong>Learning Module Overview</strong>: the main results in a few lines.</span></li>
@@ -241,12 +251,8 @@ table.toc td.cfa-c {{ white-space: nowrap; width: 5.5rem; }}
 <div class="table-wrap"><table class="notation"><tbody>{notation_html}</tbody></table></div>
 
 <h2 class="sh" id="contents">Contents</h2>
-<p class="cap">In the CFA L1 column, Q1–Q11 are the eleven learning modules of the CFA Level I <em>Quantitative Methods</em> volume (see the crosswalk below).</p>
+<p class="cap">A module is published after an independent review recomputes its numbers and checks its mathematics; until then it is listed as in review.</p>
 {"".join(vols)}
-
-<h2 class="sh" id="cfa">CFA Level I crosswalk</h2>
-<p>Every learning module of the 2026 CFA Level I <em>Quantitative Methods</em> volume is covered, usually at greater depth and with the derivations the curriculum omits.</p>
-<div class="table-wrap"><table><thead><tr><th>CFA Quant</th><th>CFA learning module</th><th>Covered in this book</th></tr></thead><tbody>{"".join(cfa_rows)}</tbody></table></div>
 
 <h2 class="sh" id="labs">Labs, data and environment</h2>
 <p>Each module ships with a Jupyter notebook that rebuilds its exhibits. Labs are Polars-first and use NumPy, SciPy and Matplotlib; later volumes add statsmodels, cvxpy and arch. Taiwan data come from FinMind and US data from FinMind's US price tables; each lab bundles a verified offline snapshot and can refresh it with your own FinMind token.</p>
@@ -256,12 +262,12 @@ uv pip install polars pyarrow numpy scipy matplotlib statsmodels cvxpy arch jupy
 export FINMIND_TOKEN="your-token"</code></pre></div>
 
 <h2 class="sh" id="edition">Edition notes</h2>
-<p><strong>Edition 0.1 (10 October 2026).</strong> Roadmap, contents and conventions, and the sample module LM3 with its lab. Volumes will be released in order, starting with Volume I.</p>
-<p class="cap">Educational material only; nothing here is investment advice. CFA® and Chartered Financial Analyst® are trademarks owned by CFA Institute; this project is independent of CFA Institute and is not endorsed by it. Market data: FinMind.</p>
+{edition_html}
+<p class="cap">A personal study project. Educational material only; nothing here is investment advice. Text and code are released under the MIT License. Market data: FinMind.</p>
 </main>
 <aside class="outline" aria-label="On this page"><h2>On this page</h2><ol>
 <li><a href="#goals">What you will be able to do</a></li><li><a href="#roadmap">Roadmap</a></li><li><a href="#how">How each module works</a></li>
-<li><a href="#notation">Notation and conventions</a></li><li><a href="#contents">Contents</a></li><li><a href="#cfa">CFA Level I crosswalk</a></li>
+<li><a href="#notation">Notation and conventions</a></li><li><a href="#contents">Contents</a></li>
 <li><a href="#labs">Labs, data and environment</a></li><li><a href="#edition">Edition notes</a></li></ol></aside>
 </div>
 <script src="assets/book.js"></script>

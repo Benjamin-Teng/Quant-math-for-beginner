@@ -228,7 +228,11 @@
       var src = document.getElementById("chart-" + h.getAttribute("data-chart"));
       if (!src) return;
       var spec = JSON.parse(src.textContent);
-      if (spec.x.type === "date") spec.series.forEach(function (s) { s.x = s.x.map(function (d) { return typeof d === "number" ? d : Date.parse(d + "T00:00:00Z"); }); });
+      if (spec.x.type === "date") {   // dates may be ISO strings or epoch milliseconds, in series and annotations alike
+        var toT = function (d) { return typeof d === "number" ? d : Date.parse(d + "T00:00:00Z"); };
+        spec.series.forEach(function (s) { s.x = s.x.map(toT); });
+        (spec.ann || []).forEach(function (a) { ["x", "x0", "x1"].forEach(function (k) { if (a[k] != null) a[k] = toT(a[k]); }); });
+      }
       Book.lineChart(h, spec);
     });
   }

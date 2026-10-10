@@ -1,101 +1,94 @@
 title: From Calculus to Kelly
 subtitle: A quantitative curriculum for statistical modeling, portfolio optimization and optimal leverage
-cfa:
-  Q1: Rates and Returns
-  Q2: Time Value of Money in Finance
-  Q3: Statistical Measures of Asset Returns
-  Q4: Probability Trees and Conditional Expectations
-  Q5: Portfolio Mathematics
-  Q6: Simulation Methods
-  Q7: Estimation and Inference
-  Q8: Hypothesis Testing
-  Q9: Parametric and Non-Parametric Tests of Independence
-  Q10: Simple Linear Regression
-  Q11: Introduction to Big Data Techniques
+# Edition notes, newest first. A module is linked from the site only when its entry below has `status: published`.
+editions:
+  - version: "0.1"
+    date: 10 October 2026
+    notes: "Roadmap, contents and conventions, and the sample module LM3 with its lab. Volumes are released in order, starting with Volume I."
 volumes:
   - id: I
     title: Calculus for Finance
     blurb: Compounding, approximation and optimization — the language every later volume is written in.
     lms:
-      - {n: 1, title: "Exponentials, Logarithms and Compounding", desc: "Discrete vs continuous compounding; simple vs log returns; why logs make time additive.", cfa: [Q1, Q2]}
-      - {n: 2, title: "Limits and Derivatives", desc: "Marginal thinking, the chain rule, elasticity; duration as a derivative.", cfa: []}
-      - {n: 3, title: "Taylor Series and Approximation", desc: "Local polynomial models, error bounds, volatility drag, leveraged-ETF decay, duration–convexity.", cfa: [Q1]}
-      - {n: 4, title: "Optimization in One Variable", desc: "First- and second-order conditions, concavity, the binary Kelly bet, Newton's method.", cfa: []}
-      - {n: 5, title: "Integration", desc: "Areas, accumulation and expectation as an integral; the Gaussian integral.", cfa: [Q6]}
-      - {n: 6, title: "Sequences, Series and the Time Value of Money", desc: "Geometric series, annuities, perpetuities, bond and dividend-discount pricing.", cfa: [Q2]}
-      - {n: 7, title: "Multivariable Calculus and Lagrange Multipliers", desc: "Gradients, Hessians, multivariate Taylor, constrained optimization; the two-asset minimum-variance portfolio.", cfa: [Q5]}
+      - {n: 1, title: "Exponentials, Logarithms and Compounding", desc: "Discrete vs continuous compounding; simple vs log returns; why logs make time additive."}
+      - {n: 2, title: "Limits and Derivatives", desc: "Marginal thinking, the chain rule, elasticity; duration as a derivative."}
+      - {n: 3, title: "Taylor Series and Approximation", desc: "Local polynomial models, error bounds, volatility drag, leveraged-ETF decay, duration–convexity.", status: published}
+      - {n: 4, title: "Optimization in One Variable", desc: "First- and second-order conditions, concavity, the binary Kelly bet, Newton's method."}
+      - {n: 5, title: "Integration", desc: "Areas, accumulation and expectation as an integral; the Gaussian integral."}
+      - {n: 6, title: "Sequences, Series and the Time Value of Money", desc: "Geometric series, annuities, perpetuities, bond and dividend-discount pricing."}
+      - {n: 7, title: "Multivariable Calculus and Lagrange Multipliers", desc: "Gradients, Hessians, multivariate Taylor, constrained optimization; the two-asset minimum-variance portfolio."}
   - id: II
     title: Linear Algebra for Portfolios
     blurb: Portfolios are vectors and risk is a quadratic form; this volume makes that literal.
     lms:
-      - {n: 8, title: "Vectors and Matrices", desc: "Weights, returns and the dot product; portfolio return as wᵀr.", cfa: [Q5]}
-      - {n: 9, title: "Linear Systems, Inverses and Rank", desc: "Solving for weights; singular matrices as perfect collinearity.", cfa: []}
-      - {n: 10, title: "Quadratic Forms and Covariance Matrices", desc: "wᵀΣw, positive (semi)definiteness, matrix calculus.", cfa: [Q5]}
-      - {n: 11, title: "Eigen-decomposition and PCA", desc: "Eigen-portfolios of Taiwan sectors; condition numbers and why Σ⁻¹ amplifies error.", cfa: [Q11]}
-      - {n: 12, title: "Cholesky, SVD and Least Squares", desc: "Simulating correlated returns; OLS as a projection.", cfa: [Q10]}
+      - {n: 8, title: "Vectors and Matrices", desc: "Weights, returns and the dot product; portfolio return as wᵀr."}
+      - {n: 9, title: "Linear Systems, Inverses and Rank", desc: "Solving for weights; singular matrices as perfect collinearity."}
+      - {n: 10, title: "Quadratic Forms and Covariance Matrices", desc: "wᵀΣw, positive (semi)definiteness, matrix calculus."}
+      - {n: 11, title: "Eigen-decomposition and PCA", desc: "Eigen-portfolios of Taiwan sectors; condition numbers and why Σ⁻¹ amplifies error."}
+      - {n: 12, title: "Cholesky, SVD and Least Squares", desc: "Simulating correlated returns; OLS as a projection."}
   - id: III
     title: Probability
     blurb: Random variables as functions, expectation as the workhorse, and the distributions markets actually produce.
     lms:
-      - {n: 13, title: "Probability Foundations and Bayes", desc: "Sample spaces, conditional probability, Bayes' rule; a random variable is a function.", cfa: [Q4]}
-      - {n: 14, title: "Random Variables, Expectation and Jensen's Inequality", desc: "LOTUS, moments, E[R²] = σ² + μ², and the real reason for volatility drag.", cfa: [Q3, Q4]}
-      - {n: 15, title: "Distributions in Finance", desc: "Normal, lognormal, Student-t and Poisson, fitted to TAIEX returns.", cfa: [Q3, Q6]}
-      - {n: 16, title: "Joint Distributions and Dependence", desc: "Covariance, conditional expectation, the multivariate normal, crash correlation.", cfa: [Q3, Q5]}
-      - {n: 17, title: "Law of Large Numbers and Central Limit Theorem", desc: "Why the median path, not the mean path, is what you live through.", cfa: [Q7]}
-      - {n: 18, title: "Monte Carlo Simulation and the Bootstrap", desc: "Random generation, simulation error, variance reduction, resampling.", cfa: [Q6, Q7]}
+      - {n: 13, title: "Probability Foundations and Bayes", desc: "Sample spaces, conditional probability, Bayes' rule; a random variable is a function."}
+      - {n: 14, title: "Random Variables, Expectation and Jensen's Inequality", desc: "LOTUS, moments, E[R²] = σ² + μ², and the real reason for volatility drag."}
+      - {n: 15, title: "Distributions in Finance", desc: "Normal, lognormal, Student-t and Poisson, fitted to TAIEX returns."}
+      - {n: 16, title: "Joint Distributions and Dependence", desc: "Covariance, conditional expectation, the multivariate normal, crash correlation."}
+      - {n: 17, title: "Law of Large Numbers and Central Limit Theorem", desc: "Why the median path, not the mean path, is what you live through."}
+      - {n: 18, title: "Monte Carlo Simulation and the Bootstrap", desc: "Random generation, simulation error, variance reduction, resampling."}
   - id: IV
     title: Statistical Inference and Econometrics
     blurb: Turning a return series into estimates you can defend, with their uncertainty attached.
     lms:
-      - {n: 19, title: "Descriptive Statistics of Returns", desc: "Location, dispersion, shape; the √T rule and when it fails.", cfa: [Q1, Q3]}
-      - {n: 20, title: "Estimation Theory and Maximum Likelihood", desc: "Bias, variance, MSE; why SE(μ̂) = σ/√T ignores sampling frequency.", cfa: [Q7]}
-      - {n: 21, title: "Hypothesis Testing and Multiple Testing", desc: "p-values, power, Bonferroni and FDR; the t > 3 hurdle for strategies.", cfa: [Q8, Q9]}
-      - {n: 22, title: "Resampling Methods", desc: "Block and stationary bootstrap; confidence intervals for Sharpe and Kelly.", cfa: [Q6, Q7]}
-      - {n: 23, title: "Linear Regression", desc: "From simple to multiple OLS in matrix form; HAC errors; CAPM beta and factor models.", cfa: [Q10]}
-      - {n: 24, title: "Bayesian Inference and Shrinkage", desc: "Priors, posteriors, James–Stein; fractional Kelly as a Bayesian answer.", cfa: [Q4]}
-      - {n: 25, title: "Time Series I: ARMA, Unit Roots and Cointegration", desc: "Stationarity, mean reversion, the futures–spot basis.", cfa: []}
-      - {n: 26, title: "Time Series II: Volatility Models", desc: "EWMA, GARCH, realized volatility from Shioaji ticks.", cfa: []}
+      - {n: 19, title: "Descriptive Statistics of Returns", desc: "Location, dispersion, shape; the √T rule and when it fails."}
+      - {n: 20, title: "Estimation Theory and Maximum Likelihood", desc: "Bias, variance, MSE; why SE(μ̂) = σ/√T ignores sampling frequency."}
+      - {n: 21, title: "Hypothesis Testing and Multiple Testing", desc: "p-values, power, Bonferroni and FDR; the t > 3 hurdle for strategies."}
+      - {n: 22, title: "Resampling Methods", desc: "Block and stationary bootstrap; confidence intervals for Sharpe and Kelly."}
+      - {n: 23, title: "Linear Regression", desc: "From simple to multiple OLS in matrix form; HAC errors; CAPM beta and factor models."}
+      - {n: 24, title: "Bayesian Inference and Shrinkage", desc: "Priors, posteriors, James–Stein; fractional Kelly as a Bayesian answer."}
+      - {n: 25, title: "Time Series I: ARMA, Unit Roots and Cointegration", desc: "Stationarity, mean reversion, the futures–spot basis."}
+      - {n: 26, title: "Time Series II: Volatility Models", desc: "EWMA, GARCH, realized volatility from Shioaji ticks."}
   - id: V
     title: Stochastic Calculus
     blurb: The continuous-time tools behind GBM, Itô's lemma and the continuous Kelly result.
     lms:
-      - {n: 27, title: "From Random Walk to Brownian Motion", desc: "Scaling limits, quadratic variation, and what (dW)² = dt really means.", cfa: []}
-      - {n: 28, title: "The Itô Integral and Itô's Lemma", desc: "Itô's lemma derived as a Taylor expansion that keeps its second-order term.", cfa: []}
-      - {n: 29, title: "Geometric Brownian Motion", desc: "Solving the SDE; lognormal prices; mean, median and mode.", cfa: [Q6]}
-      - {n: 30, title: "Beyond GBM", desc: "Ornstein–Uhlenbeck spreads, Merton jumps for Taiwan gap days, stochastic volatility.", cfa: []}
-      - {n: 31, title: "Option Pricing Bridge (Optional)", desc: "Black–Scholes by delta hedging; Greeks; TXO and warrants.", cfa: [Q2]}
+      - {n: 27, title: "From Random Walk to Brownian Motion", desc: "Scaling limits, quadratic variation, and what (dW)² = dt really means."}
+      - {n: 28, title: "The Itô Integral and Itô's Lemma", desc: "Itô's lemma derived as a Taylor expansion that keeps its second-order term."}
+      - {n: 29, title: "Geometric Brownian Motion", desc: "Solving the SDE; lognormal prices; mean, median and mode."}
+      - {n: 30, title: "Beyond GBM", desc: "Ornstein–Uhlenbeck spreads, Merton jumps for Taiwan gap days, stochastic volatility."}
+      - {n: 31, title: "Option Pricing Bridge (Optional)", desc: "Black–Scholes by delta hedging; Greeks; TXO and warrants."}
   - id: VI
     title: Portfolio Optimization
     blurb: Mean–variance theory, the convex machinery to solve it, and the estimation error that breaks it.
     lms:
-      - {n: 32, title: "Portfolio Return and Risk", desc: "N-asset portfolio mathematics in matrix form.", cfa: [Q5]}
-      - {n: 33, title: "Mean–Variance Optimization", desc: "Lagrangian derivation, global minimum variance, the frontier, tangency and the CML.", cfa: []}
-      - {n: 34, title: "Convex Optimization in Practice", desc: "Quadratic programs, KKT conditions, cvxpy; long-only, leverage and turnover limits.", cfa: []}
-      - {n: 35, title: "Estimation Error and Robust Portfolios", desc: "The 1/N puzzle, Ledoit–Wolf shrinkage, Black–Litterman, resampling.", cfa: []}
-      - {n: 36, title: "Risk Parity, HRP and Volatility Targeting", desc: "Euler risk contributions and risk-based allocation.", cfa: []}
+      - {n: 32, title: "Portfolio Return and Risk", desc: "N-asset portfolio mathematics in matrix form."}
+      - {n: 33, title: "Mean–Variance Optimization", desc: "Lagrangian derivation, global minimum variance, the frontier, tangency and the CML."}
+      - {n: 34, title: "Convex Optimization in Practice", desc: "Quadratic programs, KKT conditions, cvxpy; long-only, leverage and turnover limits."}
+      - {n: 35, title: "Estimation Error and Robust Portfolios", desc: "The 1/N puzzle, Ledoit–Wolf shrinkage, Black–Litterman, resampling."}
+      - {n: 36, title: "Risk Parity, HRP and Volatility Targeting", desc: "Euler risk contributions and risk-based allocation."}
   - id: VII
     title: Measuring True Risk and Return
     blurb: What a track record really says once compounding, fat tails, costs and selection are accounted for.
     lms:
-      - {n: 37, title: "VaR, Expected Shortfall and Drawdown", desc: "Parametric, historical and Monte Carlo VaR; ES; drawdown statistics.", cfa: [Q5, Q6]}
-      - {n: 38, title: "The Statistics of the Sharpe Ratio", desc: "Standard errors (Lo 2002), Probabilistic and Deflated Sharpe, minimum track record.", cfa: [Q8]}
-      - {n: 39, title: "Backtesting Without Fooling Yourself", desc: "Survivorship and look-ahead bias, Taiwan taxes and fees, walk-forward, PBO.", cfa: [Q11]}
-      - {n: 40, title: "Stress Testing", desc: "Taiwan crash scenarios (2008, 2015, 2020, 2024/8/5, 2025/4/7) and overnight gaps.", cfa: [Q6]}
+      - {n: 37, title: "VaR, Expected Shortfall and Drawdown", desc: "Parametric, historical and Monte Carlo VaR; ES; drawdown statistics."}
+      - {n: 38, title: "The Statistics of the Sharpe Ratio", desc: "Standard errors (Lo 2002), Probabilistic and Deflated Sharpe, minimum track record."}
+      - {n: 39, title: "Backtesting Without Fooling Yourself", desc: "Survivorship and look-ahead bias, Taiwan taxes and fees, walk-forward, PBO."}
+      - {n: 40, title: "Stress Testing", desc: "Taiwan crash scenarios (2008, 2015, 2020, 2024/8/5, 2025/4/7) and overnight gaps."}
   - id: VIII
     title: The Kelly Criterion and Optimal Leverage
     blurb: Growth-optimal sizing from the binary bet to multi-asset leverage under uncertainty.
     lms:
-      - {n: 41, title: "Discrete Kelly", desc: "Binary and general discrete bets; position size vs risk size; sensitivity to p.", cfa: []}
-      - {n: 42, title: "Continuous-Time Kelly", desc: "g(f) by Itô, f* = SR/σ, g* = r + SR²/2, and the 2f* ruin line.", cfa: []}
-      - {n: 43, title: "Multi-Asset Kelly", desc: "f* = Σ⁻¹(μ − r): the tangency portfolio, levered.", cfa: []}
-      - {n: 44, title: "Fractional Kelly and Drawdown Control", desc: "CRRA equivalence, drawdown probabilities, risk-constrained Kelly.", cfa: []}
-      - {n: 45, title: "Kelly Under Uncertainty and Frictions", desc: "Parameter uncertainty, fat tails and jumps, rebalancing, financing costs, bootstrap Kelly.", cfa: []}
-      - {n: 46, title: "Leverage Instruments in Practice", desc: "TX, MTX and TMF futures; 00631L and TQQQ; margin regimes.", cfa: []}
+      - {n: 41, title: "Discrete Kelly", desc: "Binary and general discrete bets; position size vs risk size; sensitivity to p."}
+      - {n: 42, title: "Continuous-Time Kelly", desc: "g(f) by Itô, f* = SR/σ, g* = r + SR²/2, and the 2f* ruin line."}
+      - {n: 43, title: "Multi-Asset Kelly", desc: "f* = Σ⁻¹(μ − r): the tangency portfolio, levered."}
+      - {n: 44, title: "Fractional Kelly and Drawdown Control", desc: "CRRA equivalence, drawdown probabilities, risk-constrained Kelly."}
+      - {n: 45, title: "Kelly Under Uncertainty and Frictions", desc: "Parameter uncertainty, fat tails and jumps, rebalancing, financing costs, bootstrap Kelly."}
+      - {n: 46, title: "Leverage Instruments in Practice", desc: "TX, MTX and TMF futures; 00631L and TQQQ; margin regimes."}
   - id: IX
     title: Capstone
     blurb: Everything assembled into working research pipelines on Taiwan and US data.
     lms:
-      - {n: 47, title: "The Statistical Modeling Workflow", desc: "Data, model, diagnostics, decision — end to end.", cfa: [Q11]}
-      - {n: 48, title: "Capstone A: A Taiwan Core–Satellite Portfolio", desc: "Mean–variance vs risk parity vs Kelly, compared walk-forward.", cfa: []}
-      - {n: 49, title: "Capstone B: Kelly Sizing a Single Strategy", desc: "From backtest returns to fractional Kelly on TX futures, uncertainty included.", cfa: []}
-      - {n: 50, title: "Capstone C: Multi-Strategy Allocation and Monitoring", desc: "Constrained multi-strategy Kelly, re-estimation and monitoring.", cfa: []}
+      - {n: 47, title: "The Statistical Modeling Workflow", desc: "Data, model, diagnostics, decision — end to end."}
+      - {n: 48, title: "Capstone A: A Taiwan Core–Satellite Portfolio", desc: "Mean–variance vs risk parity vs Kelly, compared walk-forward."}
+      - {n: 49, title: "Capstone B: Kelly Sizing a Single Strategy", desc: "From backtest returns to fractional Kelly on TX futures, uncertainty included."}
+      - {n: 50, title: "Capstone C: Multi-Strategy Allocation and Monitoring", desc: "Constrained multi-strategy Kelly, re-estimation and monitoring."}

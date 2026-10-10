@@ -28,7 +28,14 @@ TARGET = "web"
 OUT = ROOT / "docs"
 SYL = yaml.safe_load((SRC / "syllabus.yaml").read_text(encoding="utf-8"))
 ALL_LMS = [dict(lm, vol=v["id"], vol_title=v["title"]) for v in SYL["volumes"] for lm in v["lms"]]
-AVAILABLE = {int(p.stem[2:]) for p in SRC.glob("lm[0-9][0-9].md")}
+# A module goes on the site only after review: `status: published` on its entry in syllabus.yaml. Other modules
+# with a source file are drafts. Drafts never reach docs/: they build in preview mode, a complete local copy of the
+# site in dist/preview/ (git-ignored) where drafts are linked like published modules and carry a draft chip.
+WRITTEN = {int(p.stem[2:]) for p in SRC.glob("lm[0-9][0-9].md")}
+PUBLISHED = {lm["n"] for lm in ALL_LMS if lm.get("status") == "published" and lm["n"] in WRITTEN}
+DRAFTS = WRITTEN - PUBLISHED
+AVAILABLE = set(PUBLISHED)          # modules that pages in this build link to (preview adds the drafts)
+PREVIEW = False
 FONTS_LINK = ('<link rel="preconnect" href="https://fonts.googleapis.com">'
               '<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>'
               '<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;700&display=swap">')
@@ -37,6 +44,12 @@ def set_target(t):
     global TARGET, OUT
     TARGET = t
     OUT = ROOT / "docs" if t == "web" else ROOT / "dist" / "artifact"
+
+def set_preview():
+    """Preview mode: web pages for published and draft modules alike, written to dist/preview/."""
+    global PREVIEW, OUT
+    set_target("web"); PREVIEW = True; OUT = ROOT / "dist" / "preview"
+    AVAILABLE.update(DRAFTS)
 
 def pdf_name(n):
     """File name of a module's PDF, e.g. LM03_Taylor_Series_and_Approximation.pdf."""
@@ -70,7 +83,7 @@ def copy_assets():
     (a / "katex" / "katex.min.css").write_text(css, encoding="utf-8")
     for f in (kd / "fonts").glob("*.woff2"):
         shutil.copy(f, a / "katex" / "fonts" / f.name)
-    if TARGET == "web":
+    if TARGET == "web" and not PREVIEW:
         (OUT / ".nojekyll").write_text("")
 
 # ---------------------------------------------------------------- math
@@ -103,7 +116,8 @@ def restore_code(md, vault):
 
 def extract_math(md, ms):
     md = re.sub(r"(?s)\$\$(.+?)\$\$", lambda m: ms.add(m.group(1), True), md)
-    md = re.sub(r"(?<![\\$])\$(?!\$)([^\n$]+?)(?<!\\)\$", lambda m: ms.add(m.group(1), False), md)
+    # inline: content may hold escaped characters such as \$ (e.g. \text{NT\$}); an escaped \$ never opens or closes
+    md = re.sub(r"(?<![\\$])\$(?!\$)((?:[^\n$\\]|\\.)+?)\$", lambda m: ms.add(m.group(1), False), md)
     return md.replace(r"\$", "&#36;")
 
 # ---------------------------------------------------------------- markdown
@@ -230,7 +244,7 @@ def rail(current, depth):
         parts.append(f'<h2>Vol {v["id"]} · {html.escape(v["title"])}</h2><ol>')
         for lm in v["lms"]:
             n = lm["n"]; t = html.escape(lm["title"])
-            if n in AVAILABLE:
+            if n in AVAILABLE or n == current:
                 cur = ' aria-current="page"' if n == current else ""
                 parts.append(f'<li><a href="{pre}lm{n:02d}.html"{cur}><span class="k">LM{n}</span><span>{t}</span></a></li>')
             else:
@@ -314,19 +328,18 @@ def build_lm(path):
     lo_rows = "".join(f'<tr><td><input type="checkbox" id="lo{i}" aria-label="Mastered outcome {i}"></td><td><span class="lo-k">{i}</span>{md_inline(t)}</td></tr>'
                       for i, t in enumerate(los, 1))
     lo_box = (f'<section class="lo" aria-label="Learning outcomes"><div class="lo-bar">Learning Outcomes</div>'
-              f'<table><thead><tr><th>Mastery</th><th>The candidate should be able to:</th></tr></thead><tbody>{lo_rows}</tbody></table></section>')
+              f'<table><thead><tr><th>Mastery</th><th>After this module you should be able to:</th></tr></thead><tbody>{lo_rows}</tbody></table></section>')
     ov_box = ('<aside class="overview"><div class="label">Learning Module Overview</div><ul>' +
               "".join(f"<li>{md_inline(o)}</li>" for o in ovs) + "</ul></aside>") if ovs else ""
-    cfa = ", ".join(f'{c} {SYL["cfa"][c]}' for c in fm.get("cfa", meta.get("cfa", [])))
     head = (f'<header class="lm-head"><div class="lm-band"><div class="lm-kicker">Learning Module</div>'
             f'<div class="lm-num">{n}</div></div>'
             f'<h1 class="lm-title">{html.escape(fm["title"])}</h1>'
             + (f'<p class="lm-sub">{md_inline(fm["subtitle"])}</p>' if fm.get("subtitle") else "") +
             f'<div class="lm-meta"><span class="chip"><b>Volume</b> {meta["vol"]} · {html.escape(meta["vol_title"])}</span>'
             f'{chips_for(fm.get("prereq", []), "Builds on")}{chips_for(fm.get("leads", []), "Leads to")}'
-            + (f'<span class="chip"><b>CFA L1</b> {html.escape(cfa)}</span>' if cfa else "")
             + (f'<span class="chip"><b>Time</b> {html.escape(str(fm["time"]))}</span>' if fm.get("time") else "")
-            + (f'<a class="chip pdf-chip" href="../pdf/{pdf_name(n)}"><b>PDF</b> A4 print edition</a>' if TARGET == "web" else "")
+            + ('<span class="chip draft-chip"><b>Status</b> draft, under review</span>' if n not in PUBLISHED else "")
+            + (f'<a class="chip pdf-chip" href="../pdf/{pdf_name(n)}"><b>PDF</b> A4 print edition</a>' if TARGET == "web" and n in PUBLISHED and not PREVIEW else "")
             + '</div></header>')
     intro_html = render_blocks(intro_md, ctx) if intro_md.strip() else ""
     main = head + lo_box + ov_box + intro_html + "".join(sections) + pager(n)
@@ -382,16 +395,23 @@ def build_lm(path):
 
 if __name__ == "__main__":
     ap = argparse.ArgumentParser(description="Build the From Calculus to Kelly site.")
-    ap.add_argument("modules", nargs="*", help="e.g. lm03 index (default: every module plus the index)")
+    ap.add_argument("modules", nargs="*", help="e.g. lm03 index (default: every published module plus the index)")
     ap.add_argument("--target", choices=["web", "artifact"], default="web")
-    ap.add_argument("--list-pdfs", action="store_true", help="print 'html|pdf|title' for each available module and exit")
+    ap.add_argument("--preview", action="store_true",
+                    help="build published and draft modules into dist/preview/ (implied when a draft is named)")
+    ap.add_argument("--list-pdfs", action="store_true", help="print 'html|pdf|title' for each published module and exit")
     args = ap.parse_args()
     set_target(args.target)
     if args.list_pdfs:
-        for n in sorted(AVAILABLE):
+        for n in sorted(PUBLISHED):
             t = next(x for x in ALL_LMS if x["n"] == n)["title"]
             print(f"lm/lm{n:02d}.html|pdf/{pdf_name(n)}|LM{n} {t}")
         raise SystemExit(0)
+    named_drafts = [t for t in args.modules if t.startswith("lm") and int(t[2:]) in DRAFTS]
+    if args.preview or named_drafts:
+        set_preview()
+        if named_drafts and not args.preview:
+            print(f"preview mode ({', '.join(named_drafts)} not yet published): writing to dist/preview/")
     copy_assets()
     for t in (args.modules or [f"lm{n:02d}" for n in sorted(AVAILABLE)] + ["index"]):
         if t == "index":
