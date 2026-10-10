@@ -44,13 +44,13 @@
 
     host.innerHTML = '<div class="w-head"><span class="w-title">Tail-probability explorer: model area versus 0050 data</span><span class="w-tag">Interactive</span></div>' +
       '<div class="controls">' +
-      '<label for="tl-k">Threshold k <span class="v" id="tl-k-v"></span><input type="range" id="tl-k" min="-0.10" max="-0.01" step="0.001" value="-0.05"></label>' +
+      '<label for="tl-k">Threshold κ <span class="v" id="tl-k-v"></span><input type="range" id="tl-k" min="-0.10" max="-0.01" step="0.001" value="-0.05"></label>' +
       '<label for="tl-m">Model<select id="tl-m"><option value="n">Normal, fitted mean and σ</option><option value="t">Student-t, ν = 3, same σ (illustrative)</option></select></label>' +
       '<label for="tl-s">Density axis<select id="tl-s"><option value="log">Log scale (shows the tails)</option><option value="lin">Linear scale</option></select></label>' +
       '</div><div class="tl-chart"></div><div class="readout" aria-live="polite"></div>' +
       '<p class="w-note">Bars: histogram of 0050\'s ' + n.toLocaleString("en-US") + ' daily total returns (' + W.first + ' to ' + W.last +
       '), in 0.5-point bins, scaled so that their total area is 1. Curve: the model density with the same mean and standard deviation. ' +
-      'Shaded: the area left of k, which is the probability of a day at or below k. On the log axis an empty bin drops to the floor.</p>';
+      'Shaded: the area left of κ, which is the probability of a day at or below κ. On the log axis an empty bin drops to the floor.</p>';
     var sk = host.querySelector("#tl-k"), sm = host.querySelector("#tl-m"), ss = host.querySelector("#tl-s");
     var chart = host.querySelector(".tl-chart"), out = host.querySelector(".readout");
 
@@ -83,7 +83,7 @@
         series: [
           { name: "0050 daily returns (histogram)", color: "2", x: hx, y: hy },
           { name: name, color: m === "t" ? "3" : "1", dash: m === "t", x: mx, y: my }],
-        ann: [{ type: "vline", x: k, label: "k = " + fmt(k, "pct1"), anchor: k < -0.06 ? "start" : "end" }]
+        ann: [{ type: "vline", x: k, label: "κ = " + fmt(k, "pct1"), anchor: k < -0.06 ? "start" : "end" }]
       };
       var ch = B.lineChart(chart, spec);
       /* shaded tail areas, drawn under the lines and clipped like them */
@@ -113,7 +113,7 @@
       var ratio = e > 0 ? a / e : Infinity;
       out.innerHTML =
         "<div><span>Standardized threshold z</span><b>" + fmt(z, "n3") + "</b></div>" +
-        "<div><span>Model P(R ≤ k): shaded area</span><b>" + sci(p) + "</b></div>" +
+        "<div><span>Model Pr(R ≤ κ): shaded area</span><b>" + sci(p) + "</b></div>" +
         "<div><span>Model: expected days of " + n.toLocaleString("en-US") + "</span><b>" + sci(e) + "</b></div>" +
         "<div><span>0050: actual days</span><b>" + a + "</b></div>" +
         "<div><span>Actual ÷ expected</span><b" + (ratio > 3 || ratio < 1 / 3 ? ' class="bad"' : "") + ">" +

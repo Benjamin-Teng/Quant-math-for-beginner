@@ -1,13 +1,16 @@
 """Chart data for LM5 (src/data/lm05-*.json), computed from the verified 0050 return series.
 
-Run after build_series.py:   python3 data/lm05_charts.py
+Run from the repository root, after data/build_series.py:
+
+    uv run python data/lm05_charts.py
 
 lm05-riemann.json  Section 2: a rising deposit rate and its left/right Riemann sums with four panels
 lm05-tail.json     Section 7: days with R <= x, normal model vs Student-t (illustrative) vs 0050 data (log scale).
                    Its extra key "widget" carries the data of the tail-probability explorer in src/lm05.js:
                    the sample moments, a histogram of all daily returns and the sorted returns below -0.9%.
 """
-import json, math
+import json
+import math
 from pathlib import Path
 
 import numpy as np
@@ -47,7 +50,7 @@ riemann = {
 # ------------------------------------------------------------------ Section 7: tail counts, normal vs t(3) vs data
 nu = 3
 sc = s * math.sqrt((nu - 2) / nu)
-xs = [round(-0.105 + k * 0.0005, 4) for k in range(int(round((0.105 - 0.010) / 0.0005)) + 1)]
+xs = [round(-0.105 + k * 0.0005, 4) for k in range(round((0.105 - 0.010) / 0.0005) + 1)]
 floor = 1e-3
 norm_y = []
 for x in xs:
@@ -59,8 +62,10 @@ x_floor = round(mu + s * z_floor, 5)
 t_y = [round(float(n * stats.t.cdf((x - mu) / sc, nu)), 5) for x in xs]
 srt = np.sort(R)
 emp_x, emp_y = [], []
+# Returns keep 10 decimals: enough to separate every pair of distinct returns (the closest differ by 2e-7), while
+# exact ties, such as the two -1.000% days that float division puts on either side of -0.01, become equal again.
 for k, v in enumerate(srt[srt <= -0.010 + 1e-12], start=1):  # step function of #(R <= x)
-    emp_x += [round(float(v), 6), round(float(v), 6)]
+    emp_x += [round(float(v), 10), round(float(v), 10)]
     emp_y += [k - 1 if k > 1 else None, k]
 emp_x.append(-0.010); emp_y.append(int((R <= -0.010 + 1e-12).sum()))
 nx = sorted(set(xs + [x_floor]))
@@ -74,7 +79,8 @@ for x in nx:
 # histogram for the widget: bins of 0.5 pp centred on multiples of 0.5%, so the +-10% limit days sit in bin centres
 edges = np.round(np.arange(-0.1075, 0.1076, 0.005), 4)
 counts, _ = np.histogram(R, bins=edges)
-lower = [round(float(v), 6) for v in srt[srt <= -0.009 + 1e-12]]
+# the widget counts R <= kappa + 1e-12 from this list: at 6 decimals 2021-05-17's -1.8999612% became -1.9%
+lower = [round(float(v), 10) for v in srt[srt <= -0.009 + 1e-12]]
 
 tail = {
     "alt": "Number of days with a return at or below x: normal model, Student-t with 3 degrees of freedom, and 0050 data, log scale",
