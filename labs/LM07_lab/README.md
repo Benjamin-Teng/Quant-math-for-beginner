@@ -1,28 +1,37 @@
 # LM7 Lab — Multivariable Calculus and Lagrange Multipliers
 
-Companion to *From Calculus to Kelly*, Learning Module 7.
+Companion to *From Calculus to Kelly*, Learning Module 7. The notebook builds the total-return series of 0050 and 00679B (all 37 00679B ex-dates, the 0050 split), reproduces the module's exhibits and computational examples, and works the computational practice problems.
 
 ## Run
 
-```bash
-cd ~/projects && source .venv/bin/activate
-uv pip install polars pyarrow numpy scipy sympy matplotlib jupyter
-cd LM07_lab && jupyter lab LM07_lab.ipynb
-```
-
-The notebook is saved with its outputs, so you can read it before running it.
-
-## Data (FinMind, retrieved 2026-10-10; not in the repository)
-
-FinMind's licence does not allow its raw data in a public repository, so `data/` is git-ignored. Build it from the repository root with your own FinMind token:
+From the repository root, install the locked Python environment (`uv.lock`) and open the notebook:
 
 ```bash
-export FINMIND_TOKEN=...           # your FinMind API token
-python3 data/fetch_finmind.py      # rebuilds data/raw/ and checks every file against data/raw_manifest.json
-python3 data/make_lab_data.py      # writes this folder and every other lab's
+uv sync
+uv run --with jupyterlab jupyter lab labs/LM07_lab/LM07_lab.ipynb
 ```
 
-The folder then holds:
+The notebook is saved with its outputs, so you can read it before running it. To re-execute it, from inside this folder:
+
+```bash
+uv run jupyter nbconvert --to notebook --execute --inplace LM07_lab.ipynb
+```
+
+`build/make_lab07.py` generates the notebook and this README: edit the generator, not the generated files.
+
+## Data (FinMind, as retrieved 2026-10-10; not in the repository)
+
+The notebook reads FinMind files that you download once with your own token. From the repository root, run `uv run python data/fetch_finmind.py`, then `uv run python data/make_lab_data.py`. FinMind's licence does not allow the book to redistribute the data. After that, the notebook runs offline.
+
+The same steps in a shell (`data/raw/` and this folder's `data/` are git-ignored):
+
+```bash
+export FINMIND_TOKEN=...               # your FinMind API token
+uv run python data/fetch_finmind.py    # rebuilds and verifies data/raw/
+uv run python data/make_lab_data.py    # writes every lab's data/ folder
+```
+
+`fetch_finmind.py` checks every file against `data/raw_manifest.json`. The notebook reads only the files in its own `data/` folder, which then holds:
 
 | File | Content |
 |:--|:--|

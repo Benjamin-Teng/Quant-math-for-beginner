@@ -1,6 +1,6 @@
 /* LM7 interactive figure: two-asset volatility explorer (correlation and weight sliders,
    volatility curve with the minimum-variance point). Presets are the sample estimates printed by
-   data/lm07_stats.py (population moments, annualized with A = 243.05 trading days a year). */
+   data/lm07_stats.py (population moments, annualized with A = 243.0543 trading sessions a year). */
 (function () {
   "use strict";
   var B = window.Book, fmt = B.fmt;

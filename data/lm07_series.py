@@ -1,6 +1,6 @@
 """LM7 data: verified daily total-return series for 0050 and 00679B on common trading dates.
 
-Run:  python3 data/lm07_series.py
+Run:  uv run python data/lm07_series.py
 Writes data/processed/lm07_returns.parquet (and .csv) with columns
     date, R_0050, R_00679B, I_0050, I_00679B
 where R are simple total returns between consecutive common trading dates and I are total-return
@@ -75,7 +75,7 @@ def verify_and_index(sym):
           f"dividend mismatches {n_div}, split mismatches {sum(1 for w in expl if w[1] == 'split')}, "
           f"ex-dates without a mismatch (unchanged close) {sorted(silent)}")
     # 3) total-return index on the fund's own calendar
-    I, idx = [1.0], []
+    I = [1.0]
     for i in range(1, len(dates)):
         k = sfac if dates[i] == sdate else 1
         g = (float(close[i]) + float(D.get(dates[i], 0))) / (float(close[i - 1]) / k)
