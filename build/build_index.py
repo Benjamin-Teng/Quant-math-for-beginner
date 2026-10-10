@@ -138,9 +138,13 @@ def build():
         (M(r"R_t = \dfrac{P_t + D_t}{P_{t-1}} - 1"), "simple (holding-period) return; adds across assets"),
         (M(r"r_t = \ln(1+R_t)"), "log return; adds across time"),
         (M(r"\mu = \mathbb{E}[R],\ \ \sigma^2 = \operatorname{Var}(R)"), "mean and variance of simple returns"),
-        (M(r"g = \mathbb{E}[\ln(1+R)]"), "log growth rate per period; what compounding delivers"),
+        (M(r"g = \mathbb{E}[\ln(1+R)]"), "log growth rate per period (per year once annualized); what compounding delivers"),
         (M(r"G = W_T / W_0"), "growth factor over a holding period"),
+        (M(r"A"), "periods per year used to annualize, always with its sample (243.1 sessions a year in the book's 0050 sample)"),
         (M(r"f,\ f^*"), "exposure, position value divided by equity (above 1 it is leverage); its growth-maximizing (Kelly) value"),
+        (M(r"\mathrm{SR} = (\mu - r_f)/\sigma"), "Sharpe ratio of a return, per day or annualized (say which)"),
+        (M(r"\varphi,\ \Phi"), "standard normal density and distribution function"),
+        (M(r"B_t"), "standard Brownian motion (W stays wealth)"),
         (M(r"=,\ \approx,\ :="), "exact; approximate with the neglected order stated; defined as"),
     ]
     notation_html = "".join(f"<tr><td>{a}</td><td>{esc(b)}</td></tr>" for a, b in notation)
