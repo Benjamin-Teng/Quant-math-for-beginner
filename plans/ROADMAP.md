@@ -37,21 +37,32 @@ on for that part.
   returns); keep the raw download reproducible rather than committing very large raw files.
 - `TaiwanStockPriceAdj` (adjusted prices) is a useful cross-check of the hand-built total-return series.
 
+**FinMind access: the owner has a Sponsor plan** (2026-10-10). It allows 6,000 API calls an hour and every dataset
+marked Free, Backer or Sponsor in `list_datasets`. Intraday datasets need a `data_id` and return one day per request
+(whole-day, all-product downloads are Sponsor Pro only), so 15 years of TX minute bars is about 3,700 calls, well
+inside an hour. The licence is non-commercial, forbids redistributing raw data and requires citing FinMind.
+
+Sponsor datasets this book will use: `TaiwanFuturesKBar` (futures 1-minute bars from 2011), `TaiwanStockKBar` (stock
+and TAIEX 1-minute bars from 2019), `TaiwanFuturesTick` / `TaiwanStockPriceTick` / `TaiwanOptionTick` (ticks; stocks
+from 2018-12-07), `TaiwanStockEvery5SecondsIndex` (sector indices every 5 seconds; 13:30:00 is the official close),
+`TaiwanFuturesFinalSettlementPrice` (official final settlement prices), `TaiwanFuturesSpreadTrading` (calendar-spread
+quotes), `TaiwanStockMarketValueWeight` and `TaiwanStockMarketValue` (TAIEX weights and market caps),
+`TaiwanStockIndustryChain` (industry classification), `TaiwanStockInfoWithWarrantSummary` (warrant strikes and
+ratios), `TaiwanStockTradingDailyReport` (broker-branch flows), `USStockPriceMinute`.
+
 ## Per-volume notes
 
 | Volume | Main FinMind data (tier) | New Python tools | Notes |
 |:--|:--|:--|:--|
-| II | daily prices of a cross-section of Taiwan large caps or sector ETFs (`TaiwanStockPrice`, `TaiwanStockPriceAdj`, Free) for covariance and PCA | NumPy linear algebra | LM11 "eigen-portfolios of Taiwan sectors"; LM12 simulates correlated returns with Cholesky |
+| II | sector index closes (`TaiwanStockEvery5SecondsIndex`, value at 13:30:00) or large caps grouped by `TaiwanStockIndustryChain`; TAIEX weights (`TaiwanStockMarketValueWeight`); daily prices (`TaiwanStockPrice`, `TaiwanStockPriceAdj`) | NumPy linear algebra | LM11 "eigen-portfolios of Taiwan sectors"; LM12 simulates correlated returns with Cholesky |
 | III | long TAIEX and 0050 daily history (`TaiwanStockPrice`, `TaiwanStockTotalReturnIndex`, Free) | SciPy distributions | LM15 fits normal, lognormal, Student-t and Poisson to TAIEX returns; LM16 crash correlation; LM18 Monte Carlo and bootstrap |
-| IV | stock and index returns (Free); TX and TAIEX for the basis (`TaiwanFuturesDaily`, Free); 5-second TAIEX for realized volatility (`TaiwanVariousIndicators5Seconds`, Free) | statsmodels, arch | LM25 cointegration of the futures–spot basis; LM26 compares EWMA and GARCH forecasts with realized volatility from intraday TAIEX. With a Backer/Sponsor plan, TX minute bars (`TaiwanFuturesKBar`) or ticks are alternatives |
-| V | TAIEX opens and closes for overnight gaps (Free); TXO (`TaiwanOptionDaily`, Free); warrants (`TaiwanStockInfoWithWarrant`, Free) | — | LM30 Merton jumps for Taiwan gap days and Ornstein–Uhlenbeck spreads; LM31 Black–Scholes bridge with TXO and warrants |
+| IV | stock and index returns; TX and TAIEX for the basis (`TaiwanFuturesDaily`), with calendar spreads (`TaiwanFuturesSpreadTrading`) and official final settlement prices (`TaiwanFuturesFinalSettlementPrice`); intraday data for realized volatility: TX 1-minute bars from 2011 (`TaiwanFuturesKBar`), TAIEX 1-minute bars from 2019 (`TaiwanStockKBar`) or 5-second TAIEX (`TaiwanVariousIndicators5Seconds`) | statsmodels, arch | LM25 cointegration of the futures–spot basis; LM26 compares EWMA and GARCH forecasts with realized volatility, including the choice of sampling interval (ticks show microstructure noise) |
+| V | TAIEX opens and closes for overnight gaps; TXO (`TaiwanOptionDaily`, `TaiwanOptionTick`); warrants with strikes and ratios (`TaiwanStockInfoWithWarrantSummary`); `TaiwanOptionVix` only from 2026-03 | — | LM30 Merton jumps for Taiwan gap days and Ornstein–Uhlenbeck spreads; LM31 Black–Scholes bridge with TXO and warrants |
 | VI | Taiwan ETFs (0050, 00679B and others) and US ETFs (`USStockPrice`, Free) | cvxpy, scikit-learn (Ledoit–Wolf) | long-only, leverage and turnover constraints; 1/N, shrinkage, Black–Litterman, risk parity, HRP |
-| VII | TAIEX daily back to 2008 for stress tests (Free) | — | Taiwan securities and futures transaction taxes and broker fees must come from official sources; stress scenarios 2008, 2015, 2020, 2024-08-05, 2025-04-07 |
-| VIII | TX, MTX, TMF daily (`TaiwanFuturesDaily`, Free); 00631L; TQQQ (`USStockPrice`) | — | official TAIFEX margin tables, dated; continuous-time Kelly g(f), fractional Kelly and drawdown control, parameter uncertainty |
-| IX | as needed by each capstone | — | capstone A: Taiwan core–satellite portfolio walk-forward; B: Kelly sizing of a single strategy on TX; C: multi-strategy allocation |
+| VII | TAIEX daily back to 2008 for stress tests; intraday paths for drawdowns within the day (`TaiwanFuturesKBar`) | — | Taiwan securities and futures transaction taxes and broker fees must come from official sources; stress scenarios 2008, 2015, 2020, 2024-08-05, 2025-04-07 |
+| VIII | TX, MTX, TMF daily and 1-minute bars (`TaiwanFuturesDaily`, `TaiwanFuturesKBar`); final settlement prices; 00631L; TQQQ (`USStockPrice`, `USStockPriceMinute`) | — | official TAIFEX margin tables, dated; intraday paths decide margin calls, so leverage limits are tested on minute bars; continuous-time Kelly g(f), fractional Kelly and drawdown control, parameter uncertainty |
+| IX | as needed by each capstone, e.g. broker-branch flows (`TaiwanStockTradingDailyReport`) for a flow-based strategy | — | capstone A: Taiwan core–satellite portfolio walk-forward; B: Kelly sizing of a single strategy on TX; C: multi-strategy allocation |
 
 ## Open decisions for the owner
 
 - **Capstone B:** use the backtest returns of one of the owner's own strategies, or a strategy built in the book.
-- **FinMind plan:** the plan above uses Free datasets; if the owner has a Backer or Sponsor plan, minute bars and
-  ticks become available for Volumes IV and VIII.

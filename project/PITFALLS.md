@@ -49,7 +49,8 @@ unless stated.
   alignment remove nine). Say which sample a count or annualization factor comes from.
 - **TX futures (`TaiwanFuturesDaily`):** on its last trading day the expiring contract's `settlement_price` prints 0.0
   (use `close` or TAIFEX's published final settlement price); on days a contract does not trade, `close` and `volume`
-  print 0 while `settlement_price` is set by the exchange. Back months often trade a few lots a day, so their
+  print 0 while `settlement_price` is set by the exchange. For expiry, use the official final settlement price from
+  `TaiwanFuturesFinalSettlementPrice` (the owner's Sponsor plan includes it). Back months often trade a few lots a day, so their
   settlements are partly exchange-determined: report volume when a result leans on them.
 - **Futures vs index timing:** TAIEX closes on a 13:25–13:30 call auction; the TX daily settlement comes from the last
   minute before 13:45. Daily changes in the near-month basis therefore had a standard deviation of about 83 points in 2025, mostly timing noise. Example: on 2025-06-30

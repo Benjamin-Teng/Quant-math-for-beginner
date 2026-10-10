@@ -19,7 +19,9 @@ An independent personal-study project.
 - **Commit and push directly to `main`**; no pull requests. `git fetch` and rebase before every push.
 - **No references to any professional-certification curriculum or exam body**, anywhere. `build/qa/check_terms.py`
   must pass (`build.sh` runs it).
-- **Historical market data come only from FinMind** (daily and intraday); never Shioaji for history.
+- **Historical market data come only from FinMind** (daily and intraday); never Shioaji for history. He has a
+  **Sponsor plan** (6,000 calls an hour; minute bars, ticks, final settlement prices…), licensed for non-commercial
+  use: never redistribute raw FinMind data, and cite FinMind.
 - Never commit third-party course material he shares for reference.
 - Publish a module only after an independent review and verified fixes (AUTHORING §11).
 

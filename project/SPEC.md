@@ -32,6 +32,7 @@ assertions, wants real Taiwan and US market cases, and expects approximations to
 | Presentation | clear heading hierarchy; diagrams, charts and worked examples; concise prose; real market situations as cases | original brief |
 | Data | real Taiwan and US market data (FinMind), verified against FinMind's own checksums; every printed number reproduced by a script | agreed while building LM3 |
 | Historical data source | FinMind only, including intraday history (5-second TAIEX, minute bars, ticks); Shioaji is not used for historical data | owner, 2026-10-10 |
+| FinMind plan | Sponsor: 6,000 API calls an hour and every Free, Backer and Sponsor dataset; non-commercial licence that forbids redistributing raw data and requires citing FinMind | owner, 2026-10-10 |
 | Remaining volumes | five batches after Volume I: II + III, IV + V, VI + VII, VIII, IX (`plans/ROADMAP.md`) | agreed 2026-10-10 |
 | Hosting | GitHub repo [Benjamin-Teng/Quant-math-for-beginner](https://github.com/Benjamin-Teng/Quant-math-for-beginner) (public); the built site in `docs/` is served by GitHub Pages from `main` `/docs`, and will move to the owner's own domain via `docs/CNAME` | owner, 2026-10-10 |
 | Git | commit and push directly to `main`; no pull requests | owner, 2026-10-10 |
