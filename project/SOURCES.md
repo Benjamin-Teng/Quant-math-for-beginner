@@ -47,7 +47,7 @@ All FinMind queries ran through the FinMind MCP server on the owner's computer, 
 | Bank of Taiwan 存戶須知重要內容說明書 (version 2017-01-26, hosted on gov.tw) | whole months credited monthly, part months by day; 整存整付 compounded, 存本取息 simple: not the same convention as DBS |
 | [Yuanta 00679B fund page](https://www.yuantaetfs.com/product/detail/00679B/Basic_information) and holdings ratio page | tracked index (ICE US Treasury 20+ Year), set-up 2017-01-11, listing 2017-01-17, no currency hedge |
 | Yahoo Taiwan quote profile for 00679B (tw.stock.yahoo.com) | quoted in TWD |
-| ProShares UltraPro QQQ (TQQQ) summary prospectus, 1 October 2022 (SEC EDGAR, f23121d1.htm) | expense ratio 0.98% gross, 0.86% net; objective three times the daily Nasdaq-100 return (read 2026-10-11) |
+| ProShares UltraPro QQQ (TQQQ) summary prospectus, 1 October 2022 (SEC EDGAR, f23121d1.htm) | expense ratio 0.98% gross, 0.86% net; objective three times the daily Nasdaq-100 return, index Bloomberg ticker NDX (read 2026-10-11) |
 | Nasdaq, "NDX Index Versions" (indexes.nasdaq.com/docs/NDX%20Versions.pdf) | NDX is the price-return index (dividends excluded), XNDX the total-return version (read 2026-10-11) |
 | Federal Reserve, open market operations page; FRED series FEDFUNDS | 2022 target-range moves (0–0.25% to 4.25–4.50%); 2022 monthly effective rate averaging 1.68% (read 2026-10-11) |
 | Lee and Li newsletter 5323 (leeandli.com) | Banking Act Art. 47-1 cap |
