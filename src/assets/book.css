@@ -398,6 +398,8 @@ details.co.answer .tag { color: var(--good); }
   details > summary::before { content: "" !important; width: 0 !important; }
   .widget .controls { display: none; }
   .katex-display { overflow: visible; }
+  .exhibit > .ex-body, .table-wrap { overflow: visible; }   /* a scroll box would clip a wide table on paper */
+  .page table th, .page table td { padding-left: 0.4rem; padding-right: 0.4rem; }
 }
 .ex-body .table-wrap { margin: 0; }
 .co .table-wrap { margin: 0.6rem 0 0.9rem; }
