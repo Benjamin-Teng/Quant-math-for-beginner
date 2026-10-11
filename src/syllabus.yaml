@@ -33,7 +33,7 @@ volumes:
     blurb: Portfolios are vectors and risk is a quadratic form; this volume makes that literal.
     lms:
       - {n: 8, title: "Vectors and Matrices", desc: "Weights, returns and the dot product; portfolio return as wᵀR."}
-      - {n: 9, title: "Linear Systems, Inverses and Rank", desc: "Solving for weights; singular matrices as perfect collinearity."}
+      - {n: 9, title: "Linear Systems, Inverses and Rank", desc: "Solving for a replicating mix; singular matrices as perfect collinearity."}
       - {n: 10, title: "Quadratic Forms and Covariance Matrices", desc: "wᵀΣw, positive (semi)definiteness, matrix calculus."}
       - {n: 11, title: "Eigen-decomposition and PCA", desc: "Principal components of Taiwan sector returns; condition numbers and why Σ⁻¹ amplifies error."}
       - {n: 12, title: "Cholesky, SVD and Least Squares", desc: "Cholesky factors and whitening; SVD and numerical rank; least squares as a projection."}
