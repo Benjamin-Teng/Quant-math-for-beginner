@@ -2,7 +2,8 @@
 
 A self-study quantitative-finance textbook (static website + A4 PDFs + Jupyter labs) that runs from first-year
 calculus, statistics and linear algebra to Kelly leverage, GBM and Itô's lemma. Owner: Benjamin. MIT License.
-An independent personal-study project.
+An independent personal-study project. `AGENTS.md` lets Codex take over the project by pointing to this file; keep
+every project instruction here, not there.
 
 ## Read first, in this order
 
