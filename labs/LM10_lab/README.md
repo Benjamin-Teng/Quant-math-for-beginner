@@ -1,6 +1,6 @@
 # LM10 Lab — Quadratic Forms and Covariance Matrices
 
-Companion to *From Calculus to Kelly*, Learning Module 10. The notebook repairs the sector closes, builds the sample covariance matrix of the 28 TWSE leaf sector indices three ways, reproduces the module's exhibits and computational examples (portfolio variance, tests of definiteness, rank and pairwise deletion, gradients), and works the computational practice problems.
+Companion to *From Calculus to Kelly*, Learning Module 10. The notebook repairs the sector closes, builds the sample covariance matrix of U28 (the 28 leaf sector indices among the 30 TWSE sector indices that FinMind serves daily) three ways, reproduces the module's exhibits and computational examples (portfolio variance, tests of definiteness, rank and pairwise deletion, gradients), and works the computational practice problems.
 
 ## Run
 

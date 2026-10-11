@@ -52,12 +52,12 @@ Companion notebook to **From Calculus to Kelly, LM10**. It repairs the sector cl
 | Part | Rebuilds |
 |:--|:--|
 | 1 | The data: the repair of the sector closes, the U28 sample, $T$ and $A$ |
-| 2 | Quadratic forms: the symmetric part and level sets ([[eg:cross]], [[ex:levels]]) |
+| 2 | Quadratic forms: the symmetric part and level curves ([[eg:cross]], [[ex:levels]]) |
 | 3 | The sample covariance matrix three ways, $C$, [[eg:byhand]], [[eg:tocorr]], the case ([[ex:vols]], [[ex:corr]]) |
 | 4 | Portfolio variance: `X @ w` against `w @ S @ w`, [[eg:mix]] and [[ex:grid]], [[eg:equal]] |
 | 5 | Tests of definiteness: minors, pivots, all principal minors, congruence ([[eg:three]], [[eg:minors]], [[ex:tests]]) |
 | 6 | Failures: rank against $T$ ([[eg:shortT]], [[ex:rank]]), collinearity, missing values in software ([[ex:python]]), pairwise deletion ([[ex:pairwise]], [[eg:negvar]], [[ex:admissible]]) |
-| 7 | Matrix calculus: gradients by finite differences, [[eg:switch]], convexity (10.10) |
+| 7 | Matrix calculus: gradients by finite differences, [[eg:switch]], the gradient and the level curves ([[ex:gradient]]), convexity (10.10) |
 | 8 | Practice problems 4, 5, 6, 9 and 11, and an extension exercise |
 
 **Environment.** From the repository root, `uv sync` installs the locked Python environment (`uv.lock`). Open this notebook with the `.venv` kernel, or run `uv run --with jupyterlab jupyter lab`.
@@ -66,7 +66,7 @@ Companion notebook to **From Calculus to Kelly, LM10**. It repairs the sector cl
 
 `data/` then holds `sectors_close_raw.csv` (the daily closes FinMind's `TaiwanStockPrice` serves for TAIEX and the 30 TWSE sector indices, one column each, empty where a series has no close), `sectors_close_repairs.csv` (every close that the book repairs, with its 13:30:00 value from `TaiwanStockEvery5SecondsIndex`), and the closes and cash dividends of 0050, 00631L and 00679B. The notebook reads nothing outside `data/`.
 
-**Conventions (as in the module).** U28 is the 28 leaf sector indices (all except Electronic and ChemicalBiotechnologyMedicalCare); S3 is Semiconductor, FinancialInsurance and Food, and S5 adds Plastics and ShippingTransportation. Daily simple price returns between consecutive TAIEX-calendar dates, closes from 2008-12-01 to 2026-10-08; moments with divisor $T$; $A=T/\text{years}$ with years = calendar days / 365.25. Weights are rebalanced daily.
+**Conventions (as in the module).** U28 is the 28 leaf sector indices among the 30 TWSE sector indices that FinMind serves daily (all except the aggregates Electronic and ChemicalBiotechnologyMedicalCare); S3 is Semiconductor, FinancialInsurance and Food, and S5 adds Plastics and ShippingTransportation. Daily simple price returns between consecutive TAIEX-calendar dates, closes from 2008-12-01 to 2026-10-08; moments with divisor $T$; $A=T/\text{years}$ with years = calendar days / 365.25. Weights are rebalanced daily.
 """)
 
 code(r"""
@@ -181,7 +181,7 @@ for off, col in ((0.5, "tab:blue"), (1.0, "tab:orange"), (2.0, "tab:green")):
     ax.contour(x1, x2, x1**2 + 2 * off * x1 * x2 + x2**2, levels=[1.0], colors=[col])
     ax.plot([], [], color=col, label=f"off-diagonal {off}")
 ax.set_aspect("equal"); ax.set_xlabel("x1"); ax.set_ylabel("x2"); ax.legend(loc="upper right")
-ax.set_title("[[ex:levels]]: level sets h(x) = 1"); plt.show()
+ax.set_title("[[ex:levels]]: level curves h(x) = 1"); plt.show()
 """)
 
 md(r"""
@@ -196,7 +196,7 @@ S = Xc.T @ Xc / T
 S_np = np.cov(X, rowvar=False, ddof=0)
 S_outer = sum(np.outer(row, row) for row in Xc) / T
 print("shapes:", X.shape, Xc.shape, S.shape)
-print("largest gaps between the three:", f"{np.abs(S - S_np).max():.1e}", f"{np.abs(S - S_outer).max():.1e}")
+print("the three agree within 1e-15:", max(np.abs(S - S_np).max(), np.abs(S - S_outer).max()) < 1e-15)
 assert max(np.abs(S - S_np).max(), np.abs(S - S_outer).max()) < 1e-15
 print("every column of the centred matrix sums to zero:", np.abs(Xc.sum(axis=0)).max() < 1e-12)
 s = np.sqrt(np.diag(S))
@@ -260,7 +260,7 @@ ax.set_xticks(range(28)); ax.set_yticks(range(28))
 ax.set_xticklabels([U28[k] for k in order], rotation=90, fontsize=6); ax.set_yticklabels([U28[k] for k in order], fontsize=6)
 fig.colorbar(im); ax.set_title("[[ex:corr]]: correlation matrix of U28"); plt.show()
 off = ~np.eye(28, dtype=bool)
-print(f"correlations from {C[off].min():.2f} to {C[off].max():.2f}, mean {C[off].mean():.3f}")
+print(f"correlations from {C[off].min():.3f} to {C[off].max():.3f}, mean {C[off].mean():.3f}")
 print(f"divisor T-1 multiplies a volatility by sqrt(T/(T-1)) = {math.sqrt(T / (T - 1)):.6f}")
 """)
 
@@ -407,7 +407,10 @@ allm = ok.all(axis=1)
 Sc, Cc = cov0(Z[allm]), np.corrcoef(Z[allm].T)
 offc = cnt[np.triu_indices(n, 1)]
 print(f"common sample: T = {allm.sum()} from {dates[int(np.argmax(allm))]}; pairwise counts {offc.min()} .. {offc.max()}")
-for name, Mx in (("pairwise C", Cp), ("pairwise S", Sp), ("common C", Cc), ("common S", Sc)):
+first_common = dates[int(np.argmax(allm))]
+halt = [d for d, a in zip(dates, allm) if d >= first_common and not a]
+print(f"it drops {sum(d < first_common for d in dates)} returns before {first_common} and {len(halt)} dates after it: {halt}")
+for name, Mx in (("C_pw", Cp), ("S_pw", Sp), ("common C", Cc), ("common S", Sc)):
     p = pivots(Mx)
     print(f"{name:10s}: {len(p)} pivots computed, last {p[-1]:.3e}", "-> not PSD" if p[-1] <= 0 else "-> PD")
 iS = U28.index("Semiconductor"); i631 = 28 + ETFS.index("00631L")
@@ -417,7 +420,7 @@ print(f"implied / pairwise correlation, Semiconductor and 00631L: {Sp[iS, i631] 
 ev, vecs = np.linalg.eigh(Sp)
 q = vecs[:, 0] * np.sign(vecs[np.argmax(np.abs(vecs[:, 0])), 0])
 top = np.argsort(-np.abs(q))[:3]
-print("witness entries:", [(cols[k], round(float(q[k]), 3)) for k in top], f"; x'Sx = {q @ Sp @ q:.2e} a day")
+print("witness entries:", [(cols[k], round(float(q[k]), 3)) for k in top], f"; x'S_pw x = {q @ Sp @ q:.2e} a day")
 for j, e in enumerate(ETFS):
     idx = list(range(28)) + [28 + j]
     p = pivots(Sp[np.ix_(idx, idx)])
@@ -438,13 +441,14 @@ for a_, b_ in pairs:
 print(pl.DataFrame([{"pair": f"{a_}/{b_}", **{str(y): round(tab[(a_, b_, y)][0], 3) for y in range(2017, 2027)}} for a_, b_ in pairs]))
 r12, r13, r23 = (round(tab[(*pairs[0], 2018)][0], 3), round(tab[(*pairs[1], 2023)][0], 3), round(tab[(*pairs[2], 2019)][0], 3))
 print("chosen:", r12, r13, r23, "with T_ij", tab[(*pairs[0], 2018)][1], tab[(*pairs[1], 2023)][1], tab[(*pairs[2], 2019)][1])
-Cn = np.array([[1, r12, r13], [r12, 1, r23], [r13, r23, 1]])
+Cn = np.array([[1, r12, r13], [r12, 1, r23], [r13, r23, 1]])     # C_pw: no single sample has this matrix
 detC = 1 + 2 * r12 * r13 * r23 - r12**2 - r13**2 - r23**2
-print(f"det C = {detC:.6f}; x = (-1, 1, 1): x'Cx = {np.array([-1, 1, 1]) @ Cn @ np.array([-1, 1, 1]):.2f}")
-adjC = detC * np.linalg.inv(Cn)
+print(f"det C_pw = {detC:.6f}; x = (-1, 1, 1): x'C_pw x = {np.array([-1, 1, 1]) @ Cn @ np.array([-1, 1, 1]):.2f}")
+adjC = detC * np.linalg.inv(Cn)                                   # the adjugate, from C_pw adj(C_pw) = det(C_pw) I
 for j in range(3):
     xj = adjC[:, j]
-    print(f"witness j = {j + 1}: adj(C)_jj = {adjC[j, j]:.6f}, x'Cx = {xj @ Cn @ xj:.4f} = det C * adj(C)_jj = {detC * adjC[j, j]:.4f}")
+    print(f"witness j = {j + 1}: adj(C_pw)_jj = {adjC[j, j]:.6f}, x'C_pw x = {xj @ Cn @ xj:.4f}"
+          f" = det C_pw * adj(C_pw)_jj = {detC * adjC[j, j]:.4f}")
 fails = sum(1 for y1, y2, y3 in permutations(range(2017, 2027), 3)
             if 1 + 2 * tab[(*pairs[0], y1)][0] * tab[(*pairs[1], y2)][0] * tab[(*pairs[2], y3)][0]
             - tab[(*pairs[0], y1)][0] ** 2 - tab[(*pairs[1], y2)][0] ** 2 - tab[(*pairs[2], y3)][0] ** 2 < 0)
@@ -461,34 +465,57 @@ ell = np.outer(np.cos(t) * math.sqrt(1 + r12), u1) + np.outer(np.sin(t) * math.s
 ax.fill(ell[:, 0], ell[:, 1], alpha=0.2); ax.plot(ell[:, 0], ell[:, 1])
 ax.plot([C18[0, 2]], [C18[1, 2]], "o", label="2018, common dates"); ax.plot([r13], [r23], "o", label="constructed")
 ax.set_aspect("equal"); ax.set_xlabel("rho13"); ax.set_ylabel("rho23"); ax.legend()
-ax.set_title("[[ex:admissible]]: det C >= 0 when rho12 = 0.982"); plt.show()
+ax.set_title("[[ex:admissible]]: det C_pw >= 0 when rho12 = 0.982"); plt.show()
 """)
 
 md(r"""
-## Part 7 — Matrix calculus ([[eg:switch]])
+## Part 7 — Matrix calculus ([[eg:switch]], [[ex:gradient]])
 
-By (10.8) the gradient of $\mathbf w^{\top}M\mathbf w$ is $(M+M^{\top})\mathbf w$; for the annualized variance, $\mathbf g=2A\hat\Sigma\mathbf w$. Central differences confirm it, and (10.9) prices a switch exactly.
+By (10.8) the gradient of $\mathbf w^{\top}M\mathbf w$ is $(M+M^{\top})\mathbf w$; for the annualized variance it is $2A\hat\Sigma\mathbf w$. Central differences confirm it, and (10.9) prices a switch exactly. The sample volatility of the switch is what the switch would have done in 2008–2026, not a forecast.
 """)
 
 code(r"""
 var_a = lambda v: A * v @ S @ v
-g = 2 * A * S @ w
+grad = 2 * A * S @ w
 num = np.array([(var_a(w + 1e-6 * e) - var_a(w - 1e-6 * e)) / 2e-6 for e in np.eye(28)])
-print("largest gap between finite differences and 2A S w:", f"{np.abs(num - g).max():.1e}")
+print("finite differences agree with 2A S w to 1e-8:", np.abs(num - grad).max() < 1e-8)
 iG, iC = U28.index("GlassCeramic"), U28.index("CommunicationsInternet")
-print(f"gradient: GlassCeramic {g[iG]:.6f} (largest: {U28[int(np.argmax(g))]}), CommunicationsInternet {g[iC]:.6f} (smallest: {U28[int(np.argmin(g))]})")
+print(f"gradient: GlassCeramic {grad[iG]:.6f} (largest: {U28[int(np.argmax(grad))]}), "
+      f"CommunicationsInternet {grad[iC]:.6f} (smallest: {U28[int(np.argmin(grad))]})")
 Dl = np.zeros(28); Dl[iC], Dl[iG] = 1 / 28, -1 / 28
-lin, quad = Dl @ g, A * Dl @ S @ Dl
+lin, quad = Dl @ grad, A * Dl @ S @ Dl
 print(f"[[eg:switch]]: {var_a(w):.7f} {lin:+.7f} {quad:+.7f} = {var_a(w) + lin + quad:.7f}; direct {var_a(w + Dl):.7f}")
 print(f"volatility {math.sqrt(var_a(w)):.2%} -> {math.sqrt(var_a(w + Dl)):.2%}; linear term alone {math.sqrt(var_a(w) + lin):.2%}")
 
-# (10.10) numerically: a PSD matrix (S) and the indefinite symmetric part of the cross-term example
+# (10.10) numerically: a PSD matrix (A S) and the indefinite symmetric part of the cross-term example
 for name, Mx in (("A S, U28", A * S), ("M_sym of the cross-term example", Msym)):
     rng_pts = [(np.eye(len(Mx))[0], np.eye(len(Mx))[1], 0.5), (np.ones(len(Mx)) / len(Mx), np.eye(len(Mx))[-1], 0.3)]
-    for xa, ya, al in rng_pts:
+    for xa, ya, om in rng_pts:                      # om is the mixing weight omega of (10.10)
         h = lambda v: v @ Mx @ v
-        lhs = h(al * xa + (1 - al) * ya); rhs = al * h(xa) + (1 - al) * h(ya)
-        print(f"{name}: h(mix) = {lhs:.6f}, chord = {rhs:.6f}, identity residual {lhs - rhs + al * (1 - al) * h(xa - ya):.1e}")
+        lhs = h(om * xa + (1 - om) * ya); rhs = om * h(xa) + (1 - om) * h(ya)
+        print(f"{name}: h(mix) = {lhs:.6f}, chord = {rhs:.6f}, "
+              f"identity holds to 1e-12: {abs(lhs - rhs + om * (1 - om) * h(xa - ya)) < 1e-12}")
+""")
+
+code(r"""
+# [[ex:gradient]]: level curves of the annualized variance in Semiconductor and Food, with the gradient 2Mw
+Mg = AS3[np.ix_([0, 2], [0, 2])] / 1e4                  # that block of the printed A Sigma_3, in decimal units
+gw = np.linspace(-1.0, 1.0, 401)
+w1g, w2g = np.meshgrid(gw, gw)
+var2 = Mg[0, 0] * w1g**2 + 2 * Mg[0, 1] * w1g * w2g + Mg[1, 1] * w2g**2
+pts = [np.array([0.15 / math.sqrt(Mg[0, 0]), 0.0]), np.array([0.0, 0.15 / math.sqrt(Mg[1, 1])]),
+       np.ones(2) * 0.15 / math.sqrt(np.ones(2) @ Mg @ np.ones(2))]
+fig, ax = plt.subplots(figsize=(5.5, 5.5))
+ax.contour(w1g, w2g, var2, levels=[0.10**2, 0.15**2], colors=["tab:green", "tab:blue"])
+for p in pts:
+    gp = 2 * Mg @ p
+    tan = np.array([-gp[1], gp[0]]) / np.linalg.norm(gp)       # direction along the level curve
+    ax.annotate("", xy=p + 4 * gp, xytext=p, arrowprops=dict(arrowstyle="->", color="tab:orange"))
+    ax.plot(*np.column_stack([p - 0.3 * tan, p + 0.3 * tan]), ls="--", color="grey")
+    print(f"w = {p.round(4)}: volatility {math.sqrt(p @ Mg @ p):.2%}; gradient 2Mw = {gp.round(4)}; "
+          f"perpendicular to the curve: {abs(tan @ gp) < 1e-15}")
+ax.set_aspect("equal"); ax.set_xlabel("w1, Semiconductor"); ax.set_ylabel("w2, Food")
+ax.set_title("[[ex:gradient]]: gradients (drawn x4) are perpendicular to the level curves"); plt.show()
 """)
 
 md(r"""
@@ -510,8 +537,10 @@ sp5 = vb5 / 5 + 0.8 * cb5
 print(f"Problem 5: vbar {vb5:.4e}, cbar {cb5:.4e}; variance {sp5:.4e}, annual {A * sp5:.6f}, "
       f"volatility {math.sqrt(A * sp5):.2%}, limit {math.sqrt(A * cb5):.2%}")
 
-# Problem 6: leading minors and pivots of the printed A Sigma_3
-print("Problem 6: leading minors", [f"{np.linalg.det(AS3[:k, :k]):,.2f}" for k in (1, 2, 3)], "; pivots", pivots(AS3).round(2))
+# Problem 6: pivots of the printed A Sigma_3 by elimination without row exchanges
+Kb = AS3[1:, 1:] - np.outer(AS3[1:, 0], AS3[0, 1:]) / AS3[0, 0]    # the block left after step 1
+print("Problem 6: block after step 1\n", Kb.round(4))
+print("pivots", pivots(AS3).round(2), "| all positive (PD):", bool(pivots(AS3).min() > 0))
 """)
 
 code(r"""
@@ -560,7 +589,7 @@ nbf.write(nb, LAB / "LM10_lab.ipynb")
 
 (LAB / "README.md").write_text("""# LM10 Lab — Quadratic Forms and Covariance Matrices
 
-Companion to *From Calculus to Kelly*, Learning Module 10. The notebook repairs the sector closes, builds the sample covariance matrix of the 28 TWSE leaf sector indices three ways, reproduces the module's exhibits and computational examples (portfolio variance, tests of definiteness, rank and pairwise deletion, gradients), and works the computational practice problems.
+Companion to *From Calculus to Kelly*, Learning Module 10. The notebook repairs the sector closes, builds the sample covariance matrix of U28 (the 28 leaf sector indices among the 30 TWSE sector indices that FinMind serves daily) three ways, reproduces the module's exhibits and computational examples (portfolio variance, tests of definiteness, rank and pairwise deletion, gradients), and works the computational practice problems.
 
 ## Run
 

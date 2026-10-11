@@ -166,6 +166,11 @@ off = ~np.eye(28, dtype=bool)
 cbar = float(S[off].mean())
 share = (sp2 - float(np.sum(w**2 * s**2))) / sp2
 anchor("off-diagonal share", f"{100 * share:.1f}%", "92.8%")
+# the variance terms' share of the variance (A1): the two printed shares add to 100%
+assert f"{100 * share:.1f}" == "92.8" and f"{100 * (1 - share):.1f}" == "7.2"
+same("variance-term share from the printed covariance share", f"{100 - 92.8:.1f}%", "7.2%")
+show("variance-term share", "the variance terms are the other 7.2%")
+show("variance-term share (Summary)", "The variance terms alone, 7.2% of it, would give a volatility of only 4.22%, against the book's 15.75%")
 anchor("vbar, cbar", f"{vbar:.4e}; {cbar:.4e}", "2.0328e-04; 9.7254e-05")
 C = S / np.outer(s, s)
 anchor("mean correlation", f"{C[off].mean():.3f}", "0.502")
@@ -267,7 +272,8 @@ show("E3 way back", "23.88\\times19.07\\times0.575=261.85")
 show("C_3 display", "1&0.575&0.403\\\\0.575&1&0.596\\\\0.403&0.596&1")
 show("full-sample correlation in E2", "give 0.575")
 cmin, cmax = float(C[off].min()), float(C[off].max())
-show("correlation range", f"from {cmin:.2f} to {cmax:.2f}, with mean {C[off].mean():.3f}")
+show("correlation range", f"from {cmin:.3f} to {cmax:.3f}, with mean {C[off].mean():.3f}")
+anchor("correlation range (LM8, LM11)", f"{cmin:.4f}, {cmax:.4f}; {cmin:.3f}, {cmax:.3f}", "0.2175, 0.7547; 0.217, 0.755")
 ordered = [names[k] for k in order]
 show("heatmap order", "The first fourteen are " + ", ".join(ordered[:13]) + " and " + ordered[13] + ".")
 show("heatmap order", "The last fourteen are " + ", ".join(ordered[14:27]) + " and " + ordered[27] + ".")
@@ -326,6 +332,13 @@ anchor("limit", pct(math.sqrt(A * cbar)), "15.45%")
 
 # ====================================================================================== Section 5: E6, X6, E7
 c12, c13, c23 = dec("0.575"), dec("0.403"), dec("0.596")
+# the opening of Section 5: the form of the printed C_3 at (1,-1,0) and (0,1,-1); X6's first row quotes both
+C3p = [[Fr(1), c12, c13], [c12, Fr(1), c23], [c13, c23, Fr(1)]]
+for xv_, txt in (([1, -1, 0], "2-2(0.575)=0.85"), ([0, 1, -1], "2-2(0.596)=0.808")):
+    val = sum(xv_[i] * C3p[i][j] * xv_[j] for i in range(3) for j in range(3))
+    same(f"x'C_3x at {xv_}", fmt(val, 3 if "808" in txt else 2), txt.split("=")[1])
+    show("Section 5 opening", txt)
+show("X6 first row", "0.85 and 0.808 at the two vectors tried")
 m2 = 1 - c12**2
 m3 = 1 + 2 * c12 * c13 * c23 - c12**2 - c13**2 - c23**2
 same("C_3 minor 2", fmt(m2, 6), "0.669375")
@@ -365,10 +378,19 @@ anchor("E7 (the module rounds the block to whole %², the anchors to 0.1)",
 mix50 = 0.5 * X[:, i3[0]] + 0.5 * X[:, i3[1]]
 S_mix = 1e4 * A * cov0(np.column_stack([X[:, i3[0]], X[:, i3[1]], mix50]))
 R1 = [[Fr(fmt(S_mix[i, j], 1)) for j in range(3)] for i in range(3)]
+upper = [fmt(S_mix[i, j], 1) for i, j in ((0, 0), (0, 1), (0, 2), (1, 1), (1, 2), (2, 2))]
+assert upper == ["570.3", "261.8", "416.1", "363.7", "312.8", "364.4"], upper
+show("rounding pitfall entries", "upper triangle reads 570.3, 261.8, 416.1; 363.7, 312.8; 364.4")
 d_r1 = det3(R1)
+d_printed = det3([[dec("570.3"), dec("261.8"), dec("416.1")], [dec("261.8"), dec("363.7"), dec("312.8")],
+                  [dec("416.1"), dec("312.8"), dec("364.4")]])
 same("det of the computed 50/50 matrix rounded to 0.1", thousands(fmt(d_r1, 2)), "-13,888.91")
-show("rounding pitfall", "determinant $-13,888.91$")
+same("det from the printed upper triangle", thousands(fmt(d_printed, 2)), "-13,888.91")
+show("rounding pitfall", "Its determinant is then $-13,888.91$")
 anchor("E7 rounded", thousands(fmt(d_r1, 2)), "-13,888.91")
+# in daily %^2 the same rounding keeps the matrix exactly singular (A2's evidence; the text names its units instead)
+daily = 1e4 * cov0(np.column_stack([X[:, i3[0]], X[:, i3[1]], mix50]))
+assert det3([[Fr(fmt(daily[i, j], 1)) for j in range(3)] for i in range(3)]) == 0
 
 # ====================================================================================== Section 6: rank, collinearity
 ranks = {}
@@ -423,7 +445,7 @@ assert len(piv["Cp"]) == n and piv["Cp"].min() > 0                       # pairw
 assert len(piv["Cc"]) == n and piv["Cc"].min() > 0 and len(piv["Sc"]) == n and piv["Sc"].min() > 0
 k_neg = len(piv["Sp"])
 assert k_neg == 29 and piv["Sp"][-1] < 0 and cols[k_neg - 1] == "0050"
-show("negative pivot", f"\\delta_{{29}}={sci(float(piv['Sp'][-1]), 2)}")
+show("negative pivot", f"d_{{29}}={sci(float(piv['Sp'][-1]), 2)}")
 show("negative pivot step", "a negative pivot at step 29, the 0050 column")
 show("X8a", "not PSD: pivot 29 is negative")
 show("X8a", "PD: 31 positive pivots")
@@ -434,7 +456,7 @@ assert int((ev < 0).sum()) == 1
 top = sorted(range(n), key=lambda k: -abs(q[k]))[:3]
 assert [cols[k] for k in top] == ["Semiconductor", "00631L", "0050"]
 show("witness entries", f"{q[top[0]]:.3f} in Semiconductor, {q[top[1]]:.3f} in 00631L, {q[top[2]]:.3f} in 0050".replace("-", "\u2212"))
-show("witness form", f"\\mathbf x^{{\\top}}\\hat\\Sigma\\mathbf x={sci(float(q @ Sp @ q), 2)}")
+show("witness form", f"\\mathbf x^{{\\top}}\\hat\\Sigma_{{\\text{{pw}}}}\\mathbf x={sci(float(q @ Sp @ q), 2)}")
 assert abs(float(q @ Sp @ q) - float(ev[0])) < 1e-18
 anchor("pairwise eigen", f"C {np.linalg.eigvalsh(Cp)[0]:.5f}; Sigma {ev[0]:.2e}; common C {np.linalg.eigvalsh(Cc)[0]:.5f}, Sigma {np.linalg.eigvalsh(Sc)[0]:.2e}",
        "C 0.01380; Sigma -6.56e-06; common C 0.01337, Sigma 3.55e-06")
@@ -471,6 +493,16 @@ pair = sorted([cols[kk[0]], cols[kk[1]]])
 assert pair == ["ElectronicProductsDistribution", "TradingConsumersGoods"]
 show("largest change", f"by as much as {dC[kk]:.3f}")
 show("largest change pair", f"correlate at {Cp[kk]:.3f} on all dates but at {Cc[kk]:.3f} from 2017")
+# what the common sample drops: every return before 18 January 2017, and the dates around two ETF halts
+before = [d for d in smp.dates if d < common_dates[0]]
+assert before[0] == "2008-12-02" and before[-1] == "2017-01-17"
+halt = [d for d in smp.dates if d >= common_dates[0] and d not in set(common_dates)]
+assert len(halt) == 11 and len(before) + len(halt) + 2357 == T
+assert [d for d in halt if d not in etf["0050"]] == [d for d in halt if d.startswith("2025-06")]      # 6 dates
+assert [d for d in halt if d not in etf["00631L"]] == [d for d in halt if d.startswith("2026-03")]    # 5 dates
+assert all(d in etf["00679B"] for d in halt)
+show("common sample drops", "It drops the returns from 2 December 2008 to 17 January 2017, and 11 dates around the "
+     "trading halts of 0050 (June 2025) and 00631L (March 2026)")
 
 # ====================================================================================== Section 6: E9 (constructed)
 pairs = [("0050", "00631L"), ("0050", "00679B"), ("00631L", "00679B")]
@@ -532,6 +564,10 @@ for y1, y2, y3 in permutations(range(2017, 2027), 3):
 assert fails == 362
 show("failing assignments", "Of the 720 ways")
 show("failing assignments", "362 produce a negative determinant")
+# the calendar years are partial at both ends: 00679B's first return and the sample's last date
+assert min(etf["00679B"]) == "2017-01-18" and min(etf["0050"]) < "2017-01-03" and min(etf["00631L"]) < "2017-01-03"
+assert max(max(etf[e]) for e in ETFS) == "2026-10-08"
+show("partial years", "Here 00679B's 2017 starts on 18 January, and 2026 runs to 8 October.")
 show("X8 ellipse", "\\rho_{13}^2-2(0.982)\\rho_{13}\\rho_{23}+\\rho_{23}^2\\le1-0.982^2")
 # the constructed point lies outside the ellipse, the 2018 point inside
 assert float(r13**2 - 2 * r12 * r13 * r23 + r23**2) > 1 - 0.982**2
@@ -541,8 +577,8 @@ assert float(dec(c18[1]) ** 2 - 2 * r12 * dec(c18[1]) * dec(c18[2]) + dec(c18[2]
 g = 2 * A * S @ w
 iG, iC = names.index("GlassCeramic"), names.index("CommunicationsInternet")
 assert int(np.argmax(g)) == iG and int(np.argmin(g)) == iC
-show("E10 gradient", f"{g[iG]:.6f} for GlassCeramic")
-show("E10 gradient", f"{g[iC]:.6f} for CommunicationsInternet")
+show("E10 gradient", f"The GlassCeramic entry of the gradient is {g[iG]:.6f}")
+show("E10 gradient", f"the CommunicationsInternet entry is {g[iC]:.6f}")
 Dl = np.zeros(28)
 Dl[iC], Dl[iG] = 1 / 28, -1 / 28
 lin, quad = float(Dl @ g), float(A * Dl @ S @ Dl)
@@ -551,7 +587,7 @@ assert abs(v0 + lin + quad - v1) < 1e-15                               # (10.9) 
 P_ = {k: f"{val:.7f}" for k, val in (("v0", v0), ("lin", lin), ("quad", quad), ("v1", v1))}
 same("linear term from printed gradient", fmt((dec(f"{g[iC]:.6f}") - dec(f"{g[iG]:.6f}")) / 28, 7), P_["lin"])
 same("printed parts add up", fmt(dec(P_["v0"]) + dec(P_["lin"]) + dec(P_["quad"]), 7), P_["v1"])
-show("E10 linear", f"({g[iC]:.6f}-{g[iG]:.6f})/28={P_['lin']}")
+show("E10 linear", f"2A\\boldsymbol\\Delta^{{\\top}}\\hat\\Sigma\\mathbf w=({g[iC]:.6f}-{g[iG]:.6f})/28={P_['lin']}")
 show("E10 quadratic", f"=+{P_['quad']}")
 show("E10 sum", f"variance of {P_['v0']} becomes")
 show("E10 sum", f"&{P_['v0']}{P_['lin']}+{P_['quad']}")
@@ -559,8 +595,9 @@ show("E10 sum", f"&={P_['v1']}")
 same("E10 vol before", pct(math.sqrt(float(P_["v0"]))), "15.75%")
 same("E10 vol after", pct(math.sqrt(float(P_["v1"]))), "15.28%")
 same("E10 linear only", pct(math.sqrt(float(dec(P_["v0"]) + dec(P_["lin"])))), "15.23%")
-show("E10 vols", "from 15.75% to 15.28%")
+show("E10 vols", "the sample volatility would have fallen from 15.75% to 15.28%")
 show("E10 linear only", "would give 15.23%")
+show("overview", "would have cut its 2008–2026 sample volatility from 15.75% to 15.28%")
 anchor("E10", f"{g[iG]:.5f}, {g[iC]:.5f}; {lin:.6f}; {quad:+.6f}; {v0:.6f} -> {v1:.6f}; {pct(math.sqrt(v0))} -> {pct(math.sqrt(v1))}",
        "0.07230, 0.02764; -0.001595; +0.000136; 0.024803 -> 0.023345; 15.75% -> 15.28%")
 
@@ -610,25 +647,30 @@ for t in ("=4.1480\\times10^{-5}+7.2557\\times10^{-5}", "=1.14037\\times10^{-4}"
     show("P5", t)
 anchor("P5", f"{vb5:.4e}, {cb5:.4e}; {pct(math.sqrt(A * np.full(5, 0.2) @ S5m @ np.full(5, 0.2)))}; {pct(math.sqrt(A * cb5))}",
        "2.0740e-04, 9.0696e-05; 16.73%; 14.92%")
-# P6: leading minors and pivots of the printed matrix (two decimals)
-d1, d2, d3 = M3[0][0], M3[0][0] * M3[1][1] - M3[0][1] ** 2, det3(M3)
-assert d2 == dec("138894.8193")                                          # exact; printed to two decimals
-P6 = {"d1": fmt(d1, 2), "d2": thousands(fmt(d2, 2)), "d3": thousands(fmt(d3, 2)),
-      "p2": fmt(d2 / d1, 2), "p3": fmt(d3 / d2, 2)}
-same("P6 elimination entry", fmt(M3[1][1] - M3[0][1] ** 2 / M3[0][0], 2), "243.53")
-print("P6 (printed matrix):", P6)
-same("P6 pivot 2 from printed minors", fmt(dec(P6["d2"]) / dec(P6["d1"]), 2), P6["p2"])
-same("P6 pivot 3 from printed minors", fmt(dec(P6["d3"]) / dec(P6["d2"]), 2), P6["p3"])
-# elimination on the printed matrix gives the same pivots
+# P6: pivots of the printed matrix (two decimals) by elimination without row exchanges, as the editor decided
+k22 = M3[1][1] - M3[0][1] ** 2 / M3[0][0]                                 # exact rationals from the printed entries
+k23 = M3[1][2] - M3[0][1] * M3[0][2] / M3[0][0]
+k33 = M3[2][2] - M3[0][2] ** 2 / M3[0][0]
+P6 = {"k22": fmt(k22, 4), "k23": fmt(k23, 4), "k33": fmt(k33, 4), "d3x": fmt(k33 - k23**2 / k22, 4)}
+assert P6 == {"k22": "243.5299", "k23": "116.8602", "k33": "237.3775", "d3x": "181.3010"}, P6
+# from the printed four-decimal block the third pivot is the same; so are two-decimal intermediates
+same("P6 d3 from the printed block", fmt(dec(P6["k33"]) - dec(P6["k23"]) ** 2 / dec(P6["k22"]), 4), P6["d3x"])
+same("P6 d3 from two-decimal intermediates", fmt(dec("237.38") - dec("116.86") ** 2 / dec("243.53"), 2), "181.30")
 piv3 = pivots(np.array([[float(v) for v in row] for row in M3]))
-same("P6 elimination", f"{piv3[1]:.2f}, {piv3[2]:.2f}", f"{P6['p2']}, {P6['p3']}")
-show("P6 d2", f"570.34(363.73)-261.83^2={P6['d2']}")
-show("P6 d3", f"\\det(A\\hat\\Sigma_3)={P6['d3']}")
-show("P6 pivots", f"{P6['d2']}/570.34={P6['p2']}")
-show("P6 pivots", f"{P6['d3']}/{P6['d2']}={P6['p3']}")
-show("P6 elimination", "261.83/570.34")
-anchor("P6 (one-decimal matrix in the anchors)", f"{P6['d1']}, {P6['d2']}, {P6['d3']}; {P6['d1']}, {P6['p2']}, {P6['p3']}",
-       "570.3, 138,878.87, ≈25,178,038; 570.3, 243.52, 181.29")
+same("P6 pivots by float elimination", f"{piv3[0]:.2f}, {piv3[1]:.2f}, {piv3[2]:.2f}", "570.34, 243.53, 181.30")
+same("P6 pivots from the printed values", f"{fmt(dec(P6['k22']), 2)}, {fmt(dec(P6['d3x']), 2)}", "243.53, 181.30")
+assert k22 > 0 and k33 - k23**2 / k22 > 0                                # all pivots positive: PD (test 3)
+assert fmt(M3[0][0] * k22 * (k33 - k23**2 / k22), 2) == fmt(det3(M3), 2)  # their product is det, never printed
+print("P6 (printed matrix):", P6)
+show("P6 d1", "The first pivot is $d_1=570.34$")
+show("P6 elimination", "Subtract $261.83/570.34$ times row 1 from row 2, and $162.26/570.34$ times row 1 from row 3")
+show("P6 k22", f"k_{{22}}&=363.73-\\frac{{261.83^2}}{{570.34}}\\\\&={P6['k22']}")
+show("P6 k23", f"k_{{23}}&=191.35-\\frac{{261.83\\times162.26}}{{570.34}}\\\\&={P6['k23']}")
+show("P6 k33", f"k_{{33}}&=283.54-\\frac{{162.26^2}}{{570.34}}\\\\&={P6['k33']}")
+show("P6 d3", f"d_3={P6['k33']}-{P6['k23']}^2/{P6['k22']}={P6['d3x']}")
+show("P6 pivots", "The pivots 570.34, 243.53 and 181.30 are all positive")
+anchor("P6 pivots (one-decimal matrix in the anchors)", f"570.34, {fmt(k22, 2)}, {fmt(k33 - k23**2 / k22, 2)}",
+       "570.3, 243.52, 181.29")
 # P9: five points from Semiconductor to Food, printed matrix in decimal units
 Md = [[v / 10**4 for v in row] for row in M3]
 w9 = [Fr(1, 2), Fr(3, 10), Fr(1, 5)]
@@ -646,11 +688,12 @@ same("P9 linear from printed gradient", fmt(sum(d9[i] * dec(g9p[i]) for i in ran
 same("P9 parts add up", fmt(dec(P9["v0"]) + dec(P9["lin"]) + dec(P9["quad"]), 6), P9["v1"])
 same("P9 vols", f"{pct(math.sqrt(float(dec(P9['v0']))))} -> {pct(math.sqrt(float(dec(P9['v1']))))}", "17.91% -> 17.37%")
 same("P9 quadratic from printed entries", fmt(Fr(1, 400) * (dec("0.057034") + dec("0.028354") - 2 * dec("0.016226")), 6), P9["quad"])
-show("P9 gradient", f"({g9p[0]},\\,{g9p[1]},\\,{g9p[2]})")
-show("P9 linear", f"0.05\\,({g9p[2]}-{g9p[0]})={P9['lin']}")
-show("P9 quadratic", f"=+{P9['quad']}")
-show("P9 variance", f"{P9['v0']}{P9['lin']}+{P9['quad']}={P9['v1']}")
-show("P9 vols", "from 17.91% to 17.37%")
+show("P9 gradient", f"2A\\hat\\Sigma_3\\mathbf w=({g9p[0]},\\,{g9p[1]},\\,{g9p[2]})")
+show("P9 linear", f"$$0.05\\,({g9p[2]}-{g9p[0]})={P9['lin']},$$")
+show("P9 quadratic", f"&0.05^2\\,(0.057034+0.028354\\\\&\\quad-2\\times0.016226)=+{P9['quad']}")
+show("P9 variance", f"from {P9['v0']} to ${P9['v0']}{P9['lin']}+{P9['quad']}={P9['v1']}$")
+show("P9 vols", "the volatility falls from 17.91% to 17.37%")
+assert (dec("0.057034"), dec("0.028354"), dec("0.016226")) == (M3[0][0] / 10**4, M3[2][2] / 10**4, M3[0][2] / 10**4)
 anchor("P9 (one-decimal matrix in the anchors)", f"{', '.join(g9p)}; {P9['lin']}; +{P9['quad']}; {P9['v0']} -> {P9['v1']}",
        "0.0792, 0.0557, 0.0390; -0.002009; +0.000132; 0.032060 -> 0.030184")
 # P11: S5 three ways, the ddof effect
@@ -666,6 +709,78 @@ same("P11 ratio", f"{v5d / v5:.6f}", "1.000114")
 P11 = {"v0": f"{100 * v5:.4f}%", "v1": f"{100 * v5d:.4f}%", "gap": f"{100 * (v5d - v5):.4f}"}
 print("P11:", P11)
 show("P11", f"from {P11['v0']} to {P11['v1']}")
+
+# ====================================================================================== hand examples (exact arithmetic)
+def form2(m: list[list[Fr]], x: list[Fr]) -> Fr:
+    """The quadratic form x'Mx in exact arithmetic."""
+    return sum((x[i] * m[i][j] * x[j] for i in range(len(x)) for j in range(len(x))), Fr(0))
+
+
+# E1 and the Section 2 knowledge check
+M1 = [[Fr(1), Fr(4)], [Fr(0), Fr(1)]]
+assert form2(M1, [Fr(1), Fr(-1)]) == -2 and Fr(1) * 1 - Fr(2) ** 2 == -3
+show("E1", "h(1,-1)=1-4+1=-2<0")
+show("E1", "\\det M_{\\text{sym}}=1-4=-3<0")
+assert form2([[Fr(3), Fr(-2)], [Fr(-2), Fr(1)]], [Fr(1), Fr(2)]) == -1 and 3 * 1 - 4 == -1
+show("KC 2", "h(1,2)=3-8+4=-1")
+# Section 4 knowledge check: two assets, variances 4 and 1, covariance -1 (%^2)
+Mk = [[Fr(4), Fr(-1)], [Fr(-1), Fr(1)]]
+for wk, v_, sp_, bound in (([Fr(1, 5), Fr(4, 5)], "0.48", "0.69", "1.2"), ([Fr(1, 2), Fr(1, 2)], "0.75", "0.87", "1.5")):
+    vk = form2(Mk, wk)
+    same(f"KC 4 variance {wk}", fmt(vk, 2), v_)
+    same(f"KC 4 volatility {wk}", f"{math.sqrt(float(vk)):.2f}", sp_)
+    same(f"KC 4 bound {wk}", fmt(2 * wk[0] + wk[1], 1), bound)
+show("KC 4", "0.04(4)+0.64(1)+2(0.16)(-1)=0.48")
+show("KC 4", "0.25(4)+0.25(1)+2(0.25)(-1)=0.75")
+show("KC 4", "s_p=0.69%")
+show("KC 4", "s_p=0.87%")
+# Section 5 knowledge check: m11 = 2, m22 = 4, m12 = 3
+assert 2 * 4 - 9 == -1 and form2([[Fr(2), Fr(3)], [Fr(3), Fr(4)]], [Fr(3), Fr(-2)]) == -2
+show("KC 5", "h(\\mathbf x)=2(9)+2(3)(3)(-2)+4(4)=-2<0")
+# Section 7 knowledge check: gradient of the unsymmetric M of E1 at (1, 1)
+assert [sum((M1[i][j] + M1[j][i]) for j in range(2)) for i in range(2)] == [6, 6]
+show("KC 7", "\\nabla h(1,1)=(6,6)^{\\top}")
+# Problem 1: leading minors; M_C's seven principal minors and its null vector
+MA = [[Fr(2), Fr(1), Fr(0)], [Fr(1), Fr(2), Fr(3)], [Fr(0), Fr(3), Fr(2)]]
+MB = [[Fr(2), Fr(1), Fr(0)], [Fr(1), Fr(2), Fr(1)], [Fr(0), Fr(1), Fr(2)]]
+MC = [[Fr(1), Fr(1), Fr(0)], [Fr(1), Fr(1), Fr(0)], [Fr(0), Fr(0), Fr(1)]]
+assert (MB[0][0] * MB[1][1] - MB[0][1] ** 2, det3(MB)) == (3, 4) and (MA[0][0] * MA[1][1] - 1, det3(MA)) == (3, -12)
+pm = [MC[0][0], MC[1][1], MC[2][2], MC[0][0] * MC[1][1] - MC[0][1] ** 2, MC[0][0] * MC[2][2] - MC[0][2] ** 2,
+      MC[1][1] * MC[2][2] - MC[1][2] ** 2, det3(MC)]
+assert pm == [1, 1, 1, 0, 1, 1, 0] and [sum(MC[i][j] * [1, -1, 0][j] for j in range(3)) for i in range(3)] == [0, 0, 0]
+show("S1", "Its seven principal minors are 1, 1 and 1, then 0, 1 and 1, then 0")
+show("S1", "2(4-9)-1(2)=-12<0")
+# Problem 2: the symmetric part of (2 6; 0 3)
+assert 2 * 3 - 3**2 == -3 and form2([[Fr(2), Fr(6)], [Fr(0), Fr(3)]], [Fr(1), Fr(-1)]) == -1
+show("S2", "h(1,-1)=2-6+3=-1")
+# Problem 8: exposures f = (1, 0.5), Delta = (0.1, -0.1)
+a8, M8 = [dec("0.10"), dec("0.04")], [[dec("0.04"), dec("0.01")], [dec("0.01"), dec("0.02")]]
+f8, D8 = [Fr(1), dec("0.5")], [dec("0.1"), dec("-0.1")]
+
+
+def u8(f: list[Fr]) -> Fr:
+    """u(f) = a'f - f'Mf/2, the quadratic growth model of Problem 8."""
+    return sum((a8[i] * f[i] for i in range(2)), Fr(0)) - form2(M8, f) / 2
+
+
+grad8 = [a8[i] - sum(M8[i][j] * f8[j] for j in range(2)) for i in range(2)]
+assert grad8 == [dec("0.055"), dec("0.020")]
+lin8, quad8 = sum(D8[i] * grad8[i] for i in range(2)), form2(M8, D8)
+assert (lin8, quad8, lin8 - quad8 / 2) == (dec("0.0035"), dec("0.0004"), dec("0.0033"))
+assert (u8(f8), u8([f8[0] + D8[0], f8[1] + D8[1]])) == (dec("0.0925"), dec("0.0958"))
+assert u8([f8[0] + D8[0], f8[1] + D8[1]]) - u8(f8) == lin8 - quad8 / 2                    # (10.9) is exact
+show("S8", "&=(0.10-0.045,\\;0.04-0.02)^{\\top}")
+show("S8", "&=(0.055,\\;0.020)^{\\top}")
+show("S8", "&=0.0035-\\tfrac12(0.0004)")
+show("S8", "&=0.0033")
+show("S8", "moves from 0.0925 to 0.0958")
+# Problem 10: x = e1, y = e2, omega = 1/2 for the M of E1
+xm = [Fr(1, 2), Fr(1, 2)]
+assert (form2(M1, xm), (form2(M1, [Fr(1), Fr(0)]) + form2(M1, [Fr(0), Fr(1)])) / 2, -form2(M1, [Fr(1), Fr(-1)])) \
+    == (Fr(3, 2), 1, 2)
+assert form2(M1, xm) - 1 == Fr(1, 4) * 2                                             # the excess is omega(1-omega)*2
+show("S10", "h(\\tfrac12,\\tfrac12)=1.5")
+show("S10", "The excess $0.5$")
 
 # ====================================================================================== chart-only numbers cited
 show("X7 note", "\\min(T-1,\\,28)")

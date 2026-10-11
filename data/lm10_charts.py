@@ -38,8 +38,9 @@ specs: dict[str, dict] = {}
 # ------------------------------------------------------------------ lm10-vols: the case
 specs["lm10-vols"] = {
     "type": "bar", "height": 340,
-    "alt": "Annualized volatility of the 28 TWSE leaf sector indices, 2008 to 2026, sorted from 13.67% to 35.31%, "
-           "with lines at their mean 21.94%, the equal-weight book 15.75% and its variance terms alone 4.22%",
+    "alt": f"Annualized volatility of the 28 sector indices of U28, 2008 to 2026, sorted from {vol[order[0]]:.2%} to "
+           f"{vol[order[-1]]:.2%}, with lines at their mean {vol.mean():.2%}, the equal-weight book {book:.2%} and its "
+           f"variance terms alone {var_only:.2%}",
     "categories": [names[k] for k in order],
     "x": {"label": "Sector index, from the least to the most volatile"},
     "y": {"fmt": "pct2", "tfmt": "pct0", "label": "Annualized volatility of daily price returns, 2008-12-02 to 2026-10-08",
@@ -70,7 +71,7 @@ for x1, x2 in ((1.0, 0.0), (0.0, 1.0)):                                    # san
     assert abs(x1 * x1 + x1 * x2 + x2 * x2 - 1) < 1e-12
 specs["lm10-levels"] = {
     "type": "vector", "height": 380,
-    "alt": "Level sets h(x) = 1 of three quadratic forms with diagonal entries 1: an ellipse for off-diagonal 0.5, "
+    "alt": "Level curves h(x) = 1 of three quadratic forms with diagonal entries 1: an ellipse for off-diagonal 0.5, "
            "two parallel lines for off-diagonal 1 and a hyperbola for off-diagonal 2",
     "x": {"label": "x_1", "fmt": "n2", "min": -2.5, "max": 2.5, "name": "x_1"},
     "y": {"label": "x_2", "fmt": "n2", "min": -2.5, "max": 2.5, "name": "x_2"},
@@ -81,10 +82,11 @@ specs["lm10-levels"] = {
 
 # ------------------------------------------------------------------ lm10-corr: the U28 correlation matrix
 C = S / np.outer(s, s)
+offd = ~np.eye(28, dtype=bool)
 specs["lm10-corr"] = {
     "type": "heatmap",
     "alt": "Correlation matrix of the 28 sector indices, ordered from the least to the most volatile; every "
-           "correlation is positive, from 0.22 to 0.75",
+           f"correlation is positive, from {C[offd].min():.3f} to {C[offd].max():.3f}",
     "labels": [names[k] for k in order],
     "matrix": [[r(C[i, j], 2) for j in order] for i in order],
     "fmt": "n2", "min": -1, "max": 1, "valueName": "correlation",
@@ -115,13 +117,13 @@ rho12 = 0.982
 square = [[[-1, -1], [1, -1]], [[1, -1], [1, 1]], [[1, 1], [-1, 1]], [[-1, 1], [-1, -1]]]
 specs["lm10-admissible"] = {
     "type": "vector", "height": 360,
-    "alt": "The pairs of correlations rho13 and rho23 that make a 3 by 3 correlation matrix with rho12 = 0.982 "
-           "positive semidefinite fill a thin ellipse along the diagonal; the 2018 common-sample point lies inside, "
-           "the constructed point outside",
+    "alt": "The pairs of correlations rho13 and rho23 for which the pairwise 3 by 3 correlation matrix with "
+           "rho12 = 0.982 is positive semidefinite fill a thin ellipse along the diagonal; the 2018 common-sample "
+           "point lies inside, the constructed point outside",
     "x": {"label": "ρ_{13}, 0050 / 00679B", "fmt": "n3", "min": -1.1, "max": 1.1, "name": "ρ_{13}"},
     "y": {"label": "ρ_{23}, 00631L / 00679B", "fmt": "n3", "min": -1.1, "max": 1.1, "name": "ρ_{23}"},
     "ellipses": [{"center": [0, 0], "cov": [[1, rho12], [rho12, 1]], "scale": 1, "color": "1", "fill": True,
-                  "label": "det C ≥ 0 when ρ_{12} = 0.982"}],
+                  "label": "det C_{pw} ≥ 0 when ρ_{12} = 0.982"}],
     "segments": [{"from": a, "to": b, "color": "var(--muted)", "width": 1} for a, b in square],
     "points": [{"at": p18, "label": "2018, common dates", "color": "1"},
                {"at": [0.199, -0.444], "label": "constructed", "color": "2"}],
