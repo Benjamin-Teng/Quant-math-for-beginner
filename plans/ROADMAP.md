@@ -78,12 +78,14 @@ Who owns what where modules touch; a brief may refine a line but not move a topi
 
 **Historical market data come only from FinMind** (owner, 2026-10-10). Shioaji is not used for historical data.
 
-- Daily data (prices, dividends, futures, options, indices) go through the FinMind MCP in windows under 500 rows,
-  checked with `data/check_chunk.py`, as in Volume I. Check every new daily series also for rows copied from another
+- Daily data (prices, dividends, futures, options, indices) come through the FinMind API (`data/fetch_finmind.py`), a
+  whole series per query where the dataset allows it, checked with `data/check_chunk.py`. The 500-row windows of
+  Volumes I and II came from the MCP tool's cap, not from the API (PITFALLS §2). Check every new daily series also for rows copied from another
   date (PITFALLS §3): the spread check and the manifest's checksums both pass on them.
-- Intraday data are too large for 500-row windows (one day of 5-second TAIEX is about 3,240 rows). Download them
-  with a FinMind API token from a session that can reach FinMind (for example Claude Code on the owner's computer),
-  with a script in `data/` that logs rows per day. Commit the derived series the text uses (for example 5-minute
+- Intraday data are large (one day of 5-second TAIEX is about 3,240 rows), and some datasets answer one day per
+  request (`TaiwanStockEvery5SecondsIndex`, `TaiwanVariousIndicators5Seconds`). Download them with a FinMind API token
+  from a session that can reach FinMind (for example Claude Code on the owner's computer), with a script in `data/`
+  that logs rows per day and stays within the plan's hourly call quota. Commit the derived series the text uses (for example 5-minute
   returns); keep the raw download reproducible rather than committing very large raw files.
 - `TaiwanStockPriceAdj` (adjusted prices) is a useful cross-check of the hand-built total-return series.
 

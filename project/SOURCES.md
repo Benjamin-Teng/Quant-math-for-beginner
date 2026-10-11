@@ -20,7 +20,7 @@ Pages an exam body publishes publicly are listed like any other source when a mo
 | FinMind `TaiwanVariousIndicators5Seconds` | tried for TAIEX intraday on 2025-06-30 |
 | TWSE `rwd/zh/TAIEX/MI_5MINS_HIST` (JSON) | TAIEX daily high/low around 27–30 June 2025 |
 
-All FinMind queries ran through the FinMind MCP server on the owner's computer, in windows under 500 rows.
+Volume I's first FinMind queries ran through the FinMind MCP server on the owner's computer, in windows under 500 rows (that tool's cap). Every registered file is now fetched, and re-checked byte for byte, through the FinMind API with `data/fetch_finmind.py`, which has no such cap (PITFALLS §2).
 
 ## Taiwan exchanges, regulators and official pages
 

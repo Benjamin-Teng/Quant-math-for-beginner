@@ -33,8 +33,12 @@ unless stated.
 - **The cloud container has no general internet.** FinMind, Yahoo and cdnjs were blocked; only package registries
   and GitHub worked. Market data came through the FinMind MCP server running on the owner's computer. In a session
   without that server, use a FinMind API token instead, and never invent or estimate data.
-- **FinMind returns at most 500 rows per query.** Query in windows (about 18 months of daily data for one stock), and
-  check every window with `data/check_chunk.py`.
+- **The FinMind MCP tool returns at most 500 rows per query; the API does not stop there.** On 2026-10-11 one API
+  query returned 4,737 daily rows (Semiconductor, 2007-07-02 → 2026-10-08), identical to the 13 registered 500-row
+  chunks. The rule "windows under 500 rows" came from the MCP tool, used when sessions had no internet, and outlived
+  it. Existing files keep their registered windows; new data come through the API (`fetch_finmind.py`), a whole series
+  per query where the dataset allows it (some intraday datasets answer one day per request). Check every file with
+  `data/check_chunk.py`. Record which tool imposes a limit next to the rule, so the rule can be dropped with the tool.
 - **The Python environment is uv-managed** (`pyproject.toml` + `uv.lock`, since 2026-10-11): `uv sync`, then
   `uv run python <script>`; add a package with `uv add`, never `pip install`. The old `build/requirements.txt` lacked
   scipy and sympy, which the LM2/4/5/7 scripts import, and only running every step in a fresh environment showed it.

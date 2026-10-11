@@ -253,9 +253,11 @@ for something else.
 ## 8. Data
 
 - Real Taiwan and US data, and for historical data FinMind only (`TaiwanStockPrice`, `TaiwanStockDividendResult`,
-  `TaiwanFuturesDaily`, `TaiwanStockTotalReturnIndex`, `USStockPrice`, …), fetched through the FinMind MCP tool in
-  windows of fewer than 500 rows. Intraday history (`TaiwanVariousIndicators5Seconds`, minute bars, ticks) is too large
-  for those windows: download it with a FinMind API token and a logged script (see `plans/ROADMAP.md`).
+  `TaiwanFuturesDaily`, `TaiwanStockTotalReturnIndex`, `USStockPrice`, …), fetched through the FinMind API with
+  `data/fetch_finmind.py` and a token, a whole series per query where the dataset allows it. (The MCP tool caps a query
+  at 500 rows, which is why Volume I's files are windows of that size.) Intraday history
+  (`TaiwanVariousIndicators5Seconds`, minute bars, ticks) is large, and some datasets answer one day per request:
+  download it with a logged script (see `plans/ROADMAP.md`).
 - Store raw files in `data/raw/` exactly as returned (`date,close,spread` for prices) and register each one in
   `data/raw_manifest.json` with `uv run python data/fetch_finmind.py --add …`. `data/raw/` is git-ignored: FinMind's licence
   forbids redistributing raw data, so the repository keeps only the manifest and the scripts. Verify every close against
