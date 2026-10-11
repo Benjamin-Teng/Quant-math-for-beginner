@@ -114,7 +114,7 @@ command lasts until you close the window.</li>
 </ol>
 </section><section class="sec unnum" id="a-ten-minute-smoke-test"><h2 class="plain"><span class="ttl">A ten-minute smoke test</span></h2><p>Run this test before you fetch all the data. It checks your environment, and it teaches three lessons. First, fetch
 only the 0050 files: <code>uv run python data/fetch_finmind.py --only 0050__</code>. Do not run <code>make_lab_data.py</code> yet, because
-it needs all of Volume I's files. Then run this code from the repository root:</p>
+it needs the other files too. Then run this code from the repository root:</p>
 <div class="code"><div class="code-h"><span>Python</span><button class="copy" type="button">Copy</button></div><pre class="hl"><code><span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">polars</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pl</span>

@@ -11,7 +11,7 @@ repository. [`raw_manifest.json`](raw_manifest.json) records, for every raw file
 ```bash
 export FINMIND_TOKEN=...            # your FinMind API token
 uv run python data/fetch_finmind.py       # rebuild data/raw/ and verify every file byte for byte (or ./build.sh --fetch)
-uv run python data/make_lab_data.py       # build labs/LMNN_lab/data/ from data/raw/
+uv run python data/make_lab_data.py       # build labs/LMNN_lab/data/ from data/raw/ (sectors_close/ optional)
 uv run python data/fetch_finmind.py --verify   # later: confirm local files still match, no network
 ```
 
@@ -41,7 +41,7 @@ numbers never change silently. New raw files are registered with `fetch_finmind.
 All files are exactly as returned by FinMind (retrieved 2026-10-10), in windows of fewer than 500 rows; they are listed in `raw_manifest.json` and rebuilt by `fetch_finmind.py`.
 
 - `0050__<start>__<end>.csv`, `00631L__<start>__<end>.csv`: `date,close,spread` from `TaiwanStockPrice` (unadjusted), 2014-10-31 → 2026-10-08.
-- `00679B__<start>__<end>.csv`: `date,close,spread`, 2017-01-17 → 2026-10-09. `00679B_dividends.csv`: 37 quarterly ex-dates with before/after prices and cash dividends from `TaiwanStockDividendResult`; on 2019-03-05 and 2025-08-21 the close was unchanged, so the spread check cannot flag them and the dividend file is the authority.
+- `00679B__<start>__<end>.csv`: `date,close,spread`, 2017-01-17 → 2026-10-08. `00679B_dividends.csv`: 37 quarterly ex-dates with before/after prices and cash dividends from `TaiwanStockDividendResult`; on 2019-03-05 and 2025-08-21 the close was unchanged, so the spread check cannot flag them and the dividend file is the authority.
 - `0050_dividends.csv`: ex-dividend dates, before/after prices and cash dividends from `TaiwanStockDividendResult`.
 - `TAIEX__2025-04-01__2025-10-31.csv`: TAIEX daily closes (146 rows).
 - `TX__2025-04-01__2025-10-31.csv`: `TaiwanFuturesDaily` for TX, regular session only, every listed contract month (876 rows). On its last trading day the expiring contract's `settlement_price` prints 0.0 (the final settlement price is not in this field; use `close` or TAIFEX's published final settlement price). On days a contract does not trade, `close` and `volume` print 0 while `settlement_price` is set by the exchange.

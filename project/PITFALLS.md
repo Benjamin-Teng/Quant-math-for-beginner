@@ -152,7 +152,13 @@ unless stated.
   heading to cross a band from 15% to 30% of the window, but a jump puts the heading at `scroll-padding-top`, above
   the band, so a short sub-heading never crossed it. Rule: the active entry is the last heading at or above the
   line where a jump puts it, and a clicked entry stays active until the reader scrolls (`book.js`). Test outline
-  changes with clicks as well as the wheel.
+  changes with clicks as well as the wheel. After a click, Page Down and Space scrolled the outline panel, not the page,
+  because Chromium scrolls the box clicked last; a click now moves the focus to the target heading (no ring after a
+  mouse click, since the style uses `:focus-visible`). Test with the keyboard too.
+- **Charts measured their labels before the web fonts arrived** (2026-10-11). `book.js` places a label by its
+  measured width, and the first drawing runs at `DOMContentLoaded`, usually with the fallback font, so a label near
+  an edge could cross it by several pixels. The charts are drawn again on `document.fonts.ready`. Anything that
+  measures text in JavaScript must wait for the fonts or measure again.
 - **Sticky side panels ran past the bottom of the window.** `.rail` and `.outline` had `max-height: calc(100vh -
   3.6rem)` plus padding with the default `box-sizing: content-box`, so each panel was taller than the window by its
   padding and its last entries could not be reached. Rule: a sticky panel with a `max-height` takes `box-sizing:

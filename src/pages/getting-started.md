@@ -41,7 +41,7 @@ and their risk. Volume VII adds the continuous-time tools that the Kelly volume 
 
 Run this test before you fetch all the data. It checks your environment, and it teaches three lessons. First, fetch
 only the 0050 files: `uv run python data/fetch_finmind.py --only 0050__`. Do not run `make_lab_data.py` yet, because
-it needs all of Volume I's files. Then run this code from the repository root:
+it needs the other files too. Then run this code from the repository root:
 
 ```python
 from pathlib import Path

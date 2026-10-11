@@ -47,10 +47,9 @@ re-check of each fix.
 3. **Notation.** AUTHORING §6 has the vectors-and-matrices table and the $L$ and $\lambda$ rows.
 4. **Tooling.** Bar, heatmap, scatter and vector charts in `src/assets/book.js`, with build gates; `build/qa/style.py`
    (AUTHORING §1 counts and formula punctuation) and `build/qa/display_scroll.py` (§10 items 7 and 8); the notation
-   row on the front page. **Left for Stage 2:** `data/make_lab_data.py` must export the sector closes (and the repair
-   rule's inputs) to each Volume II lab's `data/` folder, and run without `sectors_close/`; `book.js` measures chart
-   labels before the web fonts load (a label's width can be off by up to about 13 px, enough to cross an edge), so
-   redraw the charts on `document.fonts.ready` before the first Volume II scatter or vector chart is published.
+   row on the front page. Before Stage 2 (2026-10-11): `data/make_lab_data.py` writes each Volume II lab's two
+   sector files (`plans/vol-2.md`, "Labs") and runs without `sectors_close/`; `book.js` draws the charts again once
+   the web fonts arrive, and a click in the outline moves the focus to the target heading (owner-approved).
 5. **Volume I punctuation.** The 15 spots are rewritten; `style.py` finds none left.
 6. **Briefs.** `plans/vol-2.md`, from two designs per module and the editor's decisions. Its facts were checked on
    official pages, software references and bibliographic records (`project/SOURCES.md`), and its Chinese terms come
@@ -87,10 +86,6 @@ finds nothing (options before the pattern).
   320 px screen (the gate is 400 px); split it at the commas, then a fresh check.
 - Volume I has 92 display formulas that scroll inside their own box at 400 px (`build/qa/display_scroll.py`; LM1–LM7:
   8, 15, 14, 10, 19, 9, 17). AUTHORING §10 item 8 applies from Volume II; break the worst with `aligned` if time allows.
-- For the owner (site code): after a click in a long outline, the keyboard's Page Down, Space and End scroll the
-  outline panel, not the page: Chromium scrolls the box that was clicked last, although the link loses the focus on
-  the jump (the behaviour predates 0.2.1). Moving the focus to the target heading (`tabindex="-1"`,
-  `focus({preventScroll: true})`) fixes it in a test: Page Down then scrolls the page.
 - `uv run ruff check data` reports I001 in `data/build_series.py` and `data/check_chunk.py` and B023 in
   `build_series.py` (a lambda that reads the loop's `divd`; it runs inside the same iteration, so the result is
   right). Tidy them when those files next change.

@@ -895,9 +895,36 @@
         return false;
       };
       window.addEventListener("scroll", function () { if (!queued) { queued = true; requestAnimationFrame(spy); } }, { passive: true });
-      links.forEach(function (a) { a.addEventListener("click", function () { pinTo(a.getAttribute("href")); }); });
+      // After the jump, the keyboard must scroll the page, not the outline panel that was clicked: Chromium scrolls the
+      // box clicked last, so the focus moves to the target (a section or a heading). The target is made focusable for
+      // that (data-jump: no focus ring, book.css) until a click lands inside it, which then focuses as it always did,
+      // so a wide display in that section still scrolls with the arrow keys.
+      var jumped = [];
+      var focusTarget = function (hash) {
+        var t = document.getElementById(decodeURIComponent(hash.slice(1)));
+        if (!t) return;
+        if (!t.hasAttribute("tabindex")) { t.setAttribute("tabindex", "-1"); t.setAttribute("data-jump", ""); jumped.push(t); }
+        t.focus({ preventScroll: true });
+      };
+      window.addEventListener("mousedown", function (e) {
+        jumped = jumped.filter(function (t) {
+          if (!t.contains(e.target)) return true;
+          t.removeAttribute("tabindex"); t.removeAttribute("data-jump");
+          return false;
+        });
+      }, { passive: true, capture: true });
+      links.forEach(function (a) {
+        a.addEventListener("click", function (e) {
+          if (e.button !== 0 || e.ctrlKey || e.metaKey || e.shiftKey || e.altKey) return;   // a new tab or window: no jump here
+          var h = a.getAttribute("href");
+          pinTo(h);
+          setTimeout(function () { if (location.hash === h) focusTarget(h); }, 0);   // after the browser's own jump
+        });
+      });
       window.addEventListener("hashchange", function () {
-        if (!pinTo(location.hash)) { pinned = false; requestAnimationFrame(spy); }   // after the browser has restored the scroll position
+        var h = location.hash;
+        if (pinTo(h)) setTimeout(function () { focusTarget(h); }, 0);   // Back and Forward land on an entry: same as a click
+        else { pinned = false; requestAnimationFrame(spy); }   // after the browser has restored the scroll position
       });
       ["wheel", "touchstart", "keydown", "mousedown"].forEach(function (ev) {
         window.addEventListener(ev, function () { if (pinned) { pinned = false; } }, { passive: true, capture: true });
@@ -909,7 +936,14 @@
 
   function boot() {
     initTheme(); chrome(); renderCharts(); initWidgets(); layoutTags();
-    if (document.fonts && document.fonts.ready) document.fonts.ready.then(function () { if (!printing()) layoutTags(); });
+    // charts measure their labels while drawing, and drawing is what starts a web font's download: if a font was
+    // still loading then, draw again once it has arrived, so the labels are placed with their real widths
+    var fontsLate = !!(document.fonts && document.fonts.status !== "loaded");
+    if (document.fonts && document.fonts.ready) document.fonts.ready.then(function () {
+      if (printing()) return;
+      if (fontsLate) { renderCharts(); document.querySelectorAll("[data-widget]").forEach(function (h) { if (h.__redraw) h.__redraw(); }); }
+      layoutTags();
+    });
     var lastW = window.innerWidth, t;
     window.addEventListener("resize", function () {
       clearTimeout(t);

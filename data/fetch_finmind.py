@@ -21,8 +21,8 @@ reports that the request quota ("upper limit") is used up. Re-run to retry; entr
     uv run python data/fetch_finmind.py --only 00679B  # restrict to manifest paths containing a substring
     uv run python data/fetch_finmind.py --exclude sectors_close/   # skip paths containing a substring (repeatable),
                                                        # e.g. on FinMind's free plan, which lacks that dataset
-    uv run python data/make_lab_data.py                # then rebuild every lab's data/ folder (needs Volume I's
-                                                       # files: data/raw/*.csv and data/raw/lm06/)
+    uv run python data/make_lab_data.py                # then rebuild every lab's data/ folder (needs data/raw/*.csv,
+                                                       # lm06/ and sectors/; uses sectors_close/ when present)
 
 Register a new raw file (after verifying it with data/check_chunk.py). --add re-fetches the query (it needs
 FINMIND_TOKEN) and refuses to register it unless the result matches the file byte for byte: FinMind's labels differ
@@ -66,6 +66,7 @@ LOCK = ROOT / "data" / "raw_manifest.lock"
 API ="https://api.finmindtrade.com/api/v4/data"
 PAUSE = 0.7                                                # seconds between requests, far below the hourly API limit
 MAX_CONSECUTIVE_FAILURES = 25
+LAB_INPUTS = ("lm06/", "sectors/")                         # folders make_lab_data.py needs, besides the top level
 
 def sha256(b: bytes) -> str:
     return hashlib.sha256(b).hexdigest()
@@ -258,15 +259,15 @@ def main():
               + (" Fetched now:" if fetched else ""))
         for p in fetched:
             print(f"  {p}")
-        # make_lab_data.py reads Volume I's files only: the top level of data/raw and data/raw/lm06/
+        # make_lab_data.py reads the top level of data/raw, lm06/ and sectors/; sectors_close/ only when present
         need = [e["path"] for e in load_manifest()["files"]
-                if ("/" not in e["path"] or e["path"].startswith("lm06/")) and not verify_local(e)]
+                if ("/" not in e["path"] or e["path"].startswith(LAB_INPUTS)) and not verify_local(e)]
         if need:
-            print(f"make_lab_data.py needs {len(need)} more of Volume I's files (data/raw/*.csv, data/raw/lm06/): run "
+            print(f"make_lab_data.py needs {len(need)} more files (data/raw/*.csv, lm06/, sectors/): run "
                   "fetch_finmind.py with no --only and no --exclude (on the free plan: --exclude sectors_close/ only) "
                   "before it.")
         else:
-            print("Volume I's files are complete; next: uv run python data/make_lab_data.py")
+            print("make_lab_data.py has every file it needs; next: uv run python data/make_lab_data.py")
     else:
         print("data/raw matches the manifest; next: uv run python data/make_lab_data.py")
 

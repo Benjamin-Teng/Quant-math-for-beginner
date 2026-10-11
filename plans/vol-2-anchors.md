@@ -102,7 +102,9 @@ the inverse costs more and has weaker error bounds (Higham 2002a, ch. 14); Stran
 ## LM10
 
 **Status.** Recomputed independently on 2026-10-11: all 36 rows reproduced; row 30 now separates $C$ from $\hat\Sigma$,
-and rows 5, 13, 17 and 35 state their definitions.
+and rows 5, 13, 17 and 35 state their definitions. Row 30 then moved to one-session ETF returns (an ETF column of a
+two-fund frame inherits the other fund's halts, PITFALLS §3), and rows 25 and 29 follow it; the editor and an
+independent check agree on all three.
 
 U28 sample: closes of the 28 leaf sectors from `vol2_closes.parquet`, dates 2008-12-01..2026-10-08; $R_t=P_t/P_{t-1}-1$ on consecutive rows; $\hat\Sigma$ with `ddof=0`; $A=T/\text{years}$, years = (2026-10-08 − 2008-12-01 in days)/365.25. Annualized volatility $=s\sqrt A$.
 
@@ -132,12 +134,12 @@ U28 sample: closes of the 28 leaf sectors from `vol2_closes.parquet`, dates 2008
 | 22 | E7 rounded | det of the computed 50/50 matrix with entries rounded to 0.1 (416.1, 312.8, 364.4) | −13,888.91 |
 | 23 | rank windows | `matrix_rank(np.cov(X[-T:], rowvar=False, ddof=0))` for $T=20..35$, asserted $=\min(T-1,28)$; first dates | $T=28$: 27 from 2026-08-28; $T=29$: 28 from 2026-08-27 |
 | 24 | collinear | S5 + its EW series: rank; $\lvert\mathbf v^{\top}\hat\Sigma\mathbf v\rvert$, $\mathbf v=(\frac15,\dots,\frac15,-1)$ | 5; below 1e-15 |
-| 25 | E9 correlations | per calendar year, each pair on its own common dates: 0050/00631L 2018; 0050/00679B 2023; 00631L/00679B 2019; $T_{ij}$ | 0.982 (247); 0.199 (239); −0.444 (242) |
+| 25 | E9 correlations | one-session total returns (row 30), per calendar year, each pair on its common dates: 0050/00631L 2018; 0050/00679B 2023; 00631L/00679B 2019; $T_{ij}$ | 0.982 (247); 0.199 (239); −0.444 (242) |
 | 26 | E9 det, form | from the 3-decimal entries; $\mathbf x=(-1,1,1)$ | −0.374592; −0.25 |
 | 27 | witnesses | $\det C\cdot\operatorname{adj}(C)_{jj}$, $j=1,2,3$ | −0.3007, −0.3598, −0.0134 |
 | 28 | 2018 common triple | all three ETFs on 2018 common dates ($T=247$); det of 3-decimal matrix | 0.982, −0.394, −0.395; 0.0301 |
-| 29 | failing assignments | ordered triples of distinct years 2017–2026 for the three pairs with $\det<0$ | 359 of 720 |
-| 30 | real pairwise case | U28 + total returns of 0050, 00631L (`etf_daily_returns.parquet`) and 00679B (`lm07_returns.parquet`) on U28 dates: common $T$ and dates; pairwise $T$ range; smallest eigenvalue of the pairwise $C$ (each pair standardized on its common dates), of the pairwise $\hat\Sigma$ (each variance on the series' own returns, each covariance on the pair's common dates with that pair's means, divisor the pair's count), of the common-sample $C$ and $\hat\Sigma$; largest entries of the eigenvector of the negative eigenvalue (sign rule); U28 plus one ETF; Semiconductor's variance on its own sample and on 00631L's dates; largest entry change of $C$ | 2,359, 2017-01-18..2026-10-08; 2,359..4,382; 0.01381; −7.06e-06 (not PSD); 0.01345, 3.58e-06; Semiconductor 0.653, 00631L −0.477, 0050 −0.329; +0050 −2.30e-06, +00631L −5.58e-06, +00679B +2.72e-05; 2.3234e-4 vs 2.5084e-4; 0.144 ElectronicProductsDistribution/TradingConsumersGoods (0.465 vs 0.321) |
+| 29 | failing assignments | ordered triples of distinct years 2017–2026 for the three pairs with $\det<0$, on row 25's one-session returns (full-precision or 3-decimal correlations alike) | 362 of 720 |
+| 30 | real pairwise case | U28 + one-session total returns of 0050, 00631L and 00679B (between consecutive TAIEX-calendar dates on which the fund has both closes, from its raw closes and dividends; halt-spanning returns drop out) on U28 dates: common $T$ and dates; pairwise $T$ range; smallest eigenvalue of the pairwise $C$ (each pair standardized on its common dates), of the pairwise $\hat\Sigma$ (each variance on the series' own returns, each covariance on the pair's common dates with that pair's means, divisor the pair's count), of the common-sample $C$ and $\hat\Sigma$; largest entries of the eigenvector of the negative eigenvalue (sign rule); U28 plus one ETF; Semiconductor's variance on its own sample and on 00631L's dates; largest entry change of $C$ | 2,357, 2017-01-18..2026-10-08; 2,362..4,382; 0.01380; −6.56e-06 (not PSD); 0.01337, 3.55e-06; Semiconductor 0.656, 00631L −0.454, 0050 −0.362; +0050 −2.35e-06, +00631L −4.85e-06, +00679B +2.72e-05; 2.3234e-4 vs 2.5076e-4 (00631L's 2,906 dates); 0.144 ElectronicProductsDistribution/TradingConsumersGoods (0.465 vs 0.321) |
 | 31 | E10 | $\mathbf g=2A\hat\Sigma\mathbf w$ EW U28: entries GlassCeramic, CommunicationsInternet (also the max and min of $\mathbf g$); $\boldsymbol\Delta^{\top}\mathbf g$; $A\boldsymbol\Delta^{\top}\hat\Sigma\boldsymbol\Delta$; variance; volatility | 0.07230, 0.02764; −0.001595; +0.000136; 0.024803 → 0.023345; 15.75% → 15.28% |
 | 32 | Problem 4 | $(0.2,0.3,0.5)$ from 3-decimal $C_3$ and 2-decimal volatilities | 15.74% |
 | 33 | Problem 5 | S5 $\overline{\operatorname{var}}$, $\overline{\operatorname{cov}}$; EW S5 volatility; limit | 2.0740e-4, 9.0696e-5; 16.73%; 14.92% |

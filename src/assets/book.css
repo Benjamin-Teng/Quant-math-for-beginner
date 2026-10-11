@@ -105,6 +105,7 @@ body { background: var(--paper); color: var(--ink); font-family: var(--f-body); 
 a { color: var(--accent); text-underline-offset: 0.18em; text-decoration-thickness: 0.06em; }
 a:hover { text-decoration-thickness: 0.12em; }
 :focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; border-radius: 2px; }
+[data-jump]:focus { outline: none; }   /* a section or heading focused by an outline jump (book.js) is not a control */
 ::selection { background: var(--accent-soft); }
 h1, h2, h3, h4 { font-family: var(--f-head); color: var(--ink); text-wrap: balance; line-height: 1.2; }
 strong { font-weight: 650; }
