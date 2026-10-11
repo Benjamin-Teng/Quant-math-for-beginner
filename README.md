@@ -69,7 +69,7 @@ Math is rendered to HTML at build time, so the pages need no JavaScript to show 
 
 Every link in `docs/` is relative, so the site works at a domain root or under a sub-path.
 
-- **GitHub Pages:** Settings → Pages → *Deploy from a branch* → `main` / `/docs`. For a custom domain, add a file `docs/CNAME` containing the domain (for example `quant.example.com`) and point a DNS `CNAME` record at `benjamin-teng.github.io`.
+- **GitHub Pages:** Settings → Pages → *Deploy from a branch* → `main` / `/docs`; the site is live at <https://quantmath.fintools.tw>. `build/build.py` writes `docs/CNAME` with that domain, and a DNS `CNAME` record points `quantmath.fintools.tw` at `benjamin-teng.github.io`.
 - **Any static host** (Cloudflare Pages, Netlify, your own server): publish the `docs/` folder; no build step is needed on the host.
 
 ## Writing a module

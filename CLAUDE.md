@@ -49,7 +49,7 @@ uv run ruff check <files> && uv run ty check <files>   # Python gates (dev group
 
 `src/` module sources (`lmNN.md`, `lmNN.js`, `data/*.json`, `assets/`, `syllabus.yaml`) · `build/` builders and QA ·
 `data/` the raw-data manifest, fetch script and the scripts that compute every number · `labs/` executed notebooks (data built locally) ·
-`docs/` the published site (GitHub Pages, `main` `/docs`) · `plans/` module briefs · `reviews/` review records ·
+`docs/` the published site (GitHub Pages, `main` `/docs`, at <https://quantmath.fintools.tw>) · `plans/` module briefs · `reviews/` review records ·
 `project/` spec, pitfalls, sources.
 
 ## Working with agents
