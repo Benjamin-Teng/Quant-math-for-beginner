@@ -21,7 +21,8 @@ RULES
 - When you check a source, paraphrase it; never quote more than one short sentence from any page, paper or book.
 
 REFERENCE FILES: AUTHORING.md (house style; §6 is the book-wide notation table), project/PITFALLS.md (known traps),
-src/lm03.md (published reference module), {NEIGHBOUR DRAFTS}, data: {DATA FILES}, author scripts: {SCRIPTS},
+{REFERENCE MODULE} (a published module of the same kind), {NEIGHBOUR DRAFTS}, the brief (plans/vol-{V}.md) and the
+anchors (plans/vol-{V}-anchors.md), data: {DATA FILES}, author scripts: {SCRIPTS},
 executed lab: labs/LM{NN}_lab/LM{NN}_lab.ipynb, rendered page: dist/preview/lm/lm{NN}.html
 (build it first with `uv run python build/build.py --preview` if it is missing).
 
@@ -32,10 +33,13 @@ WHAT TO CHECK
 3. Problems: solve each practice problem before reading its solution; check keys and distractors; keys should vary.
 4. Internal consistency: [[ex:]]/[[eg:]] targets in the rendered page, every exhibit cited, equation tags,
    outcomes vs {lo=…}, problem/solution numbering, widget initial state.
-5. Notation against AUTHORING §6: report every clash inside the module or with the table.
-6. Facts and references: {FACTS}; illustrative inputs labelled.
+5. Notation against AUTHORING §6, including "Common notation first": report every clash inside the module or with
+   the table, and every symbol the module invents where a common one exists.
+6. Facts and references: {FACTS}; every reference is listed in project/SOURCES.md, and no section or theorem number
+   is cited that SOURCES.md does not give; illustrative inputs labelled.
 7. Pedagogy and language: nothing used before it is taught without a pointer; 導讀 boxes in accurate Traditional
-   Chinese with Taiwan usage; English clear. Length: Volume I at most 40 A4 pages; from Volume II at most 6,000 words
+   Chinese with Taiwan usage and AUTHORING §1's terms (樂詞網, the English term in parentheses at first use in each
+   box; a row is 列 and a column is 行); English clear. Length: Volume I at most 40 A4 pages; from Volume II at most 6,000 words
    of prose (AUTHORING §1's count) and 36 pages. Apply AUTHORING §1's Voice sub-rules (to every sentence from Volume
    II on, to new or changed sentences in Volume I) and report every breach, in particular a sentence over 30 words, a
    module average of 16 words or more, a paragraph over 80 words, a dropped connector, and a bare "this"/"it"/"that"
@@ -43,6 +47,10 @@ WHAT TO CHECK
    to a conclusion, list parallel items or carry one chain of reasoning. In every volume, report a character after
    an inline formula that §1's formula-punctuation rule does not allow. Confirm check_terms passes.
 8. Rendering: no raw `$`, no katex-error elements, no broken links, no empty exhibits; no overflow at 400 px.
+9. From Volume II: the module against its brief (what it owns and leaves, sections, exhibits, examples, problems,
+   the hygiene declaration and result labels, the lab) and against the anchors; report every departure that the
+   writer's hand-back does not justify. The lab's data cell does what the brief's "Labs" says, on the paid and
+   the free plan.
 
 OUTPUT: a prioritized list. For each finding: severity (critical = a reader would learn wrong math or a wrong number;
 major = misleading, inconsistent or unsupported; minor = wording/style), location (section, quoted text, line number),
@@ -87,4 +95,35 @@ build the preview and run the overflow check, and confirm `uv run python build/q
 
 OUTPUT: a table with one row per finding — verified / reopened (with the reason) — then any new findings with
 severity, location and correction.
+```
+
+## 4. Blind solver (read-only)
+
+```text
+You are a blind solver for LM{N} "{TITLE}" of *From Calculus to Kelly* (src/lm{NN}.md). Read-only rules as for a
+reviewer. Read the module up to its "Solutions" heading only; solve every knowledge check and every practice problem
+from the text, with your own code where a problem needs data or arithmetic ({DATA FILES}). Record your answers before
+you open the Solutions section and the lab's solution cells. Then compare.
+
+For each item: your answer with its working; agree or disagree with the module's answer key and solution; and whether
+the question is well posed (enough information; units, divisor, sample and rounding stated; exactly one correct
+multiple-choice answer; distractors plausible but wrong; keys varied across questions).
+
+OUTPUT: a table, one row per item (agree / disagree / ill-posed), then the details of every disagreement or flaw with
+the correction you propose. Under 1,200 words.
+```
+
+## 5. Number auditor (read-only)
+
+```text
+You audit every number in LM{N} "{TITLE}" of *From Calculus to Kelly* (src/lm{NN}.md). Read-only rules as for a
+reviewer. List every quantitative statement: text, exhibits and their notes, examples, knowledge checks, problems,
+solutions, the notation note, the widget's initial state and the lab box. Recompute each one with your own code, from
+data/raw/ (or the lab's data/ folder, which data/make_lab_data.py builds from it) or from the printed inputs the module
+gives, in exact arithmetic (fractions or decimals) wherever rounding can matter. Follow the module's stated
+definitions: sample, dates, divisor, return type, units and rounding. Do not import the author's scripts. Compare
+with the anchors (plans/vol-{V}-anchors.md).
+
+OUTPUT: how many numbers you audited; every mismatch (location, printed value, your value, the definition you used,
+the likely cause); every number whose definition the text leaves unclear. Under 1,500 words.
 ```
