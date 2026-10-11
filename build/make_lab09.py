@@ -464,7 +464,7 @@ plt.xlabel("x1 (Semiconductor)"); plt.ylabel("x2 (FinancialInsurance)"); plt.tit
 md(r"""
 ## Part 8 — Perfect collinearity
 
-A return matrix has rank below its number of columns exactly when a fixed combination of its columns is 0 on every date (9.9).
+A return matrix has rank below its number of columns exactly when a fixed non-zero combination of its columns is 0 on every date (9.9).
 """)
 
 code(r"""
