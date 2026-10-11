@@ -75,7 +75,7 @@ Companion notebook to **From Calculus to Kelly, LM9**. It rebuilds the module's 
 
 `data/` then holds two files. `sectors_close_raw.csv` has the daily closes that FinMind's `TaiwanStockPrice` serves for TAIEX and the 30 TWSE sector indices, empty where a series has no close. `sectors_close_repairs.csv` lists the 561 closes that FinMind copied from another date or series, each with its official 13:30:00 value from `TaiwanStockEvery5SecondsIndex` (a paid dataset; the column is empty on FinMind's free plan). The notebook reads nothing outside `data/`.
 
-**Conventions (as in the module).** The hand-sized systems use percent returns $100(P_t/P_{t-1}-1)$ of 7–10 April 2025, rounded to 0.01, solved in exact rational arithmetic (`fractions.Fraction`). Section 7 uses daily simple returns on the common sample from the close of 2008-12-01 to 2026-10-08, between consecutive TAIEX trading dates.
+**Conventions (as in the module).** The hand-sized systems use percent returns $100(P_t/P_{t-1}-1)$ of 7–10 April 2025, rounded to 0.01, solved in exact rational arithmetic (`fractions.Fraction`). Section 8 uses daily simple returns on the common sample from the close of 2008-12-01 to 2026-10-08, between consecutive TAIEX trading dates.
 """)
 
 code(r"""
