@@ -38,9 +38,8 @@ numbers never change silently. New raw files are registered with `fetch_finmind.
 
 ## Raw files (`raw/`)
 
-All files are exactly as returned by FinMind (retrieved 2026-10-10), in windows of fewer than 500 rows (the FinMind MCP tool's cap, which the first downloads went through; the API
-returns a whole series in one query, so new files need not be split); they are listed in `raw_manifest.json` and rebuilt
-by `fetch_finmind.py`.
+All files are exactly as returned by FinMind (retrieved 2026-10-10), in the windows in which they were first downloaded (a new series may be a single file); they are listed in
+`raw_manifest.json` and rebuilt by `fetch_finmind.py`.
 
 - `0050__<start>__<end>.csv`, `00631L__<start>__<end>.csv`: `date,close,spread` from `TaiwanStockPrice` (unadjusted), 2014-10-31 → 2026-10-08.
 - `00679B__<start>__<end>.csv`: `date,close,spread`, 2017-01-17 → 2026-10-08. `00679B_dividends.csv`: 37 quarterly ex-dates with before/after prices and cash dividends from `TaiwanStockDividendResult`; on 2019-03-05 and 2025-08-21 the close was unchanged, so the spread check cannot flag them and the dividend file is the authority.

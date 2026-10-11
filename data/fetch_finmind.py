@@ -33,9 +33,8 @@ session without API access; run the full fetch in a clean checkout before relyin
         --start 2025-04-01 --end 2025-10-31 --filter trading_session=^position$ --filter 'contract_date=^\\d{6}$'
 
 Columns are kept under the FinMind names unless mapped with --map out=source (for example
---map cash_dividend=stock_and_cache_dividend). The FinMind MCP server caps a query at 500 rows; the API that this
-script calls returned 4,737 daily rows in one query, so a new daily series can be one file. Intraday datasets need this
-script (some answer one day per request).
+--map cash_dividend=stock_and_cache_dividend). A new daily series can be one file: the API returns the whole
+window in one query. Some intraday datasets answer one day per request.
 
 A dataset that accepts only a start date (TaiwanStockEvery5SecondsIndex answers "we only send one day data, so
 end_date parameter need be none") is registered by leaving out --end: the manifest entry then has "end_date": null and

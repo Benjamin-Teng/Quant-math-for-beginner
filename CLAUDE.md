@@ -76,5 +76,5 @@ uv run ruff check <files> && uv run ty check <files>   # Python gates (dev group
 - Launch independent agents together in one message; do the editor's quick work before launching a batch.
 - Data: raw FinMind files are never committed (licence); `data/raw_manifest.json` lists them and `fetch_finmind.py`
   rebuilds them. New data come from FinMind through its API (`FINMIND_TOKEN`), a whole series per query where the dataset
-  allows it: the API returned 4,737 daily rows in one query, while the MCP server caps a query at 500 rows. Check each
-  file with `data/check_chunk.py` and register it with `fetch_finmind.py --add`; never invent or estimate data.
+  allows it. Check each file with `data/check_chunk.py` and register it with `fetch_finmind.py --add`; never invent or
+  estimate data.

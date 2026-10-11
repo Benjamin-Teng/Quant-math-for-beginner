@@ -524,7 +524,7 @@ print("PP14", {name: round(float(v), 5) for name, v in pp14.items()}, f"00631L {
 md(r"""
 ### Extension: the inverse fund
 
-For an inverse fund $L=-1$, the drag coefficient $L(L-1)/2$ equals $1$: a daily −1× fund suffers the **same** variance drag as a daily 2× fund. Fetch Yuanta Taiwan 50 Bear −1X (00632R) and test (3.11) with $L=-1$. The helper below downloads data from the FinMind API with your own token (`FINMIND_TOKEN` environment variable) and the standard library's `urllib`; it queries one year at a time, which keeps each query under FinMind's 500-row limit.
+For an inverse fund $L=-1$, the drag coefficient $L(L-1)/2$ equals $1$: a daily −1× fund suffers the **same** variance drag as a daily 2× fund. Fetch Yuanta Taiwan 50 Bear −1X (00632R) and test (3.11) with $L=-1$. The helper below downloads data from the FinMind API with your own token (`FINMIND_TOKEN` environment variable) and the standard library's `urllib`; it queries one year at a time.
 """)
 
 code(r"""

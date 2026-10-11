@@ -79,8 +79,7 @@ Who owns what where modules touch; a brief may refine a line but not move a topi
 **Historical market data come only from FinMind** (owner, 2026-10-10). Shioaji is not used for historical data.
 
 - Daily data (prices, dividends, futures, options, indices) come through the FinMind API (`data/fetch_finmind.py`), a
-  whole series per query where the dataset allows it, checked with `data/check_chunk.py`. The 500-row windows of
-  Volumes I and II came from the MCP tool's cap, not from the API (PITFALLS §2). Check every new daily series also for rows copied from another
+  whole series per query where the dataset allows it, checked with `data/check_chunk.py`. Check every new daily series also for rows copied from another
   date (PITFALLS §3): the spread check and the manifest's checksums both pass on them.
 - Intraday data are large (one day of 5-second TAIEX is about 3,240 rows), and some datasets answer one day per
   request (`TaiwanStockEvery5SecondsIndex`, `TaiwanVariousIndicators5Seconds`). Download them with a FinMind API token
