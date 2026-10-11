@@ -133,6 +133,8 @@ assert (q1 > 0).all()
 assert U28[int(np.argmin(q1))] == "OilGasElectricity" and U28[int(np.argmax(q1))] == "Other"
 say("PC1 smallest loading (OilGasElectricity)", q1.min(), ".3f")
 say("PC1 largest loading (Other)", q1.max(), ".3f")
+need("with entries from 0.130 to 0.224")                       # the case box: entries of q1, not weights,
+assert abs(q1.sum() - math.sqrt(N)) < 0.05                      # since they sum to about sqrt(28), not to 1
 share = lam / N
 cum = np.cumsum(share)
 k80 = int(np.argmax(cum >= 0.80)) + 1
@@ -487,12 +489,16 @@ rev = math.hypot(float(Qa[:, 1] @ Qb[:, 1]), float(Qa[:, 1] @ Qb[:, 2]))
 say("reverse measure: first half's q2 against the second half's plane", rev, ".3f")
 chk("reverse measure from the printed 4-decimal cosines", math.hypot(c22_4, c32_4), ".3f", "0.514")
 need("0.2966^2+0.4196^2")
+assert TEXT is None or "reverse check" not in TEXT              # one term per concept: the reverse measure
 cos24 = [abs(float(Qa[:, 1] @ Qb[:, k])) for k in range(N)]
 assert int(np.argmax(cos24)) == 3                              # the first half's q2 is closest to the second half's q4
 say("|cos| of the first half's q2 with the second half's q4", cos24[3], ".3f")
 cos32 = [abs(float(Qa[:, k] @ Qb[:, 1])) for k in range(N)]
 assert int(np.argmax(cos32)) == 2                              # the second half's q2 is closest to the first half's q3
 need("the first half's third direction ranks second in the second half (0.879), and its second ranks fourth (0.776)")
+# Solution 4 cites 0.879 from Section 7: the printed 0.927 and 0.297 would give 0.878 (PITFALLS section 7)
+assert format(math.sqrt(0.927**2 - 0.297**2), ".3f") == "0.878"
+need("(cosine 0.879 in Section 7)")
 plane_q3 = math.hypot(float(Qa[:, 1] @ Qb[:, 2]), float(Qa[:, 2] @ Qb[:, 2]))
 say("plane measure of the second half's q3 against the first half's plane", plane_q3, ".3f")
 chk("its angle, from the printed 0.437", deg(math.acos(0.437)), ".0f", "64")
@@ -567,6 +573,7 @@ chk("S5 bound from the printed factors", 10.863 * 0.44235, ".3f", "4.805")
 assert format(k5 * dn5, ".3f") == "4.805"
 chk("pitfall: S5 kappa, one decimal", 10.863, ".1f", "10.9")
 chk("pitfall: U28 kappa, whole", 126.05, ".0f", "126")
+need(r"S5 has $\kappa(\hat\Sigma^{(1)})=10.9$", r"U28 has $\kappa(\hat\Sigma^{(1)})=126$")   # the pitfall names the matrix
 chk("problem 10: S5 realized over bound", 0.910 / 4.805, ".2f", "0.19")
 chk("problem 10: U28 realized over bound", 0.729 / 30.93, ".3f", "0.024")
 chk("problem 10: ratio of the two kappas", 126.05 / 10.863, ".1f", "11.6")
