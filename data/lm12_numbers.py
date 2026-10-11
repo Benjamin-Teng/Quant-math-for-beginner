@@ -274,6 +274,11 @@ for nm in ("S3", "S5", "U28 full", "U28 last 250"):
 assert gaps["U28 + Electronic full"] < 1e-12
 assert 1e-12 <= gaps["U28 + Electronic 2016"] < 1e-11, gaps["U28 + Electronic 2016"]
 has("gap order", "$10^{-12}$ to $10^{-11}$")
+# The digits rule (LM11's bound (11.9) with a relative change of order 1e-16): float64 keeps 53 significant bits,
+# about 16 decimal digits, and rounds with a relative error of at most 2^-53 = 1.1e-16.
+assert np.finfo(np.float64).nmant == 52 and round(53 * math.log10(2)) == 16 and 1e-16 < 2.0**-53 < 2e-16
+has("digits rule: rounding", "relative amount of order $10^{-16}$")
+has("digits rule: bound", "at most about $\\kappa\\times10^{-16}$")
 chk("digits lost, U28", math.log10(solver_gap(U28, FULL)[1]), ".1f", "2.0")
 chk("digits lost, U28 + Electronic 2016", math.log10(solver_gap(["Electronic", *U28], Y2016)[1]), ".1f", "5.6")
 
