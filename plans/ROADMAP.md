@@ -137,3 +137,10 @@ Volume VII results it uses.
 ## Open decisions for the owner
 
 - **Capstone B:** use the backtest returns of one of the owner's own strategies, or a strategy built in the book.
+
+## Decided by the owner
+
+- **Volume IV intraday data** (2026-10-11): approved. Minute bars and other intraday history come through the
+  FinMind API with a logged script in `data/`; Volume IV's Stage 1 capability check fixes the details (request
+  range per dataset, file layout, what is committed) and reports them.
+- **Volume V packages** (2026-10-11): approved. Add `cvxpy` and `scikit-learn` with `uv add` when Volume V starts.
