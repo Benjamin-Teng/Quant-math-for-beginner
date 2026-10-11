@@ -93,6 +93,17 @@ finds nothing (options before the pattern).
 ## Then: the remaining volumes
 
 Follow [`plans/ROADMAP.md`](plans/ROADMAP.md): batch 2 is Volume III (LM13–LM18), then IV, V + VI, VII, VIII and IX.
-Each batch repeats Stages 1–4 and bumps the edition. Ask the owner about code, site, repository and his standing
-rules, and about the open decisions at the end of the roadmap before the batch that needs them; content is the
-editor's call.
+Each batch repeats Stages 1–4 and bumps the edition (the owner confirmed the process, 2026-10-11). Ask the owner about
+code, site, repository and his standing rules, and about the open decisions at the end of the roadmap before the batch
+that needs them; content is the editor's call. Stage 1 of every batch, in this order:
+
+1. Briefs (`plans/vol-N.md`) within ROADMAP's module boundaries, with notation that follows AUTHORING §6 ("Common
+   notation first").
+2. **Capability check.** List every exhibit, widget, dataset and Python package the briefs need; check each against
+   `src/assets/book.js`, `build/qa/`, `data/` and `pyproject.toml`; send the owner one list of what is missing (site
+   code, data pipeline, new packages) and build what he approves before any writer starts.
+3. Data: fetch through the API, check every new series as PITFALLS §3 says, and register it in the manifest.
+4. Anchors (`plans/vol-N-anchors.md`): every number the briefs quote, with its definition, recomputed by independent
+   code; facts checked on official sources (`project/SOURCES.md`).
+5. Lab data: `data/make_lab_data.py` writes each lab's files, and the briefs name them.
+6. A fresh check of the whole of Stage 1, then commit and push.
