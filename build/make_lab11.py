@@ -2,7 +2,7 @@
 
 Run:  uv run python build/make_lab11.py
 Then execute from inside the lab folder:
-      cd labs/LM11_lab && uv run jupyter nbconvert --to notebook --execute LM11_lab.ipynb --output LM11_lab.ipynb
+      cd labs/LM11_lab && uv run jupyter nbconvert --to notebook --execute --inplace LM11_lab.ipynb
 
 The notebook reads only the files in labs/LM11_lab/data/, which data/make_lab_data.py builds from data/raw/
 (FinMind's licence keeps raw data out of the repository). This script writes the notebook and the README only.
@@ -123,7 +123,7 @@ md(r"""
 
 FinMind serves some sector-index closes copied from another date or from another series (project/PITFALLS.md §3 in the repository). **Rule:** every close listed in `sectors_close_repairs.csv` is replaced by its `close_1330`, the official 13:30:00 value of `TaiwanStockEvery5SecondsIndex`. On FinMind's free plan that dataset is not available, `close_1330` is empty, and the cell drops those closes instead. Returns are taken between consecutive TAIEX-calendar dates, so a dropped close removes the returns into and out of its date.
 
-With every value present, the repaired closes equal the book's (`data/vol2_series.py`) cell for cell: 561 closes replaced, 524 of them in U28 from 2008-12-01, on 38 dates. On the free plan U28's sample keeps $T=4{,}307$ of the 4,382 returns ($A=241.28$), and only numbers computed inside a window without a listed close keep their values: 7–10 April 2025, December 2008, the last 250 returns and the calendar years 2014, 2023, 2024 and 2026. Every full-sample, half-sample and per-year number below changes, and so do the cosines against the full sample (Getting Started, "Fetch the data"). The checks against the module's printed values run only when no close is dropped.
+With every value present, the repaired closes equal the book's (`data/vol2_series.py`) cell for cell: 561 closes replaced, 524 of them in U28 from 2008-12-01, on 38 dates. On the free plan U28's sample keeps $T=4{,}307$ of the 4,382 returns ($A=241.28$), and only numbers computed inside a window without a listed close keep their values: 7–10 April 2025, December 2008, the last 250 returns and the calendar years 2014, 2023, 2024 and 2026. Every full-sample and half-sample number below changes, and so do the other years' numbers and every cosine or plane measure against the full sample (Getting Started, "Fetch the data"). The checks against the module's printed values run only when no close is dropped.
 """)
 
 code(r"""
@@ -416,7 +416,9 @@ print(f"U28's smallest eigenvalue: {lam[-1]:.4f}")
 md(r"""
 ## Part 9 — Eigenvalue gaps and stability ([[eg:gap]], [[ex:yshare]], [[ex:ycos]], [[ex:halves]])
 
-(11.9): a diagonal matrix with neighbouring eigenvalues and $\varepsilon$ off the diagonal turns its eigenvectors by $\tfrac12\arctan(2\varepsilon/\text{gap})\approx\varepsilon/\text{gap}$. Then each calendar year against the full sample, and the two halves. This is a **stability check**: the full-sample reference could not have been known inside a year, and nothing here is an out-of-sample test.
+(11.7): a diagonal matrix with neighbouring eigenvalues and $\varepsilon$ off the diagonal turns its eigenvectors by $\tfrac12\arctan(2\varepsilon/\text{gap})\approx\varepsilon/\text{gap}$. Then each calendar year against the full sample, and the two halves. This is a **stability check**: the full-sample reference could not have been known inside a year, and nothing here is an out-of-sample test.
+
+The plane measure is one-sided: it shows how much of the compared period's $\mathbf q_2$ lies in the reference period's plane of $\mathbf q_2$ and $\mathbf q_3$, not that the plane holds. The last cell therefore also swaps the halves, and finds where each half's second component went.
 """)
 
 code(r"""
@@ -425,7 +427,7 @@ for a_, b_ in ((1, 2), (6, 7)):
     gap = lam[a_] - lam[b_]
     print(f"lambda_{a_ + 1} = {lam[a_]:.5f}, lambda_{b_ + 1} = {lam[b_]:.5f}, gap {gap:.5f}: exact {math.degrees(0.5 * math.atan(2 * eps / gap)):.2f} deg, "
           f"first order {math.degrees(eps / gap):.2f} deg")
-# numerical check of (11.9) on a 2 x 2 matrix
+# numerical check of (11.7) on a 2 x 2 matrix
 Mt = np.array([[lam[1], eps], [eps, lam[2]]])
 wt, Qt = eig_desc(Mt)
 print(f"eigh on [[lambda_2, eps], [eps, lambda_3]]: q1 at {math.degrees(math.atan2(Qt[1, 0], Qt[0, 0])):.2f} deg")
@@ -453,13 +455,24 @@ print(f"shares {wa[0] / N:.1%} and {wb[0] / N:.1%}; signed cos of PC2 {c22:.4f};
       f"plane measure {math.hypot(c22, c23):.4f}, an angle of {math.degrees(math.acos(math.hypot(c22, c23))):.0f} deg")
 print(f"PC2's largest loading: first half {U28[int(np.abs(Qa[:, 1]).argmax())]} {Qa[np.abs(Qa[:, 1]).argmax(), 1]:.3f}; "
       f"second half {U28[int(np.abs(Qb[:, 1]).argmax())]} {Qb[np.abs(Qb[:, 1]).argmax(), 1]:.3f}")
+# the measure is one-sided: swap the halves, and find where each half's q2 went
+c32 = Qa[:, 1] @ Qb[:, 2]
+print(f"reverse measure (the first half's q2 against the second half's plane): {math.hypot(c22, c32):.4f}")
+print("second half's q2 against the first half's q1..q5, |cos|:", np.abs(Qa[:, :5].T @ Qb[:, 1]).round(3))
+print("first half's q2 against the second half's q1..q5, |cos|:", np.abs(Qb[:, :5].T @ Qa[:, 1]).round(3))
+pm3 = math.hypot(Qa[:, 1] @ Qb[:, 2], Qa[:, 2] @ Qb[:, 2])
+print(f"second half's q3 against the first half's plane: {pm3:.4f}, an angle of {math.degrees(math.acos(pm3)):.0f} deg; "
+      f"second half's lambda_3 - lambda_4 = {wb[2] - wb[3]:.3f}")
+print(f"variance along the first half's q3: {Qa[:, 2] @ corr(S1) @ Qa[:, 2]:.3f} in the first half, "
+      f"{Qa[:, 2] @ corr(S2) @ Qa[:, 2]:.3f} in the second; along its q2: {Qa[:, 1] @ corr(S1) @ Qa[:, 1]:.3f}, "
+      f"{Qa[:, 1] @ corr(S2) @ Qa[:, 1]:.3f}")
 halves   # [[ex:halves]]
 """)
 
 md(r"""
 ## Part 10 — The inverse of $\hat\Sigma$ ([[eg:tight]], [[eg:halvesinv]], [[ex:solve]], [[ex:xshares]])
 
-(11.7): $\hat\Sigma^{-1}\mathbf b=\sum_k(\mathbf q_k^{\top}\mathbf b/\lambda_k)\,\mathbf q_k$; (11.8): $\lVert\Delta\mathbf x\rVert/\lVert\mathbf x+\Delta\mathbf x\rVert\le\kappa\lVert\Delta M\rVert_2/\lVert M\rVert_2$ in the spectral norm. Systems are solved with `np.linalg.solve`, never with `inv`.
+(11.8): $\hat\Sigma^{-1}\mathbf b=\sum_k(\mathbf q_k^{\top}\mathbf b/\lambda_k)\,\mathbf q_k$; (11.9): $\lVert\Delta\mathbf x\rVert/\lVert\mathbf x+\Delta\mathbf x\rVert\le\kappa\lVert\Delta M\rVert_2/\lVert M\rVert_2$ in the spectral norm. Systems are solved with `np.linalg.solve`, never with `inv`. The covariance eigenvectors of the two halves are then compared component by component.
 """)
 
 code(r"""
@@ -477,9 +490,15 @@ shares = {}
 for lab, Sh, xh in (("first half", S1, x1), ("second half", S2, x2)):
     wh, Qh = eig_desc(Sh)
     c = (Qh.T @ np.ones(N) / wh) ** 2 / (xh @ xh)
-    assert np.allclose(Qh @ (Qh.T @ np.ones(N) / wh), xh)          # (11.7) rebuilds the solution
+    assert np.allclose(Qh @ (Qh.T @ np.ones(N) / wh), xh)          # (11.8) rebuilds the solution
     shares[lab] = c
-    print(f"{lab}: PC1 gives {c[0]:.1%} of ||x||^2, the 14 smallest components {c[14:].sum():.1%}")
+    print(f"{lab}: PC1 gives {c[0]:.1%} of ||x||^2, the 14 smallest components {c[14:].sum():.1%}; "
+          f"largest gap between neighbours among the 14 smallest eigenvalues {(-np.diff(wh[14:])).max():.2e}, "
+          f"against lambda_1 - lambda_2 = {wh[0] - wh[1]:.2e}")
+wc1, Qc1 = eig_desc(S1); wc2, Qc2 = eig_desc(S2)
+ccov = np.abs(np.sum(Qc1 * Qc2, axis=0))                     # |cos| of q_k in the two halves, k = 1..28
+print("covariance PCA, |cos| between the halves:", ccov.round(3))
+print(f"the 14 smallest: {(ccov[14:] < 0.25).sum()} of 14 below 0.25; PC1 {ccov[0]:.3f}")
 _, R5 = sample(S5)
 xs5a, xs5b, rel5, bnd5 = rel_and_bound(cov0(R5[:h]), cov0(R5[h:]), np.ones(5))
 print(f"S5: x(1) = {xs5a.round(2)}, x(2) = {xs5b.round(2)}; relative change {rel5:.3f}, cosine "
@@ -537,8 +556,10 @@ c5 = XI5.T @ XI5 / R5.shape[0]
 print("Var(xi_k):", np.diag(c5).round(4), " largest covariance of two scores:", f"{np.abs(c5 - np.diag(np.diag(c5))).max():.1e}")
 # Problem 12 (Python): per year, from the table of Part 9
 g = ytab.sort("gap 2-3").row(0, named=True)
-print(f"P12: smallest gap lambda_2 - lambda_3 in {g['year']}: {g['gap 2-3']:.3f}; |cos q1| >= {ytab['|cos q1|'].min():.3f}; "
-      f"|cos q2| {ytab['|cos q2|'].min():.3f} .. {ytab['|cos q2|'].max():.3f}; plane {ytab['plane measure'].min():.3f} .. {ytab['plane measure'].max():.3f}")
+lo1 = ytab.sort("|cos q1|").row(0, named=True)
+print(f"P12: smallest gap lambda_2 - lambda_3 in {g['year']}: {g['gap 2-3']:.3f}; lowest |cos q1| {lo1['|cos q1|']:.6f} "
+      f"({lo1['year']}; every year at least 0.98: {lo1['|cos q1|'] >= 0.98}); |cos q2| {ytab['|cos q2|'].min():.3f} .. "
+      f"{ytab['|cos q2|'].max():.3f}; plane {ytab['plane measure'].min():.3f} .. {ytab['plane measure'].max():.3f}")
 """)
 
 md(r"""

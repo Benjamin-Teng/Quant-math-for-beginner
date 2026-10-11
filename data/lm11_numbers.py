@@ -99,7 +99,8 @@ A = a_factor(T, df["date"][0], df["date"][-1])
 P(f"U28 sample: T = {T}, first return {dates[0]}, last {dates[-1]}, A = {A:.7f}")
 assert (T, N, dates[0], dates[-1]) == (4382, 28, "2008-12-02", "2026-10-08")
 say("T", T, ",")
-say("A", A, ".4f")
+say("A", A, ".2f")                                             # "A=245.48 sessions a year" (LM7's and LM10's wording)
+need("A=245.48$ sessions a year on the U28 sample")
 rep = json.loads((PROC / "vol2_repairs.json").read_text(encoding="utf-8"))["repairs"]
 inside = [r for r in rep if r["series"] in U28 and "2008-12-01" <= r["date"] <= "2026-10-08"]
 say("repaired U28 closes in the sample", len(inside), "d")
@@ -177,7 +178,8 @@ say("x Financial, first half", x1[iF], ",.2f")
 say("x Financial, second half", x2[iF], ",.2f")
 rel_u28 = float(np.linalg.norm(x2 - x1) / np.linalg.norm(x2))
 say("relative change", rel_u28, ".3f")
-say("relative change in percent", rel_u28, ".1%")
+need("0.729 of the second half's solution length")             # relative to ||x(2)||, the denominator of (11.9)
+P(f"   (relative to the first half's length instead: {np.linalg.norm(x2 - x1) / np.linalg.norm(x1):.4f}; not printed)")
 say("cosine of the two solutions", float(x1 @ x2 / np.linalg.norm(x1) / np.linalg.norm(x2)), ".3f")
 
 # ====================================================================== Section 2: E1 (Semiconductor / Financial)
@@ -210,18 +212,19 @@ assert np.allclose(QSF[:, 0], [0.827, 0.563], atol=5e-4) and np.allclose(QSF[:, 
 chk("angle of M e1", deg(math.atan2(1.0666, 2.3234)), ".1f", "24.7")
 chk("pitfall: lambda1 over Semiconductor's variance", 3.0492 / 2.3234, ".2f", "1.31")
 chk("correlation from the printed entries", 1.0666 / math.sqrt(2.3234 * 1.4817), ".4f", "0.5749")
-# the widget's initial state (src/lm11.js), printed for the reviewer: annualized volatilities and the correlation
+# the widget's initial state (src/lm11.js), printed for the reviewer: annualized volatilities and the correlation, to
+# the precision of the sliders (steps 0.0001), so that the widget's kappa matches the ladder exhibit's 4.03
 P(f"widget inputs: Semiconductor {math.sqrt(A * SSF[0, 0]):.2%}, FinancialInsurance {math.sqrt(A * SSF[1, 1]):.2%}, "
-  f"rho {float(corr(SSF)[0, 1]):.3f}")
-assert (f"{math.sqrt(A * SSF[0, 0]):.2%}", f"{math.sqrt(A * SSF[1, 1]):.2%}", f"{float(corr(SSF)[0, 1]):.3f}") == \
-    ("23.88%", "19.07%", "0.575")
+  f"rho {float(corr(SSF)[0, 1]):.4f}")
+assert (f"{math.sqrt(A * SSF[0, 0]):.2%}", f"{math.sqrt(A * SSF[1, 1]):.2%}", f"{float(corr(SSF)[0, 1]):.4f}") == \
+    ("23.88%", "19.07%", "0.5749")
 
 # ====================================================================== Section 3: E2 (LM7's Sigma) and E3 (S3)
 P("\n--- Section 3 ---")
 r50, r679, A7 = lm07_pair()
 assert len(r50) == 2363
 say("LM7 T", len(r50), ",")
-P(f"LM7 A = {A7:.4f} (LM7 annualizes with it; the daily ellipse of the chart does not need it)")
+say("LM7 A (E2: Sigma = A Sigma-hat on LM7's sample; the daily ellipse of the chart does not need it)", A7, ".4f")
 S7 = cov0(np.column_stack([r50, r679])) * A7
 a11, a22, a12 = (round(float(v), 6) for v in (S7[0, 0], S7[1, 1], S7[0, 1]))
 assert (a11, a22, a12) == (0.040425, 0.018214, -0.002866)          # LM7's printed Sigma
@@ -408,19 +411,25 @@ for a_, b_ in ((1, 2), (6, 7)):
 chk("E8 gap 2-3 from the printed eigenvalues", 1.48370 - 1.14694, ".5f", "0.33676")
 chk("E8 gap 7-8 from the printed eigenvalues", 0.58028 - 0.54445, ".5f", "0.03583")
 P(f"E8 unrounded gaps: {lam[1] - lam[2]:.6f}, {lam[6] - lam[7]:.6f}")
-chk("E8 ratio eps/gap (2-3)", eps / 0.33676, ".3f", "0.148")
+chk("E8 ratio eps/gap (2-3)", eps / 0.33676, ".4f", "0.1485")
 chk("E8 exact, gap 0.33676", deg(0.5 * math.atan(2 * eps / 0.33676)), ".2f", "8.27")
 chk("E8 first order, gap 0.33676", deg(eps / 0.33676), ".2f", "8.51")
-chk("E8 ratio eps/gap (7-8)", eps / 0.03583, ".2f", "1.40")
+chk("E8 first order from the printed radians 0.1485", deg(0.1485), ".2f", "8.51")
+chk("E8 ratio eps/gap (7-8)", eps / 0.03583, ".4f", "1.3955")
 chk("E8 exact, gap 0.03583", deg(0.5 * math.atan(2 * eps / 0.03583)), ".1f", "35.1")
 chk("E8 first order, gap 0.03583", deg(eps / 0.03583), ".1f", "80.0")
+chk("E8 first order from the printed radians 1.3955", deg(1.3955), ".1f", "80.0")
 need("0.1/0.33676")
 for a_, b_ in ((1, 2), (6, 7)):                                # unrounded gaps give the same printed angles
     g_ = float(lam[a_] - lam[b_])
     assert format(deg(0.5 * math.atan(2 * eps / g_)), ".2f" if a_ == 1 else ".1f") == ("8.27" if a_ == 1 else "35.1")
 say("KC gap 1-2", lam[0] - lam[1], ".2f")
-say("KC gap 3-4", lam[2] - lam[3], ".2f")
-say("KC gap 4-5", lam[3] - lam[4], ".2f")
+say("KC gap 3-4", lam[2] - lam[3], ".3f")
+say("KC gap 4-5", lam[3] - lam[4], ".3f")
+chk("KC: (11.7) turns q4 against q3, from the printed gap 0.193", deg(0.5 * math.atan(2 * eps / 0.193)), ".1f", "13.7")
+assert format(deg(0.5 * math.atan(2 * eps / float(lam[2] - lam[3]))), ".1f") == "13.7"     # unrounded gap: same
+assert deg(0.5 * math.atan(2 * eps / float(lam[3] - lam[4]))) > 10                           # "more than ten degrees"
+need("more than ten degrees")
 # per year
 ycos1 = {y: abs(float(ys[y][1][:, 0] @ Q[:, 0])) for y in years}
 ycos2 = {y: abs(float(ys[y][1][:, 1] @ Q[:, 1])) for y in years}
@@ -434,6 +443,9 @@ say("returns in 2026", int((yr == 2026).sum()), "d")
 say("returns in December 2008", int((yr == 2008).sum()), "d")
 assert min(years, key=lambda y: ycos1[y]) == 2026
 say("smallest yearly |cos| PC1 (2026)", ycos1[2026], ".3f")
+# the printed lower bound must hold at full precision: 0.98, not the minimum rounded up (0.981 > 0.980974)
+assert min(ycos1.values()) >= 0.98 and min(ycos1.values()) < 0.981
+need("at least 0.98 every year", "lowest in 2026, at 0.981", "2026 has the lowest, 0.981")
 assert (min(years, key=lambda y: ycos2[y]), max(years, key=lambda y: ycos2[y])) == (2016, 2025)
 say("smallest yearly |cos| PC2 (2016)", ycos2[2016], ".3f")
 say("largest yearly |cos| PC2 (2025)", ycos2[2025], ".3f")
@@ -466,6 +478,30 @@ ia, ib = int(np.argmax(np.abs(Qa[:, 1]))), int(np.argmax(np.abs(Qb[:, 1])))
 assert (U28[ia], U28[ib]) == ("OilGasElectricity", "ElectronicPartsComponents")
 say("PC2 first half, OilGasElectricity loading", Qa[ia, 1], ".3f")
 say("PC2 second half, ElectronicPartsComponents loading", Qb[ib, 1], ".3f")
+# The plane measure is one-sided (review of 2026-10-11, finding 1): it says where the second half's q2 went, not that
+# the plane of q2 and q3 holds. The reverse check, the cross cosines and the second half's q3 show that it does not.
+say("|cos| of the second half's q2 with the first half's q3", abs(float(Qa[:, 2] @ Qb[:, 1])), ".3f")
+c32_4 = round(abs(float(Qb[:, 2] @ Qa[:, 1])), 4)                # second half's q3 . first half's q2
+say("cos of the first half's q2 with the second half's q3, 4 decimals", c32_4, ".4f")
+rev = math.hypot(float(Qa[:, 1] @ Qb[:, 1]), float(Qa[:, 1] @ Qb[:, 2]))
+say("reverse measure: first half's q2 against the second half's plane", rev, ".3f")
+chk("reverse measure from the printed 4-decimal cosines", math.hypot(c22_4, c32_4), ".3f", "0.514")
+need("0.2966^2+0.4196^2")
+cos24 = [abs(float(Qa[:, 1] @ Qb[:, k])) for k in range(N)]
+assert int(np.argmax(cos24)) == 3                              # the first half's q2 is closest to the second half's q4
+say("|cos| of the first half's q2 with the second half's q4", cos24[3], ".3f")
+cos32 = [abs(float(Qa[:, k] @ Qb[:, 1])) for k in range(N)]
+assert int(np.argmax(cos32)) == 2                              # the second half's q2 is closest to the first half's q3
+need("the first half's third direction ranks second in the second half (0.879), and its second ranks fourth (0.776)")
+plane_q3 = math.hypot(float(Qa[:, 1] @ Qb[:, 2]), float(Qa[:, 2] @ Qb[:, 2]))
+say("plane measure of the second half's q3 against the first half's plane", plane_q3, ".3f")
+chk("its angle, from the printed 0.437", deg(math.acos(0.437)), ".0f", "64")
+assert format(deg(math.acos(plane_q3)), ".0f") == "64"
+say("second half: lambda3 - lambda4", wb[2] - wb[3], ".3f")
+pa = np.degrees(np.arccos(np.clip(np.linalg.svd(Qa[:, 1:3].T @ Qb[:, 1:3], compute_uv=False), -1, 1)))
+P(f"for the editor (not printed in the module): principal angles between the two halves' planes of q2 and q3: "
+  f"{pa[0]:.2f} and {pa[1]:.2f} degrees")
+need("one-sided")
 
 # ====================================================================== Section 8: the inverse
 P("\n--- Section 8 ---")
@@ -480,7 +516,7 @@ chk("E9 kappa", 1.95 / 0.05, ".0f", "39")
 chk("E9 norm ratio", 0.01 / 1.95, ".6f", "0.005128")
 chk("E9 bound from the printed factors", 39 * 0.005128, ".4f", "0.2000")
 assert abs(39 * 0.01 / 1.95 - 0.2) < 1e-15
-# E10 and X14: shares of ||x||^2 by component, through (11.7)
+# E10 and X14: shares of ||x||^2 by component, through (11.8)
 for lab, Sh, xh in (("first", S1, x1), ("second", S2, x2)):
     wh, Qh = eig_desc(Sh)
     cs = (Qh.T @ one / wh) ** 2 / float(xh @ xh)
@@ -488,6 +524,22 @@ for lab, Sh, xh in (("first", S1, x1), ("second", S2, x2)):
     say(f"E10 {lab} half, PC1 share of ||x||^2", cs[0], ".1%")
     say(f"E10 {lab} half, the 14 smallest components", cs[14:].sum(), ".1%")
     P(f"   {lab}: shares by k {np.round(cs * 100, 2).tolist()}")
+    # "they also lie close together": every gap between neighbours among the 14 smallest eigenvalues is under 1% of
+    # the gap between lambda_1 and lambda_2 (review finding 2)
+    gaps = -np.diff(wh[14:])
+    assert gaps.max() < 0.01 * (wh[0] - wh[1]), (lab, gaps.max() / (wh[0] - wh[1]))
+    P(f"   {lab}: largest neighbouring gap among the 14 smallest eigenvalues {gaps.max():.2e}, "
+      f"{gaps.max() / (wh[0] - wh[1]):.2%} of lambda_1 - lambda_2")
+# "poorly determined": |cos theta| between the halves' covariance eigenvectors, component by component
+wc1, Qc1 = eig_desc(S1)
+wc2, Qc2 = eig_desc(S2)
+ccov = np.abs(np.sum(Qc1 * Qc2, axis=0))
+P("covariance PCA, |cos| between the halves, k = 1..28:", np.round(ccov, 3).tolist())
+assert int(np.argmax(ccov)) == 0                               # PC1, the most stable direction
+n_small = int((ccov[14:] < 0.25).sum())
+assert n_small == 12 and np.all(np.abs(ccov[14:] - 0.25) > 0.005)    # no value near the 0.25 edge
+say("eigenvectors of the 14 smallest eigenvalues with |cos| below 0.25", n_small, "d")
+need("12 of the 14 eigenvectors of the smallest eigenvalues have", "below 0.25")
 k1 = float(np.linalg.cond(S1))
 dn_ = spec_norm(S2 - S1) / spec_norm(S1)
 say("kappa(Sigma^(1))", k1, ".2f")
@@ -586,11 +638,19 @@ chk("P9 rho for kappa 100", 99 / 101, ".4f", "0.9802")
 
 # ====================================================================== widget initial state (for the reviewer)
 P("\n--- widget pca2, initial state (Semiconductor / FinancialInsurance, covariance, b = e1) ---")
-s1w, s2w, rw = 0.2388, 0.1907, 0.575
+s1w, s2w, rw = 0.2388, 0.1907, 0.5749                          # src/lm11.js: slider values (steps 0.0001)
 
 
-def wmat(rho_: float) -> np.ndarray:
-    return np.array([[s1w**2, rho_ * s1w * s2w], [rho_ * s1w * s2w, s2w**2]])
+def wmat(rho_: float, s1_: float = s1w, s2_: float = s2w) -> np.ndarray:
+    return np.array([[s1_**2, rho_ * s1_ * s2_], [rho_ * s1_ * s2_, s2_**2]])
+
+
+def rel_bound(m0: np.ndarray, m1: np.ndarray, b: np.ndarray) -> tuple[float, float]:
+    """The widget's relative change ||dx|| / ||x + dx|| and its bound (11.9), kappa ||dM||_2 / ||M||_2."""
+    xa_w, xb_w = np.linalg.solve(m0, b), np.linalg.solve(m1, b)
+    w0 = eig_desc(m0)[0]
+    return (float(np.linalg.norm(xb_w - xa_w) / np.linalg.norm(xb_w)),
+            float(w0[0] / w0[1] * spec_norm(m1 - m0) / w0[0]))
 
 
 ww, qw = eig_desc(wmat(rw))
@@ -599,6 +659,19 @@ P(f"lambda {ww.round(6).tolist()}, share {ww[0] / ww.sum():.4f}, kappa {ww[0] / 
   f"{deg(math.atan2(qw[1, 0], qw[0, 0])):.2f} deg, x {xw.round(3).tolist()} -> {xw2.round(3).tolist()}, relative "
   f"change {np.linalg.norm(xw2 - xw) / np.linalg.norm(xw2):.4f}, bound "
   f"{ww[0] / ww[1] * spec_norm(wmat(rw + 0.01) - wmat(rw)) / ww[0]:.4f}")
+# the widget's kappa reads like the ladder exhibit's kappa(Sigma) for the same pair (review findings 7 and A4)
+assert format(ww[0] / ww[1], ".2f") == format(ladder[2][3][0] / ladder[2][3][-1], ".2f") == "4.03"
+# the note: equal volatilities and b = 1; for rho > 0, 1 is q1 and the change is 0.01/(1 + rho), below the bound; for
+# rho < 0, 1 is q2 and the change equals the bound (review findings 8 and A1)
+for rho_ in (0.5, 0.9, -0.5, -0.9):
+    m0, m1 = wmat(rho_, 0.2, 0.2), wmat(rho_ + 0.01, 0.2, 0.2)
+    q_one = eig_desc(m0)[1][:, 0 if rho_ > 0 else 1]
+    assert np.allclose(q_one, np.array([1.0, 1.0]) / math.sqrt(2))
+    rc, bd = rel_bound(m0, m1, np.ones(2))
+    assert abs(rc - 0.01 / (1 + rho_)) < 1e-12 and (rc < bd - 1e-6 if rho_ > 0 else abs(rc - bd) < 1e-12), (rho_, rc, bd)
+    P(f"equal volatilities, b = 1, rho {rho_:+.1f}: relative change {rc:.4f}, bound {bd:.4f}")
+JS = (HERE.parent / "src" / "lm11.js").read_text(encoding="utf-8")   # the note's formula sits in the widget
+assert "0.01/(1 + ρ)" in JS and "Bound (11.9)" in JS and "bound (11.9)" in JS and "value: 0.5749" in JS
 assert np.allclose(sign_fix(np.array([-1.0, 1.0]) / math.sqrt(2)), np.array([1.0, -1.0]) / math.sqrt(2))
 
 # ====================================================================== numbers in the text that no check covered
@@ -609,7 +682,7 @@ if TEXT is not None:
     toks = set(re.findall(r"(?<![\w.$])-?\d[\d,]*\.\d+%?|(?<![\w.$])\d{1,3}(?:,\d{3})+|(?<![\w.$])\d+%", body))
     known = " ".join(COVERED)
     left = sorted(t for t in toks if t not in known and t.lstrip("-") not in known
-                  and not re.fullmatch(r"(7|9|10|11)\.\d+", t)          # equation tags
-                  and t not in {"4.7", "4.18", "6.1", "13:30"})
+                  and not re.fullmatch(r"(7|9|10|11|12)\.\d+", t)       # equation tags
+                  and t not in {"4.7", "4.18", "6.1", "6.5", "7.3", "13:30"})   # sections of the references
     P("\nnumbers in src/lm11.md that no check covered:", left if left else "none")
 P("\nall checks passed" if TEXT is not None else "\nsrc/lm11.md not found: values printed, text not checked")

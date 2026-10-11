@@ -46,11 +46,11 @@
         { type: "select", id: "pc-b", label: "Right-hand side b", options: [["e1", "e₁ = (1, 0)"], ["one", "1 = (1, 1)"]] },
         { id: "pc-s1", label: "Volatility σ₁ (asset 1)", min: 0.05, max: 0.6, step: 0.0001, value: 0.2388 },
         { id: "pc-s2", label: "Volatility σ₂ (asset 2)", min: 0.05, max: 0.6, step: 0.0001, value: 0.1907 },
-        { id: "pc-r", label: "Correlation ρ", min: -0.99, max: 0.99, step: 0.005, value: 0.575 }
+        { id: "pc-r", label: "Correlation ρ", min: -0.99, max: 0.99, step: 0.0001, value: 0.5749 }
       ]) + '<div class="pc-chart"></div><div class="readout" aria-live="polite"></div>' +
       '<p class="w-note">The ellipse is the set of points x with x<sup>T</sup>M<sup>−1</sup>x = 1; its half-axes, √λ₁ and √λ₂, lie along the eigenvectors q₁ and q₂ (signed by the book\'s rule). ' +
-      'The last rows solve Mx = b, then raise ρ by 0.01 and solve again. The relative change of the solution never exceeds the bound (11.8): κ times the change of the matrix relative to its spectral norm. ' +
-      'Initial state: Semiconductor (asset 1) and FinancialInsurance (asset 2), 2008–2026. With equal volatilities and b = 1 the solution barely moves, because 1 is then the eigenvector q₁ and the change in ρ only rescales its eigenvalue.</p>';
+      'The last rows solve Mx = b, then raise ρ by 0.01 and solve again. The relative change of the solution never exceeds the bound (11.9): κ times the change of the matrix relative to its spectral norm. ' +
+      'Initial state: Semiconductor (asset 1) and FinancialInsurance (asset 2), 2008–2026. With equal volatilities and b = 1 = (1, 1), the vector 1 is an eigenvector. For ρ &gt; 0 it is q₁, and the solution barely moves (relative change 0.01/(1 + ρ)). For ρ &lt; 0 it is q₂, the direction of the small eigenvalue, and the change reaches the bound.</p>';
     var sm = host.querySelector("#pc-m"), sb = host.querySelector("#pc-b");
     var i1 = host.querySelector("#pc-s1"), i2 = host.querySelector("#pc-s2"), ir = host.querySelector("#pc-r");
     var chart = host.querySelector(".pc-chart"), out = host.querySelector(".readout");
@@ -59,7 +59,7 @@
       var mode = sm.value, s1 = +i1.value, s2 = +i2.value, rho = +ir.value;
       host.querySelector("#pc-s1-v").textContent = fmt(s1, "pct2");
       host.querySelector("#pc-s2-v").textContent = fmt(s2, "pct2");
-      host.querySelector("#pc-r-v").textContent = fmt(rho, "n3");
+      host.querySelector("#pc-r-v").textContent = fmt(rho, "n4");
       i1.disabled = i2.disabled = mode === "corr";
       var m = matrix(mode, s1, s2, rho), e = eig2(m[0], m[1], m[2]);
       var f = mode === "corr" ? "n2" : "pct0", tf = mode === "corr" ? "n1" : "pct0";
@@ -86,7 +86,7 @@
         "<div><span>Solution x of Mx = b</span><b>" + vec(x) + "</b></div>" +
         "<div><span>After ρ + 0.01</span><b>" + (rho2 < 1 ? vec(x2) : "singular: ρ would be 1") + "</b></div>" +
         "<div><span>Relative change of x</span><b>" + (rel == null ? "—" : fmt(rel, "n4")) + "</b></div>" +
-        "<div><span>Bound (11.8)</span><b>" + fmt(bound, "n4") + "</b></div>";
+        "<div><span>Bound (11.9)</span><b>" + fmt(bound, "n4") + "</b></div>";
     }
     [sm, sb, i1, i2, ir].forEach(function (el) { el.addEventListener("input", draw); });
     host.__redraw = draw; draw();
