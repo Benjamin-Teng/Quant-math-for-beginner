@@ -34,6 +34,7 @@ SRC, BUILD = ROOT / "src", ROOT / "build"
 # "artifact" writes the same site to dist/artifact/ with a content-only index for claude.ai artifacts.
 TARGET = "web"
 OUT = ROOT / "docs"
+DOMAIN = "quantmath.fintools.tw"   # GitHub Pages custom domain, written to docs/CNAME (owner, 2026-10-11)
 SYL = yaml.safe_load((SRC / "syllabus.yaml").read_text(encoding="utf-8"))
 ALL_LMS = [dict(lm, vol=v["id"], vol_title=v["title"]) for v in SYL["volumes"] for lm in v["lms"]]
 # A module goes on the site only after review: `status: published` on its entry in syllabus.yaml. Other modules
@@ -93,6 +94,7 @@ def copy_assets():
         shutil.copy(f, a / "katex" / "fonts" / f.name)
     if TARGET == "web" and not PREVIEW:
         (OUT / ".nojekyll").write_text("")
+        (OUT / "CNAME").write_text(DOMAIN + "\n", encoding="utf-8", newline="\n")
 
 # ---------------------------------------------------------------- math
 class MathStore:
