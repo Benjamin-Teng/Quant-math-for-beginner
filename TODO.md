@@ -64,7 +64,14 @@ AUTHORING (§1, §6), PITFALLS and the brief up front. First drafts stay under 5
 assert from the start that every printed value appears in the text and follows from the printed inputs. Writers run
 `style.py`, the build, `overflow.py` at 400 px, `print_width.py`, `pdf_scale.py` and `check_terms.py` before handing
 back. At each hand-back the editor rebases the branch, fast-forwards `main` and pushes (drafts never reach `docs/`
-without `status: published`), so review records cite commits on `main`.
+without `status: published`), so review records cite commits on `main`. **Done 2026-10-11:** the five drafts
+(5,371–5,493 words of prose, 32–33 pages) are on `main`; the editor re-ran every gate there (numbers scripts, charts
+unchanged, style FAIL 0, 400 px, displays, print width, PDF scale 1.0000, terms, ruff, ty, labs without errors).
+Open from the hand-backs, for Stage 3: cross-module equation numbers (LM9 and LM10 cite LM8's and LM9's tags from
+the briefs), LM12's References (IndexS02 is TAIEX's rules, IndexS03 the sector series'), the extra 樂詞網 terms the
+writers checked (record them in SOURCES and the brief), Hessian as 海森矩陣 (LM7's form, kept), and two book.js
+options (bar-label text for LM8's `angles`, ellipses above points for LM11's Exhibit 3). In a worktree, `ty` needs
+`--python` pointing at the main checkout's `.venv`.
 
 **Stage 3, review.** Per module, in parallel in round 1: the independent reviewer (`reviews/REVIEW_PROMPT.md`), the
 blind solver (K) and the number auditor (A, exact arithmetic from `data/raw/`); one consolidated list with the

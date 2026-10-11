@@ -33,6 +33,12 @@ numbers never change silently. New raw files are registered with `fetch_finmind.
 | LM5 | `lm05_numbers.py`, `lm05_charts.py` | `processed/lm05_numbers.json` and every LM5 number; `../src/data/lm05-*.json` |
 | LM6 | `lm06_basis.py`, `lm06_numbers.py`, `lm06_charts.py` | TX basis decomposition through the 2025 dividend season; every other LM6 number; `../src/data/lm06-*.json` |
 | LM7 | `lm07_series.py`, `lm07_stats.py`, `lm07_numbers.py`, `lm07_tables.py`, `lm07_charts.py` | `processed/lm07_returns.parquet` (0050 and 00679B total returns), `processed/lm07_stats.json`; LM7 numbers and tables; `../src/data/lm07-*.json` |
+| LM8–LM12 | `vol2_series.py` | `processed/vol2_closes.parquet` (TAIEX and the 30 sector indices, repaired from the 13:30:00 values), `processed/vol2_repairs.json`, `processed/vol2_series.txt` (the report); needs `raw/sectors_close/` |
+| LM8 | `lm08_numbers.py`, `lm08_charts.py` | every LM8 number, asserted against `../src/lm08.md`; `../src/data/lm08-*.json` |
+| LM9 | `lm09_numbers.py`, `lm09_charts.py` | every LM9 number, asserted against `../src/lm09.md`; `../src/data/lm09-*.json` (the widget presets are in `lm09-area.json`) |
+| LM10 | `lm10_series.py` (imported), `lm10_numbers.py`, `lm10_charts.py` | the U28 sample and the ETFs' one-session returns; every LM10 number, asserted; `../src/data/lm10-*.json` |
+| LM11 | `lm11_common.py` (imported), `lm11_numbers.py`, `lm11_charts.py` | every LM11 number, asserted; `../src/data/lm11-*.json` |
+| LM12 | `lm12_numbers.py`, `lm12_charts.py` | every LM12 number, asserted against `../src/lm12.md`; `../src/data/lm12-*.json` |
 
 `processed/` is not committed; `./build.sh --data` recreates it.
 

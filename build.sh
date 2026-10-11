@@ -33,6 +33,12 @@ DATA_STEPS=(
   data/lm05_numbers.py data/lm05_charts.py
   data/lm06_basis.py data/lm06_numbers.py data/lm06_charts.py
   data/lm07_series.py data/lm07_stats.py data/lm07_numbers.py data/lm07_tables.py data/lm07_charts.py
+  data/vol2_series.py           # Volume II sector closes, repaired from the 13:30:00 values (needs data/raw/sectors_close/)
+  data/lm08_numbers.py data/lm08_charts.py
+  data/lm09_numbers.py data/lm09_charts.py
+  data/lm10_numbers.py data/lm10_charts.py
+  data/lm11_numbers.py data/lm11_charts.py
+  data/lm12_numbers.py data/lm12_charts.py
 )
 # Raw FinMind data are not committed (licence): fetch them with your token and verify against data/raw_manifest.json.
 if [ "$FETCH" = 1 ]; then
