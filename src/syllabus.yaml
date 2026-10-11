@@ -2,6 +2,9 @@ title: From Calculus to Kelly
 subtitle: A quantitative curriculum for statistical modeling, portfolio optimization and optimal leverage
 # Edition notes, newest first. A module is linked from the site only when its entry below has `status: published`.
 editions:
+  - version: "0.2.1"
+    date: 11 October 2026
+    notes: "Volumes V to VII reordered so that portfolio optimization and risk measurement come before stochastic calculus: LM27–31 are now Portfolio Optimization (formerly LM32–36), LM32–35 Measuring True Risk and Return (formerly LM37–40) and LM36–40 Stochastic Calculus (formerly LM27–31). The old numbers belonged only to modules not yet published. In Volume I the references follow the new numbers, and a few hyphens and colons after formulas were rewritten so that none can start a line."
   - version: "0.2"
     date: 11 October 2026
     notes: "Volume I complete: LM1–LM7 with their labs. Each module passed an independent review, a blind solve of every question with a key check, a full audit of its numbers from the raw data and verified revision rounds; LM3 was revised the same way. Wide formulas and tables now fit the printed page, and equation numbers and punctuation no longer collide with formulas."
@@ -28,7 +31,7 @@ volumes:
       - {n: 9, title: "Linear Systems, Inverses and Rank", desc: "Solving for weights; singular matrices as perfect collinearity."}
       - {n: 10, title: "Quadratic Forms and Covariance Matrices", desc: "wᵀΣw, positive (semi)definiteness, matrix calculus."}
       - {n: 11, title: "Eigen-decomposition and PCA", desc: "Eigen-portfolios of Taiwan sectors; condition numbers and why Σ⁻¹ amplifies error."}
-      - {n: 12, title: "Cholesky, SVD and Least Squares", desc: "Simulating correlated returns; OLS as a projection."}
+      - {n: 12, title: "Cholesky, SVD and Least Squares", desc: "Cholesky factors and whitening; SVD and numerical rank; least squares as a projection."}
   - id: III
     title: Probability
     blurb: Random variables as functions, expectation as the workhorse, and the distributions markets actually produce.
@@ -48,40 +51,40 @@ volumes:
       - {n: 21, title: "Hypothesis Testing and Multiple Testing", desc: "p-values, power, Bonferroni and FDR; the t > 3 hurdle for strategies."}
       - {n: 22, title: "Resampling Methods", desc: "Block and stationary bootstrap; confidence intervals for Sharpe and Kelly."}
       - {n: 23, title: "Linear Regression", desc: "From simple to multiple OLS in matrix form; HAC errors; CAPM beta and factor models."}
-      - {n: 24, title: "Bayesian Inference and Shrinkage", desc: "Priors, posteriors, James–Stein; fractional Kelly as a Bayesian answer."}
+      - {n: 24, title: "Bayesian Inference and Shrinkage", desc: "Priors, posteriors, James–Stein; when fractional Kelly is a Bayesian answer."}
       - {n: 25, title: "Time Series I: ARMA, Unit Roots and Cointegration", desc: "Stationarity, mean reversion, the futures–spot basis."}
       - {n: 26, title: "Time Series II: Volatility Models", desc: "EWMA, GARCH, and realized volatility from 5-second TAIEX data."}
   - id: V
-    title: Stochastic Calculus
-    blurb: The continuous-time tools behind GBM, Itô's lemma and the continuous Kelly result.
-    lms:
-      - {n: 27, title: "From Random Walk to Brownian Motion", desc: "Scaling limits, quadratic variation, and what (dB)² = dt really means."}
-      - {n: 28, title: "The Itô Integral and Itô's Lemma", desc: "Itô's lemma derived as a Taylor expansion that keeps its second-order term."}
-      - {n: 29, title: "Geometric Brownian Motion", desc: "Solving the SDE; lognormal prices; mean, median and mode."}
-      - {n: 30, title: "Beyond GBM", desc: "Ornstein–Uhlenbeck spreads, Merton jumps for Taiwan gap days, stochastic volatility."}
-      - {n: 31, title: "Option Pricing Bridge (Optional)", desc: "Black–Scholes by delta hedging; Greeks; TXO and warrants."}
-  - id: VI
     title: Portfolio Optimization
     blurb: Mean–variance theory, the convex machinery to solve it, and the estimation error that breaks it.
     lms:
-      - {n: 32, title: "Portfolio Return and Risk", desc: "N-asset portfolio mathematics in matrix form."}
-      - {n: 33, title: "Mean–Variance Optimization", desc: "Lagrangian derivation, global minimum variance, the frontier, tangency and the CML."}
-      - {n: 34, title: "Convex Optimization in Practice", desc: "Quadratic programs, KKT conditions, cvxpy; long-only, leverage and turnover limits."}
-      - {n: 35, title: "Estimation Error and Robust Portfolios", desc: "The 1/N puzzle, Ledoit–Wolf shrinkage, Black–Litterman, resampling."}
-      - {n: 36, title: "Risk Parity, HRP and Volatility Targeting", desc: "Euler risk contributions and risk-based allocation."}
-  - id: VII
+      - {n: 27, title: "Portfolio Return and Risk", desc: "N-asset portfolio mathematics in matrix form."}
+      - {n: 28, title: "Mean–Variance Optimization", desc: "Lagrangian derivation, global minimum variance, the frontier, tangency and the CML."}
+      - {n: 29, title: "Convex Optimization in Practice", desc: "Quadratic programs, KKT conditions, cvxpy; long-only, leverage and turnover limits."}
+      - {n: 30, title: "Estimation Error and Robust Portfolios", desc: "The 1/N puzzle, Ledoit–Wolf shrinkage, Black–Litterman, resampling."}
+      - {n: 31, title: "Risk Parity, HRP and Volatility Targeting", desc: "Euler risk contributions and risk-based allocation."}
+  - id: VI
     title: Measuring True Risk and Return
     blurb: What a track record really says once compounding, fat tails, costs and selection are accounted for.
     lms:
-      - {n: 37, title: "VaR, Expected Shortfall and Drawdown", desc: "Parametric, historical and Monte Carlo VaR; ES; drawdown statistics."}
-      - {n: 38, title: "The Statistics of the Sharpe Ratio", desc: "Standard errors (Lo 2002), Probabilistic and Deflated Sharpe, minimum track record."}
-      - {n: 39, title: "Backtesting Without Fooling Yourself", desc: "Survivorship and look-ahead bias, Taiwan taxes and fees, walk-forward, PBO."}
-      - {n: 40, title: "Stress Testing", desc: "Taiwan crash scenarios (2008, 2015, 2020, 2024/8/5, 2025/4/7) and overnight gaps."}
+      - {n: 32, title: "VaR, Expected Shortfall and Drawdown", desc: "Parametric, historical and Monte Carlo VaR; ES; drawdown statistics."}
+      - {n: 33, title: "The Statistics of the Sharpe Ratio", desc: "Standard errors (Lo 2002), Probabilistic and Deflated Sharpe, minimum track record."}
+      - {n: 34, title: "Backtesting Without Fooling Yourself", desc: "Survivorship and look-ahead bias, Taiwan taxes and fees, walk-forward, PBO."}
+      - {n: 35, title: "Stress Testing", desc: "Taiwan crash scenarios (2008, 2015, 2020, 2024/8/5, 2025/4/7) and overnight gaps, replayed on a portfolio."}
+  - id: VII
+    title: Stochastic Calculus
+    blurb: The continuous-time tools behind GBM, Itô's lemma and the continuous Kelly result that Volume VIII builds on.
+    lms:
+      - {n: 36, title: "From Random Walk to Brownian Motion", desc: "Scaling limits, quadratic variation, and what (dB)² = dt really means."}
+      - {n: 37, title: "The Itô Integral and Itô's Lemma", desc: "Itô's lemma derived as a Taylor expansion that keeps its second-order term."}
+      - {n: 38, title: "Geometric Brownian Motion", desc: "Solving the SDE; lognormal prices; mean, median and mode."}
+      - {n: 39, title: "Beyond GBM", desc: "Ornstein–Uhlenbeck spreads, Merton jumps for Taiwan gap days, stochastic volatility."}
+      - {n: 40, title: "Option Pricing Bridge (Optional)", desc: "Black–Scholes by delta hedging; Greeks; TXO and warrants."}
   - id: VIII
     title: The Kelly Criterion and Optimal Leverage
     blurb: Growth-optimal sizing from the binary bet to multi-asset leverage under uncertainty.
     lms:
-      - {n: 41, title: "Discrete Kelly", desc: "Binary and general discrete bets; position size vs risk size; sensitivity to p."}
+      - {n: 41, title: "Discrete Kelly", desc: "Beyond LM4's binary bet: general discrete outcomes, the ruin boundary, position vs risk size, and what log utility assumes."}
       - {n: 42, title: "Continuous-Time Kelly", desc: "g(f) by Itô, f* = SR/σ, g* = r + SR²/2, and the 2f* ruin line."}
       - {n: 43, title: "Multi-Asset Kelly", desc: "f* = Σ⁻¹(μ − r): the tangency portfolio, levered."}
       - {n: 44, title: "Fractional Kelly and Drawdown Control", desc: "CRRA equivalence, drawdown probabilities, risk-constrained Kelly."}

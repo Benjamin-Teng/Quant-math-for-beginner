@@ -19,9 +19,9 @@ def roadmap_svg():
         "II": ("L", 1, "Linear Algebra for Portfolios", "LM8–12"),
         "III": ("R", 1, "Probability", "LM13–18"),
         "IV": ("M", 2, "Statistical Inference", "LM19–26"),
-        "V": ("R", 2, "Stochastic Calculus", "LM27–31"),
-        "VI": ("L", 3, "Portfolio Optimization", "LM32–36"),
-        "VII": ("M", 3, "True Risk and Return", "LM37–40"),
+        "V": ("L", 3, "Portfolio Optimization", "LM27–31"),
+        "VI": ("M", 3, "True Risk and Return", "LM32–35"),
+        "VII": ("R", 3, "Stochastic Calculus", "LM36–40"),
         "VIII": ("M", 4, "Kelly and Optimal Leverage", "LM41–46"),
         "IX": ("M", 5, "Capstone", "LM47–50"),
     }
@@ -34,18 +34,18 @@ def roadmap_svg():
         ("I", "II", "gradients, Lagrange", "elbow"),
         ("I", "III", "integrals, series", "elbow"),
         ("III", "IV", "distributions", "elbow"),
-        ("III", "V", "random walks", "down"),
-        ("II", "VI", "wᵀΣw", "down"),
-        ("IV", "VI", "estimated μ, Σ", "elbow"),
-        ("IV", "VII", "sampling error", "down"),
-        ("V", "VIII", "Itô, GBM", "elbow"),
-        ("VI", "VIII", "tangency portfolio", "elbow"),
-        ("VII", "VIII", "uncertainty in μ", "down"),
+        ("III", "VII", "random walks", "down"),
+        ("II", "V", "wᵀΣw", "down"),
+        ("IV", "V", "estimated μ, Σ", "elbow"),
+        ("IV", "VI", "sampling error", "down"),
+        ("VII", "VIII", "Itô, GBM", "elbow"),
+        ("V", "VIII", "tangency portfolio", "elbow"),
+        ("VI", "VIII", "uncertainty in μ", "down"),
         ("VIII", "IX", "sizing rules", "down"),
     ]
     out = [(f'<svg viewBox="0 0 {W} {H}" role="img" aria-label="Prerequisite map: calculus feeds linear algebra and probability; '
             'probability feeds statistics and stochastic calculus; linear algebra and statistics feed portfolio optimization; '
-            'statistics feeds risk measurement; stochastic calculus, portfolio optimization and risk measurement all feed the Kelly volume, which feeds the capstone." '
+            'statistics feeds risk measurement; portfolio optimization, risk measurement and stochastic calculus all feed the Kelly volume, which feeds the capstone." '
             'class="roadmap-svg">'),
            ('<defs><marker id="rm-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">'
             '<path d="M0,0 L10,5 L0,10 z" fill="currentColor"/></marker></defs>')]
@@ -54,14 +54,12 @@ def roadmap_svg():
         ax, ay = anchor(a, "bottom"); bx, by = anchor(b, "top")
         if route == "down" and abs(ax - bx) < 1:
             pts = [(ax, ay), (bx, by - 2)]; lx, ly = ax + 8, (ay + by) / 2 + 4; anc = "start"
-        elif a == "V" and b == "VIII":
+        elif a == "VII" and b == "VIII":
             pts = [(ax, ay), (ax, by + nh / 2), (anchor(b, "right")[0] + 2, by + nh / 2)]
-            lx, ly = ax + 8, (ay + by) / 2 + 30; anc = "start"
-        elif a == "VI" and b == "VIII":
+            lx, ly = ax + 8, by + nh / 2 - 8; anc = "start"
+        elif a == "V" and b == "VIII":
             pts = [(ax, ay), (ax, by + nh / 2), (anchor(b, "left")[0] - 2, by + nh / 2)]
             lx, ly = ax + 8, by + nh / 2 - 8; anc = "start"
-        elif a == "II" and b == "VI":
-            pts = [(ax, ay), (bx, by - 2)]; lx, ly = ax + 8, (ay + by) / 2 + 4; anc = "start"
         else:
             midy = (ay + by) / 2
             pts = [(ax, ay), (ax, midy), (bx, midy), (bx, by - 2)]
@@ -117,10 +115,10 @@ def build():
     else:
         start_link = ""
     goals = [
-        ("Build statistical models", "Return distributions, regressions and factor models, GARCH volatility, cointegrated spreads — estimated, diagnosed and stated with their uncertainty.", "Vol III–V"),
-        ("Optimize portfolios under estimation error", "Mean–variance, risk parity and Kelly portfolios with realistic constraints, shrinkage estimators, and walk-forward evaluation.", "Vol II, VI"),
-        ("Measure true risk and return", "Geometric growth instead of arithmetic averages, confidence intervals for Sharpe ratios, Deflated Sharpe, costs and biases removed.", "Vol IV, VII"),
-        ("Size positions with Kelly leverage", "From the binary bet to multi-asset leverage, with fat tails, parameter uncertainty, margin rules and drawdown limits.", "Vol V, VIII"),
+        ("Build statistical models", "Return distributions, regressions and factor models, GARCH volatility, cointegrated spreads — estimated, diagnosed and stated with their uncertainty.", "Vol III, IV"),
+        ("Optimize portfolios under estimation error", "Mean–variance, risk parity and Kelly portfolios with realistic constraints, shrinkage estimators, and walk-forward evaluation.", "Vol II, V"),
+        ("Measure true risk and return", "Geometric growth instead of arithmetic averages, confidence intervals for Sharpe ratios, Deflated Sharpe, costs and biases removed.", "Vol IV, VI"),
+        ("Size positions with Kelly leverage", "From the binary bet to multi-asset leverage, with fat tails, parameter uncertainty, margin rules and drawdown limits.", "Vol VII, VIII"),
     ]
     goal_html = "".join(f'<div class="goal"><div class="gk">{esc(k)}</div><h3>{esc(t)}</h3><p>{esc(d)}</p></div>' for t, d, k in goals)
     legend = [

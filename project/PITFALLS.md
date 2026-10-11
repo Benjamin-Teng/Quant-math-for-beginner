@@ -97,6 +97,14 @@ unless stated.
   it failed from the next session. Back a one-day case with a multi-day figure and say where it ranks.
 - **2025 TX margins:** no official TAIFEX page was found, only third-party reports; LM2 labels its margin illustrative
   and quotes the official figures effective 2026-08-12.
+- **FinMind copies one day's values onto other dates** (2026-10-11, Volume II data). In `TaiwanStockPrice`'s
+  sector-index series, on 18 dates every sector prints the closes of another day (Semiconductor 1531.87 on both
+  2009-06-05 and 2025-06-11, against 68.65 and 643.65 at the official close), and Chemical has about 20 more such
+  dates. The served rows are reproduced byte for byte, so the manifest's checksums pass, and about 250 of the copied
+  closes move less than 12%, so an outlier filter misses them. About 1,500 other rows carry another day's spread while
+  the close is sound, so a close is never rebuilt as the previous close plus the spread. Rule: look for identical
+  values on different dates and for closes the spread contradicts on both sides; repair them from the 13:30:00 value
+  of `TaiwanStockEvery5SecondsIndex`, registered as raw files; the series builder stops on anything it cannot explain.
 
 ## 4. Build system and rendering
 

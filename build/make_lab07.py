@@ -598,7 +598,7 @@ wf
 md(r"""
 ### Extension: how long should the estimation window be?
 
-Practice Problem 12 re-estimated the weight once a year from the previous calendar year. Generalize it. For estimation windows of 6, 12, 24 and 36 months, re-estimate the minimum-variance weight at the end of every month and hold it for the next month, computing returns daily. Compare the out-of-sample volatility of each rule with the 50/50 mix and with the full-sample weight (which uses future data). Then repeat with weekly instead of daily returns for estimation. Which window and which frequency would you have chosen, and how much of the gap to perfect foresight does each close? LM35 returns to this question with shrinkage estimators.
+Practice Problem 12 re-estimated the weight once a year from the previous calendar year. Generalize it. For estimation windows of 6, 12, 24 and 36 months, re-estimate the minimum-variance weight at the end of every month and hold it for the next month, computing returns daily. Compare the out-of-sample volatility of each rule with the 50/50 mix and with the full-sample weight (which uses future data). Then repeat with weekly instead of daily returns for estimation. Which window and which frequency would you have chosen, and how much of the gap to perfect foresight does each close? LM30 returns to this question with shrinkage estimators.
 """)
 
 code(r"""

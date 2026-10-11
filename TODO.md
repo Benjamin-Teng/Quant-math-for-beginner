@@ -34,13 +34,15 @@ The owner approved the tooling, the data pipeline and the repository process on 
 
 **Stage 1, before any writer starts.**
 
-1. **Data.** `TaiwanStockPrice` daily closes of TAIEX and the 30 TWSE sector indices (ROADMAP, "Daily sector indices
-   need no intraday download"), from 2007-07-02 (2005-01-03 where a series starts then) to 2026-10-08, in windows under
-   500 rows under `data/raw/sectors/`, each checked with `data/check_chunk.py` and registered with
-   `data/fetch_finmind.py --add`; `data/README.md` updated.
-2. **Anchor numbers.** An editor's script computes the facts the briefs rely on (the common sample and its $A$,
-   sector correlations and PCA, condition numbers, the `Electronic` index against its eight sub-industries, TAIEX
-   against the sector returns, LM8's P&L case); a second agent recomputes every quoted one with independent code.
+1. **Data.** Done (`01d3bb8`): 403 files under `data/raw/sectors/`, TAIEX and the 30 TWSE sector indices,
+   2007-07-02 → 2026-10-08. **Still to do:** FinMind copies one day's values onto other dates in the sector series
+   (`data/README.md`, PITFALLS §3), so register the 13:30:00 closes of `TaiwanStockEvery5SecondsIndex` for every
+   flagged date (one query per date for the 18 dates where every sector is wrong, one per sector otherwise; this
+   needs `fetch_finmind.py` to omit `end_date` for that dataset), and write `data/vol2_series.py`, which replaces the
+   flagged closes and stops on any close it cannot explain, as `build_series.py` does.
+2. **Anchor numbers.** First pass done (`data/vol2_anchors.py`, which dropped the bad closes instead of repairing
+   them); rerun on the repaired series. A second agent recomputes every number the briefs quote with independent
+   code.
 3. **Notation.** Extend AUTHORING §6 for vectors and matrices before the briefs: bold column vectors, matrices as plain
    capitals, $^{\top}$ only, a generic matrix that is not $A$ (the annualization factor), a Cholesky factor that is not
    $L$ (leverage), eigenvalues $\lambda_k$ always subscripted, $\hat\Sigma$ dividing by $T$ (`ddof=0`), checked against
@@ -53,9 +55,17 @@ The owner approved the tooling, the data pipeline and the repository process on 
    (hyphens: lm01:79, lm03:22, lm03:396, lm05:335; `；`: lm01:279, lm05:191 twice, lm05:430; `：`: lm01:578, lm02:511,
    lm05:271, lm05:372, lm05:532, lm07:133, lm07:572) by AUTHORING §1's formula-punctuation rule; `style.py` finds none
    left; a fresh check; rebuild `docs/` and the PDFs.
-6. **Briefs.** `plans/vol-2.md` in the format of `plans/vol-1.md`, plus per module: notation, concepts used before
-   they are taught (with pointers), verified anchor numbers with their scripts, exhibits and chart types, a problems
-   plan, lab parts and cross-module tags. A fresh Opus agent checks the briefs.
+6. **Briefs.** `plans/vol-2.md` in the format given in ROADMAP ("Brief format"), within its "Module boundaries"
+   table. A fresh Opus agent checks the briefs.
+7. **Renumbering and two new pages** (owner, 2026-10-11, after a review by Codex). Volumes V–VII reordered and
+   LM27–LM40 renumbered (ROADMAP; edition 0.2.1 in the syllabus): applied to the syllabus, the front page's map,
+   Volume I's references and leads, the LM7 lab, AUTHORING, SPEC and `plans/vol-1.md`; rebuild `docs/` and the
+   PDFs with item 5, then a fresh check of every Volume I change. Add a **Getting Started** page (prerequisites,
+   environment and FinMind token, data semantics, the book's conventions, reproducibility, a ten-minute smoke test in
+   a code block) and a **Research hygiene** page (point-in-time data, chronological splits, selection kept apart from
+   evaluation, costs inside the strategy, the universe and data policy fixed in advance, results labelled
+   descriptive, in-sample, stability or out-of-sample); every module that estimates, selects or backtests carries a
+   short local note pointing to it.
 
 **Stage 2, writing.** Five writers in parallel, one module each on its own worktree branch (`vol2/lmNN`), with
 AUTHORING (§1, §6), PITFALLS and the brief up front. First drafts stay under 5,500 words of prose; numbers scripts
@@ -85,7 +95,7 @@ finds nothing (options before the pattern).
 
 ## Then: the remaining volumes
 
-Follow [`plans/ROADMAP.md`](plans/ROADMAP.md): batch 2 is Volume III (LM13–LM18), then IV + V, VI + VII, VIII and IX.
+Follow [`plans/ROADMAP.md`](plans/ROADMAP.md): batch 2 is Volume III (LM13–LM18), then IV, V + VI, VII, VIII and IX.
 Each batch repeats Stages 1–4 and bumps the edition. Ask the owner about code, site, repository and his standing
 rules, and about the open decisions at the end of the roadmap before the batch that needs them; content is the
 editor's call.

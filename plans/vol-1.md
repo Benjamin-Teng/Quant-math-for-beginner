@@ -12,7 +12,7 @@ dividend season for LM6.
 
 ## LM1 Exponentials, Logarithms and Compounding
 
-**Prereq:** none. **Leads:** 3, 6, 19, 29.
+**Prereq:** none. **Leads:** 3, 6, 19, 38.
 **Owns:** laws of exponents/logs; change of base; log scale charts; compounding frequency, EAR, the limit
 $(1+r/n)^n\to e^r$ and the definition of $e$; holding-period and annualized returns; continuously compounded
 returns and their additivity over time; time-to-goal and rate-to-goal problems; drawdown recovery arithmetic.
@@ -36,7 +36,7 @@ drawdown.
 
 ## LM2 Limits and Derivatives
 
-**Prereq:** 1. **Leads:** 3, 4, 7, 31.
+**Prereq:** 1. **Leads:** 3, 4, 7, 40.
 **Owns:** limits and continuity (including the derivative as a limit and $\lim (1+1/n)^n$ revisited briefly),
 differentiation rules (power, exponential, logarithmic, product, quotient, chain), derivatives as marginal rates,
 sensitivities and elasticities, differentials and the linear approximation, numerical differentiation.
@@ -101,13 +101,13 @@ returns, with a shaded density.
 
 ## LM6 Sequences, Series and the Time Value of Money
 
-**Prereq:** 1. **Leads:** 3, 7, 25, 31.
+**Prereq:** 1. **Leads:** 3, 7, 25, 40.
 **Owns:** arithmetic and geometric sequences, finite and infinite geometric sums, PV/FV, annuities (ordinary and due),
 perpetuities, growing annuities and perpetuities, loan amortization, bond pricing and YTM (numerically — link
 [[LM4]] for Newton), dividend discount and Gordon growth models with implied required return and implied growth,
 cash-flow additivity and no-arbitrage: implied forward rates, forward FX, and index futures fair value
 $F=Se^{(r-q)T}$.
-**Leaves:** duration and convexity (LM2/LM3), term-structure modelling, options (LM31).
+**Leaves:** duration and convexity (LM2/LM3), term-structure modelling, options (LM40).
 **Motivating case:** "Why does TX trade below TAIEX every summer?" — use near-month TX settlement vs TAIEX close in
 May–September 2025; the discount (逆價差) widens before the ex-dividend season. Fair value $F=Se^{(r-q)T}$ turns
 the basis into an implied dividend yield; compare it with a plausible range. Connects directly to futures–spot
@@ -124,12 +124,12 @@ dividend yield through the 2025 season.
 
 ## LM7 Multivariable Calculus and Lagrange Multipliers
 
-**Prereq:** 2, 3, 4. **Leads:** 10, 32, 33, 43.
+**Prereq:** 2, 3, 4. **Leads:** 10, 27, 28, 43.
 **Owns:** functions of several variables, partial derivatives, gradient, Hessian, multivariate Taylor to second
 order, unconstrained optima and the 2×2 definiteness test, Lagrange multipliers and the multiplier as shadow price,
 KKT conditions for simple inequality constraints, gradient-based numerical optimization; two-asset minimum-variance
 weights, two-asset tangency weights and the two-asset Kelly fraction by calculus.
-**Leaves:** matrix notation and $N$ assets (Vol II and LM32–33), estimation error (LM35).
+**Leaves:** matrix notation and $N$ assets (Vol II and LM27–28), estimation error (LM30).
 **Motivating case:** "0050 plus a US Treasury ETF: how much bond minimizes risk?" — 00679B (元大美債20年, TWD) and
 0050 daily total returns since 2017: volatilities, correlation (and its regime change in 2022, when both fell), the
 calculus-derived minimum-variance weight, its in-sample vs out-of-sample volatility. State clearly that 00679B returns

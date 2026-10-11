@@ -72,7 +72,7 @@ lm: 1
 title: Exponentials, Logarithms and Compounding        # must match src/syllabus.yaml
 subtitle: "One line that states the module's point."
 prereq: []                 # module numbers this one builds on (every module it cites for a result)
-leads: [3, 19, 29]         # module numbers that build on this one
+leads: [3, 19, 38]         # module numbers that build on this one
 time: "≈ 2 h + lab"
 js: [lm01.js]              # only if the module has widgets
 outcomes:                  # 6–8; each completes "After this module you should be able to:"

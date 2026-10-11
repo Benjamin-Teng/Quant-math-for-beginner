@@ -37,7 +37,8 @@ material: worked examples, diagrams and formulas carry the content, and the pros
 | Historical data source | FinMind only, including intraday history (5-second TAIEX, minute bars, ticks); Shioaji is not used for historical data | owner, 2026-10-10 |
 | Raw data in the repo | none: raw FinMind files are git-ignored and rebuilt from `data/raw_manifest.json` with `data/fetch_finmind.py`; history purged of them | owner, 2026-10-10 |
 | FinMind plan | Sponsor: 6,000 API calls an hour and every Free, Backer and Sponsor dataset; non-commercial licence that forbids redistributing raw data and requires citing FinMind | owner, 2026-10-10 |
-| Remaining volumes | six batches after Volume I: II, III, IV + V, VI + VII, VIII, IX (`plans/ROADMAP.md`) | agreed 2026-10-10; Volume II on its own: owner, 2026-10-11 |
+| Remaining volumes | seven batches after Volume I: II, III, IV, V + VI, VII, VIII, IX (`plans/ROADMAP.md`) | agreed 2026-10-10; Volume II on its own: owner, 2026-10-11 |
+| Volume order | portfolio optimization (V) and risk measurement (VI) before stochastic calculus (VII), which stays required because Volume VIII's continuous-time results use it; LM27–LM40 renumbered (ROADMAP gives the mapping) | owner, 2026-10-11, after a review by Codex |
 | Hosting | GitHub repo [Benjamin-Teng/Quant-math-for-beginner](https://github.com/Benjamin-Teng/Quant-math-for-beginner) (public); the built site in `docs/` is served by GitHub Pages from `main` `/docs` at <https://quantmath.fintools.tw> (`build/build.py` writes `docs/CNAME`; DNS at Gandi: `quantmath CNAME benjamin-teng.github.io.`, and the TXT record `_github-pages-challenge-Benjamin-Teng` that keeps `fintools.tw` verified for this GitHub account must stay) | owner, 2026-10-10; domain 2026-10-11 |
 | Git | commit and push directly to `main`; no pull requests | owner, 2026-10-10 |
 | License | MIT (`LICENSE`); FinMind data remain subject to FinMind's terms | owner, 2026-10-10 |
@@ -58,9 +59,9 @@ Nine volumes, fifty learning modules; the authoritative list (titles, one-line d
 | II | Linear Algebra for Portfolios | LM8–LM12 |
 | III | Probability | LM13–LM18 |
 | IV | Statistical Inference and Econometrics | LM19–LM26 |
-| V | Stochastic Calculus | LM27–LM31 |
-| VI | Portfolio Optimization | LM32–LM36 |
-| VII | Measuring True Risk and Return | LM37–LM40 |
+| V | Portfolio Optimization | LM27–LM31 |
+| VI | Measuring True Risk and Return | LM32–LM35 |
+| VII | Stochastic Calculus | LM36–LM40 |
 | VIII | The Kelly Criterion and Optimal Leverage | LM41–LM46 |
 | IX | Capstone | LM47–LM50 |
 
