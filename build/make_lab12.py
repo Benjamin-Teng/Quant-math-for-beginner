@@ -75,7 +75,7 @@ Companion notebook to **From Calculus to Kelly, LM12**. It repairs the sector cl
 
 `data/` then holds `sectors_close_raw.csv` (the closes FinMind's `TaiwanStockPrice` serves for TAIEX and the 30 TWSE sector indices, one column per series, empty where a series has no close) and `sectors_close_repairs.csv` (each of the 561 closes that FinMind copied from another date or series, with its official 13:30:00 value from `TaiwanStockEvery5SecondsIndex`). The notebook reads nothing outside `data/`.
 
-**Conventions (as in the module).** Daily simple returns of price indices between consecutive TAIEX-calendar dates; the common sample of TAIEX and U28 (the 28 sector indices without the aggregates Electronic and ChemicalBiotechnologyMedicalCare) from the close of 2008-12-01 to 2026-10-08, $T=4{,}382$ returns; moments divide by $T$; a fit is least squares of TAIEX's returns on the sector returns with an intercept. Every fit is in-sample, the yearly fits are a stability check, and the SVD, $L$ and $\mathbf z_t$ describe the full sample.
+**Conventions (as in the module).** Daily simple returns of price indices between consecutive TAIEX-calendar dates; the common sample of TAIEX and U28 (the 28 leaf indices among the 30 TWSE sector indices that FinMind serves daily, that is, all but the aggregates Electronic and ChemicalBiotechnologyMedicalCare) from the close of 2008-12-01 to 2026-10-08, $T=4{,}382$ returns; moments divide by $T$; a fit is least squares of TAIEX's returns on the sector returns with an intercept. Every fit is in-sample, the yearly fits are a stability check, and the SVD, $L$ and $\mathbf z_t$ describe the full sample.
 """)
 
 code(r"""
@@ -84,6 +84,7 @@ import math
 import numpy as np
 import polars as pl
 import matplotlib.pyplot as plt
+from scipy.linalg import solve_triangular
 
 DATA = Path("data")
 FIRST_CLOSE, LAST_CLOSE = "2008-12-01", "2026-10-08"
@@ -156,6 +157,10 @@ def show(label, value, fmt, printed, kept=False):
 
 
 show("T", T, ",", "4,382")
+# the listed closes are the same on every plan, so these counts never change
+show("listed U28 closes in the sample", in_sample.height, "d", "524", kept=True)
+show("   on dates", in_sample["date"].n_unique(), "d", "38", kept=True)
+show("   with Electronic's", in_sample.height + elec.height, "d", "542", kept=True)
 """)
 
 md(r"""
@@ -394,24 +399,25 @@ The recursion (12.8) column by column, checked against `np.linalg.cholesky` (low
 """)
 
 code(r"""
-def cholesky(S):
-    n = len(S)
-    L = np.zeros_like(S)
+def cholesky(Sigma):
+    # the recursion (12.8), column by column; d is the pivot l_jj^2
+    n = len(Sigma)
+    L = np.zeros_like(Sigma)
     for j in range(n):
-        d = S[j, j] - L[j, :j] @ L[j, :j]
+        d = Sigma[j, j] - L[j, :j] @ L[j, :j]
         if d <= 0:
             raise np.linalg.LinAlgError(f"not positive definite at column {j + 1}")
         L[j, j] = math.sqrt(d)
         for i in range(j + 1, n):
-            L[i, j] = (S[i, j] - L[i, :j] @ L[j, :j]) / L[j, j]
+            L[i, j] = (Sigma[i, j] - L[i, :j] @ L[j, :j]) / L[j, j]
     return L
 
 
 i5 = [col[c] for c in S5]
-S5m = Sig[np.ix_(i5, i5)]
-L5 = cholesky(S5m)
-print(f"own recursion vs np.linalg.cholesky: largest difference {np.abs(L5 - np.linalg.cholesky(S5m)).max():.1e}")
-show("[[eg:chol2]] sigma_11 (x 1e4)", 1e4 * S5m[0, 0], ".6f", "2.323354")
+Sig5 = Sig[np.ix_(i5, i5)]
+L5 = cholesky(Sig5)
+print(f"own recursion vs np.linalg.cholesky: largest difference {np.abs(L5 - np.linalg.cholesky(Sig5)).max():.1e}")
+show("[[eg:chol2]] sigma_11 (x 1e4)", 1e4 * Sig5[0, 0], ".6f", "2.323354")
 show("   l_11", L5[0, 0], ".7f", "0.0152426")
 show("   l_21", L5[1, 0], ".6f", "0.006998")
 show("   l_22", L5[1, 1], ".6f", "0.009960")
@@ -424,10 +430,10 @@ pl.DataFrame(100 * L5, schema=S5, orient="row").insert_column(0, pl.Series("sect
 """)
 
 code(r"""
-S_dec = np.cov(X[DEC], rowvar=False, ddof=0)
-print(f"December 2008: Sigma is {S_dec.shape} with rank {np.linalg.matrix_rank(S_dec)}")
+Sig_dec = np.cov(X[DEC], rowvar=False, ddof=0)
+print(f"December 2008: Sigma is {Sig_dec.shape} with rank {np.linalg.matrix_rank(Sig_dec)}")
 try:
-    np.linalg.cholesky(S_dec)
+    np.linalg.cholesky(Sig_dec)
 except np.linalg.LinAlgError as err:
     print("np.linalg.cholesky raised LinAlgError:", err)
 """)
@@ -435,18 +441,18 @@ except np.linalg.LinAlgError as err:
 md(r"""
 ## Part 6 — Whitening and colouring
 
-$\mathbf z_t=L^{-1}(\mathbf R_t-\bar{\mathbf R})$ by a triangular solve (here `np.linalg.solve`; `scipy.linalg.solve_triangular` exploits the triangle). The mean of $\lVert\mathbf z_t\rVert^2$ is exactly $N$, and the squared length does not depend on the asset order.
+$\mathbf z_t=L^{-1}(\mathbf R_t-\bar{\mathbf R})$ by a triangular solve: `scipy.linalg.solve_triangular` with `lower=True` works down the rows of $L$ and never forms $L^{-1}$ (`np.linalg.solve` would also work, as a general solver that ignores the triangle). The mean of $\lVert\mathbf z_t\rVert^2$ is exactly $N$, and the squared length does not depend on the asset order.
 """)
 
 code(r"""
-Z5 = np.linalg.solve(L5, Xc[:, i5].T).T
+Z5 = solve_triangular(L5, Xc[:, i5].T, lower=True).T
 q5 = (Z5 ** 2).sum(axis=1)
 print(f"sample covariance of z: largest |entry - identity| {np.abs(Z5.T @ Z5 / T - np.eye(5)).max():.1e}; mean |z|^2 = {q5.mean():.12f}")
 i7 = dates.index("2025-04-07")
 for c, p in zip(S5, ("-9.95", "-9.89", "-8.66", "-9.90", "-9.73")):
     show(f"7 April 2025 return, {c}", 100 * X[i7, col[c]], ".2f", p, kept=True)
 rev = i5[::-1]
-z_rev = np.linalg.solve(np.linalg.cholesky(Sig[np.ix_(rev, rev)]), Xc[i7, rev])
+z_rev = solve_triangular(np.linalg.cholesky(Sig[np.ix_(rev, rev)]), Xc[i7, rev], lower=True)
 tbl = pl.DataFrame({"sector": S5, "return %": 100 * X[i7, i5], "centred %": 100 * Xc[i7, i5],
                     "z, given order": Z5[i7], "z, reversed order": z_rev[::-1]})
 show("[[eg:apr7eg]] |z|^2", q5[i7], ".2f", "89.30")
@@ -462,15 +468,18 @@ pl.DataFrame({"rank": list(range(1, 6)), "date": [dates[k] for k in top], "|z|^2
 
 code(r"""
 L2 = np.linalg.cholesky(Sig[np.ix_(i5[:2], i5[:2])])
-Z2 = np.linalg.solve(L2, Xc[:, i5[:2]].T).T
+Z2 = solve_triangular(L2, Xc[:, i5[:2]].T, lower=True).T
 print("the pair's z equals the first two entries of S5's z:", np.allclose(Z2, Z5[:, :2]))
+q2 = (Z2 ** 2).sum(axis=1)                 # the pair's squared whitened length, z_1^2 + z_2^2
+print(f"7 April 2025: the pair's z_1^2 + z_2^2 = {q2[i7]:.2f}, S5's |z|^2 = {q5[i7]:.2f}; "
+      f"{int((q2 > 9).sum())} of {T} days lie outside the curve z_1^2 + z_2^2 = 9")
 fig, axes = plt.subplots(1, 2, figsize=(10, 5))
 t = np.linspace(0, 2 * np.pi, 400)
 ring = np.vstack([np.cos(t), np.sin(t)]) * 3
 for ax, P, curve, title in ((axes[0], 100 * Xc[:, i5[:2]], 100 * L2 @ ring, "centred returns (% a day)"),
                             (axes[1], Z2, ring, "whitened returns")):
     ax.scatter(P[:, 0], P[:, 1], s=2, alpha=0.4)
-    ax.plot(curve[0], curve[1], color="tab:orange", label="|z|^2 = 9")
+    ax.plot(curve[0], curve[1], color="tab:orange", label="$z_1^2+z_2^2=9$")
     ax.scatter([P[i7, 0]], [P[i7, 1]], color="tab:red", s=30, label="7 Apr 2025")
     ax.set_aspect("equal"); ax.set_title(title); ax.legend(fontsize=8)
 fig.suptitle("[[ex:white]]: Semiconductor (x) and FinancialInsurance (y)"); plt.show()
@@ -494,7 +503,8 @@ for name, Mx in (("A", [[4, 2], [2, 5]]), ("B", [[4, 6], [6, 9]]), ("C", [[1, 3]
     try:
         print(f"P3 matrix {name}: det {np.linalg.det(Mx):.0f}, L = {np.linalg.cholesky(Mx).tolist()}")
     except np.linalg.LinAlgError:
-        print(f"P3 matrix {name}: det {np.linalg.det(Mx):.0f}, no Cholesky factor")
+        # B gives l_22 = 0 exactly and C a negative l_22^2: neither has a positive diagonal
+        print(f"P3 matrix {name}: det {np.linalg.det(Mx):.0f}, no Cholesky factor with a positive diagonal")
 
 xp, yp = np.array([-1.0, 0, 1, 2]), np.array([0.0, 1, 1, 4])
 Dp = np.column_stack([np.ones(4), xp]); bp = np.linalg.lstsq(Dp, yp, rcond=None)[0]; ep = yp - Dp @ bp
@@ -518,15 +528,20 @@ s5 = np.linalg.svd(Xc[:, i5] / math.sqrt(T), compute_uv=False)
 print("P8: singular values", s5.round(6), " eigenvalues x 1e4", (1e4 * s5 ** 2).round(3),
       f" kappa(X~) {s5[0] / s5[-1]:.3f}, kappa(Sigma) {(s5[0] / s5[-1]) ** 2:.2f}")
 
-s1, s2, rho = 0.201, 0.135, -0.11
-S7 = np.array([[s1 ** 2, rho * s1 * s2], [rho * s1 * s2, s2 ** 2]])
-L7 = np.linalg.cholesky(S7)
-print(f"P9: L = {L7.round(5).tolist()}, slope l21/l11 = {L7[1, 0] / L7[0, 0]:.4f}, l22 = {L7[1, 1]:.4%}")
+# P9 and P10: LM7's annualized covariance matrix of 0050 and 00679B, as LM7 prints it
+Sig7 = np.array([[0.040425, -0.002866], [-0.002866, 0.018214]])
+L7 = np.linalg.cholesky(Sig7)
+print(f"P9: L = {L7.round(6).tolist()}")
+show("   l_11", L7[0, 0], ".5f", "0.20106", kept=True)
+show("   l_21", L7[1, 0], ".6f", "-0.014254", kept=True)
+show("   l_22", L7[1, 1], ".6f", "0.134204", kept=True)
+show("   slope l_21/l_11", L7[1, 0] / L7[0, 0], ".4f", "-0.0709", kept=True)
 d = np.array([-0.30, 0.10])
-z = np.linalg.solve(L7, d)
-zr = np.linalg.solve(np.linalg.cholesky(S7[::-1, ::-1]), d[::-1])
-print(f"P10: z = {z.round(4)}, |z|^2 = {z @ z:.3f}; reversed order z = {zr.round(4)}, |z|^2 = {zr @ zr:.3f}; "
-      f"d' Sigma^-1 d = {d @ np.linalg.solve(S7, d):.3f}")
+z = solve_triangular(L7, d, lower=True)
+zr = solve_triangular(np.linalg.cholesky(Sig7[::-1, ::-1]), d[::-1], lower=True)
+print(f"P10: z = {z.round(3)}, reversed order z = {zr.round(3)}; d' Sigma^-1 d = {d @ np.linalg.solve(Sig7, d):.4f}")
+show("   |z|^2", z @ z, ".2f", "2.57", kept=True)
+show("   |z|^2, reversed order", zr @ zr, ".2f", "2.57", kept=True)
 """)
 
 code(r"""
@@ -538,27 +553,30 @@ b_c = (np.linalg.pinv(np.column_stack([np.ones(250), X[LAST]])) @ y[LAST])[1:]
 sL = np.linalg.svd(XL, compute_uv=False)
 print(f"P11: R-squared {r2_last:.5f}; largest gaps {np.abs(b_a - b_b).max():.1e} and {np.abs(b_a - b_c).max():.1e}; "
       f"kappa(X~) {sL[0] / sL[-1]:.2f}, kappa(X~'X~) {(sL[0] / sL[-1]) ** 2:.1f}")
-# P12: yearly fits and the numerical rank of Electronic + eight at delta = 0.01
+# P12: yearly fits and the numerical rank of Electronic + eight at delta = 0.01, standardized within each year
 ranks = {yr: (int((ratios(year == yr) > 0.01).sum()),
               int(np.linalg.matrix_rank((E9[year == yr] - E9[year == yr].mean(0)) / E9[year == yr].std(0))))
          for yr in range(2009, 2027)}
 print(f"P12: smallest yearly R-squared {low['R-squared']:.5f} ({low['year']}); rank at 0.01 and matrix_rank by year:", ranks)
+show("   s_9/s_1 in 2010", ratios(year == 2010)[-1], ".5f", "0.01004")
 """)
 
 md(r"""
 ### Extension: how close is a coloured simulation?
 
-Colour $T$ independent standard normal draws with S5's $L$ and compare the sample covariance of the simulated returns with $\hat\Sigma$. The relative gap below uses the Frobenius norm, the square root of the sum of squared entries. Then repeat with other seeds and with $T$ = 500, 4,382 and 50,000: how does the gap shrink as $T$ grows? [[LM18]] explains the rate.
+Colour $T$ independent standard normal draws with S5's $L$ and compare the sample covariance of the simulated returns with $\hat\Sigma$. The relative gap below uses the Frobenius norm, the square root of the sum of squared entries. Then repeat with other seeds and with $T$ = 500, 4,382 and 50,000: how does the gap shrink as $T$ grows? LM18 explains the rate.
 """)
 
 code(r"""
 rng = np.random.default_rng(20261011)
 draws = rng.standard_normal((T, 5))
 sim = draws @ L5.T                      # row t is L z_t
-S_sim = np.cov(sim, rowvar=False, ddof=0)
-gap = np.linalg.norm(S_sim - S5m) / np.linalg.norm(S5m)
+Sig_sim = np.cov(sim, rowvar=False, ddof=0)
+gap = np.linalg.norm(Sig_sim - Sig5) / np.linalg.norm(Sig5)
 print(f"relative Frobenius gap: {gap:.4f}")
-show("relative Frobenius gap (4 decimals)", gap, ".4f", "0.0250")
+# the module prints no gap; 0.0250 is what this seed gives with every close repaired
+if FULL_DATA:
+    assert f"{gap:.4f}" == "0.0250", gap
 # your code: other seeds, other T
 """)
 

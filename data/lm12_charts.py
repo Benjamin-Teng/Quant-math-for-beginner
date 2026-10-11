@@ -4,7 +4,8 @@ Run:  uv run python data/lm12_charts.py      (after data/vol2_series.py; data/lm
 
 Inputs: data/processed/vol2_closes.parquet only. Same sample and conventions as data/lm12_numbers.py: closes
 2008-12-01 .. 2026-10-08, daily simple returns between consecutive TAIEX-calendar dates (T = 4,382), U28 = the 28
-sector indices without the aggregates, fits with an intercept by np.linalg.lstsq, moments with divisor T.
+leaf indices among the 30 TWSE sector indices that FinMind serves daily (all but the aggregates), fits with an
+intercept by np.linalg.lstsq, moments with divisor T.
 Writes lm12-proj, lm12-coef, lm12-drift, lm12-svd, lm12-rank, lm12-white-raw, lm12-white-z and lm12-weights (the
 bar chart that the widget taiexWeights starts from, with every sample's coefficients in its "widget" block).
 """
@@ -172,7 +173,8 @@ i7 = dates.index("2025-04-07")
 pct = 100 * xpc
 white_raw = {
     "type": "scatter", "equal": True, "alt": "Centred daily returns of Semiconductor against FinancialInsurance, "
-    "4,382 days, with the tilted ellipse on which the squared whitened length is 9; 7 April 2025 lies far outside",
+    "4,382 days, with the tilted ellipse on which the pair's squared whitened length is 9; 7 April 2025 lies far "
+    "outside",
     "height": 440,
     "x": {"label": "Semiconductor, centred (% a day)", "fmt": "n2", "tfmt": "n0", "name": "Semiconductor",
           "min": -11, "max": 11},
@@ -182,7 +184,7 @@ white_raw = {
                 "x": [r(v, 2) for v in pct[:, 0]], "y": [r(v, 2) for v in pct[:, 1]]}],
     "ellipses": [{"center": [0, 0], "cov": [[r(1e4 * sig2[0, 0], 6), r(1e4 * sig2[0, 1], 6)],
                                             [r(1e4 * sig2[1, 0], 6), r(1e4 * sig2[1, 1], 6)]],
-                  "scale": 3, "color": "2", "label": "squared whitened length 9"}],
+                  "scale": 3, "color": "2", "label": "z_1^2 + z_2^2 = 9"}],
     "points": [{"at": [r(pct[i7, 0], 3), r(pct[i7, 1], 3)], "label": "7 Apr 2025", "color": "2", "dx": 8, "dy": -6}],
 }
 write("lm12-white-raw", white_raw)

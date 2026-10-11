@@ -3,13 +3,15 @@
 Run:  uv run python data/lm12_numbers.py      (after data/vol2_series.py has written processed/vol2_closes.parquet)
 
 Inputs: data/processed/vol2_closes.parquet (TAIEX and the 30 TWSE sector indices, closes repaired from the 13:30:00
-values by data/vol2_series.py), the file names in data/raw/sectors_close/ (one per repaired close: they show that no
-top-five day uses a repaired close) and src/lm12.md (the text the checks compare against).
+values by data/vol2_series.py), the file names in data/raw/sectors_close/ (one per repaired close: they give the
+number of repaired closes in the sample and show that no top-five day uses a repaired close), src/lm12.md (the
+text the checks compare against) and src/lm07.md (the covariance matrix that Problems 9 and 10 take from LM7).
 
 Sample: closes 2008-12-01 .. 2026-10-08, daily simple returns between consecutive TAIEX-calendar dates, T = 4,382
-(first return 2008-12-02); U28 = the 28 sector indices without the aggregates Electronic and
-ChemicalBiotechnologyMedicalCare. Moments divide by T. A fit is least squares of TAIEX's
-returns on the sector returns with an intercept (np.linalg.lstsq on (1 X)); R-squared = 1 - |e|^2 / |y - mean(y)|^2.
+(first return 2008-12-02); U28 = the 28 leaf indices among the 30 TWSE sector indices that FinMind serves daily,
+that is, all but the aggregates Electronic and ChemicalBiotechnologyMedicalCare. Moments divide by T. A fit is least
+squares of TAIEX's returns on the sector returns with an intercept (np.linalg.lstsq on (1 X)); R-squared =
+1 - |e|^2 / |y - mean(y)|^2.
 
 Each check chk(label, value, fmt, printed) asserts that format(value, fmt) equals the printed string and that the
 string appears in src/lm12.md (after replacing the Unicode minus by '-' and '{,}' by ','). Hand examples are
@@ -336,6 +338,10 @@ assert all(v[1] == 9 for v in ranks_year.values())
 assert [yr for yr, v in ranks_year.items() if v[0] == 9] == [2009, 2010, 2018]
 assert sum(v[0] == 8 for v in ranks_year.values()) == 15
 has("years with rank 9", "9 in 2009, 2010 and 2018 and 8 in the other 15 years")
+has("Problem 12 standardizes within each year", "within that year (divisor $T$)")
+sv_2010 = std_sv(year == 2010)
+chk("Electronic + eight: s_9/s_1 in 2010, standardized within the year", sv_2010[-1] / sv_2010[0], ".5f", "0.01004")
+assert nrank(sv_2010, 0.01) == 9 and nrank(sv_2010, 0.0101) == 8, "2010 is no longer just above the tolerance"
 
 # ------------------------------------------------------------------ Section 6: Cholesky, whitening
 i5 = [col[c] for c in S5]
@@ -420,8 +426,23 @@ for rank, (k, pd, pq, pt) in enumerate(zip(top, ("2025-04-07", "2026-07-31", "20
     chk(f"top-5 |z|^2 {pd}", float(q5[k]), ".2f", pq)
     chk(f"top-5 TAIEX return {pd}", float(100 * y[int(k)]), "+.2f", pt)
 assert REPAIRED.is_dir(), "data/raw/sectors_close/ is missing: run data/fetch_finmind.py"
-chk("repaired closes (raw files in sectors_close/)", float(len(list(REPAIRED.glob("*__*.csv")))), ".0f", "561")
+repairs = [f.stem.split("__") for f in REPAIRED.glob("*__*.csv")]
+assert len(repairs) == 561, "the manifest lists 561 repaired closes"
+in_window = [(sid, d) for sid, d in repairs if FIRST_CLOSE <= d <= LAST_CLOSE]
+rep_u28 = [(sid, d) for sid, d in in_window if sid in U28]
+rep_elec = [(sid, d) for sid, d in in_window if sid == "Electronic"]
+assert not [d for sid, d in in_window if sid == "TAIEX"], "a TAIEX close was repaired"
+assert {d for _, d in rep_elec} <= {d for _, d in rep_u28}, "an Electronic repair falls on a date without a U28 repair"
+print(f"repaired closes in the sample: U28 {len(rep_u28)} on {len({d for _, d in rep_u28})} dates, "
+      f"Electronic {len(rep_elec)}, others {len(in_window) - len(rep_u28) - len(rep_elec)} (not used)")
+chk("repaired U28 closes in the sample", float(len(rep_u28)), ".0f", "524")
+chk("dates of the repaired U28 closes", float(len({d for _, d in rep_u28})), ".0f", "38")
+chk("repaired U28 and Electronic closes", float(len(rep_u28) + len(rep_elec)), ".0f", "542")
+has("U28 repairs in the case source", "524 copied closes on 38 dates in this sample")
+has("repairs in the References", "524 closes on 38 dates of the U28 sample, 542 with Electronic")
 chk("sector indices served", 30.0, ".0f", "30")
+has("U28's description", "the 28 leaf indices among the 30 TWSE sector indices that FinMind serves daily")
+has("the four sector indices of 30 June 2023", "base date 30 June 2023")
 chk("pitfall: smallest fall of the four", -100 * X[i7, col["ShippingTransportation"]], ".2f", "9.73")
 chk("pitfall: largest fall", -100 * X[i7, col["Semiconductor"]], ".2f", "9.95")
 chk("December 2008 Sigma rank", float(np.linalg.matrix_rank(sig_dec)), ".0f", "21")
@@ -486,40 +507,48 @@ for v, p in zip(s5p, ("5.876", "1.819", "1.316", "0.874", "0.485"), strict=True)
 chk("S5 kappa(X~) from printed s", s5p[0] / s5p[-1], ".3f", "3.481")
 chk("S5 kappa(Sigma) from printed kappa", 3.481**2, ".2f", "12.12")
 chk("S5 log10 kappa(Sigma)", math.log10(12.12), ".2f", "1.08")
-# 9 and 10: LM7's printed moments (20.1%, 13.5%, -0.11)
-s1_7, s2_7, rho_7 = 0.201, 0.135, -0.11
-cov_7 = rho_7 * s1_7 * s2_7
-chk("P9 covariance", cov_7, ".6f", "-0.002985")
-chk("P9 variance 0050", s1_7**2, ".6f", "0.040401")
-chk("P9 variance 00679B", s2_7**2, ".6f", "0.018225")
-L7 = np.linalg.cholesky(np.array([[s1_7**2, cov_7], [cov_7, s2_7**2]]))
-chk("P9 l_11", L7[0, 0], ".5f", "0.20100")
-chk("P9 l_21", L7[1, 0], ".5f", "-0.01485")
-chk("P9 l_21 from printed covariance", -0.002985 / 0.201, ".5f", "-0.01485")
-chk("P9 l_22", L7[1, 1], ".5f", "0.13418")
-chk("P9 l_22 from printed inputs", math.sqrt(0.018225 - 0.01485**2), ".5f", "0.13418")
-chk("P9 slope", L7[1, 0] / L7[0, 0], ".4f", "-0.0739")
-chk("P9 slope rho s2/s1", rho_7 * s2_7 / s1_7, ".4f", "-0.0739")
+# 9 and 10: LM7's printed annualized covariance matrix of 0050 and 00679B (src/lm07.md, example "marginal"),
+# the matrix LM9 and LM11 use too
+var1_7, var2_7, cov_7 = 0.040425, 0.018214, -0.002866
+lm07 = (ROOT / "src" / "lm07.md").read_text(encoding="utf-8").replace("−", "-")
+assert all(s in lm07 for s in ("\\sigma_1^2=0.040425", "\\sigma_2^2=0.018214", "\\sigma_{12}=-0.002866")), \
+    "LM7 no longer prints this covariance matrix"
+has("P9 inputs", "$\\sigma_1^2=0.040425$, $\\sigma_2^2=0.018214$ and $\\sigma_{12}=-0.002866$")
+L7 = np.linalg.cholesky(np.array([[var1_7, cov_7], [cov_7, var2_7]]))
+chk("P9 l_11", L7[0, 0], ".5f", "0.20106")
+chk("P9 l_21", L7[1, 0], ".6f", "-0.014254")
+chk("P9 l_21 from printed l_11", cov_7 / 0.20106, ".6f", "-0.014254")
+chk("P9 l_22", L7[1, 1], ".6f", "0.134204")
+chk("P9 l_22 from printed inputs", math.sqrt(var2_7 - 0.014254**2), ".6f", "0.134204")
+chk("P9 slope l_21/l_11", L7[1, 0] / L7[0, 0], ".4f", "-0.0709")
+chk("P9 slope sigma_12/sigma_1^2", cov_7 / var1_7, ".4f", "-0.0709")
+chk("P9 slope from printed l_21/l_11", -0.014254 / 0.20106, ".4f", "-0.0709")
 chk("P9 l_22 in %", 100 * L7[1, 1], ".2f", "13.42")
+chk("P9 l_22 in % from printed", 100 * 0.134204, ".2f", "13.42")
+chk("P9 00679B volatility in %", 100 * math.sqrt(var2_7), ".2f", "13.50")
 d10 = np.array([-0.30, 0.10])
 z10 = np.linalg.solve(L7, d10)
-chk("P10 z_1", z10[0], ".4f", "-1.4925")
-chk("P10 z_2", z10[1], ".4f", "0.5801")
-chk("P10 z_2 from printed inputs", (0.10 - 0.01485 * 1.4925) / 0.13418, ".4f", "0.5801")
-chk("P10 |z|^2", float(z10 @ z10), ".3f", "2.564")
-L7r = np.linalg.cholesky(np.array([[s2_7**2, cov_7], [cov_7, s1_7**2]]))
-chk("P10 reversed l_11", L7r[0, 0], ".5f", "0.13500")
-chk("P10 reversed l_21", L7r[1, 0], ".5f", "-0.02211")
-chk("P10 reversed l_21 from printed covariance", -0.002985 / 0.135, ".5f", "-0.02211")
-chk("P10 reversed l_22", L7r[1, 1], ".5f", "0.19978")
-chk("P10 reversed l_22 from printed inputs", math.sqrt(0.040401 - 0.02211**2), ".5f", "0.19978")
+chk("P10 z_1", z10[0], ".3f", "-1.492")
+chk("P10 z_1 from printed l_11", -0.30 / 0.20106, ".3f", "-1.492")
+chk("P10 z_2", z10[1], ".3f", "0.587")
+chk("P10 z_2 from printed inputs", (0.10 - 0.014254 * 1.492) / 0.134204, ".3f", "0.587")
+chk("P10 |z|^2", float(z10 @ z10), ".2f", "2.57")
+chk("P10 |z|^2 = d' Sigma^-1 d", float(d10 @ np.linalg.solve(np.array([[var1_7, cov_7], [cov_7, var2_7]]), d10)),
+    ".2f", "2.57")
+L7r = np.linalg.cholesky(np.array([[var2_7, cov_7], [cov_7, var1_7]]))
+chk("P10 reversed l_11", L7r[0, 0], ".6f", "0.134959")
+chk("P10 reversed l_21", L7r[1, 0], ".6f", "-0.021236")
+chk("P10 reversed l_21 from printed l_11", cov_7 / 0.134959, ".6f", "-0.021236")
+chk("P10 reversed l_22", L7r[1, 1], ".6f", "0.199935")
+chk("P10 reversed l_22 from printed inputs", math.sqrt(var1_7 - 0.021236**2), ".6f", "0.199935")
 z10r = np.linalg.solve(L7r, d10[::-1])
-chk("P10 reversed z_1", z10r[0], ".4f", "0.7407")
-chk("P10 reversed z_2", z10r[1], ".4f", "-1.4197")
-chk("P10 reversed z_2 from printed inputs", (-0.30 + 0.02211 * 0.7407) / 0.19978, ".4f", "-1.4197")
-chk("P10 reversed |z|^2", float(z10r @ z10r), ".3f", "2.564")
-chk("P10 |z|^2 from printed entries", 1.4925**2 + 0.5801**2, ".3f", "2.564")
-chk("P10 reversed |z|^2 from printed entries", 0.7407**2 + 1.4197**2, ".3f", "2.564")
+chk("P10 reversed z_1", z10r[0], ".3f", "0.741")
+chk("P10 reversed z_1 from printed l_11", 0.10 / 0.134959, ".3f", "0.741")
+chk("P10 reversed z_2", z10r[1], ".3f", "-1.422")
+chk("P10 reversed z_2 from printed inputs", (-0.30 + 0.021236 * 0.741) / 0.199935, ".3f", "-1.422")
+chk("P10 reversed |z|^2", float(z10r @ z10r), ".2f", "2.57")
+chk("P10 |z|^2 from printed entries", 1.492**2 + 0.587**2, ".2f", "2.57")
+chk("P10 reversed |z|^2 from printed entries", 0.741**2 + 1.422**2, ".2f", "2.57")
 # 11: last-250 fit three ways
 xl = X[LAST] - X[LAST].mean(axis=0)
 yl = y[LAST] - y[LAST].mean()
