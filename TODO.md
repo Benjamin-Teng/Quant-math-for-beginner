@@ -8,7 +8,8 @@
   labs. Each module went through an independent review, a verifier, the editor's gates (a blind solve of every
   question with a key check, and a full audit of its numbers from `data/raw/`), revision rounds and a closing
   verification; the editor's fixes after closing passed fresh checks. Every finding in [`reviews/`](reviews/README.md)
-  is verified fixed. The records hold the decisions; `project/PITFALLS.md` holds the lessons.
+  is verified fixed, except LM1's V12, withdrawn on the owner's clarification of 2026-10-11 (the GIPS citation is
+  restored). The records hold the decisions; `project/PITFALLS.md` holds the lessons.
 - Reviews and verifications use fresh Opus subagents, never Codex (the owner's instruction, 2026-10-10). The editor
   (main session) recomputes every major finding before accepting it and passes no agent claim through unchecked.
 - Shared changes made while closing Volume I: inline formulas keep their punctuation and equation tags never print

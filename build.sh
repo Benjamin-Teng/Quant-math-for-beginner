@@ -69,5 +69,5 @@ if [ "$LABS" = 1 ]; then
     # second pass: merge a print the kernel flushed in two pieces (in one pass the merge would run before execution)
   done
 fi
-py build/qa/check_terms.py     # the book cites no certification curriculum (project/PITFALLS.md)
+py build/qa/check_terms.py     # no text derived from a certification curriculum (project/PITFALLS.md §1)
 echo "done: open docs/index.html"

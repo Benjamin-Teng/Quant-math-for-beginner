@@ -11,7 +11,7 @@ against a blind solution) and A1… (full number audit) for the editor's gates.
 
 | Module | Review | Round 1 | Gates | Stage |
 |:--|:--|:--|:--|:--|
-| [LM1](lm01.md) Exponentials, Logarithms and Compounding | 21 (2 critical, 4 major) | all 21 verified; V1–V5 | K1–K10, A1–A14 (3 major) | **published** in 0.2; closed, merged `7129c5a` |
+| [LM1](lm01.md) Exponentials, Logarithms and Compounding | 21 (2 critical, 4 major) | all 21 verified; V1–V5 | K1–K10, A1–A14 (3 major) | **published** in 0.2; closed, merged `7129c5a`; V12 withdrawn on the owner's clarification and the GIPS citation restored (2026-10-11) |
 | [LM2](lm02.md) Limits and Derivatives | 19 (5 major) | all 19 verified; V1–V8 | K1–K7 (2 major), A1–A10 (1 major) | **published** in 0.2; closed, merged `8ac0f31` |
 | [LM3](lm03.md) Taylor Series and Approximation | 34 (edition 0.1, all fixed) | — | K1–K16 (3 major), A1–A27 (4 major) | **published** in 0.2; closed, merged `c85df84` |
 | [LM4](lm04.md) Optimization in One Variable | 24 (1 critical, 8 major) and length | 23 verified, 12 reopened; V1–V5 | K1–K6, A1–A11 | **published** in 0.2; closed, merged `bca9443` |

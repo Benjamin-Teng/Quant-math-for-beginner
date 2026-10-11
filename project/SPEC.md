@@ -12,8 +12,9 @@ left to do is in [`../TODO.md`](../TODO.md).
 - By the end the reader can: **build their own statistical models**; **optimize portfolios statistically**;
   **measure true risk and return** (geometric growth, honest uncertainty, costs and biases removed); and
   **optimize Kelly leverage**, including under estimation error.
-- A personal study project. It is independent of any professional-certification curriculum and must not reference
-  one (owner, 2026-10-10). Released under the MIT License (owner, 2026-10-10).
+- A personal study project. It is independent of any professional-certification curriculum and never copies or
+  adapts one's material (owner, 2026-10-10); the rule is about intellectual property, and what an exam body publishes
+  publicly may be cited (owner's clarification, 2026-10-11). Released under the MIT License (owner, 2026-10-10).
 
 ## 2. Reader
 
@@ -38,7 +39,7 @@ assertions, wants real Taiwan and US market cases, and expects approximations to
 | Hosting | GitHub repo [Benjamin-Teng/Quant-math-for-beginner](https://github.com/Benjamin-Teng/Quant-math-for-beginner) (public); the built site in `docs/` is served by GitHub Pages from `main` `/docs`, and will move to the owner's own domain via `docs/CNAME` | owner, 2026-10-10 |
 | Git | commit and push directly to `main`; no pull requests | owner, 2026-10-10 |
 | License | MIT (`LICENSE`); FinMind data remain subject to FinMind's terms | owner, 2026-10-10 |
-| Independence | no references to any professional-certification curriculum or exam body, anywhere in the repo; `build/qa/check_terms.py` enforces it | owner, 2026-10-10 |
+| Independence | no infringement of intellectual property: nothing copied or adapted from a professional-certification curriculum (its readings, outcome wording or problems), anywhere in the repo; documents an exam body publishes publicly may be cited like any source; `build/qa/check_terms.py` guards against curriculum-derived text | owner, 2026-10-10; clarified 2026-10-11 |
 | Quality gate | a module is published (linked from the site, PDF built) only after an independent review and its fixes | editor's process, AUTHORING §11 |
 | Unclear brief | raise it with the owner rather than guess | original brief |
 | Conversation | the owner reads and writes Traditional Chinese; reply to him in Traditional Chinese | owner's preference |

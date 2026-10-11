@@ -3,8 +3,9 @@
 Every website and data service used while building edition 0.1 and the Volume I drafts (2026-10-10), extracted from
 the session logs of the editor and all writer, reviewer and data agents. Each module's own References section is the
 authoritative citation list; this file shows where facts were checked, so the next session can go straight to the
-right page. Four pages about a professional-certification curriculum, consulted before the owner's 2026-10-10
-decision, are deliberately left out (see PITFALLS §1).
+right page. Four pages about a professional-certification curriculum, consulted for edition 0.1, are left out: the
+owner had that edition's crosswalk and curriculum references removed on 2026-10-10, and no current text cites them.
+Pages an exam body publishes publicly are listed like any other source when a module uses them (PITFALLS §1).
 
 ## Market data
 
@@ -76,6 +77,8 @@ All FinMind queries ran through the FinMind MCP server on the owner's computer, 
 
 | Page | Used for |
 |:--|:--|
+| GIPS 2020 advertising guidelines comparison (gipsstandards.org PDF) | provision 8.A.4: periods under one year are not annualized |
+| Spaulding Group, "Why don't we annualize returns of less than one year" | background for the same rule |
 | [Microsoft Support: LOG function](https://support.microsoft.com/en-us/excel/functions/log-function) | Excel LOG defaults to base 10 |
 | SciPy docs: [`integrate.quad`](https://docs.scipy.org/doc/scipy/reference/generated/scipy.integrate.quad.html), [SLSQP](https://docs.scipy.org/doc/scipy/reference/optimize.minimize-slsqp.html), [1.16.0 release notes](https://docs.scipy.org/doc/scipy/release/1.16.0-notes.html) | QUADPACK description; SLSQP returns multipliers |
 | MacTutor, [History of e](https://mathshistory.st-andrews.ac.uk/HistTopics/e/); Britannica; Wikipedia (e, Mills ratio, Descartes' rule of signs, William Karush) | history and secondary checks |
