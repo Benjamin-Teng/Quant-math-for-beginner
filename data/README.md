@@ -47,6 +47,18 @@ All files are exactly as returned by FinMind (retrieved 2026-10-10), in windows 
 - `TX__2025-04-01__2025-10-31.csv`: `TaiwanFuturesDaily` for TX, regular session only, every listed contract month (876 rows). On its last trading day the expiring contract's `settlement_price` prints 0.0 (the final settlement price is not in this field; use `close` or TAIFEX's published final settlement price). On days a contract does not trade, `close` and `volume` print 0 while `settlement_price` is set by the exchange.
 - `lm06/`: for LM6, TAIEX closes (`TaiwanStockPrice`) for 2024-12-31 → 2025-03-31 and 2025-11-03 → 2025-12-31, which with the main TAIEX file cover calendar 2025; the TWSE total-return index (`TaiwanStockTotalReturnIndex`, columns `date,stock_id,price`) for the same three windows; TAIEX open, high (`max`), low (`min`), close and spread for 2025-06-26 → 2025-07-01. `lm06_basis.py` checks that every close satisfies the spread rule across the chunks, that both indices share their dates, and that the total-return index never falls behind the price index except by rounding (it gains only on ex-dividend days).
 - `QQQ__us_2022.csv`, `TQQQ__us_2022.csv`: `date,adj_close,close` from `USStockPrice`. Adjusted closes depend on the retrieval date; returns within the window do not.
+- `sectors/` (Volume II, retrieved 2026-10-11): `date,close,spread` from `TaiwanStockPrice` for TAIEX and the 30 TWSE
+  sector indices (`data_id` = the index id, e.g. `Semiconductor`), 2007-07-02 → 2026-10-08, in 13 windows of 18
+  months per series (`<ID>__<start>__<end>.csv`, at most 378 rows each; 403 files). Every file passed `check_chunk.py`
+  for duplicates and order and is rebuilt byte for byte by `fetch_finmind.py`, **but the sector closes are not usable
+  as served.** FinMind copies one day's values onto other dates: on 18 dates every sector prints the same closes (for
+  example Semiconductor 1531.87 on both 2009-06-05 and 2025-06-11, against 68.65 and 643.65 at the 13:30:00 close of
+  `TaiwanStockEvery5SecondsIndex`), and Chemical has about 20 more such dates. About 1,500 other rows carry a stale
+  spread (another day's spread, volume and turnover) while the close is sound, so a close is never repaired as the
+  previous close plus the spread. The Volume II scripts replace each flagged close with the official 13:30:00 value of
+  `TaiwanStockEvery5SecondsIndex`, itself registered here (PITFALLS §3). TAIEX in the same dataset is clean, but its
+  spread prints 0.0 through parts of 2017-12, 2018-09 and 2026-02. TradingConsumersGoods has three stray closes
+  before 2008-12-01 and is complete only from then.
 
 ## Verification
 
