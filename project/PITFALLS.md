@@ -138,7 +138,9 @@ unless stated.
   clip on paper. LM2's equation (2.11), 36 px too wide, printed every page at 95%: the module read 36–37 pages and is 40
   at full size. Page counts come only from unshrunk PDFs (`build/qa/pdf_scale.py`, run by `build.sh --pdf`);
   `build/qa/print_width.py` lists what sticks out at 680 px. A wide display formula gets a line break (`gathered`/`aligned`), not a smaller
-  font.
+  font. A second cause print_width.py cannot see (LM11, 2026-10-11): an inline formula with a subscript or superscript
+  that ends a printed line sticks out by about 2 px (KaTeX's `.vlist-s` spacer) and shrank a PDF to 0.998. pdf_scale.py
+  catches it; reword the sentence so that another word ends the line.
 - **A whole-page View Transition is too heavy for the module pages** (2026-10-11). A cross-fade on a theme change
   snapshots the page first: on KaTeX pages of 20–30 thousand elements that delayed the change, froze a phone-class
   CPU for close to a second and sent quick second clicks to `<html>`, so they were lost. The theme now changes at
