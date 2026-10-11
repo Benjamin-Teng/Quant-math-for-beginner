@@ -6,13 +6,16 @@ Inputs: data/processed/vol2_closes.parquet (the repaired sector closes) and data
 from data/vol2_series.py, and the raw 0050, 00631L and 00679B closes and dividends in data/raw/ (see
 data/lm10_series.py for the U28 sample and the ETFs' one-session total returns).
 
-The script prints each value as src/lm10.md prints it and asserts three things:
+The script prints each value as src/lm10.md prints it, asserts the first two things below and reports the third:
   * every printed value appears in src/lm10.md exactly as printed (after the normalization in `norm`);
   * every hand calculation follows from the inputs printed next to it (PITFALLS section 7): such values are
     recomputed from the printed strings, often in exact decimal arithmetic;
-  * the data values agree with the editor's anchors (plans/vol-2-anchors.md, LM10), except where the module prints
-    the S3 matrix to two decimals instead of one: those values are printed next to the anchors' for the hand-back.
-A floating-point residue is never printed: it is asserted below a bound, and the text says "below 10^-15".
+  * the data values agree with the editor's anchors (plans/vol-2-anchors.md, LM10). Rows 14, 21, 34 and 35 give
+    the module's values, from the S3 matrix printed to two decimals (E7: its block in whole %²), and beside them the
+    values from the matrix to one decimal; the script compares both. A difference prints DIFFERS and is listed at
+    the end.
+A floating-point residue is never printed in the module: it is asserted against a bound, and the text says "below
+10^-15" (the daily S5 matrix) or "larger" (the 50/50 matrix in %²).
 """
 import json
 import math
@@ -82,6 +85,13 @@ def thousands(s: str) -> str:
     neg = whole.startswith("-")
     whole = f"{int(whole.lstrip('-')):,}"
     return ("-" if neg else "") + whole + (f".{frac}" if frac else "")
+
+
+def plain(q: Fr, sep: bool = False) -> str:
+    """A value with up to six decimals as the anchors spell it: no trailing zeros (416.05, 364.4, 0), commas if sep."""
+    assert q * 10**6 == int(q * 10**6), q                                   # exact at six decimals: nothing is cut
+    s = fmt(q, 6).rstrip("0").rstrip(".")
+    return thousands(s) if sep else s
 
 
 def det3(m: list[list[Fr]]) -> Fr:
@@ -183,7 +193,10 @@ P3 = [[fmt(AS3[i, j], 2) for j in range(3)] for i in range(3)]       # printed t
 print("A Sigma_3 (%^2), printed:", P3)
 for v in (P3[0][0], P3[0][1], P3[0][2], P3[1][1], P3[1][2], P3[2][2]):
     show("A Sigma_3 entry", v)
-anchor("A Sigma_3 to one decimal", ", ".join(fmt(AS3[i, j], 1) for i, j in ((0, 0), (0, 1), (0, 2), (1, 1), (1, 2), (2, 2))),
+anchor("A Sigma_3 to two decimals (row 14, as printed)",
+       ", ".join(P3[i][j] for i, j in ((0, 0), (0, 1), (0, 2), (1, 1), (1, 2), (2, 2))),
+       "570.34, 261.83, 162.26, 363.73, 191.35, 283.54")
+anchor("A Sigma_3 to one decimal (row 14)", ", ".join(fmt(AS3[i, j], 1) for i, j in ((0, 0), (0, 1), (0, 2), (1, 1), (1, 2), (2, 2))),
        "570.3, 261.8, 162.3, 363.7, 191.3, 283.5")
 M3 = [[dec(v) for v in row] for row in P3]                             # the printed matrix, exact
 same("sqrt(570.34)", f"{math.sqrt(float(M3[0][0])):.2f}", "23.88")
@@ -371,8 +384,17 @@ show("E7 minors", "570(364.5)-416^2=34,709")
 show("E7 minors", "364(364.5)-313^2=34,709")
 show("E7 matrix", "570&262&416\\\\262&364&313\\\\416&313&364.5")
 show("E7 variance rule", "\\tfrac14(570)+\\tfrac12(262)+\\tfrac14(364)")
-anchor("E7 (the module rounds the block to whole %², the anchors to 0.1)",
-       f"{', '.join(fmt(v, 1) for v in E7[2])}; {', '.join(thousands(fmt(v, 0)) for v in mins2)}; det {det3(E7)}",
+anchor("E7 from the block in whole %² (row 21, the module's construction)",
+       f"{', '.join(plain(v) for v in E7[2])}; {', '.join(plain(v, True) for v in mins2)}; det {plain(det3(E7))}",
+       "416, 313, 364.5; 138,836, 34,709, 34,709; det 0")
+# row 21's value: the same construction from the block to one decimal (570.3, 261.8, 363.7)
+b11, b12, b22 = (dec(fmt(AS3[i, j], 1)) for i, j in ((0, 0), (0, 1), (1, 1)))
+E7a = [[b11, b12, (b11 + b12) / 2], [b12, b22, (b12 + b22) / 2],
+       [(b11 + b12) / 2, (b12 + b22) / 2, b11 / 4 + b12 / 2 + b22 / 4]]
+mins2a = [E7a[0][0] * E7a[1][1] - E7a[0][1] ** 2, E7a[0][0] * E7a[2][2] - E7a[0][2] ** 2,
+          E7a[1][1] * E7a[2][2] - E7a[1][2] ** 2]
+anchor("E7 from the block to one decimal (row 21's value)",
+       f"{', '.join(plain(v) for v in E7a[2])}; {', '.join(plain(v, True) for v in mins2a)}; det {plain(det3(E7a))}",
        "416.05, 312.75, 364.4; 138,878.87, 34,719.7175, 34,719.7175; det 0")
 # the computed 50/50 matrix, rounded to one decimal (pitfall of Section 6)
 mix50 = 0.5 * X[:, i3[0]] + 0.5 * X[:, i3[1]]
@@ -409,6 +431,14 @@ xv = np.array([0.2] * 5 + [-1.0])
 assert int(np.linalg.matrix_rank(S6)) == 5 and abs(float(xv @ S6 @ xv)) < 1e-15
 show("collinear", "The $6\\times6$ matrix has rank 5")
 show("residue", "below $10^{-15}$")
+# the exact zeros of the pitfall's 50/50 matrix in %² (x'Mx at (0.5, 0.5, -1), and det) come out far above 10^-15:
+# its entries sit on a floating-point grid with spacing above 10^-14. The residues differ between machines and are
+# never printed in the module.
+x50 = np.array([0.5, 0.5, -1.0])
+res50 = (abs(float(x50 @ S_mix @ x50)), abs(float(np.linalg.det(S_mix))))
+print(f"residues of the 50/50 matrix in %^2: x'Mx {res50[0]:.1e}, det {res50[1]:.1e}")
+assert max(res50) > 1e-15 and float(np.spacing(np.abs(S_mix)).min()) > 1e-14
+show("residue, two matrices", "below $10^{-15}$ for the daily S5 matrix above, larger for this matrix in %²")
 
 # ====================================================================================== Section 6: pairwise deletion, real case
 etf = {e: one_session(e, smp.calendar) for e in ETFS}
@@ -587,7 +617,8 @@ assert abs(v0 + lin + quad - v1) < 1e-15                               # (10.9) 
 P_ = {k: f"{val:.7f}" for k, val in (("v0", v0), ("lin", lin), ("quad", quad), ("v1", v1))}
 same("linear term from printed gradient", fmt((dec(f"{g[iC]:.6f}") - dec(f"{g[iG]:.6f}")) / 28, 7), P_["lin"])
 same("printed parts add up", fmt(dec(P_["v0"]) + dec(P_["lin"]) + dec(P_["quad"]), 7), P_["v1"])
-show("E10 linear", f"2A\\boldsymbol\\Delta^{{\\top}}\\hat\\Sigma\\mathbf w=({g[iC]:.6f}-{g[iG]:.6f})/28={P_['lin']}")
+show("E10 linear", f"$$\\begin{{aligned}}2A\\boldsymbol\\Delta^{{\\top}}\\hat\\Sigma\\mathbf w&=\\frac{{{g[iC]:.6f}-{g[iG]:.6f}}}{{28}}"
+                  f"\\\\&={P_['lin']}.\\end{{aligned}}$$")
 show("E10 quadratic", f"=+{P_['quad']}")
 show("E10 sum", f"variance of {P_['v0']} becomes")
 show("E10 sum", f"&{P_['v0']}{P_['lin']}+{P_['quad']}")
@@ -668,10 +699,12 @@ show("P6 rule", "k_{ij}=m_{ij}-m_{i1}m_{1j}/570.34")
 show("P6 K", f"K=\\begin{{pmatrix}}{P6['k22']}&{P6['k23']}\\\\{P6['k23']}&{P6['k33']}\\end{{pmatrix}}")
 show("P6 k22 example", "k_{22}=363.73-261.83^2/570.34")
 show("P6 d2", f"So $d_2={P6['k22']}$")
-show("P6 d3", f"d_3={P6['k33']}-{P6['k23']}^2/{P6['k22']}={P6['d3x']}")
+show("P6 d3", f"$$d_3={P6['k33']}-\\frac{{{P6['k23']}^2}}{{{P6['k22']}}}={P6['d3x']}.$$")
 show("P6 pivots", "The pivots 570.34, 243.53 and 181.30 are all positive")
-anchor("P6 pivots (one-decimal matrix in the anchors)", f"570.34, {fmt(k22, 2)}, {fmt(k33 - k23**2 / k22, 2)}",
-       "570.3, 243.52, 181.29")
+anchor("P6 pivots (row 34, the printed two-decimal matrix)",
+       f"{fmt(M3[0][0], 2)}, {fmt(k22, 2)}, {fmt(k33 - k23**2 / k22, 2)} "
+       f"(after step 1: {P6['k22']}, {P6['k23']}, {P6['k33']})",
+       "570.34, 243.53, 181.30 (after step 1: 243.5299, 116.8602, 237.3775)")
 # P9: five points from Semiconductor to Food, printed matrix in decimal units
 Md = [[v / 10**4 for v in row] for row in M3]
 w9 = [Fr(1, 2), Fr(3, 10), Fr(1, 5)]
@@ -692,11 +725,22 @@ same("P9 quadratic from printed entries", fmt(Fr(1, 400) * (dec("0.057034") + de
 show("P9 gradient", f"2A\\hat\\Sigma_3\\mathbf w=({g9p[0]},\\,{g9p[1]},\\,{g9p[2]})")
 show("P9 linear", f"$$0.05\\,({g9p[2]}-{g9p[0]})={P9['lin']},$$")
 show("P9 quadratic", f"&0.05^2\\,(0.057034+0.028354\\\\&\\quad-2\\times0.016226)=+{P9['quad']}")
-show("P9 variance", f"from {P9['v0']} to ${P9['v0']}{P9['lin']}+{P9['quad']}={P9['v1']}$")
+show("P9 variance", f"So the variance moves from {P9['v0']} to")
+show("P9 variance", f"$$\\begin{{aligned}}&{P9['v0']}{P9['lin']}+{P9['quad']}\\\\&={P9['v1']},\\end{{aligned}}$$")
 show("P9 vols", "the volatility falls from 17.91% to 17.37%")
 assert (dec("0.057034"), dec("0.028354"), dec("0.016226")) == (M3[0][0] / 10**4, M3[2][2] / 10**4, M3[0][2] / 10**4)
-anchor("P9 (one-decimal matrix in the anchors)", f"{', '.join(g9p)}; {P9['lin']}; +{P9['quad']}; {P9['v0']} -> {P9['v1']}",
-       "0.0792, 0.0557, 0.0390; -0.002009; +0.000132; 0.032060 -> 0.030184")
+anchor("P9 (row 35, the printed two-decimal matrix)",
+       f"{', '.join(g9p)}; {P9['lin']}; +{P9['quad']}; {P9['v0']} -> {P9['v1']}; "
+       f"{pct(math.sqrt(float(dec(P9['v0']))))} -> {pct(math.sqrt(float(dec(P9['v1']))))}",
+       "0.07923, 0.05566, 0.03905; -0.002009; +0.000132; 0.032063 -> 0.030186; 17.91% -> 17.37%")
+# row 35's notes: the matrix to one decimal (row 14) gives 0.032060 -> 0.030184, and the mix's 320.60 %² beside the
+# two-decimal matrix's 320.63 and the computed matrix's 320.62 (row 17, the total of the nine terms)
+M1d = [[dec(fmt(AS3[i, j], 1)) / 10**4 for j in range(3)] for i in range(3)]
+var9a = sum(w9[i] * M1d[i][j] * w9[j] for i in range(3) for j in range(3))
+new9a = sum((w9[i] + d9[i]) * M1d[i][j] * (w9[j] + d9[j]) for i in range(3) for j in range(3))
+anchor("P9 on the one-decimal matrix (row 35's note)", f"{fmt(var9a, 6)} -> {fmt(new9a, 6)}", "0.032060 -> 0.030184")
+anchor("mix in %² from the two-decimal, one-decimal and computed matrices (row 35's note)",
+       f"{fmt(var9 * 10**4, 2)}, {fmt(var9a * 10**4, 2)}, {total:.2f}", "320.63, 320.60, 320.62")
 # P11: S5 three ways, the ddof effect
 X5 = X[:, i5]
 Xc5 = X5 - X5.mean(axis=0)

@@ -17,10 +17,14 @@
       '<input type="range" id="' + id + '" min="-1" max="1" step="0.001" value="' + value + '"></label>';
   }
 
-  // d decimals; a non-zero value that would round to zero at d decimals gets three significant figures instead,
-  // so a small negative determinant never prints as "−0" beside the verdict "not PSD"
+  // d decimals. A value within TOL of zero is an exact zero blurred by floating point, and prints as 0: on the
+  // 0.001 slider grid a non-zero det C_pw is at least 1e-9 in absolute value, a non-zero minor or adjugate entry at
+  // least 1e-6, and the witness's x'C_pw x = det C_pw * adj(C_pw)_jj at least 1e-9 * 0.001999 > TOL.
+  // Any other value that would round to zero at d decimals gets three significant figures instead, so a small
+  // negative determinant never prints as "−0" beside the verdict "not PSD"
   function num(v, d) {
-    if (v !== 0 && Math.abs(v) < 0.5 * Math.pow(10, -d)) {
+    if (Math.abs(v) <= TOL) return (0).toFixed(d);
+    if (Math.abs(v) < 0.5 * Math.pow(10, -d)) {
       var p = Math.abs(v).toExponential(2).split("e");
       return (v < 0 ? "−" : "") + p[0] + " × 10<sup>" + String(+p[1]).replace("-", "−") + "</sup>";
     }

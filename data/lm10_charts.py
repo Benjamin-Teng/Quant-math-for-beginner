@@ -130,12 +130,13 @@ specs["lm10-admissible"] = {
 }
 
 # ------------------------------------------------------------------ lm10-gradient: gradients and level sets
+# the points are exposures f to Semiconductor and Food, the rest of the book in cash: they need not sum to 1
 i3 = [names.index(n) for n in S3]
 AS3 = 1e4 * A * S[np.ix_(i3, i3)]
 P3 = np.round(AS3, 2)                                                      # the matrix as printed in Section 2
 M = np.array([[P3[0, 0], P3[0, 2]], [P3[0, 2], P3[2, 2]]]) / 1e4            # Semiconductor and Food, decimal units
 Minv = np.linalg.inv(M)
-SCALE = 4                                                                   # arrows drawn at four times 2Mw
+SCALE = 4                                                                   # arrows drawn at four times 2Mf
 pts = [np.array([0.15 / math.sqrt(M[0, 0]), 0.0]), np.array([0.0, 0.15 / math.sqrt(M[1, 1])])]
 dvec = np.array([1.0, 1.0])
 pts.append(dvec * 0.15 / math.sqrt(float(dvec @ M @ dvec)))
@@ -147,16 +148,17 @@ for k, p in enumerate(pts):
     tan = np.array([-g[1], g[0]]) / np.linalg.norm(g)
     assert abs(float(tan @ g)) < 1e-15                                    # tangent is perpendicular to the gradient
     vectors.append({"from": [r(p[0], 4), r(p[1], 4)], "to": [r(tip[0], 4), r(tip[1], 4)], "color": "2",
-                    **({"label": "2Mw"} if k == 2 else {})})
+                    **({"label": "2Mf"} if k == 2 else {})})
     segments.append({"from": [r(p[0] - 0.3 * tan[0], 4), r(p[1] - 0.3 * tan[1], 4)],
                      "to": [r(p[0] + 0.3 * tan[0], 4), r(p[1] + 0.3 * tan[1], 4)], "color": "var(--ink-2)", "width": 1.5})
     points.append({"at": [r(p[0], 4), r(p[1], 4)], "color": "var(--ink)", "r": 3.5})
 specs["lm10-gradient"] = {
     "type": "vector", "height": 380,
-    "alt": "Two level ellipses of portfolio variance for Semiconductor and Food, at 10% and 15% volatility, with "
-           "gradient arrows at three points on the outer ellipse, each perpendicular to it",
-    "x": {"label": "w_1, weight in Semiconductor", "fmt": "n2", "name": "w_1"},
-    "y": {"label": "w_2, weight in Food", "fmt": "n2", "name": "w_2"},
+    "alt": "Two level ellipses of the variance of exposures to Semiconductor and Food, the rest of the book in cash, "
+           "at 10% and 15% volatility, with gradient arrows at three points on the outer ellipse, each perpendicular "
+           "to it",
+    "x": {"label": "f_1, exposure to Semiconductor", "fmt": "n2", "name": "f_1"},
+    "y": {"label": "f_2, exposure to Food", "fmt": "n2", "name": "f_2"},
     "ellipses": [{"center": [0, 0], "cov": [[r(Minv[0, 0]), r(Minv[0, 1])], [r(Minv[1, 0]), r(Minv[1, 1])]],
                   "scale": 0.10, "color": "3", "label": "volatility 10%"},
                  {"center": [0, 0], "cov": [[r(Minv[0, 0]), r(Minv[0, 1])], [r(Minv[1, 0]), r(Minv[1, 1])]],

@@ -498,23 +498,24 @@ for name, Mx in (("A S, U28", A * S), ("M_sym of the cross-term example", Msym))
 """)
 
 code(r"""
-# [[ex:gradient]]: level curves of the annualized variance in Semiconductor and Food, with the gradient 2Mw
+# [[ex:gradient]]: level curves of the annualized variance of the exposures f to Semiconductor and Food, the rest
+# of the book in cash (so f need not sum to 1), with the gradient 2Mf
 Mg = AS3[np.ix_([0, 2], [0, 2])] / 1e4                  # that block of the printed A Sigma_3, in decimal units
-gw = np.linspace(-1.0, 1.0, 401)
-w1g, w2g = np.meshgrid(gw, gw)
-var2 = Mg[0, 0] * w1g**2 + 2 * Mg[0, 1] * w1g * w2g + Mg[1, 1] * w2g**2
+gf = np.linspace(-1.0, 1.0, 401)
+f1g, f2g = np.meshgrid(gf, gf)
+var2 = Mg[0, 0] * f1g**2 + 2 * Mg[0, 1] * f1g * f2g + Mg[1, 1] * f2g**2
 pts = [np.array([0.15 / math.sqrt(Mg[0, 0]), 0.0]), np.array([0.0, 0.15 / math.sqrt(Mg[1, 1])]),
        np.ones(2) * 0.15 / math.sqrt(np.ones(2) @ Mg @ np.ones(2))]
 fig, ax = plt.subplots(figsize=(5.5, 5.5))
-ax.contour(w1g, w2g, var2, levels=[0.10**2, 0.15**2], colors=["tab:green", "tab:blue"])
+ax.contour(f1g, f2g, var2, levels=[0.10**2, 0.15**2], colors=["tab:green", "tab:blue"])
 for p in pts:
     gp = 2 * Mg @ p
     tan = np.array([-gp[1], gp[0]]) / np.linalg.norm(gp)       # direction along the level curve
     ax.annotate("", xy=p + 4 * gp, xytext=p, arrowprops=dict(arrowstyle="->", color="tab:orange"))
     ax.plot(*np.column_stack([p - 0.3 * tan, p + 0.3 * tan]), ls="--", color="grey")
-    print(f"w = {p.round(4)}: volatility {math.sqrt(p @ Mg @ p):.2%}; gradient 2Mw = {gp.round(4)}; "
+    print(f"f = {p.round(4)}: volatility {math.sqrt(p @ Mg @ p):.2%}; gradient 2Mf = {gp.round(4)}; "
           f"perpendicular to the curve: {abs(tan @ gp) < 1e-15}")
-ax.set_aspect("equal"); ax.set_xlabel("w1, Semiconductor"); ax.set_ylabel("w2, Food")
+ax.set_aspect("equal"); ax.set_xlabel("f1, exposure to Semiconductor"); ax.set_ylabel("f2, exposure to Food")
 ax.set_title("[[ex:gradient]]: gradients (drawn x4) are perpendicular to the level curves"); plt.show()
 """)
 
