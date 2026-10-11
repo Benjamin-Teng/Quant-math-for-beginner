@@ -16,6 +16,14 @@ An independent personal-study project.
 ## Owner's standing rules
 
 - Talk to Benjamin in **Traditional Chinese**; the book itself is English with 中文導讀 boxes.
+- **Division of responsibility** (owner, 2026-10-11): Benjamin oversees the code architecture, the website and
+  repository maintenance; propose changes there and wait for his approval. Every content and editorial decision
+  (scope, depth, length, style, notation, examples, cases) is delegated to Claude as the editor: decide on evidence,
+  report the reasons, accept his veto. The numbers in `AUTHORING.md` are editorial choices, revisable with evidence;
+  the owner's decisions are those `project/SPEC.md` attributes to him.
+- **Source authenticity comes first** (owner, 2026-10-11): textbooks, papers, official documents, FinMind data and
+  Claude's own knowledge are all acceptable sources, but every citation is checked to exist as cited, and no data,
+  reference or quotation is ever invented.
 - **Commit and push directly to `main`**; no pull requests. `git fetch` and rebase before every push.
 - **Infringe no one's intellectual property** (owner, 2026-10-10; clarified 2026-10-11). In particular, never copy or
   adapt a professional-certification curriculum's material (its readings, outcome wording or problems). What an exam

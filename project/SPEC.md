@@ -19,7 +19,9 @@ left to do is in [`../TODO.md`](../TODO.md).
 ## 2. Reader
 
 A Taiwan-based futures and securities professional: fluent in markets, rusty on proofs, prefers derivations to
-assertions, wants real Taiwan and US market cases, and expects approximations to be called approximations.
+assertions, wants real Taiwan and US market cases, and expects approximations to be called approximations. Reads
+English as a second language and wants to learn the mathematical tools systematically rather than meet a lot of
+material: worked examples, diagrams and formulas carry the content, and the prose connects them (owner, 2026-10-11).
 
 ## 3. Decisions
 
@@ -29,7 +31,7 @@ assertions, wants real Taiwan and US market cases, and expects approximations to
 | Language | English body text with technical terms in English; hard ideas get a Traditional Chinese 中文導讀 box | owner's choice |
 | Rigor | derivations complete; optional rigorous proofs in collapsed Deep Dive boxes | owner's choice |
 | Code | short Python snippets in the text, plus one Jupyter lab per module; Polars first | owner's choice |
-| Length | no limit for the whole book; each module 30–40 A4 pages | original brief; AUTHORING §1 |
+| Length | no limit for the whole book; each module 30–40 A4 pages | original brief, where Claude (Cowork) chose the numbers; an editorial matter since 2026-10-11 (AUTHORING §1) |
 | Presentation | clear heading hierarchy; diagrams, charts and worked examples; concise prose; real market situations as cases | original brief |
 | Data | real Taiwan and US market data (FinMind), verified against FinMind's own checksums; every printed number reproduced by a script | agreed while building LM3 |
 | Historical data source | FinMind only, including intraday history (5-second TAIEX, minute bars, ticks); Shioaji is not used for historical data | owner, 2026-10-10 |
@@ -41,7 +43,8 @@ assertions, wants real Taiwan and US market cases, and expects approximations to
 | License | MIT (`LICENSE`); FinMind data remain subject to FinMind's terms | owner, 2026-10-10 |
 | Independence | no infringement of intellectual property: nothing copied or adapted from a professional-certification curriculum (its readings, outcome wording or problems), anywhere in the repo; documents an exam body publishes publicly may be cited like any source; `build/qa/check_terms.py` guards against curriculum-derived text | owner, 2026-10-10; clarified 2026-10-11 |
 | Quality gate | a module is published (linked from the site, PDF built) only after an independent review and its fixes | editor's process, AUTHORING §11 |
-| Unclear brief | raise it with the owner rather than guess | original brief |
+| Division of responsibility | the owner oversees the code architecture, the website and repository maintenance: changes there are proposed to him and wait for his approval. Every content and editorial decision (scope, depth, length, style, notation, examples, cases) is delegated to Claude as the editor, who decides on evidence, reports the reasons and accepts the owner's veto. Source authenticity comes first: textbooks, papers, official documents, FinMind data and Claude's own knowledge are all acceptable sources, but every citation is checked to exist as cited, and no data, reference or quotation is ever invented | owner, 2026-10-11 |
+| Unclear brief | content: the editor decides and reports the reasons; code, website, repository and the owner's standing rules: raise it with the owner rather than guess | original brief; owner, 2026-10-11 |
 | Conversation | the owner reads and writes Traditional Chinese; reply to him in Traditional Chinese | owner's preference |
 
 ## 4. Structure
