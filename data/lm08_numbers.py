@@ -139,6 +139,13 @@ def cos_uncentred(x: np.ndarray, y: np.ndarray) -> float:
     return float(x @ y / np.linalg.norm(x) / np.linalg.norm(y))
 
 
+def cos_centred(x: list[Fraction], y: list[Fraction]) -> float:
+    """(8.9) in exact arithmetic up to the final square root: the cosine of the centred vectors."""
+    xc = [v - sum(x) / len(x) for v in x]
+    yc = [v - sum(y) / len(y) for v in y]
+    return float(sum(a * b for a, b in zip(xc, yc))) / math.sqrt(float(sum(a * a for a in xc) * sum(b * b for b in yc)))
+
+
 def angle(c: float) -> float:
     return math.degrees(math.acos(c))
 
@@ -419,7 +426,7 @@ def main() -> None:
     chk("rho by hand (from the printed sums)", rho_hand, ".4f", "0.2527")
     chk("angle by hand", angle(rho_hand), ".1f", "75.4°", suffix="°")
     chk("angle from the printed rho 0.2527", angle(0.2527), ".1f", "75.4°", suffix="°")      # PITFALLS section 7
-    in_text("=0.2527$, an angle of 75.4°", "[[eg:weekcorr]] got 0.2527 because it worked from returns rounded")
+    in_text("=0.2527$, an angle of 75.4°")
     sxy_u, sxx_u, syy_u = (sum(a * b for a, b in zip(x5, y5)), sum(a * a for a in x5), sum(b * b for b in y5))
     chk("x'y uncentred", sxy_u, ".3f", "33.348")
     chk("|x|^2", sxx_u, ".3f", "236.899")
@@ -430,6 +437,12 @@ def main() -> None:
     chk("week rho 0050/00679B (exact inputs)", wk_rho, ".4f", "0.2526")
     chk("week rho (3 dp)", wk_rho, ".3f", "0.253")
     chk("week uncentred (3 dp)", cos_uncentred(Xf[:, 1], Xf[:, 2]), ".3f", "0.293")
+    # Solution 11: the table's inputs alone, percent returns to four decimals, give Example 6's 0.2527; the same
+    # returns as fractions rounded to four decimals give 0.2523, so the sentence names the unit (reviews/lm08.md, V2)
+    chk("week rho from the table's percent returns (4 dp)", cos_centred(x5, y5), ".4f", "0.2527")
+    chk("week rho from fractional returns (4 dp)", cos_centred([rnd(r[1], 4) for r in X], [rnd(r[2], 4) for r in X]),
+        ".4f", "0.2523", in_text=False)
+    in_text("[[eg:weekcorr]] got 0.2527 because it worked from its table's returns, in percent rounded to four decimals")
     chk("week angle 0050/00679B", angle(wk_rho), ".0f", "75°", suffix="°")
     P_(f"   week, five returns: TX/0050 {corr(Xf[:, 0], Xf[:, 1]):.4f} ({angle(corr(Xf[:, 0], Xf[:, 1])):.2f} deg); "
        f"0050/00679B {wk_rho:.4f} ({angle(wk_rho):.2f} deg), uncentred {cos_uncentred(Xf[:, 1], Xf[:, 2]):.4f}; "
