@@ -170,8 +170,8 @@ hr { border: 0; border-top: 1px solid var(--rule); margin-block: 2rem; }
 .tt-moon::before, .tt-moon::after { content: ""; position: absolute; border-radius: 50%; background: rgba(132, 145, 175, 0.45); }
 .tt-moon::before { width: 0.36rem; height: 0.36rem; top: 0.3rem; left: 0.36rem; }
 .tt-moon::after { width: 0.22rem; height: 0.22rem; top: 0.78rem; left: 0.8rem; }
-.tt-sun { background: radial-gradient(circle at 40% 35%, #fff4b8 0%, #ffd23f 55%, #f6b100 100%);
-  box-shadow: 0 0 0 1px #7a4a00, 0 0 0 0.16rem rgba(255, 214, 64, 0.35), 0 0 0.6rem rgba(255, 190, 40, 0.7);
+.tt-sun { background: radial-gradient(circle at 40% 35%, #fff4b8 0%, #ffd23f 55%, #f2a400 100%);
+  box-shadow: 0 0 0.4rem 0.05rem rgba(255, 246, 214, 0.75);   /* the sky brightens round the sun; no hard ring */
   opacity: 0; transform: rotate(-90deg) scale(0.9);
   transition: opacity 200ms var(--ease-in-out), transform 260ms var(--ease-out); }
 /* day: the knob crosses to the right, the sun replaces the moon, clouds rise in as the stars fade */
