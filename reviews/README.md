@@ -21,15 +21,15 @@ against a blind solution) and A1… (full number audit) for the editor's gates.
 
 LM3's 34 findings of edition 0.1 were fixed before the first push; its record starts with the gates on that text.
 
-## Status (2026-10-12): Volume II in Stage 3
+## Status (2026-10-12): Volume II in Stage 3, paused until the closing check
 
 | Module | Review | Round 1 | Gates | Stage |
 |:--|:--|:--|:--|:--|
-| [LM8](lm08.md) Vectors and Matrices | round 1: 26 findings (8 major) | revision 1 done; verification next | — | draft on `main` |
-| [LM9](lm09.md) Linear Systems, Inverses and Rank | round 1: 29 findings (2 major) | revision 1 done; verification next | — | draft on `main` |
-| [LM10](lm10.md) Quadratic Forms and Covariance Matrices | round 1: 42 findings (9 major) | revision 1 done; verification next | — | draft on `main` |
-| [LM11](lm11.md) Eigen-decomposition and PCA | round 1: 41 findings (2 critical, 4 major) | revision 1 done; verification next | — | draft on `main` |
-| [LM12](lm12.md) Cholesky, SVD and Least Squares | round 1: 42 findings (6 major) | revision 1 done; verification next | — | draft on `main` |
+| [LM8](lm08.md) Vectors and Matrices | round 1: 26 findings (8 major) | revisions 1 and 2 done; verification 1 passed (round-2 items left), closing check next | — | draft on `main` |
+| [LM9](lm09.md) Linear Systems, Inverses and Rank | round 1: 29 findings (2 major) | revisions 1 and 2 done; verification 1 passed (round-2 items left), closing check next | — | draft on `main` |
+| [LM10](lm10.md) Quadratic Forms and Covariance Matrices | round 1: 42 findings (9 major) | revisions 1 and 2 done; verification 1 passed (round-2 items left), closing check next | — | draft on `main` |
+| [LM11](lm11.md) Eigen-decomposition and PCA | round 1: 41 findings (2 critical, 4 major) | revisions 1 and 2 done; verification 1 passed (round-2 items left), closing check next | — | draft on `main` |
+| [LM12](lm12.md) Cholesky, SVD and Least Squares | round 1: 42 findings (6 major) | revisions 1 and 2 done; verification 1 passed (round-2 items left), closing check next | — | draft on `main` |
 
 Round 1 ran the independent reviewer, the blind solver (K), the number auditor (A) and a Volume II cross-module check (X) on each draft; the IDs in each record follow that order.
 

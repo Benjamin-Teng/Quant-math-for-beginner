@@ -1,4 +1,4 @@
-# TODO — handoff (2026-10-11)
+# TODO — handoff (2026-10-12)
 
 > 給接手的 Claude Code：先讀 `CLAUDE.md`，再依下列順序執行。每完成一項就 commit 並直接 push 到 `main`，並用繁體中文向 Benjamin 回報。
 
@@ -77,6 +77,22 @@ options (bar-label text for LM8's `angles`, ellipses above points for LM11's Exh
 blind solver (K) and the number auditor (A, exact arithmetic from `data/raw/`); one consolidated list with the
 editor's decisions → writer → verifier (fixes, changed lines, `style.py`) → closing pass → the editor's fixes → a
 fresh check.
+
+**Where Stage 3 stands (2026-10-12; paused by the owner until the weekly token reset, Saturday 2026-10-17).** Round 1
+(reviewer, blind solver, auditor, Volume II cross-module check) found 180 items (1 critical, 29 major); revision 1
+fixed all, and verification 1 confirmed all but four, adding 30 minor items. Revision 2 fixed every item marked
+"round 2" and is on `main` with every gate passing (prose 5,658–5,969 words, 33–36 pages at scale 1.0000). Each
+`reviews/lmNN.md` holds the findings, decisions, both revisions and the verification. **Resume here:**
+
+1. Closing check (read-only, fresh agents; `reviews/REVIEW_PROMPT.md` §3 with REVIEWED_COMMIT `b9ef6ae`): one
+   verifier per module for the "Verification 1" items and anything the round-2 edits changed, plus one Volume II
+   re-check of notation, terms and cross-references.
+2. The editor's small fixes, then a fresh check of them: LM9's Section 8 code comment "# 2: one combination is zero"
+   → "one non-zero combination"; LM12's Cholesky 中文導讀 glosses (變異數, 互不相關, 對角線); `project/SOURCES.md`
+   no longer needs Golub and Van Loan §2.6 and §3.3 for LM12 (keep §3.4 for LM9 and ch. 8 for LM11); optional:
+   the brief's LM11 notation (ℓ, ζ) and anchors row 24's note on residues in %².
+3. Stage 4 below. Optional for the owner: `book.js` options the writers asked for (bar-label text, ellipses above
+   points, a significant-figure `Book.fmt` code); the modules work without them.
 
 **Stage 4, publishing 0.3.** `status: published` for LM8–LM12; the 0.3 edition note; the README status table; prereq
 and leads consistent both ways (Volume I modules gain leads to the Volume II modules that build on them, e.g. LM7 →
