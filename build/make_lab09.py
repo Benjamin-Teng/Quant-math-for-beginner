@@ -59,14 +59,14 @@ Companion notebook to **From Calculus to Kelly, LM9**. It rebuilds the module's 
 
 | Part | Rebuilds |
 |:--|:--|
-| 1 | The sector closes with the repair rule; the four days ([[ex:days]]); the common sample |
+| 1 | The sector closes with the repair rule; the four days ([[ex:days]]); the sector sample of Section 8 |
 | 2 | Both pictures of the 8–9 April system ([[eg:two]], [[ex:rowpic]], [[ex:colpic]]) |
 | 3 | Determinants: areas and angles ([[eg:sliver]], [[ex:area]]), cofactors with `Fraction` against `np.linalg.det` ([[eg:cof]]) |
 | 4 | Cramer's rule ([[eg:cramer]]) timed against `solve` for $n=2,\dots,9$, and its cost ([[ex:cost]]) |
 | 5 | Elimination with and without row swaps ([[eg:gauss]], [[ex:elim]]) against `solve` |
 | 6 | Gauss–Jordan and the inverse ([[ex:inverse]]); LM7's $\Sigma^{-1}$ ([[eg:sigma]]) |
 | 7 | Rank and the number of solutions ([[ex:regimes]], [[eg:line]], [[eg:four]], [[ex:wline]], [[ex:triples]]) |
-| 8 | Perfect collinearity: the mix column ([[eg:mix]]), the two 50/50 mixes ([[ex:drift]]), U28 and Electronic |
+| 8 | Perfect collinearity: the mix column ([[eg:mix]]), the two 50/50 mixes ([[ex:drift]]), the third columns of the knowledge check, U28 and Electronic |
 | 9 | Practice problems 4–11 and an extension exercise |
 
 **Environment.** From the repository root, `uv sync` installs the locked Python environment (`uv.lock`). Open this notebook with the `.venv` kernel, or run `uv run --with jupyterlab jupyter lab`.
@@ -75,7 +75,7 @@ Companion notebook to **From Calculus to Kelly, LM9**. It rebuilds the module's 
 
 `data/` then holds two files. `sectors_close_raw.csv` has the daily closes that FinMind's `TaiwanStockPrice` serves for TAIEX and the 30 TWSE sector indices, empty where a series has no close. `sectors_close_repairs.csv` lists the 561 closes that FinMind copied from another date or series, each with its official 13:30:00 value from `TaiwanStockEvery5SecondsIndex` (a paid dataset; the column is empty on FinMind's free plan). The notebook reads nothing outside `data/`.
 
-**Conventions (as in the module).** The hand-sized systems use percent returns $100(P_t/P_{t-1}-1)$ of 7–10 April 2025, rounded to 0.01, solved in exact rational arithmetic (`fractions.Fraction`). Section 8 uses daily simple returns on the common sample from the close of 2008-12-01 to 2026-10-08, between consecutive TAIEX trading dates.
+**Conventions (as in the module).** The hand-sized systems use percent returns $100(P_t/P_{t-1}-1)$ of 7–10 April 2025, rounded to 0.01, solved in exact rational arithmetic (`fractions.Fraction`). Section 8 uses daily simple returns on the Volume II sector sample: closes from 2008-12-01 to 2026-10-08, returns between consecutive TAIEX trading dates.
 """)
 
 code(r"""
@@ -144,7 +144,7 @@ def cramer(m, b):
 """)
 
 md(r"""
-## Part 1 — Data: the repair rule, the four days and the common sample
+## Part 1 — Data: the repair rule, the four days and the sector sample
 
 FinMind serves some sector closes copied from another date or another series. The repair cell replaces each close listed in `sectors_close_repairs.csv` by its 13:30:00 value; a listed close without that value (FinMind's free plan) is dropped, never estimated. With every value present, the result equals the closes the module uses, cell for cell.
 """)
@@ -167,12 +167,12 @@ for sid in rep["id"].unique().sort().to_list():
                     .drop("_fix", "_listed").sort("date"))
 n_fixed = rep.filter(pl.col("close_1330").is_not_null()).height
 in_u28 = rep.filter(pl.col("id").is_in(U28) & (pl.col("date") >= pl.lit("2008-12-01")))
-in_sec7 = rep.filter(pl.col("id").is_in(["Electronic", *ELEC8, "FinancialInsurance"])
+in_sec8 = rep.filter(pl.col("id").is_in(["Electronic", *ELEC8, "FinancialInsurance"])
                      & (pl.col("date") >= pl.lit("2008-12-01")))
 print("rule: each listed close is replaced by its 13:30:00 value; without that value it is dropped")
 print(f"listed closes {rep.height}: replaced {n_fixed}, dropped {rep.height - n_fixed}")
 print(f"in U28 from 2008-12-01: {in_u28.height} closes on {in_u28['date'].n_unique()} dates; "
-      f"in Electronic, its eight sub-industries and Financial: {in_sec7.height}")
+      f"in Electronic, its eight sub-industries and FinancialInsurance: {in_sec8.height}")
 print(f"{len(SERIES)} series, {closes.height} dates, {closes['date'][0]} -> {closes['date'][-1]}")
 """)
 
@@ -197,7 +197,7 @@ R = {c: [round2(v) for v in R_exact[c]] for c in COLS}
 MF = [[R["Semiconductor"][k], R["FinancialInsurance"][k], R["Food"][k]] for k in range(4)]   # rows: days
 BF = R["TAIEX"]
 days = pl.DataFrame({"session": DAYS, "TAIEX b_i": [float(v) for v in BF],
-                     "Semiconductor": [float(r[0]) for r in MF], "Financial": [float(r[1]) for r in MF],
+                     "Semiconductor": [float(r[0]) for r in MF], "FinancialInsurance": [float(r[1]) for r in MF],
                      "Food": [float(r[2]) for r in MF]})
 ties = sorted((abs(100 * v - math.floor(100 * v) - Fraction(1, 2)) / 100, c, d, v)
               for c in COLS for d, v in zip(DAYS, R_exact[c]))
@@ -207,12 +207,12 @@ days   # [[ex:days]]
 """)
 
 code(r"""
-# the common sample: closes from 2008-12-01, returns between consecutive TAIEX trading dates
+# the sector sample of Section 8: closes from 2008-12-01, returns between consecutive TAIEX trading dates
 cs = closes.filter(pl.col("date") >= pl.lit("2008-12-01")).sort("date")
 rets = cs.with_columns([(pl.col(c) / pl.col(c).shift(1) - 1).alias(c) for c in SERIES]).slice(1)
 sample = rets.drop_nulls(subset=[*U28, "Electronic", "TAIEX"])
 T = sample.height
-print(f"common sample: {cs.height} closes {cs['date'][0]} -> {cs['date'][-1]}; T = {T:,} returns, first {sample['date'][0]}")
+print(f"sector sample: {cs.height} closes {cs['date'][0]} -> {cs['date'][-1]}; T = {T:,} returns, first {sample['date'][0]}")
 """)
 
 md(r"""
@@ -222,7 +222,7 @@ Rows: each day is a line in the plane of the multiples $(x_1,x_2)$. Columns: $x_
 """)
 
 code(r"""
-M1 = [MF[1][:2], MF[2][:2]]          # 8 and 9 April; Semiconductor, Financial
+M1 = [MF[1][:2], MF[2][:2]]          # 8 and 9 April; Semiconductor, FinancialInsurance
 b1 = BF[1:3]
 x1 = cramer(M1, b1)
 print("E1: det =", dec(det_cof(M1), 3), " x =", [dec(v, 6) for v in x1])
@@ -238,7 +238,8 @@ for row, rhs, lab in zip(M1, b1, ("8 April", "9 April")):
         v_ = np.linspace(-1, 1.5, 50)
         ax_r.plot((r - c * v_) / a, v_, label=lab)
 ax_r.plot(float(x1[0]), float(x1[1]), "ko")
-ax_r.set(xlim=(0, 2), ylim=(-1, 1.5), xlabel="x1 (Semiconductor)", ylabel="x2 (Financial)", title="[[ex:rowpic]]: rows")
+ax_r.set(xlim=(0, 2), ylim=(-1, 1.5), xlabel="x1 (Semiconductor)", ylabel="x2 (FinancialInsurance)",
+         title="[[ex:rowpic]]: rows")
 ax_r.legend()
 m1, m2 = np.array([float(M1[0][0]), float(M1[1][0])]), np.array([float(M1[0][1]), float(M1[1][1])])
 p = float(x1[0]) * m1
@@ -268,11 +269,13 @@ def area_angle(m):
 
 M2 = [[MF[0][0], MF[0][2]], [MF[2][0], MF[2][2]]]   # 7 and 9 April; Semiconductor, Food
 b2 = [BF[0], BF[2]]
-for name, m, b in (("8, 9 April: Semi, Fin", M1, b1), ("7, 9 April: Semi, Food", M2, b2)):
+for name, m, b in (("8, 9 April: Semiconductor, FinancialInsurance", M1, b1), ("7, 9 April: Semiconductor, Food", M2, b2)):
     n1, n2, th = area_angle(m)
     d = det_cof(m)
+    dot = m[0][0] * m[0][1] + m[1][0] * m[1][1]       # positive: the angle is acute, so sin(theta) picks theta
     print(f"{name}: det {dec(d, 4)}; |m1| {n1:.6f}, |m2| {n2:.6f}, product {n1 * n2:.4f}; "
-          f"sin(theta) {float(d) / (n1 * n2):.4f}; theta {th:.2f} deg; x = {[dec(v, 5) for v in cramer(m, b)]}")
+          f"sin(theta) {float(d) / (n1 * n2):.4f}; dot product {dec(dot, 4)}; theta {th:.2f} deg; "
+          f"x = {[dec(v, 5) for v in cramer(m, b)]}")
 print("ratio of the areas:", round(float(det_cof(M1) / det_cof(M2)), 2), "(about nine)")
 """)
 
@@ -290,7 +293,7 @@ print("np.linalg.det:", repr(np.linalg.det(np.array(M3, dtype=float))))
 md(r"""
 ## Part 4 — Cramer's rule and its cost
 
-Cramer's rule (9.4) with cofactor expansions takes $(n+1)!$ terms; elimination takes about $\tfrac23n^3$ operations. The timing uses real returns: the first $n$ sectors of U28 on the last $n$ days of the sample. Times depend on the machine; the counts do not.
+Cramer's rule (9.4) with cofactor expansions takes $(n+1)!$ terms, each a product of $n$ entries and so $n-1$ multiplications; elimination takes about $\tfrac23n^3$ operations. The timing uses real returns: the first $n$ sectors of U28 on the last $n$ days of the sample. Times depend on the machine; the counts do not.
 """)
 
 code(r"""
@@ -308,7 +311,8 @@ for n in range(2, 10):
     t1 = time.perf_counter()
     xs = np.linalg.solve(np.array(m), b)
     t2 = time.perf_counter()
-    rows.append({"n": n, "(n+1)! terms": math.factorial(n + 1), "2n^3/3 operations": round(2 * n**3 / 3, 1),
+    rows.append({"n": n, "(n+1)! terms": math.factorial(n + 1), "multiplications (n+1)!(n-1)": math.factorial(n + 1) * (n - 1),
+                 "2n^3/3 operations": round(2 * n**3 / 3, 1),
                  "Cramer seconds": t1 - t0, "solve seconds": t2 - t1, "max |difference|": float(np.abs(np.array(xc) - xs).max())})
 pl.DataFrame(rows)   # [[ex:cost]]: the counts; the times are this machine's
 """)
@@ -319,6 +323,15 @@ plt.semilogy(ns, [math.factorial(n + 1) for n in ns], label="Cramer: (n+1)! term
 plt.semilogy(ns, 2 * ns**3 / 3, label="Elimination: 2n^3/3 operations")
 plt.xlabel("number of unknowns n"); plt.title("[[ex:cost]]"); plt.legend(); plt.show()
 print(f"n = 20: 21! = {math.factorial(21):,} terms against {2 * 20**3 / 3:,.0f} operations")
+
+
+def nested(n):
+    # multiplications of a nested cofactor expansion, which reuses the minors' values
+    return 0 if n == 1 else n * (nested(n - 1) + 1)
+
+
+print(f"n = 4: {5 * math.factorial(4)} products of four entries; {5 * math.factorial(4) * 3} multiplications "
+      f"formed one by one, {5 * nested(4)} in nested expansions")
 """)
 
 md(r"""
@@ -354,6 +367,12 @@ steps, swaps, piv, xg = eliminate(M3, b3, pivoting=False)
 print("[[eg:gauss]]: swaps", swaps, " pivots", [dec(v, 6) for v in piv], " x", [dec(v, 6) for v in xg])
 print("product of the pivots:", dec(piv[0] * piv[1] * piv[2], 6))
 print("np.linalg.solve:", np.linalg.solve(np.array(M3, dtype=float), np.array(b3, dtype=float)).round(6))
+# the printed six-decimal entries move the last digit: l32 and the back substitution from them
+F = Fraction
+print("l32: exact", steps[-1]["multiplier"], "; from the rounded entries", dec(F("-1.166955") / F("4.495940"), 6))
+x2_r = (F("-0.130251") - F("7.242704") * F("-0.916113")) / F("4.495940")
+x1_r = (F("-9.70") + F("9.89") * F("1.446834") + F("8.66") * F("-0.916113")) / F("-9.95")
+print("x2, x1 from the rounded entries and the printed x3, x2:", dec(x2_r, 6), dec(x1_r, 6))
 pl.DataFrame(steps)   # [[ex:elim]]
 """)
 
@@ -375,7 +394,8 @@ im = ax.imshow(np.array(Minv, dtype=float), cmap="RdBu", vmin=-1.1, vmax=1.1)
 for i in range(3):
     for j in range(3):
         ax.text(j, i, f"{float(Minv[i][j]):.3f}", ha="center", va="center")
-ax.set_xticks(range(3), ["7 April", "8 April", "9 April"]); ax.set_yticks(range(3), ["x1 Semi", "x2 Fin", "x3 Food"])
+ax.set_xticks(range(3), ["7 April", "8 April", "9 April"])
+ax.set_yticks(range(3), ["x1 Semiconductor", "x2 FinancialInsurance", "x3 Food"])
 ax.grid(False); ax.set_title("[[ex:inverse]]"); plt.colorbar(im); plt.show()
 print("x = M^-1 b:", [dec(sum(a * v for a, v in zip(r, b3)), 6) for r in Minv])
 """)
@@ -418,11 +438,15 @@ tri = []
 for name, rows_ in TRI.items():
     m, b = [MF[r] for r in rows_], [BF[r] for r in rows_]
     x = cramer(m, b)
-    tri.append({"days (April)": name, "det": dec(det_cof(m), 6), "Semiconductor": float(x[0]), "Financial": float(x[1]),
-                "Food": float(x[2])})
+    tri.append({"days (April)": name, "det": dec(det_cof(m), 6), "Semiconductor": float(x[0]),
+                "FinancialInsurance": float(x[1]), "Food": float(x[2])})
 tri = pl.DataFrame(tri)
 pred = sum(a * v for a, v in zip(MF[3], x3))
-print(f"Financial's multiple from {tri['Financial'].min():.3f} to {tri['Financial'].max():.3f}")
+print(f"FinancialInsurance's multiple from {tri['FinancialInsurance'].min():.3f} to {tri['FinancialInsurance'].max():.3f}")
+row7 = np.array(MF[0], dtype=float)
+cos7 = -row7.sum() / (np.linalg.norm(row7) * math.sqrt(3))
+print(f"7 April: the sectors fell {-row7.max():.2f}% to {-row7.min():.2f}%; "
+      f"their row lies {math.degrees(math.acos(cos7)):.1f} deg from (-1, -1, -1)")
 print(f"7-9 April mix on 10 April: {dec(pred, 2)}% against TAIEX's {float(BF[3])}%")
 tri   # [[ex:triples]]
 """)
@@ -433,18 +457,18 @@ s_ = np.linspace(-2, 2, 50)
 plt.plot(xp[0] + s_ * xh[0], xp[1] + s_ * xh[1], "k-", label="7-8 April line, x3 from -2 to 2")
 for name, col in (("7, 8, 9", "C0"), ("7, 8, 10", "C1")):
     row = tri.filter(pl.col("days (April)") == pl.lit(name))
-    plt.plot(row["Semiconductor"][0], row["Financial"][0], "o", color=col, label=f"with {name.split(', ')[-1]} April")
-plt.xlabel("x1 (Semiconductor)"); plt.ylabel("x2 (Financial)"); plt.title("[[ex:wline]]"); plt.legend(); plt.show()
+    plt.plot(row["Semiconductor"][0], row["FinancialInsurance"][0], "o", color=col, label=f"with {name.split(', ')[-1]} April")
+plt.xlabel("x1 (Semiconductor)"); plt.ylabel("x2 (FinancialInsurance)"); plt.title("[[ex:wline]]"); plt.legend(); plt.show()
 """)
 
 md(r"""
 ## Part 8 — Perfect collinearity
 
-A return matrix has rank below its number of columns exactly when a fixed mix of its columns returns 0 on every date (9.9).
+A return matrix has rank below its number of columns exactly when a fixed combination of its columns is 0 on every date (9.9).
 """)
 
 code(r"""
-# [[eg:mix]]: replace Food by the daily rebalanced 50/50 mix of Semiconductor and Financial
+# [[eg:mix]]: replace Food by the daily rebalanced 50/50 mix of Semiconductor and FinancialInsurance
 Mmix = [[r[0], r[1], (r[0] + r[1]) / 2] for r in M3]
 print("mix column:", [float(r[2]) for r in Mmix], " exact ranks:", rank_exact(Mmix),
       rank_exact([r + [bi] for r, bi in zip(Mmix, b3)]))
@@ -460,7 +484,7 @@ print("np.linalg.matrix_rank:", np.linalg.matrix_rank(Xm))
 """)
 
 code(r"""
-# the two 50/50 mixes on the common sample
+# the two 50/50 mixes on the sector sample
 RS, RF = sample["Semiconductor"].to_numpy(), sample["FinancialInsurance"].to_numpy()
 reb = 0.5 * RS + 0.5 * RF
 PS, PF = cs["Semiconductor"].to_numpy(), cs["FinancialInsurance"].to_numpy()
@@ -474,10 +498,19 @@ dts = cs["date"].to_list()
 iw_max, iw_min = int(np.nanargmax(w)), int(np.nanargmin(w))
 print(f"buy-and-hold weight in Semiconductor: {w[0]:.2f} -> {w[-1]:.3f} on {dts[-1]}; "
       f"min {w[iw_min]:.3f} on {dts[iw_min]}, max {w[iw_max]:.3f} on {dts[iw_max]}")
-print(f"largest daily gap between the two mixes: {np.nanmax(np.abs(reb - bh)) * 100:.2f} percentage points")
+print(f"largest absolute daily gap between the two mixes' returns: {np.nanmax(np.abs(reb - bh)) * 100:.2f} percentage points")
 plt.plot(pl.Series(dts).str.to_date().to_list(), w, label="bought on 1 December 2008 and held")
 plt.axhline(0.5, color="C1", ls="--", label="rebalanced to 50/50 every day")
 plt.ylabel("weight of Semiconductor"); plt.title("[[ex:drift]]"); plt.legend(); plt.show()
+""")
+
+code(r"""
+# the knowledge check of Section 8: which third column makes the rank lower than 3?
+V73 = 0.7 * PS / PS[0] + 0.3 * PF / PF[0]                    # a 70/30 mix bought at the 2008-12-01 close and held
+bh73_all = cs.select("date").with_columns(pl.Series("V", V73)).with_columns((pl.col("V") / pl.col("V").shift(1) - 1).alias("R"))
+bh73 = sample.select("date").join(bh73_all.select("date", "R"), on="date", how="left").sort("date")["R"].to_numpy()
+for name, third in (("70/30 rebalanced daily", 0.7 * RS + 0.3 * RF), ("spread R_S - R_F", RS - RF), ("70/30 held", bh73)):
+    print(f"{name}: matrix_rank {np.linalg.matrix_rank(np.column_stack([RS, RF, third]))}")
 """)
 
 code(r"""
@@ -543,7 +576,7 @@ v = []
 for i in range(3):
     v.append((prices[i] - sum(Mb[i][j] * v[j] for j in range(i))) / Mb[i][i])
 print("discount factors:", [dec(x, 6) for x in v])
-print("spot rates:", [f"{float(x) ** (-1 / (i + 1)) - 1:.4%}" for i, x in enumerate(v)])
+print("annual-compounding spot rates z_t = v_t^(-1/t) - 1:", [f"{float(x) ** (-1 / (i + 1)) - 1:.4%}" for i, x in enumerate(v)])
 """)
 
 md(r"""
@@ -573,9 +606,9 @@ print("matrix_rank of M and [M|b]:", np.linalg.matrix_rank(four), np.linalg.matr
 """)
 
 md(r"""
-**Problem 11.** The two 50/50 mixes: Part 8 printed the ranks (2 and 3), the final buy-and-hold weight and the largest daily gap.
+**Problem 11.** The two 50/50 mixes on Section 8's sample: Part 8 printed the ranks (2 and 3), the final buy-and-hold weight and the largest absolute daily gap between the two mixes' returns, in percentage points.
 
-**Without the repair files.** On FinMind's free plan the repair cell drops the 561 listed closes. No listed close falls on 2–10 April 2025, so Parts 2–7 and Problems 4–10 do not change. The common sample loses the returns into and out of each dropped date: $T$ falls from 4,382 to 4,307, and the correlation of Semiconductor with Electronic moves from 0.952591 to 0.953091. The four ranks, the buy-and-hold weights and the largest daily gap stay as printed. The timings of Part 4 differ from machine to machine in any case.
+**Without the repair files.** On FinMind's free plan the repair cell drops the 561 listed closes. No listed close falls on 2–10 April 2025, so Parts 2–7 and Problems 4–10 do not change. The sector sample loses the returns into and out of each dropped date: $T$ falls from 4,382 to 4,307, and the correlation of Semiconductor with Electronic moves from 0.952591 to 0.953091. The ranks, the buy-and-hold weights and the largest absolute daily gap stay as printed. The timings of Part 4 differ from machine to machine in any case.
 
 ### Extension: an exact fit for any $N$
 
@@ -601,7 +634,7 @@ nbf.write(nb, LAB / "LM09_lab.ipynb")
 
 (LAB / "README.md").write_text("""# LM9 Lab — Linear Systems, Inverses and Rank
 
-Companion to *From Calculus to Kelly*, Learning Module 9. The notebook repairs the sector closes, rebuilds the four-day case of 7–10 April 2025 in exact arithmetic, draws both pictures of a linear system, computes determinants, Cramer's rule, elimination and inverses, counts solutions with the rank, builds the two 50/50 mixes of Semiconductor and Financial, and works the computational practice problems.
+Companion to *From Calculus to Kelly*, Learning Module 9. The notebook repairs the sector closes, rebuilds the four-day case of 7–10 April 2025 in exact arithmetic, draws both pictures of a linear system, computes determinants, Cramer's rule, elimination and inverses, counts solutions with the rank, builds the two 50/50 mixes of Semiconductor and FinancialInsurance, and works the computational practice problems.
 
 ## Run
 
@@ -641,6 +674,6 @@ The notebook reads only the files in its own `data/` folder:
 | `data/sectors_close_raw.csv` | `date`, then TAIEX and the 30 TWSE sector indices: the daily closes FinMind's `TaiwanStockPrice` serves, 2007-07-02 → 2026-10-08, empty where a series has no close |
 | `data/sectors_close_repairs.csv` | `id`, `date`, `close_1330`: the 561 closes FinMind copied from another date or series, with the official 13:30:00 value of `TaiwanStockEvery5SecondsIndex` (empty on the free plan) |
 
-Part 1 replaces each listed close by its 13:30:00 value, or drops it when the value is missing. The sector indices are market-value-weighted price indices; `Electronic` and `ChemicalBiotechnologyMedicalCare` aggregate other sector indices and stay out of the 28-sector set U28.
+Part 1 replaces each listed close by its 13:30:00 value, or drops it when the value is missing. The sector indices are market-value-weighted price indices. U28 holds the 28 leaf indices among the 30 TWSE sector indices that FinMind serves daily: `Electronic` and `ChemicalBiotechnologyMedicalCare` aggregate other sector indices and stay out of it.
 """, encoding="utf-8", newline="\n")
 print("wrote", LAB / "LM09_lab.ipynb", "and README.md | labels:", {k: ("X" if w == "Exhibit" else "E") + str(n) for k, (w, n) in NUM.items()})

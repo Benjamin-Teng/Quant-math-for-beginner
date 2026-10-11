@@ -3,8 +3,8 @@
 Run after data/vol2_series.py:  uv run python data/lm09_charts.py
 
 Reads data/processed/vol2_closes.parquet only. The hand-sized systems use the percent returns of 7-10 April 2025
-rounded to 0.01, solved in exact rational arithmetic as in data/lm09_numbers.py; the drift chart uses the common
-sample 2008-12-01 .. 2026-10-08. Writing the same data twice gives byte-identical files.
+rounded to 0.01, solved in exact rational arithmetic as in data/lm09_numbers.py; the drift chart uses the Volume II
+sector sample, closes 2008-12-01 .. 2026-10-08. Writing the same data twice gives byte-identical files.
 """
 import json
 import math
@@ -105,7 +105,7 @@ specs["lm09-rowpic"] = {
     "type": "scatter", "alt": "Row picture: the 8 April and 9 April equations as two lines in the plane of the two multiples, crossing at one point",
     "height": 320,
     "x": {"label": "x_1, multiple of Semiconductor", "fmt": "n3", "tfmt": "n1", "min": 0.0, "max": 2.0, "name": "x_1"},
-    "y": {"label": "x_2, multiple of Financial", "fmt": "n3", "tfmt": "n1", "min": -1.0, "max": 1.5, "name": "x_2"},
+    "y": {"label": "x_2, multiple of FinancialInsurance", "fmt": "n3", "tfmt": "n1", "min": -1.0, "max": 1.5, "name": "x_2"},
     "lines": [{"from": f8, "to": t8, "extend": True, "color": "1", "width": 2, "label": "8 April: −3.99x_1 + 0.53x_2 = −4.02"},
               {"from": f9, "to": t9, "extend": True, "color": "2", "width": 2, "label": "9 April: −4.47x_1 − 5.61x_2 = −5.79"}],
     "points": [{"at": [r6(x1[0]), r6(x1[1])], "label": "x = (1.035, 0.207)", "color": "var(--ink)", "dx": 10, "dy": -8}],
@@ -115,13 +115,12 @@ specs["lm09-rowpic"] = {
 m1, m2 = [M1[0][0], M1[1][0]], [M1[0][1], M1[1][1]]
 s1 = [x1[0] * v for v in m1]
 specs["lm09-colpic"] = {
-    "type": "vector", "alt": "Column picture: 1.035 times the Semiconductor column plus 0.207 times the Financial column ends at TAIEX's returns",
+    "type": "vector", "alt": "Column picture: 1.035 times the Semiconductor column plus 0.207 times the FinancialInsurance column ends at TAIEX's returns",
     "height": 340,
     "x": {"label": "8 April return (%)", "fmt": "n2", "name": "8 April"},
     "y": {"label": "9 April return (%)", "fmt": "n2", "name": "9 April"},
-    "vectors": [{"to": fl(m2), "color": "2", "width": 1.5, "dash": True, "label": "m_2 (Financial)"},
-                {"to": [r6(v) for v in s1], "color": "1", "width": 2.5, "label": "1.035 m_1 (Semiconductor)", "dx": -6, "dy": -6,
-                 "anchor": "end"},
+    "vectors": [{"to": fl(m2), "color": "2", "width": 1.5, "dash": True, "label": "m_2"},
+                {"to": [r6(v) for v in s1], "color": "1", "width": 2.5, "label": "1.035 m_1", "dx": -6, "dy": -6, "anchor": "end"},
                 {"from": [r6(v) for v in s1], "to": fl(b1), "color": "2", "width": 2.5, "label": "0.207 m_2", "dx": -12, "dy": 2,
                  "anchor": "end"},
                 {"to": fl(b1), "color": "var(--ink)", "width": 1.5, "label": "b (TAIEX)", "dx": 12, "dy": -2, "anchor": "start"}],
@@ -164,14 +163,14 @@ specs["lm09-area"] = {
     "height": 330,
     "x": {"label": "return on the first day of the pair (%)", "fmt": "n2", "name": "first day"},
     "y": {"label": "return on the second day (%)", "fmt": "n2", "name": "second day"},
-    "series": [{"name": "8 and 9 April: Semiconductor, Financial (θ = 47.15°)", "color": "1",
+    "series": [{"name": "8 and 9 April: m_1 Semiconductor, m_2 FinancialInsurance (θ = 47.15°)", "color": "1",
                 "x": [r6((s_1[0]) / 2, 4)], "y": [r6((s_1[1]) / 2, 4)], "r": 2.5},
-               {"name": "7 and 9 April: Semiconductor, Food (θ = 1.52°)", "color": "2",
+               {"name": "7 and 9 April: m_1 Semiconductor, m_2 Food (θ = 1.52°)", "color": "2",
                 "x": [r6((s_2[0]) / 2, 4)], "y": [r6((s_2[1]) / 2, 4)], "r": 2.5}],
-    "points": [{"at": [r6((s_1[0]) / 2, 4), r6((s_1[1]) / 2, 4)], "label": "area 24.753", "color": "1", "r": 2.5, "dx": 8, "dy": 4},
+    "points": [{"at": [r6(s_1[0], 4), r6(s_1[1], 4)], "label": "area 24.753", "color": "1", "r": 2.5, "dx": -4, "dy": 24, "anchor": "end"},
                {"at": [r6(s_2[0], 4), r6(s_2[1], 4)], "label": "area 2.7813", "color": "2", "r": 2.5, "dx": -2, "dy": 24}],
-    "vectors": [{"to": fl(p1), "color": "1", "label": "Semi"}, {"to": fl(q1), "color": "1", "label": "Fin"},
-                {"to": fl(p2), "color": "2", "label": "Semi", "dx": -6, "dy": -10}, {"to": fl(q2), "color": "2", "label": "Food", "dx": 4, "dy": 16}],
+    "vectors": [{"to": fl(p1), "color": "1", "label": "m_1"}, {"to": fl(q1), "color": "1", "label": "m_2"},
+                {"to": fl(p2), "color": "2", "label": "m_1", "dx": -6, "dy": -10}, {"to": fl(q2), "color": "2", "label": "m_2", "dx": 4, "dy": 16}],
     "segments": [{"from": fl(p1), "to": fl(s_1), "color": "1"}, {"from": fl(q1), "to": fl(s_1), "color": "1"},
                  {"from": fl(p2), "to": fl(s_2), "color": "2"}, {"from": fl(q2), "to": fl(s_2), "color": "2"}],
 }
@@ -182,8 +181,8 @@ assert f"{ang(p1, q1):.2f}" == "47.15" and f"{ang(p2, q2):.2f}" == "1.52"
 sig = [[Fr("0.040425"), Fr("-0.002866")], [Fr("-0.002866"), Fr("0.018214")]]
 exc = [Fr("0.22751"), Fr("-0.02547")]
 presets = [
-    {"id": "e1", "name": "8 and 9 April: Semiconductor, Financial", "m": [fl(r) for r in M1], "b": fl(b1),
-     "rows": ["8 April", "9 April"], "cols": ["Semiconductor", "Financial"], "unit": "%", "range": [12, 12], "step": "0.01",
+    {"id": "e1", "name": "8 and 9 April: Semiconductor, FinancialInsurance", "m": [fl(r) for r in M1], "b": fl(b1),
+     "rows": ["8 April", "9 April"], "cols": ["Semiconductor", "FinancialInsurance"], "unit": "%", "range": [12, 12], "step": "0.01",
      "x": [r6(v) for v in x1]},
     {"id": "e2", "name": "7 and 9 April: Semiconductor, Food (1.52°)", "m": [fl(r) for r in M2], "b": fl(b2),
      "rows": ["7 April", "9 April"], "cols": ["Semiconductor", "Food"], "unit": "%", "range": [12, 12], "step": "0.01",
@@ -215,7 +214,7 @@ Minv = inverse3(M3)
 flat = [r6(v) for r in Minv for v in r]
 specs["lm09-inverse"] = {
     "type": "heatmap", "alt": "Heatmap of the inverse of the 7 to 9 April matrix: rows are the three multiples, columns the three days",
-    "rows": ["x_1 Semiconductor", "x_2 Financial", "x_3 Food"], "cols": ["7 April", "8 April", "9 April"],
+    "rows": ["x_1", "x_2", "x_3"], "cols": ["7 April", "8 April", "9 April"],
     "matrix": [[r6(v) for v in r] for r in Minv], "fmt": "n3", "min": math.floor(min(flat) * 1000) / 1000,
     "max": math.ceil(max(flat) * 1000) / 1000, "scaleFmt": "n2", "valueName": "change in x_i per point of TAIEX on the day",
 }
@@ -224,12 +223,12 @@ specs["lm09-inverse"] = {
 TRI = {"7, 8, 9 Apr": [0, 1, 2], "7, 8, 10 Apr": [0, 1, 3], "7, 9, 10 Apr": [0, 2, 3], "8, 9, 10 Apr": [1, 2, 3]}
 sols = {k: solve([MF[r] for r in v], [TAIEX[r] for r in v]) for k, v in TRI.items()}
 specs["lm09-triples"] = {
-    "type": "bar", "alt": "The exact replicating mix for each of the four triples of days: the multiples of Semiconductor, Financial and Food",
+    "type": "bar", "alt": "The exact replicating mix for each of the four triples of days: the multiples of Semiconductor, FinancialInsurance and Food",
     "height": 300, "categories": list(TRI), "valueLabels": True,
     "x": {"label": "Days used"},
     "y": {"fmt": "n3", "tfmt": "n1", "label": "Multiple in the exact mix"},
     "series": [{"name": "Semiconductor x_1", "color": "1", "values": [r6(s[0]) for s in sols.values()]},
-               {"name": "Financial x_2", "color": "2", "values": [r6(s[1]) for s in sols.values()]},
+               {"name": "FinancialInsurance x_2", "color": "2", "values": [r6(s[1]) for s in sols.values()]},
                {"name": "Food x_3", "color": "3", "values": [r6(s[2]) for s in sols.values()]}],
 }
 
@@ -248,7 +247,7 @@ specs["lm09-wline"] = {
     "type": "scatter", "alt": "The line of mixes that reproduce TAIEX on 7 and 8 April, seen in the plane of the first two multiples, with the two points that a third day picks",
     "height": 320,
     "x": {"label": "x_1, multiple of Semiconductor", "fmt": "n3", "tfmt": "n1", "min": -0.6, "max": 2.6, "name": "x_1"},
-    "y": {"label": "x_2, multiple of Financial", "fmt": "n3", "tfmt": "n1", "min": -3.4, "max": 3.4, "name": "x_2"},
+    "y": {"label": "x_2, multiple of FinancialInsurance", "fmt": "n3", "tfmt": "n1", "min": -3.4, "max": 3.4, "name": "x_2"},
     "lines": [{"from": [r6(p_1 - 2 * h_1), r6(p_2 - 2 * h_2)], "to": [r6(p_1 + 2 * h_1), r6(p_2 + 2 * h_2)], "color": "var(--ink-2)",
                "width": 2}],
     "series": [{"name": "with 9 April (x_3 = −0.916)", "color": "1", "x": [r6(sols["7, 8, 9 Apr"][0])], "y": [r6(sols["7, 8, 9 Apr"][1])], "r": 5},
@@ -265,7 +264,7 @@ wS = 0.5 * (PS / PS[0]) / V
 imax, imin = int(np.argmax(wS)), int(np.argmin(wS))
 keep = sorted(set(range(0, len(cd), 5)) | {imax, imin, len(cd) - 1})
 specs["lm09-drift"] = {
-    "alt": "Semiconductor's weight in a 50/50 mix with Financial: constant at 0.5 when rebalanced daily, drifting to 0.858 when bought and held, December 2008 to October 2026",
+    "alt": "Semiconductor's weight in a 50/50 mix with FinancialInsurance: constant at 0.5 when rebalanced daily, drifting to 0.858 when bought and held, December 2008 to October 2026",
     "height": 300,
     "x": {"type": "date"},
     "y": {"type": "lin", "fmt": "n3", "tfmt": "n1", "label": "Weight of Semiconductor in the 50/50 mix", "min": 0.4, "max": 0.9},

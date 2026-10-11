@@ -46,6 +46,7 @@
       '<p class="w-note">Column picture: the columns m₁ (fixed by the system chosen) and m₂ (sliders) span a parallelogram whose area is |det M|; ' +
       "when a solution exists, the dashed path x₁m₁ + x₂m₂ ends at b. Row picture: one line per equation, meeting at the solution. " +
       "As m₂ turns toward m₁ the area shrinks and the mix grows: LM11 measures this sensitivity with the condition number. " +
+      "The readout rank M is the number of independent columns (Section 7). " +
       "A determinant within 10⁻⁹ of 0, relative to the product of the column lengths, counts as 0.</p>";
     var sel = host.querySelector("#se-p"), ids = ["se-m12", "se-m22", "se-b1", "se-b2"];
     var inp = ids.map(function (id) { return host.querySelector("#" + id); });

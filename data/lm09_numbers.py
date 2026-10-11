@@ -9,8 +9,8 @@ data/vol2_series.py) and data/processed/vol2_repairs.json. Nothing else is read.
   and Food on 7, 8, 9 and 10 April 2025, between consecutive TAIEX trading dates, rounded to 0.01. The rounded values
   are the inputs: every system built from them is solved in exact rational arithmetic (fractions.Fraction), so each
   printed solution is the exact solution for the printed inputs, rounded only when it is printed.
-* Section 7 uses daily simple returns R_t = P_t / P_{t-1} - 1 on the common sample 2008-12-01 .. 2026-10-08 (float64,
-  NumPy), as the Volume II briefs define it.
+* Section 8 uses daily simple returns R_t = P_t / P_{t-1} - 1 on the Volume II sector sample, closes 2008-12-01 ..
+  2026-10-08 (float64, NumPy), as the Volume II briefs define it.
 
 Every printed value is checked twice (AUTHORING section 8, PITFALLS section 7): it must follow from the inputs the
 module prints next to it, and it must appear in src/lm09.md exactly as printed. The script stops on any mismatch.
@@ -328,9 +328,11 @@ f4 = matvec(Sinv4, [E1_, E2_])
 P(f"   f* from the printed 4-decimal inverse: ({dec(f4[0], 6)}, {dec(f4[1], 6)}); Sigma times printed inverse: "
   f"{[[dec(v, 6) for v in r] for r in matmul(Sig, Sinv4)]}")
 
-# ---------------------------------------------------------------- Section 7: the common sample (float64)
+# ---------------------------------------------------------------- Section 8: the sector sample (float64)
 AGG = ["Electronic", "ChemicalBiotechnologyMedicalCare"]
-U28 = [c for c in cl.columns[1:] if c not in ["TAIEX", *AGG]]
+SECTORS30 = [c for c in cl.columns[1:] if c != "TAIEX"]
+assert cl.columns[0] == "date" and len(SECTORS30) == 30 and all(a in SECTORS30 for a in AGG)   # the 30 sector series
+U28 = [c for c in SECTORS30 if c not in AGG]
 ELEC8 = ["Semiconductor", "ComputerPeripheralEquipment", "Optoelectronic", "CommunicationsInternet",
          "ElectronicPartsComponents", "ElectronicProductsDistribution", "InformationService", "OtherElectronic"]
 assert len(U28) == 28 and all(e in U28 for e in ELEC8)
@@ -339,7 +341,7 @@ assert cs.select(pl.all().is_null().any()).row(0) == tuple([False] * cs.width), 
 cdates = cs["date"].to_list()
 Rt = {c: cs[c].to_numpy()[1:] / cs[c].to_numpy()[:-1] - 1 for c in U28 + ["Electronic", "TAIEX"]}
 T = len(Rt["Semiconductor"])
-P(f"COMMON SAMPLE: {len(cdates)} dates {cdates[0]}..{cdates[-1]}; T = {T}; first return {cdates[1]}")
+P(f"SECTOR SAMPLE: {len(cdates)} dates {cdates[0]}..{cdates[-1]}; T = {T}; first return {cdates[1]}")
 RS, RF = Rt["Semiconductor"], Rt["FinancialInsurance"]
 reb = 0.5 * RS + 0.5 * RF
 PS, PF = cs["Semiconductor"].to_numpy(), cs["FinancialInsurance"].to_numpy()
@@ -363,6 +365,17 @@ r_u28, r_e9 = int(np.linalg.matrix_rank(XU)), int(np.linalg.matrix_rank(XE))
 corr_se = float(np.corrcoef(Rt["Semiconductor"], Rt["Electronic"])[0, 1])
 P(f"   U28 matrix_rank {r_u28} of {XU.shape}; Electronic + eight: matrix_rank {r_e9} of {XE.shape}; corr(Semi, Electronic) {corr_se:.6f}")
 P(f"   max |X x_h| for the rebalanced mix: {np.abs(np.column_stack([RS, RF, reb]) @ np.array([-0.5, -0.5, 1.0])).max():.1e}")
+# KC of Section 8: a 70/30 mix rebalanced daily and the spread are fixed combinations of the two columns; a 70/30 mix
+# bought at the 2008-12-01 close and held is not
+reb73, spread = 0.7 * RS + 0.3 * RF, RS - RF
+V73 = 0.7 * PS / PS[0] + 0.3 * PF / PF[0]
+bh73 = V73[1:] / V73[:-1] - 1
+r_reb73 = int(np.linalg.matrix_rank(np.column_stack([RS, RF, reb73])))
+r_spread = int(np.linalg.matrix_rank(np.column_stack([RS, RF, spread])))
+r_bh73 = int(np.linalg.matrix_rank(np.column_stack([RS, RF, bh73])))
+res73 = float(np.abs(np.column_stack([RS, RF, reb73]) @ np.array([-0.7, -0.3, 1.0])).max())
+res_sp = float(np.abs(np.column_stack([RS, RF, spread]) @ np.array([-1.0, 1.0, 1.0])).max())
+P(f"   KC 70/30: matrix_rank rebalanced {r_reb73}, spread {r_spread}, held {r_bh73}; max |X x| {res73:.1e} and {res_sp:.1e}")
 
 # ---------------------------------------------------------------- Section 3: the cost of Cramer's rule
 cost = [(n, math.factorial(n), math.factorial(n + 1), Fr(2, 3) * n**3) for n in range(2, 21)]
@@ -518,6 +531,13 @@ chk("E2 sliver product of printed lengths", f"{10.907951 * 9.611686:.4f}", "104.
 chk("E2 sliver sin", f"{2.7813 / 104.8438:.4f}", "0.0265")
 chk("E2 sliver angle from printed sin", f"{math.degrees(math.asin(0.0265)):.2f}", "1.52")
 chk("E2 sliver angle exact", f"{angle(col(M2, 0), col(M2, 1)):.2f}", "1.52")
+# the sine fits theta and 180 - theta: the positive dot products make both angles acute
+chk("E1 dot product", d(F("-3.99") * F("0.53") + F("-4.47") * F("-5.61"), 3), "22.962")
+chk("E2 sliver dot product", d(F("-9.95") * F("-8.66") + F("-4.47") * F("-4.17"), 4), "104.8069")
+assert sum(a * b for a, b in zip(col(M1, 0), col(M1, 1))) == F("22.962")
+assert sum(a * b for a, b in zip(col(M2, 0), col(M2, 1))) == F("104.8069")
+chk("E1 angle from the printed cosine", f"{math.degrees(math.acos(22.962 / 33.7634)):.2f}", "47.15", in_text=False)
+chk("E2 angle from the printed cosine", f"{math.degrees(math.acos(104.8069 / 104.8438)):.2f}", "1.52", in_text=False)
 num1 = det(with_col(M2, 0, b2))
 num2 = det(with_col(M2, 1, b2))
 chk("E2 sliver numerators", f"{d(num1, 4)} {d(num2, 4)}", "-9.6924 14.2515", in_text=False)
@@ -547,21 +567,30 @@ for j, pr in enumerate(("-23.919201", "-103.581657", "65.586258")):
     chk(f"E4 x{j + 1} from printed", d(F(pr) / F("-71.591922"), 6), d(x3[j], 6))
 chk("E4 x", ", ".join(d(v, 6) for v in x3), "0.334105, 1.446834, -0.916113", in_text=False)
 present("0.334105,\\ 1.446834,\\ -0.916113")
-chk("cost n=3", f"{math.factorial(4)} {Fr(2, 3) * 27}", "24 18", in_text=False)
 chk("cost n=20 terms", f"{math.factorial(21):,}", "51,090,942,171,709,440,000")
 chk("cost n=20 terms (about)", f"{math.factorial(21):.1e}", "5.1e+19", in_text=False)
 present("5.1\\times10^{19}")
 chk("cost n=20 operations", f"{2 * 20**3 / 3:,.0f}", "5,333")
 chk("KC n=4 products", f"{5 * math.factorial(4)}", "120")
 chk("KC n=4 multiplications", f"{5 * math.factorial(4) * 3}", "360")
+
+
+def nested_mults(n: int) -> int:
+    """Multiplications of a nested cofactor expansion: n entries times the n minors, each expanded the same way."""
+    return 0 if n == 1 else n * (nested_mults(n - 1) + 1)
+
+
+assert [nested_mults(k) for k in (2, 3, 4)] == [2, 9, 40]
+chk("KC n=4 nested multiplications per determinant", str(nested_mults(4)), "40")
+chk("KC n=4 nested multiplications in all", str(5 * nested_mults(4)), "200")
 # ---- Example gauss (E5), exhibit elim, KC of Section 4
 L = el["mult"]
 chk("E5 l21 from printed", d(F("-3.99") / F("-9.95"), 6), "0.401005")
 chk("E5 l31 from printed", d(F("-4.47") / F("-9.95"), 6), "0.449246")
 chk("E5 l21 l31 l32 exact", " ".join(d(L[key], 6) for key in ((1, 0), (2, 0), (2, 1))), "0.401005 0.449246 -0.259557", in_text=False)
-# l32 from the rounded entries is -0.2595575..., so the text gives the exact value and names the entries in words
-assert abs(F("-1.166955") / F("4.495940") - L[(2, 1)]) < Fr(1, 10**6)
 present("-0.259557")
+# dividing the rounded entries gives -0.2595575..., which the text prints beside the exact multiplier
+chk("E5 l32 from the rounded entries", d(F("-1.166955") / F("4.495940"), 6), "-0.259558")
 step1 = el["steps"][0]
 chk("elim row 8 Apr after step 1", " ".join(d(v, 6) for v in step1[1][1:]), "4.495940 7.242704 -0.130251", in_text=False)
 chk("elim row 9 Apr after step 1", " ".join(d(v, 6) for v in step1[2][1:]), "-1.166955 -0.279528 -1.432312", in_text=False)
@@ -581,6 +610,8 @@ bs2 = (F("-0.130251") - F("7.242704") * F("-0.916113")) / F("4.495940")
 bs1 = (F("-9.70") + F("9.89") * F("1.446834") + F("8.66") * F("-0.916113")) / F("-9.95")
 P(f"   E5 back substitution from the printed entries: x2 {d(bs2, 7)}, x1 {d(bs1, 7)} (exact: {d(x3[1], 7)}, {d(x3[0], 7)})")
 assert abs(bs2 - x3[1]) < Fr(2, 10**6) and abs(bs1 - x3[0]) < Fr(2, 10**6)   # the text says the substitution is exact
+chk("E5 x2 from the rounded entries and the printed x3", d(bs2, 6), "1.446835")
+chk("E5 x1 from the rounded entries and the printed x3, x2", d(bs1, 6), "0.334106")
 chk("E5 exact pivots product", d(el["piv"][0] * el["piv"][1] * el["piv"][2], 6), "-71.591922")
 chk("KC4 l21", d(F("-4.47") / F("-3.99"), 6), "1.120301")
 chk("KC4 row", f"{d(row2_e1[0], 6)} {d(row2_e1[1], 6)}", "-6.203759 -1.286391", in_text=False)
@@ -639,6 +670,7 @@ chk("triples Financial max", d(max(fin_rng), 3), "2.069")
 assert tri["7-8-10"][1][1] == min(fin_rng) and tri["8-9-10"][1][1] == max(fin_rng)
 chk("7 April row against (-1,-1,-1), degrees", f"{angle(MF[0], [Fr(-1)] * 3):.1f}", "3.6")
 present("3.6°")
+chk("7 April sector falls", f"{d(-max(MF[0]), 2)}% to {d(-min(MF[0]), 2)}%", "8.66% to 9.95%")
 # 7 April: 0050 closed -10.000000% and TX's front month settled at its limit (LM8's case); TAIEX fell 9.699731%
 chk("10 Apr from printed mix", d(F("9.91") * F("0.334105") + F("8.36") * F("1.446834") + F("5.72") * F("-0.916113"), 2), "10.17")
 for name, pr in (("7-8-9", "-71.591922"), ("7-8-10", "22.568247"), ("7-9-10", "-29.587887"), ("8-9-10", "49.300524")):
@@ -656,6 +688,17 @@ chk("largest daily gap", f"{gap.max() * 100:.2f}", "2.57")
 chk("Electronic + eight rank", f"{r_e9} {XE.shape}", "9 (4382, 9)", in_text=False)
 chk("corr Semi Electronic", f"{corr_se:.6f}", "0.952591")
 chk("U28 rank", f"{r_u28}", "28")
+present("28 leaf indices among the 30 TWSE sector indices")
+chk("KC Section 8: ranks with the 70/30 rebalanced mix, the spread, the 70/30 held mix", f"{r_reb73} {r_spread} {r_bh73}",
+    "2 2 3", in_text=False)
+assert res73 < 1e-15 and res_sp < 1e-15
+# in exact arithmetic, on the four days of the case: both third columns are fixed combinations of the first two
+M73 = [[r[0], r[1], F("0.7") * r[0] + F("0.3") * r[1]] for r in MF]
+Msp = [[r[0], r[1], r[0] - r[1]] for r in MF]
+assert matvec(M73, [F("-0.7"), F("-0.3"), Fr(1)]) == [0] * 4 and matvec(Msp, [Fr(-1), Fr(1), Fr(1)]) == [0] * 4
+assert rank(M73) == rank(Msp) == 2
+present("(-0.7,-0.3,1)^{\\top}")
+present("(-1,1,1)^{\\top}")
 chk("E9 mix column", " ".join(d(r[2], 2) for r in Mmix), "-9.92 -1.73 -5.04", in_text=False)
 present("-9.92,\\,-1.73,\\,-5.04")
 chk("E9 E1 mix on 7 Apr (from printed)", d(F("-9.95") * F("1.035062") + F("-9.89") * F("0.207357"), 2), "-12.35")
