@@ -141,6 +141,12 @@ that teaches something.
 meaning in every module; a module may add local symbols in its notation note but may not reuse a book-wide symbol
 for something else.
 
+**Common notation first** (owner, 2026-10-11). Use the symbols a reader meets in standard textbooks and in practice
+($\sigma$ for a volatility, $\rho$ for a correlation, $\Sigma$ for a covariance matrix, $\beta$ for a regression slope,
+$\Delta$ for a change), so that the book never asks the reader to learn private symbols. A module introduces a new
+symbol only where no common one exists or the common one would clash with a book-wide symbol below, and its notation
+note says why.
+
 | Symbol | Book-wide meaning |
 |:--|:--|
 | $R$, $r$ | simple return per period; $r:=\ln(1+R)$ the log return. A continuously compounded rate is also an $r$: $r_f$, $r(t)$ |
