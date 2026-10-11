@@ -51,14 +51,33 @@ All files are exactly as returned by FinMind (retrieved 2026-10-10), in windows 
   sector indices (`data_id` = the index id, e.g. `Semiconductor`), 2007-07-02 → 2026-10-08, in 13 windows of 18
   months per series (`<ID>__<start>__<end>.csv`, at most 378 rows each; 403 files). Every file passed `check_chunk.py`
   for duplicates and order and is rebuilt byte for byte by `fetch_finmind.py`, **but the sector closes are not usable
-  as served.** FinMind copies one day's values onto other dates: on 18 dates every sector prints the same closes (for
-  example Semiconductor 1531.87 on both 2009-06-05 and 2025-06-11, against 68.65 and 643.65 at the 13:30:00 close of
-  `TaiwanStockEvery5SecondsIndex`), and Chemical has about 20 more such dates. About 1,500 other rows carry a stale
-  spread (another day's spread, volume and turnover) while the close is sound, so a close is never repaired as the
-  previous close plus the spread. The Volume II scripts replace each flagged close with the official 13:30:00 value of
+  as served.** FinMind copies values from elsewhere: 18 dates carry every sector's closes from another date (the set
+  of 2026-06-29 appears on six of them, so Semiconductor prints 1531.87 on 2009-06-05 and on 2025-06-11, against
+  68.65 and 643.65 at the 13:30:00 close of `TaiwanStockEvery5SecondsIndex`), and on 21 more dates Chemical carries the
+  same-day close of ChemicalBiotechnologyMedicalCare. 1,528 other rows carry a stale spread (another day's spread,
+  volume and turnover) while the close is sound, so a close is never repaired as the previous close plus the spread. The Volume II scripts replace each flagged close with the official 13:30:00 value of
   `TaiwanStockEvery5SecondsIndex`, itself registered here (PITFALLS §3). TAIEX in the same dataset is clean, but its
-  spread prints 0.0 through parts of 2017-12, 2018-09 and 2026-02. TradingConsumersGoods has three stray closes
-  before 2008-12-01 and is complete only from then.
+  spread prints 0.0 through parts of 2017-12, 2018-09 and 2026-02. TradingConsumersGoods has only three closes before
+  2008-12-01 in this dataset (the index existed: `TaiwanStockEvery5SecondsIndex` has values on other dates) and is complete
+  from then.
+- `sectors_close/` (Volume II, retrieved 2026-10-11): the 13:30:00 value of `TaiwanStockEvery5SecondsIndex` (a
+  Backer dataset) for each of the 561 sector closes that `vol2_series.py` repairs, one file per close
+  (`<ID>__<date>.csv`, `data_id` = the index, filtered to `time` 13:30:00 and `kind` twse). The dataset takes only a
+  start date, so these manifest entries have `end_date: null`.
+- `taiex_close/` (Volume II, retrieved 2026-10-11): the 13:30:00 TAIEX value of `TaiwanVariousIndicators5Seconds`
+  (Free) on each of the 52 dates where TAIEX's spread prints 0.0, so that those closes can be checked; all 52 equal
+  the served close.
+
+`vol2_series.py` builds the Volume II closes with exact decimal arithmetic. It flags a sector close that the spread
+contradicts on both sides or that repeats another date's close, replaces the 561 wrong ones with their 13:30:00 values,
+accepts 1,528 stale spreads (an isolated mismatch whose closes agree with their other neighbours), checks TAIEX's
+zero-spread closes against `taiex_close/`, and stops on any close still contradicted on both sides or on any change in
+the set of flagged closes it keeps as served. While the repair was built, 3,029 further 13:30:00 values were fetched
+and equalled the served close, and a spot check of 20 unflagged closes, one a year from 2007 to 2026, found every one
+equal to its 13:30:00 value; the script records the 3,029 count (not the files), and this paragraph records the spot
+check. Its outputs, git-ignored in `processed/`,
+are `vol2_closes.parquet` (4,737 dates × 31 series), `vol2_repairs.json` and `vol2_series.txt`. `vol2_anchors.py` is
+the editor's exploration for the Volume II briefs (`processed/vol2_anchors.txt`).
 
 ## Verification
 

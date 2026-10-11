@@ -166,7 +166,8 @@
         var k = document.createElement("span"); k.className = "key";
         var sw = document.createElement("i"); sw.className = "sw" + (s.dash ? " dash" : "");
         sw.style.background = color(s.color); sw.style.color = color(s.color);
-        k.appendChild(sw); k.appendChild(document.createTextNode(s.name)); lg.appendChild(k);
+        var nm = document.createElement("span"); nm.innerHTML = rich(s.name == null ? "" : s.name);   // a_1 / A^T as sub- and superscripts, as in the other chart types
+        k.appendChild(sw); k.appendChild(nm); lg.appendChild(k);
       });
       host.appendChild(lg);
     }
@@ -175,7 +176,7 @@
     var W = Math.max(280, Math.round(host.clientWidth || 640)), H = spec.height || Math.round(Math.min(360, Math.max(220, W * 0.52)));
     var narrow = W < 460;
     var m = { l: narrow ? 46 : 58, r: spec.endLabels && !narrow ? (spec.endMargin || 96) : 16, t: 12, b: spec.x.label ? 44 : 30 };
-    var svg = el("svg", { viewBox: "0 0 " + W + " " + H, role: "img", "aria-label": spec.alt || "" }, wrap);
+    var svg = el("svg", { viewBox: "0 0 " + W + " " + H, role: "img", "aria-label": spec.alt || spec.title || null }, wrap);
     var xs = [], ys = [];
     series.forEach(function (s) { s.x.forEach(function (v, i) { var yv = s.y[i]; if (yv != null && isFinite(yv)) { xs.push(v); ys.push(yv); } }); });
     var x0 = spec.x.min != null ? spec.x.min : Math.min.apply(null, xs), x1 = spec.x.max != null ? spec.x.max : Math.max.apply(null, xs);
@@ -211,7 +212,7 @@
       else if (dt) t.textContent = fmtDate(v, dt.mode === "year" ? "year" : null);
       else t.textContent = xl && xl[i] != null ? xl[i] : fmt(v, spec.x.fmt);
     });
-    if (spec.x.label) { var tx = el("text", { class: "ttl-y", x: m.l + (W - m.l - m.r) / 2, y: H - 6, "text-anchor": "middle" }, svg); tx.textContent = spec.x.label; }
+    if (spec.x.label) { var tx = el("text", { class: "ttl-y", x: m.l + (W - m.l - m.r) / 2, y: H - 6, "text-anchor": "middle" }, svg); setText(tx, spec.x.label); }
     if (spec.y.label) { var ty = el("text", { class: "ttl-y", x: m.l, y: m.t - 2 + 0, "text-anchor": "start" }, svg); ty.textContent = ""; host.setAttribute("data-ylabel", spec.y.label); }
     // series
     var sg = el("g", { class: "series" }, svg);
@@ -239,13 +240,13 @@
     (spec.ann || []).forEach(function (a) {
       if (a.type === "vline") {
         el("line", { x1: X(a.x), x2: X(a.x), y1: m.t, y2: H - m.b }, ag);
-        if (a.label) { var t = el("text", { x: X(a.x) + (a.anchor === "end" ? -5 : 5), y: m.t + 11 + (a.dy || 0), "text-anchor": a.anchor || "start" }, ag); t.textContent = a.label; }
+        if (a.label) { var t = el("text", { x: X(a.x) + (a.anchor === "end" ? -5 : 5), y: m.t + 11 + (a.dy || 0), "text-anchor": a.anchor || "start" }, ag); setText(t, a.label); }
       } else if (a.type === "hline") {
         el("line", { x1: m.l, x2: W - m.r, y1: Y(a.y), y2: Y(a.y) }, ag);
-        if (a.label) { var t2 = el("text", { x: W - m.r - 4, y: Y(a.y) - 5, "text-anchor": "end" }, ag); t2.textContent = a.label; }
+        if (a.label) { var t2 = el("text", { x: W - m.r - 4, y: Y(a.y) - 5, "text-anchor": "end" }, ag); setText(t2, a.label); }
       } else if (a.type === "point") {
         el("circle", { class: "dot", cx: X(a.x), cy: Y(a.y), r: 4.5, style: "fill:" + color(a.color || "1") }, ag);
-        if (a.label) { var t3 = el("text", { x: X(a.x) + (a.dx || 8), y: Y(a.y) + (a.dy || -8), "text-anchor": a.anchor || "start" }, ag); t3.textContent = a.label; }
+        if (a.label) { var t3 = el("text", { x: X(a.x) + (a.dx || 8), y: Y(a.y) + (a.dy || -8), "text-anchor": a.anchor || "start" }, ag); setText(t3, a.label); }
       }
     });
     // end labels (skip if they would collide)
@@ -263,8 +264,8 @@
       groups.forEach(function (gp) {
         var y = Math.max((gp.y0 + gp.y1) / 2, lastY + 14); lastY = y;
         var t = el("text", { class: "lab", x: W - m.r + 6, y: y + 4 }, svg);
-        t.textContent = gp.items.map(function (e) { return e.s.endLabel || e.s.name; }).join(" · ") +
-          (spec.endValue ? " " + fmt(gp.items[0].v, spec.y.fmt) : "");
+        setText(t, gp.items.map(function (e) { return e.s.endLabel || e.s.name; }).join(" · ") +
+          (spec.endValue ? " " + fmt(gp.items[0].v, spec.y.fmt) : ""));
       });
     }
     // crosshair + tooltip
@@ -287,7 +288,7 @@
       cross.setAttribute("x1", px); cross.setAttribute("x2", px); cross.setAttribute("visibility", "visible");
       var head = spec.x.type === "date" ? fmtDate(rows[0].xv) : (spec.x.tipLabel || "") + fmt(rows[0].xv, spec.x.fmt);
       tip.innerHTML = '<div class="hd">' + head + "</div>" + rows.map(function (rw) {
-        return '<div class="tk"><i style="background:' + color(rw.s.color) + '"></i><span>' + rw.s.name + "</span><b>" + fmt(rw.v, rw.s.fmt || spec.y.fmt) + "</b></div>";
+        return '<div class="tk"><i style="background:' + color(rw.s.color) + '"></i><span>' + rich(rw.s.name) + "</span><b>" + fmt(rw.v, rw.s.fmt || spec.y.fmt) + "</b></div>";
       }).join("");
       tip.hidden = false;
       var wr = wrap.getBoundingClientRect(), left = px * r.width / W + (r.left - wr.left) + 12;
@@ -297,10 +298,487 @@
     function leave() { tip.hidden = true; cross.setAttribute("visibility", "hidden"); dots.forEach(function (d) { d.setAttribute("visibility", "hidden"); }); }
     hit.addEventListener("pointermove", move); hit.addEventListener("pointerdown", move); hit.addEventListener("pointerleave", leave);
     if (spec.y.label) {
-      var cap = document.createElement("div"); cap.className = "kbd-note"; cap.style.margin = "0 0 0.2rem"; cap.textContent = spec.y.label;
+      var cap = document.createElement("div"); cap.className = "kbd-note"; cap.style.margin = "0 0 0.2rem"; cap.innerHTML = rich(spec.y.label);
       host.insertBefore(cap, wrap);
     }
     return { X: X, Y: Y, svg: svg };
+  };
+
+  /* ---------------- more chart types: bars, heatmap, scatter, vector diagram ---------------- */
+  // They share the line chart's frame: a legend for several series, a tooltip, an SVG that follows its container's
+  // width, and colours read from CSS tokens (so a theme change needs no redraw). Book.chart picks one by spec.type.
+  function esc(s) { return String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;"); }
+  var SCRIPT_RE = /([_^](?:\{[^}]*\}|\w))/, TOKEN_RE = /^([_^])(?:\{([^}]*)\}|(\w))$/;
+  function rich(s) {   // tooltip HTML: "v_1" -> v<sub>1</sub>, "x_{ij}", "A^T" -> A<sup>T</sup>
+    return esc(s).split(SCRIPT_RE).map(function (p) {
+      var m = TOKEN_RE.exec(p);
+      return m ? "<" + (m[1] === "_" ? "sub" : "sup") + ">" + (m[2] != null ? m[2] : m[3]) + "</" + (m[1] === "_" ? "sub" : "sup") + ">" : p;
+    }).join("");
+  }
+  function setText(t, s) {   // SVG text with the same subscript / superscript marks as rich()
+    s = String(s);
+    if (!SCRIPT_RE.test(s)) { t.textContent = s; return t; }
+    var shift = 0;
+    s.split(SCRIPT_RE).forEach(function (p) {
+      if (!p) return;
+      var m = TOKEN_RE.exec(p), d = m ? (m[1] === "_" ? 3 : -4) : 0;
+      var sp = el("tspan", { dy: d - shift || null, "font-size": m ? "0.75em" : null }, t);
+      sp.textContent = m ? (m[2] != null ? m[2] : m[3]) : p;
+      shift = d;
+    });
+    return t;
+  }
+  function txt(parent, x, y, s, cls, anchor) {
+    return setText(el("text", { x: x, y: y, class: cls || null, "text-anchor": anchor || null }, parent), s);
+  }
+  function clamp(v, lo, hi) { return Math.max(lo, Math.min(hi, v)); }
+  function legend(host, items, shape) {
+    var lg = document.createElement("div"); lg.className = "legend";
+    items.forEach(function (s) {
+      var k = document.createElement("span"); k.className = "key";
+      var sw = document.createElement("i"); sw.className = "sw " + shape;
+      sw.style.background = color(s.color);
+      var nm = document.createElement("span"); nm.innerHTML = rich(s.name == null ? "" : s.name);   // rich() escapes, and sets a_1 as a subscript
+      k.appendChild(sw); k.appendChild(nm); lg.appendChild(k);
+    });
+    host.appendChild(lg);
+  }
+  // legend (several series), the y label as a caption, the positioned wrapper and the tooltip; the svg comes later
+  function begin(host, spec, items, shape) {
+    host.innerHTML = ""; host.classList.add("chart");
+    if (items.length > 1 || spec.legend) legend(host, items, shape);
+    if (spec.y && spec.y.label) {
+      var cap = document.createElement("div"); cap.className = "kbd-note"; cap.style.margin = "0 0 0.2rem"; cap.innerHTML = rich(spec.y.label); host.appendChild(cap);
+    }
+    var wrap = document.createElement("div"); wrap.style.position = "relative"; host.appendChild(wrap);
+    var tip = document.createElement("div"); tip.className = "tip"; tip.hidden = true; wrap.appendChild(tip);
+    return { wrap: wrap, tip: tip, W: Math.max(280, Math.round(host.clientWidth || 640)) };
+  }
+  function makeSvg(c, H, spec) {
+    c.H = H;
+    var alt = spec.alt || spec.title || null;   // build.py refuses a spec without alt; here, no empty aria-label on a role="img"
+    if (!alt && window.console) console.warn("chart without alt text");
+    c.svg = el("svg", { viewBox: "0 0 " + c.W + " " + H, role: "img", "aria-label": alt }, c.wrap);
+    return c.svg;
+  }
+  function clipTo(svg, g, x, y, w, h) {   // clip group g to a rectangle
+    var cid = "c" + Math.random().toString(36).slice(2, 8), cp = el("clipPath", { id: cid }, el("defs", {}, svg));
+    el("rect", { x: x, y: y, width: Math.max(0, w), height: Math.max(0, h) }, cp);
+    g.setAttribute("clip-path", "url(#" + cid + ")");
+  }
+  // show html in the tooltip beside the svg point (px, py), above it when there is room
+  function showTip(c, html, px, py) {
+    c.tip.innerHTML = html; c.tip.hidden = false;
+    var r = c.svg.getBoundingClientRect(), wr = c.wrap.getBoundingClientRect(), k = r.width / c.W;
+    var cx = px * k + (r.left - wr.left), cy = py * k + (r.top - wr.top);
+    var left = cx + 12; if (left + c.tip.offsetWidth > wr.width) left = cx - c.tip.offsetWidth - 12;
+    var top = cy - c.tip.offsetHeight - 10; if (top < 0) top = cy + 14;
+    c.tip.style.left = Math.max(0, left) + "px"; c.tip.style.top = top + "px";
+  }
+  function tipRow(col, name, val, sq) {
+    return '<div class="tk"><i style="background:' + color(col) + (sq ? ";height:0.6rem;border-radius:2px" : "") + '"></i><span>' + rich(name) + "</span><b>" + val + "</b></div>";
+  }
+  function svgPoint(c, ev) { var r = c.svg.getBoundingClientRect(); return { x: (ev.clientX - r.left) * c.W / r.width, y: (ev.clientY - r.top) * c.W / r.width, k: r.width / c.W }; }
+  function maxLen(a) { return a.reduce(function (m, s) { return Math.max(m, String(s).replace(/[_^](\{[^}]*\}|\w)/g, "x").length); }, 0); }
+  // cut a label to at most n visible characters, ending in an ellipsis; a_1 / x_{ij} / A^T count as one character each
+  // and are never cut in the middle. The full text stays in the tooltip header.
+  function ellipsize(s, n) {
+    s = String(s);
+    if (maxLen([s]) <= n) return s;
+    var out = "", k = 0, re = /[_^](?:\{[^}]*\}|\w)|[\s\S]/g, m;
+    while (k < n - 1 && (m = re.exec(s))) { out += m[0]; k++; }
+    return out + "…";
+  }
+  function ticksWithStep(lo, hi, st) {
+    var t = [], v = Math.ceil(lo / st - 1e-9) * st;
+    for (; v <= hi + st * 1e-9; v += st) t.push(Math.abs(v) < st * 1e-9 ? 0 : v);
+    return t;
+  }
+
+  /* ---------------- bar chart ---------------- */
+  // spec: {type:'bar', alt, height, legend, categories:[text], valueLabels,
+  //        x:{label}, y:{fmt,tfmt,label,min,max,ticks},
+  //        series:[{name,color,values:[],fmt}], ann:[{type:'hline',y,label}]}
+  // Bars start at zero (up for positive values, down for negative ones); with several series the bars of one
+  // category stand side by side, never wider together than 78% of their slot. Category labels that do not fit tilt by
+  // 40 degrees; when even tilted ones would touch, every k-th is shown (the tooltip names every category).
+  // Value labels are dropped when they would not fit under the bars.
+  Book.barChart = function (host, spec) {
+    var series = spec.series || [], cats = spec.categories || [], nc = cats.length, ns = series.length, ys = spec.y || {}, xs = spec.x || {};
+    var c = begin(host, spec, series.map(function (s, i) { return { name: s.name, color: s.color || String(i + 1) }; }), "sq");
+    var W = c.W, narrow = W < 460, yf = ys.tfmt || ys.fmt;
+    var vals = []; series.forEach(function (s) { s.values.forEach(function (v) { if (v != null && isFinite(v)) vals.push(v); }); });
+    var y0 = ys.min != null ? ys.min : Math.min(0, Math.min.apply(null, vals)), y1 = ys.max != null ? ys.max : Math.max(0, Math.max.apply(null, vals));
+    if (!(y1 > y0)) y1 = y0 + 1;
+    var room = (y1 - y0) * (spec.valueLabels ? 0.1 : 0.03);
+    if (ys.max == null && y1 > 0) y1 += room;
+    if (ys.min == null && y0 < 0) y0 -= room;
+    var yt = ys.ticks || linTicks(y0, y1, narrow ? 4 : 6, yf);
+    var m = { l: narrow ? 46 : 58, r: 16, t: 12, b: 30 };
+    var pw = W - m.l - m.r, slot = pw / Math.max(1, nc);
+    var catPx = maxLen(cats) * 6.2 + 6, tilt = slot < catPx, shown = cats;   // labels that do not fit tilt by 40 degrees
+    if (tilt) {   // tilted labels hang down and to the left of their tick: keep them to 20 characters and widen the left margin
+      shown = cats.map(function (s) { return ellipsize(s, 20); });
+      catPx = maxLen(shown) * 6.2 + 6; tilt = slot < catPx;
+      if (tilt) {
+        var ml = clamp(catPx * 0.766 - slot / 2 + 4, m.l, Math.max(m.l, W * 0.22));
+        if (ml > m.l) { m.l = ml; pw = W - m.l - m.r; slot = pw / Math.max(1, nc); }
+        var fit = Math.floor(((m.l + slot / 2 - 4) / 0.766 - 6) / 6.2);   // characters whose tilted label still ends inside the svg
+        if (fit < 20) { shown = cats.map(function (s) { return ellipsize(s, Math.max(4, fit)); }); catPx = maxLen(shown) * 6.2 + 6; }
+      }
+    }
+    var extra = tilt ? Math.min(80, catPx * 0.65 - 18) : 0;   // room for the tilted labels
+    m.b = 30 + extra + (xs.label ? 14 : 0);
+    var svg = makeSvg(c, (spec.height || Math.round(Math.min(360, Math.max(220, W * 0.52)))) + extra, spec), H = c.H;
+    var ph = H - m.t - m.b, Y = function (v) { return m.t + ph - (v - y0) / (y1 - y0) * ph; };
+    var base = Y(clamp(0, y0, y1));
+    var hov = el("rect", { class: "hov", y: m.t, height: ph, width: slot, visibility: "hidden" }, svg);
+    var g = el("g", { class: "grid" }, svg), ax = el("g", { class: "axis" }, svg);
+    yt.forEach(function (v) {
+      if (v < y0 || v > y1) return;
+      el("line", { x1: m.l, x2: W - m.r, y1: Y(v), y2: Y(v) }, g);
+      txt(svg, m.l - 8, Y(v) + 3.5, fmt(v, yf), null, "end");
+    });
+    if (y0 < 0 && y1 > 0) el("line", { class: "zero", x1: m.l, x2: W - m.r, y1: Y(0), y2: Y(0) }, svg);
+    el("line", { x1: m.l, x2: W - m.r, y1: H - m.b, y2: H - m.b }, ax);
+    // bars
+    var per = slot * 0.78 / Math.max(1, ns), gap = ns > 1 && per >= 4 ? 2 : 0, bw = Math.min(64, per - gap), group = ns * (bw + gap) - gap;   // group <= 0.78 slot: neighbours never interleave
+    var labStep = tilt ? Math.max(1, Math.ceil(12 / (slot * 0.643))) : 1;   // tilted by 40 degrees, labels sit slot*sin40 apart: show every k-th so that they are 12 px apart
+    var bars = el("g", { class: "bars" }, svg); clipTo(svg, bars, m.l, m.t - 2, pw, ph + 4);
+    var labels = [];
+    cats.forEach(function (cat, i) {
+      var cx = m.l + (i + 0.5) * slot;
+      series.forEach(function (s, k) {
+        var v = s.values[i]; if (v == null || !isFinite(v)) return;
+        var bx = cx - group / 2 + k * (bw + gap), top = Math.min(Y(v), base), h = Math.abs(Y(v) - base);
+        if (h > 0) el("rect", { class: "bar", x: bx, y: top, width: bw, height: h, style: "fill:" + color(s.color || String(k + 1)) }, bars);
+        labels.push({ x: bx + bw / 2, y: v >= 0 ? Y(v) - 4 : Y(v) + 12, t: fmt(v, s.fmt || ys.fmt) });
+      });
+      el("line", { x1: cx, x2: cx, y1: H - m.b, y2: H - m.b + 4 }, ax);
+      if (i % labStep) return;
+      var lab = txt(svg, tilt ? cx + 3 : cx, H - m.b + (tilt ? 12 : 16), shown[i], null, tilt ? "end" : "middle");
+      if (tilt) lab.setAttribute("transform", "rotate(-40 " + (cx + 3) + " " + (H - m.b + 12) + ")");
+    });
+    (spec.ann || []).forEach(function (a) {   // over the bars but under the value labels, so the labels and their halo stay readable
+      if (a.type !== "hline") return;
+      var ag = el("g", { class: "ann" }, svg);
+      el("line", { x1: m.l, x2: W - m.r, y1: Y(a.y), y2: Y(a.y), "stroke-dasharray": "4 3" }, ag);
+      if (a.label) txt(ag, W - m.r - 4, Y(a.y) - 5, a.label, null, "end");
+    });
+    if (spec.valueLabels && labels.length) {   // 10.5 px, else 9 px, else none: the longest label must fit one bar's pitch
+      var longest = maxLen(labels.map(function (l) { return l.t; })), pitch = ns > 1 ? bw + gap : slot * 0.9;
+      var fs = longest * 6.1 <= pitch ? 10.5 : longest * 5.2 <= pitch ? 9 : 0;
+      if (fs) labels.forEach(function (l) { el("text", { class: "bv", x: l.x, y: l.y, "text-anchor": "middle", style: "font-size:" + fs + "px" }, svg).textContent = l.t; });
+    }
+    if (xs.label) txt(svg, m.l + pw / 2, H - 6, xs.label, "ttl-y", "middle");
+    // hover: one hit column per category
+    var cross = function (i) { hov.setAttribute("x", m.l + i * slot); hov.setAttribute("visibility", "visible"); };
+    cats.forEach(function (cat, i) {
+      var hit = el("rect", { x: m.l + i * slot, y: m.t, width: slot, height: ph, fill: "transparent" }, svg);
+      var show = function () {
+        cross(i);
+        var tops = [], rows = series.map(function (s, k) {
+          var v = s.values[i]; if (v == null || !isFinite(v)) return "";
+          tops.push(Y(v));
+          return tipRow(s.color || String(k + 1), s.name, fmt(v, s.fmt || ys.fmt), true);
+        }).join("");
+        showTip(c, '<div class="hd">' + rich(cat) + "</div>" + rows, m.l + (i + 0.5) * slot, tops.length ? Math.min.apply(null, tops) : m.t);
+      };
+      hit.addEventListener("pointermove", show); hit.addEventListener("pointerdown", show);
+      hit.addEventListener("pointerleave", function () { c.tip.hidden = true; hov.setAttribute("visibility", "hidden"); });
+    });
+    return { Y: Y, svg: svg };
+  };
+
+  /* ---------------- heatmap ---------------- */
+  // spec: {type:'heatmap', alt, labels:[text] (rows and columns alike) or rows:[text], cols:[text],
+  //        matrix:[[number]] (one inner array per row), fmt (cell labels, default 'n2'), min, max (default -1 and 1),
+  //        scale (false hides the colour bar), scaleFmt, valueName (tooltip, default 'value')}
+  // The scale is diverging and centred at 0: series-1 for positive values, series-2 for negative ones, the surface
+  // colour at 0, each side reaching full strength at max and min. Cells are square and carry their value.
+  // Row and column labels are cut to 16 and 18 characters; when cells would then be under 10 px they are cut to 7, and
+  // when that is not enough either, dropped (hover or touch names every cell). The chart never exceeds its container.
+  Book.heatmap = function (host, spec) {
+    var fullRows = spec.rows || spec.labels || [], fullCols = spec.cols || spec.labels || [], M = spec.matrix || [];
+    var nr = fullRows.length, nc = fullCols.length, f = spec.fmt || "n2";
+    var lo = spec.min != null ? spec.min : -1, hi = spec.max != null ? spec.max : 1;
+    var negLim = lo < 0 ? -lo : 1, posLim = hi > 0 ? hi : 1, showScale = spec.scale !== false;
+    var c = begin(host, spec, [], "sq"), W = c.W;
+    // Layout. The labels are cut to a length (the tooltip header has the full text) and the cells take what is left of
+    // the width. Cells below LABEL_MIN px cannot carry readable labels: first try short labels, then none at all
+    // (every cell still names its row and column in the tooltip), so the chart never grows wider than its container.
+    var LABEL_MIN = 10;
+    function plan(rc, cc) {
+      var rl = fullRows.map(function (s) { return ellipsize(s, rc); }), cl = fullCols.map(function (s) { return ellipsize(s, cc); });
+      var labW = Math.min(110, 14 + maxLen(rl) * 6.4), colPx = maxLen(cl) * 6.2 + 4;
+      var cell0 = Math.min(72, (W - labW - 8) / Math.max(1, nc)), tilt = colPx > cell0;
+      var mr = tilt ? Math.min(W * 0.3, Math.max(8, colPx * 0.72 - cell0 / 2 + 4)) : 8;
+      return { rows: rl, cols: cl, labW: labW, colPx: colPx, tilt: tilt, mr: mr, cell: Math.min(72, (W - labW - mr) / Math.max(1, nc)), labels: true };
+    }
+    var P = plan(16, 18);
+    if (P.cell < LABEL_MIN) { var Q = plan(7, 7); if (Q.cell >= LABEL_MIN) P = Q; }
+    if (P.cell < LABEL_MIN) P = { rows: [], cols: [], labW: 8, colPx: 0, tilt: false, mr: 8, cell: Math.max(1, Math.min(72, (W - 16) / Math.max(1, nc))), labels: false };
+    var rows = P.rows, cols = P.cols, labW = P.labW, colPx = P.colPx, tilt = P.tilt, mr = P.mr, cell = P.cell;
+    var rowStep = Math.max(1, Math.ceil(12 / cell)), colStep = tilt ? Math.max(1, Math.ceil(15.6 / cell)) : 1;   // 11 px labels need 12 px of pitch; tilted by 45 degrees, a cell of 15.6 px
+    var top = P.labels ? (tilt ? Math.min(90, 12 + colPx * 0.72) : 24) : 8, left = labW + Math.max(0, (W - labW - mr - cell * nc) / 2);
+    var H = Math.round(top + cell * nr + (showScale ? 44 : 6));
+    var svg = makeSvg(c, H, spec);
+    function tone(v) {
+      if (v == null || !isFinite(v)) return { cls: "cell none", a: 0 };
+      return v >= 0 ? { cls: "cell pos", a: Math.min(1, v / posLim) } : { cls: "cell neg", a: Math.min(1, -v / negLim) };
+    }
+    var chars = 0;
+    M.forEach(function (r) { r.forEach(function (v) { chars = Math.max(chars, fmt(v, f).length); }); });
+    var fs = Math.min(11.5, (cell - 6) / Math.max(1, chars * 0.62));   // below 7.5 px the values stay in the tooltip
+    fullRows.forEach(function (_, i) {
+      if (P.labels && i % rowStep === 0) txt(svg, left - 7, top + (i + 0.5) * cell + 4, rows[i], null, "end");
+      fullCols.forEach(function (_, j) {
+        var v = (M[i] || [])[j], t = tone(v);
+        el("rect", { class: t.cls, x: left + j * cell, y: top + i * cell, width: cell, height: cell, style: "--a:" + t.a.toFixed(3) }, svg);
+        if (fs >= 7.5 && v != null && isFinite(v)) {
+          el("text", { class: "cv", x: left + (j + 0.5) * cell, y: top + (i + 0.5) * cell + fs * 0.35, "text-anchor": "middle", style: "font-size:" + fs.toFixed(1) + "px" }, svg).textContent = fmt(v, f);
+        }
+      });
+    });
+    if (P.labels) cols.forEach(function (cl, j) {
+      if (j % colStep) return;
+      var x = left + (j + 0.5) * cell;
+      if (!tilt) txt(svg, x, top - 7, cl, null, "middle");
+      else { var t = txt(svg, x - 2, top - 6, cl, null, "start"); t.setAttribute("transform", "rotate(-45 " + (x - 2) + " " + (top - 6) + ")"); }
+    });
+    if (showScale) {   // colour bar: 21 steps from min to max, with min, 0 and max printed under it
+      var n = 21, bw = Math.min(240, cell * nc), sw = bw / n, by = top + nr * cell + 14, sf = spec.scaleFmt;
+      for (var k = 0; k < n; k++) {
+        var v = lo + (k + 0.5) / n * (hi - lo), t = tone(v);
+        el("rect", { class: t.cls.replace("cell", "cell bar-step"), x: left + k * sw, y: by, width: sw + 0.5, height: 10, style: "--a:" + t.a.toFixed(3) }, svg);
+      }
+      txt(svg, left, by + 23, fmt(lo, sf), null, "start");
+      txt(svg, left + bw, by + 23, fmt(hi, sf), null, "end");
+      if (lo < 0 && hi > 0) txt(svg, left + (0 - lo) / (hi - lo) * bw, by + 23, fmt(0, sf), null, "middle");
+    }
+    // hover: an outline on the cell under the pointer
+    var ring = el("rect", { class: "hl", width: cell, height: cell, visibility: "hidden" }, svg);
+    var hit = el("rect", { x: left, y: top, width: cell * nc, height: cell * nr, fill: "transparent" }, svg);
+    function show(ev) {
+      var p = svgPoint(c, ev), j = Math.floor((p.x - left) / cell), i = Math.floor((p.y - top) / cell);
+      if (i < 0 || j < 0 || i >= nr || j >= nc) { leave(); return; }
+      var v = (M[i] || [])[j];
+      ring.setAttribute("x", left + j * cell); ring.setAttribute("y", top + i * cell); ring.setAttribute("visibility", "visible");
+      showTip(c, '<div class="hd">' + rich(fullRows[i]) + " × " + rich(fullCols[j]) + "</div>" +
+        '<div class="tk"><i style="background:transparent"></i><span>' + esc(spec.valueName || "value") + "</span><b>" + fmt(v, f) + "</b></div>",
+        left + (j + 0.5) * cell, top + i * cell);
+    }
+    function leave() { c.tip.hidden = true; ring.setAttribute("visibility", "hidden"); }
+    hit.addEventListener("pointermove", show); hit.addEventListener("pointerdown", show); hit.addEventListener("pointerleave", leave);
+    return { svg: svg };
+  };
+
+  /* ---------------- scatter and vector diagram ---------------- */
+  // Both draw the same kinds of things on numeric axes; they differ in defaults: a vector diagram has equal scales on
+  // the two axes (spec.equal, default true) and its `segments` are dashed; a scatter plot has free scales and its `lines`
+  // are solid. Any of the keys below may appear in either.
+  // spec: {type:'scatter'|'vector', alt, height, legend, equal,
+  //        x:{label,fmt,tfmt,min,max,ticks,name}, y:{...},
+  //        series:[{name,color,x:[],y:[],labels:[text],r}],                       points (up to four series)
+  //        lines:[{from:[x,y],to:[x,y],extend,dash,color,width,label}],          straight lines; extend runs the line to the edges
+  //        segments:[...same keys...],                                            dashed by default (projections)
+  //        ellipses:[{center:[x,y],cov:[[a,b],[b,c]],scale,color,fill,axes,label}],   the contour x'S^-1 x = scale^2
+  //        vectors:[{from:[0,0],to:[x,y],label,color,width,dash,dx,dy}],           arrows
+  //        points:[{at:[x,y],label,color,r,dx,dy}]}                                single marked points
+  function clipSeg(ax, ay, bx, by, x0, x1, y0, y1, extend) {   // Liang-Barsky; extend lets the line run past both ends
+    var dx = bx - ax, dy = by - ay;
+    if (dx === 0 && dy === 0) return null;
+    var t0 = extend ? -Infinity : 0, t1 = extend ? Infinity : 1, p = [-dx, dx, -dy, dy], q = [ax - x0, x1 - ax, ay - y0, y1 - ay];
+    for (var i = 0; i < 4; i++) {
+      if (p[i] === 0) { if (q[i] < 0) return null; continue; }
+      var r = q[i] / p[i];
+      if (p[i] < 0) { if (r > t0) t0 = r; } else if (r < t1) t1 = r;
+    }
+    return t0 > t1 ? null : [ax + t0 * dx, ay + t0 * dy, ax + t1 * dx, ay + t1 * dy];
+  }
+  function ellipseShape(ctr, cov, k) {   // principal axes of a 2x2 covariance matrix, scaled by k standard deviations
+    var a = cov[0][0], b = (cov[0][1] + cov[1][0]) / 2, d = cov[1][1], h = (a - d) / 2, r = Math.sqrt(h * h + b * b), mid = (a + d) / 2;
+    if (!(mid - r >= -1e-12 * Math.abs(mid))) throw new Error("ellipse cov is not positive semi-definite");   // also catches NaN
+    var s1 = k * Math.sqrt(Math.max(0, mid + r)), s2 = k * Math.sqrt(Math.max(0, mid - r)), th = 0.5 * Math.atan2(2 * b, a - d);
+    var u = [Math.cos(th), Math.sin(th)], v = [-Math.sin(th), Math.cos(th)], pts = [];
+    for (var i = 0; i < 120; i++) {
+      var t = i / 120 * 2 * Math.PI, p = s1 * Math.cos(t), q = s2 * Math.sin(t);
+      pts.push([ctr[0] + p * u[0] + q * v[0], ctr[1] + p * u[1] + q * v[1]]);
+    }
+    return { pts: pts, hx: Math.sqrt(Math.pow(s1 * u[0], 2) + Math.pow(s2 * v[0], 2)), hy: Math.sqrt(Math.pow(s1 * u[1], 2) + Math.pow(s2 * v[1], 2)),
+             a1: [ctr[0] - s1 * u[0], ctr[1] - s1 * u[1], ctr[0] + s1 * u[0], ctr[1] + s1 * u[1]],
+             a2: [ctr[0] - s2 * v[0], ctr[1] - s2 * v[1], ctr[0] + s2 * v[0], ctr[1] + s2 * v[1]] };
+  }
+  function xyPlot(host, spec, vectorDefaults) {
+    var series = spec.series || [], vectors = spec.vectors || [], pts = spec.points || [], xs = spec.x || {}, ys = spec.y || {};
+    var equal = spec.equal != null ? !!spec.equal : vectorDefaults;
+    var lines = (spec.lines || []).map(function (l) { return { l: l, dash: l.dash === true }; })
+      .concat((spec.segments || []).map(function (l) { return { l: l, dash: l.dash !== false }; }));
+    var ells = (spec.ellipses || []).map(function (e) { return { e: e, s: ellipseShape(e.center, e.cov, e.scale || 1) }; });
+    var c = begin(host, spec, series.map(function (s, i) { return { name: s.name, color: s.color || String(i + 1) }; }), "dot");
+    var W = c.W, narrow = W < 460, bx = [], by = [];
+    function add(x, y) { if (x != null && y != null && isFinite(x) && isFinite(y)) { bx.push(x); by.push(y); } }
+    series.forEach(function (s) { s.x.forEach(function (v, i) { add(v, s.y[i]); }); });
+    vectors.forEach(function (v) { var f = v.from || [0, 0]; add(f[0], f[1]); add(v.to[0], v.to[1]); });
+    pts.forEach(function (p) { add(p.at[0], p.at[1]); });
+    lines.forEach(function (o) { add(o.l.from[0], o.l.from[1]); add(o.l.to[0], o.l.to[1]); });
+    ells.forEach(function (o) { add(o.e.center[0] - o.s.hx, o.e.center[1] - o.s.hy); add(o.e.center[0] + o.s.hx, o.e.center[1] + o.s.hy); });
+    if (!bx.length) { bx = [-1, 1]; by = [-1, 1]; }
+    var x0 = Math.min.apply(null, bx), x1 = Math.max.apply(null, bx), y0 = Math.min.apply(null, by), y1 = Math.max.apply(null, by);
+    if (x1 === x0) { x0 -= 1; x1 += 1; }
+    if (y1 === y0) { y0 -= 1; y1 += 1; }
+    var pad = vectorDefaults ? 0.1 : 0.06, px = (x1 - x0) * pad, py = (y1 - y0) * pad;
+    x0 = xs.min != null ? xs.min : x0 - px; x1 = xs.max != null ? xs.max : x1 + px;
+    y0 = ys.min != null ? ys.min : y0 - py; y1 = ys.max != null ? ys.max : y1 + py;
+    var m = { l: narrow ? 46 : 58, r: 16, t: 12, b: xs.label ? 44 : 30 }, pw = W - m.l - m.r, ph;
+    if (spec.height) ph = spec.height - m.t - m.b;
+    else if (equal) ph = clamp(pw * (y1 - y0) / (x1 - x0), 190, 460);
+    else ph = Math.round(Math.min(360, Math.max(220, W * 0.52))) - m.t - m.b;
+    if (equal) {   // the same number of pixels per unit on both axes: widen the shorter range around its middle
+      var k = Math.min(pw / (x1 - x0), ph / (y1 - y0)), ex = pw / k - (x1 - x0), ey = ph / k - (y1 - y0);
+      x0 -= ex / 2; x1 += ex / 2; y0 -= ey / 2; y1 += ey / 2;
+    }
+    var H = ph + m.t + m.b, svg = makeSvg(c, H, spec);
+    var X = function (v) { return m.l + (v - x0) / (x1 - x0) * pw; }, Y = function (v) { return m.t + ph - (v - y0) / (y1 - y0) * ph; };
+    // grid, tick labels, the lines x = 0 and y = 0
+    var xt, yt;
+    if (equal && !xs.ticks && !ys.ticks) {   // one tick step for both axes, so equal distances look equal
+      var st = niceStep(Math.max(x1 - x0, y1 - y0), narrow ? 5 : 8, RES[xs.tfmt || xs.fmt]);
+      xt = ticksWithStep(x0, x1, st); yt = ticksWithStep(y0, y1, st);
+    } else {
+      xt = xs.ticks || linTicks(x0, x1, narrow ? 4 : 7, xs.tfmt || xs.fmt);
+      yt = ys.ticks || linTicks(y0, y1, narrow ? 4 : 6, ys.tfmt || ys.fmt);
+    }
+    var g = el("g", { class: "grid" }, svg), ax = el("g", { class: "axis" }, svg);
+    yt.forEach(function (v) {
+      if (v < y0 || v > y1) return;
+      el("line", { x1: m.l, x2: W - m.r, y1: Y(v), y2: Y(v) }, g);
+      txt(svg, m.l - 8, Y(v) + 3.5, fmt(v, ys.tfmt || ys.fmt), null, "end");
+    });
+    el("line", { x1: m.l, x2: m.l, y1: m.t, y2: H - m.b }, ax);
+    el("line", { x1: m.l, x2: W - m.r, y1: H - m.b, y2: H - m.b }, ax);
+    xt.forEach(function (v) {
+      if (v < x0 || v > x1) return;
+      el("line", { x1: X(v), x2: X(v), y1: m.t, y2: H - m.b }, g);
+      el("line", { x1: X(v), x2: X(v), y1: H - m.b, y2: H - m.b + 4 }, ax);
+      txt(svg, X(v), H - m.b + 16, fmt(v, xs.tfmt || xs.fmt), null, "middle");
+    });
+    if (y0 < 0 && y1 > 0) el("line", { class: "zero", x1: m.l, x2: W - m.r, y1: Y(0), y2: Y(0) }, svg);
+    if (x0 < 0 && x1 > 0) el("line", { class: "zero", x1: X(0), x2: X(0), y1: m.t, y2: H - m.b }, svg);
+    if (xs.label) txt(svg, m.l + pw / 2, H - 6, xs.label, "ttl-y", "middle");
+    var geo = el("g", { class: "geo" }, svg); clipTo(svg, geo, m.l, m.t, pw, ph);
+    var inside = function (x, y) { return x >= x0 && x <= x1 && y >= y0 && y <= y1; };
+    var tags = [];
+    function tag(x, y, s, anchor, o, uy) { tags.push({ x: x + (o.dx || 0), y: y + (o.dy || 0), s: s, a: o.anchor || anchor, uy: uy, moved: o.dx != null || o.dy != null || o.anchor != null }); }
+    function drawTags() {   // labels go on top of everything; one that would leave the plot sideways turns to the other side
+      var boxes = [];       // boxes of the labels already placed; a label that would overlap one moves down 12 px (then up, then down 24)
+      function box(q, w) { var x = q.a === "end" ? q.x - w : q.a === "middle" ? q.x - w / 2 : q.x, y = Math.max(10, q.y); return { x0: x, x1: x + w, y0: y - 11, y1: y + 3 }; }
+      function hits(b) { return boxes.some(function (o) { return b.x0 < o.x1 && b.x1 > o.x0 && b.y0 < o.y1 && b.y1 > o.y0; }); }
+      tags.forEach(function (q) {
+        var t = txt(svg, q.x, Math.max(10, q.y), q.s, "tl", q.a), w = 0;     // drawn first, so that its real width is measured, not guessed
+        try { w = t.getComputedTextLength(); } catch (err) { w = 0; }
+        if (!(w > 0)) w = maxLen([q.s]) * 6.4;                               // not rendered (hidden, or no layout yet): estimate
+        if (!q.moved) {
+          var flipped = false;
+          if (q.a === "start" && q.x + w > W - 2) { q.a = "end"; q.x = Math.max(q.x - 16, w + 2); flipped = true; }   // a flipped label is clamped too, so a long one is not cut off at the other edge
+          else if (q.a === "end" && q.x - w < 2) { q.a = "start"; q.x = Math.min(q.x + 16, W - w - 2); flipped = true; }
+          else if (q.a === "middle") q.x = clamp(q.x, w / 2 + 2, W - w / 2 - 2);
+          if (flipped && q.uy != null) {   // a vector's label now lies on the shaft's side of the tip: step off the shaft (up if the arrow points up, else down)
+            var off = q.uy < 0 ? -12 : 12;
+            if (q.y + off < 10 || q.y + off > H - m.b - 2) off = -off;
+            q.y += off;
+          }
+          if (hits(box(q, w))) {
+            var y = q.y, steps = [12, -12, 24];
+            for (var i = 0; i < steps.length; i++) { q.y = y + steps[i]; if (q.y >= 10 && q.y <= H - m.b - 2 && !hits(box(q, w))) break; q.y = y; }
+          }
+        }
+        boxes.push(box(q, w));
+        t.setAttribute("x", q.x); t.setAttribute("y", Math.max(10, q.y)); t.setAttribute("text-anchor", q.a);
+      });
+    }
+    // ellipses
+    ells.forEach(function (o, i) {
+      var e = o.e, col = color(e.color || "var(--ink-2)"), d = "";
+      o.s.pts.forEach(function (p, j) { d += (j ? "L" : "M") + X(p[0]).toFixed(1) + "," + Y(p[1]).toFixed(1); });
+      el("path", { class: "ell", d: d + "Z", style: "stroke:" + col + ";fill:" + (e.fill ? col : "none"), "fill-opacity": e.fill ? 0.1 : null }, geo);
+      if (e.axes) [o.s.a1, o.s.a2].forEach(function (a) {
+        el("line", { class: "ln", x1: X(a[0]), y1: Y(a[1]), x2: X(a[2]), y2: Y(a[3]), style: "stroke:" + col + ";stroke-dasharray:3 3;stroke-width:1" }, geo);
+      });
+      if (e.label) {   // above the topmost point of the contour
+        var top = o.s.pts.reduce(function (b, p) { return p[1] > b[1] ? p : b; }, o.s.pts[0]);
+        tag(X(top[0]), Math.max(m.t + 10, Y(top[1]) - 6), e.label, "middle", e);
+      }
+    });
+    // lines and segments
+    lines.forEach(function (o) {
+      var l = o.l, col = color(l.color || "var(--ink-2)");
+      var s = clipSeg(l.from[0], l.from[1], l.to[0], l.to[1], x0, x1, y0, y1, !!l.extend);
+      if (!s) return;
+      el("line", { class: "ln", x1: X(s[0]), y1: Y(s[1]), x2: X(s[2]), y2: Y(s[3]),
+                   style: "stroke:" + col + (o.dash ? ";stroke-dasharray:5 4" : "") + (l.width ? ";stroke-width:" + l.width : "") }, geo);
+      if (l.label) {   // at the end with the larger x (the upper end of a vertical line), set back from the edge
+        var vert = Math.abs(s[2] - s[0]) < 1e-9 * (x1 - x0), e = (vert ? s[3] >= s[1] : s[2] >= s[0]) ? [s[2], s[3]] : [s[0], s[1]];
+        tag(clamp(X(e[0]), m.l + 4, W - m.r - 4), clamp(Y(e[1]), m.t + 12, H - m.b - 4) - 5, l.label, "end", l);
+      }
+    });
+    // vectors: a shaft and a filled head, both in the vector's colour
+    vectors.forEach(function (v, i) {
+      var f = v.from || [0, 0], col = color(v.color || String(i % 4 + 1)), w = v.width || 2;
+      var x1p = X(f[0]), y1p = Y(f[1]), x2p = X(v.to[0]), y2p = Y(v.to[1]), L = Math.hypot(x2p - x1p, y2p - y1p);
+      if (L < 1) return;
+      var ux = (x2p - x1p) / L, uy = (y2p - y1p) / L, hl = Math.min(11, L * 0.6), hw = hl * 0.4, bxp = x2p - ux * hl, byp = y2p - uy * hl;
+      el("line", { class: "vsh", x1: x1p, y1: y1p, x2: bxp + ux * 1, y2: byp + uy * 1, style: "stroke:" + col + ";stroke-width:" + w + (v.dash ? ";stroke-dasharray:5 4" : "") }, geo);
+      el("polygon", { class: "vhd", points: x2p + "," + y2p + " " + (bxp - uy * hw) + "," + (byp + ux * hw) + " " + (bxp + uy * hw) + "," + (byp - ux * hw), style: "fill:" + col }, geo);
+      if (v.label) {   // beyond the tip, on the side the arrow points to
+        var anchor = ux > 0.35 ? "start" : ux < -0.35 ? "end" : "middle";
+        tag(x2p + ux * 9, y2p + uy * 9 + (uy > 0.35 ? 11 : uy < -0.35 ? -1 : 4), v.label, anchor, v, uy);
+      }
+    });
+    // data points
+    var n = 0; series.forEach(function (s) { n += s.x.length; });
+    series.forEach(function (s, i) {
+      var r = s.r || (n > 150 ? 2.6 : n > 40 ? 3.4 : 4.5), col = color(s.color || String(i + 1));
+      s.x.forEach(function (xv, j) {
+        var yv = s.y[j]; if (yv == null || !isFinite(xv) || !isFinite(yv) || !inside(xv, yv)) return;
+        el("circle", { class: "pt", cx: X(xv), cy: Y(yv), r: r, style: "fill:" + col, "fill-opacity": n > 150 ? 0.75 : null }, svg);
+        if (s.labels && s.labels[j]) tag(X(xv) + 7, Y(yv) - 7, s.labels[j], "start", {});
+      });
+    });
+    pts.forEach(function (p) {
+      if (!inside(p.at[0], p.at[1])) return;
+      el("circle", { class: "pt", cx: X(p.at[0]), cy: Y(p.at[1]), r: p.r || 4.5, style: "fill:" + color(p.color || "var(--ink)") }, svg);
+      if (p.label) tag(X(p.at[0]) + 8, Y(p.at[1]) - 8, p.label, "start", p);
+    });
+    drawTags();
+    // hover: the nearest series point, vector tip or marked point within 18 px
+    var cand = [];
+    function addCand(col, head, xv, yv) { if (yv != null && isFinite(xv) && isFinite(yv) && inside(xv, yv)) cand.push({ x: X(xv), y: Y(yv), col: col, head: head, xv: xv, yv: yv }); }
+    series.forEach(function (s, i) { s.x.forEach(function (xv, j) { addCand(s.color || String(i + 1), (s.name || "") + (s.labels && s.labels[j] ? " · " + s.labels[j] : ""), xv, s.y[j]); }); });
+    vectors.forEach(function (v, i) { addCand(v.color || String(i % 4 + 1), v.label || "vector", v.to[0], v.to[1]); });
+    pts.forEach(function (p) { addCand(p.color || "var(--ink)", p.label || "point", p.at[0], p.at[1]); });
+    var ring = el("circle", { class: "hl", r: 8, visibility: "hidden" }, svg);
+    var hit = el("rect", { x: m.l, y: m.t, width: pw, height: ph, fill: "transparent" }, svg);
+    function leave() { c.tip.hidden = true; ring.setAttribute("visibility", "hidden"); }
+    function move(ev) {
+      var p = svgPoint(c, ev), best = null, bd = 18 / p.k;
+      cand.forEach(function (q) { var d = Math.hypot(q.x - p.x, q.y - p.y); if (d < bd) { bd = d; best = q; } });
+      if (!best) { leave(); return; }
+      ring.setAttribute("cx", best.x); ring.setAttribute("cy", best.y); ring.setAttribute("visibility", "visible");
+      showTip(c, '<div class="hd">' + rich(best.head) + "</div>" + tipRow(best.col, xs.name || "x", fmt(best.xv, xs.fmt)) + tipRow(best.col, ys.name || "y", fmt(best.yv, ys.fmt)), best.x, best.y);
+    }
+    hit.addEventListener("pointermove", move); hit.addEventListener("pointerdown", move); hit.addEventListener("pointerleave", leave);
+    return { X: X, Y: Y, svg: svg };
+  }
+  Book.scatter = function (host, spec) { return xyPlot(host, spec, false); };
+  Book.vectorDiagram = function (host, spec) { return xyPlot(host, spec, true); };
+
+  /* the chart types by their spec.type; a spec without one is a line chart */
+  var CHART_TYPES = { line: "lineChart", bar: "barChart", heatmap: "heatmap", scatter: "scatter", vector: "vectorDiagram" };
+  Book.chart = function (host, spec) {
+    var f = Book[CHART_TYPES[spec.type || "line"]];
+    if (!f) throw new Error("unknown chart type: " + spec.type);
+    return f(host, spec);
   };
 
   /* render every data chart on the page; re-render on width change */
@@ -308,13 +786,15 @@
     document.querySelectorAll("[data-chart]").forEach(function (h) {
       var src = document.getElementById("chart-" + h.getAttribute("data-chart"));
       if (!src) return;
-      var spec = JSON.parse(src.textContent);
-      if (spec.x.type === "date") {   // dates may be ISO strings or epoch milliseconds, in series and annotations alike
-        var toT = function (d) { return typeof d === "number" ? d : Date.parse(d + "T00:00:00Z"); };
-        spec.series.forEach(function (s) { s.x = s.x.map(toT); });
-        (spec.ann || []).forEach(function (a) { ["x", "x0", "x1"].forEach(function (k) { if (a[k] != null) a[k] = toT(a[k]); }); });
-      }
-      Book.lineChart(h, spec);
+      try {   // everything per chart is inside the try, so one bad spec leaves the other charts on the page alone
+        var spec = JSON.parse(src.textContent);
+        if (spec.x && spec.x.type === "date") {   // dates may be ISO strings or epoch milliseconds, in series and annotations alike
+          var toT = function (d) { return typeof d === "number" ? d : Date.parse(d + "T00:00:00Z"); };
+          spec.series.forEach(function (s) { s.x = s.x.map(toT); });
+          (spec.ann || []).forEach(function (a) { ["x", "x0", "x1"].forEach(function (k) { if (a[k] != null) a[k] = toT(a[k]); }); });
+        }
+        Book.chart(h, spec);
+      } catch (e) { h.innerHTML = '<p class="w-note">This chart could not be drawn.</p>'; if (window.console) console.error("chart " + h.getAttribute("data-chart") + ": " + e.message); }
     });
   }
   Book.renderCharts = renderCharts;
@@ -371,16 +851,58 @@
         } else { selectPre(pre); b.textContent = "Selected — press Ctrl+C"; }
       });
     });
-    // outline scroll-spy
+    // outline scroll-spy. The active entry is the last heading that has reached the reading line, which sits just
+    // below the spot where a jump puts a heading (html's scroll-padding-top). An observer that waits for a heading to
+    // cross a band misses jumps: a clicked sub-heading lands above the band and never crosses it. A clicked entry
+    // stays active until the reader scrolls again, so a short section at the end of the page still lights up. A hash
+    // that is not an outline entry (browser back, the address bar, an in-text link) releases that hold and the entry is
+    // recomputed from the scroll position. At the very bottom of the page the last headings may never reach the
+    // reading line, so there the active entry is the last heading whose top is inside the window. The outline panel
+    // scrolls itself (its own scrollTop, never scrollIntoView) to keep the active entry in view.
     var links = Array.prototype.slice.call(document.querySelectorAll(".outline a"));
-    if (links.length && "IntersectionObserver" in window) {
-      var map = {}; links.forEach(function (a) { map[a.getAttribute("href").slice(1)] = a; });
-      var io = new IntersectionObserver(function (ents) {
-        ents.forEach(function (e) {
-          if (e.isIntersecting) { links.forEach(function (a) { a.classList.remove("active"); }); var a = map[e.target.id]; if (a) a.classList.add("active"); }
-        });
-      }, { rootMargin: "-15% 0px -70% 0px" });
-      Object.keys(map).forEach(function (id) { var t = document.getElementById(id); if (t) io.observe(t); });
+    if (links.length) {
+      var heads = links.map(function (a) { return document.getElementById(decodeURIComponent(a.getAttribute("href").slice(1))); });
+      var current = null, pinned = false, queued = false;
+      var keepVisible = function (a) {
+        var o = a.closest(".outline");
+        if (!o || o.clientHeight === 0 || o.scrollHeight <= o.clientHeight) return;
+        var r = a.getBoundingClientRect(), orr = o.getBoundingClientRect();
+        var top = Math.max(orr.top, 0) + 24, bottom = Math.min(orr.bottom, window.innerHeight) - 24;
+        if (r.bottom > bottom) o.scrollTop += r.bottom - bottom;
+        else if (r.top < top) o.scrollTop -= top - r.top;
+      };
+      var setActive = function (a) {
+        if (a !== current) {
+          if (current) current.classList.remove("active");
+          current = a;
+          if (a) a.classList.add("active");
+        }
+        if (a) keepVisible(a);
+      };
+      var spy = function () {
+        queued = false;
+        if (pinned) return;
+        var line = (parseFloat(getComputedStyle(document.documentElement).scrollPaddingTop) || 0) + 8, pick = null;
+        for (var i = 0; i < heads.length; i++) if (heads[i] && heads[i].getBoundingClientRect().top <= line) pick = links[i];
+        var de = document.documentElement, room = de.scrollHeight - window.innerHeight;
+        if (room > 1 && window.pageYOffset >= room - 2) {
+          for (var j = 0; j < heads.length; j++) if (heads[j] && heads[j].getBoundingClientRect().top < window.innerHeight) pick = links[j];
+        }
+        setActive(pick);
+      };
+      var pinTo = function (hash) {
+        for (var i = 0; i < links.length; i++) if (links[i].getAttribute("href") === hash) { pinned = true; setActive(links[i]); return true; }
+        return false;
+      };
+      window.addEventListener("scroll", function () { if (!queued) { queued = true; requestAnimationFrame(spy); } }, { passive: true });
+      links.forEach(function (a) { a.addEventListener("click", function () { pinTo(a.getAttribute("href")); }); });
+      window.addEventListener("hashchange", function () {
+        if (!pinTo(location.hash)) { pinned = false; requestAnimationFrame(spy); }   // after the browser has restored the scroll position
+      });
+      ["wheel", "touchstart", "keydown", "mousedown"].forEach(function (ev) {
+        window.addEventListener(ev, function () { if (pinned) { pinned = false; } }, { passive: true, capture: true });
+      });
+      if (!(location.hash && pinTo(location.hash))) spy();
     }
   }
   function selectPre(pre) { var r = document.createRange(); r.selectNodeContents(pre); var s = window.getSelection(); s.removeAllRanges(); s.addRange(r); }

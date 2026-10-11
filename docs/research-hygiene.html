@@ -1,0 +1,154 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<script>(function(){var d=document.documentElement,t,m;try{t=localStorage.getItem("ftck-theme")}catch(e){}if(t!=="light"&&t!=="dark"){m=window.matchMedia&&matchMedia("(prefers-color-scheme: dark)");t=m&&m.matches?"dark":"light"}d.setAttribute("data-theme",t);document.addEventListener("click",function(e){var b=e.target.closest&&e.target.closest(".theme-toggle");if(!b||window.__ftckTheme)return;var n=d.getAttribute("data-theme")==="light"?"dark":"light";try{localStorage.setItem("ftck-theme",n)}catch(x){}window.__ftckEarly=n;d.setAttribute("data-theme",n);b.setAttribute("aria-checked",n==="light"?"true":"false")})})();</script>
+<title>Research hygiene · From Calculus to Kelly</title>
+<meta name="description" content="Six rules that keep a result from market data honest, and the four labels that results carry from Volume II on.">
+<link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;700&display=swap">
+<link rel="stylesheet" href="assets/katex/katex.min.css">
+<link rel="stylesheet" href="assets/book.css">
+</head>
+<body data-page="research-hygiene">
+<a class="skip" href="#main">Skip to content</a>
+<header class="topbar"><a class="brand" href="index.html">From Calculus to Kelly<small>量化數理教科書</small></a>
+<span class="crumb">Research hygiene</span><span class="spacer"></span>
+<button class="theme-toggle" type="button" role="switch" aria-checked="false" aria-label="Light theme"><span class="tt-track" aria-hidden="true"><span class="tt-sky tt-night"><i class="tt-star"></i><i class="tt-star"></i><i class="tt-star"></i><i class="tt-star"></i></span><span class="tt-sky tt-day"><i class="tt-cloud tt-cloud-1"></i><i class="tt-cloud tt-cloud-2"></i></span><span class="tt-knob"><i class="tt-moon"></i><i class="tt-sun"></i></span></span></button><script>document.currentScript.previousElementSibling.setAttribute("aria-checked",document.documentElement.getAttribute("data-theme")==="light"?"true":"false")</script><button class="rail-toggle" type="button" aria-controls="rail" aria-expanded="false">Contents</button></header>
+<div class="layout">
+<nav class="rail" id="rail" aria-label="Book contents"><a class="home" href="index.html">Contents &amp; roadmap</a>
+<h2>Guides</h2><ol><li><a class="guide" href="getting-started.html"><span>Getting Started</span></a></li><li><a class="guide" href="research-hygiene.html" aria-current="page"><span>Research hygiene</span></a></li></ol>
+<h2>Vol I · Calculus for Finance</h2><ol>
+<li><a href="lm/lm01.html"><span class="k">LM1</span><span>Exponentials, Logarithms and Compounding</span></a></li>
+<li><a href="lm/lm02.html"><span class="k">LM2</span><span>Limits and Derivatives</span></a></li>
+<li><a href="lm/lm03.html"><span class="k">LM3</span><span>Taylor Series and Approximation</span></a></li>
+<li><a href="lm/lm04.html"><span class="k">LM4</span><span>Optimization in One Variable</span></a></li>
+<li><a href="lm/lm05.html"><span class="k">LM5</span><span>Integration</span></a></li>
+<li><a href="lm/lm06.html"><span class="k">LM6</span><span>Sequences, Series and the Time Value of Money</span></a></li>
+<li><a href="lm/lm07.html"><span class="k">LM7</span><span>Multivariable Calculus and Lagrange Multipliers</span></a></li>
+</ol>
+<h2>Vol II · Linear Algebra for Portfolios</h2><ol>
+<li><span title="Planned"><span class="k">LM8</span><span>Vectors and Matrices</span></span></li>
+<li><span title="Planned"><span class="k">LM9</span><span>Linear Systems, Inverses and Rank</span></span></li>
+<li><span title="Planned"><span class="k">LM10</span><span>Quadratic Forms and Covariance Matrices</span></span></li>
+<li><span title="Planned"><span class="k">LM11</span><span>Eigen-decomposition and PCA</span></span></li>
+<li><span title="Planned"><span class="k">LM12</span><span>Cholesky, SVD and Least Squares</span></span></li>
+</ol>
+<h2>Vol III · Probability</h2><ol>
+<li><span title="Planned"><span class="k">LM13</span><span>Probability Foundations and Bayes</span></span></li>
+<li><span title="Planned"><span class="k">LM14</span><span>Random Variables, Expectation and Jensen&#x27;s Inequality</span></span></li>
+<li><span title="Planned"><span class="k">LM15</span><span>Distributions in Finance</span></span></li>
+<li><span title="Planned"><span class="k">LM16</span><span>Joint Distributions and Dependence</span></span></li>
+<li><span title="Planned"><span class="k">LM17</span><span>Law of Large Numbers and Central Limit Theorem</span></span></li>
+<li><span title="Planned"><span class="k">LM18</span><span>Monte Carlo Simulation and the Bootstrap</span></span></li>
+</ol>
+<h2>Vol IV · Statistical Inference and Econometrics</h2><ol>
+<li><span title="Planned"><span class="k">LM19</span><span>Descriptive Statistics of Returns</span></span></li>
+<li><span title="Planned"><span class="k">LM20</span><span>Estimation Theory and Maximum Likelihood</span></span></li>
+<li><span title="Planned"><span class="k">LM21</span><span>Hypothesis Testing and Multiple Testing</span></span></li>
+<li><span title="Planned"><span class="k">LM22</span><span>Resampling Methods</span></span></li>
+<li><span title="Planned"><span class="k">LM23</span><span>Linear Regression</span></span></li>
+<li><span title="Planned"><span class="k">LM24</span><span>Bayesian Inference and Shrinkage</span></span></li>
+<li><span title="Planned"><span class="k">LM25</span><span>Time Series I: ARMA, Unit Roots and Cointegration</span></span></li>
+<li><span title="Planned"><span class="k">LM26</span><span>Time Series II: Volatility Models</span></span></li>
+</ol>
+<h2>Vol V · Portfolio Optimization</h2><ol>
+<li><span title="Planned"><span class="k">LM27</span><span>Portfolio Return and Risk</span></span></li>
+<li><span title="Planned"><span class="k">LM28</span><span>Mean–Variance Optimization</span></span></li>
+<li><span title="Planned"><span class="k">LM29</span><span>Convex Optimization in Practice</span></span></li>
+<li><span title="Planned"><span class="k">LM30</span><span>Estimation Error and Robust Portfolios</span></span></li>
+<li><span title="Planned"><span class="k">LM31</span><span>Risk Parity, HRP and Volatility Targeting</span></span></li>
+</ol>
+<h2>Vol VI · Measuring True Risk and Return</h2><ol>
+<li><span title="Planned"><span class="k">LM32</span><span>VaR, Expected Shortfall and Drawdown</span></span></li>
+<li><span title="Planned"><span class="k">LM33</span><span>The Statistics of the Sharpe Ratio</span></span></li>
+<li><span title="Planned"><span class="k">LM34</span><span>Backtesting Without Fooling Yourself</span></span></li>
+<li><span title="Planned"><span class="k">LM35</span><span>Stress Testing</span></span></li>
+</ol>
+<h2>Vol VII · Stochastic Calculus</h2><ol>
+<li><span title="Planned"><span class="k">LM36</span><span>From Random Walk to Brownian Motion</span></span></li>
+<li><span title="Planned"><span class="k">LM37</span><span>The Itô Integral and Itô&#x27;s Lemma</span></span></li>
+<li><span title="Planned"><span class="k">LM38</span><span>Geometric Brownian Motion</span></span></li>
+<li><span title="Planned"><span class="k">LM39</span><span>Beyond GBM</span></span></li>
+<li><span title="Planned"><span class="k">LM40</span><span>Option Pricing Bridge (Optional)</span></span></li>
+</ol>
+<h2>Vol VIII · The Kelly Criterion and Optimal Leverage</h2><ol>
+<li><span title="Planned"><span class="k">LM41</span><span>Discrete Kelly</span></span></li>
+<li><span title="Planned"><span class="k">LM42</span><span>Continuous-Time Kelly</span></span></li>
+<li><span title="Planned"><span class="k">LM43</span><span>Multi-Asset Kelly</span></span></li>
+<li><span title="Planned"><span class="k">LM44</span><span>Fractional Kelly and Drawdown Control</span></span></li>
+<li><span title="Planned"><span class="k">LM45</span><span>Kelly Under Uncertainty and Frictions</span></span></li>
+<li><span title="Planned"><span class="k">LM46</span><span>Leverage Instruments in Practice</span></span></li>
+</ol>
+<h2>Vol IX · Capstone</h2><ol>
+<li><span title="Planned"><span class="k">LM47</span><span>The Statistical Modeling Workflow</span></span></li>
+<li><span title="Planned"><span class="k">LM48</span><span>Capstone A: A Taiwan Core–Satellite Portfolio</span></span></li>
+<li><span title="Planned"><span class="k">LM49</span><span>Capstone B: Kelly Sizing a Single Strategy</span></span></li>
+<li><span title="Planned"><span class="k">LM50</span><span>Capstone C: Multi-Strategy Allocation and Monitoring</span></span></li>
+</ol></nav>
+<main class="page" id="main"><header class="lm-head"><h1 class="lm-title">Research hygiene</h1><p class="lm-sub">Six rules that keep a result from market data honest, and the four labels that results carry from Volume II on.</p></header>
+<div class="co zh"><div class="co-h"><span class="tag">導讀</span><span class="t">這一頁講什麼</span></div><p>用市場資料算出來的數字，看起來很精確，卻可能誤導。下面六條規則讓結果站得住腳。從第二卷起，每個會估計、選模型或回測的模組，都會用一個短框說明它用了哪幾條規則，以及結果該怎麼解讀；更完整的處理在 <span class="coming" title="LM21 Hypothesis Testing and Multiple Testing — coming in Volume IV">LM21</span>、<span class="coming" title="LM33 The Statistics of the Sharpe Ratio — coming in Volume VI">LM33</span> 和 <span class="coming" title="LM34 Backtesting Without Fooling Yourself — coming in Volume VI">LM34</span>。</p>
+</div>
+<p>A number computed from market data can look precise and still mislead. The six rules below keep the book's results
+honest. From Volume II on, every module that estimates, selects or backtests carries a short note. The note says
+which rules apply and how to read the results.</p>
+<section class="sec unnum" id="use-only-what-was-known-at-the-time"><h2 class="plain"><span class="ttl">Use only what was known at the time</span></h2><p>A decision on a date may use only the information available on that date. A close is known only after the closing
+auction ends at 13:30. FinMind's TAIEX weight snapshots start in October 2024, so they cannot give a stock's weight in
+2015. An adjusted price is rewritten backward after each dividend, so today's file is not what an investor saw at
+the time.</p>
+</section><section class="sec unnum" id="split-by-time-never-at-random"><h2 class="plain"><span class="ttl">Split by time, never at random</span></h2><p>Market data come in time order, and tomorrow is never in today's sample. So the estimation window comes first and
+the test window after it, as in <a href="lm/lm07.html">LM7</a>: weights estimated on 2017–2021 and tested on 2022–2026. Fit every input on
+the estimation window only. That includes means, covariance matrices, principal components and any rescaling.</p>
+</section><section class="sec unnum" id="keep-selection-apart-from-evaluation"><h2 class="plain"><span class="ttl">Keep selection apart from evaluation</span></h2><p>Choose a model or a parameter on one stretch of data, and judge it once on another. Count the versions you tried.
+The more versions you try, the more likely it is that the best one is only lucky. <span class="coming" title="LM21 Hypothesis Testing and Multiple Testing — coming in Volume IV">LM21</span> and <span class="coming" title="LM33 The Statistics of the Sharpe Ratio — coming in Volume VI">LM33</span> measure that
+risk.</p>
+</section><section class="sec unnum" id="put-costs-inside-the-strategy"><h2 class="plain"><span class="ttl">Put costs inside the strategy</span></h2><p>Taxes, broker fees, slippage, financing and delays belong in the strategy while it is built. A strategy that trades
+more pays more, so one constant subtracted at the end hides the difference. <span class="coming" title="LM34 Backtesting Without Fooling Yourself — coming in Volume VI">LM34</span> gives Taiwan's official rates.</p>
+</section><section class="sec unnum" id="fix-the-universe-and-the-data-policy-first"><h2 class="plain"><span class="ttl">Fix the universe and the data policy first</span></h2><p>Decide which assets and which dates you use before you look at any result. A list of today's stocks leaves out the
+companies that were delisted, so it makes past returns look better than they were. Write down how you treat
+dividends, splits, missing values and dates that two series do not share.</p>
+</section><section class="sec unnum" id="label-every-result"><h2 class="plain"><span class="ttl">Label every result</span></h2><p>From Volume II on, every result carries one of four labels. Volume I's results fall into the same four kinds:</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th style="text-align:left">Label</th>
+<th style="text-align:left">Meaning</th>
+<th style="text-align:left">Example in the book</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">Descriptive</td>
+<td style="text-align:left">a summary of the whole sample</td>
+<td style="text-align:left">0050's total return of +902% from 2014 to 2026 (<a href="lm/lm01.html">LM1</a>)</td>
+</tr>
+<tr>
+<td style="text-align:left">In-sample</td>
+<td style="text-align:left">a model fitted and judged on the same data</td>
+<td style="text-align:left">a normal model fitted to 0050's 2,902 daily returns (<a href="lm/lm05.html">LM5</a>)</td>
+</tr>
+<tr>
+<td style="text-align:left">Stability check</td>
+<td style="text-align:left">the same calculation on two periods, compared</td>
+<td style="text-align:left">the two-asset Kelly fractions estimated in two windows (<a href="lm/lm07.html">LM7</a>)</td>
+</tr>
+<tr>
+<td style="text-align:left">Out-of-sample</td>
+<td style="text-align:left">fitted on earlier data and judged on later data that the fit never used</td>
+<td style="text-align:left">the minimum-variance weight estimated on 2017–2021 and held in 2022–2026 (<a href="lm/lm07.html">LM7</a>)</td>
+</tr>
+</tbody>
+</table></div>
+<p>A full-sample estimate describes the past. It is not a forecast.</p>
+
+<div class="co note"><div class="co-h"><span class="tag">Note</span><span class="t">Where the book goes deeper</span></div><p><span class="coming" title="LM21 Hypothesis Testing and Multiple Testing — coming in Volume IV">LM21</span> covers multiple testing. <span class="coming" title="LM33 The Statistics of the Sharpe Ratio — coming in Volume VI">LM33</span> covers the Probabilistic and Deflated Sharpe ratios. <span class="coming" title="LM34 Backtesting Without Fooling Yourself — coming in Volume VI">LM34</span> covers
+look-ahead and survivorship bias, costs, walk-forward testing and the probability of backtest overfitting.</p>
+</div>
+</section></main>
+<aside class="outline" aria-label="On this page"><h2>On this page</h2><ol><li><a href="#use-only-what-was-known-at-the-time">Use only what was known at the time</a></li><li><a href="#split-by-time-never-at-random">Split by time, never at random</a></li><li><a href="#keep-selection-apart-from-evaluation">Keep selection apart from evaluation</a></li><li><a href="#put-costs-inside-the-strategy">Put costs inside the strategy</a></li><li><a href="#fix-the-universe-and-the-data-policy-first">Fix the universe and the data policy first</a></li><li><a href="#label-every-result">Label every result</a></li></ol></aside>
+</div>
+<script src="assets/book.js"></script>
+
+</body>
+</html>

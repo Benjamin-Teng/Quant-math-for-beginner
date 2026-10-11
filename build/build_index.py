@@ -114,6 +114,11 @@ def build():
         start_link = f'<a class="start" href="lm/lm{first:02d}.html">{verb}: LM{first} {esc(first_t)} →</a>'
     else:
         start_link = ""
+    guides = [p for p in B.PAGES if p["slug"] in B.AVAILABLE_PAGES]   # standalone pages; drafts show only in preview
+    if guides:
+        links = " · ".join(f'<a href="{p["slug"]}.html">{esc(p["title"])}</a>' + ("" if p["slug"] in B.PUBLISHED_PAGES else " (draft)")
+                           for p in guides)
+        start_link += f'<p class="cap new-here">New here? {links}</p>'
     goals = [
         ("Build statistical models", "Return distributions, regressions and factor models, GARCH volatility, cointegrated spreads — estimated, diagnosed and stated with their uncertainty.", "Vol III, IV"),
         ("Optimize portfolios under estimation error", "Mean–variance, risk parity and Kelly portfolios with realistic constraints, shrinkage estimators, and walk-forward evaluation.", "Vol II, V"),
@@ -143,6 +148,7 @@ def build():
         (M(r"\mathrm{SR} = (\mu - r_f)/\sigma"), "Sharpe ratio of a return, per day or annualized (say which)"),
         (M(r"\varphi,\ \Phi"), "standard normal density and distribution function"),
         (M(r"B_t"), "standard Brownian motion (W stays wealth)"),
+        (M(r"\mathbf w,\ \hat\Sigma,\ \mathbf w^{\top}\hat\Sigma\mathbf w"), "from Volume II (LM7 already writes vectors this way): bold lower case is a column vector, here the weights; the hatted Sigma is the sample covariance matrix; the third expression is a portfolio's sample variance; the raised T means transpose"),
         (M(r"=,\ \approx,\ :="), "exact; approximate with the neglected order stated; defined as"),
     ]
     notation_html = "".join(f"<tr><td>{a}</td><td>{esc(b)}</td></tr>" for a, b in notation)
@@ -179,6 +185,7 @@ a:hover .rm-node rect {{ stroke-width: 2.25; }}
 a:focus-visible .rm-node rect {{ stroke: var(--focus); stroke-width: 3; }}
 .rm-edge {{ fill: var(--ink-2); font-size: 11px; paint-order: stroke; stroke: var(--paper); stroke-width: 4px; stroke-linejoin: round; }}
 .cap {{ font-family: var(--f-head); font-size: 0.82rem; color: var(--muted); margin: 0.4rem 0 0; }}
+.cap.new-here {{ margin-top: 0.8rem; }}
 .legend-grid {{ display: grid; grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr)); gap: 0.5rem; margin: 1rem 0; }}
 .lg-item {{ display: grid; gap: 0.2rem; padding: 0.55rem 0.8rem; border-left: 3px solid var(--rule); background: var(--surface); font-size: 0.9rem; min-width: 0; }}
 .lg-tag {{ font-family: var(--f-head); font-size: 0.72rem; font-weight: 800; letter-spacing: 0.1em; text-transform: uppercase; }}
@@ -208,6 +215,7 @@ table.toc .lm-d {{ color: var(--ink-2); font-size: 0.86rem; margin-top: 0.1rem; 
 .st.rv::before {{ content: "◐ "; }}
 .st-pdf {{ font-family: var(--f-head); font-size: 0.74rem; font-weight: 700; }}
 .notation td:first-child {{ white-space: nowrap; width: 15rem; }}
+@media (max-width: 520px) {{ .notation td:first-child {{ white-space: normal; width: auto; }} .notation td:first-child .katex {{ white-space: nowrap; }} }}   /* a long row keeps a readable second column; a formula stays whole */
 @media (max-width: 640px) {{ .goals {{ grid-template-columns: minmax(0, 1fr); }} }}
 </style>
 <a class="skip" href="#main">Skip to content</a>

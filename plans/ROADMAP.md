@@ -12,9 +12,9 @@ file (`plans/vol-N.md`, in the format below).
 | 0 | I Calculus for Finance (published 2026-10-11) | 7 | — | 0.2, 0.2.1 |
 | 1 | II Linear Algebra for Portfolios | 5 | I | 0.3 |
 | 2 | III Probability | 6 | I | 0.4 |
-| 3 | IV Statistical Inference and Econometrics | 8 | III | 0.5 |
+| 3 | IV Statistical Inference and Econometrics | 8 | II, III | 0.5 |
 | 4 | V Portfolio Optimization · VI Measuring True Risk and Return | 5 + 4 | II, IV | 0.6 |
-| 5 | VII Stochastic Calculus | 5 | III | 0.7 |
+| 5 | VII Stochastic Calculus | 5 | III, IV | 0.7 |
 | 6 | VIII The Kelly Criterion and Optimal Leverage | 6 | V, VI, VII | 0.8 |
 | 7 | IX Capstone | 4 | all | 1.0 |
 
@@ -116,7 +116,7 @@ before use (`data/README.md`). `TaiwanStockPriceAdj` is rebuilt backward from th
 
 | Volume | Main FinMind data (tier) | New Python tools | Notes |
 |:--|:--|:--|:--|
-| II | daily closes of the TWSE sector indices and TAIEX (`TaiwanStockPrice`, Free), from 2007-07-02, repaired from `TaiwanStockEvery5SecondsIndex` (Backer); Volume I's 0050, 00679B and TX files | NumPy linear algebra | LM11 "eigen-portfolios of Taiwan sectors" as data directions, not tradable portfolios; LM12 applies Cholesky to real returns (whitening), with simulation left to LM16 and LM18; brief in `plans/vol-2.md` |
+| II | daily closes of the TWSE sector indices and TAIEX (`TaiwanStockPrice`, Free), from 2007-07-02, repaired from `TaiwanStockEvery5SecondsIndex` (Backer); Volume I's 0050, 00679B and TX files | NumPy linear algebra | LM11 principal components of Taiwan sector returns, as directions in the data, not tradable portfolios; LM12 applies Cholesky to real returns (whitening), with simulation left to LM16 and LM18; brief in `plans/vol-2.md` |
 | III | long TAIEX and 0050 daily history (`TaiwanStockPrice`, `TaiwanStockTotalReturnIndex`, Free) | SciPy distributions | LM15 fits normal, lognormal, Student-t and Poisson to TAIEX returns; LM16 crash correlation; LM18 Monte Carlo and bootstrap |
 | IV | stock and index returns; TX and TAIEX for the basis (`TaiwanFuturesDaily`), with calendar spreads (`TaiwanFuturesSpreadTrading`) and official final settlement prices (`TaiwanFuturesFinalSettlementPrice`); intraday data for realized volatility: TX 1-minute bars from 2011 (`TaiwanFuturesKBar`), TAIEX 1-minute bars from 2019 (`TaiwanStockKBar`) or 5-second TAIEX (`TaiwanVariousIndicators5Seconds`) | statsmodels, arch | LM25 cointegration of the futures–spot basis; LM26 compares EWMA and GARCH forecasts with realized volatility, including the choice of sampling interval (ticks show microstructure noise) |
 | V | Taiwan ETFs (0050, 00679B and others) and US ETFs (`USStockPrice`, Free) | cvxpy, scikit-learn (Ledoit–Wolf) | long-only, leverage and turnover constraints; 1/N, shrinkage, Black–Litterman, risk parity, HRP |

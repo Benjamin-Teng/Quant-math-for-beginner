@@ -77,7 +77,11 @@ unless stated.
   (P_t + D_t)/(P_{t−1}/s) − 1.
 - **Aligned samples change the counts.** The 0050/00631L common-date sample has 2,902 returns and A = 243.1 sessions a
   year; TWSE averaged 243.8 a year in 2015–2025 (2,911 exchange sessions in the window: 0050's halt and the 00631L
-  alignment remove nine). Say which sample a count or annualization factor comes from.
+  alignment remove nine). Say which sample a count or annualization factor comes from. A column taken from a joined
+  frame keeps the join's dates (2026-10-11, Volume II): `etf_daily_returns.parquet` has no rows for 25–30 March 2026,
+  00631L's halt, so its 0050 return on 2026-03-31 covers five sessions (−2.76% against −2.10% for the day), and
+  `lm07_returns.parquet` has none for 0050's halt, so its 00679B return on 2025-06-18 is −0.79% against +0.93% for the
+  day. Use a joined frame only for statistics of the series it joins, and name the frame next to every number.
 - **TX futures (`TaiwanFuturesDaily`):** on its last trading day the expiring contract's `settlement_price` prints 0.0
   (use `close` or TAIFEX's published final settlement price); on days a contract does not trade, `close` and `volume`
   print 0 while `settlement_price` is set by the exchange. For expiry, use the official final settlement price from
@@ -97,14 +101,16 @@ unless stated.
   it failed from the next session. Back a one-day case with a multi-day figure and say where it ranks.
 - **2025 TX margins:** no official TAIFEX page was found, only third-party reports; LM2 labels its margin illustrative
   and quotes the official figures effective 2026-08-12.
-- **FinMind copies one day's values onto other dates** (2026-10-11, Volume II data). In `TaiwanStockPrice`'s
-  sector-index series, on 18 dates every sector prints the closes of another day (Semiconductor 1531.87 on both
-  2009-06-05 and 2025-06-11, against 68.65 and 643.65 at the official close), and Chemical has about 20 more such
-  dates. The served rows are reproduced byte for byte, so the manifest's checksums pass, and about 250 of the copied
-  closes move less than 12%, so an outlier filter misses them. About 1,500 other rows carry another day's spread while
-  the close is sound, so a close is never rebuilt as the previous close plus the spread. Rule: look for identical
-  values on different dates and for closes the spread contradicts on both sides; repair them from the 13:30:00 value
-  of `TaiwanStockEvery5SecondsIndex`, registered as raw files; the series builder stops on anything it cannot explain.
+- **FinMind copies values from elsewhere into a daily series** (2026-10-11, Volume II data). In `TaiwanStockPrice`'s
+  sector-index series, 18 dates carry every sector's closes from another date (11 source dates; the set of
+  2026-06-29 appears on six of them, so Semiconductor prints 1531.87 on 2009-06-05 and on 2025-06-11, against 68.65 and
+  643.65 at the official close), and on 21 more dates Chemical carries the same-day close of the aggregate
+  ChemicalBiotechnologyMedicalCare: 561 wrong closes in all. The served rows are reproduced byte for byte, so the
+  manifest's checksums pass, and about 250 of the copied closes move less than 12%, so an outlier filter misses them.
+  1,528 other rows carry another day's spread while the close is sound, so a close is never rebuilt as the previous
+  close plus the spread. Rule: look for values repeated from another date or from another series on the same date,
+  and for closes the spread contradicts on both sides; repair them from the 13:30:00 value of
+  `TaiwanStockEvery5SecondsIndex`, registered as raw files; the series builder stops on anything it cannot explain.
 
 ## 4. Build system and rendering
 
@@ -142,6 +148,15 @@ unless stated.
   snapshots the page first: on KaTeX pages of 20–30 thousand elements that delayed the change, froze a phone-class
   CPU for close to a second and sent quick second clicks to `<html>`, so they were lost. The theme now changes at
   once and only the switch animates. A reviewer finds such costs only by timing real clicks on the largest page.
+- **The outline did not follow a click on a sub-heading** (owner's report, 2026-10-11). The scroll-spy waited for a
+  heading to cross a band from 15% to 30% of the window, but a jump puts the heading at `scroll-padding-top`, above
+  the band, so a short sub-heading never crossed it. Rule: the active entry is the last heading at or above the
+  line where a jump puts it, and a clicked entry stays active until the reader scrolls (`book.js`). Test outline
+  changes with clicks as well as the wheel.
+- **Sticky side panels ran past the bottom of the window.** `.rail` and `.outline` had `max-height: calc(100vh -
+  3.6rem)` plus padding with the default `box-sizing: content-box`, so each panel was taller than the window by its
+  padding and its last entries could not be reached. Rule: a sticky panel with a `max-height` takes `box-sizing:
+  border-box`.
 - **Chrome breaks a line after an inline-block, even before a full stop** (KaTeX's boxes), and a word joiner does not
   stop it. `build.py` wraps the last box of an inline formula followed by punctuation in a nowrap span; it holds
   `. , ; : ! ? ) ] ’ ” " '` and CJK closing punctuation, not `% - –` or fullwidth `；：`.

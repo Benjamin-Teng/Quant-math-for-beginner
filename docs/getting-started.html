@@ -1,0 +1,216 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<script>(function(){var d=document.documentElement,t,m;try{t=localStorage.getItem("ftck-theme")}catch(e){}if(t!=="light"&&t!=="dark"){m=window.matchMedia&&matchMedia("(prefers-color-scheme: dark)");t=m&&m.matches?"dark":"light"}d.setAttribute("data-theme",t);document.addEventListener("click",function(e){var b=e.target.closest&&e.target.closest(".theme-toggle");if(!b||window.__ftckTheme)return;var n=d.getAttribute("data-theme")==="light"?"dark":"light";try{localStorage.setItem("ftck-theme",n)}catch(x){}window.__ftckEarly=n;d.setAttribute("data-theme",n);b.setAttribute("aria-checked",n==="light"?"true":"false")})})();</script>
+<title>Getting Started · From Calculus to Kelly</title>
+<meta name="description" content="Who the book is for, how to read a module, how to run the labs, and the conventions every module uses.">
+<link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;700&display=swap">
+<link rel="stylesheet" href="assets/katex/katex.min.css">
+<link rel="stylesheet" href="assets/book.css">
+</head>
+<body data-page="getting-started">
+<a class="skip" href="#main">Skip to content</a>
+<header class="topbar"><a class="brand" href="index.html">From Calculus to Kelly<small>量化數理教科書</small></a>
+<span class="crumb">Getting Started</span><span class="spacer"></span>
+<button class="theme-toggle" type="button" role="switch" aria-checked="false" aria-label="Light theme"><span class="tt-track" aria-hidden="true"><span class="tt-sky tt-night"><i class="tt-star"></i><i class="tt-star"></i><i class="tt-star"></i><i class="tt-star"></i></span><span class="tt-sky tt-day"><i class="tt-cloud tt-cloud-1"></i><i class="tt-cloud tt-cloud-2"></i></span><span class="tt-knob"><i class="tt-moon"></i><i class="tt-sun"></i></span></span></button><script>document.currentScript.previousElementSibling.setAttribute("aria-checked",document.documentElement.getAttribute("data-theme")==="light"?"true":"false")</script><button class="rail-toggle" type="button" aria-controls="rail" aria-expanded="false">Contents</button></header>
+<div class="layout">
+<nav class="rail" id="rail" aria-label="Book contents"><a class="home" href="index.html">Contents &amp; roadmap</a>
+<h2>Guides</h2><ol><li><a class="guide" href="getting-started.html" aria-current="page"><span>Getting Started</span></a></li><li><a class="guide" href="research-hygiene.html"><span>Research hygiene</span></a></li></ol>
+<h2>Vol I · Calculus for Finance</h2><ol>
+<li><a href="lm/lm01.html"><span class="k">LM1</span><span>Exponentials, Logarithms and Compounding</span></a></li>
+<li><a href="lm/lm02.html"><span class="k">LM2</span><span>Limits and Derivatives</span></a></li>
+<li><a href="lm/lm03.html"><span class="k">LM3</span><span>Taylor Series and Approximation</span></a></li>
+<li><a href="lm/lm04.html"><span class="k">LM4</span><span>Optimization in One Variable</span></a></li>
+<li><a href="lm/lm05.html"><span class="k">LM5</span><span>Integration</span></a></li>
+<li><a href="lm/lm06.html"><span class="k">LM6</span><span>Sequences, Series and the Time Value of Money</span></a></li>
+<li><a href="lm/lm07.html"><span class="k">LM7</span><span>Multivariable Calculus and Lagrange Multipliers</span></a></li>
+</ol>
+<h2>Vol II · Linear Algebra for Portfolios</h2><ol>
+<li><span title="Planned"><span class="k">LM8</span><span>Vectors and Matrices</span></span></li>
+<li><span title="Planned"><span class="k">LM9</span><span>Linear Systems, Inverses and Rank</span></span></li>
+<li><span title="Planned"><span class="k">LM10</span><span>Quadratic Forms and Covariance Matrices</span></span></li>
+<li><span title="Planned"><span class="k">LM11</span><span>Eigen-decomposition and PCA</span></span></li>
+<li><span title="Planned"><span class="k">LM12</span><span>Cholesky, SVD and Least Squares</span></span></li>
+</ol>
+<h2>Vol III · Probability</h2><ol>
+<li><span title="Planned"><span class="k">LM13</span><span>Probability Foundations and Bayes</span></span></li>
+<li><span title="Planned"><span class="k">LM14</span><span>Random Variables, Expectation and Jensen&#x27;s Inequality</span></span></li>
+<li><span title="Planned"><span class="k">LM15</span><span>Distributions in Finance</span></span></li>
+<li><span title="Planned"><span class="k">LM16</span><span>Joint Distributions and Dependence</span></span></li>
+<li><span title="Planned"><span class="k">LM17</span><span>Law of Large Numbers and Central Limit Theorem</span></span></li>
+<li><span title="Planned"><span class="k">LM18</span><span>Monte Carlo Simulation and the Bootstrap</span></span></li>
+</ol>
+<h2>Vol IV · Statistical Inference and Econometrics</h2><ol>
+<li><span title="Planned"><span class="k">LM19</span><span>Descriptive Statistics of Returns</span></span></li>
+<li><span title="Planned"><span class="k">LM20</span><span>Estimation Theory and Maximum Likelihood</span></span></li>
+<li><span title="Planned"><span class="k">LM21</span><span>Hypothesis Testing and Multiple Testing</span></span></li>
+<li><span title="Planned"><span class="k">LM22</span><span>Resampling Methods</span></span></li>
+<li><span title="Planned"><span class="k">LM23</span><span>Linear Regression</span></span></li>
+<li><span title="Planned"><span class="k">LM24</span><span>Bayesian Inference and Shrinkage</span></span></li>
+<li><span title="Planned"><span class="k">LM25</span><span>Time Series I: ARMA, Unit Roots and Cointegration</span></span></li>
+<li><span title="Planned"><span class="k">LM26</span><span>Time Series II: Volatility Models</span></span></li>
+</ol>
+<h2>Vol V · Portfolio Optimization</h2><ol>
+<li><span title="Planned"><span class="k">LM27</span><span>Portfolio Return and Risk</span></span></li>
+<li><span title="Planned"><span class="k">LM28</span><span>Mean–Variance Optimization</span></span></li>
+<li><span title="Planned"><span class="k">LM29</span><span>Convex Optimization in Practice</span></span></li>
+<li><span title="Planned"><span class="k">LM30</span><span>Estimation Error and Robust Portfolios</span></span></li>
+<li><span title="Planned"><span class="k">LM31</span><span>Risk Parity, HRP and Volatility Targeting</span></span></li>
+</ol>
+<h2>Vol VI · Measuring True Risk and Return</h2><ol>
+<li><span title="Planned"><span class="k">LM32</span><span>VaR, Expected Shortfall and Drawdown</span></span></li>
+<li><span title="Planned"><span class="k">LM33</span><span>The Statistics of the Sharpe Ratio</span></span></li>
+<li><span title="Planned"><span class="k">LM34</span><span>Backtesting Without Fooling Yourself</span></span></li>
+<li><span title="Planned"><span class="k">LM35</span><span>Stress Testing</span></span></li>
+</ol>
+<h2>Vol VII · Stochastic Calculus</h2><ol>
+<li><span title="Planned"><span class="k">LM36</span><span>From Random Walk to Brownian Motion</span></span></li>
+<li><span title="Planned"><span class="k">LM37</span><span>The Itô Integral and Itô&#x27;s Lemma</span></span></li>
+<li><span title="Planned"><span class="k">LM38</span><span>Geometric Brownian Motion</span></span></li>
+<li><span title="Planned"><span class="k">LM39</span><span>Beyond GBM</span></span></li>
+<li><span title="Planned"><span class="k">LM40</span><span>Option Pricing Bridge (Optional)</span></span></li>
+</ol>
+<h2>Vol VIII · The Kelly Criterion and Optimal Leverage</h2><ol>
+<li><span title="Planned"><span class="k">LM41</span><span>Discrete Kelly</span></span></li>
+<li><span title="Planned"><span class="k">LM42</span><span>Continuous-Time Kelly</span></span></li>
+<li><span title="Planned"><span class="k">LM43</span><span>Multi-Asset Kelly</span></span></li>
+<li><span title="Planned"><span class="k">LM44</span><span>Fractional Kelly and Drawdown Control</span></span></li>
+<li><span title="Planned"><span class="k">LM45</span><span>Kelly Under Uncertainty and Frictions</span></span></li>
+<li><span title="Planned"><span class="k">LM46</span><span>Leverage Instruments in Practice</span></span></li>
+</ol>
+<h2>Vol IX · Capstone</h2><ol>
+<li><span title="Planned"><span class="k">LM47</span><span>The Statistical Modeling Workflow</span></span></li>
+<li><span title="Planned"><span class="k">LM48</span><span>Capstone A: A Taiwan Core–Satellite Portfolio</span></span></li>
+<li><span title="Planned"><span class="k">LM49</span><span>Capstone B: Kelly Sizing a Single Strategy</span></span></li>
+<li><span title="Planned"><span class="k">LM50</span><span>Capstone C: Multi-Strategy Allocation and Monitoring</span></span></li>
+</ol></nav>
+<main class="page" id="main"><header class="lm-head"><h1 class="lm-title">Getting Started</h1><p class="lm-sub">Who the book is for, how to read a module, how to run the labs, and the conventions every module uses.</p></header>
+<div class="co zh"><div class="co-h"><span class="tag">導讀</span><span class="t">這一頁講什麼</span></div><p>開始之前需要什麼程度、一個模組怎麼讀、lab 怎麼跑，以及全書共用的資料與計算慣例。設定好環境後，先做十分鐘的小測試：確認環境和資料都沒問題，再抓全部資料，從 <a href="lm/lm01.html">LM1</a> 開始。</p>
+</div>
+<section class="sec unnum" id="who-the-book-is-for"><h2 class="plain"><span class="ttl">Who the book is for</span></h2><p>The book is for a market professional who wants the mathematics behind portfolio work. You know the markets, but
+your university mathematics is rusty. Volume I reviews calculus from the start, so school algebra is enough.</p>
+<p>For the code you need basic Python: variables, functions, lists, loops and reading a table. You do not need to know
+NumPy or Polars yet. The modules introduce them, and the code on this page only needs to run.</p>
+</section><section class="sec unnum" id="how-to-read-a-module"><h2 class="plain"><span class="ttl">How to read a module</span></h2><p>A module opens with its learning outcomes and a case built on real Taiwan or US data. Numbered sections follow.
+Each section moves from a small example to a definition, a derivation, a worked example and a short knowledge
+check. A 中文導讀 box gives the intuition in Traditional Chinese. Practice problems with full solutions close the
+module, and a lab notebook rebuilds every number in it.</p>
+<p>Read the volumes in order: I, II, III, IV, V, VI, VII, VIII, IX. After Volume VI you can already analyse portfolios
+and their risk. Volume VII adds the continuous-time tools that the Kelly volume needs. The
+<a href="index.html#roadmap">roadmap on the front page</a> shows how the volumes depend on each other.</p>
+</section><section class="sec unnum" id="set-up-the-labs"><h2 class="plain"><span class="ttl">Set up the labs</span></h2><ol>
+<li>Install <a href="https://docs.astral.sh/uv/">uv</a>, the tool that manages the book's Python environment.</li>
+<li>Clone the <a href="https://github.com/Benjamin-Teng/Quant-math-for-beginner">repository</a>, and from its root run
+<code>uv sync</code>. It installs the exact package versions in <code>uv.lock</code>.</li>
+<li>Open a lab in VS Code and choose the <code>.venv</code> kernel, or run <code>uv run --with jupyterlab jupyter lab</code> from the
+repository root.</li>
+<li>Create an account on the <a href="https://finmindtrade.com/">FinMind</a> site and copy your API token. Put it in the
+environment variable <code>FINMIND_TOKEN</code> on your own computer, and never write it into a file that you share. In
+PowerShell, type <code>$env:FINMIND_TOKEN = &quot;your token&quot;</code>; in bash, type <code>export FINMIND_TOKEN=&quot;your token&quot;</code>. Either
+command lasts until you close the window.</li>
+</ol>
+</section><section class="sec unnum" id="a-ten-minute-smoke-test"><h2 class="plain"><span class="ttl">A ten-minute smoke test</span></h2><p>Run this test before you fetch all the data. It checks your environment, and it teaches three lessons. First, fetch
+only the 0050 files: <code>uv run python data/fetch_finmind.py --only 0050__</code>. Do not run <code>make_lab_data.py</code> yet, because
+it needs all of Volume I's files. Then run this code from the repository root:</p>
+<div class="code"><div class="code-h"><span>Python</span><button class="copy" type="button">Copy</button></div><pre class="hl"><code><span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">polars</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pl</span>
+
+<span class="n">files</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">Path</span><span class="p">(</span><span class="s2">"data/raw"</span><span class="p">)</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="s2">"0050__*.csv"</span><span class="p">))</span>
+<span class="n">px</span> <span class="o">=</span> <span class="n">pl</span><span class="o">.</span><span class="n">concat</span><span class="p">([</span><span class="n">pl</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">f</span><span class="p">)</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">files</span><span class="p">])</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="s2">"date"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">px</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="n">px</span><span class="p">[</span><span class="s2">"date"</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span> <span class="n">px</span><span class="p">[</span><span class="s2">"date"</span><span class="p">][</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+
+<span class="n">px</span> <span class="o">=</span> <span class="n">px</span><span class="o">.</span><span class="n">with_columns</span><span class="p">(</span>
+    <span class="n">R</span><span class="o">=</span><span class="n">pl</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="s2">"close"</span><span class="p">)</span> <span class="o">/</span> <span class="n">pl</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="s2">"close"</span><span class="p">)</span><span class="o">.</span><span class="n">shift</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span>
+    <span class="n">r</span><span class="o">=</span><span class="p">(</span><span class="n">pl</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="s2">"close"</span><span class="p">)</span> <span class="o">/</span> <span class="n">pl</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="s2">"close"</span><span class="p">)</span><span class="o">.</span><span class="n">shift</span><span class="p">(</span><span class="mi">1</span><span class="p">))</span><span class="o">.</span><span class="n">log</span><span class="p">(),</span>
+<span class="p">)</span><span class="o">.</span><span class="n">drop_nulls</span><span class="p">()</span>
+<span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">px</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="s2">"R"</span><span class="p">)</span><span class="o">.</span><span class="n">head</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span><span class="o">.</span><span class="n">iter_rows</span><span class="p">():</span>  <span class="c1"># three lowest returns</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">row</span><span class="p">)</span>
+
+<span class="n">cut</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="mf">0.7</span> <span class="o">*</span> <span class="n">px</span><span class="o">.</span><span class="n">height</span><span class="p">)</span>          <span class="c1"># the first 70% of the returns</span>
+<span class="n">est</span><span class="p">,</span> <span class="n">test</span> <span class="o">=</span> <span class="n">px</span><span class="p">[:</span><span class="n">cut</span><span class="p">],</span> <span class="n">px</span><span class="p">[</span><span class="n">cut</span><span class="p">:]</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">est</span><span class="p">[</span><span class="s2">"date"</span><span class="p">][</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="s2">"&lt;"</span><span class="p">,</span> <span class="n">test</span><span class="p">[</span><span class="s2">"date"</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span>
+
+<span class="n">prev</span> <span class="o">=</span> <span class="n">px</span><span class="o">.</span><span class="n">row</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">named</span><span class="o">=</span><span class="kc">True</span><span class="p">)[</span><span class="s2">"close"</span><span class="p">]</span>
+<span class="n">row</span> <span class="o">=</span> <span class="n">px</span><span class="o">.</span><span class="n">row</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">named</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="s2">"date"</span><span class="p">],</span> <span class="n">prev</span><span class="p">,</span> <span class="n">row</span><span class="p">[</span><span class="s2">"close"</span><span class="p">],</span> <span class="n">row</span><span class="p">[</span><span class="s2">"close"</span><span class="p">]</span> <span class="o">/</span> <span class="n">prev</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="n">row</span><span class="p">[</span><span class="s2">"R"</span><span class="p">])</span>
+</code></pre></div><p>The code computes price returns, without dividends. The first line shows <code>(2907, 3)</code>: 2,907 rows and 3 columns,
+from 2014-10-31 to 2026-10-08. The lowest return is −74.8% on 2025-06-18, the day of a stock split, not a crash. The
+next two are the limit-down day of 2025-04-07 and 2024-08-05 (−9.1%). The estimation window ends on 2023-03-01, and
+the test window starts on the next trading day. The last line checks one return by hand: 65.65 / 65.6 − 1 = 0.000762
+on 2014-11-04.</p>
+<p>The first lesson is the stock split: a raw price series is not yet a return series. The second is the cut by time:
+the test window always comes after the estimation window, as the <a href="research-hygiene.html">Research hygiene</a> page
+explains. The third is in the second row: a fall from 176.00 to 158.40 is exactly −10%, yet Python prints
+<code>-0.09999999999999998</code>. Floating point stores most decimals a little off, which the conventions below take into
+account.</p>
+</section><section class="sec unnum" id="fetch-the-data"><h2 class="plain"><span class="ttl">Fetch the data</span></h2><p>Run <code>uv run python data/fetch_finmind.py</code>, then <code>uv run python data/make_lab_data.py</code>. After that, every lab runs
+offline. The book ships no market data, because FinMind's licence does not allow the book to redistribute it.</p>
+<p>Volume I's files come from FinMind's free datasets, and so do Volume II's sector indices. One folder needs a paid
+plan: <code>data/raw/sectors_close/</code>, 561 small files that repair FinMind's copied sector closes (see &quot;Check, do not trust&quot;
+below). On the free plan, run <code>uv run python data/fetch_finmind.py --exclude sectors_close/</code>; <code>make_lab_data.py</code> does not
+need those files, and Volume II's labs say what changes without them. The fetch skips any file that it cannot get, lists it at the end and stops with
+an error code.</p>
+</section><section class="sec unnum" id="data-you-will-meet"><h2 class="plain"><span class="ttl">Data you will meet</span></h2><ul>
+<li><strong>Close, adjusted close and total return.</strong> A close is the price of the day's last trade; on TWSE it comes from the
+closing auction from 13:25 to 13:30. An adjusted close is rewritten backward
+after each dividend or split, so it depends on the day you download it. A total return adds the dividend back on
+the ex-dividend day. The book builds total returns itself and says which series each number uses.</li>
+<li><strong>Stock splits.</strong> 0050 split four for one on 2025-06-18. Its raw close fell 74.8% that day, yet four new shares
+were worth 0.9% more than one old share. A return series must undo the split first.</li>
+<li><strong>Indices.</strong> TAIEX and the TWSE sector indices are price indices: they leave dividends out. TWSE also publishes a
+total-return index, which includes them.</li>
+<li><strong>Futures.</strong> A TX contract has a daily settlement price and a close, and the two can differ. The book says which
+one it uses.</li>
+<li><strong>Check, do not trust.</strong> FinMind's sector-index series contain rows copied from other dates. Every data script in
+the book checks its input and stops on anything it cannot explain.</li>
+</ul>
+</section><section class="sec unnum" id="dates-and-missing-values"><h2 class="plain"><span class="ttl">Dates and missing values</span></h2><ul>
+<li>Use the exchange's trading dates, not a Monday-to-Friday calendar. The 0050 data contain nine Saturday trading
+days, such as 2016-01-30.</li>
+<li>When you combine two series, keep only the dates they share. That changes the number of returns, so every count in
+the book says which sample it comes from.</li>
+<li>A trading halt makes one return cover several days. 0050 was halted from 11 to 17 June 2025 for its split, so its
+return on 2025-06-18 covers six trading days.</li>
+<li>After a join, sort by date again. Never rely on the order of rows.</li>
+</ul>
+</section><section class="sec unnum" id="conventions"><h2 class="plain"><span class="ttl">Conventions</span></h2><ul>
+<li>A simple return is <span class="math-inline" role="math" aria-label="R_t=(P_t+D_t)/P_{t-1}-1"><span class="katex"><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8333em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.00773em;">R</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.2806em;"><span style="top:-2.55em;margin-left:-0.0077em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">t</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mopen">(</span><span class="mord"><span class="mord mathnormal" style="margin-right:0.13889em;">P</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.2806em;"><span style="top:-2.55em;margin-left:-0.1389em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">t</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.02778em;">D</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.2806em;"><span style="top:-2.55em;margin-left:-0.0278em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">t</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mclose">)</span><span class="mord">/</span><span class="mord"><span class="mord mathnormal" style="margin-right:0.13889em;">P</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3011em;"><span style="top:-2.55em;margin-left:-0.1389em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight">t</span><span class="mbin mtight">−</span><span class="mord mtight">1</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.2083em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">−</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="mi-end"><span class="base"><span class="strut" style="height:0.6444em;"></span><span class="mord">1</span></span></span></span></span></span>, where <span class="math-inline" role="math" aria-label="D_t"><span class="katex"><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8333em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.02778em;">D</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.2806em;"><span style="top:-2.55em;margin-left:-0.0278em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">t</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span></span> is the cash dividend of a share that goes ex-dividend on
+day <span class="math-inline" role="math" aria-label="t"><span class="katex"><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6151em;"></span><span class="mord mathnormal">t</span></span></span></span></span> (zero on most days). Simple returns add across the assets of a portfolio, and log returns
+<span class="math-inline" role="math" aria-label="r_t=\ln(1+R_t)"><span class="katex"><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.5806em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.02778em;">r</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.2806em;"><span style="top:-2.55em;margin-left:-0.0278em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">t</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mop">ln</span><span class="mopen">(</span><span class="mord">1</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.00773em;">R</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.2806em;"><span style="top:-2.55em;margin-left:-0.0077em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">t</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mclose">)</span></span></span></span></span> add across time (<a href="lm/lm01.html">LM1</a>).</li>
+<li>Sample moments divide by <span class="math-inline" role="math" aria-label="T"><span class="katex"><span class="katex-html" aria-hidden="true"><span class="mi-end"><span class="base"><span class="strut" style="height:0.6833em;"></span><span class="mord mathnormal" style="margin-right:0.13889em;">T</span></span></span></span></span></span>, the number of returns, and each module says so. NumPy's <code>np.cov</code> and Polars' <code>var</code>
+and <code>std</code> divide by <span class="math-inline" role="math" aria-label="T-1"><span class="katex"><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.7667em;vertical-align:-0.0833em;"></span><span class="mord mathnormal" style="margin-right:0.13889em;">T</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">−</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:0.6444em;"></span><span class="mord">1</span></span></span></span></span> unless you pass <code>ddof=0</code>; NumPy's <code>np.var</code> and <code>np.std</code> already divide by <span class="math-inline" role="math" aria-label="T"><span class="katex"><span class="katex-html" aria-hidden="true"><span class="mi-end"><span class="base"><span class="strut" style="height:0.6833em;"></span><span class="mord mathnormal" style="margin-right:0.13889em;">T</span></span></span></span></span></span>.</li>
+<li>The number of periods per year, <span class="math-inline" role="math" aria-label="A"><span class="katex"><span class="katex-html" aria-hidden="true"><span class="mi-end"><span class="base"><span class="strut" style="height:0.6833em;"></span><span class="mord mathnormal">A</span></span></span></span></span></span>, comes from the sample in use. It is the number of returns divided by the
+number of years, and the years are the calendar days divided by 365.25.</li>
+<li>Tables say whether a number is a percent or a decimal: 1% is 0.01.</li>
+<li>Vectors are columns. The <a href="index.html#notation">notation table on the front page</a> lists the main symbols.</li>
+</ul>
+</section><section class="sec unnum" id="reproducible-numbers"><h2 class="plain"><span class="ttl">Reproducible numbers</span></h2><ul>
+<li>Seed the random generator once, at the start of a notebook, for example <code>rng = np.random.default_rng(20261011)</code>.
+Every run then gives the same draws.</li>
+<li>Never test two computed numbers with <code>x == y</code>. Compare them with a tolerance that fits their size, such as
+<code>math.isclose(x, y, rel_tol=1e-9, abs_tol=1e-12)</code>: relative for large amounts, absolute near zero.</li>
+<li>Prices with two decimals make some returns exact. A move from 100.00 to 101.00 is exactly 1%. Floating point may
+store it a little above or below 1%, so a count of &quot;returns of at least 1%&quot; can be off by one (<a href="lm/lm05.html">LM5</a>).</li>
+<li>A printed number is rounded. Compute from the full value, and print one more digit when a reader will compute
+from it.</li>
+</ul>
+</section><section class="sec unnum" id="from-formula-to-code"><h2 class="plain"><span class="ttl">From formula to code</span></h2><p>Use four steps for every formula. First, compute a small case by hand. Second, write down the shape and the unit
+of every object. Third, write the vectorized code. Fourth, check the code against the hand result.</p>
+<p>For a portfolio of two assets with weights <span class="math-inline" role="math" aria-label="\mathbf w=(0.6,\ 0.4)^{\top}"><span class="katex"><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.4444em;"></span><span class="mord mathbf" style="margin-right:0.01597em;">w</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:1.0991em;vertical-align:-0.25em;"></span><span class="mopen">(</span><span class="mord">0.6</span><span class="mpunct">,</span><span class="mspace"> </span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord">0.4</span><span class="mclose"><span class="mclose">)</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.8491em;"><span style="top:-3.063em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mtight">⊤</span></span></span></span></span></span></span></span></span></span></span></span></span> and returns <span class="math-inline" role="math" aria-label="\mathbf R=(0.02,\ {-0.01})^{\top}"><span class="katex"><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6861em;"></span><span class="mord mathbf">R</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="mi-end"><span class="base"><span class="strut" style="height:1.0991em;vertical-align:-0.25em;"></span><span class="mopen">(</span><span class="mord">0.02</span><span class="mpunct">,</span><span class="mspace"> </span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord"><span class="mord">−</span><span class="mord">0.01</span></span><span class="mclose"><span class="mclose">)</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.8491em;"><span style="top:-3.063em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mtight">⊤</span></span></span></span></span></span></span></span></span></span></span></span></span></span>,
+the hand result is <span class="math-inline" role="math" aria-label="0.6\times0.02+0.4\times(-0.01)=0.008"><span class="katex"><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.7278em;vertical-align:-0.0833em;"></span><span class="mord">0.6</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">×</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:0.7278em;vertical-align:-0.0833em;"></span><span class="mord">0.02</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:0.7278em;vertical-align:-0.0833em;"></span><span class="mord">0.4</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">×</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mopen">(</span><span class="mord">−</span><span class="mord">0.01</span><span class="mclose">)</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="mi-end"><span class="base"><span class="strut" style="height:0.6444em;"></span><span class="mord">0.008</span></span></span></span></span></span>. The code gives the same number:</p>
+<div class="code"><div class="code-h"><span>Python</span><button class="copy" type="button">Copy</button></div><pre class="hl"><code><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+
+<span class="n">w</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">0.6</span><span class="p">,</span> <span class="mf">0.4</span><span class="p">])</span>     <span class="c1"># weights, shape (2,), they sum to 1</span>
+<span class="n">R</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">0.02</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.01</span><span class="p">])</span>  <span class="c1"># simple returns, shape (2,)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">w</span> <span class="o">@</span> <span class="n">R</span><span class="p">)</span>                 <span class="c1"># 0.008 (up to floating point)</span>
+</code></pre></div></section></main>
+<aside class="outline" aria-label="On this page"><h2>On this page</h2><ol><li><a href="#who-the-book-is-for">Who the book is for</a></li><li><a href="#how-to-read-a-module">How to read a module</a></li><li><a href="#set-up-the-labs">Set up the labs</a></li><li><a href="#a-ten-minute-smoke-test">A ten-minute smoke test</a></li><li><a href="#fetch-the-data">Fetch the data</a></li><li><a href="#data-you-will-meet">Data you will meet</a></li><li><a href="#dates-and-missing-values">Dates and missing values</a></li><li><a href="#conventions">Conventions</a></li><li><a href="#reproducible-numbers">Reproducible numbers</a></li><li><a href="#from-formula-to-code">From formula to code</a></li></ol></aside>
+</div>
+<script src="assets/book.js"></script>
+
+</body>
+</html>

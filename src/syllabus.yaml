@@ -4,13 +4,18 @@ subtitle: A quantitative curriculum for statistical modeling, portfolio optimiza
 editions:
   - version: "0.2.1"
     date: 11 October 2026
-    notes: "Volumes V to VII reordered so that portfolio optimization and risk measurement come before stochastic calculus: LM27–31 are now Portfolio Optimization (formerly LM32–36), LM32–35 Measuring True Risk and Return (formerly LM37–40) and LM36–40 Stochastic Calculus (formerly LM27–31). The old numbers belonged only to modules not yet published. In Volume I the references follow the new numbers, and a few hyphens and colons after formulas were rewritten so that none can start a line."
+    notes: "Volumes V to VII reordered so that portfolio optimization and risk measurement come before stochastic calculus: LM27–31 are now Portfolio Optimization (formerly LM32–36), LM32–35 Measuring True Risk and Return (formerly LM37–40) and LM36–40 Stochastic Calculus (formerly LM27–31). The old numbers belonged only to modules not yet published. In Volume I the references follow the new numbers, and a few hyphens, semicolons and colons after formulas were rewritten so that none can start a line. A Getting Started page and a Research hygiene page open the book."
   - version: "0.2"
     date: 11 October 2026
     notes: "Volume I complete: LM1–LM7 with their labs. Each module passed an independent review, a blind solve of every question with a key check, a full audit of its numbers from the raw data and verified revision rounds; LM3 was revised the same way. Wide formulas and tables now fit the printed page, and equation numbers and punctuation no longer collide with formulas."
   - version: "0.1"
     date: 10 October 2026
     notes: "Roadmap, contents and conventions, and the sample module LM3 with its lab. Volumes are released in order, starting with Volume I."
+# Standalone pages, written in src/pages/<slug>.md (front matter: title, description). Like a module, a page is linked
+# from the site and built into docs/ only with `status: published`; without it, only the preview build shows it (as a draft).
+pages:
+  - {slug: getting-started, title: "Getting Started", status: published}
+  - {slug: research-hygiene, title: "Research hygiene", status: published}
 volumes:
   - id: I
     title: Calculus for Finance
@@ -30,7 +35,7 @@ volumes:
       - {n: 8, title: "Vectors and Matrices", desc: "Weights, returns and the dot product; portfolio return as wᵀR."}
       - {n: 9, title: "Linear Systems, Inverses and Rank", desc: "Solving for weights; singular matrices as perfect collinearity."}
       - {n: 10, title: "Quadratic Forms and Covariance Matrices", desc: "wᵀΣw, positive (semi)definiteness, matrix calculus."}
-      - {n: 11, title: "Eigen-decomposition and PCA", desc: "Eigen-portfolios of Taiwan sectors; condition numbers and why Σ⁻¹ amplifies error."}
+      - {n: 11, title: "Eigen-decomposition and PCA", desc: "Principal components of Taiwan sector returns; condition numbers and why Σ⁻¹ amplifies error."}
       - {n: 12, title: "Cholesky, SVD and Least Squares", desc: "Cholesky factors and whitening; SVD and numerical rank; least squares as a projection."}
   - id: III
     title: Probability

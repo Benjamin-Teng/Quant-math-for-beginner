@@ -13,7 +13,9 @@ How a learning module (LM) is written, checked, reviewed and published. The refe
 - **Language:** English body text. Hard ideas get a **中文導讀** callout (`> [!zh]`) in Traditional Chinese, about one
   per one or two sections, 3–6 sentences, never a translation of the paragraph above it but the intuition behind it.
   Keep English terms in the Chinese text where they help (e.g. 波動拖累 volatility drag). Use Taiwan usage
-  (最適, not 最優; 權益歸零 for zero equity, since 斷頭 means forced liquidation).
+  (最適, not 最優; 權益歸零 for zero equity, since 斷頭 means forced liquidation). Mathematical terms follow 樂詞網
+  (terms.naer.edu.tw), its mathematics or statistics listing (another field's entry, or the common form, when neither
+  lists the term), with the English term in parentheses at first use in each box; a row is 列 and a column is 行.
 - **Voice:** textbook register, concise. Active voice, concrete numbers, no filler ("it is worth noting", "in
   today's world"), no emoji, no questions as headings. For a reader of English as a second language, clarity comes
   before brevity. The sub-rules below are for English text: all of it from Volume II on, and new or changed
@@ -63,6 +65,12 @@ How a learning module (LM) is written, checked, reviewed and published. The refe
 | `data/raw/…` | verified raw data, git-ignored and registered in `data/raw_manifest.json` (see §8) |
 | `build/make_labNN.py` | generates `labs/LMNN_lab/LMNN_lab.ipynb` |
 | `labs/LMNN_lab/` | notebook (saved with outputs), `README.md`; its `data/` is built locally by `data/make_lab_data.py` |
+
+A standalone page (Getting Started, Research hygiene) is `src/pages/<slug>.md`, listed under `pages:` in
+`src/syllabus.yaml` with its `slug`, a `title` equal to the page's own, and `status: published` once it may reach
+`docs/`. Its front matter holds only `title` and `description`; it takes the Markdown, callouts, formulas and `[[LMn]]`
+links of a module, but no `js:`, no attributes on headings (`{lo=…}`, `{-}`) and no PDF. The builder stops on any of
+these.
 
 ## 3. Front matter
 
@@ -143,7 +151,7 @@ for something else.
 | $T$, $t$, $\tau$, $n$ | either a sample size (number of returns) or a horizon or maturity in years: a module uses one of the two and says which; time index; time to maturity or expiry, or any span in years when $T$ is a count; number of compounding or payment periods |
 | $P$, $W$, $D$, $\mathrm{DD}$ | price; wealth; cash dividend ($D_1$ the next dividend); drawdown |
 | $f$, $f^*$, $c$ | exposure ÷ equity of a position ($f>1$ is leverage); its growth-maximizing (Kelly) value; $c:=f/f^*$, the fraction of full Kelly |
-| $L$ | a leveraged fund's fixed daily multiple (00631L: $L=2$); for a portfolio, total exposure $\sum_i f_i$ |
+| $L$ | a leveraged fund's fixed daily multiple (00631L: $L=2$); for a portfolio, total exposure $\sum_i f_i$; in a module without leverage, a Cholesky factor, declared (table below) |
 | $p$, $q$, $b$, $a$ | binary bet: win probability, $q=1-p$, gain $b$ and loss $a$ per unit staked, so $f^*=p/a-q/b$. In futures pricing $q$ is instead the continuous dividend yield; a module uses one of the two |
 | $r_f$ | risk-free or financing rate (state the compounding) |
 | $\mathrm{SR}$ | Sharpe ratio $(\mu-r_f)/\sigma$ of a return; say the period (per day, or annualized) |
@@ -151,8 +159,27 @@ for something else.
 | $\varphi$, $\Phi$ | standard normal density and distribution function |
 | $B_t$ | standard Brownian motion ($W$ stays wealth, so $dW_t=W_t(\mu\,dt+\sigma\,dB_t)$ reads unambiguously); a module without Brownian motion may use $B$ for a balance, declared in its notation note |
 | $y$, $i$, $v$, $k$, $\gamma$ | yield to maturity or IRR; periodic interest rate; discount factor $1/(1+i)$; required return; growth rate of dividends or cash flows (simple, per period) |
-| $\lambda$, $\nu$, $\mathcal L$ | multiplier of an equality constraint; multipliers of inequality constraints (KKT), or in a module about distributions a Student $t$'s degrees of freedom (a module uses one of the two); Lagrangian |
+| $\lambda$, $\nu$, $\mathcal L$ | multiplier of an equality constraint (with a subscript, $\lambda_k$ is an eigenvalue: table below); multipliers of inequality constraints (KKT), or in a module about distributions a Student $t$'s degrees of freedom (a module uses one of the two); Lagrangian |
 | $h$, $u$; $\psi$ | generic functions in modules where $f$ or $g$ already have their book-wide meaning ($f$, $g$, $h$ are fine in purely mathematical modules); constraint functions, $\psi(x)=b$ or $\psi_i(x)\le b_i$ (there $b$ is a constraint level, not a bet's gain: a module uses one of the two) |
+
+**Vectors and matrices** (from Volume II; LM7 already writes vectors, transposes and $\Sigma$ this way):
+
+| Symbol | Book-wide meaning |
+|:--|:--|
+| $\mathbf x$, $\boldsymbol\mu$ | a vector is bold lower case (bold Greek with `\boldsymbol`) and a column; a vector of a book-wide capital quantity keeps its letter in bold capitals ($\mathbf R_t$ returns, $\mathbf P_t$ prices); column $j$ of a matrix $M$ is $\mathbf m_j$; inline, a column is written $(x_1,\dots,x_N)^{\top}$; a displayed vector or matrix uses `pmatrix` |
+| $M$, $K$; $m_{ij}$ | a matrix is a plain capital; a generic matrix is $M$ (a second one $K$), never $A$, which annualizes; $m_{ij}$ is the entry in row $i$ and column $j$ |
+| $^{\top}$, $M^{-1}$, $\det M$, $\operatorname{rank}M$, $\operatorname{tr}M$ | transpose (never $^T$, since $T$ is a count, and never a prime, which is a derivative); inverse; determinant; rank; trace |
+| $I$, $\mathbf 0$, $\mathbf 1$, $\mathbf e_i$ | identity ($I_N$ when the size matters); zero vector; vector of ones; $i$th standard basis vector, in a module that does not use LM7's excess-return vector $\mathbf e$ |
+| $\lVert\mathbf x\rVert$, $\lVert M\rVert_2$, $\mathbf x^{\top}\mathbf y$, $\theta$ | Euclidean norm; spectral norm, $\max_{\lVert\mathbf u\rVert=1}\lVert M\mathbf u\rVert$ (the largest absolute eigenvalue of a symmetric $M$); dot product (LM8 also writes $\mathbf x\cdot\mathbf y$); angle between two vectors ($\varphi$ stays the normal density) |
+| $N$, $i$, $j$; $T$, $t$ | number of assets and asset indices; number of returns and the date index |
+| $\mathbf R_t$, $X$, $\tilde X$, $\bar{\mathbf R}$ | vector of the $N$ simple returns on date $t$; the $T\times N$ matrix whose row $t$ is $\mathbf R_t^{\top}$ (date first, asset second); its centred version $X-\mathbf 1\bar{\mathbf R}^{\top}$; vector of sample means |
+| $\hat\Sigma$, $\mathbf s$, $C$ | sample covariance matrix $\tilde X^{\top}\tilde X/T$ (divisor $T$; in NumPy `ddof=0`, `rowvar=False`); vector of sample standard deviations; correlation matrix $\operatorname{diag}(\mathbf s)^{-1}\hat\Sigma\operatorname{diag}(\mathbf s)^{-1}$ |
+| $\sigma_p^2$, $s_p^2$ | portfolio variance $\mathbf w^{\top}\Sigma\mathbf w$ in a model; $\mathbf w^{\top}\hat\Sigma\mathbf w$ in a sample |
+| $\lambda_k$, $\mathbf q_k$, $Q$, $\Lambda$, $\kappa$ | eigenvalues $\lambda_1\ge\dots\ge\lambda_N$, always subscripted (the multiplier of the variance-maximizing unit vector is one, LM11); unit eigenvectors, each signed so that its entry largest in absolute value is positive (on a tie, the first of the tied entries); $Q=(\mathbf q_1\ \cdots\ \mathbf q_N)$; $\Lambda=\operatorname{diag}(\lambda_1,\dots,\lambda_N)$; condition number, $\lambda_1/\lambda_N$ for a positive definite matrix (LM7's $M/m$) |
+| $L$, $\mathbf z_t$ | Cholesky factor, $\hat\Sigma=LL^{\top}$ with $L$ lower triangular, in a module without leverage, declared; whitened vector $L^{-1}(\mathbf R_t-\bar{\mathbf R})$ |
+| $U$, $S$, $V$, $s_k$ | singular value decomposition $M=USV^{\top}$; singular values $s_1\ge s_2\ge\dots\ge0$ on the diagonal of $S$ (subscripted, so distinct from the sample standard deviation $s$); for data the book decomposes $\tilde X/\sqrt T$, so that $\lambda_k=s_k^2$ |
+| $\mathbf y$, $\hat{\boldsymbol\beta}$, $\hat{\mathbf y}$, $\hat{\boldsymbol\varepsilon}$, $\Pi$ | least squares: response (in a module without yields), coefficients, fitted values, residuals, projection matrix $X(X^{\top}X)^{-1}X^{\top}$ ($P$ stays the price and $H$ the Hessian); the share of variance a fit explains is written "R-squared" in words, never $R^2$, which is a squared return, and a formula may use $\cos^2\theta$ |
+| $M\mathbf x=\mathbf b$ | a linear system; $\mathbf b$ is a vector, in a module without bets |
 
 - Subscripted standard symbols are distinct symbols and may sit beside the table: $D_{\text{mod}}$, $D_{\text{Mac}}$,
   $D_{\mathrm{KL}}$, $a_{n,i}$, $s_{n,i}$, $T_1(x)$.
@@ -192,10 +219,35 @@ for something else.
   at least three are in range, otherwise on month starts (every 1, 2, 3 or 6 months, labelled "Jan 2026", "Apr", …).
   On a numeric axis, `ticks` fixes the tick values and `tickLabels` (one string per tick) replaces their text.
   Format codes: `pct0..pct3`, `bp`, `x0..x2` (multiples), `n0..n5`. At most four series; legend is automatic.
+- Other chart types: add `"type"` to the spec (`"line"` is the default, and the spec above is a line chart). All types
+  need `alt`, share the legend, tooltip, colour tokens and format codes, and are drawn by `Book.chart(host, spec)`.
+  - `"bar"`: `categories` (one text each), `valueLabels`, `x: {label}`, `y: {fmt, tfmt, label, min, max, ticks}`,
+    `series: [{name, color, values, fmt}]`, `ann: [{"type": "hline", y, label}]`. Bars start at zero, several series
+    stand side by side. Category labels that do not fit tilt by 40 degrees (long ones are cut with an ellipsis); with
+    very many categories only every k-th is labelled, and the tooltip names every one. Value labels drop out when they
+    would not fit. Keep to about 30 categories on screen.
+  - `"heatmap"`: `labels` (rows and columns alike) or `rows` and `cols`; `matrix` (one array per row; `null` is a
+    blank cell); `fmt` (cell text, default `n2`), `min` and `max` (default -1 and 1), `scale: false` to hide the colour
+    bar, `scaleFmt`, `valueName` (tooltip). The scale is diverging and centred at 0 (series 1 above, series 2 below).
+    Labels are cut to 16 and 18 characters, to 7 when the cells would be under 10 px, and dropped below that: a matrix
+    larger than about 25 rows loses its labels on a phone, so list the order of rows in the exhibit note.
+  - `"scatter"` and `"vector"` share one drawing routine; a vector diagram has equal scales on both axes (`equal`,
+    default true; `equal: true` widens an author's own `x`/`y` `min`/`max` until the scales match) and dashed
+    `segments`, a scatter plot has free scales and solid `lines`. Keys: `x`, `y` (`label`, `fmt`, `tfmt`, `min`, `max`,
+    `ticks`, `name` for the tooltip), `series: [{name, color, x, y, labels, r}]` (points), `points: [{at, label, color,
+    r, dx, dy}]`, `lines` and `segments: [{from, to, extend, dash, color, width, label}]`, `vectors: [{from, to, label,
+    color, width, dash, dx, dy}]` (arrows; `from` defaults to the origin), `ellipses: [{center, cov, scale, color,
+    fill, axes, label}]` (the contour x'S^-1 x = scale^2 of a positive semi-definite 2x2 `cov`; anything else fails).
+- Series names, categories and labels may mark `a_1` and `x_{ij}` as subscripts and `A^T` and `x^{2}` as superscripts:
+  in legends and tooltips of every chart type, in the text drawn on bar, heatmap, scatter and vector charts, and in
+  line-chart end labels (not in a line chart's axis titles or annotations). A `^` or `_` followed by anything but a
+  letter, digit or `{...}` (as in `e^(-2t)`) stays as typed.
+- `build.py` refuses a chart spec without a non-empty `alt` string, or one that is not strict JSON: write a missing
+  point as `null`, never `NaN`. A spec the browser cannot draw leaves a one-line note and the other charts alone.
 - Chart text (legends, labels, end labels) uses no combining marks: the chart font has no Greek, so a hat drifts off
   its letter (write "sample mean", or keep μ̂ for the exhibit note, which renders in the body font).
 - Code blocks keep lines to 80 characters: longer lines are cut off at A4 print width.
-- Widgets use `Book.lineChart(host, spec)` and `Book.fmt(v, code)` from `src/assets/book.js`; they must render a
+- Widgets use `Book.chart(host, spec)` (or `Book.lineChart`) and `Book.fmt(v, code)` from `src/assets/book.js`; they must render a
   meaningful initial state (it is what the PDF shows) and must not depend on external libraries.
 
 ## 8. Data
@@ -261,7 +313,11 @@ Standard wording, the same in every module (FinMind's licence forbids redistribu
    shrunk PDF is too low; `build/qa/print_width.py <html>` lists what sticks out.
 7. From Volume II, the §1 counts hold: at most 6,000 words of prose, no sentence over 30 words, an average under 16,
    no paragraph over 80 words; in every volume, nothing after an inline formula that §1's formula-punctuation rule
-   does not allow.
+   does not allow. `uv run python build/qa/style.py src/lmNN.md` checks all of this and lists the 25–30-word
+   sentences for a second look.
+8. From Volume II, no display formula needs sideways scrolling on a phone: `uv run python build/qa/display_scroll.py
+   dist/preview/lm/lmNN.html 400` (`overflow.py` cannot see a display that scrolls inside its own box). Volume I's
+   displays that scroll inside their own box (92 at 400 px) are accepted; TODO lists their clean-up as optional.
 
 ## 11. Review and publishing
 

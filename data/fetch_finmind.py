@@ -7,11 +7,22 @@ count and a SHA-256 of the file. A re-fetch must reproduce the file byte for byt
 the new file is written next to the old path as <name>.new and the script exits with status 1, so the book's numbers
 never change silently.
 
+A fetch never stops at the first failing entry (for example a dataset that your FinMind plan does not cover, a
+network timeout or a dropped connection): any exception is logged with its type and message, the run goes on, and a
+summary of the failed entries is printed at the end with exit status 1. An answer with no rows where the manifest
+expects rows counts as failed too (usually the plan or the dataset access, not a revision of the data). The run pauses
+after a failure as after a success, and stops early, with the summary, after 25 failures in a row or when FinMind
+reports that the request quota ("upper limit") is used up. Re-run to retry; entries that already match are skipped.
+--verify and --add behave as before.
+
     export FINMIND_TOKEN=...                     # your FinMind API token
     uv run python data/fetch_finmind.py                # fetch missing or changed files, verify all
     uv run python data/fetch_finmind.py --verify       # verify local files only (no network)
     uv run python data/fetch_finmind.py --only 00679B  # restrict to manifest paths containing a substring
-    uv run python data/make_lab_data.py                # then rebuild every lab's data/ folder
+    uv run python data/fetch_finmind.py --exclude sectors_close/   # skip paths containing a substring (repeatable),
+                                                       # e.g. on FinMind's free plan, which lacks that dataset
+    uv run python data/make_lab_data.py                # then rebuild every lab's data/ folder (needs Volume I's
+                                                       # files: data/raw/*.csv and data/raw/lm06/)
 
 Register a new raw file (after verifying it with data/check_chunk.py). --add re-fetches the query (it needs
 FINMIND_TOKEN) and refuses to register it unless the result matches the file byte for byte: FinMind's labels differ
@@ -24,6 +35,15 @@ session without API access; run the full fetch in a clean checkout before relyin
 Columns are kept under the FinMind names unless mapped with --map out=source (for example
 --map cash_dividend=stock_and_cache_dividend). Daily data can also come through the FinMind MCP server in windows
 under 500 rows; intraday datasets need this script (one day per request).
+
+A dataset that accepts only a start date (TaiwanStockEvery5SecondsIndex answers "we only send one day data, so
+end_date parameter need be none") is registered by leaving out --end: the manifest entry then has "end_date": null and
+the request carries no end_date, so the response is that one day. Always pass --data-id: without it the request returns
+every series of the day (about 200,000 rows). --filter then keeps the one row you need:
+
+    uv run python data/fetch_finmind.py --add sectors_close/Semiconductor__2025-06-11.csv \
+        --dataset TaiwanStockEvery5SecondsIndex --data-id Semiconductor --start 2025-06-11 \
+        --filter time=^13:30:00$ --filter kind=^twse$
 """
 import argparse
 import csv
@@ -34,6 +54,7 @@ import os
 import re
 import sys
 import time
+import urllib.error
 import urllib.parse
 import urllib.request
 from pathlib import Path
@@ -43,6 +64,8 @@ RAW = ROOT / "data" / "raw"
 MANIFEST = ROOT / "data" / "raw_manifest.json"
 LOCK = ROOT / "data" / "raw_manifest.lock"
 API ="https://api.finmindtrade.com/api/v4/data"
+PAUSE = 0.7                                                # seconds between requests, far below the hourly API limit
+MAX_CONSECUTIVE_FAILURES = 25
 
 def sha256(b: bytes) -> str:
     return hashlib.sha256(b).hexdigest()
@@ -82,13 +105,21 @@ def fmt(value, kind):
     return str(value)
 
 def fetch(entry, token):
-    params = {"dataset": entry["dataset"], "start_date": entry["start_date"], "end_date": entry["end_date"]}
+    params = {"dataset": entry["dataset"], "start_date": entry["start_date"]}
+    if entry.get("end_date"):                              # null/absent: the dataset takes a start date only
+        params["end_date"] = entry["end_date"]
     if entry.get("data_id"):
         params["data_id"] = entry["data_id"]
     url = API + "?" + urllib.parse.urlencode({**params, "token": token})
     req = urllib.request.Request(url, headers={"Authorization": f"Bearer {token}", "User-Agent": "calculus-to-kelly"})
-    with urllib.request.urlopen(req, timeout=120) as r:
-        payload = json.loads(r.read().decode("utf-8"))
+    try:
+        with urllib.request.urlopen(req, timeout=120) as r:
+            payload = json.loads(r.read().decode("utf-8"))
+    except urllib.error.HTTPError as e:                    # FinMind explains a refusal in the body (plan, quota, ...)
+        body = e.read().decode("utf-8", "replace")[:300]
+        raise RuntimeError(f"{entry['path']}: HTTP {e.code} {e.reason}: {body}") from e
+    if not isinstance(payload, dict):
+        raise TypeError(f"{entry['path']}: unexpected answer from FinMind: {str(payload)[:100]}")
     if payload.get("status") not in (200, None) or "data" not in payload:
         raise RuntimeError(f"{entry['path']}: FinMind returned {payload.get('status')} {payload.get('msg')}")
     return payload["data"]
@@ -147,6 +178,8 @@ def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--verify", action="store_true", help="check local files against the manifest; no network")
     ap.add_argument("--only", default="", help="only manifest paths containing this substring")
+    ap.add_argument("--exclude", action="append", default=[], metavar="SUBSTR",
+                    help="skip manifest paths containing this substring (repeatable)")
     ap.add_argument("--add", help="register an existing data/raw file (path relative to data/raw)")
     ap.add_argument("--dataset"); ap.add_argument("--data-id", default="")
     ap.add_argument("--start"); ap.add_argument("--end")
@@ -157,7 +190,10 @@ def main():
     args = ap.parse_args()
     if args.add:
         return add(args)
-    entries = [e for e in load_manifest()["files"] if args.only in e["path"]]
+    if "" in args.exclude:
+        ap.error("--exclude needs a non-empty substring (an empty one matches every path)")
+    entries = [e for e in load_manifest()["files"]
+               if args.only in e["path"] and not any(x in e["path"] for x in args.exclude)]
     if args.verify:
         bad = [e["path"] for e in entries if not verify_local(e)]
         for e in entries:
@@ -167,20 +203,72 @@ def main():
     if not token:
         raise SystemExit("set FINMIND_TOKEN to your FinMind API token")
     changed = 0
-    for e in entries:
+    fetched: list[str] = []
+    failed: list[tuple[str, str]] = []
+    run = 0                                                # consecutive failures
+    stop_reason = ""
+    left = 0
+    for k, e in enumerate(entries):
         if verify_local(e):
             print(f"ok      {e['path']}"); continue
-        data, n = render(e, fetch(e, token))
+        try:
+            data, n = render(e, fetch(e, token))
+            if n == 0 and e["rows"] > 0:                   # no rows is a refusal, not a revision of the data
+                raise RuntimeError(f"{e['path']}: FinMind returned no rows where the manifest expects {e['rows']}; "
+                                   "likely cause: your FinMind plan does not cover this dataset, or the token lacks access to it")
+        except Exception as exc:  # noqa: BLE001  one bad entry must not stop the run (Ctrl-C still does)
+            msg = " ".join(f"{type(exc).__name__}: {exc}".split())
+            failed.append((e["path"], msg))
+            run += 1
+            print(f"FAILED  {e['path']}: {msg}")
+            if "upper limit" in msg.lower():
+                stop_reason = "FinMind reports that the request quota (upper limit) is used up"
+            elif run >= MAX_CONSECUTIVE_FAILURES:
+                stop_reason = f"{run} failures in a row"
+            if stop_reason:
+                left = sum(1 for x in entries[k + 1:] if not verify_local(x))
+                break
+            time.sleep(PAUSE)                              # a failure costs a request too
+            continue
+        run = 0
         out = RAW / e["path"]; out.parent.mkdir(parents=True, exist_ok=True)
         if sha256(data) == e["sha256"]:
-            out.write_bytes(data); print(f"fetched {e['path']} ({n} rows)")
+            out.write_bytes(data); fetched.append(e["path"]); print(f"fetched {e['path']} ({n} rows)")
         else:
             Path(str(out) + ".new").write_bytes(data); changed += 1
             print(f"CHANGED {e['path']}: {n} rows vs {e['rows']} in the manifest; written as {out.name}.new")
-        time.sleep(0.7)                                    # stay far below the hourly API limit
+        time.sleep(PAUSE)                                  # stay far below the hourly API limit
+    if stop_reason:
+        print(f"\nSTOPPED EARLY: {stop_reason}; {left} further entries were not tried. "
+              "Check the plan and token (or wait for the quota to reset) and re-run: matching entries are skipped.")
+    if failed:
+        print(f"\n{len(failed)} of {len(entries)} entries failed to fetch:")
+        for path, msg in failed:
+            print(f"  {path}: {msg}")
+    problems = []
     if changed:
-        sys.exit(f"{changed} file(s) differ from the manifest: inspect the .new files before replacing anything")
-    print("data/raw matches the manifest; next: uv run python data/make_lab_data.py")
+        problems.append(f"{changed} file(s) differ from the manifest: inspect the .new files before replacing anything")
+    if failed:
+        problems.append(f"{len(failed)} entries could not be fetched (listed above)")
+    if problems:
+        sys.exit("; ".join(problems))
+    if args.only or args.exclude:
+        print(f"{len(entries)} entries selected: {len(fetched)} fetched in this run, {len(entries) - len(fetched)} "
+              "already matched; the other manifest entries were left out by --only/--exclude."
+              + (" Fetched now:" if fetched else ""))
+        for p in fetched:
+            print(f"  {p}")
+        # make_lab_data.py reads Volume I's files only: the top level of data/raw and data/raw/lm06/
+        need = [e["path"] for e in load_manifest()["files"]
+                if ("/" not in e["path"] or e["path"].startswith("lm06/")) and not verify_local(e)]
+        if need:
+            print(f"make_lab_data.py needs {len(need)} more of Volume I's files (data/raw/*.csv, data/raw/lm06/): run "
+                  "fetch_finmind.py with no --only and no --exclude (on the free plan: --exclude sectors_close/ only) "
+                  "before it.")
+        else:
+            print("Volume I's files are complete; next: uv run python data/make_lab_data.py")
+    else:
+        print("data/raw matches the manifest; next: uv run python data/make_lab_data.py")
 
 if __name__ == "__main__":
     main()

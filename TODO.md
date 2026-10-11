@@ -5,7 +5,8 @@
 ## Where things stand
 
 - **Volume I is published (edition 0.2, 2026-10-11).** LM1–LM7 are on the site (`docs/`) with A4 PDFs and executed
-  labs. Each module went through an independent review, a verifier, the editor's gates (a blind solve of every
+  labs. Edition 0.2.1 adds the reordered Volumes V–VII, Volume I's punctuation fixes, and the Getting Started and
+  Research hygiene pages. Each module went through an independent review, a verifier, the editor's gates (a blind solve of every
   question with a key check, and a full audit of its numbers from `data/raw/`), revision rounds and a closing
   verification. Every finding in [`reviews/`](reviews/README.md) is verified fixed, except LM1's V12, withdrawn on the
   owner's clarification of 2026-10-11. The records hold the decisions; `project/PITFALLS.md` holds the lessons.
@@ -32,40 +33,32 @@
 The owner approved the tooling, the data pipeline and the repository process on 2026-10-11. Scope and module plan:
 `plans/ROADMAP.md` and, once written, `plans/vol-2.md`.
 
-**Stage 1, before any writer starts.**
+**Stage 1, before any writer starts.** Done on 2026-10-11; every item had a fresh Opus check and the editor's
+re-check of each fix.
 
-1. **Data.** Done (`01d3bb8`): 403 files under `data/raw/sectors/`, TAIEX and the 30 TWSE sector indices,
-   2007-07-02 → 2026-10-08. **Still to do:** FinMind copies one day's values onto other dates in the sector series
-   (`data/README.md`, PITFALLS §3), so register the 13:30:00 closes of `TaiwanStockEvery5SecondsIndex` for every
-   flagged date (one query per date for the 18 dates where every sector is wrong, one per sector otherwise; this
-   needs `fetch_finmind.py` to omit `end_date` for that dataset), and write `data/vol2_series.py`, which replaces the
-   flagged closes and stops on any close it cannot explain, as `build_series.py` does.
-2. **Anchor numbers.** First pass done (`data/vol2_anchors.py`, which dropped the bad closes instead of repairing
-   them); rerun on the repaired series. A second agent recomputes every number the briefs quote with independent
-   code.
-3. **Notation.** Extend AUTHORING §6 for vectors and matrices before the briefs: bold column vectors, matrices as plain
-   capitals, $^{\top}$ only, a generic matrix that is not $A$ (the annualization factor), a Cholesky factor that is not
-   $L$ (leverage), eigenvalues $\lambda_k$ always subscripted, $\hat\Sigma$ dividing by $T$ (`ddof=0`), checked against
-   every Volume I notation note.
-4. **Tooling** (owner-approved): bar, heatmap, scatter and vector-diagram charts in `src/assets/book.js`;
-   `build/qa/style.py` for the AUTHORING §1 counts and formula punctuation (then name it in §10 item 7); a 400 px
-   check for display formulas that scroll (today's `overflow.py` skips scrolling boxes); `data/make_lab_data.py` for
-   several series; a vector/matrix row in the front page's notation table. A fresh Opus agent reviews each piece.
-5. **Volume I punctuation.** Rewrite the 15 spots where a hyphen or a fullwidth `；` `：` follows an inline formula
-   (hyphens: lm01:79, lm03:22, lm03:396, lm05:335; `；`: lm01:279, lm05:191 twice, lm05:430; `：`: lm01:578, lm02:511,
-   lm05:271, lm05:372, lm05:532, lm07:133, lm07:572) by AUTHORING §1's formula-punctuation rule; `style.py` finds none
-   left; a fresh check; rebuild `docs/` and the PDFs.
-6. **Briefs.** `plans/vol-2.md` in the format given in ROADMAP ("Brief format"), within its "Module boundaries"
-   table. A fresh Opus agent checks the briefs.
-7. **Renumbering and two new pages** (owner, 2026-10-11, after a review by Codex). Volumes V–VII reordered and
-   LM27–LM40 renumbered (ROADMAP; edition 0.2.1 in the syllabus): applied to the syllabus, the front page's map,
-   Volume I's references and leads, the LM7 lab, AUTHORING, SPEC and `plans/vol-1.md`; rebuild `docs/` and the
-   PDFs with item 5, then a fresh check of every Volume I change. Add a **Getting Started** page (prerequisites,
-   environment and FinMind token, data semantics, the book's conventions, reproducibility, a ten-minute smoke test in
-   a code block) and a **Research hygiene** page (point-in-time data, chronological splits, selection kept apart from
-   evaluation, costs inside the strategy, the universe and data policy fixed in advance, results labelled
-   descriptive, in-sample, stability or out-of-sample); every module that estimates, selects or backtests carries a
-   short local note pointing to it.
+1. **Data.** 403 files under `data/raw/sectors/` (TAIEX and the 30 TWSE sector indices, 2007-07-02 → 2026-10-08).
+   FinMind serves copied values in that series (PITFALLS §3), so 561 closes under `data/raw/sectors_close/` (the
+   13:30:00 value of `TaiwanStockEvery5SecondsIndex`) replace them and 52 files under `data/raw/taiex_close/` confirm
+   TAIEX; `data/vol2_series.py` builds `data/processed/vol2_closes.parquet` and stops on anything it cannot explain.
+   A free-plan reader skips `sectors_close/` with `fetch_finmind.py --exclude`. An independent check compared 640
+   closes on extreme days with the 13:30:00 values: all match, and GlassCeramic's high volatility is real.
+2. **Anchor numbers.** `plans/vol-2-anchors.md`, recomputed by independent code; its corrections are applied and each
+   module's status line records them.
+3. **Notation.** AUTHORING §6 has the vectors-and-matrices table and the $L$ and $\lambda$ rows.
+4. **Tooling.** Bar, heatmap, scatter and vector charts in `src/assets/book.js`, with build gates; `build/qa/style.py`
+   (AUTHORING §1 counts and formula punctuation) and `build/qa/display_scroll.py` (§10 items 7 and 8); the notation
+   row on the front page. **Left for Stage 2:** `data/make_lab_data.py` must export the sector closes (and the repair
+   rule's inputs) to each Volume II lab's `data/` folder, and run without `sectors_close/`; `book.js` measures chart
+   labels before the web fonts load (a label's width can be off by up to about 13 px, enough to cross an edge), so
+   redraw the charts on `document.fonts.ready` before the first Volume II scatter or vector chart is published.
+5. **Volume I punctuation.** The 15 spots are rewritten; `style.py` finds none left.
+6. **Briefs.** `plans/vol-2.md`, from two designs per module and the editor's decisions. Its facts were checked on
+   official pages, software references and bibliographic records (`project/SOURCES.md`), and its Chinese terms come
+   from 樂詞網 (AUTHORING §1).
+7. **Renumbering and two new pages.** Volumes V–VII reordered and LM27–LM40 renumbered (edition 0.2.1): syllabus,
+   front-page map, Volume I's references and leads, the LM7 lab, AUTHORING, SPEC, `plans/vol-1.md`. The **Getting
+   Started** and **Research hygiene** pages are published; every Volume II module that estimates, selects or
+   backtests carries a short note pointing to the second.
 
 **Stage 2, writing.** Five writers in parallel, one module each on its own worktree branch (`vol2/lmNN`), with
 AUTHORING (§1, §6), PITFALLS and the brief up front. First drafts stay under 5,500 words of prose; numbers scripts
@@ -92,6 +85,15 @@ finds nothing (options before the pattern).
   progress note on claude.ai.
 - LM6's Solution with "Stage 1: $D_1,\dots,D_5=11.20,\ 12.544,…$" is one unbreakable inline formula that overflows a
   320 px screen (the gate is 400 px); split it at the commas, then a fresh check.
+- Volume I has 92 display formulas that scroll inside their own box at 400 px (`build/qa/display_scroll.py`; LM1–LM7:
+  8, 15, 14, 10, 19, 9, 17). AUTHORING §10 item 8 applies from Volume II; break the worst with `aligned` if time allows.
+- For the owner (site code): after a click in a long outline, the keyboard's Page Down, Space and End scroll the
+  outline panel, not the page: Chromium scrolls the box that was clicked last, although the link loses the focus on
+  the jump (the behaviour predates 0.2.1). Moving the focus to the target heading (`tabindex="-1"`,
+  `focus({preventScroll: true})`) fixes it in a test: Page Down then scrolls the page.
+- `uv run ruff check data` reports I001 in `data/build_series.py` and `data/check_chunk.py` and B023 in
+  `build_series.py` (a lambda that reads the loop's `divd`; it runs inside the same iteration, so the result is
+  right). Tidy them when those files next change.
 
 ## Then: the remaining volumes
 
