@@ -130,6 +130,10 @@ unless stated.
   at full size. Page counts come only from unshrunk PDFs (`build/qa/pdf_scale.py`, run by `build.sh --pdf`);
   `build/qa/print_width.py` lists what sticks out at 680 px. A wide display formula gets a line break (`gathered`/`aligned`), not a smaller
   font.
+- **A whole-page View Transition is too heavy for the module pages** (2026-10-11). A cross-fade on a theme change
+  snapshots the page first: on KaTeX pages of 20–30 thousand elements that delayed the change, froze a phone-class
+  CPU for close to a second and sent quick second clicks to `<html>`, so they were lost. The theme now changes at
+  once and only the switch animates. A reviewer finds such costs only by timing real clicks on the largest page.
 - **Chrome breaks a line after an inline-block, even before a full stop** (KaTeX's boxes), and a word joiner does not
   stop it. `build.py` wraps the last box of an inline formula followed by punctuation in a nowrap span; it holds
   `. , ; : ! ? ) ] ’ ” " '` and CJK closing punctuation, not `% - –` or fullwidth `；：`.

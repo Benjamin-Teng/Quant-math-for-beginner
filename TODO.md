@@ -34,6 +34,8 @@
 1. **Optional:** refresh the private claude.ai artifact preview (needs a Claude session with the artifact tool);
    update the project progress note on claude.ai.
 2. **Volumes II and III** (below), after the owner's answers to the two decisions above.
+3. **Optional:** LM6's Solution with "Stage 1: $D_1,\dots,D_5=11.20,\ 12.544,…$" is one unbreakable inline formula
+   that overflows a 320 px screen (the gate is 400 px); split it at the commas, then a fresh check.
 
 ## Then: the remaining volumes
 

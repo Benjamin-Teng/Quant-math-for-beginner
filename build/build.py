@@ -48,6 +48,23 @@ PREVIEW = False
 FONTS_LINK = ('<link rel="preconnect" href="https://fonts.googleapis.com">'
               '<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>'
               '<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;700&display=swap">')
+# Theme: set data-theme before the first paint (the reader's saved choice, else the system's), so a light-theme reader
+# never sees a dark flash, and run the switch until book.js (at the end of a page of up to 1.5 MB) takes over.
+# Night sky = dark theme, day sky = light theme.
+THEME_HEAD = ('<script>(function(){var d=document.documentElement,t,m;try{t=localStorage.getItem("ftck-theme")}catch(e){}'
+              'if(t!=="light"&&t!=="dark"){m=window.matchMedia&&matchMedia("(prefers-color-scheme: dark)");'
+              't=m&&m.matches?"dark":"light"}d.setAttribute("data-theme",t);'
+              'document.addEventListener("click",function(e){var b=e.target.closest&&e.target.closest(".theme-toggle");'
+              'if(!b||window.__ftckTheme)return;var n=d.getAttribute("data-theme")==="light"?"dark":"light";'
+              'try{localStorage.setItem("ftck-theme",n)}catch(x){}window.__ftckEarly=n;d.setAttribute("data-theme",n);'
+              'b.setAttribute("aria-checked",n==="light"?"true":"false")})})();</script>')
+THEME_TOGGLE = ('<button class="theme-toggle" type="button" role="switch" aria-checked="false" aria-label="Light theme">'
+                '<span class="tt-track" aria-hidden="true"><span class="tt-sky tt-night"><i class="tt-star"></i>'
+                '<i class="tt-star"></i><i class="tt-star"></i><i class="tt-star"></i></span><span class="tt-sky tt-day">'
+                '<i class="tt-cloud tt-cloud-1"></i><i class="tt-cloud tt-cloud-2"></i></span><span class="tt-knob">'
+                '<i class="tt-moon"></i><i class="tt-sun"></i></span></span></button>'
+                '<script>document.currentScript.previousElementSibling.setAttribute("aria-checked",'
+                'document.documentElement.getAttribute("data-theme")==="light"?"true":"false")</script>')
 
 def set_target(t):
     global TARGET, OUT
@@ -392,6 +409,7 @@ def build_lm(path):
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+{THEME_HEAD}
 <title>LM{n} {html.escape(fm["title"])} · From Calculus to Kelly</title>
 <meta name="description" content="{html.escape(meta["desc"])}">
 <link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
@@ -403,7 +421,7 @@ def build_lm(path):
 <a class="skip" href="#main">Skip to content</a>
 <header class="topbar"><a class="brand" href="../index.html">From Calculus to Kelly<small>量化數理教科書</small></a>
 <span class="crumb">Vol {meta["vol"]} · LM{n} {html.escape(fm["title"])}</span><span class="spacer"></span>
-<button class="rail-toggle" type="button" aria-controls="rail" aria-expanded="false">Contents</button></header>
+{THEME_TOGGLE}<button class="rail-toggle" type="button" aria-controls="rail" aria-expanded="false">Contents</button></header>
 <div class="layout">
 <nav class="rail" id="rail" aria-label="Book contents">{rail(n, "lm")}</nav>
 <main class="page" id="main">{main}</main>

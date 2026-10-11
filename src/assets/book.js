@@ -12,6 +12,53 @@
   };
   Book.store = store;
 
+  /* ---------------- theme (dark / light) ---------------- */
+  // The script in <head> sets data-theme before the first paint (the reader's saved choice, else the system's) and
+  // runs the switch until this file has loaded. A click saves an explicit choice; without one the page follows the
+  // system. The theme changes at once: the switch's own animation shows the change (a whole-page cross-fade froze
+  // the KaTeX-heavy module pages and swallowed quick second clicks).
+  var THEME_KEY = "ftck-theme", root = document.documentElement, chosen = null;   // chosen: if storage is blocked
+  function mq(q) { return window.matchMedia ? window.matchMedia(q) : null; }
+  function systemTheme() { var m = mq("(prefers-color-scheme: dark)"); return m && m.matches ? "dark" : "light"; }
+  function savedTheme() { var s = chosen || store.get(THEME_KEY); return s === "light" || s === "dark" ? s : null; }
+  function theme() { return root.getAttribute("data-theme") || savedTheme() || systemTheme(); }
+  function syncToggles() {
+    var light = theme() === "light";
+    document.querySelectorAll(".theme-toggle").forEach(function (b) {
+      b.setAttribute("aria-checked", light ? "true" : "false");
+      b.title = light ? "Switch to the dark theme" : "Switch to the light theme";
+    });
+  }
+  function setTheme(t) {
+    if (root.getAttribute("data-theme") !== t) root.setAttribute("data-theme", t);
+    syncToggles();
+  }
+  function initTheme() {
+    window.__ftckTheme = true;                       // the head script's early click handler steps aside
+    var early = window.__ftckEarly;                  // a choice clicked before this file loaded
+    if ((early === "light" || early === "dark") && store.get(THEME_KEY) !== early) chosen = early;
+    if (!root.hasAttribute("data-theme")) root.setAttribute("data-theme", savedTheme() || systemTheme());
+    syncToggles();
+    document.querySelectorAll(".theme-toggle").forEach(function (b) {
+      b.addEventListener("click", function () {
+        var t = theme() === "light" ? "dark" : "light";
+        store.set(THEME_KEY, t);
+        chosen = store.get(THEME_KEY) === t ? null : t;   // memory only when storage refuses the write
+        setTheme(t);
+      });
+    });
+    var resync = function () { setTheme(savedTheme() || systemTheme()); };
+    var sys = mq("(prefers-color-scheme: dark)");
+    if (sys) {
+      var follow = function () { if (!savedTheme()) setTheme(systemTheme()); };
+      if (sys.addEventListener) sys.addEventListener("change", follow); else if (sys.addListener) sys.addListener(follow);
+    }
+    // Back/Forward restores a page with its old theme, and another tab may change the choice meanwhile
+    window.addEventListener("pageshow", function (e) { if (e.persisted) resync(); });
+    window.addEventListener("storage", function (e) { if (e.key === THEME_KEY || e.key === null) { chosen = null; resync(); } });
+  }
+  Book.setTheme = setTheme;
+
   /* ---------------- number formatting ---------------- */
   function fmt(v, f) {
     if (v == null || !isFinite(v)) return "—";
@@ -292,7 +339,7 @@
   }
   Book.layoutTags = layoutTags;
   Book.A4_TEXT_WIDTH = A4_TEXT_WIDTH;
-  function printing() { return !!(window.matchMedia && window.matchMedia("print").matches); }
+  function printing() { var m = mq("print"); return !!(m && m.matches); }
 
   function initWidgets() {
     document.querySelectorAll("[data-widget]").forEach(function (h) {
@@ -339,7 +386,7 @@
   function selectPre(pre) { var r = document.createRange(); r.selectNodeContents(pre); var s = window.getSelection(); s.removeAllRanges(); s.addRange(r); }
 
   function boot() {
-    chrome(); renderCharts(); initWidgets(); layoutTags();
+    initTheme(); chrome(); renderCharts(); initWidgets(); layoutTags();
     if (document.fonts && document.fonts.ready) document.fonts.ready.then(function () { if (!printing()) layoutTags(); });
     var lastW = window.innerWidth, t;
     window.addEventListener("resize", function () {

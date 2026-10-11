@@ -150,6 +150,7 @@ def build():
     notation_html = "".join(f"<tr><td>{a}</td><td>{esc(b)}</td></tr>" for a, b in notation)
     rail = B.rail(0, "root")
     body = f"""<title>From Calculus to Kelly</title>
+{B.THEME_HEAD}
 {B.FONTS_LINK}
 <link rel="stylesheet" href="assets/katex/katex.min.css">
 <link rel="stylesheet" href="assets/book.css">
@@ -214,7 +215,7 @@ table.toc .lm-d {{ color: var(--ink-2); font-size: 0.86rem; margin-top: 0.1rem; 
 <a class="skip" href="#main">Skip to content</a>
 <header class="topbar"><a class="brand" href="index.html">From Calculus to Kelly<small>量化數理教科書</small></a>
 <span class="crumb">Contents and roadmap</span><span class="spacer"></span>
-<button class="rail-toggle" type="button" aria-controls="rail" aria-expanded="false">Contents</button></header>
+{B.THEME_TOGGLE}<button class="rail-toggle" type="button" aria-controls="rail" aria-expanded="false">Contents</button></header>
 <div class="layout">
 <nav class="rail" id="rail" aria-label="Book contents">{rail}</nav>
 <main class="page" id="main">

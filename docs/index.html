@@ -6,6 +6,7 @@
 <meta name="description" content="A nine-volume quantitative curriculum from first-year calculus, statistics and linear algebra to statistical modeling, portfolio optimization and Kelly leverage.">
 <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
 <title>From Calculus to Kelly</title>
+<script>(function(){var d=document.documentElement,t,m;try{t=localStorage.getItem("ftck-theme")}catch(e){}if(t!=="light"&&t!=="dark"){m=window.matchMedia&&matchMedia("(prefers-color-scheme: dark)");t=m&&m.matches?"dark":"light"}d.setAttribute("data-theme",t);document.addEventListener("click",function(e){var b=e.target.closest&&e.target.closest(".theme-toggle");if(!b||window.__ftckTheme)return;var n=d.getAttribute("data-theme")==="light"?"dark":"light";try{localStorage.setItem("ftck-theme",n)}catch(x){}window.__ftckEarly=n;d.setAttribute("data-theme",n);b.setAttribute("aria-checked",n==="light"?"true":"false")})})();</script>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;700&display=swap">
 <link rel="stylesheet" href="assets/katex/katex.min.css">
 <link rel="stylesheet" href="assets/book.css">
@@ -72,7 +73,7 @@ table.toc .lm-d { color: var(--ink-2); font-size: 0.86rem; margin-top: 0.1rem; }
 <a class="skip" href="#main">Skip to content</a>
 <header class="topbar"><a class="brand" href="index.html">From Calculus to Kelly<small>量化數理教科書</small></a>
 <span class="crumb">Contents and roadmap</span><span class="spacer"></span>
-<button class="rail-toggle" type="button" aria-controls="rail" aria-expanded="false">Contents</button></header>
+<button class="theme-toggle" type="button" role="switch" aria-checked="false" aria-label="Light theme"><span class="tt-track" aria-hidden="true"><span class="tt-sky tt-night"><i class="tt-star"></i><i class="tt-star"></i><i class="tt-star"></i><i class="tt-star"></i></span><span class="tt-sky tt-day"><i class="tt-cloud tt-cloud-1"></i><i class="tt-cloud tt-cloud-2"></i></span><span class="tt-knob"><i class="tt-moon"></i><i class="tt-sun"></i></span></span></button><script>document.currentScript.previousElementSibling.setAttribute("aria-checked",document.documentElement.getAttribute("data-theme")==="light"?"true":"false")</script><button class="rail-toggle" type="button" aria-controls="rail" aria-expanded="false">Contents</button></header>
 <div class="layout">
 <nav class="rail" id="rail" aria-label="Book contents"><a class="home" href="index.html">Contents &amp; roadmap</a>
 <h2>Vol I · Calculus for Finance</h2><ol>

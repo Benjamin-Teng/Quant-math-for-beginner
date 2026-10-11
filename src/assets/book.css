@@ -29,7 +29,7 @@
   --surface: #ffffff;
   --ink: #15181c;
   --ink-2: #3b4148;
-  --muted: #69707a;
+  --muted: #606873;
   --rule: #d6dbe0;
   --rule-soft: #e6e9ec;
   --panel: #edf0f3;          /* grey example plate */
@@ -46,11 +46,12 @@
   --good-soft: #e5f3ea;
   --bad: #b42323;
   --focus: #1c5aa6;
+  --current-mark: transparent;   /* the rail's current module: its black bar is enough in light */
   /* charts */
-  --series-1: #2a78d6; --series-2: #eb6834; --series-3: #1baf7a; --series-4: #6250d6;
+  --series-1: #2a78d6; --series-2: #eb6834; --series-3: #179c6d; --series-4: #6250d6;
   --grid: #e3e6e9; --axis: #b9c0c7; --chart-surface: #ffffff;
   /* code */
-  --code-bg: #f1f3f5; --tok-kw: #7a3e9d; --tok-str: #1f6f43; --tok-num: #a64b00; --tok-com: #6b7480;
+  --code-bg: #f1f3f5; --tok-kw: #7a3e9d; --tok-str: #1f6f43; --tok-num: #a64b00; --tok-com: #646c78;
   --tok-fn: #1c5aa6; --tok-op: #3b4148; --tok-bi: #0f6b75;
   /* type */
   --f-body: "Source Serif 4", "Noto Serif TC", Georgia, "Times New Roman", serif;
@@ -60,33 +61,40 @@
   --fs-body: 1.0625rem;
   --lh-body: 1.62;
   --measure: 46rem;
+  --ease-out: cubic-bezier(0.23, 1, 0.32, 1);        /* entrances */
+  --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);    /* movement on screen */
   color-scheme: light;
 }
-@media (prefers-color-scheme: dark) {
+/* Dark: midnight ink, a deep blue-slate with chalk-grey text (body text 12:1, not the glare of near-black and
+   white). The page script in <head> sets data-theme from the reader's choice or the system; the media query
+   covers pages without scripts. Screen only: print and the PDFs always use the light palette. */
+@media screen and (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
-    --paper: #0f1113; --surface: #16191c; --ink: #e7e9ec; --ink-2: #c3c8ce; --muted: #9299a2;
-    --rule: #2c3238; --rule-soft: #22272c; --panel: #1b1f23; --panel-head: #252a30;
-    --bar: #2a3037; --bar-ink: #f3f5f7; --accent: #7cb2f4; --accent-soft: #17283c;
-    --seal: #f08a62; --seal-soft: #2a1a14; --amber: #e3ab4a; --amber-soft: #2a2112;
-    --good: #5bd08a; --good-soft: #132a1c; --bad: #ff7b7b; --focus: #7cb2f4;
-    --series-1: #3987e5; --series-2: #d95926; --series-3: #199e70; --series-4: #9085e9;
-    --grid: #262b30; --axis: #3d444b; --chart-surface: #16191c;
-    --code-bg: #1a1e22; --tok-kw: #d0a2f0; --tok-str: #8fd6a7; --tok-num: #f2b36b; --tok-com: #87909a;
-    --tok-fn: #8cc0ff; --tok-op: #c3c8ce; --tok-bi: #6fd3dc;
+    --paper: #141a26; --surface: #1a2130; --ink: #d3d8e1; --ink-2: #b3bac7; --muted: #8f98a8;
+    --rule: #2f3849; --rule-soft: #252d3c; --panel: #1f2737; --panel-head: #283043;
+    --bar: #252e40; --bar-ink: #e6e9ef; --accent: #8db6ee; --accent-soft: #1e2c44;
+    --seal: #e79377; --seal-soft: #2c2026; --amber: #d9ae62; --amber-soft: #2b2619;
+    --good: #73c597; --good-soft: #17291f; --bad: #ef8b8b; --focus: #8db6ee;
+    --series-1: #4f8fe0; --series-2: #dd6c3f; --series-3: #2aa57a; --series-4: #9a8ff0;
+    --grid: #273041; --axis: #455063; --chart-surface: #1a2130;
+    --code-bg: #1a2131; --tok-kw: #c9a6ee; --tok-str: #92cda8; --tok-num: #e6b578; --tok-com: #8a93a3;
+    --tok-fn: #93bcf2; --tok-op: #b3bac7; --tok-bi: #78c7cf; --current-mark: var(--accent);
     color-scheme: dark;
   }
 }
-:root[data-theme="dark"] {
-  --paper: #0f1113; --surface: #16191c; --ink: #e7e9ec; --ink-2: #c3c8ce; --muted: #9299a2;
-  --rule: #2c3238; --rule-soft: #22272c; --panel: #1b1f23; --panel-head: #252a30;
-  --bar: #2a3037; --bar-ink: #f3f5f7; --accent: #7cb2f4; --accent-soft: #17283c;
-  --seal: #f08a62; --seal-soft: #2a1a14; --amber: #e3ab4a; --amber-soft: #2a2112;
-  --good: #5bd08a; --good-soft: #132a1c; --bad: #ff7b7b; --focus: #7cb2f4;
-  --series-1: #3987e5; --series-2: #d95926; --series-3: #199e70; --series-4: #9085e9;
-  --grid: #262b30; --axis: #3d444b; --chart-surface: #16191c;
-  --code-bg: #1a1e22; --tok-kw: #d0a2f0; --tok-str: #8fd6a7; --tok-num: #f2b36b; --tok-com: #87909a;
-  --tok-fn: #8cc0ff; --tok-op: #c3c8ce; --tok-bi: #6fd3dc;
-  color-scheme: dark;
+@media screen {
+  :root[data-theme="dark"] {
+    --paper: #141a26; --surface: #1a2130; --ink: #d3d8e1; --ink-2: #b3bac7; --muted: #8f98a8;
+    --rule: #2f3849; --rule-soft: #252d3c; --panel: #1f2737; --panel-head: #283043;
+    --bar: #252e40; --bar-ink: #e6e9ef; --accent: #8db6ee; --accent-soft: #1e2c44;
+    --seal: #e79377; --seal-soft: #2c2026; --amber: #d9ae62; --amber-soft: #2b2619;
+    --good: #73c597; --good-soft: #17291f; --bad: #ef8b8b; --focus: #8db6ee;
+    --series-1: #4f8fe0; --series-2: #dd6c3f; --series-3: #2aa57a; --series-4: #9a8ff0;
+    --grid: #273041; --axis: #455063; --chart-surface: #1a2130;
+    --code-bg: #1a2131; --tok-kw: #c9a6ee; --tok-str: #92cda8; --tok-num: #e6b578; --tok-com: #8a93a3;
+    --tok-fn: #93bcf2; --tok-op: #b3bac7; --tok-bi: #78c7cf; --current-mark: var(--accent);
+    color-scheme: dark;
+  }
 }
 
 /* ---------- base ---------- */
@@ -112,12 +120,81 @@ hr { border: 0; border-top: 1px solid var(--rule); margin-block: 2rem; }
   gap: 0.75rem; padding: 0.55rem 1rem; background: color-mix(in srgb, var(--paper) 92%, transparent);
   backdrop-filter: blur(8px); border-bottom: 1px solid var(--rule); font-family: var(--f-head); }
 .topbar .brand { font-weight: 700; font-stretch: 85%; letter-spacing: 0.01em; color: var(--ink); text-decoration: none;
-  font-size: 0.98rem; white-space: nowrap; }
+  font-size: 0.98rem; white-space: nowrap; min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+@media (max-width: 520px) { .topbar .brand small { display: none; } }   /* room for the theme switch and Contents */
+@media (max-width: 360px) {
+  .topbar { gap: 0.5rem; padding-inline: 0.75rem; }
+  .rail-toggle { padding-inline: 0.5rem; }
+  .topbar .brand { font-size: 0.88rem; }
+}
 .topbar .brand small { font-weight: 500; color: var(--muted); font-stretch: 100%; margin-left: 0.4rem; }
 .topbar .crumb { color: var(--muted); font-size: 0.85rem; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .topbar .spacer { flex: 1; }
 .rail-toggle { display: none; font: inherit; font-size: 0.85rem; font-weight: 600; border: 1px solid var(--rule);
   background: var(--surface); color: var(--ink); border-radius: 6px; padding: 0.3rem 0.65rem; cursor: pointer; }
+
+/* ---------- theme switch: night sky (dark theme) / day sky (light theme) ---------- */
+.theme-toggle { display: none; appearance: none; background: none; border: 0; margin: -0.5rem 0; padding: 0.5rem 0.15rem;
+  line-height: 0; color: inherit; cursor: pointer; border-radius: 999px; }
+:root[data-theme] .theme-toggle { display: inline-block; }       /* the page script ran: the switch works */
+.theme-toggle:focus-visible { outline: none; }
+.theme-toggle:focus-visible .tt-track { outline: 2px solid var(--focus); outline-offset: 2px; }   /* ring hugs the track */
+.tt-track { position: relative; display: block; width: 3.25rem; height: 1.75rem; border-radius: 999px; overflow: hidden;
+  isolation: isolate; box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.45), 0 0 0 1px var(--muted);
+  transition: box-shadow 150ms ease; }
+.tt-sky { position: absolute; inset: 0; transition: opacity 260ms ease; }
+.tt-night { background: linear-gradient(170deg, #0b1228 0%, #17234a 60%, #22336a 100%); transition: opacity 0s; }
+/* the night sky stays opaque under the day sky while it fades, so the bar never shows through mid-way */
+.tt-day { background: linear-gradient(170deg, #3d8fe0 0%, #6db4f2 55%, #a7d8ff 100%); opacity: 0; }
+.tt-star { position: absolute; border-radius: 50%; background: #fff;
+  transition: opacity 260ms ease, transform 260ms var(--ease-out); }
+.tt-star:nth-child(1) { width: 2px; height: 2px; top: 0.35rem; right: 0.6rem; }
+.tt-star:nth-child(2) { width: 1.5px; height: 1.5px; top: 0.95rem; right: 1.15rem; opacity: 0.75; }
+.tt-star:nth-child(3) { width: 1.5px; height: 1.5px; top: 1.2rem; right: 0.45rem; opacity: 0.85; }
+.tt-star:nth-child(4) { width: 1px; height: 1px; top: 0.45rem; right: 1.45rem; opacity: 0.6; }
+.tt-cloud { position: absolute; background: #fff; border-radius: 999px; opacity: 0; transform: translateY(0.45rem);
+  transition: opacity 260ms ease, transform 260ms var(--ease-out); }
+.tt-cloud::before, .tt-cloud::after { content: ""; position: absolute; background: #fff; border-radius: 50%; }
+.tt-cloud-1 { width: 0.95rem; height: 0.32rem; left: 0.35rem; bottom: 0.3rem; }
+.tt-cloud-1::before { width: 0.44rem; height: 0.44rem; left: 0.12rem; top: -0.26rem; }
+.tt-cloud-1::after { width: 0.34rem; height: 0.34rem; left: 0.44rem; top: -0.16rem; }
+.tt-cloud-2 { width: 0.66rem; height: 0.24rem; left: 0.8rem; bottom: 0.95rem; }
+.tt-cloud-2::before { width: 0.3rem; height: 0.3rem; left: 0.1rem; top: -0.18rem; }
+.tt-cloud-2::after { width: 0.22rem; height: 0.22rem; left: 0.32rem; top: -0.1rem; }
+.tt-knob { position: absolute; top: 0.1875rem; left: 0.1875rem; width: 1.375rem; height: 1.375rem; border-radius: 50%;
+  transition: transform 260ms var(--ease-in-out); }
+.tt-moon, .tt-sun { position: absolute; inset: 0; border-radius: 50%;
+  transition: opacity 200ms ease, transform 260ms var(--ease-out); }
+.tt-moon { background: radial-gradient(circle at 35% 30%, #f6f8fc 0%, #dfe4ef 60%, #c6cddd 100%);
+  box-shadow: 0 0 0.4rem rgba(214, 224, 255, 0.35); transition: opacity 0s, transform 260ms var(--ease-out); }
+.tt-moon::before, .tt-moon::after { content: ""; position: absolute; border-radius: 50%; background: rgba(132, 145, 175, 0.45); }
+.tt-moon::before { width: 0.36rem; height: 0.36rem; top: 0.3rem; left: 0.36rem; }
+.tt-moon::after { width: 0.22rem; height: 0.22rem; top: 0.78rem; left: 0.8rem; }
+.tt-sun { background: radial-gradient(circle at 40% 35%, #fff4b8 0%, #ffd23f 55%, #f6b100 100%);
+  box-shadow: 0 0 0 1px #7a4a00, 0 0 0 0.16rem rgba(255, 214, 64, 0.35), 0 0 0.6rem rgba(255, 190, 40, 0.7);
+  opacity: 0; transform: rotate(-90deg) scale(0.9);
+  transition: opacity 200ms var(--ease-in-out), transform 260ms var(--ease-out); }
+/* day: the knob crosses to the right, the sun replaces the moon, clouds rise in as the stars fade */
+:root[data-theme="light"] .tt-night { opacity: 0; transition-delay: 260ms; }   /* hide once the day sky covers it */
+:root[data-theme="light"] .tt-day { opacity: 1; }
+:root[data-theme="light"] .tt-knob { transform: translateX(1.5rem); }
+:root[data-theme="light"] .tt-moon { opacity: 0; transform: rotate(90deg) scale(0.9); transition-delay: 200ms, 0s; }
+:root[data-theme="light"] .tt-sun { opacity: 1; transform: none; }
+:root[data-theme="light"] .tt-star { opacity: 0; transform: translateY(-0.35rem); }
+:root[data-theme="light"] .tt-cloud { opacity: 1; transform: none; }
+:root[data-theme="light"] .tt-cloud-2 { transition-delay: 40ms; }               /* entrances stagger, exits do not */
+:root[data-theme="dark"] .tt-star:nth-child(2) { transition-delay: 10ms; }
+:root[data-theme="dark"] .tt-star:nth-child(3) { transition-delay: 25ms; }
+:root[data-theme="dark"] .tt-star:nth-child(4) { transition-delay: 40ms; }   /* last star settles at 300 ms */
+@media (hover: hover) and (pointer: fine) {
+  .theme-toggle:hover .tt-track { box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.45), 0 0 0 1px var(--ink-2); }
+}
+/* Windows high contrast drops gradients and shadows: draw a plain framed track and a solid knob instead */
+@media (forced-colors: active) {
+  .tt-track { border: 1px solid ButtonText; }
+  .tt-knob { background: ButtonText; }
+  .tt-moon, .tt-sun, .tt-star, .tt-cloud { display: none; }
+}
 
 /* ---------- layout ---------- */
 .layout { --gutter: 1.25rem; display: grid; grid-template-columns: 16.5rem minmax(0, 1fr) 13.5rem; gap: 0 2.5rem;
@@ -130,9 +207,9 @@ hr { border: 0; border-top: 1px solid var(--rule); margin-block: 2rem; }
 .rail li > a, .rail li > span { display: grid; grid-template-columns: 2.4rem 1fr; gap: 0.3rem; padding: 0.22rem 0.4rem;
   border-radius: 4px; color: var(--ink-2); text-decoration: none; line-height: 1.3; }
 .rail li a:hover { background: var(--panel); color: var(--ink); }
-.rail li > span { color: var(--muted); opacity: 0.72; }
+.rail li > span { color: var(--muted); }
 .rail li .k { font-variant-numeric: tabular-nums; color: var(--muted); font-weight: 600; }
-.rail li a[aria-current="page"] { background: var(--bar); color: var(--bar-ink); }
+.rail li a[aria-current="page"] { background: var(--bar); color: var(--bar-ink); box-shadow: inset 3px 0 0 var(--current-mark); }
 .rail li a[aria-current="page"] .k { color: var(--bar-ink); }
 .rail .home { display: block; font-weight: 700; color: var(--ink); text-decoration: none; margin-bottom: 0.6rem; }
 
@@ -299,7 +376,7 @@ details.co.answer .tag { color: var(--good); }
 .chart .axis line, .chart .axis path { stroke: var(--axis); stroke-width: 1; shape-rendering: crispEdges; }
 .chart .series path.line { fill: none; stroke-width: 2; stroke-linejoin: round; stroke-linecap: round; }
 .chart .series path.area { stroke: none; opacity: 0.1; }
-.chart .zero { stroke: var(--axis); stroke-width: 1.25; }
+.chart .zero { stroke: var(--muted); stroke-width: 1.25; }
 .chart .ann line { stroke: var(--muted); stroke-width: 1; }
 .chart .ann text { fill: var(--ink-2); font-size: 11px; }
 .chart .band { fill: var(--panel); }
@@ -370,9 +447,9 @@ details.co.answer .tag { color: var(--good); }
 .refs a { overflow-wrap: anywhere; }
 
 /* ---------- pager ---------- */
-.pager { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-top: 4rem; border-top: 1px solid var(--rule); padding-top: 1.2rem; font-family: var(--f-head); }
-.pager a, .pager span { display: grid; gap: 0.1rem; text-decoration: none; padding: 0.6rem 0.8rem; border: 1px solid var(--rule); background: var(--surface); }
-.pager span { color: var(--muted); opacity: 0.7; }
+.pager { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 1rem; margin-top: 4rem; border-top: 1px solid var(--rule); padding-top: 1.2rem; font-family: var(--f-head); }
+.pager > a, .pager > span { display: grid; gap: 0.1rem; text-decoration: none; padding: 0.6rem 0.8rem; border: 1px solid var(--rule); background: var(--surface); }
+.pager > span { color: var(--muted); }
 .pager .dir { font-size: 0.7rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); font-weight: 700; }
 .pager .nx { text-align: right; }
 .pager a b { color: var(--ink); font-weight: 700; }
@@ -382,6 +459,12 @@ details.co.answer .tag { color: var(--good); }
 .kbd-note { font-family: var(--f-head); font-size: 0.8rem; color: var(--muted); }
 .toc-volume { margin: 2rem 0; }
 @media (prefers-reduced-motion: reduce) { * { scroll-behavior: auto !important; transition: none !important; animation: none !important; } }
+@media (prefers-reduced-motion: reduce) {
+  .tt-day, .tt-star, .tt-cloud, .tt-sun { transition: opacity 200ms ease !important; }
+  .tt-moon { transition: opacity 0s !important; }
+  :root[data-theme="light"] .tt-moon { transition: opacity 0s 200ms !important; }
+  :root[data-theme="light"] .tt-night { transition: opacity 0s 200ms !important; }
+}
 
 /* ---------- print (PDF export) ---------- */
 @media print {

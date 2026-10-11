@@ -70,9 +70,14 @@ lab notebook that reproduces every number. Details: AUTHORING §4–§5.
 
 - **Type:** Source Serif 4 (body), Archivo (headings and interface), IBM Plex Mono (code), self-hosted as woff2 from
   npm Fontsource; Noto Sans TC (Chinese) from Google Fonts.
-- **Colour tokens** (`src/assets/book.css`, light and dark): paper `#f8f9fa`, ink `#15181c`, accent `#1c5aa6`,
-  seal `#b8360f` (中文導讀), amber (pitfalls, draft chip), grey panel (examples).
-- **Chart palette:** light `#2a78d6`, `#eb6834`, `#1baf7a`, `#6250d6`; dark `#3987e5`, `#d95926`, `#199e70`, `#9085e9`.
+- **Colour tokens** (`src/assets/book.css`): light, ledger paper: paper `#f8f9fa`, ink `#15181c`, accent `#1c5aa6`,
+  seal `#b8360f` (中文導讀), amber (pitfalls, draft chip), grey panel (examples). Dark, midnight ink: paper
+  `#141a26`, ink `#d3d8e1` (body text 12:1, softer than near-black and white; owner, 2026-10-11), accent `#8db6ee`,
+  seal `#e79377`. Print and the PDFs always use the light palette.
+- **Theme switch** (owner, 2026-10-11): a switch in the top bar, a night sky with moon and stars for the dark theme
+  and a day sky with sun and clouds for the light theme. The reader's choice is saved; without one the page follows
+  the system. The theme changes at once and the switch animates itself (CSS transitions, at most 300 ms).
+- **Chart palette:** light `#2a78d6`, `#eb6834`, `#179c6d`, `#6250d6`; dark `#4f8fe0`, `#dd6c3f`, `#2aa57a`, `#9a8ff0`.
 - **Math:** KaTeX 0.16.11 rendered at build time, so formulas need no client-side JavaScript.
 - **Charts and widgets:** the dependency-free `src/assets/book.js` (line charts with hover tooltips, log/linear axes,
   light/dark aware; widgets registered as `Book.widgets.<name>`). Charts are specified in `src/data/*.json`.
