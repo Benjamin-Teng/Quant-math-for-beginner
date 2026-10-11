@@ -47,8 +47,7 @@
       '</div><div class="c3-chart"></div><div class="readout" aria-live="polite"></div>' +
       '<p class="w-note">The sliders set the three correlations of a pairwise matrix ' + CPW + '. The starting values are the constructed example of Section 6: three correlations from three different years (2018, 2023 and 2019), which no single sample can produce. ' +
       'The shaded ellipse is the set where det ' + CPW + ' ≥ 0 for the current ρ₁₂, inside the square of correlations between −1 and 1; the dot is the current (ρ₁₃, ρ₂₃). ' +
-      'The verdict checks all seven principal minors. When ' + CPW + ' is not PSD, the witness is the column x = adj(' + CPW + ')e<sub>j</sub> of the adjugate with the largest 2 × 2 minor, and xᵀ' + CPW + 'x = det ' + CPW + ' · adj(' + CPW + ')<sub>jj</sub> (Practice Problem 7). ' +
-      'Values too small for the decimals shown appear with three significant figures.</p>';
+      'The verdict checks all seven principal minors. When ' + CPW + ' is not PSD, the witness is the column x = adj(' + CPW + ')e<sub>j</sub> of the adjugate with the largest 2 × 2 minor, and xᵀ' + CPW + 'x = det ' + CPW + ' · adj(' + CPW + ')<sub>jj</sub> (Practice Problem 7).</p>';
     var s12 = host.querySelector("#c3-12"), s13 = host.querySelector("#c3-13"), s23 = host.querySelector("#c3-23");
     var chart = host.querySelector(".c3-chart"), out = host.querySelector(".readout");
 

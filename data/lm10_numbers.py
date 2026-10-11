@@ -664,9 +664,10 @@ assert fmt(M3[0][0] * k22 * (k33 - k23**2 / k22), 2) == fmt(det3(M3), 2)  # thei
 print("P6 (printed matrix):", P6)
 show("P6 d1", "The first pivot is $d_1=570.34$")
 show("P6 elimination", "Subtract $261.83/570.34$ times row 1 from row 2, and $162.26/570.34$ times row 1 from row 3")
-show("P6 k22", f"k_{{22}}&=363.73-\\frac{{261.83^2}}{{570.34}}\\\\&={P6['k22']}")
-show("P6 k23", f"k_{{23}}&=191.35-\\frac{{261.83\\times162.26}}{{570.34}}\\\\&={P6['k23']}")
-show("P6 k33", f"k_{{33}}&=283.54-\\frac{{162.26^2}}{{570.34}}\\\\&={P6['k33']}")
+show("P6 rule", "k_{ij}=m_{ij}-m_{i1}m_{1j}/570.34")
+show("P6 K", f"K=\\begin{{pmatrix}}{P6['k22']}&{P6['k23']}\\\\{P6['k23']}&{P6['k33']}\\end{{pmatrix}}")
+show("P6 k22 example", "k_{22}=363.73-261.83^2/570.34")
+show("P6 d2", f"So $d_2={P6['k22']}$")
 show("P6 d3", f"d_3={P6['k33']}-{P6['k23']}^2/{P6['k22']}={P6['d3x']}")
 show("P6 pivots", "The pivots 570.34, 243.53 and 181.30 are all positive")
 anchor("P6 pivots (one-decimal matrix in the anchors)", f"570.34, {fmt(k22, 2)}, {fmt(k33 - k23**2 / k22, 2)}",
