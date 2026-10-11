@@ -2,10 +2,11 @@
 
 Run:  uv run python data/lm08_numbers.py
 
-Inputs: data/raw/ (TX__2025-04-01__2025-10-31.csv, the 0050 and 00679B close chunks, both dividend files and the
-sectors_close/ file names) and data/processed/: vol2_closes.parquet (the repaired sector closes, data/vol2_series.py),
-lm07_returns.parquet (data/lm07_series.py) and etf_daily_returns.parquet (data/build_series.py). The case is computed
-in exact arithmetic (Decimal prices, Fraction returns).
+Inputs: data/raw/ (TX__2025-04-01__2025-10-31.csv, TAIEX__2025-04-01__2025-10-31.csv, the 0050 and 00679B close
+chunks, both dividend files and the sectors_close/ file names), data/raw_manifest.json (the TX file's session filter)
+and data/processed/: vol2_closes.parquet (the repaired sector closes, data/vol2_series.py), lm07_returns.parquet
+(data/lm07_series.py) and etf_daily_returns.parquet (data/build_series.py). The case is computed in exact arithmetic
+(Decimal prices, Fraction returns).
 
 Every quoted value passes two checks (project/PITFALLS.md section 7): its formatted value equals the printed text, and
 the printed text appears in src/lm08.md. A hand calculation is recomputed from the inputs printed next to it, not
@@ -223,6 +224,13 @@ def main() -> None:
     chk("00679B change 7 Apr", P[1][2] - P[0][2], "+.2f", "+0.54")
     chk("TX volume 2 Apr", c["volume"][0], ",d", "66,423")
     chk("TX volume 7 Apr", c["volume"][1], ",d", "2,736")
+    # the volumes are the April contract's regular-session volume: the TX file keeps FinMind's trading_session
+    # "position" rows only (data/raw_manifest.json), one row per contract month, and case() keeps contract 202504
+    man = json.loads((HERE / "raw_manifest.json").read_text(encoding="utf-8"))
+    tx_entry = [e for e in next(iter(man.values())) if e["path"] == "TX__2025-04-01__2025-10-31.csv"]
+    assert len(tx_entry) == 1 and tx_entry[0]["filter"].get("trading_session") == "^position$", tx_entry
+    in_text("The April contract's regular-session volume was 66,423 contracts on 2 April and 2,736 on 7 April",
+            "The April contract's regular-session volume fell from 66,423 contracts on 2 April to 2,736")
     X = week_returns(c)
     chk("R TX 7 Apr", X[0][0], "+.4%", "-9.9972%")
     chk("R 0050 7 Apr", X[0][1], "+.4%", "-10.0000%")
@@ -247,6 +255,16 @@ def main() -> None:
     k = int(np.argmax(np.abs(rt)))
     assert tx_idx["date"][k + 1] == "2025-04-07" and tx_idx["date"][0] == "2007-07-02" and tx_idx["date"][-1] == LAST
     chk("TAIEX fall on 7 Apr (largest |move| 2007-07 .. 2026-10)", -rt[k], ".4%", "9.6997%")
+    # the same fall from the 2025 TAIEX file (retrieved 10 October 2026); the long series was retrieved 11 October
+    t25 = read_chunks("TAIEX__2025-04-01__2025-10-31.csv")
+    r25 = Fraction(Decimal(t25["2025-04-07"][1])) / Fraction(Decimal(t25["2025-04-02"][1])) - 1
+    chk("TAIEX fall on 7 Apr (2025 file)", -r25, ".4%", "9.6997%")
+    assert abs(float(r25) - float(rt[k])) < 1e-12, (float(r25), float(rt[k]))
+    in_text("retrieved 10 October 2026 (TX, ETFs, TAIEX in 2025) and 11 October 2026 (TAIEX from July 2007)")
+    # the TX row of the case exhibit: the change in points and Delta P in NT$ per contract
+    in_text("so its price change $\\Delta P_i$ is $200\\times(-2{,}129)=-425{,}800$ NT\\$",
+            "| TX, April 2025 contract | index points, NT\\$200 a point | −1 contract | 21,296 | 19,167 | −2,129 "
+            "| −9.9972% | +425,800 |")
     # the notionals of the case box and the exposures (Example 3, Section 3)
     vals = [H[i] * P[0][i] for i in range(3)]
     chk("TX notional (millions)", -vals[0] / Decimal(10**6), ".2f", "4.26")
@@ -323,6 +341,21 @@ def main() -> None:
     chk("true 8 Apr return of the fixed book", true8, ".3%", "-0.328%")
     chk("f(2 Apr)'R(8 Apr)", fR8, ".3%", "-0.226%")
     P_(f"   precise: {float(true8):.6%} and {float(fR8):.6%} (anchors -0.328117%, -0.226276%)")
+    chk("equity at the close of 7 April (W0 + 57,400)", W7, ",.0f", "10,057,400")
+    in_text("the book's equity was NT\\$10,057,400, $W_0$ plus that day's NT\\$57,400",
+            "the TX exposure had shrunk from −0.426 on 2 April to −0.381, and the 0050 exposure from 0.422 to 0.378",
+            "returned −0.328% of its equity at the close of 7 April")
+    # Problem 10, option C: the daily P&Ls W0 X f with the exposures of 2 April against the fixed book's Y h
+    w0xf = [Fraction(W0) * sum(Fraction(f[i]) * X[kk][i] for i in range(3)) for kk in range(5)]
+    assert w0xf[0] == Fraction(Yh[0])                              # exact on 7 April: (8.4) for one period
+    assert all(w0xf[kk] != Fraction(Yh[kk]) for kk in range(1, 5))  # and on no later day
+    chk("P10 C: W0 f'R on 8 Apr", w0xf[1], ",.0f", "-22,628")
+    chk("P10 C: fixed book on 8 Apr", Yh[1], ",.0f", "-33,000")
+    chk("P10 C: miss on 8 Apr", w0xf[1] - Fraction(Yh[1]), ",.0f", "10,372")
+    assert rnd(w0xf[1], 0) - Fraction(Yh[1]) == 10_372             # the printed figures give the printed miss
+    in_text("it gives a P&L of −22,628 against the book's −33,000, a miss of NT\\$10,372")
+    P_(f"   P10 C: daily misses W0 X f - Y h {[round(float(a - Fraction(b)), 2) for a, b in zip(w0xf, Yh)]}, "
+       f"week {float(sum(w0xf) - sum(Fraction(v) for v in Yh)):+.4f} (the week's sum is no test of option C)")
     # X w, X K (Example 8, the `xk` exhibit)
     K = {"100% 0050": (0, 1, 0), "60/40": (0, Fraction(6, 10), Fraction(4, 10)), "50/50": (0, Fraction(1, 2), Fraction(1, 2))}
     xk = {}
@@ -383,8 +416,10 @@ def main() -> None:
     chk("|x~|^2", sxx, ".3f", "230.775")
     chk("|y~|^2", syy, ".3f", "45.851")
     rho_hand = 25.989 / math.sqrt(230.775 * 45.851)
-    chk("rho by hand", rho_hand, ".3f", "0.253")
+    chk("rho by hand (from the printed sums)", rho_hand, ".4f", "0.2527")
     chk("angle by hand", angle(rho_hand), ".1f", "75.4°", suffix="°")
+    chk("angle from the printed rho 0.2527", angle(0.2527), ".1f", "75.4°", suffix="°")      # PITFALLS section 7
+    in_text("=0.2527$, an angle of 75.4°", "[[eg:weekcorr]] got 0.2527 because it worked from returns rounded")
     sxy_u, sxx_u, syy_u = (sum(a * b for a, b in zip(x5, y5)), sum(a * a for a in x5), sum(b * b for b in y5))
     chk("x'y uncentred", sxy_u, ".3f", "33.348")
     chk("|x|^2", sxx_u, ".3f", "236.899")
@@ -442,6 +477,8 @@ def main() -> None:
     chk("LM7 rho (4 dp)", v["rho"], ".4f", "-0.1056")
     chk("LM7 angle (2 dp)", angle(v["rho"]), ".2f", "96.06°", suffix="°")
     chk("LM7 angle (1 dp)", angle(v["rho"]), ".1f", "96.1°", suffix="°")
+    chk("LM7 angle from the printed rho -0.1056 (2 dp)", angle(-0.1056), ".2f", "96.06°", suffix="°")
+    chk("LM7 angle from the printed rho -0.1056 (1 dp)", angle(-0.1056), ".1f", "96.1°", suffix="°")
     mix = 0.423 * v["a"] + 0.577 * v["b"]
     sp = float(mix.std() * math.sqrt(v["A"]))
     chk("mix vol w = 0.423 (2 dp)", sp, ".2%", "10.91%")
@@ -468,6 +505,10 @@ def main() -> None:
     iu = np.triu_indices(28, 1)
     cv = C[iu]
     chk("U28 pairs", len(cv), "d", "378")
+    # U28 as the volume describes it (reviews/lm08.md, X7): 30 sector series in FinMind, less the two aggregates
+    assert len([n for n in pl.read_parquet(PROC / "vol2_closes.parquet").columns if n not in ("date", "TAIEX")]) == 30
+    in_text("U28, the 28 leaf indices among the 30 TWSE sector indices that FinMind serves daily: all except the "
+            "aggregates Electronic and ChemicalBiotechnologyMedicalCare")
     kmax, kmin = int(np.argmax(cv)), int(np.argmin(cv))
     assert {names[iu[0][kmax]], names[iu[1][kmax]]} == {"ElectronicPartsComponents", "ComputerPeripheralEquipment"}
     assert {names[iu[0][kmin]], names[iu[1][kmin]]} == {"BiotechnologyMedicalCare", "OilGasElectricity"}
@@ -491,11 +532,13 @@ def main() -> None:
     P_(f"   (8.11) S3 equal weights: s_p {s_ew:.4%} a day <= sum w_i s_i {s_avg:.4%} (lab anchors 1.0527%, 1.2721%)")
     # the `angles` exhibit
     ap = angles_pairs()
-    for p_, (r_pr, d_pr) in zip(ap, (("0.974", "13.0"), ("0.755", "41.0"), ("0.575", "54.9"), ("0.403", "66.2"),
-                                     ("0.217", "77.4"), ("-0.106", "96.1"))):
-        chk(f"angles {p_['label']} rho", p_["rho"], ".3f", r_pr)
+    for p_, (r_pr, d_pr) in zip(ap, (("0.9744", "13.0"), ("0.7547", "41.0"), ("0.5749", "54.9"), ("0.4035", "66.2"),
+                                     ("0.2175", "77.4"), ("-0.1056", "96.1"))):
+        chk(f"angles {p_['label']} rho", p_["rho"], ".4f", r_pr)
         chk(f"angles {p_['label']} angle", p_["deg"], ".1f", d_pr + "°", suffix="°")
-        assert abs(angle(float(r_pr)) - p_["deg"]) < 0.1                          # the printed rho gives the printed angle
+        # the printed rho gives the printed angle (PITFALLS section 7): arccos of the four-decimal rho, to 0.1 degree
+        chk(f"angles {p_['label']} angle from the printed rho", angle(float(r_pr)), ".1f", d_pr + "°", suffix="°")
+        in_text(f"| {r_pr.replace('-', '−')} | {d_pr}° |")
     a1, b1, dd1 = lm1_pair()
     chk("LM1 T", len(a1), ",d", "2,902")
     assert dd1[0] == "2014-11-03" and dd1[-1] == LAST
@@ -552,16 +595,22 @@ def main() -> None:
     chk("P4 distance", np.linalg.norm(wb - wa), ".4f", "0.1414")
     chk("P4 relative distance from printed", 0.1414 / 0.6164, ".4f", "0.2294")
     chk("P4 1-norm", np.abs(wb - wa).sum(), ".1f", "0.2")
+    chk("P4 one-way turnover (half the 1-norm)", np.abs(wb - wa).sum() / 2, ".0%", "10%", in_text=False)
+    in_text("a two-way turnover of 20% (10% one way)")
     chk("P6 angle", angle(8 / 9), ".2f", "27.27°", suffix="°")
     x7, y7 = np.array([2, 4, 0, 2.0]), np.array([1, 3, 1, 3.0])
     chk("P7 rho", corr(x7, y7), ".4f", "0.7071")
     assert abs(np.cov(x7, y7, ddof=0)[0, 1] - 1) < 1e-12 and abs(np.cov(x7, y7, ddof=1)[0, 1] - 4 / 3) < 1e-12
+    in_text("keep the TX rows with `contract_date` 202504 and use their `settlement_price`")       # Problem 11
     chk("P8 arccos(-0.106)", angle(-0.106), ".1f", "96.1°", suffix="°")
     chk("P8 distractor arccos(0.106)", angle(0.106), ".1f", "83.9°", suffix="°")
     chk("P9 max angle", angle(0.7547), ".2f", "41.00°", suffix="°")
     chk("P9 max sqrt(2(1-rho))", math.sqrt(2 * (1 - 0.7547)), ".4f", "0.7004")
     chk("P9 min angle", angle(0.2175), ".2f", "77.44°", suffix="°")
     chk("P9 min sqrt(2(1-rho))", math.sqrt(2 * (1 - 0.2175)), ".4f", "1.2510")
+    in_text("By (8.10), the root-mean-square gap per date")
+    # Problem 1, option C: h'R mixes contracts and shares with pure numbers (no value to check, only the wording)
+    in_text("The holdings times the simple returns, $\\mathbf h^{\\top}\\mathbf R$")
     # ================================================================================ the Python box of Section 7
     m = re.search(r"\[!python\] Shapes and products in NumPy\n(.*?)\n(?!>)", TEXT, re.DOTALL)
     assert m is not None

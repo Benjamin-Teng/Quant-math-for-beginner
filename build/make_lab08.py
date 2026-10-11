@@ -64,7 +64,7 @@ Companion notebook to **From Calculus to Kelly, LM8**. It rebuilds the module's 
 
 **Data.** The notebook reads FinMind files that you download once with your own token. From the repository root, run `uv run python data/fetch_finmind.py`, then `uv run python data/make_lab_data.py`. FinMind's licence does not allow the book to redistribute the data. After that, the notebook runs offline.
 
-`data/` then holds FinMind `TaiwanFuturesDaily` rows for TX (April to October 2025), `TaiwanStockPrice` closes with FinMind's `spread` column for 0050, 00631L and 00679B, their cash dividends from `TaiwanStockDividendResult`, and the closes of TAIEX and the 30 TWSE sector indices with the list of closes that the book repairs (Part 5). Prices are unadjusted; dividends and splits are handled explicitly. The notebook reads nothing outside `data/`.
+`data/` then holds FinMind `TaiwanFuturesDaily` rows for TX (April to October 2025, regular session, every contract month), `TaiwanStockPrice` closes with FinMind's `spread` column for 0050, 00631L and 00679B, their cash dividends from `TaiwanStockDividendResult`, and the closes of TAIEX and of the 30 TWSE sector indices that FinMind serves daily, with the list of closes that the book repairs (Part 5). Prices are unadjusted; dividends and splits are handled explicitly. The notebook reads nothing outside `data/`.
 
 **Conventions (as in the module).** Vectors list (TX, 0050, 00679B) in that order; TX is worth NT\$200 a point per contract. Returns are simple returns; standard deviations and covariances divide by $T$; a correlation is the same with any divisor.
 """)
@@ -106,7 +106,7 @@ for f in ("0050_dividends.csv", "00679B_dividends.csv"):    # no ex-date in the 
     d = pl.read_csv(DATA / f).filter(pl.col("date").is_between(pl.lit("2025-04-03"), pl.lit("2025-04-11")))
     assert d.height == 0, f
 print("shape:", apr.shape)
-apr   # [[ex:case]]: settlement prices in points, closes in NT$ per share, TX volume in contracts
+apr   # [[ex:case]]: settlement prices in points, closes in NT$ per share; TX_volume is the April contract's regular-session volume
 """)
 
 code(r"""
@@ -217,8 +217,10 @@ xch, ych = (xh - xb).round(4), (yh - yb).round(4)
 prh = (xch * ych).round(4)
 print("means:", xb, yb)
 print(pl.DataFrame({"date": days, "x": xh, "y": yh, "x~": xch, "y~": ych, "x~ y~": prh}))
+rho_h = 25.989 / math.sqrt(230.775 * 45.851)     # from the printed sums, as [[eg:weekcorr]] does
 print(f"sum x~y~ = {prh.sum():.4f}; |x~|^2 = {xch @ xch:.3f}; |y~|^2 = {ych @ ych:.3f}; "
-      f"rho = {25.989 / math.sqrt(230.775 * 45.851):.3f}; uncentred {xh @ yh:.3f} / sqrt({xh @ xh:.3f} x {yh @ yh:.3f})")
+      f"rho = {rho_h:.4f}, angle {math.degrees(math.acos(round(rho_h, 4))):.1f} deg; "
+      f"uncentred {xh @ yh:.3f} / sqrt({xh @ xh:.3f} x {yh @ yh:.3f})")
 # the same from the unrounded returns
 xc, yc = x - x.mean(), y - y.mean()
 rho_w = cos(xc, yc)
@@ -291,7 +293,7 @@ ax.set_xlim(-3, 25); ax.set_ylim(-1, 15); ax.set_aspect("equal"); ax.set_title("
 md(r"""
 **The sector sample, with its repair.** FinMind serves some sector closes copied from another date or from another series on the same date (Getting Started, "Check, do not trust"). `sectors_close_repairs.csv` lists every close the book repairs, with the official 13:30:00 value in `close_1330`. **Rule:** replace each listed close with `close_1330`; if `close_1330` is empty, drop that close. On FinMind's free plan `close_1330` is empty, because the 13:30:00 values come from a paid dataset, so every listed close is dropped. Returns stay between consecutive TAIEX-calendar dates, so a dropped close removes the returns into and out of its date.
 
-**U28** is every TWSE sector index except the aggregates `Electronic` and `ChemicalBiotechnologyMedicalCare`, on one common sample of daily price returns from 2008-12-01.
+**U28** is the 28 leaf indices among the 30 TWSE sector indices that FinMind serves daily: all except the aggregates `Electronic` and `ChemicalBiotechnologyMedicalCare`, on one common sample of daily price returns from 2008-12-01. TWSE compiles them as price indices (IndexS03), so their returns leave out cash dividends.
 """)
 
 code(r"""
@@ -403,8 +405,9 @@ print("Y h (NT$):", (Y @ H).round(2), " 1'Y h =", round(float(np.ones(5) @ Y @ H
       " = h'(P_11 - P_2) =", round(float(H @ (P[-1] - P[0])), 2))
 
 # the drift: exposures of the fixed book after 7 April, and the 8 April return
-W7 = W0 + H @ dP[0]
+W7 = W0 + H @ dP[0]                            # equity at the close of 7 April: W0 plus that day's P&L
 f7 = H * P[1] / W7
+print(f"equity at the close of 7 April: {W7:,.0f}")
 print("exposures at the close of 2 April:", f.round(3), "  at the close of 7 April:", f7.round(3))
 print(f"8 April: the fixed book returned {(H @ dP[1]) / W7:.3%}; the 2 April exposures give {f @ R[1]:.3%}; "
       f"today's exposures give {f7 @ R[1]:.3%}")
@@ -450,7 +453,8 @@ f2 = H2 * P[0] / W0
 print(f"PP3: f = {f2}, net = gross = {f2.sum():.5f}; W0 f'R(7 Apr) = {W0 * f2 @ R[0]:,.2f} = h'dP {H2 @ dP[0]:,.2f}")
 wa, wb = np.array([0.5, 0.3, 0.2]), np.array([0.4, 0.3, 0.3])
 print(f"PP4: norms {np.linalg.norm(wa):.4f}, {np.linalg.norm(wb):.4f}; distance {np.linalg.norm(wb - wa):.4f}; "
-      f"relative {np.linalg.norm(wb - wa) / np.linalg.norm(wa):.4f}; 1-norm {np.abs(wb - wa).sum():.1f}")
+      f"relative {np.linalg.norm(wb - wa) / np.linalg.norm(wa):.4f}; 1-norm {np.abs(wb - wa).sum():.1f} "
+      f"(two-way turnover {np.abs(wb - wa).sum():.0%}, one way {np.abs(wb - wa).sum() / 2:.0%})")
 x6, y6 = np.array([1.0, 2, 2]), np.array([2.0, 1, 2])
 a6 = x6 @ y6 / (y6 @ y6)
 print(f"PP6: angle {math.degrees(math.acos(cos(x6, y6))):.2f} deg; a = {a6:.4f} = 8/9; "
@@ -462,6 +466,10 @@ for d in (0, 1):
 print(f"PP7: cosine of the centred vectors {cos(x7 - x7.mean(), y7 - y7.mean()):.4f}")
 for r in (0.7547, 0.2175):
     print(f"PP9: rho {r}: angle {math.degrees(math.acos(r)):.2f} deg, sqrt(2(1 - rho)) = {math.sqrt(2 * (1 - r)):.4f}")
+# PP10, option C: the daily P&Ls W0 X f with the exposures of 2 April against the fixed book's Y h
+print("PP10: W0 X f (NT$):", (W0 * (X @ f)).round(2))
+print("      Y h (NT$):    ", (Y @ H).round(2))
+print("      miss, W0 X f - Y h:", (W0 * (X @ f) - Y @ H).round(2) + 0.0, "(exact on 7 April only)")   # + 0.0: no -0.
 # PP11: Part 1 joined the files; the five returns as a Polars frame
 wk = pl.DataFrame({"date": apr["date"][1:], "R_0050": R[:, 1], "R_00679B": R[:, 2]})
 xa, ya = wk["R_0050"].to_numpy(), wk["R_00679B"].to_numpy()
@@ -491,7 +499,7 @@ nbf.write(nb, LAB / "LM08_lab.ipynb")
 
 (LAB / "README.md").write_text("""# LM8 Lab — Vectors and Matrices
 
-Companion to *From Calculus to Kelly*, Learning Module 8. The notebook joins TX, 0050 and 00679B on their dates for the week of 7–11 April 2025, rebuilds the total-return frames of the ETF pairs and the repaired sample of 28 TWSE sector indices, reproduces the module's exhibits and computational examples, and works the computational practice problems.
+Companion to *From Calculus to Kelly*, Learning Module 8. The notebook joins TX, 0050 and 00679B on their dates for the week of 7–11 April 2025, rebuilds the total-return frames of the ETF pairs and the repaired sample of U28 (the 28 leaf indices among the 30 TWSE sector indices that FinMind serves daily), reproduces the module's exhibits and computational examples, and works the computational practice problems.
 
 ## Run
 
@@ -528,10 +536,10 @@ On FinMind's free plan, fetch with `uv run python data/fetch_finmind.py --exclud
 
 | File | Content |
 |:--|:--|
-| `data/TX__2025-04-01__2025-10-31.csv` | TX daily rows from `TaiwanFuturesDaily`, every listed contract month: settlement price, close, volume, open interest |
+| `data/TX__2025-04-01__2025-10-31.csv` | TX daily rows from `TaiwanFuturesDaily`, regular session, every listed contract month: settlement price, close, volume, open interest |
 | `data/0050_daily_raw.csv`, `data/00631L_daily_raw.csv`, `data/00679B_daily_raw.csv` | daily closes and FinMind `spread` (unadjusted) from `TaiwanStockPrice` |
 | `data/0050_dividends.csv`, `data/00679B_dividends.csv` | ex-dividend dates, before and after prices and cash dividends from `TaiwanStockDividendResult` |
-| `data/sectors_close_raw.csv` | the closes FinMind serves for TAIEX and the 30 TWSE sector indices, one column per series |
+| `data/sectors_close_raw.csv` | the closes FinMind serves for TAIEX and the 30 TWSE sector indices it has daily, one column per series |
 | `data/sectors_close_repairs.csv` | every sector close the book repairs, with its 13:30:00 value from `TaiwanStockEvery5SecondsIndex` (empty on the free plan) |
 
 Every ETF close is checked against FinMind's own `spread` column; the only mismatches allowed are ex-dividend days and the splits of 0050 (4-for-1, 2025-06-18) and 00631L (22-for-1, 2026-03-31).
