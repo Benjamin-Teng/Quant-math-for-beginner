@@ -3,9 +3,7 @@
 Every website and data service used while building edition 0.1 and the Volume I drafts (2026-10-10), extracted from
 the session logs of the editor and all writer, reviewer and data agents. Each module's own References section is the
 authoritative citation list; this file shows where facts were checked, so the next session can go straight to the
-right page. Four pages about a professional-certification curriculum, consulted for edition 0.1, are left out: the
-owner had that edition's crosswalk and curriculum references removed on 2026-10-10, and no current text cites them.
-Pages an exam body publishes publicly are listed like any other source when a module uses them (PITFALLS §1).
+right page. Pages consulted for edition 0.1 that no current text cites are left out.
 
 ## Market data
 

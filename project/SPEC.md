@@ -12,9 +12,8 @@ left to do is in [`../TODO.md`](../TODO.md).
 - By the end the reader can: **build their own statistical models**; **optimize portfolios statistically**;
   **measure true risk and return** (geometric growth, honest uncertainty, costs and biases removed); and
   **optimize Kelly leverage**, including under estimation error.
-- A personal study project. It is independent of any professional-certification curriculum and never copies or
-  adapts one's material (owner, 2026-10-10); the rule is about intellectual property, and what an exam body publishes
-  publicly may be cited (owner's clarification, 2026-10-11). Released under the MIT License (owner, 2026-10-10).
+- A personal study project (owner, 2026-10-10); its intellectual-property rule and that rule's scope are in
+  CLAUDE.md. Released under the MIT License (owner, 2026-10-10).
 
 ## 2. Reader
 
@@ -42,7 +41,7 @@ material: worked examples, diagrams and formulas carry the content, and the pros
 | Hosting | GitHub repo [Benjamin-Teng/Quant-math-for-beginner](https://github.com/Benjamin-Teng/Quant-math-for-beginner) (public); the built site in `docs/` is served by GitHub Pages from `main` `/docs` at <https://quantmath.fintools.tw> (`build/build.py` writes `docs/CNAME`; DNS at Gandi: `quantmath CNAME benjamin-teng.github.io.`, and the TXT record `_github-pages-challenge-Benjamin-Teng` that keeps `fintools.tw` verified for this GitHub account must stay) | owner, 2026-10-10; domain 2026-10-11 |
 | Git | commit and push directly to `main`; no pull requests | owner, 2026-10-10 |
 | License | MIT (`LICENSE`); FinMind data remain subject to FinMind's terms | owner, 2026-10-10 |
-| Independence | no infringement of intellectual property: nothing copied or adapted from a professional-certification curriculum (its readings, outcome wording or problems), anywhere in the repo; documents an exam body publishes publicly may be cited like any source; `build/qa/check_terms.py` guards against curriculum-derived text | owner, 2026-10-10; clarified 2026-10-11 |
+| Independence | the intellectual-property rule and its scope in CLAUDE.md | owner, 2026-10-10; clarified 2026-10-11 |
 | Quality gate | a module is published (linked from the site, PDF built) only after an independent review and its fixes | editor's process, AUTHORING §11 |
 | Division of responsibility | the owner oversees the code architecture, the website and repository maintenance: changes there are proposed to him and wait for his approval. Every content and editorial decision (scope, depth, length, style, notation, examples, cases) is delegated to Claude as the editor, who decides on evidence, reports the reasons and accepts the owner's veto. Source authenticity comes first: textbooks, papers, official documents, FinMind data and Claude's own knowledge are all acceptable sources, but every citation is checked to exist as cited, and no data, reference or quotation is ever invented | owner, 2026-10-11 |
 | Unclear brief | content: the editor decides and reports the reasons; code, website, repository and the owner's standing rules: raise it with the owner rather than guess | original brief; owner, 2026-10-11 |

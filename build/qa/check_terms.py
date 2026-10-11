@@ -1,12 +1,10 @@
 #!/usr/bin/env python3
 """Fail if banned terms appear in sources, labs, docs or the built site.
 
-The book is an independent personal-study project (owner, 2026-10-10). The rule is about intellectual property
-(owner's clarification, 2026-10-11): never copy or adapt a professional-certification curriculum's material (its
-readings, outcome wording or problems). A document an exam body publishes publicly may be cited like any source
-(LM1 cites the GIPS standards). The terms below are tripwires for curriculum-derived text, not the rule itself: a hit
-asks where the text came from. If a citation the rule allows needs one of them (for example a public document's
-publisher), add a narrow exact-phrase exception to this script. Run from the repository root:
+The rule and its scope are in CLAUDE.md ("Intellectual property"). BANNED holds tripwire terms for that scope, not
+the rule itself: a hit asks where the text came from. Add a term to BANNED when a new one turns up. If a citation the
+rule allows needs one of them (for example the publisher of a public document; LM1 cites the GIPS standards), add a
+narrow exact-phrase exception to this script. Run from the repository root:
 
     uv run python build/qa/check_terms.py          # exit 1 and list hits if any banned term is found
 
@@ -20,7 +18,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
 BANNED = re.compile(r"\bCFA\b|Chartered Financial Analyst|candidate should be able", re.IGNORECASE)
-SKIP_DIRS = {"node_modules", ".venv", ".git", "dist", "__pycache__", ".ipynb_checkpoints"}
+SKIP_DIRS = {"node_modules", ".venv", ".git", ".claude", "dist", "__pycache__", ".ipynb_checkpoints"}   # .claude: agent worktrees
 SUFFIXES = {".md", ".py", ".js", ".css", ".html", ".yaml", ".yml", ".json", ".txt", ".sh", ".ipynb"}
 
 def text_of(p: Path) -> str:

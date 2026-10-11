@@ -5,16 +5,10 @@ unless stated.
 
 ## 1. Owner's rules that were broken once
 
-- **A professional-certification curriculum's material.** The first edition cited one and mapped itself onto it (a
-  crosswalk table, header chips, the curriculum's outcome wording, a note that the modules follow its architecture, a
-  reference to its readings and a trademark note); the owner had all of that removed on 2026-10-10: the book is an
-  independent personal-study project. The module format of SPEC §4 stays. The rule is about intellectual property
-  (owner's clarification, 2026-10-11): never copy or adapt such a curriculum's material, in text, code comments, front
-  matter or docs; `uv run python build/qa/check_terms.py` (run by `build.sh`) guards it. A document an exam body
-  publishes publicly may be cited like any source. On 2026-10-11 a verifier read the rule as a ban on anything an exam
-  body owns, and the editor deleted LM1's citation of the GIPS standards; the owner had it restored. A reading that
-  widens an owner's rule to a new kind of material is a question for the owner, not a finding to fix. Also never commit third-party course material the owner shares for reference (licensed PDFs marked not for
-  distribution).
+- **Intellectual property** (CLAUDE.md, "Owner's standing rules"). Edition 0.1 had to be cleaned on 2026-10-10;
+  the module format of SPEC §4 stays. On 2026-10-11 a verifier widened the rule to anything an exam body owns, LM1's
+  citation of the GIPS standards was deleted, and the owner had it restored: whether new material falls in the rule's
+  scope is a question for the owner, not a finding to fix.
 - **Shioaji for historical data.** The syllabus once planned LM26's realized volatility "from Shioaji ticks". The
   owner's rule: all historical data come from FinMind, which has intraday history too
   (`TaiwanVariousIndicators5Seconds` for TAIEX every 5 seconds, free; minute bars and ticks on paid plans).
@@ -254,5 +248,5 @@ unless stated.
   - Averages of annualized rates near expiry are noise: a few days with τ of one or two days dominate a monthly mean
     of daily implied rates. Annualize the averaged components instead, or leave the column out.
   - A chart that plots values near machine precision differs between Windows and Linux; floor it well above 1e-16.
-  - Notation peculiar to one certification curriculum's formula sheet (for example "ΔCurve") is that curriculum's
-    material: use the module's own symbols.
+  - Write a sensitivity in the module's own symbols, as its notation note defines them (for example P(y ± Δy) and
+    Δy).

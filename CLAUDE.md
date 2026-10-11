@@ -29,9 +29,11 @@ every project instruction here, not there.
   Claude's own knowledge are all acceptable sources, but every citation is checked to exist as cited, and no data,
   reference or quotation is ever invented.
 - **Commit and push directly to `main`**; no pull requests. `git fetch` and rebase before every push.
-- **Infringe no one's intellectual property** (owner, 2026-10-10; clarified 2026-10-11). In particular, never copy or
-  adapt a professional-certification curriculum's material (its readings, outcome wording or problems). What an exam
-  body publishes publicly may be cited like any source. `build/qa/check_terms.py` must pass (`build.sh` runs it).
+- **Intellectual property** (owner, 2026-10-10; clarified 2026-10-11). The book is our own writing from the sources in
+  `project/SOURCES.md`; what an exam body publishes publicly is cited like any other source. Out of scope, everywhere
+  in the repository: a professional-certification curriculum's material, namely its readings, outcome wording and
+  problems. Whether new material falls in that scope is the owner's call. `build/qa/check_terms.py` lists tripwire
+  terms for it and must pass (`build.sh` runs it).
 - **Historical market data come only from FinMind** (daily and intraday); never Shioaji for history. He has a
   **Sponsor plan** (6,000 calls an hour; minute bars, ticks, final settlement prices…), licensed for non-commercial
   use: never redistribute raw FinMind data, and cite FinMind.
