@@ -637,6 +637,9 @@ fin_rng = [t[1][1] for t in tri.values()]
 chk("triples Financial min", d(min(fin_rng), 3), "-1.479")
 chk("triples Financial max", d(max(fin_rng), 3), "2.069")
 assert tri["7-8-10"][1][1] == min(fin_rng) and tri["8-9-10"][1][1] == max(fin_rng)
+chk("7 April row against (-1,-1,-1), degrees", f"{angle(MF[0], [Fr(-1)] * 3):.1f}", "3.6")
+present("3.6°")
+# 7 April: 0050 closed -10.000000% and TX's front month settled at its limit (LM8's case); TAIEX fell 9.699731%
 chk("10 Apr from printed mix", d(F("9.91") * F("0.334105") + F("8.36") * F("1.446834") + F("5.72") * F("-0.916113"), 2), "10.17")
 for name, pr in (("7-8-9", "-71.591922"), ("7-8-10", "22.568247"), ("7-9-10", "-29.587887"), ("8-9-10", "49.300524")):
     chk(f"triple det {name}", d(tri[name][0], 6), pr)
