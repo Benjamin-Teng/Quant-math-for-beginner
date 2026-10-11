@@ -146,7 +146,7 @@ U28 sample: closes of the 28 leaf sectors from `vol2_closes.parquet`, dates 2008
 | 32 | Problem 4 | $(0.2,0.3,0.5)$ from 3-decimal $C_3$ and 2-decimal volatilities | 15.74% |
 | 33 | Problem 5 | S5 $\overline{\operatorname{var}}$, $\overline{\operatorname{cov}}$; EW S5 volatility; limit | 2.0740e-4, 9.0696e-5; 16.73%; 14.92% |
 | 34 | Problem 6 | printed (two-decimal) $A\hat\Sigma_3$: pivots by elimination | 570.34, 243.53, 181.30 (after step 1: 243.5299, 116.8602, 237.3775) |
-| 35 | Problem 9 | printed $A\hat\Sigma_3$, $\boldsymbol\Delta=(-0.05,0,0.05)$: $2A\hat\Sigma\mathbf w$; linear; quadratic; variance; volatility | 0.07923, 0.05566, 0.03905; −0.002009; +0.000132; 0.032063 → 0.030186 (two-decimal matrix; the one-decimal one gives 0.032060 → 0.030184) (the printed matrix gives 320.60 %², row 17's computed one 320.62); 17.91% → 17.37% |
+| 35 | Problem 9 | printed $A\hat\Sigma_3$, $\boldsymbol\Delta=(-0.05,0,0.05)$: $2A\hat\Sigma\mathbf w$; linear; quadratic; variance; volatility | 0.07923, 0.05566, 0.03905; −0.002009; +0.000132; 0.032063 → 0.030186 (two-decimal matrix; the one-decimal one gives 0.032060 → 0.030184) (the two-decimal printed matrix gives 320.63 %², the one-decimal one 320.60, row 17's computed one 320.62); 17.91% → 17.37% |
 | 36 | lab extension | per calendar year (2009–2025, 2026 to 2026-10-08, $T_y=185$): EW volatility ÷ mean sector volatility | 0.563 (2017) … 0.809 (2020) |
 
 ## LM11
@@ -168,7 +168,7 @@ Common definitions. **U28 sample**: `vol2_closes.parquet`, rows with date ≥ 20
 | 8 | halves $\mathbf x$ | `solve`($\hat\Sigma^{(h)}$, $\mathbf 1$), daily units | Semi 430.84 → −587.60; Fin −2,547.30 → 2,216.20 |
 | 9 | halves change | $\lVert\mathbf x^{(2)}-\mathbf x^{(1)}\rVert/\lVert\mathbf x^{(2)}\rVert$; cosine | 0.7286; 0.6902 |
 | 10 | bound U28 | $\kappa(\hat\Sigma^{(1)})$; $\lVert\hat\Sigma^{(2)}-\hat\Sigma^{(1)}\rVert_2/\lVert\hat\Sigma^{(1)}\rVert_2$; product | 126.05; 0.24536; 30.93 ($\kappa(\hat\Sigma^{(2)})=119.40$) |
-| 11 | (11.7) shares | $(\mathbf q_k^{\top}\mathbf 1/\lambda_k)^2/\lVert\mathbf x\rVert^2$ with $\hat\Sigma^{(h)}$'s eigenpairs; $k=1$; $k=15..28$ | 1.80%, 1.02%; 72.03%, 80.48% |
+| 11 | (11.8) shares | $(\mathbf q_k^{\top}\mathbf 1/\lambda_k)^2/\lVert\mathbf x\rVert^2$ with $\hat\Sigma^{(h)}$'s eigenpairs; $k=1$; $k=15..28$ | 1.80%, 1.02%; 72.03%, 80.48% |
 | 12 | halves PCA | U28 $C^{(h)}$: $\lambda_1$, share; $\lvert\mathbf q_k^{(1)\top}\mathbf q_k^{(2)}\rvert$, $k=1..5$ | 16.116/13.787, 57.56%/49.24%; 0.9971, 0.2966, 0.1206, 0.0431, 0.4279 |
 | 13 | plane measure | $\lVert[\mathbf q_2^{(1)}\ \mathbf q_3^{(1)}]^{\top}\mathbf q_2^{(2)}\rVert$; PC2 largest entries per half | 0.9274 (one-sided: where the second half's $\mathbf q_2$ went, not that the plane holds); reverse measure 0.514; $\lvert\mathbf q_3^{(1)\top}\mathbf q_2^{(2)}\rvert$ 0.8787, $\lvert\mathbf q_2^{(1)\top}\mathbf q_4^{(2)}\rvert$ 0.7765; principal angles between the two planes 21.9° and 64.2°; OilGasElectricity / ElectronicPartsComponents, signed cos −0.2966 |
 | 14 | per year | $\lvert\cos\rvert$ of year's $\mathbf q_1$, $\mathbf q_2$ with full sample; plane measure (the year's $\mathbf q_2$ on the full sample's $\mathbf q_2$, $\mathbf q_3$ plane, as row 13); $\lambda_2-\lambda_3$ | PC1 at least 0.98, lowest 0.980974 (2026), PC2 0.119 (2016) to 0.946 (2025); plane 0.690 (2020) to 0.959 (2024); min gap 2022 0.029 |
