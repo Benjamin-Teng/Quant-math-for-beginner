@@ -9,6 +9,10 @@ The reader reads English as a second language and wants the tools learned system
 what its module owns and what it leaves to others; LM7 is written, so link to its two-asset results with [[LM7]]
 instead of repeating them.
 
+From Stage 3 (2026-10-12) the module sources and their numbers scripts are authoritative: this brief and the anchors
+record the plan, the editor's decisions and the corrections of review round 1, and `reviews/lm08.md` … `lm12.md`
+record every change after that.
+
 ## Shared decisions
 
 - **Length and voice.** AUTHORING §1: at most 6,000 words of prose and 36 pages; first drafts under 5,500 words;
@@ -24,7 +28,8 @@ instead of repeating them.
   matrices, `cholesky`, `svd`, `lstsq`, `matrix_rank`, `cond`; `np.cov(..., rowvar=False, ddof=0)` or
   `Xc.T @ Xc / T`; Polars for data; print shapes when they matter.
 - **Python facts** (checked 2026-10-11 on the NumPy 2.5, Polars and SciPy references; `project/SOURCES.md`). `np.cov`
-  treats rows as variables and divides by $T-1$ unless `ddof=0`; `np.var` and `np.std` divide by $T$; Polars' `var`,
+  treats rows as variables and divides by the number of observations less one unless `ddof=0` (on a $T\times N$ return
+  matrix, pass `rowvar=False`: the divisor is then $T-1$); `np.var` and `np.std` divide by $T$; Polars' `var`,
   `std` and `pl.cov` divide by $T-1$ unless `ddof=0`, `pl.corr` has no `ddof`, and Polars has no `DataFrame.cov`.
   `eigh` returns eigenvalues in ascending order; `svd` returns singular values in descending order and $V^{\top}$ as
   `Vh`; `np.linalg.cholesky` returns the lower factor, `scipy.linalg.cholesky` the upper one. `matrix_rank` and `lstsq`
@@ -43,7 +48,8 @@ instead of repeating them.
   高斯消去法, 克拉瑪法則, 奇異值分解, 主成分分析, 最小平方法, Cholesky 分解, 正交投影, 擬反矩陣 (Moore–Penrose 反矩陣),
   譜分解, 內積, Cauchy–Schwarz 不等式. Settled in review (2026-10-11): pivot 樞軸元 (LM9's term), upper and lower
   triangular matrix 上三角矩陣, 下三角矩陣, out-of-sample test 樣本外檢定, Euclidean norm 歐氏範數, dot product 內積,
-  Hessian 海森矩陣 (LM7's form). 樂詞網 has no mathematics or statistics entry for column space, whitening,
+  Hessian 海森矩陣 (LM7's form), leading principal minor 首主子行列式, partial pivoting 部分軸元消元法, system of
+  linear equations 線性方程組 (樂詞網, searched 2026-10-12). 樂詞網 has no mathematics or statistics entry for column space, whitening,
   projection matrix or pairwise deletion, and lists null space as 零核空間 in mathematics and 零空間 in engineering:
   write 行空間, 白化, 投影矩陣, 按配對刪除 (its sociology entry) and 零空間, each with its English term. A row is 列 and a column is 行.
 - **Data.** Daily closes of TAIEX and the TWSE sector indices from `data/vol2_series.py` (repaired from the 13:30:00
@@ -478,7 +484,7 @@ Elements: 10 examples, 7 knowledge checks (§2–§8), 5 中文導讀 (§2–3, 
 - A gradient step changes total weight: only zero-sum trades count, only differences of gradient entries matter. Never call $2(\hat\Sigma\mathbf w)_i$, a row of X5 or the diagonal/off-diagonal split a contribution of an asset (LM27, LM31); never set the gradient proportional to $\mathbf 1$ (LM28).
 - (10.9) is exact (`=`); the 15.45% limit holds under a stated hypothesis (both averages fixed), not in the data.
 - Rounding can break PSD: E7's matrix with each computed entry rounded to 0.1 has $\det=-13{,}888.91$. Build printed matrices from printed inputs (E7 from E3's entries) and print floating-point residues as "below $10^{-15}$", never their value (they differ across machines).
-- `np.cov` treats rows as variables and divides by $T-1$ by default; pass `rowvar=False, ddof=0`. `matrix_rank` uses a tolerance; X7 must match (10.7), asserted.
+- `np.cov` treats rows as variables and divides by the number of observations less one by default; on the $T\times N$ matrix pass `rowvar=False, ddof=0`. `matrix_rank` uses a tolerance; X7 must match (10.7), asserted.
 - $\mathbf x^{\top}C\mathbf x$ in E9 is the number a risk system would report, not a variance of any sample; $C$ needs every $s_i>0$.
 - Data: only repaired closes from `vol2_series.py` (a raw read puts 2009-06-05 at the level of 29 June 2026); one sample, one $A$ (245.4793712, never S15's 245.78); sectors are price indices, ETFs total returns; E2 computed from the two-decimal printed returns; E9's year triple is a choice (362 of the 720 assignments with distinct years fail) and the script prints the per-year table so the choice is visible.
 

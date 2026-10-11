@@ -28,7 +28,8 @@ $=200F$, $W_0=10^7$.
   -0.226276\%$.
 - $X\mathbf w$ (0050, 00679B weights): 60/40 daily −5.2771, −3.3840, −4.4377, +7.1448, −0.0259%; sum −5.9798%;
   compounded $\prod(1+R)-1=-6.3194\%$. 50/50 sum −6.0915%, compounded −6.3284%. 100% 0050 sum −5.5332%, comp −6.5057%.
-- Week correlations (five returns, centred cosine): TX/0050 0.9912 (7.63°); 0050/00679B 0.2526 (75.37°), uncentred
+- Week correlations (five returns, centred cosine): TX/0050 0.9912 (7.63°); 0050/00679B 0.2526 (75.37°; Example 6
+  prints 0.2527 from its rounded inputs), uncentred
   0.2930; TX/00679B 0.2802 (73.73°).
 - $\lVert(0.6,0.4)-(0.5,0.5)\rVert=0.141421$.
 - 0050/00679B, `lm07_returns.parquet` `R_0050`, `R_00679B`, rows with both, $T=2{,}363$: $\rho=-0.105632$, 96.064°,
@@ -40,7 +41,8 @@ $=200F$, $W_0=10^7$.
   `np.corrcoef`): 378 pairs; max ElectronicPartsComponents/ComputerPeripheralEquipment 0.754715 (40.999°,
   $\sqrt{2(1-\rho)}=0.7004$); min BiotechnologyMedicalCare/OilGasElectricity 0.217481 (77.439°, 1.2510); median
   0.5015. Semiconductor/FinancialInsurance 0.574858 (54.91°; uncentred 0.575796); Semiconductor/Food 0.403495
-  (66.20°); FinancialInsurance/Food 0.59584 (53.43°).
+  (66.20°); FinancialInsurance/Food 0.59584 (53.43°). The `angles` table prints these ρ to four decimals (0.9744,
+  0.7547, 0.5749, 0.4035, 0.2175, −0.1056), so that each printed angle follows from its printed ρ.
 - S3 equal-weight daily-rebalanced mix, U28 sample: $s$ (divisor $T$) 1.0527% a day; $\sum_iw_is_i=1.2721\%$
   (Semiconductor 1.5243%, FinancialInsurance 1.2173%, Food 1.0747%).
 - Identity check, Semiconductor/FinancialInsurance, each centred and divided by its $s$ (divisor $T$): squared distance
@@ -123,14 +125,14 @@ U28 sample: closes of the 28 leaf sectors from `vol2_closes.parquet`, dates 2008
 | 11 | limit | $\sqrt{A\,\overline{\operatorname{cov}}}$ | 15.45% |
 | 12 | mean off-diagonal correlation | mean of 756 off-diagonal entries of $C$ | 0.502 (context only) |
 | 13 | divisor effect | factor $\sqrt{T/(T-1)}$ on a volatility | 1.000114 (a relative change of 0.0114%, not percentage points) |
-| 14 | S3 $A\hat\Sigma_3$ (%²) | $10^4A\hat\Sigma$ for (Semiconductor, FinancialInsurance, Food), to 0.1 | 570.3, 261.8, 162.3; 363.7, 191.3; 283.5 |
+| 14 | S3 $A\hat\Sigma_3$ (%²) | $10^4A\hat\Sigma$ for (Semiconductor, FinancialInsurance, Food), printed to 0.01 (the module's choice, accepted in review) | 570.34, 261.83, 162.26; 363.73, 191.35; 283.54 (to 0.1: 570.3, 261.8, 162.3; 363.7, 191.3; 283.5) |
 | 15 | S3 volatilities; correlations | $\sqrt{A\hat\sigma_{ii}}$; $C_{12},C_{13},C_{23}$ | 23.88, 19.07, 16.84%; 0.575, 0.403, 0.596 |
 | 16 | $C_3$ leading minors, pivots | from the 3-decimal entries | 1, 0.669375, 0.427966; 1, 0.6694, 0.6394 |
 | 17 | mix $(0.5,0.3,0.2)$ | computed $\hat\Sigma_3$: $\sqrt{A\mathbf w^{\top}\hat\Sigma_3\mathbf w}$; $\mathbf w^{\top}(\text{vols})$; grid total in %² | 17.91%; 21.03%; 320.62 |
 | 18 | X5 cells (%²) | $10^4Aw_iw_j\hat\sigma_{ij}$, to 0.01 | 142.58, 39.27, 16.23; 32.74, 11.48; 11.34 (sum of all nine 320.62) |
 | 19 | E2 returns | Semiconductor, FinancialInsurance on 2025-04-07/08/09 vs previous close (2025-04-02), % to 0.01 | −9.95, −3.99, −4.47; −9.89, +0.53, −5.61 |
 | 20 | E2 from printed | means; $\hat\Sigma$ ($\times10^{-4}$, $T=3$); $\rho$ | −6.1367%, −4.99%; 7.3092, 9.8339, 18.2883; 0.851 |
-| 21 | E7 matrix | E3 block + third row $(0.5(570.3+261.8),\ 0.5(261.8+363.7),\ 0.25\cdot570.3+0.5\cdot261.8+0.25\cdot363.7)$; $2\times2$ minors; det | 416.05, 312.75, 364.4; 138,878.87, 34,719.7175, 34,719.7175; 0 |
+| 21 | E7 matrix (the module builds it from the block rounded to whole %²: 416, 313, 364.5; minors 138,836, 34,709, 34,709; det 0) | E3 block + third row $(0.5(570.3+261.8),\ 0.5(261.8+363.7),\ 0.25\cdot570.3+0.5\cdot261.8+0.25\cdot363.7)$; $2\times2$ minors; det | 416.05, 312.75, 364.4; 138,878.87, 34,719.7175, 34,719.7175; 0 |
 | 22 | E7 rounded | det of the computed 50/50 matrix with entries rounded to 0.1 (416.1, 312.8, 364.4) | −13,888.91 |
 | 23 | rank windows | `matrix_rank(np.cov(X[-T:], rowvar=False, ddof=0))` for $T=20..35$, asserted $=\min(T-1,28)$; first dates | $T=28$: 27 from 2026-08-28; $T=29$: 28 from 2026-08-27 |
 | 24 | collinear | S5 + its EW series: rank; $\lvert\mathbf v^{\top}\hat\Sigma\mathbf v\rvert$, $\mathbf v=(\frac15,\dots,\frac15,-1)$ | 5; below 1e-15 |
@@ -143,8 +145,8 @@ U28 sample: closes of the 28 leaf sectors from `vol2_closes.parquet`, dates 2008
 | 31 | E10 | $\mathbf g=2A\hat\Sigma\mathbf w$ EW U28: entries GlassCeramic, CommunicationsInternet (also the max and min of $\mathbf g$); $\boldsymbol\Delta^{\top}\mathbf g$; $A\boldsymbol\Delta^{\top}\hat\Sigma\boldsymbol\Delta$; variance; volatility | 0.07230, 0.02764; −0.001595; +0.000136; 0.024803 → 0.023345; 15.75% → 15.28% |
 | 32 | Problem 4 | $(0.2,0.3,0.5)$ from 3-decimal $C_3$ and 2-decimal volatilities | 15.74% |
 | 33 | Problem 5 | S5 $\overline{\operatorname{var}}$, $\overline{\operatorname{cov}}$; EW S5 volatility; limit | 2.0740e-4, 9.0696e-5; 16.73%; 14.92% |
-| 34 | Problem 6 | printed $A\hat\Sigma_3$: leading minors; pivots | 570.3, 138,878.87, ≈25,178,038; 570.3, 243.52, 181.29 |
-| 35 | Problem 9 | printed $A\hat\Sigma_3$, $\boldsymbol\Delta=(-0.05,0,0.05)$: $2A\hat\Sigma\mathbf w$; linear; quadratic; variance; volatility | 0.0792, 0.0557, 0.0390; −0.002009; +0.000132; 0.032060 → 0.030184 (the printed matrix gives 320.60 %², row 17's computed one 320.62); 17.91% → 17.37% |
+| 34 | Problem 6 | printed (two-decimal) $A\hat\Sigma_3$: pivots by elimination | 570.34, 243.53, 181.30 (after step 1: 243.5299, 116.8602, 237.3775) |
+| 35 | Problem 9 | printed $A\hat\Sigma_3$, $\boldsymbol\Delta=(-0.05,0,0.05)$: $2A\hat\Sigma\mathbf w$; linear; quadratic; variance; volatility | 0.07923, 0.05566, 0.03905; −0.002009; +0.000132; 0.032063 → 0.030186 (two-decimal matrix; the one-decimal one gives 0.032060 → 0.030184) (the printed matrix gives 320.60 %², row 17's computed one 320.62); 17.91% → 17.37% |
 | 36 | lab extension | per calendar year (2009–2025, 2026 to 2026-10-08, $T_y=185$): EW volatility ÷ mean sector volatility | 0.563 (2017) … 0.809 (2020) |
 
 ## LM11
@@ -156,7 +158,7 @@ Common definitions. **U28 sample**: `vol2_closes.parquet`, rows with date ≥ 20
 
 | # | Number(s) | Definition | Value |
 |:--|:--|:--|:--|
-| 1 | $T$, first/last return, $A$ | U28 sample; $A=T/$(days from 2008-12-01 to 2026-10-08 / 365.25) | 4,382; 2008-12-02, 2026-10-08; 245.4794 |
+| 1 | $T$, first/last return, $A$ | U28 sample; $A=T/$(days from 2008-12-01 to 2026-10-08 / 365.25) | 4,382; 2008-12-02, 2026-10-08; 245.4794 (printed 245.48) |
 | 2 | min/max pairwise correlation, $\bar\rho$ | off-diagonal of U28 $C$ | 0.2175 Biotech/OilGas; 0.7547 Computer/Parts; 0.50227 |
 | 3 | $\lambda_1$, shares | U28 $C$; $\lambda_k/28$; first $k$ with cumulative ≥ 0.80 | 14.7214; 52.58%; $k=12$, 80.93% |
 | 4 | PC1 range; PC2 signs | entries of $\mathbf q_1$, $\mathbf q_2$ of U28 $C$ | 0.1302 OilGas to 0.2238 Other; 11 positive (8 electronics + Biotech, Chemical, ElectricMachinery), 17 negative |
@@ -168,8 +170,8 @@ Common definitions. **U28 sample**: `vol2_closes.parquet`, rows with date ≥ 20
 | 10 | bound U28 | $\kappa(\hat\Sigma^{(1)})$; $\lVert\hat\Sigma^{(2)}-\hat\Sigma^{(1)}\rVert_2/\lVert\hat\Sigma^{(1)}\rVert_2$; product | 126.05; 0.24536; 30.93 ($\kappa(\hat\Sigma^{(2)})=119.40$) |
 | 11 | (11.7) shares | $(\mathbf q_k^{\top}\mathbf 1/\lambda_k)^2/\lVert\mathbf x\rVert^2$ with $\hat\Sigma^{(h)}$'s eigenpairs; $k=1$; $k=15..28$ | 1.80%, 1.02%; 72.03%, 80.48% |
 | 12 | halves PCA | U28 $C^{(h)}$: $\lambda_1$, share; $\lvert\mathbf q_k^{(1)\top}\mathbf q_k^{(2)}\rvert$, $k=1..5$ | 16.116/13.787, 57.56%/49.24%; 0.9971, 0.2966, 0.1206, 0.0431, 0.4279 |
-| 13 | plane measure | $\lVert[\mathbf q_2^{(1)}\ \mathbf q_3^{(1)}]^{\top}\mathbf q_2^{(2)}\rVert$; PC2 largest entries per half | 0.9274; OilGasElectricity / ElectronicPartsComponents, signed cos −0.2966 |
-| 14 | per year | $\lvert\cos\rvert$ of year's $\mathbf q_1$, $\mathbf q_2$ with full sample; plane measure (the year's $\mathbf q_2$ on the full sample's $\mathbf q_2$, $\mathbf q_3$ plane, as row 13); $\lambda_2-\lambda_3$ | PC1 ≥ 0.981 (2026), PC2 0.119 (2016) to 0.946 (2025); plane 0.690 (2020) to 0.959 (2024); min gap 2022 0.029 |
+| 13 | plane measure | $\lVert[\mathbf q_2^{(1)}\ \mathbf q_3^{(1)}]^{\top}\mathbf q_2^{(2)}\rVert$; PC2 largest entries per half | 0.9274 (one-sided: where the second half's $\mathbf q_2$ went, not that the plane holds); reverse measure 0.514; $\lvert\mathbf q_3^{(1)\top}\mathbf q_2^{(2)}\rvert$ 0.8787, $\lvert\mathbf q_2^{(1)\top}\mathbf q_4^{(2)}\rvert$ 0.7765; principal angles between the two planes 21.9° and 64.2°; OilGasElectricity / ElectronicPartsComponents, signed cos −0.2966 |
+| 14 | per year | $\lvert\cos\rvert$ of year's $\mathbf q_1$, $\mathbf q_2$ with full sample; plane measure (the year's $\mathbf q_2$ on the full sample's $\mathbf q_2$, $\mathbf q_3$ plane, as row 13); $\lambda_2-\lambda_3$ | PC1 at least 0.98, lowest 0.980974 (2026), PC2 0.119 (2016) to 0.946 (2025); plane 0.690 (2020) to 0.959 (2024); min gap 2022 0.029 |
 | 15 | $\kappa$ ladder | $\kappa(C)$, $\kappa(\hat\Sigma)$ | LM7 1.2362, 2.2851; Semis/Fin 3.7043, 4.0337; S3 5.8823, 7.0449; S5 8.5162, 12.1177; U28 70.637, 108.085; Elec+8 836.3, 925.3; all 30 2,265.7, 2,410.7 |
 | 16 | E1 | Semis/Fin $\hat\Sigma\times10^4$ entries $(\hat\sigma_{11},\hat\sigma_{22},\hat\sigma_{12})$; (11.2) on 4-digit inputs; $\mathbf q_1$ angle; ann. vol; $\rho$ | 2.3234, 1.4817, 1.0666; 3.0492, 0.7559; 34.23°; 23.88%, 19.07%; 0.5749 |
 | 17 | E2 | LM7: `lm07_returns.parquet` R_0050, R_00679B (nulls dropped), $\Sigma=243.0543\,\hat\Sigma$ | $T=2{,}363$; 0.040789, 0.017850; $\mathbf q_1=(0.9920,-0.1260)$; −7.236°; 20.196%, 13.360%; factor 0.3912; $\rho=-0.1056$ |
@@ -222,7 +224,7 @@ $\hat\Sigma$ with divisor $T$; $\tilde X$ centred. Years by calendar year of the
 | 26 | 7 April 2025 $\mathbf z$ | given order; reversed order (Shipping, Plastics, Food, Financial, Semiconductor) | (−6.59, −5.35, −3.82, −1.32, −0.98); (−5.75, −4.52, −5.11, −2.71, −1.54) |
 | 27 | top-5 $\lVert\mathbf z_t\rVert^2$, S5 | dates and values | 2025-04-07 89.30; 2026-07-31 74.13; 2025-04-10 65.98; 2020-07-27 61.28; 2026-07-17 55.58 |
 | 28 | S3 on 7 April 2025 | $\lVert\mathbf z\rVert^2$; rank | 86.60; 1 |
-| 29 | LM7 problem | $\Sigma$ from 20.1%, 13.5%, −0.11: $l_{11}$, $l_{21}$, $l_{22}$; slope $\rho\sigma_2/\sigma_1$ | 0.20100, −0.01485, 0.13418; −0.0739 |
+| 29 | LM7 problem | LM7's printed $\Sigma$ (0.040425, −0.002866, 0.018214), as LM9 and LM11 use it: $l_{11}$, $l_{21}$, $l_{22}$; slope $\sigma_{12}/\sigma_1^2$; Problem 10's squared length | 0.20106, −0.014254, 0.134204; −0.0709; 2.5705 (printed 2.57) in both orders |
 | 30 | lab extension | `default_rng(20261011).standard_normal((4382,5)) @ L.T`, S5; $\hat\Sigma_{\text{sim}}$ centred, divisor $T$; $\lVert\hat\Sigma_{\text{sim}}-\hat\Sigma\rVert_F/\lVert\hat\Sigma\rVert_F$ | 0.025024 |
 | 31 | hand examples | E1, E2, E5 (exact integers; check by hand) | as listed |
 | 32 | `cond` table gaps | as in row 16, for S3, S5 and the U28 full sample | all below 1e-14 (5.0e-16, 2.9e-16, 6.5e-16 on one run) |

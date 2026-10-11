@@ -15,7 +15,9 @@ right page. Pages consulted for edition 0.1 that no current text cites are left 
 | FinMind `TaiwanStockTotalReturnIndex` | TAIEX total-return index (LM6 dividend measurement) |
 | FinMind `USStockPrice` | QQQ and TQQQ, calendar 2022 (LM3) |
 | FinMind `InterestRate` | tried for Taiwan's policy rate: not available (Fed, ECB and others only) |
-| FinMind `TaiwanVariousIndicators5Seconds` | tried for TAIEX intraday on 2025-06-30 |
+| FinMind `TaiwanVariousIndicators5Seconds` | tried for TAIEX intraday on 2025-06-30; from Volume II, TAIEX's official 13:30:00 close on the 52 dates whose spread prints 0.0 |
+| FinMind `TaiwanStockEvery5SecondsIndex` | the official 13:30:00 close of a TWSE sector index, one date per request; the 561 closes that repair FinMind's copied sector values (Volume II) |
+| FinMind `TaiwanStockInfo` | which index ids FinMind serves: none for the four sector indices TWSE launched on 30 June 2023 (`DigitalCloudServices` has no id and no `TaiwanStockPrice` rows; MCP query, 2026-10-12) |
 | TWSE `rwd/zh/TAIEX/MI_5MINS_HIST` (JSON) | TAIEX daily high/low around 27–30 June 2025 |
 
 Every registered FinMind file is fetched, and re-checked byte for byte, through the FinMind API with `data/fetch_finmind.py`.
@@ -92,7 +94,7 @@ Every registered FinMind file is fetched, and re-checked byte for byte, through 
 | NumPy 2.5 [`linalg.inv`](https://numpy.org/doc/2.5/reference/generated/numpy.linalg.inv.html) and [`linalg.det`](https://numpy.org/doc/2.5/reference/generated/numpy.linalg.det.html) | the inverse and the determinant, cited by LM9 and LM12 |
 | SciPy [`linalg.solve_triangular`](https://docs.scipy.org/doc/scipy/reference/generated/scipy.linalg.solve_triangular.html) (v1.18) | triangular solves with `lower=True`, cited by LM12 |
 | SciPy [`linalg.cholesky`](https://docs.scipy.org/doc/scipy/reference/generated/scipy.linalg.cholesky.html) (v1.18) | returns the upper factor by default |
-| 樂詞網, [terms.naer.edu.tw](https://terms.naer.edu.tw/) (國家教育研究院) | Chinese terms of the 中文導讀 (AUTHORING §1); Volume II's list is in `plans/vol-2.md`, "Chinese terms" (searched 2026-10-11) |
+| 樂詞網, [terms.naer.edu.tw](https://terms.naer.edu.tw/) (國家教育研究院) | Chinese terms of the 中文導讀 (AUTHORING §1); Volume II's list is in `plans/vol-2.md`, "Chinese terms" (searched 2026-10-11 and 12) |
 
 ## Papers and books (where bibliographic details were verified)
 
@@ -118,7 +120,11 @@ Every registered FinMind file is fetched, and re-checked byte for byte, through 
   90° rotation. Strang & Herman, *Calculus Volume 3*, OpenStax, Houston, 2016 (published 30 March 2016; CC BY-NC-SA
   4.0, free online at openstax.org): §4.7 "Maxima/Minima Problems", Theorem 4.18 "Extreme Value Theorem" for two
   variables (read 2026-10-11). Golub & Van Loan's ch. 8 and §8.3 come from tables of contents (a 4th-edition summary
-  and Cornell's GVL page), not from the book itself.
+  and Cornell's GVL page), not from the book itself; §2.6 "The Sensitivity of Square Systems", §3.3 "Roundoff Error in
+  Gaussian Elimination" and §3.4 "Pivoting" come from the 4th edition's table of contents on the distributor's page
+  (woodslane.com.au/products/9781421407944, read 2026-10-12). TWSE's IndexS03 (2023.06), Appendix 1, lists the four
+  sector indices launched with base date 2023-06-30 (綠能環保類, 數位雲端類, 運動休閒類, 居家生活類); IndexS02 (2023.04)
+  gives TAIEX as total market value over the base value, times 100 (both re-read 2026-10-12).
 
 ## Writing style (AUTHORING §1, checked 2026-10-11)
 
