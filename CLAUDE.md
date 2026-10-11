@@ -21,6 +21,9 @@ An independent personal-study project.
   (scope, depth, length, style, notation, examples, cases) is delegated to Claude as the editor: decide on evidence,
   report the reasons, accept his veto. The numbers in `AUTHORING.md` are editorial choices, revisable with evidence;
   the owner's decisions are those `project/SPEC.md` attributes to him.
+- **Process is the editor's choice** (owner, 2026-10-11): this is a learning-content project, not a software
+  project. No SDD, OpenSpec or other process skill is required; decide per task whether any process helps. The
+  default is the project's own cycle: briefs in `plans/`, the queue in `TODO.md`, the gates of AUTHORING §10–§11.
 - **Source authenticity comes first** (owner, 2026-10-11): textbooks, papers, official documents, FinMind data and
   Claude's own knowledge are all acceptable sources, but every citation is checked to exist as cited, and no data,
   reference or quotation is ever invented.

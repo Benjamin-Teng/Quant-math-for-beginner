@@ -7,16 +7,50 @@ How a learning module (LM) is written, checked, reviewed and published. The refe
 
 - **Reader:** a Taiwan-based futures/securities professional reviewing university mathematics on the way to
   quantitative portfolio work. Comfortable with markets; rusty on proofs. Prefers derivations to assertions and
-  expects approximations to be called approximations.
+  expects approximations to be called approximations. Reads English as a second language and wants the tools
+  learned systematically rather than a lot of material: worked examples, diagrams and formulas carry the content,
+  and the prose connects them (owner, 2026-10-11).
 - **Language:** English body text. Hard ideas get a **中文導讀** callout (`> [!zh]`) in Traditional Chinese, about one
   per one or two sections, 3–6 sentences, never a translation of the paragraph above it but the intuition behind it.
   Keep English terms in the Chinese text where they help (e.g. 波動拖累 volatility drag). Use Taiwan usage
   (最適, not 最優; 權益歸零 for zero equity, since 斷頭 means forced liquidation).
-- **Voice:** textbook register, concise. Sentences under 25 words; paragraphs of at most four sentences. The
-  limits are for prose: the symbol lists of a notation note and an exhibit's source note may run longer.
-  Active voice, concrete numbers, no filler ("it is worth noting", "in today's world"), no emoji, no questions as
-  headings.
-- **Length:** 30–40 A4 pages when printed (roughly 8,000–11,000 words including examples, problems and solutions).
+- **Voice:** textbook register, concise. Active voice, concrete numbers, no filler ("it is worth noting", "in
+  today's world"), no emoji, no questions as headings. For a reader of English as a second language, clarity comes
+  before brevity. The sub-rules below are for English text: all of it from Volume II on, and new or changed
+  sentences in Volume I (why: `project/PITFALLS.md` §6, "Hard sentence caps"). A 中文導讀 follows the Language rule,
+  the first two sentences of this item and the formula-punctuation rule.
+  - A sentence ends at `.`, `?` or `!` (a semicolon does not end it) and makes one main point; a definition, theorem
+    or result may state linked conclusions in one sentence.
+  - Put the main clause early: a condition may come first ("If …, then …"; "When …, …"), a chain of clauses may not.
+    Keep the logical connectors (because, so, hence, but): a shorter sentence that has lost its "because" is worse.
+  - Sentences average under 16 words in a module, and none exceeds 30. A sentence of 25–30 words stays only when it
+    binds conditions to a conclusion, lists parallel items or carries one chain of reasoning; otherwise split it.
+  - One idea per paragraph, at most 80 words. Each list item, each lettered part of a solution and each text block of
+    a box is a paragraph; a sentence that continues after a display stays one sentence of its paragraph.
+  - A bare "this", "it" or "that" never refers back across a paragraph break; after a display, name what you refer to
+    ("this equation", "(10.3)").
+  - A theorem with more than two hypotheses lists them (a hypothesis is a clause with its own verb; standing
+    assumptions may go in a "Let …" sentence before it).
+  - One term per concept: the term in the module's Glossary, which keeps an earlier module's term for the same
+    concept; no synonyms for variety. Plain verbs rather than idioms or phrasal verbs ("exclude", not "rule out").
+  - Avoid noun stacks (at most two nouns before the head noun), stacked negatives and more than one colon in a
+    sentence. An inline formula longer than about 15 symbols goes in a display.
+  - Never start a sentence with a symbol, that is anything in math mode: "The variance is $V=…$", not "$V=…$ is …".
+    A ticker or a number (even in math mode) may start a sentence, an entry of a notation note may start with the
+    symbol it defines, and a part label such as (a) is not part of the sentence. Separate two formulas by words.
+  - Counting: split on white space after replacing each inline formula and each `[[…]]` reference by one token.
+    Exempt from the sentence and paragraph limits: the symbol lists of a notation note, the Source and Computations
+    sentences of an exhibit note, tables, code and displayed math.
+- **Formula punctuation (every volume):** after an inline formula put a space, an opening bracket or a character the
+  renderer keeps on the formula's line (`GLUE` in `build/build.py`: `. , ; : ! ? ) ] ’ ” " '` and `，。、」』）】》！？`).
+  Anything else, such as a hyphen, a dash, a letter, `%` or a fullwidth `；` or `：`, can start the next line
+  (`project/PITFALLS.md` §4): write `$k\text{th}$` or "step $k$", "$5\%$", "from $k$ to $m$", and recast the Chinese
+  clause.
+- **Length:** from Volume II, at most 6,000 words of prose and 36 A4 pages, examples, problems and solutions
+  included; first drafts stay under 5,500 words so that revisions have room. Prose is counted as in Voice over the
+  English text after the front matter, without displays, tables, code, headings, box titles, the Glossary and the
+  References (Volume I modules have 6,300–8,300 such words and run 33–40 pages; Volume I keeps its 40-page limit and
+  has no word limit).
 
 ## 2. File layout for module NN
 
@@ -221,9 +255,13 @@ Standard wording, the same in every module (FinMind's licence forbids redistribu
 3. Screenshots in light and dark mode look right (`build/qa/shoot.py`).
 4. Every number reproduced by the scripts; every `[[ex:…]]`/`[[eg:…]]` points where the prose intends.
 5. The lab executes from a clean kernel.
-6. The PDF (`build/render_pdf.py`) has at most 40 pages and is not shrunk: `uv run python build/qa/pdf_scale.py
+6. The PDF (`build/render_pdf.py`) has at most 40 pages (Volume I) or 36 pages (from Volume II, §1) and is not
+   shrunk: `uv run python build/qa/pdf_scale.py
    <pdf>`. Chromium shrinks the whole document when anything is wider than the A4 text width, so a page count from a
    shrunk PDF is too low; `build/qa/print_width.py <html>` lists what sticks out.
+7. From Volume II, the §1 counts hold: at most 6,000 words of prose, no sentence over 30 words, an average under 16,
+   no paragraph over 80 words; in every volume, nothing after an inline formula that §1's formula-punctuation rule
+   does not allow.
 
 ## 11. Review and publishing
 

@@ -103,3 +103,42 @@ All FinMind queries ran through the FinMind MCP server on the owner's computer, 
   (mathpop.com) and bookseller listings. Hull, *Options, Futures, and Other Derivatives*, 11th ed. (Global Edition),
   Pearson, print ISBN 9781292410654 — Pearson's catalogue gives copyright 2022 (published 5 July 2021). Modules cite
   them as Spivak (2008) and Hull (2022) (checked 2026-10-11).
+
+## Writing style (AUTHORING §1, checked 2026-10-11)
+
+Read for the Volume II style rules; each statement below was checked against the source by a second agent or by the
+editor.
+
+- GOV.UK [A to Z style guide](https://guidance.publishing.service.gov.uk/writing-to-gov-uk-standards/style-guides/a-to-z-style-guide/),
+  "Sentence length": check sentences of more than 25 words to see whether a split makes them clearer. Inside GOV.UK,
+  ["Sentence length: why 25 words is our limit"](https://insidegovuk.blog.gov.uk/2014/08/04/sentence-length-why-25-words-is-our-limit/)
+  (Sara Vincent, 2014-08-04): break such sentences up or condense them, and otherwise keep them plain.
+- European Commission, Directorate-General for Translation, *How to write clearly* (2011, ISBN 978-92-79-16957-1; read
+  in a third-party copy of the official PDF): 20 words a sentence on average, and keep link words such as "but", "so"
+  and "however" when splitting.
+- Plain English Campaign, *How to write in plain English* (`howto.pdf`, linked from plainenglish.co.uk/free-guides): an
+  average sentence length of 15 to 20 words.
+- PLAIN, Federal Plain Language Guidelines, "Write short paragraphs"
+  ([archived source](https://raw.githubusercontent.com/GSA/plainlanguage.gov/main/_pages/guidelines/concise/write-short-paragraphs.md)):
+  paragraphs of no more than 150 words in three to eight sentences.
+- Halmos, "How to Write Mathematics", *L'Enseignement Mathématique* 16 (1970): a theorem statement is one sentence
+  whenever possible; never start a sentence with a symbol.
+- Knuth, Larrabee and Roberts, *Mathematical Writing*, MAA Notes 14 (1989): symbols in different formulas are separated
+  by words (§1); M.-C. van Leunen's class (§35): averages under 20 words a sentence, with varied lengths.
+- Krantz, *A Primer of Mathematical Writing*, 2nd ed. ([arXiv:1612.04888](https://arxiv.org/abs/1612.04888), 2016):
+  short declarative sentences and short paragraphs, each with one point.
+- Blau, "The Effect of Syntax on Readability for ESL Students in Puerto Rico", *TESOL Quarterly* 16(4) (1982),
+  [doi:10.2307/3586469](https://doi.org/10.2307/3586469) (abstract read in an OpenAlex copy): complex sentences with
+  the clues to their relationships left intact scored highest, above short simple sentences, so material at a lower
+  readability-formula level did not help these second-language readers understand.
+- Yano, Long and Ross, "The Effects of Simplified and Elaborated Texts on Foreign Language Reading Comprehension",
+  *Language Learning* 44(2) (1994), [doi:10.1111/j.1467-1770.1994.tb01100.x](https://doi.org/10.1111/j.1467-1770.1994.tb01100.x)
+  (Crossref abstract): comprehension of the simplified and the elaborated versions did not differ significantly.
+- Crossley, Allen and McNamara, "Text readability and intuitive simplification: A comparison of readability
+  formulas", *Reading in a Foreign Language* 23(1): 86–101 (2011),
+  [ScholarSpace record](https://scholarspace.manoa.hawaii.edu/items/fc754b04-a1ef-4176-885e-e4389a3a27e0/full): an index
+  built on cognitive measures sorted intuitively simplified texts into beginning, intermediate and advanced levels
+  significantly better than traditional readability formulas built on sentence and word length.
+- Nielsen Norman Group: Nielsen, ["How Users Read on the Web"](https://www.nngroup.com/articles/how-users-read-on-the-web/)
+  (1997), one idea per paragraph; Moran, ["Reading Content on Mobile Devices"](https://www.nngroup.com/articles/mobile-content/)
+  (2016), no practical difference in comprehension between phones and desktops.

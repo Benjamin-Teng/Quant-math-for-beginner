@@ -34,8 +34,14 @@ WHAT TO CHECK
    outcomes vs {lo=…}, problem/solution numbering, widget initial state.
 5. Notation against AUTHORING §6: report every clash inside the module or with the table.
 6. Facts and references: {FACTS}; illustrative inputs labelled.
-7. Pedagogy and language: nothing used before it is taught without a pointer; length (30–40 A4 pages); 導讀 boxes in
-   accurate Traditional Chinese with Taiwan usage; English clear. Confirm check_terms passes.
+7. Pedagogy and language: nothing used before it is taught without a pointer; 導讀 boxes in accurate Traditional
+   Chinese with Taiwan usage; English clear. Length: Volume I at most 40 A4 pages; from Volume II at most 6,000 words
+   of prose (AUTHORING §1's count) and 36 pages. Apply AUTHORING §1's Voice sub-rules (to every sentence from Volume
+   II on, to new or changed sentences in Volume I) and report every breach, in particular a sentence over 30 words, a
+   module average of 16 words or more, a paragraph over 80 words, a dropped connector, and a bare "this"/"it"/"that"
+   referring back across a paragraph break. A 25–30-word sentence is a breach only when it does not bind conditions
+   to a conclusion, list parallel items or carry one chain of reasoning. In every volume, report a character after
+   an inline formula that §1's formula-punctuation rule does not allow. Confirm check_terms passes.
 8. Rendering: no raw `$`, no katex-error elements, no broken links, no empty exhibits; no overflow at 400 px.
 
 OUTPUT: a prioritized list. For each finding: severity (critical = a reader would learn wrong math or a wrong number;
@@ -63,8 +69,8 @@ requests). Before handing back, run `git grep -nE "uv pip install|python3 |bundl
 dist/preview/lm/lm{NN}.html 400`, regenerate and execute the lab, and re-check every number you changed
 against script output.
 
-HAND-BACK: each finding → fixed or declined (with the reason); numbers that changed; new word count (and page count
-if length was a finding); anything left for the editor.
+HAND-BACK: each finding → fixed or declined (with the reason); numbers that changed; new word count (from Volume II,
+AUTHORING §1's prose count) and page count; anything left for the editor.
 ```
 
 ## 3. Verifier (after the revision)

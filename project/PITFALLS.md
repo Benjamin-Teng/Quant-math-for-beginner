@@ -171,6 +171,21 @@ unless stated.
 - **Interrupted agents keep their context**; resume them with a message instead of starting fresh.
 - **Give writers the cross-module notation decisions up front.** Six drafts written in parallel clashed on f, L, G, φ,
   g, D, T and q until AUTHORING §6 fixed a book-wide table.
+- **Hard sentence caps produced mechanical edits that broke the text** (Volume I, 2026-10-11). "Sentences under 25
+  words; paragraphs of at most four sentences" was an assistant's reading of the owner's "concise prose", and it was
+  enforced sentence by sentence on the text the reviews touched. The caps fought each other and the word budget
+  (merges made to meet the four-sentence cap and the 11,000-word budget raised LM6's sentences over 25 words from 10
+  to 34). Splits lost a verb (LM3 V11) and changed a claim (LM3 V14); a split paragraph sent "also" back across the
+  break (LM6 V16), and a moved sentence left "that day" pointing at the payment date instead of the ex-date (LM6
+  V25). No review ever found a long sentence hard to read; the readability faults were ambiguous references and
+  dropped conditions. The sources agree: GOV.UK's 25 words is a prompt to check whether a split helps, not a ban;
+  averages of 15–20 words are the usual target; none of the guides surveyed asks for four-sentence paragraphs. For
+  second-language readers, Blau (1982) found complex sentences that kept their connectors better understood than
+  short simple ones, and Yano, Long and Ross (1994) found longer, more explicit texts understood about as well as
+  simplified ones. Rule (AUTHORING §1): an average and a ceiling for sentences, a word cap for paragraphs (so splitting
+  a sentence cannot break it), connectors kept, no bare reference across a break, and a prose budget for length.
+  Volume I averaged 13.4 words a sentence by the §1 count, which treats a formula as one word and so runs below
+  counts of ordinary prose; the cap of 16 keeps that style without forcing splits.
 
 ## 7. Content errors the reviews caught (check these before handing a module over)
 

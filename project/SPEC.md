@@ -31,13 +31,13 @@ material: worked examples, diagrams and formulas carry the content, and the pros
 | Language | English body text with technical terms in English; hard ideas get a Traditional Chinese 中文導讀 box | owner's choice |
 | Rigor | derivations complete; optional rigorous proofs in collapsed Deep Dive boxes | owner's choice |
 | Code | short Python snippets in the text, plus one Jupyter lab per module; Polars first | owner's choice |
-| Length | no limit for the whole book; each module 30–40 A4 pages | original brief, where Claude (Cowork) chose the numbers; an editorial matter since 2026-10-11 (AUTHORING §1) |
+| Length | no limit for the whole book; Volume I modules 30–40 A4 pages; from Volume II at most 6,000 words of prose and 36 pages (AUTHORING §1) | original brief, where Claude (Cowork) chose the numbers; an editorial matter since 2026-10-11; Volume II numbers: editor, 2026-10-11 |
 | Presentation | clear heading hierarchy; diagrams, charts and worked examples; concise prose; real market situations as cases | original brief |
 | Data | real Taiwan and US market data (FinMind), verified against FinMind's own checksums; every printed number reproduced by a script | agreed while building LM3 |
 | Historical data source | FinMind only, including intraday history (5-second TAIEX, minute bars, ticks); Shioaji is not used for historical data | owner, 2026-10-10 |
 | Raw data in the repo | none: raw FinMind files are git-ignored and rebuilt from `data/raw_manifest.json` with `data/fetch_finmind.py`; history purged of them | owner, 2026-10-10 |
 | FinMind plan | Sponsor: 6,000 API calls an hour and every Free, Backer and Sponsor dataset; non-commercial licence that forbids redistributing raw data and requires citing FinMind | owner, 2026-10-10 |
-| Remaining volumes | five batches after Volume I: II + III, IV + V, VI + VII, VIII, IX (`plans/ROADMAP.md`) | agreed 2026-10-10 |
+| Remaining volumes | six batches after Volume I: II, III, IV + V, VI + VII, VIII, IX (`plans/ROADMAP.md`) | agreed 2026-10-10; Volume II on its own: owner, 2026-10-11 |
 | Hosting | GitHub repo [Benjamin-Teng/Quant-math-for-beginner](https://github.com/Benjamin-Teng/Quant-math-for-beginner) (public); the built site in `docs/` is served by GitHub Pages from `main` `/docs` at <https://quantmath.fintools.tw> (`build/build.py` writes `docs/CNAME`; DNS at Gandi: `quantmath CNAME benjamin-teng.github.io.`, and the TXT record `_github-pages-challenge-Benjamin-Teng` that keeps `fintools.tw` verified for this GitHub account must stay) | owner, 2026-10-10; domain 2026-10-11 |
 | Git | commit and push directly to `main`; no pull requests | owner, 2026-10-10 |
 | License | MIT (`LICENSE`); FinMind data remain subject to FinMind's terms | owner, 2026-10-10 |
