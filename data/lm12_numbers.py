@@ -2,10 +2,13 @@
 
 Run:  uv run python data/lm12_numbers.py      (after data/vol2_series.py has written processed/vol2_closes.parquet)
 
-Inputs: data/processed/vol2_closes.parquet only (TAIEX and the 30 TWSE sector indices, closes repaired from the
-13:30:00 values by data/vol2_series.py). Sample: closes 2008-12-01 .. 2026-10-08, daily simple returns between
-consecutive TAIEX-calendar dates, T = 4,382 (first return 2008-12-02); U28 = the 28 sector indices without the
-aggregates Electronic and ChemicalBiotechnologyMedicalCare. Moments divide by T. A fit is least squares of TAIEX's
+Inputs: data/processed/vol2_closes.parquet (TAIEX and the 30 TWSE sector indices, closes repaired from the 13:30:00
+values by data/vol2_series.py), the file names in data/raw/sectors_close/ (one per repaired close: they show that no
+top-five day uses a repaired close) and src/lm12.md (the text the checks compare against).
+
+Sample: closes 2008-12-01 .. 2026-10-08, daily simple returns between consecutive TAIEX-calendar dates, T = 4,382
+(first return 2008-12-02); U28 = the 28 sector indices without the aggregates Electronic and
+ChemicalBiotechnologyMedicalCare. Moments divide by T. A fit is least squares of TAIEX's
 returns on the sector returns with an intercept (np.linalg.lstsq on (1 X)); R-squared = 1 - |e|^2 / |y - mean(y)|^2.
 
 Each check chk(label, value, fmt, printed) asserts that format(value, fmt) equals the printed string and that the
