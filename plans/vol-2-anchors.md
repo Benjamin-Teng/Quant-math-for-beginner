@@ -135,7 +135,7 @@ U28 sample: closes of the 28 leaf sectors from `vol2_closes.parquet`, dates 2008
 | 21 | E7 matrix (the module builds it from the block rounded to whole %²: 416, 313, 364.5; minors 138,836, 34,709, 34,709; det 0) | E3 block + third row $(0.5(570.3+261.8),\ 0.5(261.8+363.7),\ 0.25\cdot570.3+0.5\cdot261.8+0.25\cdot363.7)$; $2\times2$ minors; det | 416.05, 312.75, 364.4; 138,878.87, 34,719.7175, 34,719.7175; 0 |
 | 22 | E7 rounded | det of the computed 50/50 matrix with entries rounded to 0.1 (416.1, 312.8, 364.4) | −13,888.91 |
 | 23 | rank windows | `matrix_rank(np.cov(X[-T:], rowvar=False, ddof=0))` for $T=20..35$, asserted $=\min(T-1,28)$; first dates | $T=28$: 27 from 2026-08-28; $T=29$: 28 from 2026-08-27 |
-| 24 | collinear | S5 + its EW series: rank; $\lvert\mathbf v^{\top}\hat\Sigma\mathbf v\rvert$, $\mathbf v=(\frac15,\dots,\frac15,-1)$ | 5; below 1e-15 |
+| 24 | collinear | S5 + its EW series: rank; $\lvert\mathbf x^{\top}\hat\Sigma\mathbf x\rvert$, $\mathbf x=(\frac15,\dots,\frac15,-1)$, daily $\hat\Sigma$ in decimal units | 5; below 1e-15 (the residue scales with the entries: larger for an annualized matrix in %², and it differs between machines) |
 | 25 | E9 correlations | one-session total returns (row 30), per calendar year, each pair on its common dates: 0050/00631L 2018; 0050/00679B 2023; 00631L/00679B 2019; $T_{ij}$ | 0.982 (247); 0.199 (239); −0.444 (242) |
 | 26 | E9 det, form | from the 3-decimal entries; $\mathbf x=(-1,1,1)$ | −0.374592; −0.25 |
 | 27 | witnesses | $\det C\cdot\operatorname{adj}(C)_{jj}$, $j=1,2,3$ | −0.3007, −0.3598, −0.0134 |

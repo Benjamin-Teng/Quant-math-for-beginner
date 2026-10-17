@@ -120,8 +120,8 @@ Every registered FinMind file is fetched, and re-checked byte for byte, through 
   90° rotation. Strang & Herman, *Calculus Volume 3*, OpenStax, Houston, 2016 (published 30 March 2016; CC BY-NC-SA
   4.0, free online at openstax.org): §4.7 "Maxima/Minima Problems", Theorem 4.18 "Extreme Value Theorem" for two
   variables (read 2026-10-11). Golub & Van Loan's ch. 8 and §8.3 come from tables of contents (a 4th-edition summary
-  and Cornell's GVL page), not from the book itself; §2.6 "The Sensitivity of Square Systems", §3.3 "Roundoff Error in
-  Gaussian Elimination" and §3.4 "Pivoting" come from the 4th edition's table of contents on the distributor's page
+  and Cornell's GVL page), not from the book itself; §3.4 "Pivoting" comes from the 4th edition's table of contents
+  on the distributor's page
   (woodslane.com.au/products/9781421407944, read 2026-10-12). TWSE's IndexS03 (2023.06), Appendix 1, lists the four
   sector indices launched with base date 2023-06-30 (綠能環保類, 數位雲端類, 運動休閒類, 居家生活類); IndexS02 (2023.04)
   gives TAIEX as total market value over the base value, times 100 (both re-read 2026-10-12).
