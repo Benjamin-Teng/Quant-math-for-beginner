@@ -1,25 +1,29 @@
-# TODO — handoff (2026-10-12)
+# TODO — handoff (2026-10-17)
 
 > 給接手的 Claude Code：先讀 `CLAUDE.md`，再依下列順序執行。每完成一項就 commit 並直接 push 到 `main`，並用繁體中文向 Benjamin 回報。
 
 ## Where things stand
 
-- **Volume I is published (edition 0.2, 2026-10-11).** LM1–LM7 are on the site (`docs/`) with A4 PDFs and executed
-  labs. Edition 0.2.1 adds the reordered Volumes V–VII, Volume I's punctuation fixes, and the Getting Started and
-  Research hygiene pages. Each module went through an independent review, a verifier, the editor's gates (a blind solve of every
-  question with a key check, and a full audit of its numbers from `data/raw/`), revision rounds and a closing
-  verification. Every finding in [`reviews/`](reviews/README.md) is verified fixed, except LM1's V12, withdrawn on the
-  owner's clarification of 2026-10-11. The records hold the decisions; `project/PITFALLS.md` holds the lessons.
+- **Volumes I and II are published (edition 0.3, 2026-10-17).** LM1–LM12 are on the site (`docs/`,
+  <https://quantmath.fintools.tw>) with A4 PDFs and executed labs. Volume II went through the four stages below: the
+  briefs, data, anchors and tooling; five writers; a review round (reviewer, blind solver, number auditor and a
+  cross-module check: 180 items, 2 critical (one defect, LM11 finding 1 = K1), 29 major), two revisions, a verification and a closing check; then
+  publication. Each `reviews/lmNN.md` holds the findings, decisions and rounds; `reviews/README.md` lists the findings
+  left unfixed and why. `project/PITFALLS.md` holds the lessons.
 - **The owner's decisions of 2026-10-11** (in `CLAUDE.md` and `project/SPEC.md`): he oversees code, site and
   repository; every content and editorial decision is the editor's (Claude's), reported with reasons; the process
-  is the editor's choice (no SDD or OpenSpec); source authenticity comes first; Volume II is published on its own
-  as edition 0.3, and Volume III becomes the next batch.
+  is the editor's choice (no SDD or OpenSpec); source authenticity comes first.
 - **Writing rules from Volume II** (AUTHORING §1; why: PITFALLS §6): sentences average under 16 words and never
   exceed 30; paragraphs at most 80 words; connectors kept; at most 6,000 words of prose and 36 pages a module. The
   formula-punctuation rule applies to every volume. Volume I keeps its text and its 40-page limit.
 - Reviews and verifications use fresh Opus subagents, never Codex (the owner's instruction, 2026-10-10). The editor
   (main session) recomputes every major finding before accepting it and passes no agent claim through unchecked.
-- The local branches `rev/lm01` … `rev/lm07` and their worktrees are merged (squash) and can be deleted.
+- **Publishing deploys the site.** GitHub Pages serves `docs/` from `main` (README, "Hosting"), so a push that
+  carries a rebuilt `docs/` goes live; nothing is built on GitHub. Run `./build.sh --pdf` and commit `docs/` with
+  `src/`, `data/` and `labs/` (AUTHORING §11).
+- The brief and anchors keep the plan and the corrected facts (preface of `plans/vol-2.md`); values and wording that
+  a revision changes in a module are not copied back. Four of the closing check's six refuted items (LM8 C1, CX1–CX3) rest on this rule; reviews/README.md gives the
+  reasons for CX4 and CX5.
 
 ## Owner action (not for Claude Code)
 
@@ -27,84 +31,63 @@
   data") to remove cached views and pull-request references for commits purged on 2026-10-10 because they contained
   raw FinMind data: PR #1 head `e3ed88b`, and the old `main` commits `cfc45f0`, `a9de9cf`, `44d199c`, `8ec5034`,
   `f959c26`, `49b0748`, `5b56679`.
+- Optional, site code: the front page's install block (`build/build_index.py`, the `git clone … cd …` line) is
+  755 px wide in print against the 680 px text width (`build/qa/print_width.py docs/index.html`). It was so in 0.2;
+  on screen it scrolls inside its box, and the front page has no PDF.
+- Proposed, site code (pre-existing since 0.2): every link from one page to another in the PDFs points to the
+  author's disk (`file:///D:/projects/…/docs/lm/lm07.html`), 329 links in the 12 PDFs, because `build/render_pdf.py`
+  prints `docs/` opened as `file://`. Fix: right after `pg.goto(...)`, rewrite each `a[href]` whose protocol is
+  `file:` and whose page differs from the current one to `https://quantmath.fintools.tw/…`, leaving same-page
+  anchors as internal PDF links; then `./build.sh --pdf`, check `grep -ac 'file:///' docs/pdf/*.pdf` gives 0 and
+  that each PDF keeps its count of internal links.
+- Optional, `book.js`: the options the Volume II writers asked for (bar-label text for LM8's `angles`, ellipses above
+  points for LM11's Exhibit 3, a significant-figure `Book.fmt` code); the modules work without them.
 
-## Volume II (edition 0.3)
+## Next: Volume III (edition 0.4)
 
-The owner approved the tooling, the data pipeline and the repository process on 2026-10-11. Scope and module plan:
-`plans/ROADMAP.md` and, once written, `plans/vol-2.md`.
+Follow [`plans/ROADMAP.md`](plans/ROADMAP.md): batch 2 is Volume III (LM13–LM18), then IV, V + VI, VII, VIII and IX.
+Each batch repeats Stages 1–4 and bumps the edition (the owner confirmed the process, 2026-10-11). Ask the owner about
+code, site, repository and his standing rules, and about the open decisions at the end of the roadmap before the batch
+that needs them; content is the editor's call.
 
-**Stage 1, before any writer starts.** Done on 2026-10-11; every item had a fresh Opus check and the editor's
-re-check of each fix.
+**Stage 1, before any writer starts**, in this order:
 
-1. **Data.** 403 files under `data/raw/sectors/` (TAIEX and the 30 TWSE sector indices, 2007-07-02 → 2026-10-08).
-   FinMind serves copied values in that series (PITFALLS §3), so 561 closes under `data/raw/sectors_close/` (the
-   13:30:00 value of `TaiwanStockEvery5SecondsIndex`) replace them and 52 files under `data/raw/taiex_close/` confirm
-   TAIEX; `data/vol2_series.py` builds `data/processed/vol2_closes.parquet` and stops on anything it cannot explain.
-   A free-plan reader skips `sectors_close/` with `fetch_finmind.py --exclude`. An independent check compared 640
-   closes on extreme days with the 13:30:00 values: all match, and GlassCeramic's high volatility is real.
-2. **Anchor numbers.** `plans/vol-2-anchors.md`, recomputed by independent code; its corrections are applied and each
-   module's status line records them.
-3. **Notation.** AUTHORING §6 has the vectors-and-matrices table and the $L$ and $\lambda$ rows.
-4. **Tooling.** Bar, heatmap, scatter and vector charts in `src/assets/book.js`, with build gates; `build/qa/style.py`
-   (AUTHORING §1 counts and formula punctuation) and `build/qa/display_scroll.py` (§10 items 7 and 8); the notation
-   row on the front page. Before Stage 2 (2026-10-11): `data/make_lab_data.py` writes each Volume II lab's two
-   sector files (`plans/vol-2.md`, "Labs") and runs without `sectors_close/`; `book.js` draws the charts again once
-   the web fonts arrive, and a click in the outline moves the focus to the target heading (owner-approved).
-5. **Volume I punctuation.** The 15 spots are rewritten; `style.py` finds none left.
-6. **Briefs.** `plans/vol-2.md`, from two designs per module and the editor's decisions. Its facts were checked on
-   official pages, software references and bibliographic records (`project/SOURCES.md`), and its Chinese terms come
-   from 樂詞網 (AUTHORING §1).
-7. **Renumbering and two new pages.** Volumes V–VII reordered and LM27–LM40 renumbered (edition 0.2.1): syllabus,
-   front-page map, Volume I's references and leads, the LM7 lab, AUTHORING, SPEC, `plans/vol-1.md`. The **Getting
-   Started** and **Research hygiene** pages are published; every Volume II module that estimates, selects or
-   backtests carries a short note pointing to the second.
+1. Briefs (`plans/vol-3.md`) within ROADMAP's module boundaries, with notation that follows AUTHORING §6 ("Common
+   notation first"). Volume II's forward links name what Volume III owes: LM16 (population covariance and joint
+   distributions, uncorrelated against independent, the multivariate normal and the squared Mahalanobis distance,
+   colouring), LM18 (random generation and Monte Carlo error); scan `src/lm*.md` for `[[LM13]]`
+   … `[[LM18]]` and honour each.
+2. **Capability check.** List every exhibit, widget, dataset and Python package the briefs need; check each against
+   `src/assets/book.js`, `build/qa/`, `data/` and `pyproject.toml`; send the owner one list of what is missing (site
+   code, data pipeline, new packages) and build what he approves before any writer starts.
+3. Data: fetch through the API, check every new series as PITFALLS §3 says, and register it in the manifest.
+4. Anchors (`plans/vol-3-anchors.md`): every number the briefs quote, with its definition, recomputed by independent
+   code; facts checked on official sources (`project/SOURCES.md`).
+5. Lab data: `data/make_lab_data.py` writes each lab's files, and the briefs name them.
+6. A fresh check of the whole of Stage 1, then commit and push.
 
-**Stage 2, writing.** Five writers in parallel, one module each on its own worktree branch (`vol2/lmNN`), with
-AUTHORING (§1, §6), PITFALLS and the brief up front. First drafts stay under 5,500 words of prose; numbers scripts
-assert from the start that every printed value appears in the text and follows from the printed inputs. Writers run
-`style.py`, the build, `overflow.py` at 400 px, `print_width.py`, `pdf_scale.py` and `check_terms.py` before handing
-back. At each hand-back the editor rebases the branch, fast-forwards `main` and pushes (drafts never reach `docs/`
-without `status: published`), so review records cite commits on `main`. **Done 2026-10-11:** the five drafts
-(5,371–5,493 words of prose, 32–33 pages) are on `main`; the editor re-ran every gate there (numbers scripts, charts
-unchanged, style FAIL 0, 400 px, displays, print width, PDF scale 1.0000, terms, ruff, ty, labs without errors).
-Open from the hand-backs, for Stage 3: cross-module equation numbers (LM9 and LM10 cite LM8's and LM9's tags from
-the briefs), LM12's References (IndexS02 is TAIEX's rules, IndexS03 the sector series'), the extra 樂詞網 terms the
-writers checked (record them in SOURCES and the brief), Hessian as 海森矩陣 (LM7's form, kept), and two book.js
-options (bar-label text for LM8's `angles`, ellipses above points for LM11's Exhibit 3). In a worktree, `ty` needs
+**Stage 2, writing.** One writer per module on its own worktree branch (`vol3/lmNN`), with AUTHORING (§1, §6),
+PITFALLS and the brief up front. First drafts stay under 5,500 words of prose; numbers scripts assert from the start
+that every printed value appears in the text and follows from the printed inputs (a printed string with LaTeX is a
+raw string: `"\times"` holds a tab). Writers run `style.py`, the build, `overflow.py` and `display_scroll.py` at
+400 px, `print_width.py`, `pdf_scale.py` and `check_terms.py` before handing back, and scan each 中文導讀 box for terms
+without their English at first use (the most frequent minor finding in Volume II). In a worktree, `ty` needs
 `--python` pointing at the main checkout's `.venv`.
 
-**Stage 3, review.** Per module, in parallel in round 1: the independent reviewer (`reviews/REVIEW_PROMPT.md`), the
-blind solver (K) and the number auditor (A, exact arithmetic from `data/raw/`); one consolidated list with the
-editor's decisions → writer → verifier (fixes, changed lines, `style.py`) → closing pass → the editor's fixes → a
-fresh check.
+**Stage 3, review.** Per module, in parallel: the independent reviewer (`reviews/REVIEW_PROMPT.md`), the blind solver
+(K) and the number auditor (A), plus one cross-module check (X) for the volume; one consolidated list with the
+editor's decisions → writer → verifier → closing check with a fresh adversarial second check of every new item → the
+editor's fixes → a fresh check.
 
-**Where Stage 3 stands (2026-10-12; paused by the owner until the weekly token reset, Saturday 2026-10-17).** Round 1
-(reviewer, blind solver, auditor, Volume II cross-module check) found 180 items (1 critical, 29 major); revision 1
-fixed all, and verification 1 confirmed all but four, adding 30 minor items. Revision 2 fixed every item marked
-"round 2" and is on `main` with every gate passing (prose 5,658–5,969 words, 33–36 pages at scale 1.0000). Each
-`reviews/lmNN.md` holds the findings, decisions, both revisions and the verification. **Resume here:**
-
-1. Closing check (read-only, fresh agents; `reviews/REVIEW_PROMPT.md` §3 with REVIEWED_COMMIT `b9ef6ae`): one
-   verifier per module for the "Verification 1" items and anything the round-2 edits changed, plus one Volume II
-   re-check of notation, terms and cross-references.
-2. The editor's small fixes, then a fresh check of them: LM9's Section 8 code comment "# 2: one combination is zero"
-   → "one non-zero combination"; LM12's Cholesky 中文導讀 glosses (變異數, 互不相關, 對角線); `project/SOURCES.md`
-   no longer needs Golub and Van Loan §2.6 and §3.3 for LM12 (keep §3.4 for LM9 and ch. 8 for LM11); optional:
-   the brief's LM11 notation (ℓ, ζ) and anchors row 24's note on residues in %².
-3. Stage 4 below. Optional for the owner: `book.js` options the writers asked for (bar-label text, ellipses above
-   points, a significant-figure `Book.fmt` code); the modules work without them.
-
-**Stage 4, publishing 0.3.** `status: published` for LM8–LM12; the 0.3 edition note; the README status table; prereq
-and leads consistent both ways (Volume I modules gain leads to the Volume II modules that build on them, e.g. LM7 →
-8, 9, 11; check the chips at 400 px), with a fresh check; `./build.sh --pdf`; AUTHORING §10 on every page,
-`build/qa/overflow.py` at 400 px and `build/qa/print_width.py` on every page, no dead links, and
-`git grep --untracked -nE "uv pip install|python3 |bundled|source \.venv|import requests" -- src labs build data`
-finds nothing (options before the pattern).
+**Stage 4, publishing.** `status: published`, the edition note, the README status table, prereq and leads consistent
+both ways (earlier modules gain leads to the new ones), `./build.sh --pdf`, and on every page: `overflow.py` at
+400 px, `print_width.py`, no dead links, and `git grep --untracked -nE "uv pip install|python3 |bundled|source
+\.venv|import requests" -- src labs build data` finds nothing.
 
 ## Optional
 
-- Refresh the private claude.ai artifact preview (needs a Claude session with the artifact tool); update the project
-  progress note on claude.ai.
+- Refresh the private claude.ai artifact preview (`dist/artifact/`, needs a Claude session with the artifact tool);
+  update the project progress note on claude.ai.
 - LM6's Solution with "Stage 1: $D_1,\dots,D_5=11.20,\ 12.544,…$" is one unbreakable inline formula that overflows a
   320 px screen (the gate is 400 px); split it at the commas, then a fresh check.
 - Volume I has 92 display formulas that scroll inside their own box at 400 px (`build/qa/display_scroll.py`; LM1–LM7:
@@ -112,21 +95,3 @@ finds nothing (options before the pattern).
 - `uv run ruff check data` reports I001 in `data/build_series.py` and `data/check_chunk.py` and B023 in
   `build_series.py` (a lambda that reads the loop's `divd`; it runs inside the same iteration, so the result is
   right). Tidy them when those files next change.
-
-## Then: the remaining volumes
-
-Follow [`plans/ROADMAP.md`](plans/ROADMAP.md): batch 2 is Volume III (LM13–LM18), then IV, V + VI, VII, VIII and IX.
-Each batch repeats Stages 1–4 and bumps the edition (the owner confirmed the process, 2026-10-11). Ask the owner about
-code, site, repository and his standing rules, and about the open decisions at the end of the roadmap before the batch
-that needs them; content is the editor's call. Stage 1 of every batch, in this order:
-
-1. Briefs (`plans/vol-N.md`) within ROADMAP's module boundaries, with notation that follows AUTHORING §6 ("Common
-   notation first").
-2. **Capability check.** List every exhibit, widget, dataset and Python package the briefs need; check each against
-   `src/assets/book.js`, `build/qa/`, `data/` and `pyproject.toml`; send the owner one list of what is missing (site
-   code, data pipeline, new packages) and build what he approves before any writer starts.
-3. Data: fetch through the API, check every new series as PITFALLS §3 says, and register it in the manifest.
-4. Anchors (`plans/vol-N-anchors.md`): every number the briefs quote, with its definition, recomputed by independent
-   code; facts checked on official sources (`project/SOURCES.md`).
-5. Lab data: `data/make_lab_data.py` writes each lab's files, and the briefs name them.
-6. A fresh check of the whole of Stage 1, then commit and push.

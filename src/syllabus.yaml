@@ -2,6 +2,9 @@ title: From Calculus to Kelly
 subtitle: A quantitative curriculum for statistical modeling, portfolio optimization and optimal leverage
 # Edition notes, newest first. A module is linked from the site only when its entry below has `status: published`.
 editions:
+  - version: "0.3"
+    date: 17 October 2026
+    notes: "Volume II complete: LM8–LM12 with their labs, from vectors and matrices through linear systems, covariance matrices and principal components to Cholesky, SVD and least squares, on TAIEX, the TWSE sector indices, Taiwan ETFs and TAIEX futures. Each module passed an independent review, a blind solve of every question, a full audit of its numbers from the raw data and a check across the volume, then two verified revision rounds and a closing check. Volume I now links forward to the Volume II modules that build on it."
   - version: "0.2.1"
     date: 11 October 2026
     notes: "Volumes V to VII reordered so that portfolio optimization and risk measurement come before stochastic calculus: LM27–31 are now Portfolio Optimization (formerly LM32–36), LM32–35 Measuring True Risk and Return (formerly LM37–40) and LM36–40 Stochastic Calculus (formerly LM27–31). The old numbers belonged only to modules not yet published. In Volume I the references follow the new numbers, and a few hyphens, semicolons and colons after formulas were rewritten so that none can start a line. A Getting Started page and a Research hygiene page open the book."
@@ -32,11 +35,11 @@ volumes:
     title: Linear Algebra for Portfolios
     blurb: Portfolios are vectors and risk is a quadratic form; this volume makes that literal.
     lms:
-      - {n: 8, title: "Vectors and Matrices", desc: "Weights, returns and the dot product; portfolio return as wᵀR."}
-      - {n: 9, title: "Linear Systems, Inverses and Rank", desc: "Solving for a replicating mix; singular matrices as perfect collinearity."}
-      - {n: 10, title: "Quadratic Forms and Covariance Matrices", desc: "wᵀΣw, positive (semi)definiteness, matrix calculus."}
-      - {n: 11, title: "Eigen-decomposition and PCA", desc: "Principal components of Taiwan sector returns; condition numbers and why Σ⁻¹ amplifies error."}
-      - {n: 12, title: "Cholesky, SVD and Least Squares", desc: "Cholesky factors and whitening; SVD and numerical rank; least squares as a projection."}
+      - {n: 8, title: "Vectors and Matrices", desc: "Weights, returns and the dot product; portfolio return as wᵀR.", status: published}
+      - {n: 9, title: "Linear Systems, Inverses and Rank", desc: "Solving for a replicating mix; singular matrices as perfect collinearity.", status: published}
+      - {n: 10, title: "Quadratic Forms and Covariance Matrices", desc: "wᵀΣw, positive (semi)definiteness, matrix calculus.", status: published}
+      - {n: 11, title: "Eigen-decomposition and PCA", desc: "Principal components of Taiwan sector returns; condition numbers and why Σ⁻¹ amplifies error.", status: published}
+      - {n: 12, title: "Cholesky, SVD and Least Squares", desc: "Cholesky factors and whitening; SVD and numerical rank; least squares as a projection.", status: published}
   - id: III
     title: Probability
     blurb: Random variables as functions, expectation as the workhorse, and the distributions markets actually produce.

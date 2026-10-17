@@ -4,7 +4,7 @@
 
 *A nine-volume quantitative curriculum that starts from first-year calculus, statistics and linear algebra and ends with statistical models, optimized portfolios and growth-optimal (Kelly) leverage. English text with Traditional Chinese reading guides; every module ships with a lab notebook on real Taiwan and US market data. A personal study project.*
 
-## Status — Edition 0.2 (2026-10-11)
+## Status — Edition 0.3 (2026-10-17)
 
 | Module | State | HTML | PDF | Lab |
 |:--|:--|:--|:--|:--|
@@ -16,6 +16,11 @@
 | LM5 Integration | published | [`docs/lm/lm05.html`](docs/lm/lm05.html) | [`docs/pdf/LM05_…pdf`](docs/pdf/LM05_Integration.pdf) | [`labs/LM05_lab`](labs/LM05_lab) |
 | LM6 Sequences, Series and the Time Value of Money | published | [`docs/lm/lm06.html`](docs/lm/lm06.html) | [`docs/pdf/LM06_…pdf`](docs/pdf/LM06_Sequences_Series_and_the_Time_Value_of_Money.pdf) | [`labs/LM06_lab`](labs/LM06_lab) |
 | LM7 Multivariable Calculus and Lagrange Multipliers | published | [`docs/lm/lm07.html`](docs/lm/lm07.html) | [`docs/pdf/LM07_…pdf`](docs/pdf/LM07_Multivariable_Calculus_and_Lagrange_Multipliers.pdf) | [`labs/LM07_lab`](labs/LM07_lab) |
+| LM8 Vectors and Matrices | published | [`docs/lm/lm08.html`](docs/lm/lm08.html) | [`docs/pdf/LM08_…pdf`](docs/pdf/LM08_Vectors_and_Matrices.pdf) | [`labs/LM08_lab`](labs/LM08_lab) |
+| LM9 Linear Systems, Inverses and Rank | published | [`docs/lm/lm09.html`](docs/lm/lm09.html) | [`docs/pdf/LM09_…pdf`](docs/pdf/LM09_Linear_Systems_Inverses_and_Rank.pdf) | [`labs/LM09_lab`](labs/LM09_lab) |
+| LM10 Quadratic Forms and Covariance Matrices | published | [`docs/lm/lm10.html`](docs/lm/lm10.html) | [`docs/pdf/LM10_…pdf`](docs/pdf/LM10_Quadratic_Forms_and_Covariance_Matrices.pdf) | [`labs/LM10_lab`](labs/LM10_lab) |
+| LM11 Eigen-decomposition and PCA | published | [`docs/lm/lm11.html`](docs/lm/lm11.html) | [`docs/pdf/LM11_…pdf`](docs/pdf/LM11_Eigen_decomposition_and_PCA.pdf) | [`labs/LM11_lab`](labs/LM11_lab) |
+| LM12 Cholesky, SVD and Least Squares | published | [`docs/lm/lm12.html`](docs/lm/lm12.html) | [`docs/pdf/LM12_…pdf`](docs/pdf/LM12_Cholesky_SVD_and_Least_Squares.pdf) | [`labs/LM12_lab`](labs/LM12_lab) |
 
 A module goes on the site only after an independent review has recomputed its numbers and checked its mathematics; drafts are kept in `src/` and `labs/` but are not linked from the site. The full syllabus lives in [`src/syllabus.yaml`](src/syllabus.yaml).
 
@@ -91,7 +96,7 @@ The same files open cleanly in Obsidian, so the sources double as a notes vault.
 
 ## Data
 
-Taiwan prices, dividends, index and futures data come from FinMind (`TaiwanStockPrice`, `TaiwanStockDividendResult`, `TaiwanStockTotalReturnIndex`, `TaiwanFuturesDaily`); US prices from FinMind `USStockPrice` (retrieved 2026-10-10). Every daily close in `data/raw/` was checked against FinMind's own `spread` column (close − previous close); the only mismatches are ex-dividend days and the two share splits (0050 4-for-1 on 2025-06-18, 00631L 22-for-1 on 2026-03-31), which the pipeline handles explicitly. See [`data/README.md`](data/README.md).
+Taiwan prices, dividends, index and futures data come from FinMind (`TaiwanStockPrice`, `TaiwanStockDividendResult`, `TaiwanStockTotalReturnIndex`, `TaiwanFuturesDaily`, and for Volume II the 13:30:00 index values of `TaiwanStockEvery5SecondsIndex` and `TaiwanVariousIndicators5Seconds`); US prices come from FinMind `USStockPrice`. The files were retrieved on 2026-10-10, except Volume II's `sectors/`, `sectors_close/` and `taiex_close/` files (2026-10-11). Every daily close in `data/raw/` was checked against FinMind's own `spread` column (close − previous close). In Volume I's files the only mismatches are ex-dividend days and the two share splits (0050 4-for-1 on 2025-06-18, 00631L 22-for-1 on 2026-03-31), which the pipeline handles explicitly. In Volume II's sector-index series FinMind copies some closes from other dates or series: `data/vol2_series.py` replaces the 561 wrong closes with their 13:30:00 values and accepts 1,528 stale spreads whose closes agree with their neighbours. TAIEX's spread prints 0.0 on 52 dates, and each of those closes equals its 13:30:00 value. See [`data/README.md`](data/README.md).
 
 ## License
 
