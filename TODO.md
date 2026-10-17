@@ -21,6 +21,10 @@
 - **Publishing deploys the site.** GitHub Pages serves `docs/` from `main` (README, "Hosting"), so a push that
   carries a rebuilt `docs/` goes live; nothing is built on GitHub. Run `./build.sh --pdf` and commit `docs/` with
   `src/`, `data/` and `labs/` (AUTHORING §11).
+- **PDF links** (owner-approved, 2026-10-17): `build/render_pdf.py` sends a link to another page of the book to the
+  live site (the domain in `docs/CNAME`) and keeps same-page anchors as internal PDF links; before, Chromium printed
+  them as `file:///` paths on the author's disk. After `./build.sh --pdf`, `grep -ac 'file:///' docs/pdf/*.pdf`
+  gives 0 for every file.
 - The brief and anchors keep the plan and the corrected facts (preface of `plans/vol-2.md`); values and wording that
   a revision changes in a module are not copied back. Four of the closing check's six refuted items (LM8 C1, CX1–CX3) rest on this rule; reviews/README.md gives the
   reasons for CX4 and CX5.
@@ -34,12 +38,6 @@
 - Optional, site code: the front page's install block (`build/build_index.py`, the `git clone … cd …` line) is
   755 px wide in print against the 680 px text width (`build/qa/print_width.py docs/index.html`). It was so in 0.2;
   on screen it scrolls inside its box, and the front page has no PDF.
-- Proposed, site code (pre-existing since 0.2): every link from one page to another in the PDFs points to the
-  author's disk (`file:///D:/projects/…/docs/lm/lm07.html`), 329 links in the 12 PDFs, because `build/render_pdf.py`
-  prints `docs/` opened as `file://`. Fix: right after `pg.goto(...)`, rewrite each `a[href]` whose protocol is
-  `file:` and whose page differs from the current one to `https://quantmath.fintools.tw/…`, leaving same-page
-  anchors as internal PDF links; then `./build.sh --pdf`, check `grep -ac 'file:///' docs/pdf/*.pdf` gives 0 and
-  that each PDF keeps its count of internal links.
 - Optional, `book.js`: the options the Volume II writers asked for (bar-label text for LM8's `angles`, ellipses above
   points for LM11's Exhibit 3, a significant-figure `Book.fmt` code); the modules work without them.
 

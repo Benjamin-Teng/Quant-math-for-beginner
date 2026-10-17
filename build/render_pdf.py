@@ -7,6 +7,12 @@ from playwright.async_api import async_playwright
 
 def to_url(a): return a if "://" in a else Path(a).resolve().as_uri()   # accept a file path or a URL
 SRC, OUT, TITLE = to_url(sys.argv[1]), sys.argv[2], sys.argv[3]   # page (path or URL), PDF path, footer title
+# Chromium prints a file:// page's relative links as file:/// URIs, dead for every reader. Links to other pages go to
+# the live site instead (the domain build.py writes to CNAME in the site root); same-page anchors stay internal links.
+# The href attribute is resolved, not read as .href, so an SVG <a> (no .protocol, no string .href) is handled too.
+ROOT = None if "://" in sys.argv[1] else next(
+    (d for d in Path(sys.argv[1]).resolve().parents if (d / "CNAME").is_file()), None)
+SITE = [ROOT.as_uri() + "/", "https://" + (ROOT / "CNAME").read_text(encoding="utf-8").strip() + "/"] if ROOT else None
 FOOT = ('<div style="width:100%;font-family:Archivo,Arial,sans-serif;font-size:7.5pt;color:#69707a;padding:0 15mm;display:flex;justify-content:space-between">'
         f'<span>From Calculus to Kelly · {TITLE}</span><span><span class="pageNumber"></span> / <span class="totalPages"></span></span></div>')
 async def main():
@@ -14,6 +20,11 @@ async def main():
         b = await p.chromium.launch()
         pg = await b.new_page(viewport={"width": 900, "height": 1200}, color_scheme="light")
         await pg.goto(SRC, wait_until="networkidle")
+        if SITE:
+            await pg.evaluate("""([root, site]) => document.querySelectorAll('a[href]').forEach(a => {
+                const u = URL.parse(a.getAttribute('href'), document.baseURI)?.href ?? '', page = u.split('#')[0];
+                if (u.startsWith(root) && (page !== location.href.split('#')[0] || !u.includes('#')))
+                    a.setAttribute('href', site + u.slice(root.length)); })""", SITE)
         await pg.evaluate("document.querySelectorAll('details').forEach(d => d.open = true)")
         await pg.evaluate("document.fonts.ready")
         await pg.emulate_media(media="print")
