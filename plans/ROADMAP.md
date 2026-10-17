@@ -61,7 +61,7 @@ Who owns what where modules touch; a brief may refine a line but not move a topi
 
 | Topic | Owner and scope | Leaves to |
 |:--|:--|:--|
-| Covariance | LM10: the centred data matrix, sample $\hat\Sigma$, positive semidefiniteness, $\mathbf w^{\top}\hat\Sigma\mathbf w$ as a sample quantity | LM16 population covariance and joint distributions; LM19–LM20 descriptive statistics and estimators; LM27 portfolio bookkeeping and risk decomposition |
+| Covariance | LM10: the centred data matrix, sample $\hat\Sigma$, positive semidefiniteness, $\mathbf w^{\top}\hat\Sigma\mathbf w$ as a sample quantity | LM16 population covariance and joint distributions; LM19–LM20 descriptive statistics and estimators; LM27 portfolio bookkeeping and risk decomposition; LM30 estimation error in $\hat\Sigma$ and the repair of a correlation matrix that is not PSD |
 | Rank and conditioning | LM9 exact rank and solvability; LM11 spectrum and condition number | LM12 numerical rank, SVD, pseudoinverse |
 | Factors | LM11 statistical factors (PCA), their stability, no economic labels | LM23 economic factor models; LM30 shrinkage in portfolios |
 | Least squares | LM12 projection geometry, residual orthogonality, rank deficiency | LM23 OLS inference (standard errors, HAC, t-statistics) |

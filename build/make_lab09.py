@@ -468,7 +468,7 @@ A return matrix has rank below its number of columns exactly when a fixed non-ze
 """)
 
 code(r"""
-# [[eg:mix]]: replace Food by the daily rebalanced 50/50 mix of Semiconductor and FinancialInsurance
+# [[eg:mix]]: replace Food by the daily-rebalanced 50/50 mix of Semiconductor and FinancialInsurance
 Mmix = [[r[0], r[1], (r[0] + r[1]) / 2] for r in M3]
 print("mix column:", [float(r[2]) for r in Mmix], " exact ranks:", rank_exact(Mmix),
       rank_exact([r + [bi] for r, bi in zip(Mmix, b3)]))

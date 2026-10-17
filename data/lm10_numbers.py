@@ -10,12 +10,12 @@ The script prints each value as src/lm10.md prints it, asserts the first two thi
   * every printed value appears in src/lm10.md exactly as printed (after the normalization in `norm`);
   * every hand calculation follows from the inputs printed next to it (PITFALLS section 7): such values are
     recomputed from the printed strings, often in exact decimal arithmetic;
-  * the data values agree with the editor's anchors (plans/vol-2-anchors.md, LM10). Rows 14, 21, 34 and 35 give
-    the module's values, from the S3 matrix printed to two decimals (E7: its block in whole %²), and beside them the
-    values from the matrix to one decimal; the script compares both. A difference prints DIFFERS and is listed at
-    the end.
+  * the data values agree with the editor's anchors (plans/vol-2-anchors.md, LM10). Rows 14, 21 and 35 give the
+    module's values, from the S3 matrix printed to two decimals (E7: its block in whole %²), and beside them the
+    values from the matrix to one decimal; the script compares both. Row 34 gives the module's pivots only. A
+    difference prints DIFFERS and is listed at the end.
 A floating-point residue is never printed in the module: it is asserted against a bound, and the text says "below
-10^-15" (the daily S5 matrix) or "larger" (the 50/50 matrix in %²).
+10^-15" (the daily 6×6 matrix of S5 and its equal-weight column) or "larger" (the 50/50 matrix in %²).
 """
 import json
 import math
@@ -438,7 +438,7 @@ x50 = np.array([0.5, 0.5, -1.0])
 res50 = (abs(float(x50 @ S_mix @ x50)), abs(float(np.linalg.det(S_mix))))
 print(f"residues of the 50/50 matrix in %^2: x'Mx {res50[0]:.1e}, det {res50[1]:.1e}")
 assert max(res50) > 1e-15 and float(np.spacing(np.abs(S_mix)).min()) > 1e-14
-show("residue, two matrices", "below $10^{-15}$ for the daily S5 matrix above, larger for this matrix in %²")
+show("residue, two matrices", r"below $10^{-15}$ for the daily $6\times6$ matrix above, larger for the 50/50 matrix in %²")
 
 # ====================================================================================== Section 6: pairwise deletion, real case
 etf = {e: one_session(e, smp.calendar) for e in ETFS}
