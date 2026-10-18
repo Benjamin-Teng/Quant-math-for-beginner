@@ -2,7 +2,7 @@
    Each run draws 1,000,000 uniforms from Book.rng(run) (a draw of exactly 0 is redrawn) and turns them into standard
    normal draws Z = Book.dist.PhiInv(U), cached for the current run. Plain sampling averages 1{Z <= -k}; antithetic
    sampling averages (1{Z <= -k} + 1{-Z <= -k}) / 2 over the first n/2 draws, so n evaluations in n/2 pairs; importance
-   sampling, (18.6) with a = k, averages 1{Z <= 0} exp(kZ - k^2/2), the shifted draw Z - k in the tail weighted back.
+   sampling, (18.7) with a = k, averages 1{Z <= 0} exp(kZ - k^2/2), the shifted draw Z - k in the tail weighted back.
    The chart shows each running estimate divided by the exact Phi(-k) at 41 log-spaced checkpoints up to n (values
    above 3 are drawn at 3); the readouts describe the selected method at n. The widget's generator is not NumPy's,
    and the text quotes no widget value. */
@@ -76,7 +76,7 @@
     out.className = "readout"; out.setAttribute("aria-live", "polite"); note.className = "w-note";
     note.textContent = "Each run draws 1,000,000 uniform numbers from the book's seeded generator (seed = run) and " +
       "turns them into standard normal draws Z. All three methods use the same draws: Z for plain sampling, Z and −Z " +
-      "for antithetic pairs (n/2 pairs), and Z − k weighted by (18.6) for importance sampling. Values above 3 times " +
+      "for antithetic pairs (n/2 pairs), and Z − k weighted by (18.7) for importance sampling. Values above 3 times " +
       "the exact value are drawn at 3. The widget's generator is not NumPy's; the text quotes no widget value.";
 
     function draw(vals) {

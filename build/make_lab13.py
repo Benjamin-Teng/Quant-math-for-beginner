@@ -141,7 +141,7 @@ print("the guarded counts agree with the exact counts at every whole percent fro
 md(r"""
 ## Part 2 — Events and the axioms
 
-An event on the pair space is a boolean column. Inclusion–exclusion (13.1) and the union bound (13.2) on [[eg:twofalls]]: $A$ is a fall of 2% or more today, $B$ one yesterday.
+An event on the pair space is a boolean column. Inclusion–exclusion (13.1) and the union bound (13.2) on [[eg:twofalls]]: $A$ holds the days down 2% or more, $B$ the days after one.
 """)
 
 code(r"""
@@ -275,12 +275,12 @@ def blocks(n):
 show("Pr(A), five digits", p1, ".4%", "1.8465%")
 show("model, 20 sessions", 1 - (1 - 0.018465) ** 20, ".1%", "31.1%")
 nb, left, hit = blocks(20)
-print("blocks of 20:", nb, "left out:", left, "with a fall:", hit)
+print("blocks of 20:", nb, "returns excluded:", left, "with a fall:", hit)
 show("model blocks", nb * 0.311, ".0f", "91")
 show("data, 20 sessions", hit / nb, ".1%", "20.9%")
 for n in (5, 10, 60):       # not in the module: the same comparison for other block lengths
     nb, left, hit = blocks(n)
-    print(f"{n:>2} sessions: model {1 - (1 - p1) ** n:.1%}, data {hit}/{nb} = {hit / nb:.1%} ({left} returns left out)")
+    print(f"{n:>2} sessions: model {1 - (1 - p1) ** n:.1%}, data {hit}/{nb} = {hit / nb:.1%} ({left} returns excluded)")
 """)
 
 md(r"""
@@ -399,7 +399,7 @@ Problems 4, 5, 6, 7, 10 and 11 of the module.
 """)
 
 code(r"""
-# Problem 4: falls of 2% or more on the days of the 5,847 triples
+# Problem 4: A_i holds the triples whose day i fell 2% or more (5,847 triples)
 f2 = R <= -0.02 + EPS
 e0, e1, e2 = f2[:-2], f2[1:-1], f2[2:]
 n3 = len(e0)
@@ -422,7 +422,7 @@ code(r"""
 n_half = math.log(0.5) / math.log(1 - p1)
 show("P6 n", n_half, ".2f", "37.19")
 nb, left, hit = blocks(38)
-print("blocks of 38:", nb, "left out:", left, "with a fall:", hit)
+print("blocks of 38:", nb, "returns excluded:", left, "with a fall:", hit)
 show("P6 data", hit / nb, ".2%", "32.68%")
 # Problem 7: falls of 5% or more by regime
 f5 = days.with_columns(regime=reg).group_by("regime").agg(n=(pl.col("R") <= -0.05 + EPS).sum(), days=pl.len())
@@ -444,8 +444,16 @@ show("P10 product of the margins", ind["X"].mean() * ind["Y"].mean(), ".4f", "0.
 p10 = pairs.filter(pl.col("prev_date") >= pl.lit("2015-06-01"))
 c10 = p10.select(AB=(fall & big).sum(), A=fall.sum(), B=big.sum(), N=pl.len()).row(0, named=True)
 print(c10)
+show("P11 day pairs", c10["N"], ",", "2,771")
+show("P11 falls after a smaller move", c10["A"] - c10["AB"], ",", "21")
+show("P11 other days after a big move", c10["B"] - c10["AB"], ",", "171")
+show("P11 neither", c10["N"] - c10["A"] - c10["B"] + c10["AB"], ",", "2,564")
 show("P11 share after a big move", c10["AB"] / c10["B"], ".2%", "8.06%")
+show("P11 share after a smaller move", (c10["A"] - c10["AB"]) / (c10["N"] - c10["B"]), ".2%", "0.81%")
+show("P11 share of all pairs", c10["A"] / c10["N"], ".2%", "1.30%")
 show("P11 hit rate", c10["AB"] / c10["A"], ".2%", "41.67%")
+show("P11 false-alarm rate", (c10["B"] - c10["AB"]) / (c10["N"] - c10["A"]), ".2%", "6.25%")
+show("P11 share of pairs after a big move", c10["B"] / c10["N"], ".2%", "6.71%")
 print("returns exactly equal to +2%, -2% or -3%:", sum(r_ in (Fraction(2, 100), Fraction(-2, 100), Fraction(-3, 100)) for r_ in RF))
 """)
 

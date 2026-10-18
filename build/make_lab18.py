@@ -292,7 +292,7 @@ print(f"coverage: {cover} of 1,000 intervals cover {p_ln:.4f} (standard error of
 """)
 
 md(r"""
-**[[eg:gap]]** with LM12's printed S5 factor $L$ typed in (% a day ÷ 100): LM12's lab run, `default_rng(20261011)` (that lab's seed), then **[[ex:rate]]** (experiment 12): 200 runs at each of six sizes against the formula (18.9).
+**[[eg:gap]]** with LM12's printed S5 factor $L$ typed in (% a day ÷ 100) and LM12's lab draws, `default_rng(20261011)` (that lab's seed; LM12's lab coloured them with the unrounded factor, and both give 0.0250), then **[[ex:rate]]** (experiment 12): 200 runs at each of six sizes against the formula (18.4).
 """)
 
 code(r"""
@@ -306,7 +306,7 @@ show("[[eg:gap]] relative Frobenius gap", gap, ".4f", "0.0250")
 show("   Semiconductor variance too high, %", 100 * (S_sim[0, 0] / Sig[0, 0] - 1), ".2f", "4.18")
 ratio = np.trace(Sig) ** 2 / np.linalg.norm(Sig) ** 2
 show("   tr(Sigma)^2 / |Sigma|_F^2", ratio, ".4f", "2.6509")
-show("   (18.9) at n = 4,382", math.sqrt((1 + ratio) / 4382), ".4f", "0.0289")
+show("   (18.4) at n = 4,382", math.sqrt((1 + ratio) / 4382), ".4f", "0.0289")
 g12 = rng(12)
 sizes = (100, 500, 1000, 4382, 10_000, 50_000)
 rms, runs4382 = [], None
@@ -321,7 +321,7 @@ for n in sizes:
 show("   runs at or below LM12's gap", int((runs4382 <= gap).sum()), "d", "82")
 fig, ax = plt.subplots()
 ax.loglog(sizes, rms, marker="o", label="200 runs")
-ax.loglog(sizes, [math.sqrt((1 + ratio) / n) for n in sizes], ls="--", label="(18.9)")
+ax.loglog(sizes, [math.sqrt((1 + ratio) / n) for n in sizes], ls="--", label="(18.4)")
 ax.scatter([4382], [gap], color="tab:green", zorder=3, label="LM12's run")
 ax.set_xlabel("draws n"); ax.set_ylabel("root-mean-square relative gap"); ax.legend()
 ax.set_title("[[ex:rate]]: the 1/sqrt(n) rate"); plt.show()
@@ -526,8 +526,8 @@ code(r"""
 # P12: a fresh generator of experiment 10, twenty chunks, and one call of the same size
 rng10 = np.random.default_rng([10, 20261011])
 idx = np.concatenate([rng10.integers(0, T, size=(500, m)) for _ in range(20)])
-lnG, G = r[idx].sum(axis=1), np.prod(1 + R[idx], axis=1)
-y = (lnG < 0).astype(float)
+G = np.prod(1 + R[idx], axis=1)
+y = (G < 1).astype(float)
 show("P12 Pr(G_boot < 1)", y.mean(), ".4f", "0.0561")
 show("    its standard error", y.std() / 100, ".4f", "0.0023")
 show("    mean G_boot", G.mean(), ".3f", "2.136")

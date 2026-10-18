@@ -68,7 +68,7 @@
       var loc = ml ? W.ml.loc : mu, sc = ml ? W.ml.scale : s * Math.sqrt((nu - 2) / nu);
       var x = v["td-x"] / 100, log = v["td-ax"] === "log", base = log ? 1e-5 : 0;
       nuEl.disabled = ml;
-      nuV.textContent = ml ? "3.065 (fitted)" : nu.toFixed(2);
+      nuV.textContent = ml ? "3.065 (fitted)" : Math.abs(nu - 5.14) < 1e-9 ? "5.14 (the kurtosis fit, rounded)" : nu.toFixed(2);
       var lo = -0.11, hi = 0.11, mx = [], ny = [], ty = [];
       for (var j = 0; j <= 440; j++) {
         var xx = lo + (hi - lo) * j / 440, a = D.phi((xx - mu) / s) / (s * 100), b = D.tPdf((xx - loc) / sc, nu) / (sc * 100);
@@ -118,7 +118,7 @@
         "<div><span>Normal: expected days with R ≤ −x</span><b>" + days(eN) + "</b></div>" +
         "<div><span>Student-t: expected days with R ≤ −x</span><b>" + days(eT) + "</b></div>" +
         "<div><span>TAIEX: days with R ≤ −x</span><b>" + a + "</b></div>" +
-        "<div><span>TAIEX ÷ Student-t</span><b>" + (eT > 0 ? fmt(a / eT, "x2") : "—") + "</b></div>" +
+        "<div><span>TAIEX ÷ Student-t (descriptive)</span><b>" + (eT > 0 ? fmt(a / eT, "x2") : "—") + "</b></div>" +
         "<div><span>Student-t: σ · kurtosis</span><b>" + fmt(sig, "pct3") + " · " + (nu > 4 ? fmt(3 + 6 / (nu - 4), "n2") : "infinite") + "</b></div>" +
         "<div><span>Student-t: 1% quantile (TAIEX " + fmt(W.q01, "pct3") + ")</span><b>" + fmt(q01, "pct3") + "</b></div>";
     }

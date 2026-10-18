@@ -66,7 +66,7 @@ Companion notebook to **From Calculus to Kelly, LM17**. It rebuilds the module's
 | 4 | Mean path and median path: [[ex:case]], [[eg:doublingeg]] with fractions ([[ex:doubling]]), [[eg:casegap]] |
 | 5 | Leverage: the grid of $\bar g(f)$, $f^*$ and zero growth by `brentq`, [[ex:leverage]], [[eg:leverageeg]] |
 | 6 | The central limit theorem: [[ex:binom]], [[eg:kellycoin]], [[eg:onepoint]] and the 60-heads check |
-| 7 | Lognormal wealth: [[ex:lognormal]], the calendar years, the 2003–2025 refit ([[eg:lognormaleg]]) and the widget's grid |
+| 7 | Lognormal wealth: [[ex:lognormal]] and the model's exact law by FFT, the calendar years, the 2003–2025 refit ([[eg:lognormaleg]]) and the widget's grid |
 | 8 | How fast the normal arrives: [[ex:kurtm]] with both window types, the lag correlations ([[eg:kurtsum]]) |
 | 9 | When the laws fail: [[ex:runkurt]] and [[eg:cauchy]] |
 | 10 | Practice problems 6, 7, 8 and 11, and an extension: [[ex:kurtm]] by limit regime |
@@ -125,6 +125,7 @@ years = (d1 - d0).days / 365.25
 A = T / years
 print(f"{len(tr)} closes {dates_all[0]} .. {dates_all[-1]}; first return {dates[0]}")
 show("T", T, ",", "5,849")
+show("calendar days from the first close", (d1 - d0).days, ",", "8,680")
 show("years", years, ".4f", "23.7645")
 show("A", A, ".2f", "246.12")
 
@@ -339,7 +340,9 @@ show("60 heads or more, corrected (%)", 100 * stats.norm.sf((59.5 - 50) / 5), ".
 md(r"""
 ## Part 7 — Lognormal wealth
 
-[[ex:lognormal]] from (17.6), the calendar years 2003–2025 (2003 from its first close, exact arithmetic on the closes), the daily model refitted to them ([[eg:lognormaleg]]) and the widget's grid of $(f,\bar g(f),s_r(f))$.
+[[ex:lognormal]] from (17.6), the normal approximation; then the model's exact law of the sum, the calendar years 2003–2025 (2003 from its first close, exact arithmetic on the closes), the daily model refitted to them ([[eg:lognormaleg]]) and the widget's grid of $(f,\bar g(f),s_r(f))$.
+
+The exact law needs no approximation: the sum of $m$ independent draws from TR23's empirical law has the $m$-th power of one draw's Fourier transform. Place each centred log return on a lattice of step $10^{-5}$ (its mass split between the two neighbouring points, which keeps the mean), raise the FFT to the power $m$ and transform back.
 """)
 
 code(r"""
@@ -358,6 +361,31 @@ show("one year: loss (%)", 100 * x6["Pr(W<W0)"][0], ".2f", "23.74")
 show("ten years: loss (%)", 100 * x6["Pr(W<W0)"][1], ".2f", "1.19")
 show("sample: 5% quantile", x6["5%"][2], ".2f", "5.49")
 show("sample: 95% quantile", x6["95%"][2], ".1f", "115.6")
+show("sample: loss (%)", 100 * x6["Pr(W<W0)"][2], ".3f", "0.025")
+
+# the model's exact law of the m-day sum, by FFT on a lattice of step H (the sum centred on m * mean)
+H, NPT = 1e-5, 2**22
+yc = (r - rb) / H
+lat = np.floor(yc).astype(np.int64)
+w_up = yc - lat
+pmf1 = (np.bincount(lat % NPT, weights=(1 - w_up) / T, minlength=NPT)
+        + np.bincount((lat + 1) % NPT, weights=w_up / T, minlength=NPT))
+phi1 = np.fft.fft(pmf1)
+
+
+def exact_below(m, c):
+    # Pr(sum of m log returns - m * mean < c), each lattice mass spread evenly over its cell
+    pm = np.fft.fftshift(np.fft.ifft(phi1**m).real)
+    k = c / H + NPT // 2
+    j = int(np.floor(k + 0.5))
+    return pm[:j].sum() + (k - (j - 0.5)) * pm[j]
+
+
+exact = {m: exact_below(m, -m * rb) for m in (round(A), round(10 * A), T)}
+for m, p in exact.items():
+    print(f"m = {m:,}: loss probability by (17.6) {stats.norm.cdf(-rb * sqrt(m) / sr):.4%}, exact {p:.4%}")
+show("exact loss probability, one year (%)", 100 * exact[round(A)], ".2f", "23.62")
+show("exact loss probability, the sample (%)", 100 * exact[T], ".3f", "0.026")
 
 yearly = (df.with_columns(pl.col("date").str.slice(0, 4).alias("year"))
             .group_by("year", maintain_order=True).agg(pl.col("price").last().alias("last")).sort("year"))
@@ -377,6 +405,10 @@ in_win = np.array([d <= "2025-12-31" for d in dates])   # ISO dates compare as s
 r_w = r[in_win]
 p_w = stats.norm.cdf(-r_w.mean() * sqrt(246) / r_w.std())
 show("returns 2003-2025", len(r_w), ",", "5,664")
+show("refitted daily mean log return (%)", 100 * r_w.mean(), ".6f", "0.047292")
+show("refitted daily standard deviation (%)", 100 * r_w.std(), ".5f", "1.18352")
+show("246 x refitted mean (%)", 100 * 246 * r_w.mean(), ".3f", "11.634")
+show("sqrt(246) x refitted standard deviation (%)", 100 * sqrt(246) * r_w.std(), ".3f", "18.563")
 show("refitted daily model: losing-year chance (%)", 100 * p_w, ".2f", "26.54")
 show("expected losing years", 23 * p_w, ".2f", "6.10")
 la = np.array(ann)
@@ -423,6 +455,7 @@ ax.set_xticks(range(6), [str(m) for m in ms]); ax.set_xlabel("m"); ax.set_title(
 
 
 def corr(a, b):
+    # the correlation of the pairs (a_t, b_t), as LM16 defines it; LM26 treats the autocorrelation convention
     return np.corrcoef(a, b)[0, 1]
 
 
@@ -445,12 +478,16 @@ m4 = c4 / n_ - 4 * mu * c3 / n_ + 6 * mu**2 * c2 / n_ - 3 * mu**4
 k_run = np.full(T, np.nan)
 k_run[1:] = m4[1:] / m2[1:] ** 2 - 3
 i2, i7 = dates.index("2025-04-02"), dates.index("2025-04-07")
-show("kurtosis through 2 April 2025", k_run[i2], ".2f", "4.25")
-show("kurtosis through 7 April 2025", k_run[i7], ".2f", "4.94")
+show("running excess kurtosis through 2 April 2025", k_run[i2], ".2f", "4.25")
+show("running excess kurtosis through 7 April 2025", k_run[i7], ".2f", "4.94")
 show("full sample", k_run[-1], ".2f", "5.27")
-var_a = A * m2
+var_a = A * m2   # running annualized variance of R: divisor the days so far, times A
 print(f"running annualized variance from the 246th return: {var_a[245:].min():.4f} to {var_a[245:].max():.4f}, "
       f"end {var_a[-1]:.4f}")
+show("running annualized variance through 2 April 2025", var_a[i2], ".5f", "0.03335")
+show("running annualized variance through 7 April 2025", var_a[i7], ".5f", "0.03377")
+print(f"on 7 April 2025 the variance rose {var_a[i7] / var_a[i2] - 1:.1%}, "
+      f"the excess kurtosis {k_run[i7] / k_run[i2] - 1:.0%}")
 fig, ax = plt.subplots()
 d_list = pl.Series(dates).str.to_date().to_list()
 ax.plot(d_list[245:], k_run[245:], lw=1)
@@ -476,7 +513,14 @@ show("P6 exact", ex400, ".6f", "0.000394")
 show("P6 z", z400, ".4f", "-3.3985")
 show("P6 normal", nm400, ".6f", "0.000339")
 show("P6 corrected", cc400, ".6f", "0.000404")
-print(f"P6 relative errors: n = 400 {nm400 / ex400 - 1:+.2%}, n = 100 {nm100 / ex100 - 1:+.2%}")
+print(f"P6 uncorrected relative errors: n = 400 {nm400 / ex400 - 1:+.2%}, n = 100 {nm100 / ex100 - 1:+.2%}")
+print(f"P6 corrected relative errors: n = 400 {cc400 / ex400 - 1:+.2%}, n = 100 {cc100 / ex100 - 1:+.2%}")
+area = stats.norm.cdf((166.5 - 200) / 10) - stats.norm.cdf(z400)   # between the cuts 166.015 and 166.5
+over = cc400 - ex400                                                # the corrected normal's own overshoot
+show("P6 normal area between the two cuts", area, ".6f", "0.000065")
+show("P6 overshoot of the corrected normal", over, ".6f", "0.000010")
+show("P6 net shortfall of the uncorrected normal", area - over, ".6f", "0.000055")
+print(f"half the bar of j = 166: {stats.binom.pmf(166, 400, 0.5) / 2:.7f}")
 
 gp, sp, m5 = 0.00055170, 0.012107, round(5 * A)
 show("P7 m", m5, ",", "1,231")

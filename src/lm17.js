@@ -17,7 +17,7 @@
     if (v >= 100) return fmt(v, "n1");
     return fmt(v, "n2");
   }
-  function fmtP(p) { return p < 1e-4 ? fmt(p, "sci1") : fmt(p, "pct2"); }
+  function fmtP(p) { return p < 1e-4 ? fmt(p, "sci1") : fmt(p, p < 0.01 ? "pct3" : "pct2"); }   // 0.025%, 5.49%
   function clip(v) { return v >= 1e-3 && v <= 1e7 ? v : null; }
 
   B.widgets.wealth = function (host) {

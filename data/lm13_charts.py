@@ -119,7 +119,7 @@ write("lm13-ecdf", ecdf)
 counts = [int(bucket(R, None if lo is None else lo / 100, None if hi is None else hi / 100).sum()) for lo, hi in BINS]
 assert sum(counts) == T and counts[:3] == [15, 29, 64] and sum(counts[:3]) == 108
 bins = {
-    "type": "bar", "alt": "Probability mass function of the 1% bin of a TR23 daily return, twelve bins from 5% or "
+    "type": "bar", "alt": "Probability mass function of the 1% bin of a TR23 daily return, twelve bins from −5% or "
     "below to above 5%, highest for the bins from −1% to 0 (32.07%) and from 0 to 1% (38.84%)",
     "height": 300, "categories": BIN_NAMES, "valueLabels": True,
     "x": {"label": "Bin of the daily return (%), each bin including its upper end"},

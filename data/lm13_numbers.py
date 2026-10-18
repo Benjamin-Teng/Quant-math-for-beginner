@@ -304,7 +304,8 @@ rows, cols = (nDD + nDU, nUD + nUU), (nDD + nUD, nDU + nUU)
 ind = [rows[i] * cols[j] / nP for i in range(2) for j in range(2)]
 for v, p in zip(ind, ("1,195.0", "1,448.0", "1,449.0", "1,756.0"), strict=True):
     chk(f"X4 if independent {p}", v, ",.1f", p)
-chk("X4 if independent: total", sum(ind), ",.1f", "5,848.0")
+chk("X4 if independent: total (the data's count)", sum(ind), ",.0f", "5,848")
+has("X4 independent row all", "| All | 2,644 | 3,204 | 5,848 |\n>\n> Note:")
 has("X4 independent row down", "| Down | 1,195.0 | 1,448.0 | 2,643 |")
 has("X4 independent row up", "| Up | 1,449.0 | 1,756.0 | 3,205 |")
 anchor("A13-27", ", ".join(g(x) for x in ind), "1194.954172, 1448.045828, 1449.045828, 1755.954172")
@@ -319,6 +320,18 @@ for a, b in (("A1", "A2"), ("A1", "A3"), ("A2", "A3")):
 assert Fraction(len(ev["A1"] & ev["A2"] & ev["A3"]), 4) == Fraction(1, 4) != Fraction(1, 8)
 anchor("A13-39", f"all three {Fraction(len(ev['A1'] & ev['A2'] & ev['A3']), 4)} against {Fraction(1, 8)}", "all three 1/4 against 1/8")
 has("E5 result", "$\\Pr(A_1\\cap A_2\\cap A_3)=1/4$, not $1/8$")
+# Problem 3: A3 replaced by "the two trades disagree"; pairwise independent, the triple empty
+d3 = {w for w in om if w[0] != w[1]}
+assert d3 == {"+-", "-+"} and Fraction(len(d3), 4) == Fraction(1, 2)
+assert ev["A1"] & d3 == {"+-"} and ev["A2"] & d3 == {"-+"} and ev["A1"] & ev["A2"] == {"++"}
+for a in (ev["A1"], ev["A2"]):
+    assert Fraction(len(a & d3), 4) == Fraction(1, 4) == Fraction(len(a), 4) * Fraction(len(d3), 4)
+assert not (ev["A1"] & ev["A2"] & d3) and Fraction(1, 8) != 0
+has("P3 stem", "replace $A_3$ by \"the two trades disagree\"")
+has("S3 events", "The new event is $A_3=\\{+-,-+\\}$, with probability 1/2")
+has("S3 pairs", "$A_1\\cap A_2=\\{++\\}$, $A_1\\cap A_3=\\{+-\\}$ and $A_2\\cap A_3=\\{-+\\}$, of probability $1/4=\\tfrac12\\cdot\\tfrac12$")
+has("S3 triple", "the triple has probability $0\\ne1/8$")
+has("S3 option C", "$\\Pr(A_1\\cap A_3)=\\Pr(\\{+-\\})=1/4$ is the product")
 # Deep Dive 2: 2^m - m - 1 conditions
 assert 2 ** 3 - 3 - 1 == 4
 anchor("A13-16", f"2^3 - 3 - 1 = {2 ** 3 - 3 - 1}", "2^3 - 3 - 1 = 4")
@@ -339,7 +352,7 @@ def blocks(n: int) -> tuple[int, int, int]:
 
 nb20, left20, hit20 = blocks(20)
 assert (nb20, left20, hit20) == (292, 9, 61)
-has("E6 blocks", "TR23 has 292 complete blocks, with the last 9 returns left out")
+has("E6 blocks", "TR23 has 292 complete blocks, with the last 9 returns excluded")
 chk("E6 model blocks from the printed 31.1%", nb20 * 0.311, ".0f", "91")
 chk("E6 model blocks exact", nb20 * (1 - (1 - p1) ** 20), ".0f", "91")
 has("E6 model blocks text", "$292\\times0.311=91$")
@@ -408,6 +421,9 @@ has("E7 fraction", "36/108=33.3%")
 trap = 0.0130 * 0.474 / (0.0234 * 0.526 + 0.0130 * 0.474)
 chk("E7 from the printed 2.34%, 1.30%, 52.6%, 47.4%", trap, ".1%", "33.4%")
 chk("E7 from the printed 0.5261, 0.4739", 0.0130 * 0.4739 / (0.0234 * 0.5261 + 0.0130 * 0.4739), ".1%", "33.4%")
+assert format(0.0130 * 0.474 / 0.0185, ".1%") == "33.3%"   # over the printed 1.85%, not the rebuilt denominator
+has("E7 rebuilt denominator", "Rebuilding the denominator from the rounded 2.34%, 1.30%, 52.6% and 47.4% gives 33.4%")
+has("E7 display", "\\frac{36/5,849}{108/5,849}=36/108=33.3%")
 anchor("A13-41", f"Pr(10% given A) {c10}/{c7 + c10} = {pc(c10 / (c7 + c10))}", "Pr(10% given A) 36/108 = 33.33333333%")
 
 # E8: the case by Bayes' rule
@@ -464,6 +480,12 @@ chk("E9 posterior from the printed odds", 0.15627 / 1.15627, ".1%", "13.5%")
 po = (0.1 / 0.9) * lr8
 chk("E9 posterior exact", po / (1 + po), ".1%", "13.5%")
 has("E9 posterior text", "$\\Pr(\\text{skilled}\\mid\\text{record})=0.15627/1.15627=13.5%$")
+has("E9 assumption", "Given the manager's type, months are independent.")
+has("E9 within each type", "By (13.7), applied within each type, a given sequence of 8 good and 4 bad months")
+has("E9 reading", "Eight good months in twelve move a 10% prior only to 13.5%")
+has("pitfall 5", "is the prosecutor's fallacy. The probability of the evidence given innocence is not the probability of "
+    "innocence given the evidence.")
+assert "court" not in TEXT
 anchor("A13-43", f"LR {g(lr8)}; posterior odds {g(po)}; posterior {pc(po / (1 + po))}",
        "LR 1.406408618; posterior odds 0.1562676242; posterior 13.51483177%")
 
@@ -525,7 +547,7 @@ n_le1, n_lem1 = int(at_most(tr, 1).sum()), int(at_most(tr, -1).sum())
 assert (n_le1, n_lem1, fx[0]) == (4916, 768, n_dn)
 chk("KC6 Fhat(0)", fx[0] / T, ".4f", "0.4520")
 chk("KC6 interval", (n_le1 - n_lem1) / T, ".4f", "0.7092")
-has("KC6 counts", "(4,916-768)/5,849=4,148/5,849=0.7092")
+has("KC6 counts", "&\\quad=(4,916-768)/5,849\\\\&\\quad=4,148/5,849=0.7092.")
 anchor("A13-21", f"Fhat(0) = {fx[0]}/{T} = {g(fx[0] / T)}; Pr(-1% < R <= 1%) = ({n_le1} - {n_lem1})/{T}",
        "Fhat(0) = 2644/5849 = 0.4520430843; Pr(-1% < R <= 1%) = (4916 - 768)/5849")
 
@@ -594,7 +616,9 @@ pairs3 = (int((e0 & e1).sum()), int((e0 & e2).sum()), int((e1 & e2).sum()))
 all3, un3 = int((e0 & e1 & e2).sum()), int((e0 | e1 | e2).sum())
 assert len(e0) == n3 and singles == (252, 252, 252) and pairs3 == (38, 34, 38) and all3 == 8
 assert un3 == sum(singles) - sum(pairs3) + all3 == 654
-has("P4 counts", "Each day has 252 falls; days 1 and 2 share 38, days 1 and 3 share 34, days 2 and 3 share 38, and all three share 8")
+has("P4 counts", "Each $A_i$ holds 252 triples; $A_1$ and $A_2$ share 38, $A_1$ and $A_3$ share 34, $A_2$ and $A_3$ share 38, "
+    "and all three share 8")
+has("P4 three times", "from (13.1) applied three times")
 has("S4 union", "$3\\times252-38-34-38+8=654$ triples, 11.19%")
 chk("S4 union share", un3 / n3, ".2%", "11.19%")
 chk("S4 bound share", sum(singles) / n3, ".2%", "12.93%")
@@ -629,7 +653,10 @@ chk("S6 at 38", 1 - (1 - p1) ** 38, ".2%", "50.75%")
 chk("S6 at 37", 1 - (1 - p1) ** 37, ".2%", "49.82%")
 nb38, left38, hit38 = blocks(38)
 assert (nb38, left38, hit38) == (153, 35, 50)
-has("P6 blocks", "TR23 has 153 consecutive blocks of $n$ sessions from 3 January 2003, with the last 35 returns left out, and 50 of them hold a fall")
+has("P6 blocks", "Of TR23's consecutive blocks of $n$ sessions from 3 January 2003, the incomplete last block excluded, "
+    "50 hold a fall")
+has("S6 blocks", "TR23 has 153 blocks of 38 sessions, the last 35 returns excluded, and 50 of them hold a fall, 32.68%")
+assert "153" not in TEXT.split("## Practice Problems")[1].split("## Solutions")[0], "Problem 6 must not give the block count"
 chk("S6 data share", hit38 / nb38, ".2%", "32.68%")
 anchor("A13-49", f"at 37 {pc(1 - (1 - p1) ** 37)}, at 38 {pc(1 - (1 - p1) ** 38)}; blocks of 38: {nb38}, "
        f"left out {left38}, with a fall {hit38} ({pc(hit38 / nb38)})",
@@ -677,12 +704,31 @@ chk("S10 Pr(X=1)", (nDD + nDU) / nP, ".4f", "0.4519")
 chk("S10 Pr(Y=1)", (nDD + nUD) / nP, ".4f", "0.4521")
 chk("S10 product of the printed", 0.4519 * 0.4521, ".4f", "0.2043")
 chk("S10 product exact", (nDD + nDU) * (nDD + nUD) / nP ** 2, ".4f", "0.2043")
-has("S10 fraction", "$\\Pr(X=1,Y=1)=1,226/5,848=0.2096$")
+has("S10 fraction", "&\\Pr(X=1,Y=1)\\\\&\\quad=1,226/5,848=0.2096,")
+has("S10 product", "&\\Pr(X=1)\\Pr(Y=1)\\\\&\\quad=0.4519\\times0.4521=0.2043,")
+has("P10 question", "the sign of one day depends on the day before beyond these 5,848 days?")
 anchor("A13-53", f"Pr(X=1,Y=1) {nDD}/{nP} = {g(nDD / nP)}", "Pr(X=1,Y=1) 1226/5848 = 0.2096443228")
 # P11
 has("S11", "32, 76, 457 and 5,283 days")
 has("S11 regime", "15 of the 186 days after a big move fell 3% or more, 8.06%")
-has("S11 hit", "The 15 are 41.67% of the regime's 36 falls")
+has("S11 hit", "the 15 are 41.67% of the regime's 36 falls")
+# Solution 11's table: the case on the 2,771 day pairs inside the 10% regime
+s11 = (ab2, a2 - ab2, b2 - ab2, n2 - a2 - b2 + ab2)
+assert s11 == (15, 21, 171, 2564) and (n2 - b2, n2 - a2) == (2585, 2735)
+has("S11 pairs", "On the 2,771 day pairs of the 10% regime, the same table reads")
+has("S11 row 1", "| 2% or more either way | 15 | 171 | 186 | 8.06% |")
+has("S11 row 2", "| Smaller | 21 | 2,564 | 2,585 | 0.81% |")
+has("S11 row 3", "| All | 36 | 2,735 | 2,771 | 1.30% |")
+has("S11 row 4", "| Share after a big move | 41.67% | 6.25% | 6.71% | |")
+for lab, n in (("other days after a big move", 171), ("falls after a smaller move", 21), ("neither", 2564),
+               ("days after a smaller move", 2585), ("other days", 2735)):
+    chk(f"S11 {lab}", n, ",", f"{n:,}")
+chk("S11 share after a big move", ab2 / b2, ".2%", "8.06%")
+chk("S11 share after a smaller move", (a2 - ab2) / (n2 - b2), ".2%", "0.81%")
+chk("S11 share of all pairs", a2 / n2, ".2%", "1.30%")
+chk("S11 hit rate", ab2 / a2, ".2%", "41.67%")
+chk("S11 false-alarm rate", (b2 - ab2) / (n2 - a2), ".2%", "6.25%")
+chk("S11 share of pairs after a big move", b2 / n2, ".2%", "6.71%")
 # P12
 p_, q_ = 0.55, 0.45
 chk("S12 1 - q^2", 1 - q_ ** 2, ".4f", "0.7975")

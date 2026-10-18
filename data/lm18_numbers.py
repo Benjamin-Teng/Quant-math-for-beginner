@@ -1,6 +1,6 @@
 """Every number that LM18 (Monte Carlo Simulation and the Bootstrap) quotes, computed and checked against src/lm18.md.
 
-Run:  PYTHONUTF8=1 uv run python data/lm18_numbers.py      (after data/vol3_series.py)
+Run:  uv run python data/lm18_numbers.py      (after data/vol3_series.py)
 
 Inputs (data/lm18_common.py): data/processed/vol3_taiex.parquet (TR23, the TAIEX total-return index), LM12's printed
 S5 Cholesky factor and LM5's printed Simpson errors (model parameters typed from those modules), src/lm18.md (the
@@ -299,7 +299,7 @@ has("KC4 about 52,000", "about 52,000 paths")
 assert round(n_kc / 1e4) == 5
 anchor("A18-15", f"{p_ln * (1 - p_ln) / 1e-6:.0f}; {n_kc:.0f}", "51919; 51886")
 
-# ====================================================================== E4 and X3: LM12's colouring gap, (18.9)
+# ====================================================================== E4 and X3: LM12's colouring gap, (18.4)
 L = L_PRINTED
 Sig = L @ L.T
 n4 = 4382
@@ -318,10 +318,10 @@ chk("tr^2 / F^2", tr**2 / F2, ".4f", "2.6509")
 cst = math.sqrt(1 + tr**2 / F2)
 chk("sqrt(1 + .)", cst, ".3f", "1.911")
 chk("sqrt(1 + printed 2.6509)", math.sqrt(1 + 2.6509), ".3f", "1.911")
-chk("(18.9) at 4,382", cst / math.sqrt(n4), ".4f", "0.0289")
-chk("(18.9) at 4,382 from printed 1.911", 1.911 / math.sqrt(n4), ".4f", "0.0289")
-chk("(18.9) at 50,000", cst / math.sqrt(50_000), ".4f", "0.0085")
-chk("(18.9) at 50,000 from printed 1.911", 1.911 / math.sqrt(50_000), ".4f", "0.0085")
+chk("(18.4) at 4,382", cst / math.sqrt(n4), ".4f", "0.0289")
+chk("(18.4) at 4,382 from printed 1.911", 1.911 / math.sqrt(n4), ".4f", "0.0289")
+chk("(18.4) at 50,000", cst / math.sqrt(50_000), ".4f", "0.0085")
+chk("(18.4) at 50,000 from printed 1.911", 1.911 / math.sqrt(50_000), ".4f", "0.0085")
 has("50,000 draws", "0.0085 at 50,000")
 
 
@@ -341,7 +341,8 @@ anchor("A18-21 batch SE", ", ".join(f"{rms_b[n]:.4f}" for n in X3_SIZES), "0.005
 chk("X3 RMS at 4,382", rms[4382], ".4f", "0.0301")
 chk("X3 batch SE at 4,382", rms_b[4382], ".4f", "0.0007")
 rel = max(rms_b[n] / rms[n] for n in X3_SIZES)
-chk("X3 relative batch SE at most %", pct(rel), ".1f", "2.6")
+assert 2.6 < pct(rel) < 2.7, pct(rel)
+has("X3 relative batch SE below 2.7%", "relative standard errors below 2.7%")
 below = int((runs[4382] <= gap4).sum())
 sh = below / 200
 chk("X3 runs at or below 0.0250", float(below), ".0f", "82")
@@ -349,7 +350,7 @@ chk("X3 share %", pct(sh), ".0f", "41")
 chk("X3 share SE %", pct(math.sqrt(sh * (1 - sh) / 200)), ".0f", "3")
 anchor("A18-21 share", f"{below} of 200, {sh:.3f} +- {math.sqrt(sh * (1 - sh) / 200):.3f}", "82 of 200, 0.410 +- 0.035")
 has("X3 82 of 200", "82 of 200 runs (41%)")
-has("X3 200 runs", "200 runs at each $n$ (experiment 12)")
+has("X3 200 runs", "200 runs at each $n$ (experiment 12,")
 has("X3 batches", "20 batches of 10 runs")
 
 # ====================================================================== E5 (experiment 5) and X4: against quadrature
@@ -373,16 +374,15 @@ chk("E5 relative SE %", pct(rel_plain / 1e3), ".0f", "22")
 n_1pct = (1.96 / 0.01) ** 2 * (1 - pk) / pk
 chk("draws for +-1% (x1e9)", n_1pct / 1e9, ".2f", "1.92")
 chk("draws for +-1% from printed 223.6 (x1e9)", (1.96 / 0.01) ** 2 * 223.6**2 / 1e9, ".2f", "1.92")
-n_simp = (1 / 1.2e-6) ** 2 * (1 - pk) / pk
-chk("draws for relative SE 1.2e-6 (x1e16)", n_simp / 1e16, ".1f", "3.5")
-chk("same from printed 223.6 (x1e16)", (223.6 / 1.2e-6) ** 2 / 1e16, ".1f", "3.5")
+n_simp = (1 / 1.23e-6) ** 2 * (1 - pk) / pk
+chk("draws for relative SE 1.23e-6 (x1e16)", n_simp / 1e16, ".1f", "3.3")
+chk("same from printed 223.6 (x1e16)", (223.6 / 1.23e-6) ** 2 / 1e16, ".1f", "3.3")
 simp_rel = {n + 1: e / P_LM5 for n, e in SIMPSON_LM5.items()}
 anchor("A18-22", ", ".join(f"{k}: {v:.4e}" for k, v in simp_rel.items()),
        "9: 4.8441e-01, 17: 6.1489e-02, 33: 4.7342e-03, 65: 3.1144e-04, 129: 1.9697e-05, 257: 1.2348e-06, "
        "513: 7.7486e-08, 1025: 4.8341e-09")
 chk("Simpson relative at 9", simp_rel[9], ".3f", "0.484")
 chk("Simpson relative at 257 (x1e6)", simp_rel[257] * 1e6, ".2f", "1.23")
-chk("Simpson relative at 257, LM5's 1.2e-6 (x1e6)", simp_rel[257] * 1e6, ".1f", "1.2")
 chk("Simpson relative at 1,025 (x1e9)", simp_rel[1025] * 1e9, ".2f", "4.83")
 has("257 evaluations", "with 257 evaluations of $\\varphi$")
 var_is = math.exp(KK**2) * float(stats.norm.cdf(-2 * KK)) - pk**2
@@ -556,7 +556,7 @@ EGb = (1 + Rbar) ** m
 chk("(1+Rbar)^m", EGb, ".4f", "2.1580")
 chk("(1+Rbar)^m from printed 0.062505%", 1.00062505**m, ".4f", "2.1580")
 assert f"{1.000625**m:.4f}" == "2.1579"                       # why the text prints 0.062505%
-has("(18.8) printed", "1.00062505^{1231}=2.1580")
+has("(18.9) printed", "1.00062505^{1231}=2.1580")
 chk("E10 mean G", float(G10.mean()), ".3f", "2.136")
 chk("E10 mean G SE", se(G10), ".3f", "0.009")
 chk("E10 interval low from printed", 2.136 - 1.96 * 0.009, ".3f", "2.118")
@@ -573,8 +573,9 @@ g12a = np.random.default_rng([10, 20261011])
 idx12 = np.concatenate([g12a.integers(0, T, size=(500, m)) for _ in range(20)])
 one = np.random.default_rng([10, 20261011])
 assert bool((idx12 == one.integers(0, T, size=(10_000, m))).all()), "chunked integers differ from one call"
-lnG12, G12 = r[idx12].sum(axis=1), np.prod(1 + R[idx12], axis=1)
-y12 = (lnG12 < 0).astype(float)
+G12 = np.prod(1 + R[idx12], axis=1)
+y12 = (G12 < 1).astype(float)
+assert np.array_equal(y12, (r[idx12].sum(axis=1) < 0).astype(float))   # G < 1 and ln G < 0 agree here
 assert str(y12.mean()) == "0.0561" and str(y12.std() / 100).startswith("0.0023")
 assert str(G12.mean()).startswith("2.136") and str(G12.std() / 100).startswith("0.0094")
 has("P12 code output 1", "# 0.0561 0.0023...")
@@ -597,7 +598,7 @@ data_pmf = np.bincount(np.minimum(x7.counts, 8), minlength=9)
 anchor("A18-35", ", ".join(str(int(x)) for x in data_pmf), "210, 38, 9, 16, 4, 5, 1, 0, 3")
 chk("months", float(len(x7.months)), ".0f", "286")
 assert (x7.nmon[0], x7.nmon[-1]) == (18, 6)
-has("partial months", "(18 and 6 returns)")
+has("partial months", "partial (18 and 6 returns)")
 top = [x7.months[i] for i in np.flatnonzero(x7.counts == x7.counts.max())]
 assert int(x7.counts.max()) == 8 and top == ["2008-09", "2008-10", "2020-03"]
 has("months with eight", "three months with eight (September 2008, October 2008 and March 2020)")
@@ -681,6 +682,7 @@ chk("P11 SE common, unrounded", math.sqrt((pb - pa) * (1 - (pb - pa)) / 1e5) / 0
 anchor("A18-58", f"{math.sqrt((pa * (1 - pa) + pb * (1 - pb)) / 1e5) / 0.02:.5f}; "
        f"{math.sqrt((pb - pa) * (1 - (pb - pa)) / 1e5) / 0.02:.5f}", "0.03334; 0.00519")
 has("P11 100,000", "100,000 draws on each side")
+has("pitfall 100,000", "100,000 draws a side")
 # the method pitfall of section 8: stream 2 re-created
 ppf3 = stats.norm.ppf(u3)
 sn3 = rng(2).standard_normal(3)
@@ -697,8 +699,13 @@ for lit in ("`default_rng([1, 20261011])`", "`default_rng([16, 20261011])`", "`d
             "`default_rng([e, 20261011])`", "`standard_normal(10**6)`", "`standard_normal(10_000)`",
             "`integers(0, T, size=(500, T))`", "`integers(0, T, size=(500, m))`", "`standard_normal((500, m))` ten",
             "`standard_normal((500, m))` twenty", "`standard_normal((4382, 5))`", "`default_rng(20261011)`",
-            "retrieved 18 October 2026", "(experiment 14)", "(experiment 12)", "Experiment 3", "Experiment 5",
-            "Experiment 6", "Experiment 8", "Experiment 9", "Experiment 10", "Experiment 2"):
+            "retrieved 18 October 2026", "(experiment 14, `default_rng([14, 20261011])`; in-sample model)",
+            "(experiment 12, `default_rng([12, 20261011])`)", "Experiment 3", "Experiment 5",
+            "Experiment 6", "Experiment 8", "Experiment 9", "Experiment 10", "Experiment 2",
+            "`default_rng([3, 20261011])`", "`default_rng([5, 20261011])`", "`default_rng([6, 20261011])`",
+            "`default_rng([8, 20261011])`", "`default_rng([9, 20261011])`", "`default_rng([10, 20261011])`",
+            "`default_rng([12, 20261011])`", "`default_rng([14, 20261011])`", "y = (G < 1).astype(float)",
+            "import numpy as np\n\n    T, m = 5849, 1231"):
     has(f"literal {lit}", lit)
 has("LM12's draws", "4,382 standard normal draws")
 has("1,025 evaluations", "$4.83\\times10^{-9}$ at 1,025")

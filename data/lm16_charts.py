@@ -9,7 +9,8 @@ data/lm16_numbers.py). Writes:
   lm16-contours    the pair's centred returns with the normal model's contours d^2 = 1, 4, 9;
   lm16-chisq-pair  days with d_t^2 > k^2, k = 1..5, against the normal model (log scale);
   lm16-chisq-s5    S5's days above the chi-square(5) quantiles at 50%, 90%, 99%, 99.9% (x = -log10(1 - level));
-  lm16-exceed      exceedance correlations of the pair, k = 0, 0.25, .., 2, and the normal benchmark (step 0.05);
+  lm16-exceed      exceedance correlations of the pair, k = 0, 0.25, .., 2, and the normal benchmark at rho = 0.5749
+                   (step 0.05);
   lm16-widget      the widget exceed's initial chart (joint falls, rho = 0.5749) and, in its "widget" block, the
                    model grid (joint falls of a standard normal pair, rho = 0, 0.01, .., 0.95 by k = 0, 0.05, .., 2.5,
                    by Gauss-Legendre as in data/lm16_numbers.py), the one-variable conditional variances and the
@@ -148,8 +149,9 @@ chisq_pair = {
     "height": 220,
     "x": {"type": "num", "fmt": "n0", "label": "Contour d = k, k standard units", "tipLabel": "k = ", "min": 1,
           "max": 5, "ticks": ks},
-    "y": {"type": "log", "fmt": "num", "label": "Days with d² above k² (log scale)", "min": 0.01, "max": 10000,
-          "ticks": log_ticks},
+    # ticks from 0.01 to 10,000: no n code prints both ends (n0 gives "0" for 0.01, n2 "10000.00"), so sci0
+    "y": {"type": "log", "fmt": "sig4", "tfmt": "sci0", "label": "Days with d² above k² (log scale)", "min": 0.01,
+          "max": 10000, "ticks": log_ticks},
     "series": [{"name": "U28 days", "color": "1", "fmt": "n0", "x": ks, "y": pair_data},
                {"name": "Normal model, expected days", "color": "2", "dash": True, "fmt": "sig4", "x": ks,
                 "y": [r(v, 4) for v in pair_model]}],
@@ -168,7 +170,7 @@ chisq_s5 = {
     "x": {"type": "num", "fmt": "n2", "label": "Level of the chi-square quantile, 5 degrees of freedom",
           "tipLabel": "-log10(1 - level) = ", "min": 0.2, "max": 3.1, "ticks": lx,
           "tickLabels": ["50%", "90%", "99%", "99.9%"]},
-    "y": {"type": "log", "fmt": "num", "label": "Days with d² above the quantile (log scale)", "min": 1,
+    "y": {"type": "log", "fmt": "sig4", "tfmt": "n0", "label": "Days with d² above the quantile (log scale)", "min": 1,
           "max": 10000, "ticks": [1, 10, 100, 1000, 10000]},
     "series": [{"name": "U28 days", "color": "1", "fmt": "n0", "x": lx, "y": s5_data},
                {"name": "Normal model, expected days", "color": "2", "dash": True, "fmt": "sig4", "x": lx,
@@ -214,7 +216,8 @@ assert all(v[1] is not None for v in [*falls.values(), *rises.values()]), "a poi
 y_falls = [falls[k][1] for k in reversed(kq)] + [None] * 8
 y_rises = [None] * 8 + [rises[k][1] for k in kq]
 kf = [0.05 * j for j in range(41)]
-bench = [float(joint_low(np.array([rho]), k)[1][0]) for k in kf]
+RH = 0.5749                      # the benchmark uses the printed correlation, as the exhibit's note says
+bench = [float(joint_low(np.array([RH]), k)[1][0]) for k in kf]
 xs_m = [r(-k, 2) for k in reversed(kf)] + [r(k, 2) for k in kf[1:]]
 ys_m = [r(v, 6) for v in reversed(bench)] + [r(v, 6) for v in bench[1:]]
 exceed = {

@@ -75,7 +75,11 @@
           { type: "point", x: L.mu, y: L.g, color: "2", label: "average of the logs", dx: 8, dy: 16 }
         ]
       });
-      function pts(v) { return fmt(v * 100, "n2"); }
+      // points to two decimals, or to three where two would sit on a rounding tie (+100%/−50%: σ²/2 = 28.125)
+      function pts(v) {
+        var x = Math.abs(v) * 1e4, tie = Math.abs(x - Math.floor(x) - 0.5) < 1e-6;
+        return fmt(v * 100, tie ? "n3" : "n2");
+      }
       out.innerHTML =
         "<div><span>Mean μ · standard deviation σ</span><b>" + fmt(L.mu, "pct1") + " · " + fmt(L.sd, "pct1") + "</b></div>" +
         "<div><span>Average of the logs g · log of the average ln(1 + μ)</span><b>" + fmt(L.g, "pct3") + " · " + fmt(L.lnmu, "pct3") + "</b></div>" +

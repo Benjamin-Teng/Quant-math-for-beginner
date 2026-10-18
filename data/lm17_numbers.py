@@ -1,6 +1,6 @@
 """Every number that LM17 (Law of Large Numbers and Central Limit Theorem) quotes, computed and checked against src/lm17.md.
 
-Run:  PYTHONUTF8=1 uv run python data/lm17_numbers.py      (after data/vol3_series.py has built TR23)
+Run:  uv run python data/lm17_numbers.py      (after data/vol3_series.py has built TR23)
 
 Input: data/processed/vol3_taiex.parquet (TR23: the TAIEX total-return index from FinMind's
 TaiwanStockTotalReturnIndex, closes 2003-01-02 .. 2026-10-08; columns date, tr, price, R, Rp), written and checked
@@ -12,7 +12,9 @@ defaults: excess kurtosis, bias=True); years = calendar days between the first a
 a horizon of tau years is m = round(A tau) whole sessions. The iid model draws days from TR23's empirical law, so
 mu = Rbar, g = rbar, sigma_r = s_r; gbar(f) and s_r(f) are the mean and standard deviation of ln(1 + f R_t).
 Counts use the guard R > 1e-12 (an up day) and are recounted exactly with Fraction on the two-decimal closes.
-LM17 simulates nothing, so no random generator is created.
+LM17 simulates nothing, so no random generator is created. The exact law of the iid model's m-day sum (the X6 note)
+is computed numerically: an FFT of the empirical law of r on a lattice of step 1e-5, checked by a Lugannani-Rice
+saddlepoint approximation.
 
 Checks (each stops the script on a failure):
   chk(label, value, fmt, printed)  format(value, fmt) equals the printed string, the value does not sit on a rounding
@@ -185,6 +187,8 @@ anchor("A17-03", f"{days}")
 anchor("A17-04", f"{years:.6f}")
 anchor("A17-05", f"{A:.6f}")
 chk("T", T, ",", "5,849")
+chk("calendar days", days, ",", "8,680")
+has("span in years", "8,680/365.25 = 23.7645 years")
 chk("years", years, ".4f", "23.7645")
 chk("A", A, ".2f", "246.12")
 chk("years, two decimals (X6 note)", years, ".2f", "23.76")
@@ -528,7 +532,22 @@ chk("P6: absolute error from printed values", 0.000394 - 0.000339, ".6f", "0.000
 chk("P6: absolute error", c400[1] - c400[2], ".6f", "0.000055")
 chk("P6: relative error at n = 400 (% low)", -100 * (c400[2] / c400[1] - 1), ".0f", "14")
 chk("P6: relative error at n = 100 (% high)", 100 * (c100[2] / c100[1] - 1), ".1f", "0.7")
-anchor("A17-87", f"exact {c400[1]:.6f}; z {c400[4]:.4f}, normal {c400[2]:.6f}; cc {c400[3]:.6f}; "
+# pitfall (M3 of reviews/lm17.md): the corrected normal's own error grows into the tail; the uncorrected one's 14% at
+# n = 400 comes from where its cut falls in the bar of j = 166
+chk("pitfall: exact chance at n = 400, about", c400[1], ".4f", "0.0004")
+has("pitfall: about 0.0004", "is about 0.0004")
+chk("pitfall: corrected error at n = 400 (% high)", 100 * (c400[3] / c400[1] - 1), ".1f", "2.6")
+chk("pitfall: corrected error at n = 100 (% high)", 100 * (c100[3] / c100[1] - 1), ".1f", "0.6")
+assert c10[3] < c10[1] and abs(c10[3] / c10[1] - 1) < 0.003     # n = 10: corrected 0.3% low, the centre
+area_cut = float(Phi((166.5 - 200) / 10) - Phi(c400[4]))           # normal area between the cuts 166.015 and 166.5
+over400 = c400[3] - c400[1]                                        # the corrected normal's own overshoot
+bar166 = float(stats.binom.pmf(166, 400, 0.5))
+assert 0.45 * bar166 < area_cut < 0.6 * bar166, "about half the bar of j = 166"
+chk("P6: normal area between the cuts", area_cut, ".6f", "0.000065")
+chk("P6: overshoot of the corrected normal", over400, ".6f", "0.000010")
+chk("P6: net shortfall = area - overshoot", area_cut - over400, ".6f", "0.000055")
+assert abs((area_cut - over400) - (c400[1] - c400[2])) < 1e-15
+anchor("A17-87",f"exact {c400[1]:.6f}; z {c400[4]:.4f}, normal {c400[2]:.6f}; cc {c400[3]:.6f}; "
        f"relative errors n=400 {c400[2] / c400[1] - 1:+.2%}, n=100 {c100[2] / c100[1] - 1:+.2%}")
 # KC 5
 chk("KC 5: exact Pr(j >= 60)", 100 * float(stats.binom.sf(59, 100, 0.5)), ".2f", "2.84")
@@ -552,8 +571,8 @@ def row_p(m: int) -> tuple[float, float, float, float, float, float]:
 
 
 x6 = {246: (".4f", ".4f", ".4f", ".4f", ".2f", ".1f"), 2461: (".2f", ".2f", ".2f", ".2f", ".2f", ".1f"),
-      5849: (".2f", ".2f", ".2f", ".1f", ".2f", ".1f")}
-x6_label = {246: "One year, 246", 2461: "Ten years, 2,461", 5849: "Sample, 5,849"}
+      5849: (".2f", ".2f", ".2f", ".1f", ".3f", ".1f")}
+x6_label = {246: "One year, 246", 2461: "Ten years, 2,461", 5849: "Sample (23.76 years), 5,849"}
 for m, fmts in x6.items():
     u, p = row(m), row_p(m)
     cells = []
@@ -564,6 +583,85 @@ for m, fmts in x6.items():
         assert not tie(scale * vu, ft) and not tie(scale * vp, ft), ("X6 tie", m, k)
         cells.append(cu + ("%" if k >= 4 else ""))
     has(f"X6 row m = {m}", f"| {x6_label[m]} | " + " | ".join(cells) + " |")
+has("X6 note: the approximation named", "the rest by (17.6), the normal approximation, and for $\\Pr(W_m>\\E W_m)$ "
+    "by its form in Section 6")
+
+
+# ---------------------------------------------------------------- the model's exact law (X6 note; M4 of reviews/lm17.md)
+# The sum S of m iid draws from TR23's empirical law of r, by FFT: each centred return r_t - rbar is placed on a lattice
+# of step H, its mass 1/T split linearly between its two neighbours (which keeps the mean exactly and adds at most
+# H^2/4 of variance per draw); the m-th power of the transform gives the centred sum, whose bulk (+-20 standard
+# deviations at m = T) fits the circle of NPT points. Each lattice mass is spread evenly over its cell for the
+# distribution function. A Lugannani-Rice saddlepoint approximation, which needs no lattice, checks the probabilities.
+H, NPT = 1e-5, 2**22
+yc = (r - rb) / H
+lo_i = np.floor(yc).astype(np.int64)
+w_hi = yc - lo_i
+pmf1 = (np.bincount(lo_i % NPT, weights=(1 - w_hi) / T, minlength=NPT)
+        + np.bincount((lo_i + 1) % NPT, weights=w_hi / T, minlength=NPT))
+assert abs(pmf1.sum() - 1) < 1e-12
+phi1 = np.fft.fft(pmf1)
+
+
+def exact_law(m: int) -> tuple[Vec, Vec]:
+    """Lattice pmf of S - m rbar (index NPT/2 is 0) and its cumulative sums."""
+    pm = np.fft.fftshift(np.fft.ifft(phi1**m).real)
+    assert abs(pm.sum() - 1) < 1e-9 and pm.min() > -1e-12 and pm[:NPT // 20].sum() + pm[-NPT // 20:].sum() < 1e-12
+    return pm, np.cumsum(pm)
+
+
+def law_cdf(pm: Vec, cum: Vec, c: float) -> float:
+    """Pr(S - m rbar < c), each lattice mass spread evenly over its cell [v - H/2, v + H/2)."""
+    k = c / H + NPT // 2
+    j = math.floor(k + 0.5)
+    return float(cum[j - 1] + (k - (j - 0.5)) * pm[j])
+
+
+def law_quantile(pm: Vec, cum: Vec, u: float) -> float:
+    """The c with Pr(S - m rbar < c) = u."""
+    j = int(np.searchsorted(cum, u))
+    return (j - 0.5 - NPT // 2 + (u - cum[j - 1]) / pm[j]) * H
+
+
+def lr_below(m: int, x: float) -> float:
+    """Lugannani-Rice saddlepoint approximation of Pr(S < x), S the sum of m iid draws from the empirical law of r."""
+    def tilt(s: float) -> tuple[float, float, float]:
+        a = s * r
+        w = np.exp(a - a.max())
+        k0 = float(a.max() + log(w.mean()))
+        k1 = float((w * r).sum() / w.sum())
+        return k0, k1, float((w * (r - k1) ** 2).sum() / w.sum())
+    sh = float(optimize.brentq(lambda s: m * tilt(s)[1] - x, -300.0, 300.0, xtol=1e-14))
+    k0, _, k2 = tilt(sh)
+    w_ = math.copysign(sqrt(2 * (sh * x - m * k0)), sh)
+    u_ = sh * sqrt(m * k2)
+    upper = float(stats.norm.sf(w_) + stats.norm.pdf(w_) * (1 / u_ - 1 / w_))
+    return 1 - upper
+
+
+exact_rows, diff_p, diff_q = {}, [], []
+for m in (246, 2461, 5849):
+    pm, cum = exact_law(m)
+    p_loss = law_cdf(pm, cum, -m * rb)
+    p_above = 1 - law_cdf(pm, cum, m * delta)
+    qs = [exp(m * rb + law_quantile(pm, cum, u)) for u in (0.05, 0.5, 0.95)]
+    sp_loss, sp_above = lr_below(m, 0.0), 1 - lr_below(m, m * log(1 + Rb))
+    print(f"exact law, m = {m}: Pr(W<W0) {p_loss:.6%} (saddlepoint {sp_loss:.6%}), Pr(W>EW) {p_above:.4%} "
+          f"(saddlepoint {sp_above:.4%}); 5%, median, 95%: {qs[0]:.4f}, {qs[1]:.4f}, {qs[2]:.4f}")
+    assert abs(p_loss - sp_loss) < 1e-5 and abs(p_loss - sp_loss) < 0.01 * p_loss, "FFT and saddlepoint differ"
+    assert abs(p_above - sp_above) < 1e-5, "FFT and saddlepoint differ"
+    u = row(m)
+    diff_p += [abs(u[4] - p_loss), abs(u[5] - p_above)]
+    diff_q += [abs(u[2] / qs[0] - 1), abs(u[0] / qs[1] - 1), abs(u[3] / qs[2] - 1)]
+    exact_rows[m] = (p_loss, p_above, qs)
+print(f"(17.6) against the exact law: probabilities differ by at most {100 * max(diff_p):.3f} points, quantiles by at "
+      f"most {100 * max(diff_q):.3f}%")
+assert max(diff_p) < 0.002 and max(diff_q) < 0.002
+has("X6 note: size of the error", "differ by at most 0.2 points for the probabilities and 0.2% for the quantiles")
+chk("X6 note: exact loss probability, one year (%)", 100 * exact_rows[246][0], ".2f", "23.62")
+chk("X6 note: exact loss probability, the sample (%)", 100 * exact_rows[5849][0], ".3f", "0.026")
+assert f"{100 * row(5849)[4]:.3f}" == "0.025" and f"{100 * row(246)[4]:.2f}" == "23.74"
+
 fp = "median {:.5f}; mean path {:.5f}; 5% {:.5f}; 95% {:.5f}; Pr(W<W0) {:.6f}; Pr(W>EW) {:.5f}"
 anchor("A17-47", fp.format(*row(m1)))
 anchor("A17-48", fp.format(*row(m10)))
@@ -604,7 +702,8 @@ for y in range(2003, 2026):
         loss_years.append(y)
 assert loss_years == [2008, 2011, 2015, 2018, 2022]
 chk("losing years", len(loss_years), "d", "5")
-has("losing years listed", "(2008, 2011, 2015, 2018, 2022)")
+has("losing years listed", "namely 2008, 2011, 2015, 2018 and 2022")
+has("X6: the 2003 caveat", "2003–2025 (2003 from its first close, 2 January 2003) lost")
 has("23 calendar years", "5 of the 23 calendar years 2003–2025")
 anchor("A17-50", f"{len(loss_years)} of 23: " + ", ".join(
     f"{y} {float(trf[year_end[str(y)]] / trf[0 if y == 2003 else year_end[str(y - 1)]] - 1):.2%}" for y in loss_years))
@@ -620,8 +719,14 @@ la = np.array(ann)
 chk("E8: LM15's fit, Pr(G < 1)", 100 * float(Phi(-la.mean() / la.std())), ".1f", "30.0")
 chk("E8: mean annual log return (LM15)", 100 * la.mean(), ".3f", "11.646")
 chk("E8: sd of annual log returns (LM15, divisor 23)", 100 * la.std(), ".3f", "22.207")
-chk("E8: 246 rbar' (2003-2025)", 100 * m1 * rb_w, ".3f", "11.634")
-chk("E8: sqrt(246) s_r' (2003-2025)", 100 * sqrt(m1) * sr_w, ".3f", "18.563")
+chk("E8: refitted daily mean log return, 2003-2025 (%)", 100 * rb_w, ".6f", "0.047292")
+chk("E8: refitted daily standard deviation, 2003-2025 (%)", 100 * sr_w, ".5f", "1.18352")
+chk("E8: 246 x refitted mean", 100 * m1 * rb_w, ".3f", "11.634")
+chk("E8: 246 x printed 0.047292%", 246 * 0.047292, ".3f", "11.634")
+chk("E8: sqrt(246) x refitted sd", 100 * sqrt(m1) * sr_w, ".3f", "18.563")
+chk("E8: sqrt(246) x printed 1.18352%", sqrt(246) * 1.18352, ".3f", "18.563")
+assert f"{sqrt(246) * 1.1835:.3f}" == "18.562", "1.1835% would not reproduce 18.563: the sd keeps six figures"
+has("E8: the refit's moments named", "246 times the refitted daily mean, 0.047292%")
 chk("E8: Phi(-11.634/18.563)", 100 * float(Phi(-11.634 / 18.563)), ".2f", "26.54")
 anchor("A17-51", f"{len(r_w)} returns to {dates[int(np.flatnonzero(in_win)[-1])]}: Pr(W_246 < W0) {p_w:.6f}; "
        f"23 x = {23 * p_w:.4f}")
@@ -688,6 +793,8 @@ anchor("A17-81", f"r lag 1 {corr(r[:-1], r[1:]):.4f}; abs(r) lag 1 {corr(r_abs[:
        f"abs(r) lag 20 {corr(r_abs[:-20], r_abs[20:]):.4f}")
 k_daily_R = kurt_ex(R)
 chk("daily excess kurtosis of R (LM14's)", k_daily_R, ".2f", "5.27")
+chk("daily kurtosis of R (LM14's)", k_daily_R + 3, ".2f", "8.27")
+has("pitfall: excess kurtosis named", "TR23's excess kurtosis is 5.27 (kurtosis 8.27, [[LM14]])")
 anchor("A17-55", f"{k_daily_R:.4f}")
 nw20, nw60 = T // 20, T // 60
 k20_first = kurt_ex(r[: nw20 * 20].reshape(nw20, 20).sum(axis=1))
@@ -752,6 +859,14 @@ lo_i, hi_i = 245 + int(va[245:].argmin()), 245 + int(va[245:].argmax())
 chk("X9: running variance, low", va[lo_i], ".4f", "0.0326")
 chk("X9: running variance, high", va[hi_i], ".4f", "0.0580")
 chk("X9: running variance, end", va[-1], ".4f", "0.0359")
+v_apr2, v_apr7 = va[dates_k["2025-04-02"] - 1], va[dates_k["2025-04-07"] - 1]
+chk("X9: running variance through 2 April 2025", v_apr2, ".5f", "0.03335")
+chk("X9: running variance through 7 April 2025", v_apr7, ".5f", "0.03377")
+chk("X9: its rise on 7 April 2025 (%)", 100 * (v_apr7 / v_apr2 - 1), ".1f", "1.3")
+chk("X9: the rise from the printed 0.03335 and 0.03377 (%)", 100 * (0.03377 / 0.03335 - 1), ".1f", "1.3")
+chk("X9: rise of the running excess kurtosis (%)", 100 * (k_apr7 / k_apr2 - 1), ".0f", "16")
+chk("X9: the rise from the printed 4.25 and 4.94 (%)", 100 * (4.94 / 4.25 - 1), ".0f", "16")
+has("X9: variance defined", "running annualized variance of $R$ (same divisor, times $A$)")
 same("X9: date of the low", dates[lo_i], "2024-04-12", in_md=False)
 same("X9: date of the high", dates[hi_i], "2004-06-23", in_md=False)
 has("X9: low date in words", "12 April 2024")

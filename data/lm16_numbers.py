@@ -210,8 +210,8 @@ chk("three-day correlation, unrounded returns", rho3u, ".3f", "0.850")
 anchor("A16-08", f"{g(100 * x1[i7])}; {g(100 * x2[i7])}")
 chk("7 April Semiconductor", 100 * x1[i7], ".2f", "-9.95")
 chk("7 April FinancialInsurance", 100 * x2[i7], ".2f", "-9.89")
-assert round(-50 * (x1[i7] + x2[i7]), 1) == 9.9
-has("about 9.9%", "both fell about 9.9%")
+assert -0.10 < x1[i7] < -0.0985 and -0.10 < x2[i7] < -0.0985        # -9.9529% and -9.8894%: both just short of 10%
+has("nearly 10%", "both fell nearly 10%")
 
 XP = np.column_stack([x1, x2])
 d2 = mahal(XP)
@@ -320,7 +320,7 @@ def cond_mean(x: Fraction) -> Fraction:
 
 assert all(cond_mean(F(k, 7)) == (3 * F(k, 7) + 2) / (6 * F(k, 7) + 3) for k in range(8))
 assert cond_mean(F(0)) == F(2, 3) and cond_mean(F(1)) == F(5, 9)
-has("E2 conditional mean values", "It falls from 2/3 at $x=0$ to 5/9 at $x=1$")
+has("E2 conditional mean values", "The conditional mean falls from 2/3 at $x=0$ to 5/9 at $x=1$.")
 
 # E3
 xs = [F(-1), F(0), F(1)]
@@ -470,7 +470,14 @@ chk("P6 between", bt6, ".3f", "0.002")
 chk("P6 between from the printed mean", wb * (0.2251 - 0.0619) ** 2 + wn * (0.0496 - 0.0619) ** 2, ".3f", "0.002")
 chk("P6 total", w6 + bt6, ".3f", "1.290")
 chk("P6 total from printed parts", 1.288 + 0.002, ".3f", "1.290")
-chk("P6 share", 100 * bt6 / (w6 + bt6), ".2f", "0.16")
+chk("P6 share, one decimal", 100 * bt6 / (w6 + bt6), ".1f", "0.2")
+chk("P6 share, three decimals", 100 * bt6 / (w6 + bt6), ".3f", "0.155")
+chk("P6 share from the printed parts", 100 * 0.002 / 1.290, ".3f", "0.155")
+chk("P6 share from the printed parts, one decimal", 100 * 0.002 / 1.290, ".1f", "0.2")
+bt6u = wb * (float(gb.mean()) - float(b_.mean())) ** 2 + wn * (float(gnb.mean()) - float(b_.mean())) ** 2
+chk("P6 share, unrounded data", 100 * bt6u / float(b_.var()), ".3f", "0.155")
+has("P6 share as printed", "a share between of 0.2% (0.155%)")
+has("P6 between part", "The between part is tiny (0.002 of 1.290)")
 chk("P6 unrounded mean", 100 * float(b_.mean()), ".4f", "0.0619")
 chk("P6 unrounded variance", 1e4 * float(b_.var()), ".3f", "1.290")
 anchor("A16-66", f"{g(1.8889 / 1.0570)}; {F('0.2251') / 2 + F('0.0496') / 2}; {g((0.2251 + 0.0496) / 2)}")
@@ -500,7 +507,7 @@ chk("E7 mean, unrounded", cm5u, ".2f", "-2.29")
 chk("E7 SD, unrounded", csdu, ".3f", "0.996")
 chk("E7 z, unrounded", (-3 - cm5u) / csdu, ".3f", "-0.713")
 chk("E7 probability, unrounded", float(stats.norm.cdf((-3 - cm5u) / csdu)), ".3f", "0.238")
-has("unrounded inputs agree", "unrounded inputs agree")
+has("unrounded inputs agree", "Unrounded inputs agree.")
 assert "0.4591" in norm((ROOT / "src" / "lm12.md").read_text(encoding="utf-8"))
 sel5 = (x1 >= -0.055 - EPS) & (x1 <= -0.045 + EPS)
 anchor("A16-56", f"{int(sel5.sum())}; {g(100 * float(x2[sel5].mean()))}; {g(100 * float(x2[sel5].std()))}; "
@@ -582,6 +589,7 @@ sf89 = float(stats.chi2.sf(89.30, 5))
 anchor("A16-58", f"{g(sf89, 6)}; {g(1 / (sf89 * 245.48), 6)}")
 same("E9 probability", sci(sf89, 1), "9.4\\times10^{-18}")
 same("E9 years", sci(1 / (sf89 * 245.48), 0), "4\\times10^{14}")
+has("E9 tail days", "184 days lie beyond the 99.9% quantile 20.52, where the model expects 4.4")
 
 # KC section 6: U28's 28-dimensional d^2
 d228 = mahal(X)
@@ -647,10 +655,16 @@ def bgl(r_: float, v: float) -> float:
 
 
 assert abs(bvn_lower(rho, 0.0)[0] - (0.25 + math.asin(rho) / (2 * math.pi))) < 1e-10
-mod = {k: bvn_lower(rho, k) for k in (0.0, 1.0, 2.0)}
+assert abs(bvn_lower(RH, 0.0)[0] - (0.25 + math.asin(RH) / (2 * math.pi))) < 1e-10
+# the model rows of the exceedance exhibit use the printed rho = 0.5749, as the note, condcorr and the widget do
+mod = {k: bvn_lower(RH, k) for k in (0.0, 1.0, 2.0)}
+mod_u = {k: bvn_lower(rho, k) for k in (0.0, 1.0, 2.0)}
+for k in mod:            # the unrounded rho changes only k = 0's expected days (1,522.6), nothing else printed
+    assert f"{mod[k][1]:.3f}" == f"{mod_u[k][1]:.3f}" and f"{mod[k][0]:.4f}" == f"{mod_u[k][0]:.4f}"
+has("X8 note: rho", "Benchmark and model rows at $\\rho=0.5749$")
 anchor("A16-39", "; ".join(g(mod[k][1]) for k in mod))
 anchor("A16-42", "; ".join(f"{g(mod[k][0])} ({g(T * mod[k][0])})" for k in mod))
-for k, pc, pp, pd in ((0.0, "0.332", "0.3475", "1,522.6"), (1.0, "0.229", "0.0699", "306.3"), (2.0, "0.156", "0.0051", "22.4")):
+for k, pc, pp, pd in ((0.0, "0.332", "0.3475", "1,522.7"), (1.0, "0.229", "0.0699", "306.3"), (2.0, "0.156", "0.0051", "22.4")):
     chk(f"X8 benchmark k={k}", mod[k][1], ".3f", pc)
     chk(f"X8 model probability k={k}", mod[k][0], ".4f", pp)
     chk(f"X8 model days k={k}", T * mod[k][0], ",.1f", pd)
@@ -699,6 +713,9 @@ for name, vals, pd, pr, pm in X9_rows:
         chk(f"X9 {name} model k={kk}", model, ".3f", pm[j])
         first = f"| {name} " if j == 0 else "| "
         has(f"X9 row {name} k={kk}", f"{first}| {kk} | {pd[j]} | {pr[j]} | {pm[j]} |")
+for k in (1.0, 2.0, 2.5):    # the note's printed rho = 0.5749 gives the same model column
+    assert f"{bgl(RH, v_two(k)):.3f}" == f"{bgl(rho, v_two(k)):.3f}" and f"{bgl(RH, v_low(k)):.3f}" == f"{bgl(rho, v_low(k)):.3f}"
+has("X9 note: rho", "The model uses $\\rho=0.5749$")
 for k, pt, pl_ in ((1.0, "2.5251", "0.1991"), (2.0, "5.7464", "0.1143"), (2.5, "8.0569", "0.0890")):
     chk(f"Var(Z | |Z| >= {k})", v_two(k), ".4f", pt)
     chk(f"Var(Z | Z <= -{k})", v_low(k), ".4f", pl_)

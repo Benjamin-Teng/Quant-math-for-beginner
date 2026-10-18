@@ -1,12 +1,12 @@
 """Chart specs for LM18 (src/data/lm18-*.json), computed from TR23 and from the module's simulations.
 
-Run:  PYTHONUTF8=1 uv run python data/lm18_charts.py      (after data/vol3_series.py; data/lm18_numbers.py checks the text)
+Run:  uv run python data/lm18_charts.py      (after data/vol3_series.py; data/lm18_numbers.py checks the text)
 
 Inputs (data/lm18_common.py): data/processed/vol3_taiex.parquet (TR23), LM12's printed S5 Cholesky factor and LM5's
 printed Simpson errors. Same conventions and seeds as data/lm18_numbers.py: experiment 12 for the rate chart and
 experiment 14 for the resampled months, each generator created once as np.random.default_rng([e, 20261011]).
 Writes lm18-windows (the case), lm18-invtr (the inverse transform on TR23), lm18-rate (the 1/sqrt(n) rate of
-(18.9)), lm18-quad (Monte Carlo against Simpson's rule) and lm18-destroy (monthly counts, data against resamples).
+(18.4)), lm18-quad (Monte Carlo against Simpson's rule) and lm18-destroy (monthly counts, data against resamples).
 """
 import json
 import math
@@ -88,7 +88,7 @@ invtr = {
 }
 write("lm18-invtr", invtr)
 
-# ------------------------------------------------------------------ rate: (18.9) against 200 runs (experiment 12)
+# ------------------------------------------------------------------ rate: (18.4) against 200 runs (experiment 12)
 L = L_PRINTED
 Sig = L @ L.T
 F2, tr = float(np.linalg.norm(Sig) ** 2), float(np.trace(Sig))
@@ -110,7 +110,7 @@ rate = {
     "y": {"type": "log", "fmt": "n4", "tfmt": "n3", "label": "Relative gap, root mean square (log scale)",
           "min": 0.004, "max": 0.25, "ticks": [0.005, 0.01, 0.02, 0.05, 0.1, 0.2]},
     "series": [{"name": "200 runs (experiment 12)", "color": "1", "x": lx, "y": [rd(v, 5) for v in rms]},
-               {"name": "Formula (18.9)", "color": "2", "dash": True, "x": fx,
+               {"name": "Formula (18.4)", "color": "2", "dash": True, "x": fx,
                 "y": [rd(cst / math.sqrt(10**v), 5) for v in fx]}],
     "ann": [{"type": "point", "x": rd(math.log10(4382), 4), "y": rd(gap4, 5), "color": "3",
              "label": "LM12's run, 0.0250", "dx": -128, "dy": 18}],

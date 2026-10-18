@@ -146,7 +146,7 @@ show("days with |R| >= 3%", int(big.sum()), "d", "175")
 md(r"""
 ## Part 1 — Up days in blocks of 20 sessions
 
-[[eg:updays]] and [[ex:binom]]: the first 5,840 returns in 292 consecutive blocks; the last 9 returns are left out.
+[[eg:updays]] and [[ex:binom]]: the first 5,840 returns in 292 consecutive blocks; the last 9 returns are excluded.
 """)
 
 code(r"""
@@ -191,6 +191,8 @@ show("largest gap", np.abs(b20 - p20).max(), ".4f", "0.0071")
 for n, printed in ((20, "0.53711"), (250, "0.54186"), (10_000, "0.54226")):
     show(f"(1 - 0.612/n)^n, n = {n}", (1 - 0.612 / n) ** n, ".5f", printed)
 show("e^-0.612", math.exp(-0.612), ".5f", "0.54227")
+show("gap at n = 20", math.exp(-0.612) - (1 - 0.612 / 20) ** 20, ".4f", "0.0052")
+show("e^-lambda lambda^2 / (2n) at n = 20", math.exp(-0.612) * 0.612**2 / 40, ".4f", "0.0051")
 
 monthly = (ret.with_columns(pl.col("date").str.slice(0, 7).alias("month"),
                             (pl.col("R").abs() >= pl.lit(0.03 - EPS)).cast(pl.Int64).alias("big"))
@@ -355,6 +357,9 @@ show("excess kurtosis to 2 April 2025", stats.kurtosis(eve), ".2f", "4.25")
 show("excess kurtosis to 7 April 2025", stats.kurtosis(aft), ".2f", "4.94")
 show("1% quantile before, %", 100 * np.quantile(eve, 0.01, method="inverted_cdf"), ".3f", "-3.538")
 show("1% quantile after, %", 100 * np.quantile(aft, 0.01, method="inverted_cdf"), ".3f", "-3.543")
+for name, part, printed in (("before", eve, "6.03"), ("after", aft, "5.24")):
+    n5, n6 = int((part <= -0.05 + EPS).sum()), int((part <= -0.06 + EPS).sum())
+    show(f"chord -5% to -6% {name} ({n5} and {n6} days)", math.log(n5 / n6) / math.log(1.2), ".2f", printed)
 show("without 7 April 2025", stats.kurtosis(np.delete(R, i7)), ".2f", "4.71")
 dev = R - Rbar
 top4 = np.argsort(-np.abs(dev), kind="stable")[:4]
@@ -404,6 +409,7 @@ code(r"""
 show("P2 Pr(X = 0)", stats.poisson.pmf(0, 0.612), ".3g", "0.542")
 show("P2 Pr(X >= 5)", stats.poisson.sf(4, 0.612), ".3g", "0.000431")
 show("P2 months without a large move", 286 * stats.poisson.pmf(0, 0.612), ".1f", "155.1")
+show("P2 months with five or more, 286 x 0.000431", 286 * 0.000431, ".3f", "0.123")
 # Problem 5
 show("P5 normal 1%, %", 0.0625 - 1.2084 * 2.3263, ".3f", "-2.749")
 show("P5 normal 99%, %", 0.0625 + 1.2084 * 2.3263, ".3f", "2.874")
@@ -416,6 +422,9 @@ for name, v, printed in (("median", lg7.median(), "1.1235"), ("mean", lg7.mean()
 # Problem 10
 for (a, b), printed in (((2, 4), "2.52"), ((4, 6), "4.91"), ((2, 6), "3.40")):
     show(f"P10 chord {a}% to {b}%", chord(n[a], n[b], a, b), ".2f", printed)
+ml_days = {2: 210, 4: 36.6, 6: 11.6}              # the maximum-likelihood fit's days, as the module prints them
+for (a, b), printed in (((2, 4), "2.52"), ((4, 6), "2.83"), ((2, 6), "2.64")):
+    show(f"P10 maximum-likelihood chord {a}% to {b}%", chord(ml_days[a], ml_days[b], a, b), ".2f", printed)
 # Problem 11: see the table of Part 6
 show("P11 rank of the 1% quantile before June 2015", math.ceil(0.01 * 3077), "d", "31")
 show("P11 rank after", math.ceil(0.01 * 2772), "d", "28")
@@ -429,18 +438,19 @@ show("P12 t at +5%", T * stats.t.sf(0.05, nu_m, loc_m, sc_m), ".1f", "22.0")
 """)
 
 md(r"""
-### Extension: a Student-t for five-session returns
+### Extension: a Student-t for five-session log returns
 
-Compound the daily returns into non-overlapping five-session returns, $\prod_{t}(1+R_t)-1$ over consecutive blocks of five, and fit a Student-t by maximum likelihood. Compare $\nu$, the excess kurtosis and the 1% quantile with the daily ones. Treat the comparison as a stability check and draw no conclusion yet: LM17 studies how sums of returns behave, and LM19 the sampling error of such statistics.
+Sum the daily log returns $r_t=\ln(1+R_t)$ over non-overlapping blocks of five sessions, and fit a Student-t to these five-session log returns by maximum likelihood. Compare its $\nu$ and the 1% quantile of the five-session log returns with the daily ones. Treat the comparison as a stability check and draw no conclusion yet: LM17 studies sums of log returns, their kurtosis included, and LM19 the sampling error of such statistics.
 """)
 
 code(r"""
+r = np.log1p(R)                               # daily log returns
 n5 = T // 5
-R5 = np.prod(1 + R[: n5 * 5].reshape(n5, 5), axis=1) - 1
-nu5, loc5, sc5 = stats.t.fit(R5)
-print(f"{n5} five-session returns: nu {nu5:.3f}, excess kurtosis {stats.kurtosis(R5):.2f}, "
-      f"1% quantile {100 * np.quantile(R5, 0.01, method='inverted_cdf'):.3f}%")
-# your code: other block lengths (10, 20), and overlapping blocks
+r5 = r[: n5 * 5].reshape(n5, 5).sum(axis=1)   # non-overlapping five-session log returns
+nu5, loc5, sc5 = stats.t.fit(r5)
+print(f"{n5} five-session log returns: Student-t nu {nu5:.3f}; "
+      f"1% quantile {100 * np.quantile(r5, 0.01, method='inverted_cdf'):.3f}% (log return)")
+# your code: other block lengths (10, 20); LM17 computes the kurtosis of such sums
 """)
 
 nb = nbf.v4.new_notebook()

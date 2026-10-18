@@ -97,8 +97,8 @@ them).
 - **Simulation.** Each simulated experiment (an example, a problem, an exhibit, a lab part) creates its generator once,
   at its start: `rng = np.random.default_rng([e, 20261011])`, with `e` the experiment's stated number first (NumPy's
   recommended order: varying IDs before the root seed), and never
-  reseeds inside it. Different $k$ give independent streams (NumPy's `SeedSequence`), so resizing one experiment
-  leaves the others unchanged. The stem or note prints the seed. LM18's reproduction of LM12's lab keeps that lab's
+  reseeds inside it. Different `e` give streams that are independent with very high probability (NumPy's
+  `SeedSequence`), and each experiment draws only from its own stream, so resizing one leaves the others unchanged. The stem or note prints the seed. LM18's reproduction of LM12's lab keeps that lab's
   `default_rng(20261011)`. Every printed Monte Carlo or bootstrap result states the number of draws, the seed and its
   standard error, and keeps only the digits its standard error supports. NumPy promises identical streams only for
   the same version and build, so printed simulation numbers rest on `uv.lock`'s pinned NumPy (SOURCES). A widget that
@@ -2096,7 +2096,7 @@ without proof: PCG64's period $2^{128}$ (O'Neill 2014), the antithetic sign; Sim
 
 References (records in SOURCES): Glasserman (2003), §2.2.1, §2.3.3, §4.1, §4.2 (p. 207, the monotone condition), §4.6;
 Wasserman (2004), §8.2, his equation (8.1) (divisor $B$, as LM18); Efron and Tibshirani (1993), §6.2, Algorithm 6.1
-(their equation (6.6) divides by $B-1$; E9 says so); Grinstead and Snell (1997), §5.2, Theorem 5.1; O'Neill (2014), HMC-CS-2014-0905; NumPy 2.5 and SciPy
+(their equation (6.6) divides by $B-1$; E9 says so); Grinstead and Snell (1997), §5.2, Corollary 5.2; O'Neill (2014), HMC-CS-2014-0905; NumPy 2.5 and SciPy
 1.18 references (the calls of X8, `SeedSequence`, `PCG64`, compatibility policy).
 
 Knowledge checks: §2 is a same-seed rerun a second check? (No: identical draws.) §3 why $-\ln U/\lambda$ is also

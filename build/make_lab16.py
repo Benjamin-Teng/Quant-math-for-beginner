@@ -345,7 +345,8 @@ show("Problem 6: mean, %", mp, ".4f", "0.0619", kept=True)
 show("   within, %^2", wi, ".3f", "1.288", kept=True)
 show("   between, %^2", bt, ".3f", "0.002", kept=True)
 show("   total, %^2", wi + bt, ".3f", "1.290", kept=True)
-show("   share between, %", 100 * bt / (wi + bt), ".2f", "0.16", kept=True)
+show("   share between, % (one decimal)", 100 * bt / (wi + bt), ".1f", "0.2", kept=True)
+show("   share between, % (three decimals)", 100 * bt / (wi + bt), ".3f", "0.155", kept=True)
 show("   spread ratio", sb / sn, ".2f", "1.79", kept=True)
 """)
 
@@ -485,21 +486,22 @@ def bench_low(rho, k):
     return P, (exy / P - ex * ey / P**2) / math.sqrt(vx * vy)
 
 
-rho = np.corrcoef(x1, x2)[0, 1]
+rho = np.corrcoef(x1, x2)[0, 1]                   # the data's correlation; the model uses the printed RH = 0.5749
 z1s, z2s = (x1 - x1.mean()) / x1.std(), (x2 - x2.mean()) / x2.std()
 rows8 = []
 for k in np.arange(0, 2.01, 0.25):
     lo = (z1s <= -k + EPS) & (z2s <= -k + EPS)
     hi = (z1s >= k - EPS) & (z2s >= k - EPS)
-    P, bc = bench_low(rho, k)
+    P, bc = bench_low(RH, k)
     rows8.append({"k": k, "falls: days": int(lo.sum()), "falls: corr": np.corrcoef(x1[lo], x2[lo])[0, 1],
                   "rises: days": int(hi.sum()), "rises: corr": np.corrcoef(x1[hi], x2[hi])[0, 1],
                   "benchmark": bc, "model Pr": P, "model days": T * P})
 ex8 = pl.DataFrame(rows8)
 r0, r1, r2 = rows8[0], rows8[4], rows8[8]
-show("[[ex:exceed]] benchmark at k = 0", r0["benchmark"], ".3f", "0.332")
-show("   at k = 1", r1["benchmark"], ".3f", "0.229")
-show("   at k = 2", r2["benchmark"], ".3f", "0.156")
+show("[[ex:exceed]] benchmark at k = 0 (rho = 0.5749)", r0["benchmark"], ".3f", "0.332", kept=True)
+show("   at k = 1", r1["benchmark"], ".3f", "0.229", kept=True)
+show("   at k = 2", r2["benchmark"], ".3f", "0.156", kept=True)
+show("   model days at k = 0", r0["model days"], ",.1f", "1,522.7")
 show("   joint falls at k=2: days", r2["falls: days"], "d", "44")
 show("   joint falls at k=2: corr", r2["falls: corr"], ".3f", "0.669")
 show("   joint rises at k=2: days", r2["rises: days"], "d", "32")
@@ -514,9 +516,9 @@ ks = ex8["k"].to_numpy()
 ax.plot(-ks, ex8["falls: corr"], marker="o", label="joint falls (at -k)")
 ax.plot(ks, ex8["rises: corr"], marker="o", label="joint rises (at +k)")
 kk = np.linspace(0, 2, 41)
-bb = [bench_low(rho, k)[1] for k in kk]
+bb = [bench_low(RH, k)[1] for k in kk]
 ax.plot(np.r_[-kk[::-1], kk[1:]], np.r_[bb[::-1], bb[1:]], ls="--", label="normal benchmark")
-ax.axhline(rho, color="gray", lw=0.8, ls=":")
+ax.axhline(rho, color="gray", lw=0.8, ls=":")      # the data's full-sample correlation
 ax.set_xlabel("k standard deviations"); ax.set_ylabel("correlation")
 ax.set_title("[[ex:exceed]]: exceedance correlations of the pair"); ax.legend(); plt.show()
 """)
@@ -540,7 +542,7 @@ for k in (1.0, 2.0, 2.5):
     for name, sel, v in (("either way", np.abs(z1s) >= k - EPS, v_two(k)), ("falls", z1s <= -k + EPS, v_low(k)),
                          ("rises", z1s >= k - EPS, v_low(k))):
         rows9.append({"event": name, "k": k, "days": int(sel.sum()), "data": np.corrcoef(x1[sel], x2[sel])[0, 1],
-                      "model (16.10)": bgl(rho, v)})
+                      "model (16.10)": bgl(RH, v)})
 print(pl.DataFrame(rows9).sort("event", "k"))      # [[ex:condcorr]]
 show("Var(Z | |Z| >= 2)", v_two(2.0), ".4f", "5.7464")
 show("Var(Z | Z <= -2)", v_low(2.0), ".4f", "0.1143")

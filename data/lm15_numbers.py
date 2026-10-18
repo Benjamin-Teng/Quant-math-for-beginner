@@ -24,6 +24,7 @@ it, and it checks that every [[ex:...]] and [[eg:...]] label resolves and every 
 import itertools
 import math
 import re
+import warnings
 from datetime import date
 from fractions import Fraction
 from pathlib import Path
@@ -164,6 +165,7 @@ has("first return", "3 January 2003")
 has("last return", "8 October 2026")
 chk("years", years, ".4f", "23.7645")
 chk("A", A, ".2f", "246.12")
+has("span of the closes", "The closes, 2 January 2003 – 8 October 2026, span 23.7645 years")
 anchor("A15-03", f"{T} returns {dates[0]} .. {dates[-1]}")
 anchor("A15-04", f"{days} calendar days; {years:.6f} years; A = {A:.6f}")
 
@@ -272,7 +274,7 @@ def e_k_p(x: float) -> float:             # from the printed 5.139, 0.0625%, 1.2
 # ====================================================================== Introduction and the case
 lm05_has("0050's normal days at -5%", "0.058")
 lm05_has("0050's actual days at -5%", "The data contain **nine**")
-has("LM5's verdict", "it expected 0.058 days at or below −5% in twelve years, and 9 occurred")
+has("LM5's verdict", "The model expected 0.058 days at or below −5% in twelve years, and 9 occurred")
 c5 = le(0.05)
 chk("TAIEX days at -5%", c5, "d", "15")
 chk("case: normal at -5% from the printed 0.0625%, 1.2084%", 5849 * float(stats.norm.cdf((-5 - 0.0625) / 1.2084)),
@@ -329,7 +331,7 @@ p_hat = float(up[: NB * 20].mean())
 assert (NB, T - NB * 20, dates[NB * 20], dates[NB * 20 - 1]) == (292, 9, "2026-09-24", "2026-09-23")
 chk("blocks", NB, "d", "292")
 chk("returns in blocks", NB * 20, ",", "5,840")
-has("left out", "the last 9 returns, 24 September – 8 October 2026, are left out")
+has("excluded", "the last 9 returns, 24 September – 8 October 2026, are excluded")
 has("X2 sample", "3 January 2003 – 23 September 2026")
 chk("up days in blocks", int(up[: NB * 20].sum()), ",", "3,200")
 chk("p hat", p_hat, ".3f", "0.548")
@@ -337,6 +339,9 @@ anchor("A15-22", f"{p_hat:.8f}")
 chk("E1 mean from the printed 0.548", 20 * 0.548, ".2f", "10.96")
 chk("E1 variance from the printed 0.548", 20 * 0.548 * 0.452, ".2f", "4.95")
 chk("E1 variance from the unrounded p", 20 * p_hat * (1 - p_hat), ".2f", "4.95")
+chk("E1 standard deviation from the printed 0.548", math.sqrt(20 * 0.548 * 0.452), ".2f", "2.23")
+assert abs(12 - 20 * 0.548) < math.sqrt(20 * 0.548 * 0.452)                  # the first block lies within one sd
+has("first block within one sd", "The first block's 12 up days lie within one standard deviation, 2.23, of the mean 10.96")
 chk("blocks' mean", float(blocks.mean()), ".2f", "10.96")
 chk("blocks' variance (divisor 292)", float(blocks.var()), ".2f", "4.72")
 anchor("A15-31", f"mean {blocks.mean():.6f}; variance {blocks.var():.6f}")
@@ -364,6 +369,13 @@ assert format(float(down.mean()), ".4f") == "0.4520"      # over all 5,849 days:
 rho_p = (0.4639 - 0.4521) / (1 - 0.4521)
 chk("rho1 from the printed frequencies", rho_p, ".4f", "0.0215")
 assert abs(0.4521 * (0.4639 - 0.4521) / (0.4521 * (1 - 0.4521)) - rho_p) < 1e-15      # cov / var, as the text says
+assert abs((0.4521 * 0.4639 - 0.4521**2) - 0.4521 * (0.4639 - 0.4521)) < 1e-15       # E[X1 X2] - E[X1] E[X2]
+chk("rho1 from the unrounded frequencies", (pc - pd_) / (1 - pd_), ".4f", "0.0214")
+rho_direct = float(np.corrcoef(down[:-1].astype(float), down[1:].astype(float))[0, 1])
+assert format(rho_direct, ".4f") == "0.0214", rho_direct                             # the lag-1 correlation itself
+has("rho1 text", "(0.0214 from the unrounded frequencies)")
+has("covariance defined", r"Their covariance $\E[X_1X_2]-\E[X_1]\E[X_2]$ ([[LM16]]) is $0.4521\times(0.4639-0.4521)$")
+has("both days 0.4521", "indicate falls on adjacent days, each with frequency 0.4521")
 chk("block variance with rho1, from printed inputs", 20 * 0.548 * 0.452 * (1 + 2 * (19 / 20) * 0.0215), ".2f", "5.16")
 chk("block variance with rho1, unrounded", 20 * p_hat * (1 - p_hat) * (1 + 2 * (19 / 20) * (pc - pd_) / (1 - pd_)),
     ".2f", "5.16")
@@ -389,9 +401,19 @@ for n_, pr in ((20, "0.53711"), (250, "0.54186"), (10_000, "0.54226")):
 chk("e^-0.612", math.exp(-0.612), ".5f", "0.54227")
 chk("gap at n = 20 from the printed values", 0.54227 - 0.53711, ".4f", "0.0052")
 chk("gap at n = 250 from the printed values", 0.54227 - 0.54186, ".4f", "0.0004")
-for n_ in (20, 250):                     # the gap is about e^-lambda lambda^2 / (2n): within 2% at 20, 0.1% at 250
+chk("e^-lambda lambda^2/(2n) at n = 20, printed inputs", 0.54227 * 0.612**2 / 40, ".4f", "0.0051")
+chk("e^-lambda lambda^2/(2n) at n = 250, printed inputs", 0.54227 * 0.612**2 / 500, ".4f", "0.0004")
+chk("e^-lambda lambda^2/(2n) at n = 20, unrounded", math.exp(-0.612) * 0.612**2 / 40, ".4f", "0.0051")
+has("E2 gap text", "is close to $e^{-\\lambda}\\lambda^2/(2n)$ with $\\lambda=0.612$ (0.0051 and 0.0004)")
+has("E2 reason", "and the error of the approximation is of order $1/n^2$")
+err_n2 = []
+for n_ in (20, 250, 10_000):             # gap - e^-lambda lambda^2/(2n) is of order 1/n^2: n^2 times it settles
     g = math.exp(-0.612) - (1 - 0.612 / n_) ** n_
-    assert abs(g / (math.exp(-0.612) * 0.612**2 / (2 * n_)) - 1) < 0.02
+    if n_ < 10_000:
+        assert abs(g / (math.exp(-0.612) * 0.612**2 / (2 * n_)) - 1) < 0.02
+    err_n2.append(n_**2 * (g - math.exp(-0.612) * 0.612**2 / (2 * n_)))
+assert abs(err_n2[1] / err_n2[2] - 1) < 0.05 and abs(err_n2[0] / err_n2[2] - 1) < 0.3, err_n2
+has("E2 stem 0.612", "Then take the case's monthly mean, 0.612 ($\\hat\\lambda$ of [[eg:bigmoves]])")
 has("E2 n", "for $n=20$, 250 and 10,000")
 anchor("A15-57", f"j=0: Bin(20, 0.02992) {bin_pmf[0]:.6f} against Poisson(0.5984) {poi_pmf[0]:.6f}")
 anchor("A15-58", f"n=20: {(1 - 0.612 / 20) ** 20:.6f}")
@@ -423,6 +445,8 @@ anchor("A15-48", f"{rr[0]:.6f} / {rr[1]:.6f}")
 anchor("A15-32", f"five or more {len(months) * float(stats.poisson.sf(4, lam)):.6f}")
 chk("P2 Pr(X=0), three significant figures", math.exp(-0.612), ".3g", "0.542")
 chk("P2 Pr(X>=5)", float(stats.poisson.sf(4, 0.612)), ".3g", "0.000431")
+chk("P2 months from the printed 0.000431", 286 * 0.000431, ".3f", "0.123")
+has("P2 counts", r"$286e^{-0.612}=155.1$ and $286\times0.000431=0.123$ months")
 chk("P3 inverted ratio", 0.612 / 1.846, ".2f", "0.33")
 has("P3 B", "**B.** 1.00")
 
@@ -473,7 +497,14 @@ for lab, (a, b), (pa, pb) in (("worst", (qq[0], zs[0]), ("-3.758", "-8.079")), (
 assert dates[int(order[0])] == "2025-04-07" and dates[int(order[-1])] == "2025-04-10"
 chk("QQ worst y from the printed min and s", (-9.6997 - 0.0625) / 1.2084, ".3f", "-8.079")
 chk("QQ best y from the printed max and s", (9.2512 - 0.0625) / 1.2084, ".3f", "7.604")
-chk("QQ worst x to two decimals", -qq[0], ".2f", "3.76")
+e_min = integrate.quad(lambda z: z * T * float(stats.norm.pdf(z)) * float(stats.norm.sf(z)) ** (T - 1), -12, 0,
+                       points=[-3.7], limit=200)[0]                    # E[min of T standard normals]; mass above 0 is nil
+med_min = float(stats.norm.ppf(1 - 0.5 ** (1 / T)))                      # its median
+print(f"lowest of {T} normal draws: mean {e_min:.4f}, median {med_min:.4f}, plotting position {qq[0]:.4f}")
+assert (format(e_min, ".3f"), format(med_min, ".3f")) == ("-3.718", "-3.676")
+chk("E[min] to one decimal", -e_min, ".1f", "3.7", in_md=False)
+chk("median of the min to one decimal", -med_min, ".1f", "3.7", in_md=False)
+has("about 3.7", "lies about 3.7 standard deviations below the mean")
 chk("QQ worst y to two decimals", -zs[0], ".2f", "8.08")
 chk("rank 59 gap from the printed point", -3.004 - -2.326, ".2f", "-0.68", in_md=False)
 chk("rank 59 gap from the printed 1% gap", 0.82 / 1.2084, ".2f", "0.68")
@@ -619,6 +650,11 @@ has("9% above s", "9% above $s$")
 anchor("A15-55", f"{100 * sd_m:.6f}%")
 med_j = (T + 1) // 2
 chk("sample median, %", 100 * float(srt[med_j - 1]), ".4f", "0.0879")
+LM14 = (ROOT / "src" / "lm14.md").read_text(encoding="utf-8")
+assert "the median is the 2,925th return, 0.0879%" in LM14.replace("{,}", ",")       # LM14 owns the median
+assert "The data have 175 such days" in LM14                                     # and states the 175 days first
+has("LM14's median cited", "[[LM14]]'s sample median, 0.0879%")
+has("LM14's 175 days cited", "among 5,849 ([[LM14]]); set $p$ to the frequency $175/5,849=0.02992$ a session")
 chk("kurtosis fit at -5%", e_k(-0.05), ".3g", "8.17")
 chk("KC 6: kurtosis at nu = 5.139 from the printed nu", 3 + 6 / 1.139, ".2f", "8.27")
 LV = [k / 100 for k in range(2, 11)]
@@ -662,6 +698,17 @@ chk("1% quantile after", 100 * q_aft, ".3f", "-3.543")
 chk("its change from the printed values", 3.543 - 3.538, ".3f", "0.005")
 chk("days at -3% on the eve", le(0.03, eve), "d", "96")
 chk("days at -3% after", le(0.03, aft), "d", "97")
+n56_eve, n56_aft = (le(0.05, eve), le(0.06, eve)), (le(0.05, aft), le(0.06, aft))
+assert (n56_eve, n56_aft) == ((12, 4), (13, 5)), (n56_eve, n56_aft)
+has("E10 counts at -5% and -6%", "The days at or below −5% and −6% went from 12 and 4 to 13 and 5")
+ch_eve, ch_aft = math.log(12 / 4) / math.log(1.2), math.log(13 / 5) / math.log(1.2)
+chk("chord -5% to -6% on the eve", ch_eve, ".2f", "6.03")
+chk("chord -5% to -6% after", ch_aft, ".2f", "5.24")
+chk("its change from the printed values", 6.03 - 5.24, ".2f", "0.79")
+assert format(ch_eve - ch_aft, ".2f") == "0.78"        # unrounded 0.785: the text subtracts its printed 6.03 and 5.24
+has("E10 chord", "the count by one day and the chord by 0.79, from 6.03 to 5.24")
+has("overview chord", "the chord from −5% to −6% rests on a few days and fell from 6.03 to 5.24")
+has("E10 stem", "and the chord (15.13) from −5% to −6%, defined below")
 chk("without 7 April 2025", float(stats.kurtosis(np.delete(R, i7))), ".2f", "4.71")
 dev = R - Rbar
 top4 = np.argsort(-np.abs(dev), kind="stable")[:4]
@@ -730,6 +777,18 @@ chk("P10 4% to 6%", c46, ".2f", "4.91")
 chk("P10 2% to 6%", c26, ".2f", "3.40")
 assert abs(c26 - (c24 * math.log(2) + c46 * math.log(1.5)) / math.log(3)) < 1e-12
 assert c24 < nu_m < c46
+# the maximum-likelihood fit's own chords at the same levels, from X6's printed 210, 36.6 and 11.6 days
+chk("P10 ML chord 2% to 4%, printed days", chord(210, 36.6, 2, 4), ".2f", "2.52")
+chk("P10 ML chord 4% to 6%, printed days", chord(36.6, 11.6, 4, 6), ".2f", "2.83")
+chk("P10 ML chord 2% to 6%, printed days", chord(210, 11.6, 2, 6), ".2f", "2.64")
+chk("P10 ML chord 2% to 4%, unrounded", chord(e_ml(-0.02), e_ml(-0.04), 2, 4), ".2f", "2.52")
+chk("P10 ML chord 4% to 6%, unrounded", chord(e_ml(-0.04), e_ml(-0.06), 4, 6), ".2f", "2.83")
+assert format(chord(e_ml(-0.02), e_ml(-0.06), 2, 6), ".2f") == "2.63"       # the text prints 2.64 from the printed days
+assert format(c24, ".2f") == "2.52" and chord(e_ml(-0.04), e_ml(-0.06), 4, 6) < c46 - 2
+has("P10 ML chords", "from [[ex:tailtable]]'s 210, 36.6 and 11.6 days, are 2.52, 2.83 and 2.64")
+has("P10 comparison", "They equal the data's from −2% to −4% and lie far below them from −4% to −6%")
+has("P10 deeper chord", "The deeper chord rests on 6 days and on the price limit ([[ex:loglog]])")
+has("P10 stem", "the maximum-likelihood fit's chords at the same levels and its $\\nu=3.065$")
 anchor("A15-47", f"2%->3% {adj[0]:.6f}")
 anchor("A15-68", f"ML t {chord(e_ml(-0.03), e_ml(-0.06), 3, 6):.6f}")
 lm05_has("LM5's tail index 2 to 5", "between 2 and 5")
@@ -763,9 +822,10 @@ chk("tail mean, normal, from the printed inputs, %",
 num = integrate.quad(lambda x: x * float(stats.t.pdf(x, nu_m, loc_m, sc_m)), -np.inf, -0.05)[0]
 chk("tail mean, ML t, %", 100 * num / float(stats.t.cdf(-0.05, nu_m, loc_m, sc_m)), ".2f", "-7.57")
 anchor("A15-74", f"data {100 * float(tail.mean()):.4f}%")
-has("X10 counts", "1.75, 0.926, 0.524 days against 2, 2, 1 at −7%, −8%, −9%")
+has("X10 counts", "2, 2, 1 days at −7%, −8%, −9%; the kurtosis fit's 1.75, 0.926, 0.524 come close")
 has("X10 ML", "79.0, 36.6, 19.6 days against 108, 44, 15; −3.365% against −3.567%")
-has("X10 lognormal", "median +12.35%, the compound rate; mean +15.16% against 14.97%")
+has("X10 lognormal", "losing years 6.90 expected against 5; beyond the 5% and 95% quantiles 2.3 against 2; "
+    "mean +15.16% against 14.97%")
 has("KC 7", "expects 2.57 days at or below −10%, and TAIEX has none")
 chk("upper tail +3%", ge(0.03), "d", "67")
 chk("upper tail +5%", ge(0.05), "d", "13")
@@ -776,6 +836,24 @@ chk("ML at +5%", T * float(stats.t.sf(0.05, nu_m, loc_m, sc_m)), ".1f", "22.0")
 chk("ML at +3% from the printed parameters", 5849 * float(stats.t.sf((3 - 0.0997) / 0.7761, 3.065)), ".1f", "94.2")
 chk("ML at +5% from the printed parameters", 5849 * float(stats.t.sf((5 - 0.0997) / 0.7761, 3.065)), ".1f", "22.0")
 anchor("A15-76", f"+3%: {ge(0.03)}, normal {T * float(stats.norm.sf((0.03 - Rbar) / s)):.4f}")
+# Solution 12: the fit overstates the upper tail at both levels, and, centred above 0, expects more rises than falls
+assert T * stats.t.sf(0.03, nu_m, loc_m, sc_m) > ge(0.03) and T * stats.t.sf(0.05, nu_m, loc_m, sc_m) > ge(0.05)
+assert e_ml(-0.03) < le(0.03) and e_ml(-0.05) > le(0.05) and loc_m > 0
+assert T * stats.t.sf(0.03, nu_m, loc_m, sc_m) > e_ml(-0.03) and T * stats.t.sf(0.05, nu_m, loc_m, sc_m) > e_ml(-0.05)
+has("P12 lower tail", "In the lower tail it understates at −3% (79.0 against 108) and overstates at −5% (19.6 against 15)")
+has("P12 centre", "Centred at +0.0997%, the Student-t even expects more large rises than large falls")
+has("P12 stem", "Why can no symmetric model centred near the median fit both tails?")
+# X11: SciPy's method of moments for t matches the first three raw moments (rv_continuous.fit) and fails on TR23
+with warnings.catch_warnings():
+    warnings.simplefilter("ignore")
+    try:
+        stats.t.fit(R, method="MM")
+        mm_fails = False
+    except ValueError:
+        mm_fails = True
+assert mm_fails, "stats.t.fit(R, method='MM') no longer raises on TR23: revise the trap in the scipy exhibit"
+print("CHECK stats.t.fit(R, method='MM') raises ValueError on TR23 ok")
+has("MM trap", "fits the first three raw moments, not the kurtosis of (15.12), and on TR23 it stops with an error")
 
 # ====================================================================== Section 8 and the problems
 has("code: guard", "down5 = int((R <= -0.05 + 1e-12).sum())        # 15 days: the guard")

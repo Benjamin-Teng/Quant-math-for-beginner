@@ -1,6 +1,6 @@
 """Every number that LM14 (Random Variables, Expectation and Jensen's Inequality) quotes, computed and checked.
 
-Run:  PYTHONUTF8=1 uv run python data/lm14_numbers.py     (after data/vol3_series.py and data/lm14_charts.py)
+Run:  uv run python data/lm14_numbers.py     (after data/vol3_series.py and data/lm14_charts.py)
 
 Inputs: data/processed/vol3_taiex.parquet (TR23, through data/lm14_common.py), the closes of the same file for the
 exact-fraction recount, src/lm14.md (the text the checks compare against), the chart specs src/data/lm14-*.json,
@@ -131,6 +131,9 @@ has("T", "T=5,849")
 has("first return", "3 January 2003")
 has("last return", "8 October 2026")
 has("first close", "2 January 2003")
+truth("the years run from the first close, 2 January 2003 (8,680 days), not from the first return",
+      d.days == 8680 and (d.rdates[-1] - d.dates[0]).days == 8680 and (d.rdates[-1] - d.rdates[0]).days == 8679)
+has("span of the closes", "the closes from 2 January 2003 span 23.7645 years")
 chk("years", d.years, ".4f", "23.7645")
 chk("A", d.A, ".2f", "246.12")
 
@@ -236,6 +239,13 @@ for u in (0.001, 0.01, 0.05, 0.25, 0.5, 0.75, 0.95, 0.99, 0.999):
     has(f"X3 row u={u}", f"| {u} | {j:,} | {inv * 100:.3f} | {lin * 100:.3f} |")
     if u in (0.25, 0.5, 0.75):
         truth(f"X3 columns agree at u={u}, (T-1)u whole", inv == lin and ((T - 1) * u).is_integer())
+    else:
+        truth(f"X3 columns differ at u={u}, (T-1)u not whole", inv != lin and not ((T - 1) * u).is_integer())
+    truth(f"X3 printed columns agree at u={u} only at the quartiles, the median and 0.01",
+          (f"{inv * 100:.3f}" == f"{lin * 100:.3f}") == (u in (0.01, 0.25, 0.5, 0.75)))
+    if u == 0.01:
+        truth("X3 at u=0.01: the columns differ in the fourth decimal", f"{inv * 100:.4f}" != f"{lin * 100:.4f}")
+has("X3 note", "Elsewhere they differ, at $u=0.01$ only in the fourth decimal")
 chk("F^-1(0.01) %", float(np.quantile(R, 0.01, method="inverted_cdf")) * 100, ".3f", "-3.567")
 chk("F^-1(0.99) %", float(np.quantile(R, 0.99, method="inverted_cdf")) * 100, ".3f", "3.125")
 chk("F^-1(0.001) %", float(np.quantile(R, 0.001, method="inverted_cdf")) * 100, ".3f", "-6.313")
@@ -352,14 +362,19 @@ has("X4 row E[R^4]", f"| $\\E[R^4]$ | ${sci(m4, 3)}$ | ${sci(n4, 3)}$ |")
 has("X4 row (3.7)", f"| $s^2+\\bar R^2$, (3.7) | ${sci(s**2, 3)}+{sci(Rbar**2, 3)}$ |")
 q2 = (Rbar / s) ** 2
 chk("(Rbar/s)^2", q2, ".4f", "0.0027")
-truth("third: dropped share (Rbar/s)^2/3 under 0.1%", q2 / 3 < 0.001 and abs(n3 / (3 * Rbar * s**2) - 1 - q2 / 3) < 1e-12)
-truth("fourth: dropped share about 0.5%", 0.0045 < 2 * q2 + q2**2 / 3 < 0.0055
-      and abs(n4 / (3 * s**4) - 1 - (2 * q2 + q2**2 / 3)) < 1e-12)
+truth("third: the dropped share is exactly (Rbar/s)^2/3", abs(n3 / (3 * Rbar * s**2) - 1 - q2 / 3) < 1e-12)
+truth("fourth: the dropped share is exactly 2(Rbar/s)^2 + (Rbar/s)^4/3",
+      abs(n4 / (3 * s**4) - 1 - (2 * q2 + q2**2 / 3)) < 1e-12)
+chk("third: dropped share %", q2 / 3 * 100, ".2f", "0.09")
+chk("third: dropped share from printed 0.0027 %", 0.0027 / 3 * 100, ".2f", "0.09")
+chk("fourth: dropped share %", (2 * q2 + q2**2 / 3) * 100, ".2f", "0.54")
+chk("fourth: dropped share from printed 0.0027 %", (2 * 0.0027 + 0.0027**2 / 3) * 100, ".2f", "0.54")
+has("E6 shares", "\\tfrac13(\\bar R/s)^2=0.09\\%$ of $3\\bar Rs^2=")
+has("E6 shares", "\\tfrac13(\\bar R/s)^4=0.54\\%$ of $3s^4=")
 has("3 Rbar s^2", sci(3 * Rbar * s**2, 3))
 has("3 s^4", sci(3 * s**4, 3))
 truth("3 s^4 from six-decimal inputs prints the same", sci(3 * s6**4, 3) == sci(3 * s**4, 3))
-chk("printed moments: third %", (2.740 / 2.738 - 1) * 100, ".2f", "0.07")
-chk("printed moments: fourth %", (6.430 / 6.396 - 1) * 100, ".2f", "0.53")
+truth("E6 no longer prints shares from differences of four-figure moments", "the printed moments give" not in NORM)
 truth("LM4 prints 0050's excess kurtosis 8.12 and the ratio 3.7", "excess kurtosis** of 8.12" in LM04 and "3.7 times" in LM04)
 has("0050's 8.12", "8.12")
 anchor("A14-47", g10(skew))
@@ -371,6 +386,8 @@ anchor("A14-52", g10(m4 / n4))
 anchor("A14-53", g10(n4))
 anchor("A14-23", f"E R^2 {g10(m2)}; s^2 {g10(s**2)}; Rbar^2 {g10(Rbar**2)}")
 anchor("A14-54", f"(Rbar/s)^2 {g10(q2)}")
+anchor("A14-54", f"(Rbar/s)^2/3 {g10(q2 / 3 * 100)}%")
+anchor("A14-54", f"2(Rbar/s)^2 + (Rbar/s)^4/3 {g10((2 * q2 + q2**2 / 3) * 100)}%")
 anchor("A14-55", f"3 mu sigma^2 {g10(3 * Rbar * s**2)}; 3 sigma^4 {g10(3 * s**4)}")
 
 # ---- KC: f = 2
@@ -622,6 +639,10 @@ truth("P1/P2: F_G = 1/16, 5/16, 11/16, 15/16, 1", FG == [Fraction(1, 16), Fracti
 truth("P1 (C): Pr(G >= mean) = 5/16", sum(p for v, p in four.items() if v >= EG) == Fraction(5, 16))
 has("P2 F_G", "1/16, 5/16, 11/16, 15/16 and 1")
 chk("P2 E[G]", float(EG), ".5f", "1.02015")
+truth("P2: by (14.1) and the binomial theorem, E[G] = ((1.02 + 0.99)/2)^4 = 1.005^4",
+      EG == sum(Fraction(math.comb(4, j), 16) * Fraction(102, 100) ** j * Fraction(99, 100) ** (4 - j) for j in range(5))
+      == ((Fraction(102, 100) + Fraction(99, 100)) / 2) ** 4 == Fraction(1005, 1000) ** 4)
+has("P2 binomial", "((1.02+0.99)/2)^4=1.005^4=1.02015")
 eln1 = 0.5 * math.log(1.02) + 0.5 * math.log(0.99)
 chk("P2 E ln(1 + R) one day %", eln1 * 100, ".6f", "0.487615")
 eln4 = sum(math.log(float(v)) * float(p) for v, p in four.items())
@@ -656,6 +677,13 @@ chk("P4 skewness", float(sk4), ".2f", "-2.67")
 chk("P4 kurtosis", float(ku4), ".2f", "8.11")
 chk("P4 excess", float(ku4) - 3, ".2f", "5.11")
 truth("P4 at f = 8: mu 3.2%, sigma 14.4%", 8 * mu4 == Fraction(32, 1000) and 8 * sd4 == Fraction(144, 1000))
+m2_8 = sum((8 * v) ** 2 * p for v, p in zip(v4, p4, strict=True))
+m3_8 = sum((8 * v) ** 3 * p for v, p in zip(v4, p4, strict=True))
+truth("P4 at f = 8: E[(8R)^2] = 64 x 3.4e-4 = 0.02176 = 0.144^2 + 0.032^2",
+      m2_8 == 64 * Fraction(34, 100000) == Fraction(2176, 100000) == Fraction(144, 1000) ** 2 + Fraction(32, 1000) ** 2)
+truth("P4 at f = 8: E[(8R)^3] = 512 x (-1.16e-5) = -0.0059392", m3_8 == 512 * Fraction(-116, 10**7) == Fraction(-59392, 10**7))
+has("P4 f = 8 second moment", "=64\\times3.4\\times10^{-4}=0.02176$, which is $0.144^2+0.032^2$")
+has("P4 f = 8 third moment", "=512\\times(-1.16\\times10^{-5})=-0.0059392$")
 truth("P4 squared deviations in %^2: 0.36, 29.16, variance 3.24", (Fraction(6, 10)) ** 2 == Fraction(36, 100)
       and Fraction(54, 10) ** 2 == Fraction(2916, 100) and Fraction(9, 10) * Fraction(36, 100) + Fraction(1, 10) * Fraction(2916, 100) == Fraction(324, 100))
 truth("LM4 prints this trade's exact Kelly exposure 8", "exact 8" in LM04)
@@ -724,6 +752,19 @@ chk("P10 sum of the printed terms", 2.1247 - 0.0555 + 0.2266, ".4f", "2.2958")
 chk("P10 R_G from the printed sum %", (1.1497 * math.exp(-0.022958) - 1) * 100, ".2f", "12.36")
 chk("P10 R_G second order alone %", (1.1497 * math.exp(-0.021247) - 1) * 100, ".2f", "12.55")
 truth("P10: the fourth-order term is about four times the third", 3.5 < abs(t4p / t3p) < 4.5)
+chk("P10 R_G from the second- and fourth-order terms %", (1.1497 * math.exp(-(0.021247 + 0.002266)) - 1) * 100, ".2f", "12.30")
+chk("P10 R_G from the second- and fourth-order terms, unrounded %", ((1 + mp) * math.exp(-(t2p + t4p)) - 1) * 100, ".2f",
+    "12.30")
+truth("P10: the third-order term raises the estimate from 12.30% to 12.36%", t3p < 0)
+chk("P10 (3.9)'s drag sigma^2/2 from printed", 0.2370**2 / 2 * 100, ".2f", "2.81")
+chk("P10 drag's leading term sigma^2/(2(1 + mu)) from printed", 0.2370**2 / (2 * 1.1497) * 100, ".2f", "2.44")
+chk("P10 drag's leading term unrounded", ann["var"] / (2 * (1 + ann["mu"])) * 100, ".2f", "2.44")
+truth("P10: the drag is (1 + mu)(1 - e^-gap), whose leading term carries 1/(1 + mu)",
+      abs(ann["drag"] - (1 + ann["mu"]) * -math.expm1(-ann["jensen"])) < 1e-15)
+truth("P10: the factor 1/(1 + mu)^2 would move (3.9) away from the actual rate",
+      abs((mp - sp**2 / (2 * (1 + mp) ** 2)) - cagr) > abs((mp - sp**2 / 2) - cagr))
+has("P10 (c) drag", "$\\sigma^2/(2(1+\\mu))=2.44$ points, and the higher terms bring it to the actual 2.62")
+has("P10 (c) (3.9)", "it subtracts $\\sigma^2/2=2.81$ points as the drag")
 has("P10 printed inputs", "$\\mu=14.97\\%$, $\\sigma=23.70\\%$ (divisor 23), skewness 0.19 and kurtosis 5.02")
 anchor("A14-80", f"terms {g10(t2p * 100)}, {g10(t3p * 100)}, {g10(t4p * 100)}")
 

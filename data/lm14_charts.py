@@ -89,8 +89,8 @@ lab = {2008: {"dx": -16, "dy": 4, "anchor": "end"}, 2017: {"dy": 22}}   # 2008 s
 drag_years = {
     "type": "scatter", "height": 320,
     "alt": "One point per calendar year 2003 to 2025: half the variance of the year's daily returns against its "
-    "volatility drag, both in basis points; every point lies on the 45-degree line, from 0.14 bp in 2017 to 2.25 bp "
-    "in 2008",
+    "volatility drag, both in basis points; every point lies close to the 45-degree line, from 0.14 bp in 2017 to "
+    "2.25 bp in 2008",
     "x": {"label": "Half the variance of the year's daily returns (bp)", "fmt": "n4", "tfmt": "n1", "min": 0,
           "max": 2.5, "name": "half variance"},
     "y": {"label": "Volatility drag, mean minus compound rate (bp)", "fmt": "n4", "tfmt": "n1", "min": 0, "max": 2.5,

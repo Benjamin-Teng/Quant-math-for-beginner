@@ -253,6 +253,10 @@ R6, s6 = 0.00062505, 0.01208364              # the six-decimal inputs of the cas
 nX = stats.norm(R6, s6)
 print(f"normal E[X^3] {nX.moment(3):.3e} (book 2.740e-07), E[X^4] {nX.moment(4):.3e} (book 6.430e-08)")
 show("E[R^4] / normal's", m4 / nX.moment(4), ".2f", "2.72")
+q2 = (Rbar / s) ** 2                          # the dropped terms of LM4's approximations, as shares
+show("(Rbar/s)^2", q2, ".4f", "0.0027")
+show("share dropped from 3 mu sigma^2 %", q2 / 3 * 100, ".2f", "0.09")
+show("share dropped from 3 sigma^4 %", (2 * q2 + q2 ** 2 / 3) * 100, ".2f", "0.54")
 with np.errstate(all="ignore"):
     import warnings
     with warnings.catch_warnings():
@@ -410,6 +414,7 @@ md(r"""
 code(r"""
 EG = sum(v * p for v, p in G.items())
 ElnG = sum(log(float(v)) * float(p) for v, p in G.items())
+assert EG == ((Fraction(102, 100) + Fraction(99, 100)) / 2) ** 4 == Fraction(1005, 1000) ** 4   # binomial theorem
 show("E[G]", float(EG), ".5f", "1.02015")
 show("E[ln G] %", ElnG * 100, ".5f", "1.95046")
 show("ln E[G] %", log(float(EG)) * 100, ".5f", "1.99502")
@@ -426,8 +431,8 @@ for f in (1, 8):
     x = f * x4
     mu = p4 @ x
     sd = sqrt(p4 @ (x - mu) ** 2)
-    print(f"f = {f}: mu {mu * 100:.1f}%, sigma {sd * 100:.1f}%, skew {p4 @ ((x - mu) / sd) ** 3:.4f} (-8/3), "
-          f"kurtosis {p4 @ ((x - mu) / sd) ** 4:.4f} (73/9 = {73 / 9:.4f})")
+    print(f"f = {f}: mu {mu * 100:.1f}%, sigma {sd * 100:.1f}%, E[R^2] {p4 @ x ** 2:.5f}, E[R^3] {p4 @ x ** 3:.7f}, "
+          f"skew {p4 @ ((x - mu) / sd) ** 3:.4f} (-8/3), kurtosis {p4 @ ((x - mu) / sd) ** 4:.4f} (73/9 = {73 / 9:.4f})")
 """)
 
 md(r"""
@@ -453,8 +458,14 @@ t3 = -skp * sp ** 3 / (3 * (1 + mp) ** 3)
 t4 = kup * sp ** 4 / (4 * (1 + mp) ** 4)
 show("(3.9) %", (mp - sp ** 2 / 2) * 100, ".2f", "12.16")
 print(f"terms {t2 * 100:.4f}, {t3 * 100:.4f}, {t4 * 100:.4f}; sum {(t2 + t3 + t4) * 100:.4f}")
+show("R_G, second-order term alone %", ((1 + mp) * exp(-t2) - 1) * 100, ".2f", "12.55")
+show("R_G, second- and fourth-order terms %", ((1 + mp) * exp(-(t2 + t4)) - 1) * 100, ".2f", "12.30")
 show("R_G through the fourth order %", ((1 + mp) * exp(-(t2 + t3 + t4)) - 1) * 100, ".2f", "12.36")
 show("actual compound rate %", (np.prod(growth) ** (1 / len(growth)) - 1) * 100, ".2f", "12.35")
+# (3.9) subtracts sigma^2/2 as the drag; the drag (1 + mu)(1 - e^-gap) has the leading term sigma^2/(2(1 + mu))
+show("(3.9)'s drag sigma^2/2 (points)", sp ** 2 / 2 * 100, ".2f", "2.81")
+show("drag's leading term sigma^2/(2(1 + mu)) (points)", sp ** 2 / (2 * (1 + mp)) * 100, ".2f", "2.44")
+show("actual drag (points)", annual["drag"], ".2f", "2.62")
 """)
 
 md(r"""

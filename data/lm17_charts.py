@@ -1,6 +1,6 @@
 """Chart specs for LM17 (src/data/lm17-*.json), computed from TR23.
 
-Run:  PYTHONUTF8=1 uv run python data/lm17_charts.py      (after data/vol3_series.py; data/lm17_numbers.py checks the text)
+Run:  uv run python data/lm17_charts.py      (after data/vol3_series.py; data/lm17_numbers.py checks the text)
 
 Input: data/processed/vol3_taiex.parquet only (TR23, the TAIEX total-return index from FinMind's
 TaiwanStockTotalReturnIndex). Same conventions as data/lm17_numbers.py: T = 5,849 simple daily returns from

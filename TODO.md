@@ -79,6 +79,13 @@ and Hwang §3.8 and §7.5 by section; LM14's widget shows σ²/2 = 28.13 where i
 130 of 5,849 QQ points because `.chart .pt`'s outline whitens a dense scatter (a `book.css` option for the owner).
 Preview PDFs keep `file:///` links (`dist/preview/` has no CNAME); the published PDFs, rendered from `docs/`, do not.
 
+**Stage 3 (2026-10-18), in progress.** Round 1 (reviewer, blind solver, number auditor, cross-module check; all fresh
+and read-only) found no critical item; a fresh agent per module merged the reports and re-checked every major item
+(`reviews/lm13.md` … `lm18.md`, 192 items, 25 major); revision 1 fixed every accepted item (the items above from the
+Stage 2 hand-backs are settled there: LM14's widget prints 28.125, LM18's control-variate bias is Glasserman §4.1.3,
+its tags run in reading order, its wide tables scroll inside their boxes by design). LM15 and LM16 are at 36 pages.
+Next: verification 1 (one fresh verifier per module and a volume re-check), then the closing check.
+
 The Stage 2 instructions, for later volumes: one writer per module, launched together, each with
 AUTHORING (§1, §6 with the Probability table, §7, §8's simulation rule), PITFALLS, the shared part of
 `plans/vol-3.md` and its own brief, and its anchors section. Each writer:
