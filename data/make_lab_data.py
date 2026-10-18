@@ -12,7 +12,7 @@ close, so the list is complete even without those files, and close_1330 holds th
 when the file is missing (FinMind's free plan lacks that dataset; the lab then drops the close).
 
 Volume III's labs get taiex_tr.csv, the TAIEX total-return index as FinMind serves it (raw/vol3/), from which they
-build TR23 (data/vol3_series.py checks it against the price index); LM16's lab also gets the two sector files.
+build TR23 (data/vol3_series.py checks it against the price index); LM16's lab gets the two sector files instead.
 
     uv run python data/make_lab_data.py            # write labs/LMNN_lab/data/*
     uv run python data/make_lab_data.py --check    # compare with existing files, write nothing
@@ -140,7 +140,7 @@ def build():
         "LM13_lab": {**tr23},
         "LM14_lab": {**tr23},
         "LM15_lab": {**tr23},
-        "LM16_lab": {**tr23, **sectors},
+        "LM16_lab": {**sectors},                  # LM16 works on Volume II's U28 sample only
         "LM17_lab": {**tr23},
         "LM18_lab": {**tr23},
     }

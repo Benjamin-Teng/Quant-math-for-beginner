@@ -125,6 +125,237 @@ Every registered FinMind file is fetched, and re-checked byte for byte, through 
   (woodslane.com.au/products/9781421407944, read 2026-10-12). TWSE's IndexS03 (2023.06), Appendix 1, lists the four
   sector indices launched with base date 2023-06-30 (綠能環保類, 數位雲端類, 運動休閒類, 居家生活類); IndexS02 (2023.04)
   gives TAIEX as total market value over the base value, times 100 (both re-read 2026-10-12).
+- Volume III, books (read 2026-10-18). Blitzstein & Hwang, *Introduction to Probability*, 2nd ed., Chapman &
+  Hall/CRC (CRC Press, Boca Raton, FL; Chapman & Hall/CRC Texts in Statistical Science), copyright 2019, 634 pp.,
+  hardcover ISBN 978-1-138-36991-7, eBook ISBN 978-0-429-42835-7, DOI
+  [10.1201/9780429428357](https://doi.org/10.1201/9780429428357) (Taylor & Francis datePublished 2019-02-08) — the
+  [Routledge product page](https://www.routledge.com/Introduction-to-Probability-Second-Edition/Blitzstein-Hwang/p/book/9781138369917),
+  the [Taylor & Francis eBook page](https://www.taylorfrancis.com/books/mono/10.1201/9780429428357) and Hitotsubashi
+  University OPAC record 8000089761 ("Boca Raton, FL: CRC Press, [2019]"). Partly verified: the record is confirmed,
+  the section numbers are *inferred* from the order of Routledge's unnumbered contents list and must be checked in the
+  book before they are printed (§1.6 "Non-naive definition of probability"; §2.2 conditional probability, "Definition
+  and intuition"; §2.3 "Bayes' rule and the law of total probability"; §2.5 "Independence of events"; §3.8
+  "Independence of rvs"; §4.5 LOTUS, 2D LOTUS in §7.2; §4.7 "Poisson" and §4.8 "Connections between Poisson and
+  Binomial"; §5.3 "Universality of the Uniform"; §7.5 "Multivariate Normal"; §10.1 "Inequalities", subsections not
+  shown; §10.2 "Law of large numbers"; §10.3 "Central limit theorem"; §10.4 "Chi-Square and Student-t"). Not checked:
+  whether §10.2 states both the weak and the strong law, and the theorem numbers. The free edition
+  (probabilitybook.net redirects to a Google Drive file whose owner disabled downloads) could not be read;
+  stat110.net and projects.iq.harvard.edu/stat110 returned 403 to automated requests.
+- Grinstead & Snell, *Introduction to Probability: Second Revised Edition*, American Mathematical Society,
+  Providence, RI, 1997, 510 pp., hardcover ISBN 978-0-8218-0749-1, softcover ISBN 978-0-8218-9414-9 (product code
+  IPROB.S) — [AMS bookstore](https://bookstore.ams.org/IPROB); Open Library (secondary) gives LCCN 97008126 and
+  xi + 510 pp. Verified and read in the free CHANCE Project edition ([prob.pdf](https://math.dartmouth.edu/~prob/prob/prob.pdf),
+  version of 4 July 2006, Copyright (C) 2006 Peter G. Doyle, GNU Free Documentation License, 518 pp.), whose title
+  page calls it a version of the AMS 2nd edition "Copyright (C) 2003 Charles M. Grinstead and J. Laurie Snell": its
+  2003 differs from AMS's 1997. The AMS print pagination was not compared with the free PDF, so cite section and
+  theorem numbers, not pages. Locations: no axioms as such (§1.2: Definition 1.2, the distribution function; Theorem 1.1,
+  the properties of P); conditional probability §4.1 (continuous case §4.2); Bayes' formula §4.1; independence §4.1, Definitions 4.1–4.2
+  (random variables Definitions 4.3–4.5; continuous case Definitions 4.6–4.8 and Theorems 4.2–4.3 in §4.2); LOTUS,
+  without that name, §6.1 Theorem 6.1 (discrete) and §6.3 Theorem 6.11 (continuous); Chebyshev
+  §8.1 Theorem 8.1 and §8.2 Theorem 8.3; Markov only as §8.2 Exercise 17; the "Weak Law of Large Numbers" §8.1
+  Theorem 8.2 and §8.2 Theorem 8.4; the strong law stated, not proved (§2.1; §8.1 Exercise 15, with Exercise 16's
+  sequence that satisfies the weak law but not the strong); Poisson approximation to the binomial §5.1 with Table 5.1;
+  inverse transform §5.2 Theorem 5.1; central limit theorem §9.1 Theorems 9.1–9.2, §9.2 Theorems 9.4–9.5, §9.3
+  Theorem 9.6. Not in the book (text search): Jensen's inequality and the multivariate normal. The old CHANCE book
+  page (dartmouth.edu/~chance/) returns 404.
+- Wasserman, *All of Statistics: A Concise Course in Statistical Inference*, Springer Texts in Statistics, Springer,
+  New York, copyright 2004, xx + 442 pp., hardcover ISBN 978-0-387-40272-7 (published 4 December 2003), softcover ISBN
+  978-1-4419-2322-6, eBook ISBN 978-0-387-21736-9, DOI
+  [10.1007/978-0-387-21736-9](https://doi.org/10.1007/978-0-387-21736-9) — Springer's page and its
+  [front matter PDF](https://link.springer.com/content/pdf/bfm:978-0-387-21736-9/1). Verified; the sections come from
+  the table of contents: probability §1.3, independent events §1.5, conditional probability §1.6, Bayes' theorem §1.7,
+  two important multivariate distributions §2.10, expectation §3.1, probability inequalities §4.1, inequalities for
+  expectations §4.2, law of large numbers §5.3, central limit theorem §5.4, the bootstrap ch. 8 (§8.2 "Bootstrap
+  Variance Estimation"). Not checked: what each section contains (for example Jensen in §4.2, the multivariate normal
+  in §2.10) and the theorem numbers.
+- Glasserman, *Monte Carlo Methods in Financial Engineering*, Springer, New York, 2003, Applications of Mathematics 53
+  (Springer now lists the series as Stochastic Modelling and Applied Probability, vol. 53), xiii + 596 pp., hardcover
+  ISBN 978-0-387-00451-8 (published 7 August 2003), softcover reprint ISBN 978-1-4419-1822-2, eBook ISBN
+  978-0-387-21617-1, DOI [10.1007/978-0-387-21617-1](https://doi.org/10.1007/978-0-387-21617-1) — Springer's page and
+  its [front matter PDF](https://link.springer.com/content/pdf/bfm:978-0-387-21617-1/1) with the full table of
+  contents. Verified, sections and pages from that table of contents: inverse transform §2.2.1 (p. 54),
+  acceptance-rejection §2.2.2 (p. 58), generating multivariate normals §2.3.3 (p. 71), control variates §4.1 (p. 185),
+  antithetic variates §4.2 (p. 205), stratified sampling §4.3 (p. 209), importance sampling §4.6 (p. 255); ch. 4
+  "Variance Reduction Techniques", pp. 185–280.
+- Efron & Tibshirani, *An Introduction to the Bootstrap*, Monographs on Statistics and Applied Probability 57, Chapman
+  & Hall, New York, 1993, xvi + 436 pp., ISBN 0-412-04231-2 — Open Library's record from the LC MARC (secondary; LCCN
+  93004489). The publisher's current
+  [Routledge page](https://www.routledge.com/An-Introduction-to-the-Bootstrap/Efron-Tibshirani/p/book/9780412042317)
+  gives "Copyright 1994", 456 pages, ISBN 9780412042317, and the Taylor & Francis eBook (DOI
+  [10.1201/9780429246593](https://doi.org/10.1201/9780429246593)) datePublished 1994-05-15: the 1994 dates belong to
+  later printings and the reissue, so cite 1993. Partly verified: the chapters come from Routledge's ordered list of 26
+  (ch. 4 "The Empirical Distribution Function and the Plug-In Principle", ch. 5 "Standard Errors and Estimated
+  Standard Errors", ch. 6 "The Bootstrap Estimate of Standard Error", ch. 7 "Bootstrap Standard Errors: Some
+  Examples", ch. 13 "Confidence Intervals Based on Bootstrap Percentiles"). §6.2 "The bootstrap estimate of standard
+  error" was seen only in a secondary copy of the contents (Scribd), not in the book; Algorithm 6.1 and the equation
+  number of the bootstrap standard error were not found. Cite "ch. 6" unless §6.2 is confirmed.
+- Feller, *An Introduction to Probability Theory and Its Applications*, Vol. 1, 3rd ed., Wiley, New York, ISBN
+  978-0-471-25708-0, hardcover, 528 pp. — [Wiley's page](https://www.wiley.com/en-us/An+Introduction+to+Probability+Theory+and+Its+Applications%2C+Volume+1%2C+3rd+Edition-p-9780471257080).
+  Partly verified: Wiley shows "January 1991", a catalogue date, while Open Library (secondary) gives 1968 for the 3rd
+  edition; the copyright page was not seen; cite Feller (1968). Wiley's contents list has no chapter numbers, so
+  chapter and section numbers (for example a section on the Poisson approximation) were not checked.
+- Volume III, papers (read 2026-10-18). Longin & Solnik, "Extreme Correlation of International Equity Markets", *JF*
+  56(2): 649–676, April 2001, DOI [10.1111/0022-1082.00340](https://doi.org/10.1111/0022-1082.00340) — Crossref record
+  and abstract. Verified: with extreme value theory for the tails they reject multivariate normality for the negative
+  tail but not the positive; correlation is linked to the market trend, not to volatility as such, rising in bear
+  markets but not in bull markets.
+- Forbes & Rigobon, "No Contagion, Only Interdependence: Measuring Stock Market Comovements" (the full title includes
+  the subtitle), *JF* 57(5): 2223–2261, October 2002, DOI [10.1111/0022-1082.00494](https://doi.org/10.1111/0022-1082.00494)
+  — Crossref abstract. Verified: correlation coefficients are conditional on market volatility, so heteroskedasticity
+  biases correlation-based contagion tests upward in crises; after the adjustment, unconditional correlations barely
+  rose in the 1997 Asian crisis, the 1994 Mexican devaluation and the 1987 US crash, and the high comovement in all
+  periods is what they call "interdependence".
+- Boyer, Gibson & Loretan, "Pitfalls in Tests for Changes in Correlations", Board of Governors of the Federal Reserve
+  System, *International Finance Discussion Papers* No. 597 — [index page](https://www.federalreserve.gov/pubs/ifdp/1997/597/default.htm)
+  and [PDF](https://www.federalreserve.gov/pubs/ifdp/1997/597/ifdp597.pdf). Verified (read): the PDF's title page says
+  first version December 1997, revised March 1999, while the Fed's index files it under 1997; cite 1999, the revised
+  version, with "IFDP 597". Theorem 1 (§2.1, eq. 1): for bivariate normal x, y with constant correlation ρ,
+  conditional on x ∈ A, ρ_A = ρ [ρ² + (1 − ρ²) Var(x)/Var(x | x ∈ A)]^(−1/2), so |ρ_A| > |ρ| when Var(x | A) > Var(x)
+  and smaller otherwise; splitting a sample by large or small realizations produces an apparent correlation breakdown
+  in i.i.d. data. The conditional correlation depends on the conditioning variable's conditional variance, not on
+  "high or low" as such: conditioning on large |x| raises it, on a narrow band lowers it.
+- Ang & Chen, "Asymmetric correlations of equity portfolios", *JFE* 63(3): 443–494, March 2002, DOI
+  [10.1016/S0304-405X(02)00068-5](https://doi.org/10.1016/S0304-405X(02)00068-5) — abstract on
+  [ScienceDirect](https://www.sciencedirect.com/science/article/abs/pii/S0304405X02000685) and the
+  [Columbia Business School page](https://business.columbia.edu/faculty/research/asymmetric-correlations-equity-portfolios);
+  Crossref record. Verified: correlations between US stocks and the US market are much greater for downside moves,
+  especially extreme ones, than for upside moves; conditional on the downside they differ from those implied by a
+  normal distribution by 11.6%; small, value and past-loser stocks show more asymmetry; the asymmetries reject
+  multivariate normality at daily, weekly and monthly frequencies, and regime-switching models capture them better.
+- Gigerenzer & Hoffrage, "How to improve Bayesian reasoning without instruction: Frequency formats", *Psychological
+  Review* 102(4): 684–704, 1995, DOI [10.1037/0033-295X.102.4.684](https://doi.org/10.1037/0033-295X.102.4.684) —
+  Crossref record; abstract and text read in an author-posted copy marked "not the copy of record"
+  ([pages.ucsd.edu](https://pages.ucsd.edu/~scoulson/203/GG_How_1995.pdf)). Corrected: the paper does not use the term
+  "natural frequencies" (a text search finds none); its terms are "frequency formats" and "natural sampling", with
+  "standard" and "short" menus. Study 1: 46% (standard menu) and 50% (short menu) Bayesian answers in frequency
+  formats, against 16% and 28% in probability formats, so "from 16% to as much as 50%". A text that says "natural
+  frequencies" must attribute the term to later work, which was not checked.
+- O'Neill, "PCG: A Family of Simple Fast Space-Efficient Statistically Good Algorithms for Random Number Generation",
+  Technical Report HMC-CS-2014-0905, Harvey Mudd College Computer Science Department, Claremont, CA, issued
+  5 September 2014, 58 pp. — [pcg-random.org/paper.html](https://www.pcg-random.org/paper.html) and the
+  [report PDF](https://www.cs.hmc.edu/tr/hmc-cs-2014-0905.pdf). Verified (title page read): submitted to ACM TOMS; the
+  author distributes the technical report, and no journal version is stated. NumPy's `PCG64` page cites it as
+  reference [2]; NumPy uses the member "PCG XSL RR 128/64", of the family the report names PCG-XSL-RR.
+- Peters, "The ergodicity problem in economics", *Nature Physics* 15(12): 1216–1221, a Perspective published online
+  2 December 2019 (received 29 September 2018, accepted 28 October 2019), DOI
+  [10.1038/s41567-019-0732-0](https://doi.org/10.1038/s41567-019-0732-0), paywalled — the
+  [article page](https://www.nature.com/articles/s41567-019-0732-0) metadata and the
+  [Fig. 2 caption](https://www.nature.com/articles/s41567-019-0732-0/figures/2); full text read in a third-party
+  annotated copy (cyclostationarity.com). Related: Author Correction, *Nat. Phys.* 16(1): 111, DOI
+  10.1038/s41567-019-0769-0 (online 6 December 2019); Matters Arising by Doctor, Wakker & Wang, "Economists' views on
+  the ergodicity problem", *Nat. Phys.* 16: 1168 (2020), DOI 10.1038/s41567-020-01106-x, which criticizes the
+  Perspective. Verified: eq. (2) defines the gamble Δx = +0.5x or −0.4x, each with probability 1/2; ⟨Δx⟩ = +0.05x per
+  round, while the expected change in log wealth is ½ ln 0.9 = −0.0527 per round (a typical factor √0.9 ≈ 0.949);
+  Fig. 2 shows 150 trajectories of 1,000 rounds, the ensemble average growing while the time-average growth rate gives
+  the decay of a typical trajectory.
+- Hill, "A Simple General Approach to Inference About the Tail of a Distribution", *Ann. Statist.* 3(5): 1163–1174,
+  September 1975, DOI [10.1214/aos/1176343247](https://doi.org/10.1214/aos/1176343247) — Crossref record and abstract
+  (the Project Euclid page could not be fetched: bot challenge). Verified: inference uses only the tail behaviour,
+  notably for Zipf-type tails 1 − G(y) = C y^(−α), through the conditional likelihood given the extreme order
+  statistics. Not checked: the estimator's formula in the paper's text.
+
+## Python (Volume III)
+
+Read 2026-10-18 in the NumPy v2.5 docs (`numpy.org/doc/stable`) and the SciPy v1.18.0 docs (`docs.scipy.org/doc/scipy`);
+every numeric check ran in the project's venv (NumPy 2.5.3, SciPy 1.18.1).
+
+- [`scipy.stats.lognorm`](https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.lognorm.html): pdf
+  f(x, s) = exp(−log²x / (2s²)) / (s x √(2π)) for x > 0; if X is normal with mean mu and standard deviation sigma,
+  Y = exp(X) is lognormal "with s = sigma and scale = exp(mu)". Checked with s = 0.5, scale = e^0.3: mean
+  exp(μ + σ²/2), median e^μ.
+- [`scipy.stats.t`](https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.t.html): the page gives the
+  standardized pdf and `t.pdf(x, df, loc, scale) = t.pdf(y, df)/scale` with `y = (x − loc)/scale`. It does not print
+  the variance: Var = scale²·df/(df − 2) follows from Y = loc + scale·T and was verified by computation, not read on the
+  page: `t(5, scale=2).var()` = 6.6667 = 4·5/3; `t(2).var()` and `t(1.5).var()` are inf; `t(1).var()` and
+  `t(0.5).var()` are nan. So the formula holds for df > 2, the variance is infinite for 1 < df ≤ 2 and undefined for
+  df ≤ 1.
+- [`rv_continuous.fit`](https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.rv_continuous.fit.html): the
+  default method is MLE (minimizes the negative log-likelihood); `method="MM"` minimizes the L2 norm of the relative
+  errors between the first k raw data moments and the distribution's, k being the number of non-fixed parameters.
+  `f0…fn` (or `fa`, `fix_a`), `floc` and `fscale` fix parameters, so a two-parameter lognormal needs `floc=0`. Neither
+  method is guaranteed to reach a global optimum, and data with nan or inf raise a RuntimeError.
+- [`scipy.stats.kurtosis`](https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.kurtosis.html):
+  `kurtosis(a, axis=0, fisher=True, bias=True, nan_policy='propagate', *, keepdims=False)`; the fourth central moment
+  over the squared variance, minus 3.0 when `fisher=True` (a normal gives 0); `bias=False` uses k statistics; the
+  default `bias=True` uses central moments with divisor N (written out on the `skew` page). Checked: the default equals
+  mean((x − x̄)⁴)/var(x, ddof=0)² − 3.
+- [`scipy.stats.skew`](https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.skew.html):
+  `skew(a, axis=0, bias=True, nan_policy='propagate', *, keepdims=False)`; the default is g₁ = m₃/m₂^(3/2) with
+  m_i = (1/N) Σ (x − x̄)^i; `bias=False` gives G₁ = √(N(N−1))/(N−2) · g₁.
+- NumPy [`default_rng`](https://numpy.org/doc/stable/reference/random/generator.html),
+  [`PCG64`](https://numpy.org/doc/stable/reference/random/bit_generators/pcg64.html), the
+  [random guide](https://numpy.org/doc/stable/reference/random/index.html) and
+  [compatibility policy](https://numpy.org/doc/stable/reference/random/compatibility.html): `default_rng(seed=None)`
+  builds a Generator on PCG64 (checked: `type(default_rng(20261011).bit_generator).__name__ == 'PCG64'`); integer seeds
+  must be non-negative and go to `SeedSequence`; `None` pulls fresh OS entropy; no global instance is managed. The guide
+  recommends "very large, unique numbers" as seeds and suggests `secrets.randbits(128)`. PCG64 is "PCG XSL RR 128/64",
+  period 2^128, 2^127 streams, and a fixed seed always gives the same integer stream. Caveat: the Generator's streams
+  are promised identical only for the same seed, the same calls with the same arguments, and the same NumPy build,
+  environment and machine; stream-breaking changes are allowed in X.Y releases; five calls of `rng.random()` need not
+  equal `rng.random(5)`; `multivariate_normal` may differ across builds (LAPACK). Reproducing printed simulation numbers
+  therefore needs the NumPy version pinned (uv.lock).
+- [`Generator.choice`](https://numpy.org/doc/stable/reference/random/generated/numpy.random.Generator.choice.html):
+  `choice(a, size=None, replace=True, p=None, axis=0, shuffle=True)`, with replacement by default.
+  [`Generator.integers`](https://numpy.org/doc/stable/reference/random/generated/numpy.random.Generator.integers.html):
+  `integers(low, high=None, size=None, dtype=np.int64, endpoint=False)`, sampling [low, high) by default and
+  [low, high] with `endpoint=True`; with `high=None` the results run from 0 to `low`.
+- [`Generator.multivariate_normal`](https://numpy.org/doc/stable/reference/random/generated/numpy.random.Generator.multivariate_normal.html):
+  `multivariate_normal(mean, cov, size=None, check_valid='warn', tol=1e-8, *, method='svd')`; it computes A with
+  A @ A.T = cov, by `'svd'` (default, slowest), `'eigh'` or `'cholesky'` (fastest, "less robust"); cov must be positive
+  semidefinite or the behaviour is undefined; results may differ across builds, notably with repeated singular values
+  under `'svd'`; `check_valid` (`'warn'`, `'raise'`, `'ignore'`) and `tol` govern a non-PSD cov. Checked: `'warn'`
+  gives the RuntimeWarning "covariance is not symmetric positive-semidefinite.", `'raise'` a ValueError.
+- [`scipy.stats.poisson`](https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.poisson.html): f(k) =
+  exp(−μ) μ^k / k! for k ≥ 0, μ ≥ 0, only `loc` shifts it.
+  [`scipy.stats.chi2`](https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.chi2.html): f(x, k) =
+  x^(k/2−1) e^(−x/2) / (2^(k/2) Γ(k/2)) for x > 0, a gamma with a = df/2, loc = 0, scale = 2.
+  [`scipy.special.gammaln`](https://docs.scipy.org/doc/scipy/reference/generated/scipy.special.gammaln.html): ln|Γ(x)|,
+  "the same function as the Python standard library function math.lgamma". Checked: poisson(3) mean = var = 3;
+  chi2(4) mean 4, var 8; gammaln(5) = ln 24.
+
+## Taiwan facts (Volume III)
+
+- TAIEX total-return index (發行量加權股價報酬指數), read 2026-10-18. Dividend rule verified: TWSE
+  [IndexS02.pdf](https://www.twse.com.tw/downloads/zh/products/indices/IndexS02.pdf) (2023.04 修訂), §四(一)2 and
+  §五(六): the 報酬指數 is adjusted for cash dividends, and on an ex-dividend date only its base changes, 當日基值 =
+  前一日基值 × [(前一日收盤後調整之總發行市值 − 當日發放現金股利總值) / 前一日收盤總發行市值]; Taiwan Index Plus's English
+  methodology ([The TAIEX Methodology](https://backend.taiwanindex.com.tw/api/downloadFile/IndexFiles/992/en), amended
+  April 2023) says the TR index "reflect[s] the return including reinvesting the cash dividend". Base date from Taiwan
+  Index Plus (TWSE's wholly owned subsidiary), [IR0001](https://taiwanindex.com.tw/indexes/IR0001) (also
+  [EN](https://taiwanindex.com.tw/en/indexes/IR0001) and the list page): 基期 2002.12.31, 發布日 2003.01.02, 基期指數 100.
+  Start level: TWSE's own series (`rwd/zh/TAIEX/MFI94U`) starts on 2003-01-02 at 4,524.92 and rejects queries before
+  92年1月; TAIEX closed at 4,452.45 on 2002-12-31 and 4,524.87 on 2003-01-02 (`MI_5MINS_HIST`). So the published level
+  starts from TAIEX's level at the base date, not from 100: an inference from the data, since IndexS02 does not print
+  the base value; say "set equal to TAIEX on 2002-12-31" or give the base date only. Launch date not found: no TWSE
+  notice of first publication was found, 發布日 2003.01.02 is the first value date, TWSE's `MI_INDEX` (type IND) shows a
+  報酬指數 table on 2009-01-05 (5,862.14) but returns empty tables for 2005–2008, and the
+  [index-series page](https://www.twse.com.tw/zh/indices/indices/series.html) has no separate row for it. (IndexS02
+  §四(五): TAIEX's own base is the 1966 annual average = 100, published 1970-11; Taiwan Index Plus gives launch
+  1970.11.02.)
+- Daily price limit 7% → 10% on 2015-06-01: verified again on 2026-10-18 on the two TWSE pages listed under "Taiwan
+  exchanges, regulators and official pages" ([company history](https://www.twse.com.tw/en/about/company/history.html):
+  "Jun 1: The daily price fluctuation limit is raised from 7% to 10%."; 60th-anniversary book
+  [p. 181](https://www.twse.com.tw/staticFiles/product/publication/twse60/html/181/): "104 年 6 月 1 日起，我國市場之漲跌幅度由
+  7% 放寬為 10%"). The formal notice itself was not looked up.
+
+## Chinese terms (Volume III)
+
+- 樂詞網, [terms.naer.edu.tw](https://terms.naer.edu.tw/) (國家教育研究院), searched 2026-10-18 for Volume III's list
+  (`plans/vol-3.md`, "Chinese terms"): 108 English terms (46 on the brief's list, 38 further terms, 24 printed terms and
+  their neighbours), 245 query strings, each run three times (all listings, 統計學名詞 only, 數學名詞 only), 735 result
+  pages. Search field 中英文名詞, 模糊檢索, 100 rows a page:
+  `https://terms.naer.edu.tw/search/?query_term=<q>&query_field=title&query_op=&match_type=phrase&page_size=100`,
+  plus `&filter_bool=and&filter_term=%27%E7%B5%B1%E8%A8%88%E5%AD%B8%E5%90%8D%E8%A9%9E%27&filter_field=subcategory_1.raw&filter_op=term&tabaction=browse`
+  for statistics (`filter_term=%27%E6%95%B8%E5%AD%B8%E5%90%8D%E8%A9%9E%27` for mathematics); the empty `query_op=` is
+  required, or a filtered search ignores the query and browses the whole listing. Entry pages (`/detail/<hash>/`)
+  depend on the search session and are not cited. 分布 and 分配: the statistics listing writes 分布 in every Volume III
+  compound (常態分布, 二項分布, 聯合分布, 條件分布, 累積分布函數, 依分布收斂, 經驗分布函數) and its bare
+  distribution and distribution function entries give 分布 first, 分配 second; the mathematics listing pairs "分布；分配" in most compounds but has 分布
+  alone for distribution function, conditional distribution and convergence in distribution; 條件分配 and 分配收斂
+  appear only in the economics and psychology listings; 高中以下數學名詞 lists both forms. LM5 prints 分配 three times
+  (累積分配函數, 常態分配函數, 常態分配); 累積分配函數 and 常態分配 are listed mathematics forms. Not in 樂詞網, composed from listed parts:
+  檢察官謬誤, 標準化動差, 全變異數法則, 條件相關係數, 超越相關係數, 放回重抽樣; the law of the unconscious statistician has
+  no entry and keeps its English name; the printed 尾部指數 and 超額峰態 are not in 樂詞網 either.
 
 ## Writing style (AUTHORING §1, checked 2026-10-11)
 

@@ -95,7 +95,9 @@ the editor's exploration for the Volume II briefs (`processed/vol2_anchors.txt`)
   price close agrees with its spread (or, on the 52 zero-spread dates, with `taiex_close/`), and on every date the
   total return minus the price return lies between −0.035 and +84 basis points (and within rounding on the first and last dates), the 11 days above 40 basis points in late
   June or July, when most dividends go ex. A row copied from another date would leave that range. Its outputs are
-  `processed/vol3_taiex.parquet` and `processed/vol3_series.txt`.
+  `processed/vol3_taiex.parquet` and `processed/vol3_series.txt`. `vol3_anchors_lm13.py` … `vol3_anchors_lm18.py`
+  print every number of the Volume III briefs, one line per anchor of `../plans/vol-3-anchors.md` (LM16's reads
+  `vol2_closes.parquet`); they write nothing.
 
 ## Verification
 
