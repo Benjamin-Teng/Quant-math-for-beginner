@@ -23,6 +23,22 @@ CX1… (the closing check's new module and volume findings).
 
 LM3's 34 findings of edition 0.1 were fixed before the first push; its record starts with the gates on that text.
 
+## Status (2026-10-18): Volume III in review
+
+| Module | Round 1 | Stage |
+|:--|:--|:--|
+| [LM13](lm13.md) Probability Foundations and Bayes | 31 items (3 major) | revision 1 |
+| [LM14](lm14.md) Random Variables, Expectation and Jensen's Inequality | 31 items (5 major) | revision 1 |
+| [LM15](lm15.md) Distributions in Finance | 34 items (6 major) | revision 1 |
+| [LM16](lm16.md) Joint Distributions and Dependence | 30 items (5 major) | revision 1 |
+| [LM17](lm17.md) Law of Large Numbers and Central Limit Theorem | 29 items (5 major) | revision 1 |
+| [LM18](lm18.md) Monte Carlo Simulation and the Bootstrap | 37 items (1 major) | revision 1 |
+
+Round 1 (2026-10-18) ran the independent reviewer, the blind solver (K), the number auditor (A) and a Volume III
+cross-module check (X) on each draft (`dcff66b`), all fresh and read-only. No item is critical; the blind solvers agreed
+with every answer key, and the auditors reproduced every printed number from the raw data. A fresh agent per module
+merged the reports, re-checked every major item adversarially and proposed the decisions, which the editor confirmed.
+
 ## Status (2026-10-17): Volume II published in edition 0.3
 
 | Module | Round 1 | Verification 1 | Closing check | Stage |

@@ -155,7 +155,10 @@ Every registered FinMind file is fetched, and re-checked byte for byte, through 
   §8.1 Theorem 8.1 and §8.2 Theorem 8.3; Markov only as §8.2 Exercise 17; the "Weak Law of Large Numbers" §8.1
   Theorem 8.2 and §8.2 Theorem 8.4; the strong law stated, not proved (§2.1; §8.1 Exercise 15, with Exercise 16's
   sequence that satisfies the weak law but not the strong); Poisson approximation to the binomial §5.1 with Table 5.1;
-  inverse transform §5.2 Theorem 5.1; central limit theorem §9.1 Theorems 9.1–9.2, §9.2 Theorems 9.4–9.5, §9.3
+  change of variables §5.2 Theorem 5.1 and the inverse transform as its Corollary 5.2, for F strictly increasing
+  where 0 < F < 1 (pp. 210–212 of the CHANCE PDF, read again 2026-10-18 for LM18's review); independence of
+  continuous random variables §4.2, Definition 4.7 and Theorem 4.2 (joint density the product of the marginals);
+  central limit theorem §9.1 Theorems 9.1–9.2, §9.2 Theorems 9.4–9.5, §9.3
   Theorem 9.6. Not in the book (text search): Jensen's inequality and the multivariate normal. The old CHANCE book
   page (dartmouth.edu/~chance/) returns 404.
 - Wasserman, *All of Statistics: A Concise Course in Statistical Inference*, Springer Texts in Statistics, Springer,
@@ -300,6 +303,12 @@ Every registered FinMind file is fetched, and re-checked byte for byte, through 
   §8.2 Example 8.8 (the average of n standard Cauchy variables is standard Cauchy; also §7.2 Example 7.6 and §10.3 by
   characteristic functions); §10.3 "Sketch of the Proof of the Central Limit Theorem" (bounded continuous variables,
   mgf convergence; the step to distributions not proved).
+- Glasserman (2003), §2.2.1, pp. 54–55: the inverse transform for a general distribution function, with the
+  generalized inverse (2.14) and Figure 2.6; §4.1.3 "Small-Sample Issues", p. 200: the bias from estimating the
+  control-variate coefficient is typically of order 1/n, against a standard error of order 1/√n (Google Books search
+  within [e9GWUsQkPNMC](https://books.google.com/books?id=e9GWUsQkPNMC), read 2026-10-18 for LM18's review).
+- Durrett (2019), Theorem 2.2.3: the L² weak law for uncorrelated random variables with a common mean and bounded
+  variances (read in the author's free PDF, 2026-10-18, for LM17's review; numbered as in that PDF).
 - Glasserman (2003), §4.2, p. 207 (Google Books snippet, [e9GWUsQkPNMC](https://books.google.com/books?id=e9GWUsQkPNMC),
   read 2026-10-18): antithetic sampling reduces variance when Cov(Yᵢ, Ỹᵢ) < 0 (4.29); "A simple sufficient condition
   ensuring this is monotonicity of the mapping from inputs to outputs".

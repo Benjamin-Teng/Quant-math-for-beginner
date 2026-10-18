@@ -531,7 +531,7 @@ to whole days": the picture shows 6 of 84, 7.1% [A13-34], against the readout's 
   $0.018815\times3.7215=0.07002$ ($=32:457$), probability $0.07002/1.07002=6.54\%$. The case's rounded inputs give 6.55%,
   so the example says the case rounds.
 - E9 §5 {#manager} A manager who beat the index in 8 of 12 months (hypothetical): before the record, 10% of managers
-  are skilled and beat it in a month with probability 0.55, the others with 0.5; months independent (13.7). Likelihood
+  are skilled and beat it in a month with probability 0.55, the others with 0.5; months independent given the manager's type (13.7). Likelihood
   ratio $0.55^8\times0.45^4/0.5^{12}=1.4064$; posterior odds $(0.1/0.9)\times1.4064=0.15627$;
   $\Pr(\text{skilled}\mid\text{record})=13.5\%$ [A13-43]. The LM15 and LM24 sentences.
 - E10 §6 {#rvtrades} A random variable on two trades: $X=W_2/W_0$ at $f=25$ on E1's $\Omega$: $X(++)=1.5^2=2.25$,
