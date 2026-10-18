@@ -39,6 +39,7 @@ DATA_STEPS=(
   data/lm10_numbers.py data/lm10_charts.py
   data/lm11_numbers.py data/lm11_charts.py
   data/lm12_numbers.py data/lm12_charts.py
+  data/vol3_series.py           # Volume III TR23: the TAIEX total-return index, checked against the price index
 )
 # Raw FinMind data are not committed (licence): fetch them with your token and verify against data/raw_manifest.json.
 if [ "$FETCH" = 1 ]; then

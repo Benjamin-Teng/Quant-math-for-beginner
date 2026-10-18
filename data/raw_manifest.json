@@ -28100,6 +28100,50 @@
    ],
    "rows": 1,
    "sha256": "6279c4a9680300066a9e6b195e20d71f95cf4214b14fa46b6a119809da4f0bd3"
+  },
+  {
+   "path": "vol3/TAIEX_TR__2003-01-01__2026-10-08.csv",
+   "dataset": "TaiwanStockTotalReturnIndex",
+   "data_id": "TAIEX",
+   "start_date": "2003-01-01",
+   "end_date": "2026-10-08",
+   "columns": {
+    "date": "date",
+    "price": "price"
+   },
+   "kinds": {
+    "date": "date",
+    "price": "float"
+   },
+   "filter": {},
+   "sort": [
+    "date"
+   ],
+   "rows": 5850,
+   "sha256": "8a5698ac748ae1532d4fc90c1f06a73816ef21c7aee0933973607685f440bae9"
+  },
+  {
+   "path": "vol3/TAIEX__2003-01-01__2007-07-01.csv",
+   "dataset": "TaiwanStockPrice",
+   "data_id": "TAIEX",
+   "start_date": "2003-01-01",
+   "end_date": "2007-07-01",
+   "columns": {
+    "date": "date",
+    "close": "close",
+    "spread": "spread"
+   },
+   "kinds": {
+    "date": "date",
+    "close": "float",
+    "spread": "float"
+   },
+   "filter": {},
+   "sort": [
+    "date"
+   ],
+   "rows": 1113,
+   "sha256": "4ad5b357a5016933d7acdad0b7baf14e4204619dca67fb2bfac255aeb9cb05ab"
   }
  ]
 }

@@ -11,6 +11,9 @@ lists every close that data/vol2_series.py repairs: the manifest registers one r
 close, so the list is complete even without those files, and close_1330 holds the file's 13:30:00 value, or is empty
 when the file is missing (FinMind's free plan lacks that dataset; the lab then drops the close).
 
+Volume III's labs get taiex_tr.csv, the TAIEX total-return index as FinMind serves it (raw/vol3/), from which they
+build TR23 (data/vol3_series.py checks it against the price index); LM16's lab also gets the two sector files.
+
     uv run python data/make_lab_data.py            # write labs/LMNN_lab/data/*
     uv run python data/make_lab_data.py --check    # compare with existing files, write nothing
 """
@@ -115,6 +118,7 @@ def build():
     taiex_2025 = text(h, sorted(rows + main))
     taiex_tr_2025 = text(*merged("lm06/TAIEX_TR__*.csv", drop=("stock_id",)))
     sectors = {"sectors_close_raw.csv": sectors_raw(), "sectors_close_repairs.csv": sector_repairs()}
+    tr23 = {"taiex_tr.csv": copy("vol3/TAIEX_TR__2003-01-01__2026-10-08.csv")}
     etfs = {**common, "00631L_daily_raw.csv": p631,
             "00679B_daily_raw.csv": p679, "00679B_dividends.csv": copy("00679B_dividends.csv")}
     return {
@@ -133,6 +137,12 @@ def build():
         "LM10_lab": {**sectors, **etfs},
         "LM11_lab": {**sectors, **etfs},
         "LM12_lab": {**sectors},
+        "LM13_lab": {**tr23},
+        "LM14_lab": {**tr23},
+        "LM15_lab": {**tr23},
+        "LM16_lab": {**tr23, **sectors},
+        "LM17_lab": {**tr23},
+        "LM18_lab": {**tr23},
     }
 
 if __name__ == "__main__":

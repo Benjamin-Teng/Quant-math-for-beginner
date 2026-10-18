@@ -39,6 +39,7 @@ numbers never change silently. New raw files are registered with `fetch_finmind.
 | LM10 | `lm10_series.py` (imported), `lm10_numbers.py`, `lm10_charts.py` | the U28 sample and the ETFs' one-session returns; every LM10 number, asserted; `../src/data/lm10-*.json` |
 | LM11 | `lm11_common.py` (imported), `lm11_numbers.py`, `lm11_charts.py` | every LM11 number, asserted; `../src/data/lm11-*.json` |
 | LM12 | `lm12_numbers.py`, `lm12_charts.py` | every LM12 number, asserted against `../src/lm12.md`; `../src/data/lm12-*.json` |
+| LM13–LM18 | `vol3_series.py` | `processed/vol3_taiex.parquet` (TR23: the TAIEX total-return and price indices from 2003-01-02, with their daily returns), `processed/vol3_series.txt` (the report); stops unless every total-return row agrees with the price index |
 
 `processed/` is not committed; `./build.sh --data` recreates it.
 
@@ -85,6 +86,16 @@ equal to its 13:30:00 value; the script records the 3,029 count (not the files),
 check. Its outputs, git-ignored in `processed/`,
 are `vol2_closes.parquet` (4,737 dates × 31 series), `vol2_repairs.json` and `vol2_series.txt`. `vol2_anchors.py` is
 the editor's exploration for the Volume II briefs (`processed/vol2_anchors.txt`).
+
+- `vol3/` (Volume III, retrieved 2026-10-18): the TAIEX total-return index (`TaiwanStockTotalReturnIndex`, columns
+  `date,price`), 2003-01-02 → 2026-10-08 in one file (5,850 rows; FinMind serves it from 2003-01-02), and the TAIEX
+  price index (`TaiwanStockPrice`, `date,close,spread`) for 2003-01-02 → 2007-06-29 (1,113 rows), which with
+  `sectors/TAIEX__*.csv` covers the same dates. The total-return index has no spread column, so `check_chunk.py`
+  cannot test it; `vol3_series.py` tests it against the price index instead: the two have the same 5,850 dates, every
+  price close agrees with its spread (or, on the 52 zero-spread dates, with `taiex_close/`), and on every date the
+  total return minus the price return lies between −0.035 and +84 basis points (and within rounding on the first and last dates), the 11 days above 40 basis points in late
+  June or July, when most dividends go ex. A row copied from another date would leave that range. Its outputs are
+  `processed/vol3_taiex.parquet` and `processed/vol3_series.txt`.
 
 ## Verification
 

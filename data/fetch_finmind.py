@@ -66,7 +66,7 @@ LOCK = ROOT / "data" / "raw_manifest.lock"
 API ="https://api.finmindtrade.com/api/v4/data"
 PAUSE = 0.7                                                # seconds between requests, far below the hourly API limit
 MAX_CONSECUTIVE_FAILURES = 25
-LAB_INPUTS = ("lm06/", "sectors/")                         # folders make_lab_data.py needs, besides the top level
+LAB_INPUTS = ("lm06/", "sectors/", "vol3/")                # folders make_lab_data.py needs, besides the top level
 
 def sha256(b: bytes) -> str:
     return hashlib.sha256(b).hexdigest()
@@ -259,11 +259,11 @@ def main():
               + (" Fetched now:" if fetched else ""))
         for p in fetched:
             print(f"  {p}")
-        # make_lab_data.py reads the top level of data/raw, lm06/ and sectors/; sectors_close/ only when present
+        # make_lab_data.py reads the top level of data/raw, lm06/, sectors/ and vol3/; sectors_close/ only when present
         need = [e["path"] for e in load_manifest()["files"]
                 if ("/" not in e["path"] or e["path"].startswith(LAB_INPUTS)) and not verify_local(e)]
         if need:
-            print(f"make_lab_data.py needs {len(need)} more files (data/raw/*.csv, lm06/, sectors/): run "
+            print(f"make_lab_data.py needs {len(need)} more files (data/raw/*.csv, lm06/, sectors/, vol3/): run "
                   "fetch_finmind.py with no --only and no --exclude (on the free plan: --exclude sectors_close/ only) "
                   "before it.")
         else:

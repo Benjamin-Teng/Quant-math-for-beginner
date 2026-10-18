@@ -118,7 +118,7 @@ before use (`data/README.md`). `TaiwanStockPriceAdj` is rebuilt backward from th
 | Volume | Main FinMind data (tier) | New Python tools | Notes |
 |:--|:--|:--|:--|
 | II | daily closes of the TWSE sector indices and TAIEX (`TaiwanStockPrice`, Free), from 2007-07-02, repaired from `TaiwanStockEvery5SecondsIndex` (Backer); Volume I's 0050, 00679B and TX files | NumPy linear algebra | LM11 principal components of Taiwan sector returns, as directions in the data, not tradable portfolios; LM12 applies Cholesky to real returns (whitening), with simulation left to LM16 and LM18; brief in `plans/vol-2.md` |
-| III | long TAIEX and 0050 daily history (`TaiwanStockPrice`, `TaiwanStockTotalReturnIndex`, Free) | SciPy distributions | LM15 fits normal, lognormal, Student-t and Poisson to TAIEX returns; LM16 crash correlation; LM18 Monte Carlo and bootstrap |
+| III | TR23: the TAIEX total-return index from 2003-01-02 (`TaiwanStockTotalReturnIndex`, Free; FinMind serves it from that date), checked against the price index (`TaiwanStockPrice`); LM16 uses Volume II's U28 sector sample | SciPy distributions | LM15 fits normal, lognormal, Student-t and Poisson to TAIEX returns; LM16 crash correlation; LM18 Monte Carlo and bootstrap; brief in `plans/vol-3.md` |
 | IV | stock and index returns; TX and TAIEX for the basis (`TaiwanFuturesDaily`), with calendar spreads (`TaiwanFuturesSpreadTrading`) and official final settlement prices (`TaiwanFuturesFinalSettlementPrice`); intraday data for realized volatility: TX 1-minute bars from 2011 (`TaiwanFuturesKBar`), TAIEX 1-minute bars from 2019 (`TaiwanStockKBar`) or 5-second TAIEX (`TaiwanVariousIndicators5Seconds`) | statsmodels, arch | LM25 cointegration of the futures–spot basis; LM26 compares EWMA and GARCH forecasts with realized volatility, including the choice of sampling interval (ticks show microstructure noise) |
 | V | Taiwan ETFs (0050, 00679B and others) and US ETFs (`USStockPrice`, Free) | cvxpy, scikit-learn (Ledoit–Wolf) | long-only, leverage and turnover constraints; 1/N, shrinkage, Black–Litterman, risk parity, HRP |
 | VI | TAIEX daily back to 2008 for stress tests; intraday paths for drawdowns within the day (`TaiwanFuturesKBar`) | — | Taiwan securities and futures transaction taxes and broker fees must come from official sources; stress scenarios 2008, 2015, 2020, 2024-08-05, 2025-04-07, replayed without probabilities |
@@ -143,4 +143,9 @@ Volume VII results it uses.
 - **Volume IV intraday data** (2026-10-11): approved. Minute bars and other intraday history come through the
   FinMind API with a logged script in `data/`; Volume IV's Stage 1 capability check fixes the details (request
   range per dataset, file layout, what is committed) and reports them.
+- **Volume III capabilities** (2026-10-18): approved, the editor's list of the Stage 1 capability check
+  (`plans/vol-3.md`): line-chart steps, bands, quiet series and dashed lines; format codes for scientific notation,
+  significant figures and `n6`; shared JavaScript helpers (a seeded random-number generator, distribution functions,
+  slider controls); and the TR23 data pipeline (`data/raw/vol3/`, `data/vol3_series.py`, the LM13–LM18 lab files).
+  No new package.
 - **Volume V packages** (2026-10-11): approved. Add `cvxpy` and `scikit-learn` with `uv add` when Volume V starts.
