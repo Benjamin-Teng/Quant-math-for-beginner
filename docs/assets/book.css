@@ -420,6 +420,7 @@ details.co.answer .tag { color: var(--good); }
 .chart .vhd { stroke: none; }
 .legend .sw.sq { width: 0.7rem; height: 0.7rem; border-radius: 2px; }
 .legend .sw.dot { width: 0.65rem; height: 0.65rem; border-radius: 50%; }
+.legend .sw.band { height: 0.7rem; border-radius: 2px; }
 
 .widget { margin: 1.6rem 0; border: 1px solid var(--rule); background: var(--surface); padding: 0.9rem 1rem 0.8rem; }
 .widget .w-head { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 0.3rem 1rem; align-items: baseline; font-family: var(--f-head); margin-bottom: 0.5rem; }
@@ -430,6 +431,9 @@ details.co.answer .tag { color: var(--good); }
 .widget label .v { font-weight: 700; color: var(--ink); font-variant-numeric: tabular-nums; }
 .widget input[type="range"] { width: 100%; accent-color: var(--accent); }
 .widget select { font: inherit; padding: 0.25rem 0.4rem; border: 1px solid var(--rule); border-radius: 4px; background: var(--surface); color: var(--ink); }
+.widget .controls button { font: inherit; justify-self: start; align-self: end; padding: 0.3rem 0.9rem; border: 1px solid var(--rule); border-radius: 4px;
+  background: var(--surface); color: var(--ink); cursor: pointer; }
+.widget .controls button:hover { border-color: var(--ink-2); }
 .widget .readout { display: grid; grid-template-columns: repeat(auto-fit, minmax(9.5rem, 1fr)); gap: 0.5rem 1rem; font-family: var(--f-head);
   border-top: 1px solid var(--rule-soft); padding-top: 0.6rem; margin-top: 0.4rem; }
 .widget .readout div { display: grid; gap: 0.05rem; }

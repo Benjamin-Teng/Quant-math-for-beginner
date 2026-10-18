@@ -134,7 +134,7 @@ give each module's items.
   prints no new data.
 - **CX2** (minor, confirmed; better fix found): LM16's two stated facts about the multivariate normal now cite Durrett
   (2019, §3.10 and Exercise 3.10.8), which covers every positive semidefinite Σ; CX's preferred Blitzstein and Hwang
-  §7.5 could not be read (Drive page images, downloads disabled), and the fallback narrowing is not needed. Applied in
+  §7.5 was not read (Drive page images, downloads disabled), and the fallback narrowing is not needed. Applied in
   the closing fixes; SOURCES and the LM16 brief corrected by the editor.
 - **CX3** (minor, confirmed): the Research hygiene page promised four labels while Volume III bolds **model**,
   **hypothetical** and **constructed**. The page now has a fifth label, Model, and a sentence on the two markers (RX's

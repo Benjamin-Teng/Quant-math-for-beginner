@@ -344,7 +344,7 @@ Every registered FinMind file is fetched, and re-checked byte for byte, through 
   ensuring this is monotonicity of the mapping from inputs to outputs".
 - Glasserman (2003), §9.1.2 "Calculating VAR" (from p. 484, table of contents): on p. 491 the asymptotic interval for
   a quantile estimate needs the density at the quantile, and "to avoid this step, one may divide the sample of n
-  observations into batches, compute an estimate from each batch, and form a confidence interval based on the sample
+  observations into batches, compute an estimate … from each batch, and form a confidence interval based on the sample
   standard deviation of the estimates across batches"; the central limit theorem for quantile estimation is (9.7)
   (so named on p. 500; the index places it at p. 490). Google Books search within
   [e9GWUsQkPNMC](https://books.google.com/books?id=e9GWUsQkPNMC), read 2026-10-18 for LM18's closing check; LM18 cites

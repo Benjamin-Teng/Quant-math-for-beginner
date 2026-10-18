@@ -23,21 +23,27 @@ CX1… (the closing check's new module and volume findings).
 
 LM3's 34 findings of edition 0.1 were fixed before the first push; its record starts with the gates on that text.
 
-## Status (2026-10-18): Volume III in review
+## Status (2026-10-18): Volume III published in edition 0.4
 
-| Module | Round 1 | Stage |
-|:--|:--|:--|
-| [LM13](lm13.md) Probability Foundations and Bayes | 31 items (3 major) | revision 1 |
-| [LM14](lm14.md) Random Variables, Expectation and Jensen's Inequality | 31 items (5 major) | revision 1 |
-| [LM15](lm15.md) Distributions in Finance | 34 items (6 major) | revision 1 |
-| [LM16](lm16.md) Joint Distributions and Dependence | 30 items (5 major) | revision 1 |
-| [LM17](lm17.md) Law of Large Numbers and Central Limit Theorem | 29 items (5 major) | revision 1 |
-| [LM18](lm18.md) Monte Carlo Simulation and the Bootstrap | 37 items (1 major) | revision 1 |
+| Module | Round 1 | Verification 1 | Closing check | Stage |
+|:--|:--|:--|:--|:--|
+| [LM13](lm13.md) Probability Foundations and Bayes | 31 items (3 major) | 0 reopened; V1–V4 (minor) | 8 items (minor), 7 fixed, C5 not a defect | published in 0.4 |
+| [LM14](lm14.md) Random Variables, Expectation and Jensen's Inequality | 31 items (5 major) | 0 reopened; V1–V4 (minor) | 10 items (minor), all fixed or decided | published in 0.4 |
+| [LM15](lm15.md) Distributions in Finance | 34 items (6 major) | 1 reopened (minor); V1–V2 | 10 items (minor), all fixed or decided | published in 0.4 |
+| [LM16](lm16.md) Joint Distributions and Dependence | 30 items (5 major) | 0 reopened; V1 (minor) | 8 items (1 major), all fixed | published in 0.4 |
+| [LM17](lm17.md) Law of Large Numbers and Central Limit Theorem | 29 items (5 major) | 0 reopened; V1–V3 (minor) | 7 items (minor), all fixed | published in 0.4 |
+| [LM18](lm18.md) Monte Carlo Simulation and the Bootstrap | 37 items (1 major) | 1 reopened (minor); V1–V3 | 9 items (minor), all fixed | published in 0.4 |
 
 Round 1 (2026-10-18) ran the independent reviewer, the blind solver (K), the number auditor (A) and a Volume III
 cross-module check (X) on each draft (`dcff66b`), all fresh and read-only. No item is critical; the blind solvers agreed
 with every answer key, and the auditors reproduced every printed number from the raw data. A fresh agent per module
 merged the reports, re-checked every major item adversarially and proposed the decisions, which the editor confirmed.
+Two revisions followed, each verified by fresh agents (verification 1 and a volume re-check VX, in
+`vol3_cross.md`). The closing check (one fresh verifier per module and a volume check CX) found 52 module items and
+9 volume items, one major (LM16: the multivariate normal for a singular covariance matrix, now cited to Durrett
+§3.10); a fresh adversarial second check confirmed or amended each and gave the final text, and a fresh final check
+found the volume ready to publish. Not copied back into the brief or the anchors, by the brief's preface: values,
+tags and wording that a revision changed (for example A16-39, A16-42, A17-71 and LM18's tags).
 
 ## Status (2026-10-17): Volume II published in edition 0.3
 

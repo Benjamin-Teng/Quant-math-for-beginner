@@ -2,6 +2,9 @@ title: From Calculus to Kelly
 subtitle: A quantitative curriculum for statistical modeling, portfolio optimization and optimal leverage
 # Edition notes, newest first. A module is linked from the site only when its entry below has `status: published`.
 editions:
+  - version: "0.4"
+    date: 18 October 2026
+    notes: "Volume III complete: LM13–LM18 with their labs, from sample spaces, conditional probability and Bayes' rule through random variables, expectation and Jensen's inequality, the distributions markets produce (normal, lognormal, Student-t, Poisson), joint distributions, the multivariate normal and crash correlation, and the laws of large numbers and the central limit theorem, to Monte Carlo simulation and the bootstrap, on TAIEX's total-return index from 2003 and the TWSE sector indices. Each module passed an independent review, a blind solve of every question, a full audit of its numbers from the raw data and a check across the volume, then two verified revision rounds and a closing check with an adversarial second check of every new item. Charts gain step lines, bands and simulated paths, and widgets share a seeded random-number generator and distribution functions. Volumes I and II now link forward to the Volume III modules that build on them, and LM5 writes 分布 for distribution in its Chinese text, as Volume III does. Getting Started states the seed rule for simulations, and the Research hygiene page adds the labels model, hypothetical and constructed."
   - version: "0.3"
     date: 17 October 2026
     notes: "Volume II complete: LM8–LM12 with their labs, from vectors and matrices through linear systems, covariance matrices and principal components to Cholesky, SVD and least squares, on TAIEX, the TWSE sector indices, Taiwan ETFs and TAIEX futures. Each module passed an independent review, a blind solve of every question, a full audit of its numbers from the raw data and a check across the volume, then two verified revision rounds and a closing check. Volume I now links forward to the Volume II modules that build on it."
@@ -44,12 +47,12 @@ volumes:
     title: Probability
     blurb: Random variables as functions, expectation as the workhorse, and the distributions markets actually produce.
     lms:
-      - {n: 13, title: "Probability Foundations and Bayes", desc: "Sample spaces, conditional probability, Bayes' rule; a random variable is a function."}
-      - {n: 14, title: "Random Variables, Expectation and Jensen's Inequality", desc: "LOTUS, moments, E[R²] = σ² + μ², and the real reason for volatility drag."}
-      - {n: 15, title: "Distributions in Finance", desc: "Normal, lognormal, Student-t and Poisson, fitted to TAIEX returns."}
-      - {n: 16, title: "Joint Distributions and Dependence", desc: "Covariance, conditional expectation, the multivariate normal, crash correlation."}
-      - {n: 17, title: "Law of Large Numbers and Central Limit Theorem", desc: "Why the median path, not the mean path, is what you live through."}
-      - {n: 18, title: "Monte Carlo Simulation and the Bootstrap", desc: "Random generation, simulation error, variance reduction, resampling."}
+      - {n: 13, title: "Probability Foundations and Bayes", desc: "Sample spaces, conditional probability, Bayes' rule; a random variable is a function.", status: published}
+      - {n: 14, title: "Random Variables, Expectation and Jensen's Inequality", desc: "LOTUS, moments, E[R²] = σ² + μ², and the real reason for volatility drag.", status: published}
+      - {n: 15, title: "Distributions in Finance", desc: "Normal, lognormal, Student-t and Poisson, fitted to TAIEX returns.", status: published}
+      - {n: 16, title: "Joint Distributions and Dependence", desc: "Covariance, conditional expectation, the multivariate normal, crash correlation.", status: published}
+      - {n: 17, title: "Law of Large Numbers and Central Limit Theorem", desc: "Why the median path, not the mean path, is what you live through.", status: published}
+      - {n: 18, title: "Monte Carlo Simulation and the Bootstrap", desc: "Random generation, simulation error, variance reduction, resampling.", status: published}
   - id: IV
     title: Statistical Inference and Econometrics
     blurb: Turning a return series into estimates you can defend, with their uncertainty attached.

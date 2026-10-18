@@ -130,7 +130,7 @@ an error code.
 
 ## Reproducible numbers
 
-- Create the random generator once, at the start of each simulated experiment, as
+- From Volume III on, create the random generator once, at the start of each simulated experiment, as
   `rng = np.random.default_rng([e, 20261011])` with `e` the experiment's number, and never reseed it inside the
   experiment ([[LM18]]). Every run then gives the same draws with the NumPy version that `uv.lock` pins.
 - Never test two computed numbers with `x == y`. Compare them with a tolerance that fits their size, such as

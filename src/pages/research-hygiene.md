@@ -42,7 +42,7 @@ dividends, splits, missing values and dates that two series do not share.
 
 ## Label every result
 
-From Volume II on, every result carries one of the labels below. Volume I's results fall into the first four kinds;
+From Volume II on, every result carries at least one of the labels below. Volume I's results fall into the first four kinds;
 the fifth, from Volume III on, marks the answer of a probability model:
 
 | Label | Meaning | Example in the book |

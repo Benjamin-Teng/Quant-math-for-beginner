@@ -4,7 +4,7 @@
 
 *A nine-volume quantitative curriculum that starts from first-year calculus, statistics and linear algebra and ends with statistical models, optimized portfolios and growth-optimal (Kelly) leverage. English text with Traditional Chinese reading guides; every module ships with a lab notebook on real Taiwan and US market data. A personal study project.*
 
-## Status — Edition 0.3 (2026-10-17)
+## Status — Edition 0.4 (2026-10-18)
 
 | Module | State | HTML | PDF | Lab |
 |:--|:--|:--|:--|:--|
@@ -21,6 +21,12 @@
 | LM10 Quadratic Forms and Covariance Matrices | published | [`docs/lm/lm10.html`](docs/lm/lm10.html) | [`docs/pdf/LM10_…pdf`](docs/pdf/LM10_Quadratic_Forms_and_Covariance_Matrices.pdf) | [`labs/LM10_lab`](labs/LM10_lab) |
 | LM11 Eigen-decomposition and PCA | published | [`docs/lm/lm11.html`](docs/lm/lm11.html) | [`docs/pdf/LM11_…pdf`](docs/pdf/LM11_Eigen_decomposition_and_PCA.pdf) | [`labs/LM11_lab`](labs/LM11_lab) |
 | LM12 Cholesky, SVD and Least Squares | published | [`docs/lm/lm12.html`](docs/lm/lm12.html) | [`docs/pdf/LM12_…pdf`](docs/pdf/LM12_Cholesky_SVD_and_Least_Squares.pdf) | [`labs/LM12_lab`](labs/LM12_lab) |
+| LM13 Probability Foundations and Bayes | published | [`docs/lm/lm13.html`](docs/lm/lm13.html) | [`docs/pdf/LM13_…pdf`](docs/pdf/LM13_Probability_Foundations_and_Bayes.pdf) | [`labs/LM13_lab`](labs/LM13_lab) |
+| LM14 Random Variables, Expectation and Jensen's Inequality | published | [`docs/lm/lm14.html`](docs/lm/lm14.html) | [`docs/pdf/LM14_…pdf`](docs/pdf/LM14_Random_Variables_Expectation_and_Jensen_s_Inequality.pdf) | [`labs/LM14_lab`](labs/LM14_lab) |
+| LM15 Distributions in Finance | published | [`docs/lm/lm15.html`](docs/lm/lm15.html) | [`docs/pdf/LM15_…pdf`](docs/pdf/LM15_Distributions_in_Finance.pdf) | [`labs/LM15_lab`](labs/LM15_lab) |
+| LM16 Joint Distributions and Dependence | published | [`docs/lm/lm16.html`](docs/lm/lm16.html) | [`docs/pdf/LM16_…pdf`](docs/pdf/LM16_Joint_Distributions_and_Dependence.pdf) | [`labs/LM16_lab`](labs/LM16_lab) |
+| LM17 Law of Large Numbers and Central Limit Theorem | published | [`docs/lm/lm17.html`](docs/lm/lm17.html) | [`docs/pdf/LM17_…pdf`](docs/pdf/LM17_Law_of_Large_Numbers_and_Central_Limit_Theorem.pdf) | [`labs/LM17_lab`](labs/LM17_lab) |
+| LM18 Monte Carlo Simulation and the Bootstrap | published | [`docs/lm/lm18.html`](docs/lm/lm18.html) | [`docs/pdf/LM18_…pdf`](docs/pdf/LM18_Monte_Carlo_Simulation_and_the_Bootstrap.pdf) | [`labs/LM18_lab`](labs/LM18_lab) |
 
 A module goes on the site only after an independent review has recomputed its numbers and checked its mathematics; drafts are kept in `src/` and `labs/` but are not linked from the site. The full syllabus lives in [`src/syllabus.yaml`](src/syllabus.yaml).
 
@@ -96,7 +102,7 @@ The same files open cleanly in Obsidian, so the sources double as a notes vault.
 
 ## Data
 
-Taiwan prices, dividends, index and futures data come from FinMind (`TaiwanStockPrice`, `TaiwanStockDividendResult`, `TaiwanStockTotalReturnIndex`, `TaiwanFuturesDaily`, and for Volume II the 13:30:00 index values of `TaiwanStockEvery5SecondsIndex` and `TaiwanVariousIndicators5Seconds`); US prices come from FinMind `USStockPrice`. The files were retrieved on 2026-10-10, except Volume II's `sectors/`, `sectors_close/` and `taiex_close/` files (2026-10-11). Every daily close in `data/raw/` was checked against FinMind's own `spread` column (close − previous close). In Volume I's files the only mismatches are ex-dividend days and the two share splits (0050 4-for-1 on 2025-06-18, 00631L 22-for-1 on 2026-03-31), which the pipeline handles explicitly. In Volume II's sector-index series FinMind copies some closes from other dates or series: `data/vol2_series.py` replaces the 561 wrong closes with their 13:30:00 values and accepts 1,528 stale spreads whose closes agree with their neighbours. TAIEX's spread prints 0.0 on 52 dates, and each of those closes equals its 13:30:00 value. See [`data/README.md`](data/README.md).
+Taiwan prices, dividends, index and futures data come from FinMind (`TaiwanStockPrice`, `TaiwanStockDividendResult`, `TaiwanStockTotalReturnIndex`, `TaiwanFuturesDaily`, and for Volume II the 13:30:00 index values of `TaiwanStockEvery5SecondsIndex` and `TaiwanVariousIndicators5Seconds`); US prices come from FinMind `USStockPrice`. The files were retrieved on 2026-10-10, except Volume II's `sectors/`, `sectors_close/` and `taiex_close/` files (2026-10-11). Every daily close in `data/raw/` was checked against FinMind's own `spread` column (close − previous close). In Volume I's files the only mismatches are ex-dividend days and the two share splits (0050 4-for-1 on 2025-06-18, 00631L 22-for-1 on 2026-03-31), which the pipeline handles explicitly. In Volume II's sector-index series FinMind copies some closes from other dates or series: `data/vol2_series.py` replaces the 561 wrong closes with their 13:30:00 values and accepts 1,528 stale spreads whose closes agree with their neighbours. TAIEX's spread prints 0.0 on 52 dates, and each of those closes equals its 13:30:00 value. Volume III's main sample is the TAIEX total-return index (`TaiwanStockTotalReturnIndex`, retrieved 2026-10-18), 2003-01-02 to 2026-10-08, which FinMind serves from 2003-01-02; it has no spread column, so `data/vol3_series.py` checks every row against the TAIEX price index (the same 5,850 dates, each price close against its spread, and the daily dividend gap within rounding and 1%). See [`data/README.md`](data/README.md).
 
 ## License
 

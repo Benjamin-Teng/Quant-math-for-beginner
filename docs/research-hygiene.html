@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <script>(function(){var d=document.documentElement,t,m;try{t=localStorage.getItem("ftck-theme")}catch(e){}if(t!=="light"&&t!=="dark"){m=window.matchMedia&&matchMedia("(prefers-color-scheme: dark)");t=m&&m.matches?"dark":"light"}d.setAttribute("data-theme",t);document.addEventListener("click",function(e){var b=e.target.closest&&e.target.closest(".theme-toggle");if(!b||window.__ftckTheme)return;var n=d.getAttribute("data-theme")==="light"?"dark":"light";try{localStorage.setItem("ftck-theme",n)}catch(x){}window.__ftckEarly=n;d.setAttribute("data-theme",n);b.setAttribute("aria-checked",n==="light"?"true":"false")})})();</script>
 <title>Research hygiene · From Calculus to Kelly</title>
-<meta name="description" content="Six rules that keep a result from market data honest, and the four labels that results carry from Volume II on.">
+<meta name="description" content="Six rules that keep a result from market data honest, and the labels that results carry from Volume II on.">
 <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;700&display=swap">
 <link rel="stylesheet" href="assets/katex/katex.min.css">
@@ -36,12 +36,12 @@
 <li><a href="lm/lm12.html"><span class="k">LM12</span><span>Cholesky, SVD and Least Squares</span></a></li>
 </ol>
 <h2>Vol III · Probability</h2><ol>
-<li><span title="Planned"><span class="k">LM13</span><span>Probability Foundations and Bayes</span></span></li>
-<li><span title="Planned"><span class="k">LM14</span><span>Random Variables, Expectation and Jensen&#x27;s Inequality</span></span></li>
-<li><span title="Planned"><span class="k">LM15</span><span>Distributions in Finance</span></span></li>
-<li><span title="Planned"><span class="k">LM16</span><span>Joint Distributions and Dependence</span></span></li>
-<li><span title="Planned"><span class="k">LM17</span><span>Law of Large Numbers and Central Limit Theorem</span></span></li>
-<li><span title="Planned"><span class="k">LM18</span><span>Monte Carlo Simulation and the Bootstrap</span></span></li>
+<li><a href="lm/lm13.html"><span class="k">LM13</span><span>Probability Foundations and Bayes</span></a></li>
+<li><a href="lm/lm14.html"><span class="k">LM14</span><span>Random Variables, Expectation and Jensen&#x27;s Inequality</span></a></li>
+<li><a href="lm/lm15.html"><span class="k">LM15</span><span>Distributions in Finance</span></a></li>
+<li><a href="lm/lm16.html"><span class="k">LM16</span><span>Joint Distributions and Dependence</span></a></li>
+<li><a href="lm/lm17.html"><span class="k">LM17</span><span>Law of Large Numbers and Central Limit Theorem</span></a></li>
+<li><a href="lm/lm18.html"><span class="k">LM18</span><span>Monte Carlo Simulation and the Bootstrap</span></a></li>
 </ol>
 <h2>Vol IV · Statistical Inference and Econometrics</h2><ol>
 <li><span title="Planned"><span class="k">LM19</span><span>Descriptive Statistics of Returns</span></span></li>
@@ -87,7 +87,7 @@
 <li><span title="Planned"><span class="k">LM49</span><span>Capstone B: Kelly Sizing a Single Strategy</span></span></li>
 <li><span title="Planned"><span class="k">LM50</span><span>Capstone C: Multi-Strategy Allocation and Monitoring</span></span></li>
 </ol></nav>
-<main class="page" id="main"><header class="lm-head"><h1 class="lm-title">Research hygiene</h1><p class="lm-sub">Six rules that keep a result from market data honest, and the four labels that results carry from Volume II on.</p></header>
+<main class="page" id="main"><header class="lm-head"><h1 class="lm-title">Research hygiene</h1><p class="lm-sub">Six rules that keep a result from market data honest, and the labels that results carry from Volume II on.</p></header>
 <div class="co zh"><div class="co-h"><span class="tag">導讀</span><span class="t">這一頁講什麼</span></div><p>用市場資料算出來的數字，看起來很精確，卻可能誤導。下面六條規則讓結果站得住腳。從第二卷起，每個會估計、選模型或回測的模組，都會用一個短框說明它用了哪幾條規則，以及結果該怎麼解讀；更完整的處理在 <span class="coming" title="LM21 Hypothesis Testing and Multiple Testing — coming in Volume IV">LM21</span>、<span class="coming" title="LM33 The Statistics of the Sharpe Ratio — coming in Volume VI">LM33</span> 和 <span class="coming" title="LM34 Backtesting Without Fooling Yourself — coming in Volume VI">LM34</span>。</p>
 </div>
 <p>A number computed from market data can look precise and still mislead. The six rules below keep the book's results
@@ -108,7 +108,8 @@ more pays more, so one constant subtracted at the end hides the difference. <spa
 </section><section class="sec unnum" id="fix-the-universe-and-the-data-policy-first"><h2 class="plain"><span class="ttl">Fix the universe and the data policy first</span></h2><p>Decide which assets and which dates you use before you look at any result. A list of today's stocks leaves out the
 companies that were delisted, so it makes past returns look better than they were. Write down how you treat
 dividends, splits, missing values and dates that two series do not share.</p>
-</section><section class="sec unnum" id="label-every-result"><h2 class="plain"><span class="ttl">Label every result</span></h2><p>From Volume II on, every result carries one of four labels. Volume I's results fall into the same four kinds:</p>
+</section><section class="sec unnum" id="label-every-result"><h2 class="plain"><span class="ttl">Label every result</span></h2><p>From Volume II on, every result carries at least one of the labels below. Volume I's results fall into the first four kinds;
+the fifth, from Volume III on, marks the answer of a probability model:</p>
 <div class="table-wrap"><table>
 <thead>
 <tr>
@@ -138,9 +139,16 @@ dividends, splits, missing values and dates that two series do not share.</p>
 <td style="text-align:left">fitted on earlier data and judged on later data that the fit never used</td>
 <td style="text-align:left">the minimum-variance weight estimated on 2017–2021 and held in 2022–2026 (<a href="lm/lm07.html">LM7</a>)</td>
 </tr>
+<tr>
+<td style="text-align:left">Model</td>
+<td style="text-align:left">the answer of a probability model, exact, approximate or simulated: a property of the model, not a forecast (a model fitted to the data is also in-sample)</td>
+<td style="text-align:left">the chance of a losing year if days are independent (<a href="lm/lm17.html">LM17</a>)</td>
+</tr>
 </tbody>
 </table></div>
 <p>A full-sample estimate describes the past. It is not a forecast.</p>
+<p>Volume III also marks invented bets, positions and records as <strong>hypothetical</strong>, and examples built to make a point as
+<strong>constructed</strong> (<a href="lm/lm13.html">LM13</a>, <a href="lm/lm16.html">LM16</a>).</p>
 
 <div class="co note"><div class="co-h"><span class="tag">Note</span><span class="t">Where the book goes deeper</span></div><p><span class="coming" title="LM21 Hypothesis Testing and Multiple Testing — coming in Volume IV">LM21</span> covers multiple testing. <span class="coming" title="LM33 The Statistics of the Sharpe Ratio — coming in Volume VI">LM33</span> covers the Probabilistic and Deflated Sharpe ratios. <span class="coming" title="LM34 Backtesting Without Fooling Yourself — coming in Volume VI">LM34</span> covers
 look-ahead and survivorship bias, costs, walk-forward testing and the probability of backtest overfitting.</p>

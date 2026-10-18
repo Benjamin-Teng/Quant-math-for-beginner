@@ -36,12 +36,12 @@
 <li><a href="lm/lm12.html"><span class="k">LM12</span><span>Cholesky, SVD and Least Squares</span></a></li>
 </ol>
 <h2>Vol III · Probability</h2><ol>
-<li><span title="Planned"><span class="k">LM13</span><span>Probability Foundations and Bayes</span></span></li>
-<li><span title="Planned"><span class="k">LM14</span><span>Random Variables, Expectation and Jensen&#x27;s Inequality</span></span></li>
-<li><span title="Planned"><span class="k">LM15</span><span>Distributions in Finance</span></span></li>
-<li><span title="Planned"><span class="k">LM16</span><span>Joint Distributions and Dependence</span></span></li>
-<li><span title="Planned"><span class="k">LM17</span><span>Law of Large Numbers and Central Limit Theorem</span></span></li>
-<li><span title="Planned"><span class="k">LM18</span><span>Monte Carlo Simulation and the Bootstrap</span></span></li>
+<li><a href="lm/lm13.html"><span class="k">LM13</span><span>Probability Foundations and Bayes</span></a></li>
+<li><a href="lm/lm14.html"><span class="k">LM14</span><span>Random Variables, Expectation and Jensen&#x27;s Inequality</span></a></li>
+<li><a href="lm/lm15.html"><span class="k">LM15</span><span>Distributions in Finance</span></a></li>
+<li><a href="lm/lm16.html"><span class="k">LM16</span><span>Joint Distributions and Dependence</span></a></li>
+<li><a href="lm/lm17.html"><span class="k">LM17</span><span>Law of Large Numbers and Central Limit Theorem</span></a></li>
+<li><a href="lm/lm18.html"><span class="k">LM18</span><span>Monte Carlo Simulation and the Bootstrap</span></a></li>
 </ol>
 <h2>Vol IV · Statistical Inference and Econometrics</h2><ol>
 <li><span title="Planned"><span class="k">LM19</span><span>Descriptive Statistics of Returns</span></span></li>
@@ -189,8 +189,9 @@ number of years, and the years are the calendar days divided by 365.25.</li>
 <li>Vectors are columns. The <a href="index.html#notation">notation table on the front page</a> lists the main symbols.</li>
 </ul>
 </section><section class="sec unnum" id="reproducible-numbers"><h2 class="plain"><span class="ttl">Reproducible numbers</span></h2><ul>
-<li>Seed the random generator once, at the start of a notebook, for example <code>rng = np.random.default_rng(20261011)</code>.
-Every run then gives the same draws.</li>
+<li>From Volume III on, create the random generator once, at the start of each simulated experiment, as
+<code>rng = np.random.default_rng([e, 20261011])</code> with <code>e</code> the experiment's number, and never reseed it inside the
+experiment (<a href="lm/lm18.html">LM18</a>). Every run then gives the same draws with the NumPy version that <code>uv.lock</code> pins.</li>
 <li>Never test two computed numbers with <code>x == y</code>. Compare them with a tolerance that fits their size, such as
 <code>math.isclose(x, y, rel_tol=1e-9, abs_tol=1e-12)</code>: relative for large amounts, absolute near zero.</li>
 <li>Prices with two decimals make some returns exact. A move from 100.00 to 101.00 is exactly 1%. Floating point may
