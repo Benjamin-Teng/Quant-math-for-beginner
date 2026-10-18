@@ -54,7 +54,7 @@ them).
   | $\E$, $\Var$, $\Cov$, $\operatorname{Corr}$, $\E_{\hat F}$ | expectation, variance, covariance, correlation (macros `\E`, `\Var`, `\Cov`); expectation under the empirical law | LM5's `\mathrm{Var}` is the same symbol |
   | $\operatorname{Skew}(X)$, $\operatorname{Kurt}(X)$ | standardized third and fourth moments; excess kurtosis is $\operatorname{Kurt}(X)-3$ (LM5's term) | $\gamma$ and $\kappa$ are taken |
   | $\mu_X$, $\sigma_X$, $\sigma_{XY}$, $\rho_{XY}$ | mean, standard deviation, covariance, correlation of random variables; unsubscripted $\mu$, $\sigma$, $\rho$ keep the return's | $\rho$ is a population correlation; a sample one is $\hat\rho$ in a module that has both |
-  | $\bar R$, $s$; $\bar r$, $s_r$; $g$, $\sigma_r$ | sample mean and standard deviation of $R$, and of $r=\ln(1+R)$, divisor $T$; in a model $\mu$, $\sigma$ for $R$, and $g=\E[\ln(1+R)]$ (per day) and $\sigma_r$ for $r$. $\bar g(f)$ only as LM4's (4.4), with $\bar g(1)=\bar r$ said once; $R_G$ the compound rate (LM3) | AUTHORING allows $\hat\mu$; Volume III writes $\bar R$ |
+  | $\bar R$, $s$; $\bar r$, $s_r$; $g$, $\sigma_r$ | sample mean and standard deviation of $R$, and of $r=\ln(1+R)$, divisor $T$; in a model $\mu$, $\sigma$ for $R$, and $g=\E[\ln(1+R)]$ (per day) and $\sigma_r$ for $r$. $\bar g(f)$ only as LM4's (4.4), with $\bar g(1)=\bar r$ said once; $R_G$ the compound rate (LM3's geometric mean return) | AUTHORING allows $\hat\mu$; Volume III writes $\bar R$ |
   | $\boldsymbol\mu$, $\Sigma$ | mean vector and covariance matrix of a random vector; $\hat\Sigma$ the sample one (10.2) | as §6 |
   | $\mathcal N(\mu,\sigma^2)$, $\mathcal N_N(\boldsymbol\mu,\Sigma)$, $t_\nu$, $\chi^2_N$, $\operatorname{Bin}(n,p)$, $\operatorname{Poisson}(\lambda)$, $\operatorname{Exp}(\lambda)$, $\operatorname{Unif}(0,1)$ | distributions; $\sim$ "is distributed as"; "iid" independent and identically distributed | $\lambda$: a Poisson mean or an exponential rate (amend §6); $\nu$ already allowed |
   | $n$, $\bar X_n$, $S_n$ | number of independent draws or trials; their mean and sum | $T$ stays the number of returns in a data sample |
@@ -91,7 +91,7 @@ them).
   7 April 2025 jump, the removals, the top-ten shares, the two limit regimes), the lm05.md:369 promise; LM17 owns the
   running sample kurtosis as a law of large numbers that does not settle (the lm05.md:366–368 promise, drawn in its
   X9 and citing LM15's jump), the kurtosis of $m$-day log-return sums and the lag correlations of $\lvert r\rvert$;
-  LM13 owns the threshold counts it states first (108 days at or below −3%, 15 at or below −5%).
+  LM13 owns the threshold counts it states first (108, 44 and 15 days at or below −3%, −4% and −5%).
 - **Counting.** Every count against a threshold uses one guard (`<= -x + 1e-12`, `>= x - 1e-12`) or exact arithmetic
   (PITFALLS §5): two-decimal index levels make round returns exact ties.
 - **Simulation.** Each simulated experiment (an example, a problem, an exhibit, a lab part) creates its generator once,
@@ -140,7 +140,8 @@ them).
   檢察官謬誤 (prosecutor's fallacy), 標準化動差 (standardized moment), 全變異數法則 (law of total variance),
   條件相關係數 (conditional correlation), 超越相關係數 (exceedance correlation), 放回重抽樣 (resampling with
   replacement). LOTUS keeps its English name only. Statistical 獨立 is never LM9's 線性獨立: one sentence in LM13 says
-  so. 尾部指數 and 厚尾 stay as printed in LM5; 隨機數 replaces LM12's second form 亂數 from now on.
+  so. 尾部指數 and 厚尾 stay as printed in LM5; 隨機數 replaces 亂數 from now on (the mathematics listing gives
+  "random number" as 隨機數；亂數; LM12 printed the second form, and lm12.md:527 keeps it).
 - **Research hygiene.** The site's Research hygiene page and each module's declaration. A frequency in TR23 is
   *Descriptive*; a fitted distribution is *In-sample*; comparing 2003-01-03 → 2015-05-29 with 2015-06-01 →
   2026-10-08 (the two limit regimes) is a *Stability check*; a model result (a lognormal path, a Monte Carlo
@@ -252,11 +253,15 @@ records any it declines.
 
 ## Stage 4 changes to earlier modules
 
-Collected from the briefs; the editor applies them at publication, with the edition note.
+Collected from the briefs; the editor applies them at publication, with the edition note. Applied on 2026-10-18
+after Volume III's closing check, which added the Research hygiene page (`reviews/vol3_cross.md`, "Closing check
+(CX)").
 
 - LM5:60 "[[LM14]] defines random variables" → "[[LM13]]"; LM5's 累積分配函數, 常態分配函數, 常態分配 → 累積分布函數,
   常態分布函數, 常態分布 (three strings).
 - Getting Started's seed sentence (the Simulation decision above).
+- The Research hygiene page: the fifth label, Model, and the markers hypothetical and constructed that Volume III's
+  notes use (closing check CX3).
 - Leads of Volumes I–II gain the Volume III modules that cite them for a result, by tag or by line, so that each
   earlier module's leads match the Volume III prereq lists (AUTHORING §3; each brief's "Stage 4 for earlier modules";
   a module that only honours an earlier module's forward link, as LM15 does lm04.md:541, is not added):
@@ -1241,7 +1246,8 @@ The 28-dimensional all-down comparison: not in Volume III.
 **Uses before taught.**
 
 - "Independent normal variables are jointly normal, and a normal vector's law is fixed by $\boldsymbol\mu$ and $\Sigma$
-  (stated without proof; Wasserman 2004, §2.10, Theorem 2.43, for a positive definite $\Sigma$)." The density (16.7),
+  (stated without proof; Durrett 2019, §3.10 and Exercise 3.10.8, numbered as in the author's free PDF, for every
+  positive semidefinite $\Sigma$)." The density (16.7),
   $\Sigma$ PD: "stated without proof; Wasserman 2004, §2.10: his equation (2.10) and Theorem 2.43" (SOURCES); Deep Dive
   2 draws $N=2$. Blitzstein and Hwang's §7.5 could not be read, so it is not cited (verification 1).
 - "SciPy's `stats.chi2` gives $\chi^2_N$'s tails for $N>2$; [[LM21]] builds tests on it." The definition is LM16's;

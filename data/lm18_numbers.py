@@ -332,7 +332,7 @@ def rms_centred(n: int) -> float:
 
 changes = [1 - rms_centred(n) / (cst / math.sqrt(n)) for n in (100, 200, 500, 1000, 4382, 10**5)]
 assert all(0 < c < 0.004 for c in changes) and changes == sorted(changes, reverse=True)
-has("centring under 0.4%", "under 0.4% for $n\\ge100$")
+has("centring under 0.4%", "under 0.4% for S5 when $n\\ge100$")
 runs = x3_runs(L)
 rms = {n: math.sqrt(float((g**2).mean())) for n, g in runs.items()}
 rms_b = {n: bse(lambda a: math.sqrt(float((a**2).mean())), g) for n, g in runs.items()}
@@ -709,7 +709,7 @@ for lit in ("`default_rng([1, 20261011])`", "`default_rng([16, 20261011])`", "`d
             "6 (antithetic), seeded `default_rng([e, 20261011])` with `e` the experiment's number",
             "From `default_rng([2, 20261011])`, `norm.ppf(rng.random(3))`"):
     has(f"literal {lit}", lit)
-has("LM12's draws", "4,382 standard normal draws")
+has("LM12's draws", "4,382 standard normal vectors")
 has("1,025 evaluations", "$4.83\\times10^{-9}$ at 1,025")
 has("LM5's threshold", "$p=\\Pr(Z\\le-4.1074386)=2.000355\\times10^{-5}$")
 has("code inputs", "m, g, sr = 1231, 0.0005517, 0.012107")

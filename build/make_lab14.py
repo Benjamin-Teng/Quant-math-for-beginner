@@ -67,7 +67,7 @@ Companion notebook to **From Calculus to Kelly, LM14**. It rebuilds the module's
 | 5 | Tail bounds: [[ex:bounds]], [[ex:boundtable]], [[eg:threepct]], [[eg:foursigma]], the laws that attain the bounds |
 | 6 | Jensen's inequality: the chord of any two-point law, [[eg:amgm]] |
 | 7 | Volatility drag and the Jensen gap: [[eg:dragexact]] ([[ex:dragtable]]), [[ex:dragyears]], the gap at $f=2$ |
-| 8 | Practice problems 2, 4, 6, 10 and 11, and an extension exercise |
+| 8 | Practice problems 2, 4, 5, 6, 10 and 11, and an extension exercise |
 
 **Environment.** From the repository root, `uv sync` installs the locked Python environment (`uv.lock`). Open this notebook with the `.venv` kernel, or run `uv run --with jupyterlab jupyter lab`.
 
@@ -433,6 +433,17 @@ for f in (1, 8):
     sd = sqrt(p4 @ (x - mu) ** 2)
     print(f"f = {f}: mu {mu * 100:.1f}%, sigma {sd * 100:.1f}%, E[R^2] {p4 @ x ** 2:.5f}, E[R^3] {p4 @ x ** 3:.7f}, "
           f"skew {p4 @ ((x - mu) / sd) ** 3:.4f} (-8/3), kurtosis {p4 @ ((x - mu) / sd) ** 4:.4f} (73/9 = {73 / 9:.4f})")
+""")
+
+md(r"""
+**Problem 5.** For $X\sim\mathcal N(0.05,0.20^2)$, SciPy's raw moments against (14.6).
+""")
+
+code(r"""
+n5 = stats.norm(0.05, 0.2)
+show("E[X^3]", n5.moment(3), ".6f", "0.006125")
+show("E[X^4]", n5.moment(4), ".8f", "0.00540625")
+print("(14.6):", 0.05 ** 3 + 3 * 0.05 * 0.04, 0.05 ** 4 + 6 * 0.05 ** 2 * 0.04 + 3 * 0.04 ** 2)
 """)
 
 md(r"""

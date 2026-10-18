@@ -341,7 +341,7 @@ plt.semilogy(srt[srt <= -0.01 + EPS], np.arange(1, int((R <= -0.01 + EPS).sum())
 plt.semilogy(grid, T * stats.norm.cdf((grid - Rbar) / s), label="normal")
 plt.semilogy(grid, T * stats.t.cdf(grid, nu_m, loc_m, sc_m), label="t, maximum likelihood")
 plt.semilogy(grid, T * stats.t.cdf((grid - Rbar) / sc_k, nu_k), "--", label="t, kurtosis fit")
-plt.ylim(1e-3, 1e3); plt.xlabel("daily return x"); plt.ylabel("days with R <= x"); plt.legend(); plt.show()
+plt.ylim(1e-3, 1e3); plt.xlabel("daily return"); plt.ylabel("days at or below this return"); plt.legend(); plt.show()
 """)
 
 md(r"""

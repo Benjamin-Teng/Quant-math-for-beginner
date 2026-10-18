@@ -538,9 +538,9 @@ del idx, one
 """)
 
 md(r"""
-### Extension: the case under a Student $t$ model
+### Extension: the case under a Student-t model
 
-LM15 fitted a Student $t$ distribution to TR23's daily returns by maximum likelihood. Simulate the case under that model (experiment 15): 10,000 paths of 1,231 iid daily returns $R=\text{loc}+\text{scale}\cdot Y$, $Y\sim t_\nu$, with the unrounded `stats.t.fit` parameters, `standard_t(nu, size=(500, m))` twenty times. A path with a day at or below −100% is ruined and counts as under water. Compare the answer with the 5.49% of the normal model and the 5.6% of the bootstrap. Why did it move? Look at the fitted location against $\bar R$, at the mean log return the model implies, and at the size of the worst simulated days against TAIEX's daily price limit. Then rerun with the parameters rounded to the printed digits: why do the draws change, even though the seed does not?
+LM15 fitted a Student-t distribution to TR23's daily returns by maximum likelihood. Simulate the case under that model (experiment 15): 10,000 paths of 1,231 iid daily returns $R=\text{loc}+\text{scale}\cdot Y$, $Y\sim t_\nu$, with the unrounded `stats.t.fit` parameters, `standard_t(nu, size=(500, m))` twenty times. A path with a day at or below −100% is ruined and counts as under water. Compare the answer with the 5.49% of the normal model and the 5.6% of the bootstrap. Why did it move? Look at the fitted location against $\bar R$, at the mean log return the model implies, and at the size of the worst simulated days against TAIEX's daily price limit. Then rerun with the parameters rounded to the printed digits: why do the draws change, even though the seed does not?
 """)
 
 code(r"""

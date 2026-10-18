@@ -95,7 +95,7 @@ half = [2 * math.sqrt(p_hat * (1 - p_hat) / n) for n in ns]
 tick_n = [20, 50, 100, 250, 1000, 2500, T]
 upfreq = {
     "alt": "Running share of TAIEX up days among the first n daily returns, n from 20 to 5,849 on a logarithmic axis, "
-           "settling near 0.548 inside a band of two model standard errors that narrows as n grows",
+           "settling near 0.548, drawn with the iid model's band of two standard errors, which narrows as n grows",
     "height": 300,
     "x": {"type": "num", "fmt": "n3", "label": "Number of daily returns n (log scale)", "tipLabel": "log10 of n = ",
           "min": rd(math.log10(20), 4), "max": rd(math.log10(T), 4),
@@ -157,8 +157,8 @@ pmf = [float(stats.binom.pmf(j, 100, 0.5)) for j in js]
 edges = [j - 0.5 for j in js] + [75.5]
 xs = [rd(25 + 0.25 * k, 2) for k in range(201)]
 binom = {
-    "alt": "Probabilities of 25 to 75 wins in 100 trades of a fair bet, drawn as a histogram, with the normal density of "
-           "mean 50 and standard deviation 5; the region of 41 or fewer wins, where the full-Kelly bettor is behind, "
+    "alt": "Probabilities of 25 to 75 wins in 100 trades of the Kelly bet (win probability 1/2), drawn as a histogram, "
+           "with the normal density of mean 50 and standard deviation 5; the region of 41 or fewer wins, where the full-Kelly bettor is behind, "
            "is shaded",
     "height": 300,
     "x": {"type": "num", "fmt": "n1", "tfmt": "n0", "label": "Wins j in 100 trades", "tipLabel": "x = ", "min": 25,

@@ -153,7 +153,7 @@ lognormal = {
     "height": 280,
     "x": {"type": "num", "fmt": "n4", "tfmt": "n1", "label": "Growth factor G of a calendar year", "tipLabel": "G = ",
           "min": 0.5, "max": 1.9},
-    "y": {"type": "lin", "fmt": "n3", "tfmt": "n1", "label": "Cumulative probability, Pr(G ≤ g)", "min": 0, "max": 1},
+    "y": {"type": "lin", "fmt": "n3", "tfmt": "n1", "label": "Cumulative probability, Pr(G ≤ y)", "min": 0, "max": 1},
     "series": [{"name": "Lognormal, μ_X = 0.11646, σ_X = 0.22207", "color": "1",
                 "x": gx, "y": [r(float(stats.norm.cdf((math.log(g) - muX) / sX)), 6) for g in gx]},
                {"name": "TAIEX, 23 calendar years", "color": "2", "step": True,
@@ -181,12 +181,12 @@ lower = [r(v, 10) for v in srt[srt <= -0.0095 + EPS]]
 q01_emp = float(srt[math.ceil(0.01 * T) - 1])
 check_nus = [2.05, 2.5, nu_m, 4.0, nu_k, 10.0, 30.0]
 tailchart = {
-    "alt": "Number of TAIEX days with a return at or below x, for x from -10.5% to -1%, against the expected days of "
+    "alt": "Number of TAIEX days at or below each return from -10.5% to -1%, against the expected days of "
     "the fitted normal and of two Student-t fits, log scale",
     "height": 300,
-    "x": {"type": "num", "fmt": "pct2", "tfmt": "pct0", "label": "Daily total return x", "tipLabel": "R ≤ ",
+    "x": {"type": "num", "fmt": "pct2", "tfmt": "pct0", "label": "Daily total return", "tipLabel": "R ≤ ",
           "min": -0.105, "max": -0.010},
-    "y": {"type": "log", "fmt": "sig3", "tfmt": "num", "label": "Days with R ≤ x, of 5,849 (log scale)", "min": FLOOR,
+    "y": {"type": "log", "fmt": "sig3", "tfmt": "num", "label": "Days at or below this return, of 5,849 (log scale)", "min": FLOOR,
           "max": 1000, "ticks": [0.001, 0.01, 0.1, 1, 10, 100, 1000]},
     "series": [{"name": "TAIEX (actual days)", "color": "2", "step": True, "fmt": "n0", "x": emp_x, "y": emp_y},
                {"name": "Normal (expected)", "color": "1", "x": nx, "y": ny},

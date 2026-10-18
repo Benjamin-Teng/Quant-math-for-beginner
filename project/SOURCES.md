@@ -67,7 +67,7 @@ Every registered FinMind file is fetched, and re-checked byte for byte, through 
 |:--|:--|
 | White House fact sheet, 2 April 2025 (whitehouse.gov; official, US) | the reciprocal tariffs behind the April 2025 sell-off: a 10% baseline from 5 April, higher country rates from 9 April (read 2026-10-11) |
 | TechNews [2026-05-26 weight gap](https://finance.technews.tw/2026/05/26/weight-gap/) and SETN news 1844764 (2026-05-27) | 00631L replication: TAIEX futures 160.87%, TSMC 39.63%; TSMC weight 43.7% in TAIEX vs 60.9% in Taiwan 50 (as of 2026-05-19) |
-| TechNews 2025-04-07 (black Monday records), Taiwan News zh/news/6078269 | 7 April 2025 tariff sell-off; TechNews reports 936 listed stocks (1,702 with the OTC market) closing limit-down that day (re-read 2026-10-18 for LM13–LM15) |
+| TechNews 2025-04-07 (black Monday records), Taiwan News zh/news/6078269 | 7 April 2025 tariff sell-off; TechNews reports 936 listed stocks (1,702 with the OTC market) closing limit-down that day (re-read 2026-10-18 for LM13–LM15: by Atkinson, 「台股黑色星期一創多項新紀錄，外資抄底轉買超 168.21 億元」, 936 listed and 766 OTC stocks, 1,702 in all). LM13 and LM14 cite it in one References form, "Atkinson (7 April 2025)" with the title and the TechNews link; LM15 points to LM14 for the cap (closing check, 2026-10-18) |
 | TechNews 2022-12-30 (TWD depreciation), 2025-05-05 (TWD surge); FTV News 2025505W0BEA | USD/TWD 30.708 at end-2022; 31.064 on 2 May 2025; 30.145 on 5 May 2025 |
 | TechNews 2025-06-10 (0050 one-into-four) | 0050 split timing |
 | TechNews 2025-02-04, ctee.com.tw exchange/792949 and 20250204700571 | bond ETF background (LM7) |
@@ -225,6 +225,16 @@ Every registered FinMind file is fetched, and re-checked byte for byte, through 
   especially extreme ones, than for upside moves; conditional on the downside they differ from those implied by a
   normal distribution by 11.6%; small, value and past-loser stocks show more asymmetry; the asymmetries reject
   multivariate normality at daily, weekly and monthly frequencies, and regime-switching models capture them better.
+- Ang & Chen (2002), definition read 2026-10-18 for LM16's closing check in the authors' working paper hosted by
+  Columbia Business School
+  ([corr.pdf](https://drupalgsb-test.paas.cc.columbia.edu/sites/default/files-efs/pubfiles/1516/corr.pdf), a
+  test-server URL; its abstract is the published one, with the 11.6%, and it thanks a referee; journal pagination and
+  equation numbers not compared): §3.1 "Upside and downside correlations", eq. (10), p. 7, defines the exceedance
+  correlation at level ϑ, which it calls "the Longin and Solnik (2001) exceedance correlation": the correlation of two
+  standardized returns when both lie more than ϑ standard deviations above their means (ϑ ≥ 0) or both below
+  (ϑ ≤ 0); the empirical version uses cut-offs in standard deviations from the observed means. Longin & Solnik's own
+  text was not read (CEPR DP 2538 and HEC's copy refused automated requests), so their part of LM16's attribution rests
+  on Ang and Chen's.
 - Gigerenzer & Hoffrage, "How to improve Bayesian reasoning without instruction: Frequency formats", *Psychological
   Review* 102(4): 684–704, 1995, DOI [10.1037/0033-295X.102.4.684](https://doi.org/10.1037/0033-295X.102.4.684) —
   Crossref record; abstract and text read in an author-posted copy marked "not the copy of record"
@@ -270,7 +280,9 @@ Every registered FinMind file is fetched, and re-checked byte for byte, through 
   this number not compared with the print edition): §2.1.4 "Constructing Independent Random Variables" asks whether
   independent random variables exist and builds an infinite sequence X₁, X₂, … with given distribution functions on
   ℝ^ℕ by Theorem 2.1.21 (Kolmogorov's extension theorem): consistent probability measures μₙ on (ℝⁿ, ℛⁿ) have a unique
-  extension P to (ℝ^ℕ, ℛ^ℕ). LM13 cites it for the existence of infinitely many independent trades.
+  extension P to (ℝ^ℕ, ℛ^ℕ). LM13 cites it for the existence of infinitely many independent trades, with "numbered as
+  in the author's free PDF" (closing check CX6; the print number stays unchecked: Google Books answered with a
+  CAPTCHA on 2026-10-18).
 - Blitzstein & Hwang, section numbers now verified (read 2026-10-18) in the authors' free edition. probabilitybook.net
   redirects to [Google Drive](https://drive.google.com/file/d/1VmkAAGOYCTORq1wxSQqy255qLJjTNvBI/view): file "Blitzstein
   Hwang Probability.pdf", shared from the first author's account, downloads disabled, read through the viewer's page
@@ -311,11 +323,37 @@ Every registered FinMind file is fetched, and re-checked byte for byte, through 
   within [e9GWUsQkPNMC](https://books.google.com/books?id=e9GWUsQkPNMC), read 2026-10-18 for LM18's review).
 - Durrett (2019), Theorem 1.7.2: Fubini's theorem, for f ≥ 0 or ∫|f| < ∞ (read in the author's free PDF,
   2026-10-18, for LM16's verification; numbered as in that PDF).
+- Durrett (2019), §3.10 "Limit Theorems in R^d", read 2026-10-18 for Volume III's closing check in the author's free
+  PDF (numbered and paged as in that PDF, not compared with the print edition): Theorem 3.10.4 (p. 199), the
+  inversion formula for characteristic functions on R^d; Theorem 3.10.7 (pp. 200–201), the central limit theorem in
+  R^d, whose limit is multivariate normal with mean 0 and covariance Γ, that is with characteristic function
+  exp(−θΓθᵀ/2). The text that follows (pp. 201–202) shows that a covariance matrix Γ is symmetric and nonnegative
+  definite and, for every such Γ (degenerate allowed), builds the law as YA from independent standard normal Y,
+  showing that each linear combination is normal; it gives the density (2π)^(−d/2)(det Γ)^(−1/2)exp(−yΓ⁻¹yᵀ/2) only
+  when Γ has rank d and reduces degenerate cases to that one by a linear map. Exercise 3.10.7 (p. 202): the entries of
+  a multivariate normal vector are independent if and only if they are uncorrelated. Exercise 3.10.8 (p. 203): a
+  vector is multivariate normal with mean vector θ and covariance Γ if and only if every linear combination c·X is
+  normal with mean cθᵀ and variance cΓcᵀ. The two are exercises, stated with the proof left to the reader. LM16 cites
+  §3.10 and Exercise 3.10.8 for its two stated facts (independent normals are jointly normal; μ and Σ fix the law),
+  for every positive semidefinite Σ, and keeps Wasserman for the density.
 - Durrett (2019), Theorem 2.2.3: the L² weak law for uncorrelated random variables with a common mean and bounded
-  variances (read in the author's free PDF, 2026-10-18, for LM17's review; numbered as in that PDF).
+  variances (read in the author's free PDF, 2026-10-18, for LM17's review; numbered as in that PDF, and LM17's
+  References say so since the closing check, CX6; a web search did not find the print number).
 - Glasserman (2003), §4.2, p. 207 (Google Books snippet, [e9GWUsQkPNMC](https://books.google.com/books?id=e9GWUsQkPNMC),
   read 2026-10-18): antithetic sampling reduces variance when Cov(Yᵢ, Ỹᵢ) < 0 (4.29); "A simple sufficient condition
   ensuring this is monotonicity of the mapping from inputs to outputs".
+- Glasserman (2003), §9.1.2 "Calculating VAR" (from p. 484, table of contents): on p. 491 the asymptotic interval for
+  a quantile estimate needs the density at the quantile, and "to avoid this step, one may divide the sample of n
+  observations into batches, compute an estimate from each batch, and form a confidence interval based on the sample
+  standard deviation of the estimates across batches"; the central limit theorem for quantile estimation is (9.7)
+  (so named on p. 500; the index places it at p. 490). Google Books search within
+  [e9GWUsQkPNMC](https://books.google.com/books?id=e9GWUsQkPNMC), read 2026-10-18 for LM18's closing check; LM18 cites
+  §9.1.2 for a quantile's 1/n variance and its batch standard error.
+- Glasserman (2003), §4.6.1 "Principles and First Examples" (from p. 255): p. 256, the second moment of an
+  importance-sampling estimator against plain sampling ("depending on the choice of g it might even be infinitely
+  larger or smaller"); Example 4.6.1, p. 260, "Normal distribution: change of mean", with its likelihood ratio (4.83).
+  The closed form of the shifted normal's second moment for a tail was not found in the snippets, so LM18 cites §4.6
+  for the method only and derives the formula itself (same search, read 2026-10-18 for LM18's closing check).
 
 ## Python (Volume III)
 
@@ -450,16 +488,24 @@ every numeric check ran in the project's venv (NumPy 2.5.3, SciPy 1.18.1).
   plus `&filter_bool=and&filter_term=%27%E7%B5%B1%E8%A8%88%E5%AD%B8%E5%90%8D%E8%A9%9E%27&filter_field=subcategory_1.raw&filter_op=term&tabaction=browse`
   for statistics (`filter_term=%27%E6%95%B8%E5%AD%B8%E5%90%8D%E8%A9%9E%27` for mathematics); the empty `query_op=` is
   required, or a filtered search ignores the query and browses the whole listing. Found later (2026-10-18, LM18's
-  revision): 蒙地卡羅估計量 (Monte Carlo estimator, 數學名詞; a re-run of the search lists it there, not in 統計學名詞). Entry pages (`/detail/<hash>/`)
+  revision): 蒙地卡羅估計量 (Monte Carlo estimator, 數學名詞; a re-run of the search lists it there, not in 統計學名詞).
+  Pseudo-random number generator: 擬隨機數產生器 (電子工程名詞); the statistics and mathematics listings have only
+  隨機數產生器 (random number generator, 統計學名詞) and 擬隨機數 (pseudo-random number, 數學名詞) (re-checked
+  2026-10-18, LM18's closing check). Random number: 隨機數；亂數, in that order (數學名詞 and 數學名詞-兩岸數學名詞,
+  same date); Volume III prints 隨機數, and LM12 keeps the 亂數 it printed (lm12.md:527). Entry pages (`/detail/<hash>/`)
   depend on the search session and are not cited. 分布 and 分配: the statistics listing writes 分布 in every Volume III
   compound (常態分布, 二項分布, 聯合分布, 條件分布, 累積分布函數, 依分布收斂, 經驗分布函數) and its bare
   distribution and distribution function entries give 分布 first, 分配 second; the mathematics listing pairs "分布；分配" in most compounds but has 分布
   alone for distribution function, conditional distribution and convergence in distribution; 條件分配 and 分配收斂
-  appear only in the economics and psychology listings; 高中以下數學名詞 lists both forms. LM5 prints 分配 three times
-  (累積分配函數, 常態分配函數, 常態分配); 累積分配函數 and 常態分配 are listed mathematics forms. Quantile-quantile (Q-Q) plot:
+  appear only in the economics and psychology listings; 高中以下數學名詞 lists both forms. LM5 printed 分配 three times
+  (累積分配函數, 常態分配函數, 常態分配; 累積分配函數 and 常態分配 are listed mathematics forms); Stage 4 (2026-10-18)
+  changed them to 累積分布函數, 常態分布函數 and 常態分布, so the book has one form. Quantile-quantile (Q-Q) plot:
   分位數-分位數點圖 (統計學名詞; found by the queries `QQ plot`, `Q-Q plot` and `Q-Q`, rechecked 2026-10-18). Independent
   identically distributed (iid): 獨立同分布[的] (數學名詞); 統計學名詞 has only the noun phrase 獨立且相同分布隨機變數.
-  Gambler's fallacy: 賭者謬誤 (統計學名詞, query `fallacy`). Not in 樂詞網, composed from listed parts:
+  Gambler's fallacy: 賭者謬誤 (統計學名詞, query `fallacy`). Log–log plot: 雙對數圖 (統計學名詞, listed as "double
+  logarithmic chart", beside 雙對數尺度 for "double logarithmic scale"; queries `雙對數` and `double logarithmic`,
+  2026-10-18, LM15's closing check); the query `log-log` shows only 雙對數坐標圖 (電機工程名詞) for "log-log plot" and
+  雙對數圖尺；雙對數尺度 (數學名詞) for "log-log scale". LM15 prints 雙對數圖. Not in 樂詞網, composed from listed parts:
   檢察官謬誤, 標準化動差, 全變異數法則, 條件相關係數, 超越相關係數, 放回重抽樣; the law of the unconscious statistician has
   no entry and keeps its English name; the printed 尾部指數 and 超額峰態 are not in 樂詞網 either.
 

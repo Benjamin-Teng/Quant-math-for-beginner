@@ -375,7 +375,7 @@ rho_direct = float(np.corrcoef(down[:-1].astype(float), down[1:].astype(float))[
 assert format(rho_direct, ".4f") == "0.0214", rho_direct                             # the lag-1 correlation itself
 has("rho1 text", "(0.0214 from the unrounded frequencies)")
 has("covariance defined", r"Their covariance $\E[X_1X_2]-\E[X_1]\E[X_2]$ ([[LM16]]) is $0.4521\times(0.4639-0.4521)$")
-has("both days 0.4521", "indicate falls on adjacent days, both taken at frequency 0.4521 (the first day's is 0.4519)")
+has("both days 0.4521", "be a pair's down-day indicators, both taken at frequency 0.4521 (the first day's is 0.4519)")
 chk("Pr(down) on the first day of the pairs", float(down[:-1].mean()), ".4f", "0.4519")    # 2,643 / 5,848, LM13's 0.4519
 assert int(down[:-1].sum()) == 2643
 chk("block variance with rho1, from printed inputs", 20 * 0.548 * 0.452 * (1 + 2 * (19 / 20) * 0.0215), ".2f", "5.16")
@@ -436,7 +436,11 @@ has("E3 observed", "and 210 had none. One large move: 94.9 expected, 38 observed
 nbar, nvar = float(sess_m.mean()), float(sess_m.var())
 assert (int(sess_m.min()), int(sess_m.max())) == (6, 24)
 has("sessions a month", "6 to 24 sessions")
+chk("unequal months: mean of the binomial variances", nbar * p3 * (1 - p3), ".3f", "0.594")
+chk("unequal months: variance of the means n p (divisor 286)", p3**2 * nvar, ".4f", "0.0055")
 chk("unequal months' variance", nbar * p3 * (1 - p3) + p3**2 * nvar, ".2f", "0.60")
+has("law of total variance stated", "the months' binomial variances average 0.594, and their means have variance 0.0055. "
+    "By [[LM16]]'s law of total variance, the count's variance is their sum, only 0.60.")
 pre_m = np.array([m < LIMIT_CHANGE[:7] for m in months])
 rr = [float(cnt_m[k].var() / cnt_m[k].mean()) for k in (pre_m, ~pre_m)]
 assert (int(pre_m.sum()), int((~pre_m).sum())) == (149, 137)

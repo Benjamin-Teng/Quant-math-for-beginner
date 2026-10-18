@@ -1,6 +1,6 @@
 ---
 title: Research hygiene
-description: Six rules that keep a result from market data honest, and the four labels that results carry from Volume II on.
+description: Six rules that keep a result from market data honest, and the labels that results carry from Volume II on.
 ---
 
 > [!zh] 這一頁講什麼
@@ -42,7 +42,8 @@ dividends, splits, missing values and dates that two series do not share.
 
 ## Label every result
 
-From Volume II on, every result carries one of four labels. Volume I's results fall into the same four kinds:
+From Volume II on, every result carries one of the labels below. Volume I's results fall into the first four kinds;
+the fifth, from Volume III on, marks the answer of a probability model:
 
 | Label | Meaning | Example in the book |
 |:--|:--|:--|
@@ -50,8 +51,12 @@ From Volume II on, every result carries one of four labels. Volume I's results f
 | In-sample | a model fitted and judged on the same data | a normal model fitted to 0050's 2,902 daily returns ([[LM5]]) |
 | Stability check | the same calculation on two periods, compared | the two-asset Kelly fractions estimated in two windows ([[LM7]]) |
 | Out-of-sample | fitted on earlier data and judged on later data that the fit never used | the minimum-variance weight estimated on 2017–2021 and held in 2022–2026 ([[LM7]]) |
+| Model | the answer of a probability model, exact, approximate or simulated: a property of the model, not a forecast (a model fitted to the data is also in-sample) | the chance of a losing year if days are independent ([[LM17]]) |
 
 A full-sample estimate describes the past. It is not a forecast.
+
+Volume III also marks invented bets, positions and records as **hypothetical**, and examples built to make a point as
+**constructed** ([[LM13]], [[LM16]]).
 
 > [!note] Where the book goes deeper
 > [[LM21]] covers multiple testing. [[LM33]] covers the Probabilistic and Deflated Sharpe ratios. [[LM34]] covers

@@ -111,3 +111,65 @@ No critical or major item is new.
   - A17-71 still prints 2,128 and 32.25%, and so does the brief's E5.
   - A18-21 and the brief's X3 still print ± 4%.
   - The brief's LM17 Leads line (plans/vol-3.md:1580–1581) says that LM18 cites (17.2); LM18 cites (17.1), (17.4), (17.5) and (17.6).
+
+## Closing check (CX)
+
+A fresh, read-only closing check (CX, 2026-10-18) re-read the VX items and their Revision 2 resolution, checked
+LM13–LM18 at `b330928` across modules (links, tags, front matter, numbers quoted across modules recomputed from TR23,
+中文 terms, symbols, ownership, simulation and data rules) and checked Stage 4. A second, adversarial check (RX) rated
+every CX item and every Stage 4 edit: 8 items confirmed, 1 partly (CX5), none refuted; 13 Stage 4 edits confirmed and
+1 partly (edit 13, corrected). No critical or major item. The module records (`lm13.md` … `lm18.md`, "Closing check")
+give each module's items.
+
+### VX items
+
+- VX1 and VX3: decided as recorded (not copied back; LM17 keeps five years). CX9 below fixes LM18's row.
+- VX2, VX4, VX5, VX6, VX7, VX9 and VX10: resolved, each confirmed in the text.
+- VX8: decided (option 1); two LM16 data exhibits had been missed (CX1).
+
+### CX items
+
+- **CX1** (minor, confirmed): LM16's `condcorr` and `exceed` notes lacked "Source: as [[ex:case]]."; both now end with
+  it (with "dashed horizontal line", LM16's C6). Applied in the closing fixes. LM15's `choice` stays without one: it
+  prints no new data.
+- **CX2** (minor, confirmed; better fix found): LM16's two stated facts about the multivariate normal now cite Durrett
+  (2019, §3.10 and Exercise 3.10.8), which covers every positive semidefinite Σ; CX's preferred Blitzstein and Hwang
+  §7.5 could not be read (Drive page images, downloads disabled), and the fallback narrowing is not needed. Applied in
+  the closing fixes; SOURCES and the LM16 brief corrected by the editor.
+- **CX3** (minor, confirmed): the Research hygiene page promised four labels while Volume III bolds **model**,
+  **hypothetical** and **constructed**. The page now has a fifth label, Model, and a sentence on the two markers (RX's
+  corrected text, with R14's clause on fitted models), and the Stage 4 list includes the page. The alternative
+  (unbolding in five modules) is declined: it would undo the shared decision.
+- **CX4** (trivial to minor, confirmed): LM15 now points to [[LM14]] for TR23's empirical quantiles and to [[LM13]] for
+  108, 44 and 15. Applied in the closing fixes. The plan's two ownership lines are compatible once LM15 cites LM14;
+  the editor added 44 to LM13's counts (plans/vol-3.md, "Return type").
+- **CX5** (minor, optional; partly): declined. 樂詞網's mathematics listing gives "random number" as 隨機數；亂數, so the
+  brief's "second form" is 樂詞網's order, and "from now on" is a recorded decision: LM12 keeps 亂數. Stage 4's
+  edit 14 is not applied; the editor clarified the brief's sentence and recorded the entry in SOURCES.
+- **CX6** (minor, confirmed): LM13's Theorem 2.1.21 and LM17's Theorem 2.2.3 now say "numbered as in the author's free
+  PDF", as LM16's entry does. Applied in the closing fixes. The print numbers stay 待查證 (Google Books blocked).
+- **CX7** (trivial, confirmed): LM13's References list the TechNews article in LM14's form; LM15 points to [[LM14]]
+  (R15: a reader cannot see SOURCES). Applied in the closing fixes; SOURCES' row records the form.
+- **CX8** (trivial): no change. Both "[[LM3]]'s bet" and "[[LM4]]'s bet" are right, and AUTHORING §6 itself writes
+  "Student $t$". LM18's one "LM15's Student-t model" now follows LM15's Glossary (R18).
+- **CX9** (trivial, records): reviews/lm18.md row "7, X3" now ends "(superseded: LM17 keeps five years, reviews/lm17.md
+  row "m14 + X3"; Revision 2, VX3)".
+
+### Observations
+
+- The LM18 brief's tag-user lines still use the old LM18 numbering. Left as recorded under VX1: the preface makes the
+  module authoritative.
+- The front page's notation table has no probability row: the owner's code (`build/build_index.py`), not changed.
+
+### Stage 4 edits (applied 2026-10-18, RX-confirmed text)
+
+- Leads (front matter, line 6): lm01 gains 13–18; lm02 15 and 18; lm03 13, 15, 16 and 17; lm04 13, 14 and 17; lm05
+  13 and 16; lm07 16; lm09 16. LM6, LM8, LM10, LM11 and LM12 need nothing.
+- LM5: line 60 links [[LM13]] for random variables; 常態分配函數, 常態分配 and 累積分配函數 become 常態分布函數, 常態分布
+  and 累積分布函數 (lines 191, 372, 782), so the book has one form.
+- Getting Started: the seed sentence now gives `default_rng([e, 20261011])`, one generator per experiment, never
+  reseeded, with a pointer to [[LM18]] and the NumPy version that `uv.lock` pins.
+- Research hygiene: the description and the label paragraph no longer say "four labels"; the table gains the Model
+  row; a sentence after it explains **hypothetical** and **constructed** (CX3).
+- Not applied: edit 14 (LM12's 亂數), declined under CX5. After these edits LM1–LM5, LM7, LM9 and the two pages are
+  rebuilt with the volume (`./build.sh --pdf`), followed by the `file:///` and dead-link checks.

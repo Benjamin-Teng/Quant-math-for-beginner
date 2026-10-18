@@ -447,7 +447,8 @@ ell2 = float(stats.norm.pdf(2.0)) / float(stats.norm.cdf(-2.0))
 anchor("A16-16", g(ell2))
 chk("ell at 2 = -E[Z | Z <= -2]", ell2, ".4f", "2.3732")
 assert "-2.3732" in norm((ROOT / "src" / "lm05.md").read_text(encoding="utf-8"))
-chk("Phi(-2)", float(stats.norm.cdf(-2.0)), ".4f", "0.0228")
+chk("Phi(-2)", float(stats.norm.cdf(-2.0)), ".5f", "0.02275")
+chk("KC ratio from the printed Phi(-2)", float(stats.norm.pdf(2.0)) / 0.02275, ".4f", "2.3732")
 
 # P6: the TAIEX price index tomorrow, grouped by today's |R_t| >= 2%
 gb, gnb = b_[big], b_[~big]

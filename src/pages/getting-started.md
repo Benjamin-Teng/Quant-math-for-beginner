@@ -130,8 +130,9 @@ an error code.
 
 ## Reproducible numbers
 
-- Seed the random generator once, at the start of a notebook, for example `rng = np.random.default_rng(20261011)`.
-  Every run then gives the same draws.
+- Create the random generator once, at the start of each simulated experiment, as
+  `rng = np.random.default_rng([e, 20261011])` with `e` the experiment's number, and never reseed it inside the
+  experiment ([[LM18]]). Every run then gives the same draws with the NumPy version that `uv.lock` pins.
 - Never test two computed numbers with `x == y`. Compare them with a tolerance that fits their size, such as
   `math.isclose(x, y, rel_tol=1e-9, abs_tol=1e-12)`: relative for large amounts, absolute near zero.
 - Prices with two decimals make some returns exact. A move from 100.00 to 101.00 is exactly 1%. Floating point may

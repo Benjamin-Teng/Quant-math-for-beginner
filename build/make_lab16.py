@@ -460,7 +460,7 @@ print(f"   e^(-23.09) = {math.exp(-23.09):.1e}; expected such days in 4,382: {43
 md(r"""
 ## Part 7 — Correlation in a crash
 
-**[[ex:exceed]].** The normal benchmark for joint falls has no closed form: integrate over $x\le-k$ the moments of $Y$ given $X=x$, a truncated normal, with `scipy.integrate.quad`. **[[ex:condcorr]]** uses (16.10) with the conditional variances of Deep Dive 3. **[[eg:crashcorr]]** and Problem 10 follow.
+**[[ex:exceed]].** For $k>0$ the normal benchmark for joint falls has no closed form in $\varphi$ and $\Phi$: integrate over $x\le-k$ the moments of $Y$ given $X=x$, a truncated normal, with `scipy.integrate.quad`. **[[ex:condcorr]]** uses (16.10) with the conditional variances of Deep Dive 3. **[[eg:crashcorr]]** and Problem 10 follow.
 """)
 
 code(r"""

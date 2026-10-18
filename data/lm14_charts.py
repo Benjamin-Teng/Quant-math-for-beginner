@@ -85,7 +85,8 @@ write("lm14-bounds", bounds)
 
 # ------------------------------------------------------------------ dragyears: each year's drag against s^2/2
 pts = year_points(d)
-lab = {2008: {"dx": -16, "dy": 4, "anchor": "end"}, 2017: {"dy": 22}}   # 2008 sits near the right edge
+lab = {2008: {"dx": -16, "dy": 4, "anchor": "end"}, 2017: {"dy": 22},   # 2008 sits near the right edge
+       2024: {"dx": -16, "dy": 4, "anchor": "end"}}   # the note's largest difference; 2007 lies under it
 drag_years = {
     "type": "scatter", "height": 320,
     "alt": "One point per calendar year 2003 to 2025: half the variance of the year's daily returns against its "
