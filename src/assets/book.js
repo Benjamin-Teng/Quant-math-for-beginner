@@ -931,7 +931,7 @@
           (((((AB[0] * r + AB[1]) * r + AB[2]) * r + AB[3]) * r + AB[4]) * r + 1);
     }
     if (x <= -37.5193) return x;   // p below the smallest normal double, where Phi underflows: Acklam's value stands
-    var u =(Math.abs(x) <= 0.67448975 ? PhiHalf(x) - (p - 0.5) : Phi(x) - p) / phi(x);
+    var u = (Math.abs(x) <= 0.67448975 ? PhiHalf(x) - (p - 0.5) : Phi(x) - p) / phi(x);
     return x - u / (1 + x * u / 2);
   }
   // log Γ(x), x > 0: Lanczos (g = 7, nine terms): Γ(z) = √(2π) t^(z − 1/2) e^(−t) A(z), t = z + 6.5, for z >= 1/2.
@@ -987,7 +987,7 @@
     if (nu === Infinity) return Phi(x);
     if (x === 0) return 0.5;
     if (!isFinite(x)) return x > 0 ? 1 : 0;
-    if (nu > 1e8) {   // Abramowitz & Stegun 26.7.8, as R's pt uses for large ν: Phi(x (1 − g) / √(1 + 2x²g)), g = 1/(4ν)
+    if (nu > 1e8) {   // Abramowitz & Stegun 26.7.8 (R's pt used it for large ν up to version 2.6.0): Phi(x (1 − g) / √(1 + 2x²g)), g = 1/(4ν)
       var g = 1 / (4 * nu), xx = x * x;
       return Phi(isFinite(xx) ? x * (1 - g) / Math.sqrt(1 + 2 * xx * g) : (x > 0 ? 1 : -1) * (1 - g) / Math.sqrt(2 * g));
     }

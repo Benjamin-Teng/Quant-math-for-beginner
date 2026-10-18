@@ -77,7 +77,7 @@
       var name = m === "t" ? "Student-t density, ν = 3 (illustrative)" : "Normal density, fitted";
       var spec = {
         alt: "Histogram of 0050 daily returns and a model density, with the tail left of the threshold shaded", height: 300,
-        x: { type: "num", fmt: "pct1", tfmt: "pct0", label: "Daily total return", tipLabel: "R = ", min: lo, max: hi },
+        x: { type: "num", fmt: "pct1", label: "Daily total return", tipLabel: "R = ", min: lo, max: hi },
         y: log ? { type: "log", fmt: "dens", label: "Density, probability per 1 pp of return (log scale)", min: base, max: top, ticks: [1e-5, 1e-4, 1e-3, 0.01, 0.1, 1] }
                : { type: "lin", fmt: "n2", label: "Density, probability per 1 pp of return", min: 0 },
         series: [

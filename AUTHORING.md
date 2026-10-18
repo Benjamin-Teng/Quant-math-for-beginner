@@ -163,10 +163,10 @@ note says why.
 | $\mathrm{SR}$ | Sharpe ratio $(\mu-r_f)/\sigma$ of a return; say the period (per day, or annualized) |
 | $w$, $\mathbf w$, $\mathbf f$, $\Sigma$, $\rho$ | portfolio weights summing to 1; vector of exposures; covariance matrix; correlation |
 | $\varphi$, $\Phi$ | standard normal density and distribution function |
-| $B_t$ | standard Brownian motion ($W$ stays wealth, so $dW_t=W_t(\mu\,dt+\sigma\,dB_t)$ reads unambiguously); a module without Brownian motion may use $B$ for a balance, declared in its notation note |
+| $B_t$ | standard Brownian motion ($W$ stays wealth, so $dW_t=W_t(\mu\,dt+\sigma\,dB_t)$ reads unambiguously); a module without Brownian motion may use $B$ for a balance, or (LM18) the number of bootstrap resamples, declared in its notation note |
 | $y$, $i$, $v$, $k$, $\gamma$ | yield to maturity or IRR; periodic interest rate; discount factor $1/(1+i)$; required return; growth rate of dividends or cash flows (simple, per period) |
-| $\lambda$, $\nu$, $\mathcal L$ | multiplier of an equality constraint (with a subscript, $\lambda_k$ is an eigenvalue: table below); multipliers of inequality constraints (KKT), or in a module about distributions a Student $t$'s degrees of freedom (a module uses one of the two); Lagrangian |
-| $h$, $u$; $\psi$ | generic functions in modules where $f$ or $g$ already have their book-wide meaning ($f$, $g$, $h$ are fine in purely mathematical modules); constraint functions, $\psi(x)=b$ or $\psi_i(x)\le b_i$ (there $b$ is a constraint level, not a bet's gain: a module uses one of the two) |
+| $\lambda$, $\nu$, $\mathcal L$ | multiplier of an equality constraint (with a subscript, $\lambda_k$ is an eigenvalue: table below); multipliers of inequality constraints (KKT), or in a module about distributions a Student $t$'s degrees of freedom (a module uses one of the two); Lagrangian. In a module about distributions without constraints, $\lambda$ is a Poisson mean or an exponential rate |
+| $h$, $u$; $\psi$ | generic functions in modules where $f$ or $g$ already have their book-wide meaning ($f$, $g$, $h$ are fine in purely mathematical modules; from Volume III $u$ is instead a probability level or a uniform draw, table below); constraint functions, $\psi(x)=b$ or $\psi_i(x)\le b_i$ (there $b$ is a constraint level, not a bet's gain: a module uses one of the two) |
 
 **Vectors and matrices** (from Volume II; LM7 already writes vectors, transposes and $\Sigma$ this way):
 
@@ -186,6 +186,25 @@ note says why.
 | $U$, $S$, $V$, $s_k$ | singular value decomposition $M=USV^{\top}$; singular values $s_1\ge s_2\ge\dots\ge0$ on the diagonal of $S$, in a module with an SVD (elsewhere $s_i$, the entries of $\mathbf s$, are the assets' sample standard deviations); for data the book decomposes $\tilde X/\sqrt T$, so that $\lambda_k=s_k^2$ |
 | $\mathbf y$, $\hat{\boldsymbol\beta}$, $\hat{\mathbf y}$, $\hat{\boldsymbol\varepsilon}$, $\Pi$ | least squares: response (in a module without yields), coefficients, fitted values, residuals, projection matrix $X(X^{\top}X)^{-1}X^{\top}$ ($P$ stays the price and $H$ the Hessian); the share of variance a fit explains is written "R-squared" in words, never $R^2$, which is a squared return, and a formula may use $\cos^2\theta$ |
 | $M\mathbf x=\mathbf b$ | a linear system; $\mathbf b$ is a vector, in a module without bets |
+
+**Probability** (from Volume III; LM5 already writes $\Pr$, $X\sim\mathcal N(\mu,\sigma^2)$ and $Z$ this way):
+
+| Symbol | Book-wide meaning |
+|:--|:--|
+| $\Omega$, $\omega$ | sample space; an outcome (sequences of trades or days as $+$/$-$ strings) |
+| $\Pr(\cdot)$, $\Pr(B\mid A)$ | probability and conditional probability (`\mid`), never $P$, the price. Events are sets, $\{R\le-3\%\}$; capital letters $A$, $B$ for events only in a module that does not annualize (LM13), with $A^c$ the complement |
+| $\mathbf 1_A$, $\mathbf 1\{\cdot\}$ | indicator of an event, always with a subscript or braces (bold $\mathbf 1$ alone is the vector of ones) |
+| $X$, $Y$, $Z$; $x$, $y$, $z$ | random variables and their values; $Z$ a standard normal; $R$ and $r$ are random returns. A module that writes random variables does not use the data matrix $X$ |
+| $\mathbf X$, $\mathbf Z$ | random vectors; $\mathbf Z$ a standard normal vector ($\mathbf z_t$ stays LM12's whitened data) |
+| $p_X$, $f_X$, $F_X$, $F_X^{-1}$; $\hat F$ | pmf, density, distribution function and quantile function $F_X^{-1}(u):=\min\{x:F_X(x)\ge u\}$, always subscripted ($f$ is an exposure, $p$ a win probability); empirical distribution function of a sample, mass $1/T$ on each observation |
+| $u$, $U$ | a probability level in $F^{-1}(u)$; a value of a uniform random variable $U\sim\operatorname{Unif}(0,1)$ |
+| $\E$, $\Var$, $\Cov$, $\operatorname{Corr}$; $\operatorname{Skew}$, $\operatorname{Kurt}$ | expectation, variance, covariance, correlation (macros `\E`, `\Var`, `\Cov`); standardized third and fourth moments, excess kurtosis $\operatorname{Kurt}-3$ |
+| $\mu_X$, $\sigma_X$, $\sigma_{XY}$, $\rho_{XY}$ | moments of random variables; unsubscripted $\mu$, $\sigma$, $\rho$ stay the return's. A population correlation is $\rho$, a sample one $\hat\rho$ in a module with both |
+| $\bar R$, $s$; $\bar r$, $s_r$; $g$, $\sigma_r$ | sample mean and standard deviation of $R$ and of $r$ (divisor $T$); model mean log return per day $g=\E[\ln(1+R)]$ and its standard deviation |
+| $\mathcal N$, $\mathcal N_N$, $t_\nu$, $\chi^2_N$, $\operatorname{Bin}(n,p)$, $\operatorname{Poisson}(\lambda)$, $\operatorname{Exp}(\lambda)$ | distributions; "iid" independent and identically distributed |
+| $n$, $\bar X_n$, $S_n$; $m$ | number of independent draws or trials, their mean and sum ($T$ stays the number of returns in a data sample); number of days summed or compounded in a model, whole sessions ($m=\operatorname{round}(A\tau)$) |
+| $j$, $R_{(j)}$; $k$ | the value of a count in a pmf, the $j$th smallest return; a number of standard deviations, $k\ge0$ |
+| $d^2$ | squared Mahalanobis distance $(\mathbf x-\boldsymbol\mu)^{\top}\Sigma^{-1}(\mathbf x-\boldsymbol\mu)$ |
 
 - Subscripted standard symbols are distinct symbols and may sit beside the table: $D_{\text{mod}}$, $D_{\text{Mac}}$,
   $D_{\mathrm{KL}}$, $a_{n,i}$, $s_{n,i}$, $T_1(x)$.
@@ -223,8 +242,20 @@ note says why.
   ...}], "endLabels", "endValue", "endMargin"}`.
   On a date axis, series and annotation dates may be ISO strings or epoch milliseconds; ticks fall on year starts when
   at least three are in range, otherwise on month starts (every 1, 2, 3 or 6 months, labelled "Jan 2026", "Apr", …).
-  On a numeric axis, `ticks` fixes the tick values and `tickLabels` (one string per tick) replaces their text.
-  Format codes: `pct0..pct3`, `bp`, `x0..x2` (multiples), `n0..n5`. At most four series; legend is automatic.
+  On a numeric axis, `ticks` fixes the tick values and `tickLabels` (one string per tick) replaces their text;
+  `x.tfmt` formats the ticks only (the tooltip keeps `x.fmt`), as `y.tfmt` does.
+  Format codes: `pct0..pct3`, `bp`, `x0..x2` (multiples), `n0..n6`, `sci0..sci3` (scientific, "2.00e−5") and
+  `sig2..sig4` (significant figures with trailing zeros kept, "1.20"; scientific outside 1e−4 to 1e6). The sig codes are
+  for tooltips and readouts: an axis ticks with an n or sci `tfmt` (a narrow sci axis can show a single tick: use
+  more digits). At most four named series; legend is
+  automatic.
+  From Volume III, series options: `step: true` draws a post-step line (`y[i]` holds from `x[i]` to `x[i+1]`), for
+  histograms on bin edges and distribution functions; a series with `lo` and `hi` arrays instead of `y` is a band, the
+  filled region between them (with a legend entry; `build.py` refuses lengths that differ from `x`); `quiet: true` is
+  a thin translucent line with no legend entry, tooltip row, hover dot or end label, for dozens of simulated paths
+  (`opacity`, `width` override). Bands are drawn first, then quiet lines, then the rest. `hline` and `vline`
+  annotations take `dash: true`. A log axis ignores values at or below zero. There is no log $x$ axis: plot
+  $\log_{10}$ values on a numeric axis with `tickLabels`.
 - Other chart types: add `"type"` to the spec (`"line"` is the default, and the spec above is a line chart). All types
   need `alt`, share the legend, tooltip, colour tokens and format codes, and are drawn by `Book.chart(host, spec)`.
   - `"bar"`: `categories` (one text each), `valueLabels`, `x: {label}`, `y: {fmt, tfmt, label, min, max, ticks}`,
@@ -254,7 +285,13 @@ note says why.
   its letter (write "sample mean", or keep μ̂ for the exhibit note, which renders in the body font).
 - Code blocks keep lines to 80 characters: longer lines are cut off at A4 print width.
 - Widgets use `Book.chart(host, spec)` (or `Book.lineChart`) and `Book.fmt(v, code)` from `src/assets/book.js`; they must render a
-  meaningful initial state (it is what the PDF shows) and must not depend on external libraries.
+  meaningful initial state (it is what the PDF shows) and must not depend on external libraries. Shared helpers (from
+  Volume III): `Book.controls(host, defs, onChange)` builds sliders, selects and buttons (`defs`: `id`, `label`,
+  `min`, `max`, `step`, `value`, `fmt`, `options`, `type`) and calls `onChange(values, id)` at most once a frame;
+  `Book.rng(seed)` is a seeded generator (`uniform()`, `normal()`, `int(n)`; an integer seed, the same stream in every
+  browser, not NumPy's); `Book.dist` has `phi`, `Phi`, `PhiInv`, `lgamma`, `tPdf`, `tCdf`, `poissonPmf`, `poissonCdf`,
+  `binomPmf` and `chi2Cdf`, checked against SciPy by `build/qa/test_bookjs_dist.py`. Use them instead of copying local
+  versions.
 
 ## 8. Data
 
@@ -280,6 +317,11 @@ note says why.
   trading to 13:45, so daily basis changes are noisy. Back months trade thinly; report volume when it matters, and
   remember that an untraded contract's settlement price is set by exchange rules.
 - Cite the dataset and retrieval date in the exhibit's `Source:` line.
+- Simulation (from Volume III): each simulated experiment (an example, a problem, an exhibit, a lab part) creates its
+  generator once, at its start, as `np.random.default_rng([20261011, k])` with $k$ the experiment's stated number, and
+  never reseeds it; the stem or note prints the seed. A printed Monte Carlo or bootstrap result states the number of
+  draws, the seed and its standard error, and keeps only the digits its standard error supports. The numbers script
+  re-runs it under the NumPy that `uv.lock` pins. Widgets simulate with `Book.rng(seed)` from a fixed initial state.
 
 ## 9. Labs
 

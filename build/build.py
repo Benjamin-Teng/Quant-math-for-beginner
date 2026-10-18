@@ -367,6 +367,9 @@ def check_bands(cid, spec):
     point by point, so arrays of another length would draw a wrong shape without any error."""
     if spec.get("type", "line") != "line":
         return
+    y = spec.get("y") or {}
+    if isinstance(y, dict) and y.get("type") == "log" and _finite(y.get("min")) and y["min"] <= 0:
+        raise SystemExit(f"chart {cid}: a log axis needs y.min > 0 (src/data/{cid}.json)")   # book.js would draw nothing
     for i, s in enumerate(spec.get("series") or [], 1):
         if not isinstance(s, dict) or ("lo" not in s and "hi" not in s):
             continue

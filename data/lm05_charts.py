@@ -85,7 +85,7 @@ lower = [round(float(v), 10) for v in srt[srt <= -0.009 + 1e-12]]
 tail = {
     "alt": "Number of days with a return at or below x: normal model, Student-t with 3 degrees of freedom, and 0050 data, log scale",
     "height": 330,
-    "x": {"type": "num", "fmt": "pct1", "tfmt": "pct0", "label": "Threshold x (daily total return)", "tipLabel": "x = ", "min": -0.105, "max": -0.010},
+    "x": {"type": "num", "fmt": "pct1", "label": "Threshold x (daily total return)", "tipLabel": "x = ", "min": -0.105, "max": -0.010},
     "y": {"type": "log", "fmt": "num", "label": "Days with R ≤ x out of 2,902 (log scale)", "min": 0.001, "max": 1000,
           "ticks": [0.001, 0.01, 0.1, 1, 10, 100, 1000]},
     "series": [
