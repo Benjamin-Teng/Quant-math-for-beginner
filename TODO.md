@@ -66,7 +66,20 @@ code, site, repository and his standing rules, and about the open decisions at t
 that needs them; content is the editor's call. Volume III's Stage 1 is done (above); its capability check needs nothing
 more from the owner.
 
-**Stage 2, writing.** One writer per module on its own worktree branch (`vol3/lmNN`), launched together, each with
+**Stage 2 done (2026-10-18).** The six drafts are on `main` (not published): 5,480–5,498 words of prose, 29–36
+pages at scale 1.0000, numbers scripts with 271–414 checks each and no anchor drift. The editor re-ran every gate on
+`main` (numbers, charts regenerate byte for byte, style FAIL 0, 400 px, displays, print width, PDF scale, terms, ruff,
+ty, labs without errors) and added the scripts to `build.sh` and `data/README.md`. The writers worked in place in the
+main checkout, each on its own module files only, because a worktree lacks the git-ignored `data/raw/`,
+`data/processed/` and `build/node_modules/`, and linking them into a worktree risks deleting the originals when the
+worktree is removed. Open from the hand-backs, for Stage 3: LM16 is at the 36-page limit; LM18's attribution of the
+1/n bias of an estimated control-variate coefficient to Glasserman (2003) §4.1 is not in SOURCES; LM18's tags run
+(18.1)–(18.3), (18.9), (18.4)–(18.8); LM18's Exhibit 6 table scrolls inside its box at 400 px; LM16 cites Blitzstein
+and Hwang §3.8 and §7.5 by section; LM14's widget shows σ²/2 = 28.13 where its Exhibit 7 prints 28.125; LM15 plots
+130 of 5,849 QQ points because `.chart .pt`'s outline whitens a dense scatter (a `book.css` option for the owner).
+Preview PDFs keep `file:///` links (`dist/preview/` has no CNAME); the published PDFs, rendered from `docs/`, do not.
+
+The Stage 2 instructions, for later volumes: one writer per module, launched together, each with
 AUTHORING (§1, §6 with the Probability table, §7, §8's simulation rule), PITFALLS, the shared part of
 `plans/vol-3.md` and its own brief, and its anchors section. Each writer:
 

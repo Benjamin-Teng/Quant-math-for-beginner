@@ -40,6 +40,12 @@ numbers never change silently. New raw files are registered with `fetch_finmind.
 | LM11 | `lm11_common.py` (imported), `lm11_numbers.py`, `lm11_charts.py` | every LM11 number, asserted; `../src/data/lm11-*.json` |
 | LM12 | `lm12_numbers.py`, `lm12_charts.py` | every LM12 number, asserted against `../src/lm12.md`; `../src/data/lm12-*.json` |
 | LM13–LM18 | `vol3_series.py` | `processed/vol3_taiex.parquet` (TR23: the TAIEX total-return and price indices from 2003-01-02, with their daily returns), `processed/vol3_series.txt` (the report); stops unless every total-return row agrees with the price index |
+| LM13 | `lm13_common.py` (imported), `lm13_numbers.py`, `lm13_charts.py` | every LM13 number, asserted against `../src/lm13.md`; `../src/data/lm13-*.json` |
+| LM14 | `lm14_common.py` (imported), `lm14_charts.py`, `lm14_numbers.py` | `../src/data/lm14-*.json`; every LM14 number, asserted against `../src/lm14.md` and the chart files |
+| LM15 | `lm15_numbers.py`, `lm15_charts.py` | every LM15 number, asserted against `../src/lm15.md`; `../src/data/lm15-*.json`; the widget's arithmetic checked in Node against SciPy |
+| LM16 | `lm16_numbers.py`, `lm16_charts.py` | every LM16 number (U28 sample), asserted against `../src/lm16.md`; `../src/data/lm16-*.json` |
+| LM17 | `lm17_numbers.py`, `lm17_charts.py` | every LM17 number, asserted against `../src/lm17.md` and compared with the A17 anchors; `../src/data/lm17-*.json` |
+| LM18 | `lm18_common.py` (imported), `lm18_numbers.py`, `lm18_charts.py` | every LM18 number, asserted against `../src/lm18.md`; `../src/data/lm18-*.json` |
 
 `processed/` is not committed; `./build.sh --data` recreates it.
 

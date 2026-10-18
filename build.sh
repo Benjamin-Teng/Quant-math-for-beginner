@@ -40,6 +40,12 @@ DATA_STEPS=(
   data/lm11_numbers.py data/lm11_charts.py
   data/lm12_numbers.py data/lm12_charts.py
   data/vol3_series.py           # Volume III TR23: the TAIEX total-return index, checked against the price index
+  data/lm13_numbers.py data/lm13_charts.py
+  data/lm14_charts.py data/lm14_numbers.py   # the numbers script checks the chart files, so charts run first
+  data/lm15_numbers.py data/lm15_charts.py   # the charts script also tests lm15.js in Node against SciPy
+  data/lm16_numbers.py data/lm16_charts.py   # U28, from vol2_series.py
+  data/lm17_numbers.py data/lm17_charts.py
+  data/lm18_numbers.py data/lm18_charts.py
 )
 # Raw FinMind data are not committed (licence): fetch them with your token and verify against data/raw_manifest.json.
 if [ "$FETCH" = 1 ]; then
