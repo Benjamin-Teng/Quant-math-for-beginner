@@ -228,12 +228,30 @@ hr { border: 0; border-top: 1px solid var(--rule); margin-block: 2rem; }
 .outline .sub a { padding-left: 1.6rem; font-size: 0.76rem; }
 
 @media (max-width: 1240px) { .layout { grid-template-columns: 15rem minmax(0, 1fr); } .outline { display: none; } }
+/* narrow screens: the rail is a drawer over the page, below the top bar so Contents stays in reach (book.js drawer()
+   opens it where the reader is, gives it and the backdrop --rail-top, the bar's bottom edge, and locks the page) */
+.rail-backdrop { display: none; }
 @media (max-width: 920px) {
   .layout { grid-template-columns: minmax(0, 1fr); --gutter: 1rem; }
-  .rail { display: none; position: static; max-height: none; border-bottom: 1px solid var(--rule); padding-block: 1rem; }
-  .rail.open { display: block; }
+  .rail { position: fixed; z-index: 36; top: var(--rail-top, 3.3rem); bottom: 0; left: 0; width: min(20rem, 86vw); max-height: none;
+    align-self: auto;   /* start would size a fixed box to its content (box alignment applies to positioned boxes) */
+    padding: 1rem 0.9rem calc(2.5rem + env(safe-area-inset-bottom, 0px)) max(0.9rem, env(safe-area-inset-left, 0px));
+    background: var(--paper); border-right: 1px solid var(--rule); box-shadow: 0.5rem 0 2rem rgba(0, 0, 0, 0.22);
+    overscroll-behavior: contain; visibility: hidden; transform: translateX(-100%);
+    transition: transform 200ms var(--ease-in-out), visibility 0s 200ms; }
+  .rail.open { visibility: visible; transform: none; transition: transform 260ms var(--ease-out); }
+  .rail li > a, .rail li > span, .rail .home { padding-block: 0.5rem; }   /* rows for a thumb */
+  .rail-backdrop { display: block; position: fixed; z-index: 35; inset: var(--rail-top, 3.3rem) 0 0 0; background: rgba(8, 12, 20, 0.45);
+    opacity: 0; visibility: hidden; touch-action: none; transition: opacity 200ms ease, visibility 0s 200ms; }
+  .rail-backdrop.open { opacity: 1; visibility: visible; transition: opacity 200ms ease; }
   .rail-toggle { display: inline-block; }
   .topbar .crumb { display: none; }
+}
+/* the page behind an open drawer: fixed in place at its scroll offset (iOS Safari scrolls a body with overflow: hidden);
+   the html keeps its scrollbar so the text does not reflow */
+@media screen and (max-width: 920px) {
+  html.rail-lock { overflow-y: scroll; }
+  html.rail-lock body { position: fixed; left: 0; right: 0; }
 }
 
 /* ---------- module head (cover band) ---------- */
@@ -502,7 +520,7 @@ details.co.answer .tag { color: var(--good); }
   @page { size: A4; margin: 16mm 15mm 18mm; }
   :root { --paper: #ffffff; --surface: #ffffff; }
   body { font-size: 10.4pt; line-height: 1.5; background: #fff; }
-  .topbar, .rail, .outline, .pager, .rail-toggle, button.copy, .skip { display: none !important; }
+  .topbar, .rail, .rail-backdrop, .outline, .pager, .rail-toggle, button.copy, .skip { display: none !important; }
   .layout { display: block; max-width: none; padding: 0; }
   .page { max-width: none; padding: 0; }
   .lm-band { margin-inline: 0; }

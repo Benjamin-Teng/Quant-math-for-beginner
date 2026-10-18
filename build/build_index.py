@@ -1,6 +1,7 @@
 """Landing page: roadmap, contents, conventions, edition notes. Output is content-only (the artifact
 publisher wraps the main page in its own document skeleton)."""
 import html
+import json
 import re
 
 import build as B
@@ -8,6 +9,27 @@ import build as B
 ROOT = B.ROOT; SYL = B.SYL; AVAIL = B.AVAILABLE
 
 def esc(s): return html.escape(s, quote=True)
+
+# The reading entry point: right after the static Start link, so that a returning reader never sees it change. The
+# record (book.js trackReading()) turns it into "Resume reading" for a module this page links to (L: number -> title);
+# it is read again when the page is shown again, as Back restores it from the cache as it was, and when the record
+# changes: the module left by that Back saves its last position only after this page is shown.
+RESUME_JS = r"""(function (a, L) {
+  var start = [a.getAttribute("href"), a.textContent], K = "ftck-last-read";
+  function apply() {
+    var r = null, m, t, id;
+    try { r = JSON.parse(localStorage.getItem(K)); } catch (e) {}
+    id = r && typeof r.id === "string" ? r.id : null;
+    if (r && typeof r.page === "string" && (m = /^lm\/lm(\d\d)\.html$/.exec(r.page)) && id !== null && /^([A-Za-z][\w-]*)?$/.test(id)
+        && (t = L[parseInt(m[1], 10)])) {
+      a.setAttribute("href", r.page + (id ? "#" + id : "")); a.textContent = "Resume reading: LM" + parseInt(m[1], 10) + " " + t + " →";
+    } else { a.setAttribute("href", start[0]); a.textContent = start[1]; }
+  }
+  apply();
+  window.addEventListener("pageshow", function (e) { if (e.persisted) apply(); });
+  document.addEventListener("visibilitychange", function () { if (document.visibilityState === "visible") apply(); });
+  window.addEventListener("storage", function (e) { if (e.key === K || e.key === null) apply(); });
+})"""
 
 # ---------------------------------------------------------------- roadmap diagram (hand-authored SVG)
 def roadmap_svg():
@@ -108,17 +130,19 @@ def build():
     ed_now = editions[0] if editions else {"version": "0.1"}
     edition_html = "".join(f'<p><strong>Edition {esc(str(e["version"]))} ({esc(str(e["date"]))}).</strong> {B.md_inline(e["notes"])}</p>'
                            for e in editions)
-    if AVAIL:
-        first = min(AVAIL); first_t = next(lm["title"] for v in SYL["volumes"] for lm in v["lms"] if lm["n"] == first)
-        verb = "Read the sample module" if len(AVAIL) == 1 else "Start reading"
-        start_link = f'<a class="start" href="lm/lm{first:02d}.html">{verb}: LM{first} {esc(first_t)} →</a>'
-    else:
-        start_link = ""
+    # the guides first, then the first module, which RESUME_JS turns into "Resume reading" after a module was read
+    entry_html = ""
     guides = [p for p in B.PAGES if p["slug"] in B.AVAILABLE_PAGES]   # standalone pages; drafts show only in preview
     if guides:
         links = " · ".join(f'<a href="{p["slug"]}.html">{esc(p["title"])}</a>' + ("" if p["slug"] in B.PUBLISHED_PAGES else " (draft)")
                            for p in guides)
-        start_link += f'<p class="cap new-here">New here? {links}</p>'
+        entry_html += f'<p class="new-here"><b>New here?</b> Start with {links}</p>'
+    if AVAIL:
+        first = min(AVAIL); first_t = next(lm["title"] for v in SYL["volumes"] for lm in v["lms"] if lm["n"] == first)
+        verb = "Read the sample module" if len(AVAIL) == 1 else "Start reading"
+        listed = json.dumps({lm["n"]: lm["title"] for v in SYL["volumes"] for lm in v["lms"] if lm["n"] in AVAIL}).replace("</", "<\\/")
+        entry_html += (f'<a class="start" href="lm/lm{first:02d}.html">{verb}: LM{first} {esc(first_t)} →</a>'
+                       f'<script>{RESUME_JS}(document.currentScript.previousElementSibling, {listed});</script>')
     goals = [
         ("Build statistical models", "Return distributions, regressions and factor models, GARCH volatility, cointegrated spreads — estimated, diagnosed and stated with their uncertainty.", "Vol III, IV"),
         ("Optimize portfolios under estimation error", "Mean–variance, risk parity and Kelly portfolios with realistic constraints, shrinkage estimators, and walk-forward evaluation.", "Vol II, V"),
@@ -165,6 +189,11 @@ def build():
 .hero .sub {{ font-size: 1.18rem; color: var(--ink-2); max-width: 40rem; margin: 0 0 0.6rem; }}
 .hero .zh {{ font-size: 1rem; color: var(--ink-2); max-width: 40rem; line-height: 1.8; margin: 0 0 1rem; }}
 .hero .facts {{ display: flex; flex-wrap: wrap; gap: 0.4rem 0.5rem; font-family: var(--f-head); font-size: 0.8rem; }}
+.hero .new-here {{ width: fit-content; max-width: 100%; box-sizing: border-box; margin: 1.1rem 0 0; padding: 0.55rem 0.9rem;
+  border-radius: 3px; background: var(--accent); color: var(--surface); font-family: var(--f-head); font-size: 0.92rem; line-height: 1.45; }}
+.hero .new-here a {{ color: inherit; font-weight: 700; white-space: nowrap; }}
+.hero .new-here a:focus-visible {{ outline-color: currentColor; }}   /* the focus colour is the box's own blue */
+.hero .new-here + .start {{ margin-top: 0.6rem; }}
 .hero .start {{ display: inline-flex; align-items: center; gap: 0.5rem; margin-top: 1.1rem; font-family: var(--f-head); font-weight: 700;
   background: var(--bar); color: var(--bar-ink); text-decoration: none; padding: 0.55rem 0.9rem; border-radius: 3px; }}
 .hero .start:hover {{ text-decoration: underline; }}
@@ -185,7 +214,6 @@ a:hover .rm-node rect {{ stroke-width: 2.25; }}
 a:focus-visible .rm-node rect {{ stroke: var(--focus); stroke-width: 3; }}
 .rm-edge {{ fill: var(--ink-2); font-size: 11px; paint-order: stroke; stroke: var(--paper); stroke-width: 4px; stroke-linejoin: round; }}
 .cap {{ font-family: var(--f-head); font-size: 0.82rem; color: var(--muted); margin: 0.4rem 0 0; }}
-.cap.new-here {{ margin-top: 0.8rem; }}
 .legend-grid {{ display: grid; grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr)); gap: 0.5rem; margin: 1rem 0; }}
 .lg-item {{ display: grid; gap: 0.2rem; padding: 0.55rem 0.8rem; border-left: 3px solid var(--rule); background: var(--surface); font-size: 0.9rem; min-width: 0; }}
 .lg-tag {{ font-family: var(--f-head); font-size: 0.72rem; font-weight: 800; letter-spacing: 0.1em; text-transform: uppercase; }}
@@ -235,7 +263,7 @@ table.toc .lm-d {{ color: var(--ink-2); font-size: 0.86rem; margin-top: 0.1rem; 
 <span class="chip"><b>Data</b> Taiwan &amp; US markets</span>
 <span class="chip"><b>Edition</b> {esc(str(ed_now["version"]))}</span>
 <span class="chip"><b>License</b> MIT</span></div>
-{start_link}
+{entry_html}
 </header>
 
 <h2 class="sh" id="goals">What you will be able to do</h2>

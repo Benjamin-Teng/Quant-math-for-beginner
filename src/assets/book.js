@@ -1213,8 +1213,7 @@
 
   /* ---------------- page chrome ---------------- */
   function chrome() {
-    var tg = document.querySelector(".rail-toggle"), rail = document.getElementById("rail");
-    if (tg && rail) tg.addEventListener("click", function () { var o = rail.classList.toggle("open"); tg.setAttribute("aria-expanded", o ? "true" : "false"); });
+    drawer(); trackReading();
     // learning-outcome mastery boxes
     var lm = document.body.getAttribute("data-lm");
     document.querySelectorAll(".lo input[type=checkbox]").forEach(function (cb) {
@@ -1234,17 +1233,15 @@
         } else { selectPre(pre); b.textContent = "Selected — press Ctrl+C"; }
       });
     });
-    // outline scroll-spy. The active entry is the last heading that has reached the reading line, which sits just
-    // below the spot where a jump puts a heading (html's scroll-padding-top). An observer that waits for a heading to
-    // cross a band misses jumps: a clicked sub-heading lands above the band and never crosses it. A clicked entry
-    // stays active until the reader scrolls again, so a short section at the end of the page still lights up. A hash
-    // that is not an outline entry (browser back, the address bar, an in-text link) releases that hold and the entry is
-    // recomputed from the scroll position. At the very bottom of the page the last headings may never reach the
-    // reading line, so there the active entry is the last heading whose top is inside the window. The outline panel
-    // scrolls itself (its own scrollTop, never scrollIntoView) to keep the active entry in view.
+    // outline scroll-spy. The active entry is readingHead()'s. An observer that waits for a heading to cross a band
+    // misses jumps: a clicked sub-heading lands above the band and never crosses it. A clicked entry stays active until
+    // the reader scrolls again, so a short section at the end of the page still lights up. A hash that is not an
+    // outline entry (browser back, the address bar, an in-text link) releases that hold and the entry is recomputed
+    // from the scroll position. The outline panel scrolls itself (its own scrollTop, never scrollIntoView) to keep the
+    // active entry in view.
     var links = Array.prototype.slice.call(document.querySelectorAll(".outline a"));
     if (links.length) {
-      var heads = links.map(function (a) { return document.getElementById(decodeURIComponent(a.getAttribute("href").slice(1))); });
+      var heads = outlineTargets();
       var current = null, pinned = false, queued = false;
       var keepVisible = function (a) {
         var o = a.closest(".outline");
@@ -1265,13 +1262,8 @@
       var spy = function () {
         queued = false;
         if (pinned) return;
-        var line = (parseFloat(getComputedStyle(document.documentElement).scrollPaddingTop) || 0) + 8, pick = null;
-        for (var i = 0; i < heads.length; i++) if (heads[i] && heads[i].getBoundingClientRect().top <= line) pick = links[i];
-        var de = document.documentElement, room = de.scrollHeight - window.innerHeight;
-        if (room > 1 && window.pageYOffset >= room - 2) {
-          for (var j = 0; j < heads.length; j++) if (heads[j] && heads[j].getBoundingClientRect().top < window.innerHeight) pick = links[j];
-        }
-        setActive(pick);
+        var k = readingHead(heads);
+        setActive(k < 0 ? null : links[k]);
       };
       var pinTo = function (hash) {
         for (var i = 0; i < links.length; i++) if (links[i].getAttribute("href") === hash) { pinned = true; setActive(links[i]); return true; }
@@ -1316,6 +1308,145 @@
     }
   }
   function selectPre(pre) { var r = document.createRange(); r.selectNodeContents(pre); var s = window.getSelection(); s.removeAllRanges(); s.addRange(r); }
+
+  /* On narrow screens (book.css, 920 px) the contents rail is a drawer over the page. The page behind it is fixed at
+     its scroll offset while the drawer is open (body top = -offset; overflow: hidden does not stop iOS Safari once
+     its toolbar has collapsed), so window.pageYOffset reads 0 until it closes and the offset is restored. Fixing and
+     releasing the body lays out the whole page again (about 200 ms on the largest module at a phone's speed), so it
+     waits for the first frame of the slide, which the compositor then finishes. Closes on the toggle, Escape, the
+     backdrop, a link in the drawer, focus moving into the page, Back or Forward, the page being left or hidden, or the
+     window widening past the breakpoint. */
+  function drawer() {
+    var tg = document.querySelector(".rail-toggle"), rail = document.getElementById("rail"), bar = document.querySelector(".topbar");
+    if (!tg || !rail) return;
+    var body = document.body, narrow = mq("(max-width: 920px)"), x0 = 0, y0 = 0, locked = false, pending = 0, shut = 0;
+    var scrim = document.createElement("div");
+    scrim.className = "rail-backdrop";
+    rail.parentNode.insertBefore(scrim, rail.nextSibling);
+    var later = function (f) { var id = ++pending; requestAnimationFrame(function () { setTimeout(function () { if (id === pending) f(); }, 0); }); };
+    // The text can reflow while the page is fixed (the phone turned, a font arrived), and the old offset would then land
+    // screens away: the first block at the reading line (a paragraph, list item, table row, figure…; a list or a table can
+    // fill the window) goes back to where it was, with the same point of it on the line, as a tall paragraph gets shorter.
+    var anchor = null, a0 = 0, f0 = 0, line = 0;
+    var lock = function () {
+      if (locked) return;
+      locked = true; x0 = window.pageXOffset; y0 = window.pageYOffset; anchor = null;
+      var els = document.querySelectorAll("main p, main li, main tr, main h2, main h3, main figure, main pre, main summary");
+      line = parseFloat(getComputedStyle(root).scrollPaddingTop) || 0;
+      for (var i = 0; i < els.length; i++) {
+        var r = els[i].getBoundingClientRect();
+        if (r.height && r.bottom > line) { anchor = els[i]; a0 = r.top; f0 = r.top < line ? (line - r.top) / r.height : 0; break; }
+      }
+      body.style.top = -y0 + "px"; root.classList.add("rail-lock");
+    };
+    var unlock = function () {
+      if (!locked) return;
+      locked = false; root.classList.remove("rail-lock"); body.style.top = "";
+      window.scrollTo(x0, y0);
+      if (anchor && anchor.isConnected) {
+        var r = anchor.getBoundingClientRect(), dy = f0 ? r.top + f0 * r.height - line : r.top - a0;
+        if (Math.abs(dy) >= 0.5) window.scrollBy(0, dy);
+      }
+      anchor = null;
+    };
+    var isOpen = function () { return rail.classList.contains("open"); };
+    var place = function () {   // the bar's bottom edge moves with the safe-area inset when a phone turns
+      // on these two only: set on <html>, it would restyle the whole page
+      var top = Math.max(0, bar ? bar.getBoundingClientRect().bottom : 0) + "px";
+      rail.style.setProperty("--rail-top", top); scrim.style.setProperty("--rail-top", top);
+    };
+    var open = function () {
+      place(); shut++; rail.inert = false;
+      rail.classList.add("open"); scrim.classList.add("open"); tg.setAttribute("aria-expanded", "true");
+      var cur = rail.querySelector('a[aria-current="page"]') || rail.querySelector("a");
+      if (cur) { rail.scrollTop = cur.offsetTop - (rail.clientHeight - cur.offsetHeight) / 2; cur.focus({ preventScroll: true }); }
+      later(lock);
+    };
+    var close = function (refocus) {
+      if (!isOpen()) return;
+      rail.classList.remove("open"); scrim.classList.remove("open"); tg.setAttribute("aria-expanded", "false");
+      if (refocus) tg.focus({ preventScroll: true });
+      // out of the tab order while it slides out (it stays visible for the slide), then hidden by book.css
+      var k = ++shut; rail.inert = true;
+      setTimeout(function () { if (k === shut) rail.inert = false; }, 250);
+      later(unlock);
+    };
+    tg.addEventListener("click", function () { if (isOpen()) close(true); else open(); });
+    scrim.addEventListener("click", function () { close(true); });
+    document.addEventListener("keydown", function (e) { if (e.key === "Escape" && isOpen()) close(true); });
+    rail.addEventListener("click", function (e) {
+      var a = e.target.closest && e.target.closest("a");
+      if (!a || !isOpen() || e.button !== 0 || e.ctrlKey || e.metaKey || e.shiftKey || e.altKey) return;
+      if (a.getAttribute("aria-current") === "page") { e.preventDefault(); close(true); }   // reloading would lose the place
+      else close(false);
+    });
+    document.addEventListener("focusin", function (e) {   // Tab past the last entry: back to Contents, where the page is
+      if (isOpen() && !rail.contains(e.target) && !(bar && bar.contains(e.target))) close(true);
+    });
+    window.addEventListener("resize", function () { if (isOpen()) place(); });
+    // The page reflowed under the drawer (the phone turned, the charts redrew, a font arrived): fixed again at the place
+    // being read, so that it and the top bar stay in view (the old offset can lie past the end of a shorter page)
+    if (window.ResizeObserver) new ResizeObserver(function () {
+      if (locked) requestAnimationFrame(function () { if (locked) { unlock(); lock(); place(); } });
+    }).observe(body);
+    // Back or Forward within the page: unlocked at once, so that the browser's restoring of the history entry's scroll
+    // position, after this event, moves the page (a locked page cannot scroll, and the later unlock would undo it)
+    window.addEventListener("popstate", function () { close(false); unlock(); });
+    // Leaving or reloading the page, or hiding it: closed and unlocked first, so that the scroll position the browser
+    // keeps for the history entry, and the reading position (trackReading, registered after this), are the page's own
+    var release = function () { if (locked || isOpen()) { close(true); unlock(); } };
+    window.addEventListener("pagehide", release);
+    document.addEventListener("visibilitychange", function () { if (document.visibilityState === "hidden") release(); });
+    var wide = function () {
+      rail.style.transition = "none"; void getComputedStyle(rail).transform; rail.style.transition = "";   // no slide across the breakpoint
+      if (narrow && !narrow.matches) { close(false); unlock(); rail.inert = false; }   // the lock's CSS has stopped applying
+    };
+    if (narrow) { if (narrow.addEventListener) narrow.addEventListener("change", wide); else if (narrow.addListener) narrow.addListener(wide); }
+  }
+
+  /* The heading being read, for the outline and the reading position: of the outline's targets, the last that has
+     reached the reading line, which sits just below the spot where a jump puts a heading (html's scroll-padding-top).
+     At the very bottom of the page the last headings may never reach the line, so there it is the last heading whose
+     top is inside the window. -1 before the first. */
+  function outlineTargets() {
+    return Array.prototype.slice.call(document.querySelectorAll(".outline a"))
+      .map(function (a) { return document.getElementById(decodeURIComponent(a.getAttribute("href").slice(1))); });
+  }
+  function readingHead(heads) {
+    var line = (parseFloat(getComputedStyle(root).scrollPaddingTop) || 0) + 8, k = -1, i;
+    for (i = 0; i < heads.length; i++) if (heads[i] && heads[i].getBoundingClientRect().top <= line) k = i;
+    var room = root.scrollHeight - window.innerHeight;   // 0 while the drawer holds the page
+    if (room > 1 && window.pageYOffset >= room - 2) {
+      for (i = 0; i < heads.length; i++) if (heads[i] && heads[i].getBoundingClientRect().top < window.innerHeight) k = i;
+    }
+    return k;
+  }
+
+  /* Reading position, for the front page's Resume button: on a module page, the module and readingHead(), saved when
+     it changes. The page in view owns the record: one opened in the background saves nothing until it is shown, and a
+     page hidden or left saves only if no page shown since has saved (Back restores the earlier page from the cache
+     before the later one's pagehide, which must not then overwrite it). The front page reads it (build_index.py
+     RESUME_JS, the same key) and shows it only for a module it lists, and otherwise keeps its static Start link. */
+  var LAST_KEY = "ftck-last-read";
+  function trackReading() {
+    var n = parseInt(document.body.getAttribute("data-lm"), 10), h1 = document.querySelector(".lm-title");
+    if (!(n > 0) || !h1) return;
+    var heads = outlineTargets(), page = "lm/lm" + (n < 10 ? "0" : "") + n + ".html", last = null, mine = null, queued = false;
+    var save = function (always) {
+      queued = false;
+      var k = readingHead(heads), id = k < 0 ? "" : heads[k].id;
+      if (id === last && !always) return;
+      last = id; mine = JSON.stringify({ page: page, id: id, n: n, title: h1.textContent, t: Date.now() });
+      store.set(LAST_KEY, mine);
+    };
+    var shown = function () { if (document.visibilityState !== "hidden") save(true); };
+    var left = function () { if (mine !== null && store.get(LAST_KEY) === mine) save(true); };
+    shown();
+    window.addEventListener("scroll", function () { if (!queued) { queued = true; requestAnimationFrame(function () { save(false); }); } }, { passive: true });
+    window.addEventListener("pageshow", function (e) { if (e.persisted) shown(); });
+    window.addEventListener("pagehide", left);
+    document.addEventListener("visibilitychange", function () { if (document.visibilityState === "hidden") left(); else shown(); });
+  }
 
   function boot() {
     initTheme(); chrome(); renderCharts(); initWidgets(); layoutTags();

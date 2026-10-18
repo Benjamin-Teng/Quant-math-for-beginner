@@ -55,6 +55,15 @@
 - Optional, site code: the front page's install block (`build/build_index.py`, the `git clone … cd …` line) is
   755 px wide in print against the 680 px text width (`build/qa/print_width.py docs/index.html`). It was so in 0.2;
   on screen it scrolls inside its box, and the front page has no PDF.
+- Check once on a real iPhone (owner-requested drawer, 2026-10-18; no WebKit browser was available for the five
+  review rounds): on a module page scrolled half-way, tap Contents, scroll the drawer, close it, and confirm the top
+  bar stays visible and the page does not jump; turn the phone with the drawer open and close it.
+- Owner's call on the reading record (`ftck-last-read`): it records a module as soon as it is opened, so a quick
+  look at another module changes the front page's Resume button; say if only scrolling should count.
+- Optional, `book.js`: two minor items the last review left (each tested in a scratch copy): relock directly in the
+  drawer's ResizeObserver callback (one frame of the wrong page behind the backdrop on a reflow), and add
+  `main [data-widget] > *` to the drawer's scroll anchors (a widget filling the reading line can miss the place by
+  up to a window).
 - Optional, `book.js`: two options the Volume II writers asked for (bar-label text for LM8's `angles`, ellipses above
   points for LM11's Exhibit 3); the significant-figure codes came with the Volume III kit. The modules work without
   them.

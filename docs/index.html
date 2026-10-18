@@ -17,6 +17,11 @@
 .hero .sub { font-size: 1.18rem; color: var(--ink-2); max-width: 40rem; margin: 0 0 0.6rem; }
 .hero .zh { font-size: 1rem; color: var(--ink-2); max-width: 40rem; line-height: 1.8; margin: 0 0 1rem; }
 .hero .facts { display: flex; flex-wrap: wrap; gap: 0.4rem 0.5rem; font-family: var(--f-head); font-size: 0.8rem; }
+.hero .new-here { width: fit-content; max-width: 100%; box-sizing: border-box; margin: 1.1rem 0 0; padding: 0.55rem 0.9rem;
+  border-radius: 3px; background: var(--accent); color: var(--surface); font-family: var(--f-head); font-size: 0.92rem; line-height: 1.45; }
+.hero .new-here a { color: inherit; font-weight: 700; white-space: nowrap; }
+.hero .new-here a:focus-visible { outline-color: currentColor; }   /* the focus colour is the box's own blue */
+.hero .new-here + .start { margin-top: 0.6rem; }
 .hero .start { display: inline-flex; align-items: center; gap: 0.5rem; margin-top: 1.1rem; font-family: var(--f-head); font-weight: 700;
   background: var(--bar); color: var(--bar-ink); text-decoration: none; padding: 0.55rem 0.9rem; border-radius: 3px; }
 .hero .start:hover { text-decoration: underline; }
@@ -37,7 +42,6 @@ a:hover .rm-node rect { stroke-width: 2.25; }
 a:focus-visible .rm-node rect { stroke: var(--focus); stroke-width: 3; }
 .rm-edge { fill: var(--ink-2); font-size: 11px; paint-order: stroke; stroke: var(--paper); stroke-width: 4px; stroke-linejoin: round; }
 .cap { font-family: var(--f-head); font-size: 0.82rem; color: var(--muted); margin: 0.4rem 0 0; }
-.cap.new-here { margin-top: 0.8rem; }
 .legend-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr)); gap: 0.5rem; margin: 1rem 0; }
 .lg-item { display: grid; gap: 0.2rem; padding: 0.55rem 0.8rem; border-left: 3px solid var(--rule); background: var(--surface); font-size: 0.9rem; min-width: 0; }
 .lg-tag { font-family: var(--f-head); font-size: 0.72rem; font-weight: 800; letter-spacing: 0.1em; text-transform: uppercase; }
@@ -158,7 +162,22 @@ table.toc .lm-d { color: var(--ink-2); font-size: 0.86rem; margin-top: 0.1rem; }
 <span class="chip"><b>Data</b> Taiwan &amp; US markets</span>
 <span class="chip"><b>Edition</b> 0.4</span>
 <span class="chip"><b>License</b> MIT</span></div>
-<a class="start" href="lm/lm01.html">Start reading: LM1 Exponentials, Logarithms and Compounding →</a><p class="cap new-here">New here? <a href="getting-started.html">Getting Started</a> · <a href="research-hygiene.html">Research hygiene</a></p>
+<p class="new-here"><b>New here?</b> Start with <a href="getting-started.html">Getting Started</a> · <a href="research-hygiene.html">Research hygiene</a></p><a class="start" href="lm/lm01.html">Start reading: LM1 Exponentials, Logarithms and Compounding →</a><script>(function (a, L) {
+  var start = [a.getAttribute("href"), a.textContent], K = "ftck-last-read";
+  function apply() {
+    var r = null, m, t, id;
+    try { r = JSON.parse(localStorage.getItem(K)); } catch (e) {}
+    id = r && typeof r.id === "string" ? r.id : null;
+    if (r && typeof r.page === "string" && (m = /^lm\/lm(\d\d)\.html$/.exec(r.page)) && id !== null && /^([A-Za-z][\w-]*)?$/.test(id)
+        && (t = L[parseInt(m[1], 10)])) {
+      a.setAttribute("href", r.page + (id ? "#" + id : "")); a.textContent = "Resume reading: LM" + parseInt(m[1], 10) + " " + t + " →";
+    } else { a.setAttribute("href", start[0]); a.textContent = start[1]; }
+  }
+  apply();
+  window.addEventListener("pageshow", function (e) { if (e.persisted) apply(); });
+  document.addEventListener("visibilitychange", function () { if (document.visibilityState === "visible") apply(); });
+  window.addEventListener("storage", function (e) { if (e.key === K || e.key === null) apply(); });
+})(document.currentScript.previousElementSibling, {"1": "Exponentials, Logarithms and Compounding", "2": "Limits and Derivatives", "3": "Taylor Series and Approximation", "4": "Optimization in One Variable", "5": "Integration", "6": "Sequences, Series and the Time Value of Money", "7": "Multivariable Calculus and Lagrange Multipliers", "8": "Vectors and Matrices", "9": "Linear Systems, Inverses and Rank", "10": "Quadratic Forms and Covariance Matrices", "11": "Eigen-decomposition and PCA", "12": "Cholesky, SVD and Least Squares", "13": "Probability Foundations and Bayes", "14": "Random Variables, Expectation and Jensen's Inequality", "15": "Distributions in Finance", "16": "Joint Distributions and Dependence", "17": "Law of Large Numbers and Central Limit Theorem", "18": "Monte Carlo Simulation and the Bootstrap"});</script>
 </header>
 
 <h2 class="sh" id="goals">What you will be able to do</h2>
