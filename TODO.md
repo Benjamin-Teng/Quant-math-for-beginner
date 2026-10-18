@@ -1,9 +1,25 @@
-# TODO — handoff (2026-10-17)
+# TODO — handoff (2026-10-18)
 
 > 給接手的 Claude Code：先讀 `CLAUDE.md`，再依下列順序執行。每完成一項就 commit 並直接 push 到 `main`，並用繁體中文向 Benjamin 回報。
 
 ## Where things stand
 
+- **Volume III Stage 1 is complete (2026-10-18); Stage 2 (writing) is next.** What Stage 1 produced:
+  - Data: TR23, the TAIEX total-return index from 2003-01-02 (`data/raw/vol3/`, registered), built and checked against
+    the price index on every date by `data/vol3_series.py`; a fresh review tried 40 alterations of the raw files and
+    every bad row stops the script. LM13–LM18 lab files in `data/make_lab_data.py` (LM16: U28 only).
+  - Site code, owner-approved 2026-10-18 (ROADMAP, "Decided by the owner"): line-chart `step`, band, `quiet` and
+    `dash`; `x.tfmt`; format codes `n6`, `sci0–3`, `sig2–4`; shared `Book.controls`, `Book.rng`, `Book.dist`, tested
+    against SciPy by `build/qa/test_bookjs_dist.py`; `build.py` checks bands and log axes. Reviewed twice by fresh
+    agents: 0 differences on all 12 published pages. AUTHORING §7 documents them.
+  - Rules: AUTHORING §6 gains the Probability table (and amendments for $\lambda$, $B$, $u$, $k$, $\mathcal A$,
+    $\eta$, $\zeta$); §8 the simulation rule (`np.random.default_rng([e, 20261011])`, the experiment number first).
+  - Plans: `plans/vol-3.md` (shared decisions, capability check, the editor's decisions, Stage 4 changes, six
+    briefs) and `plans/vol-3-anchors.md` (458 anchors, printed by `data/vol3_anchors_lm13.py` … `lm18.py`). Each
+    brief was drafted from the editor's spine, cross-checked (32 findings), revised, checked by fresh agents who
+    recomputed every anchor from the raw files (all reproduced), revised again and verified (no major finding left).
+  - Sources: `project/SOURCES.md` gains the Volume III books (with verified theorem and section numbers), papers,
+    Python facts, Taiwan facts and the 樂詞網 lookups (245 terms; the book writes 分布 from Volume III).
 - **Volumes I and II are published (edition 0.3, 2026-10-17).** LM1–LM12 are on the site (`docs/`,
   <https://quantmath.fintools.tw>) with A4 PDFs and executed labs. Volume II went through the four stages below: the
   briefs, data, anchors and tooling; five writers; a review round (reviewer, blind solver, number auditor and a
@@ -38,39 +54,33 @@
 - Optional, site code: the front page's install block (`build/build_index.py`, the `git clone … cd …` line) is
   755 px wide in print against the 680 px text width (`build/qa/print_width.py docs/index.html`). It was so in 0.2;
   on screen it scrolls inside its box, and the front page has no PDF.
-- Optional, `book.js`: the options the Volume II writers asked for (bar-label text for LM8's `angles`, ellipses above
-  points for LM11's Exhibit 3, a significant-figure `Book.fmt` code); the modules work without them.
+- Optional, `book.js`: two options the Volume II writers asked for (bar-label text for LM8's `angles`, ellipses above
+  points for LM11's Exhibit 3); the significant-figure codes came with the Volume III kit. The modules work without
+  them.
 
-## Next: Volume III (edition 0.4)
+## Next: Volume III (edition 0.4), Stage 2
 
 Follow [`plans/ROADMAP.md`](plans/ROADMAP.md): batch 2 is Volume III (LM13–LM18), then IV, V + VI, VII, VIII and IX.
 Each batch repeats Stages 1–4 and bumps the edition (the owner confirmed the process, 2026-10-11). Ask the owner about
 code, site, repository and his standing rules, and about the open decisions at the end of the roadmap before the batch
-that needs them; content is the editor's call.
+that needs them; content is the editor's call. Volume III's Stage 1 is done (above); its capability check needs nothing
+more from the owner.
 
-**Stage 1, before any writer starts**, in this order:
+**Stage 2, writing.** One writer per module on its own worktree branch (`vol3/lmNN`), launched together, each with
+AUTHORING (§1, §6 with the Probability table, §7, §8's simulation rule), PITFALLS, the shared part of
+`plans/vol-3.md` and its own brief, and its anchors section. Each writer:
 
-1. Briefs (`plans/vol-3.md`) within ROADMAP's module boundaries, with notation that follows AUTHORING §6 ("Common
-   notation first"). Volume II's forward links name what Volume III owes: LM16 (population covariance and joint
-   distributions, uncorrelated against independent, the multivariate normal and the squared Mahalanobis distance,
-   colouring), LM18 (random generation and Monte Carlo error); scan `src/lm*.md` for `[[LM13]]`
-   … `[[LM18]]` and honour each.
-2. **Capability check.** List every exhibit, widget, dataset and Python package the briefs need; check each against
-   `src/assets/book.js`, `build/qa/`, `data/` and `pyproject.toml`; send the owner one list of what is missing (site
-   code, data pipeline, new packages) and build what he approves before any writer starts.
-3. Data: fetch through the API, check every new series as PITFALLS §3 says, and register it in the manifest.
-4. Anchors (`plans/vol-3-anchors.md`): every number the briefs quote, with its definition, recomputed by independent
-   code; facts checked on official sources (`project/SOURCES.md`).
-5. Lab data: `data/make_lab_data.py` writes each lab's files, and the briefs name them.
-6. A fresh check of the whole of Stage 1, then commit and push.
-
-**Stage 2, writing.** One writer per module on its own worktree branch (`vol3/lmNN`), with AUTHORING (§1, §6),
-PITFALLS and the brief up front. First drafts stay under 5,500 words of prose; numbers scripts assert from the start
-that every printed value appears in the text and follows from the printed inputs (a printed string with LaTeX is a
-raw string: `"\times"` holds a tab). Writers run `style.py`, the build, `overflow.py` and `display_scroll.py` at
-400 px, `print_width.py`, `pdf_scale.py` and `check_terms.py` before handing back, and scan each 中文導讀 box for terms
-without their English at first use (the most frequent minor finding in Volume II). In a worktree, `ty` needs
-`--python` pointing at the main checkout's `.venv`.
+- copies its anchor script into `data/lmNN_numbers.py` as the starting point and asserts from the first draft that
+  every printed value appears in the text and follows from the printed inputs (a printed string with LaTeX is a raw
+  string: `"\times"` holds a tab), with LM10's `anchor(label, got, expected)` comparator reporting drift from
+  `plans/vol-3-anchors.md`;
+- writes `data/lmNN_charts.py`, `src/lmNN.md`, `src/lmNN.js` (with `Book.controls`, `Book.rng`, `Book.dist`) and
+  `build/make_labNN.py` (labs write plain "LMnn");
+- keeps first drafts under 5,500 words of prose and runs `style.py`, the build, `overflow.py` and `display_scroll.py`
+  at 400 px, `print_width.py`, `pdf_scale.py` and `check_terms.py` before handing back, and scans each 中文導讀 box for
+  terms without their English at first use; in a worktree, `ty` needs `--python` pointing at the main checkout's
+  `.venv`;
+- adds its scripts to `build.sh`'s `DATA_STEPS` and the data README table only through the editor (shared files).
 
 **Stage 3, review.** Per module, in parallel: the independent reviewer (`reviews/REVIEW_PROMPT.md`), the blind solver
 (K) and the number auditor (A), plus one cross-module check (X) for the volume; one consolidated list with the
@@ -78,9 +88,10 @@ editor's decisions → writer → verifier → closing check with a fresh advers
 editor's fixes → a fresh check.
 
 **Stage 4, publishing.** `status: published`, the edition note, the README status table, prereq and leads consistent
-both ways (earlier modules gain leads to the new ones), `./build.sh --pdf`, and on every page: `overflow.py` at
-400 px, `print_width.py`, no dead links, and `git grep --untracked -nE "uv pip install|python3 |bundled|source
-\.venv|import requests" -- src labs build data` finds nothing.
+both ways (the list in `plans/vol-3.md`, "Stage 4 changes to earlier modules", including LM5's three 分布 strings,
+LM5:60's link to LM13 and Getting Started's seed sentence), `./build.sh --pdf`, and on every page: `overflow.py` at
+400 px, `print_width.py`, no dead links, `grep -ac 'file:///' docs/pdf/*.pdf` gives 0, and `git grep --untracked -nE
+"uv pip install|python3 |bundled|source \.venv|import requests" -- src labs build data` finds nothing.
 
 ## Optional
 

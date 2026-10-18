@@ -6,11 +6,15 @@ closes 2003-01-02 .. 2026-10-08, and R, its simple daily return (null on the fir
 guard of PITFALLS section 5 (R <= -x + 1e-12, R >= x - 1e-12) and are asserted equal to an exact recount with
 fractions.Fraction from the two-decimal closes. A printed derived value is recomputed from its printed inputs at their
 printed precision and asserted (PITFALLS section 7). LM15 simulates nothing, so no generator is created.
+Empirical quantiles are LM14's order statistics R_(ceil(uT)), T the size of the sample or part in use
+(np.quantile, method="inverted_cdf").
 
-Prints one line per anchor, "A15-NN <value>", in ID order, and writes nothing.
+Prints one line per anchor, "A15-NN <value>", in ID order, and writes nothing. IDs follow the order in which the
+Stage 1 brief first quoted them and stay fixed when a revision moves a first quotation.
 
 Run from the repository root:  PYTHONUTF8=1 uv run python data/vol3_anchors_lm15.py [repository root]
 """
+import itertools
 import math
 import sys
 from collections.abc import Callable
@@ -50,7 +54,7 @@ def same_list(values: list[float], fmt: Callable[[float], str], printed: str) ->
 
 
 def days_fmt(v: float) -> str:
-    """Expected days as printed: one decimal from 10 up, three significant figures down to 0.001, then a x 10^-b."""
+    """Expected days as printed: one decimal from 10 up, three significant figures down to 0.001, two below it."""
     if v >= 10:
         return f"{v:.1f}"
     return f"{v:#.3g}".rstrip(".") if v >= 1e-3 else f"{v:.1e}"
@@ -146,7 +150,11 @@ put("mlfit", f"nu {nu_m:.6f}; loc {pct(loc_m)}; scale {pct(sc_m)}")
 nu_k = 4 + 6 / exk
 sc_k = s * math.sqrt((nu_k - 2) / nu_k)
 put("kfit", f"nu {nu_k:.6f}; scale {pct(sc_k)}; from the printed 5.27: {4 + 6 / 5.27:.6f}; "
-            f"6/5.27 = {6 / 5.27:.6f}; 4 + 6/8.27 = {4 + 6 / 8.27:.6f}")
+            f"P9's distractors: 6/5.27 = {6 / 5.27:.6f} (the 4 forgotten); 4 + 6/(5.27 - 3) = "
+            f"{4 + 6 / (5.27 - 3):.6f} (the excess taken as the kurtosis)")
+same(4 + 6 / 5.27, ".2f", "5.14")
+same(6 / 5.27, ".2f", "1.14")
+same(4 + 6 / (5.27 - 3), ".2f", "6.64")
 sd_m = sc_m * math.sqrt(nu_m / (nu_m - 2))
 same(0.7761 * math.sqrt(3.065 / 1.065), ".3f", "1.317")
 put("mlsd", f"{pct(sd_m)}; / s = {sd_m / s:.6f}")
@@ -229,8 +237,9 @@ same(math.sqrt(20 * 0.548 * 0.452), ".2f", "2.23")
 obs = [int((blocks == j).sum()) for j in range(4, 18)]
 exp_b = [NB * float(stats.binom.pmf(j, 20, p_hat)) for j in range(4, 18)]
 assert int(blocks.min()) >= 5 and int(blocks.max()) <= 16 and sum(obs) == NB
+outside = NB * (float(stats.binom.cdf(3, 20, p_hat)) + float(stats.binom.sf(17, 20, p_hat)))
 put("blk_obs", ", ".join(str(v) for v in obs))
-put("blk_exp", ", ".join(f"{v:.4f}" for v in exp_b) + f"; sum over 4..17: {sum(exp_b):.4f}")
+put("blk_exp", ", ".join(f"{v:.4f}" for v in exp_b) + f" (p = 3200/5840 unrounded); outside 4..17: {outside:.4f}")
 t5, t16 = float(stats.binom.cdf(5, 20, 0.548)), float(stats.binom.sf(15, 20, 0.548))
 put("bin_tails", f"Pr(X<=5) {t5:.6f} -> {NB * t5:.4f} blocks (observed {int((blocks <= 5).sum())}); Pr(X>=16) "
                  f"{t16:.6f} -> {NB * t16:.4f} (observed {int((blocks >= 16).sum())}); from the unrounded p: "
@@ -242,15 +251,31 @@ same(NB * t16, ".2f", "5.28")
 same(292 * 0.00677, ".2f", "1.98")
 same(292 * 0.01807, ".2f", "5.28")
 assert format(292 * 0.0181, ".2f") != "5.28"
+# X2 plots p = 3,200/5,840 unrounded (its legend says so); from the printed 0.548 ten values would differ
 same_list(exp_b, lambda v: f"{v:.2f}", "0.39, 1.50, 4.56, 11.05, 21.77, 35.18, 46.91, 51.69, 46.99, 35.05, 21.24, 10.30, 3.90, 1.11")
-same(sum(exp_b), ".1f", "291.7")
+assert abs(outside - (NB - sum(exp_b))) < 1e-9
+same(outside, ".2f", "0.34")
 down = R < 0
 put("signs", f"Pr(R<0) {int(down.sum())}/{T} = {down.mean():.6f}; on the {T - 1} day-pairs: Pr(R_t<0) = "
              f"{down[1:].mean():.6f}, Pr(R_t<0 | R_t-1<0) = {(down[:-1] & down[1:]).sum() / down[:-1].sum():.6f}")
+# A15-30: LM13's sign dependence as a lag-1 correlation of the down-day (equally, up-day: no return is 0) indicators,
+# rho1 = (Pr(D_t | D_t-1) - Pr(D)) / (1 - Pr(D)) for a stationary two-state sequence, from the printed 0.4639 and 0.4521
+rho_p = (0.4639 - 0.4521) / (1 - 0.4521)
+pc = float((down[:-1] & down[1:]).sum() / down[:-1].sum())
+pd_ = float(down[1:].mean())
+rho_u = (pc - pd_) / (1 - pd_)
 xu = up[: NB * 20]
-rho1 = float(np.corrcoef(xu[:-1], xu[1:])[0, 1])
-put("dep_var", f"lag-1 correlation of up-day indicators {rho1:.6f}; 20 p(1-p) (1 + 2 (19/20) rho1) = "
-               f"{v_bin * (1 + 2 * (19 / 20) * rho1):.6f}")
+pairs_in = np.ones(NB * 20 - 1, dtype=bool)
+pairs_in[19::20] = False                   # the 291 pairs that straddle two blocks
+rho_in = float(np.corrcoef(xu[:-1][pairs_in], xu[1:][pairs_in])[0, 1])
+rho_all = float(np.corrcoef(up[:-1], up[1:])[0, 1])
+same(rho_p, ".4f", "0.0215")
+same(20 * 0.548 * 0.452 * (1 + 2 * (19 / 20) * 0.0215), ".2f", "5.16")
+same(v_bin * (1 + 2 * (19 / 20) * rho_u), ".2f", "5.16")
+put("dep_var", f"rho1 from the printed 0.4639, 0.4521: {rho_p:.6f} (from the unrounded frequencies {rho_u:.6f}); "
+               f"20 x 0.548 x 0.452 x (1 + 2 (19/20) 0.0215) = {20 * 0.548 * 0.452 * (1 + 2 * (19 / 20) * 0.0215):.6f}; "
+               f"with the unrounded p and rho1: {v_bin * (1 + 2 * (19 / 20) * rho_u):.6f}; other pair sets (not printed): "
+               f"within-block pairs {rho_in:.6f}, all {T - 1} pairs of R {rho_all:.6f}")
 
 # ------------------------------------------------------------------ Poisson
 p3 = float(big.mean())
@@ -320,7 +345,7 @@ zs = (srt - Rbar) / s
 sel = (np.abs(qq) > 2) | (np.arange(T) % 10 == 0)
 sel[0] = sel[-1] = True
 put("qq", f"rank 1 ({qq[0]:.6f}, {zs[0]:.6f}); rank {T} ({qq[-1]:.6f}, {zs[-1]:.6f}); rank 59 ({qq[58]:.6f}, "
-          f"{zs[58]:.6f}); {int(sel.sum())} points plotted, {int((np.abs(qq) > 2).sum())} with |x| > 2")
+          f"{zs[58]:.6f}); {int(sel.sum())} points plotted, {int((np.abs(qq) > 2).sum())} with |normal quantile| > 2")
 same((-9.6997 - 0.0625) / 1.2084, ".3f", "-8.079")
 same((9.2512 - 0.0625) / 1.2084, ".3f", "7.604")
 same((-3.5671 - 0.0625) / 1.2084, ".3f", "-3.004")
@@ -365,9 +390,25 @@ gs = np.sort(G)
 put("emp_med_g", f"{gs[11]:.6f} ({yrs[int(np.argsort(G)[11])]})")
 put("norm_annual", f"Pr(G<0) = Phi(-{G.mean():.6f}/{G.std():.6f}) = {float(stats.norm.cdf(-G.mean() / G.std())):.4e}")
 same(float(stats.norm.cdf(-1.1497 / 0.2370)), ".1e", "6.1e-07")
+# LM17's iid daily model over one year, fitted to the same window as the 23 calendar years (C2; editor 2026-10-18):
+# the log returns dated 2003-01-03 .. 2025-12-31, whose sum is the sum of the 23 ln G_y
 m1 = round(A)
-put("lm17", f"m = {m1}: Phi(-rbar sqrt(m)/s_r) = {float(stats.norm.cdf(-rbar * math.sqrt(m1) / s_r)):.6f}; "
-            f"s_r sqrt(m) = {s_r * math.sqrt(m1):.6f}")
+win = np.array([d <= "2025-12-31" for d in dates])
+r_w: Vec = r[win]
+assert abs(float(r_w.sum()) - float(np.log(G).sum())) < 1e-12
+rb_w, sr_w = float(r_w.mean()), float(r_w.std())
+mu_w, sd_w = m1 * rb_w, sr_w * math.sqrt(m1)
+p_w = float(stats.norm.cdf(-mu_w / sd_w))
+put("lm17", f"{len(r_w)} log returns {dates[0]} .. {dates[int(np.flatnonzero(win)[-1])]}: rbar {pct(rb_w, 6)}, s_r "
+            f"{pct(sr_w, 6)}; m = round(A) = {m1}: mean m rbar = {mu_w:.6f}, sd s_r sqrt(m) = {sd_w:.6f}; "
+            f"Pr(loss year) = Phi(-mean/sd) = {p_w:.6f}; x 23 = {23 * p_w:.4f}; against mu_X {muX:.6f}, sigma_X {sX:.6f}; "
+            f"from the printed 0.1163, 0.1856: {float(stats.norm.cdf(-0.1163 / 0.1856)):.6f}; with 0.186: "
+            f"{float(stats.norm.cdf(-0.1163 / 0.186)):.6f}")
+same(float(stats.norm.cdf(-0.1163 / 0.1856)), ".3f", "0.265")
+same(p_w, ".3f", "0.265")
+same(mu_w, ".4f", "0.1163")
+same(sd_w, ".4f", "0.1856")
+same(float(stats.norm.cdf(-0.1163 / 0.186)), ".3f", "0.266")      # so the brief prints 0.1856, not 0.186
 put("rbar", f"rbar {pct(rbar, 8)}; s_r {pct(s_r, 8)}")
 d_ln = T * float(stats.norm.cdf((math.log(0.95) - rbar) / s_r))
 put("dlogn5", f"{d_ln:.6f}; from the printed 0.05517%, 1.2107%: "
@@ -408,7 +449,7 @@ def t_kurt(nu: float) -> float:      # (15.10), nu > 4
 put("t_mom", f"nu=3: variance {t_var(3):.6f}, kurtosis infinite; nu=4: variance {t_var(4):.6f}, kurtosis infinite; "
              f"nu=5: variance {t_var(5):.6f}, kurtosis {t_kurt(5):.6f}; nu=6: variance {t_var(6):.6f}, kurtosis "
              f"{t_kurt(6):.6f}; SciPy t(5).stats(moments='k') {float(stats.t(5).stats(moments='k')):.1f}; "
-             f"LM5 prints 9 for t_5 (lm05.md:343)")
+             f"LM5 prints 9 for t_5 (lm05.md:342)")
 
 # ------------------------------------------------------------------ tail table, both tails
 LV = [Fraction(k, 100) for k in range(2, 11)]
@@ -448,9 +489,19 @@ def chord(n1: float, n2: float, x1: float, x2: float) -> float:
 
 
 cnt = {k: le(Fraction(k, 100)) for k in range(2, 7)}
-put("chords", f"counts at 2%..6%: {', '.join(str(cnt[k]) for k in range(2, 7))}; 2%->4% "
-              f"{chord(cnt[2], cnt[4], 2, 4):.6f}; 3%->6% {chord(cnt[3], cnt[6], 3, 6):.6f}; 4%->6% "
-              f"{chord(cnt[4], cnt[6], 4, 6):.6f}; 2%->6% {chord(cnt[2], cnt[6], 2, 6):.6f}")
+adj = [chord(cnt[k], cnt[k + 1], k, k + 1) for k in range(2, 6)]          # adjacent levels, one point apart
+allc = {(i, j): chord(cnt[i], cnt[j], i, j) for i in range(2, 7) for j in range(i + 1, 7)}
+lo_p, hi_p = min(allc, key=lambda k: allc[k]), max(allc, key=lambda k: allc[k])
+assert all(a < b for a, b in itertools.pairwise(adj))                      # the chord rises with the level
+put("chords", f"counts at 2%..6%: {', '.join(str(cnt[k]) for k in range(2, 7))}; adjacent: "
+              + ", ".join(f"{k}%->{k + 1}% {v:.6f}" for k, v in zip(range(2, 6), adj))
+              + f"; all ten pairs from {allc[lo_p]:.6f} ({lo_p[0]}%->{lo_p[1]}%) to {allc[hi_p]:.6f} "
+              f"({hi_p[0]}%->{hi_p[1]}%); 2%->4% {allc[2, 4]:.6f}; 3%->6% {allc[3, 6]:.6f}; 4%->6% {allc[4, 6]:.6f}; "
+              f"2%->6% {allc[2, 6]:.6f}")
+same_list(adj, lambda v: f"{v:.2f}", "2.09, 3.12, 4.82, 5.03")
+same_list([allc[2, 4], allc[3, 6], allc[4, 6], allc[2, 6]], lambda v: f"{v:.2f}", "2.52, 4.17, 4.91, 3.40")
+# P10: the 2%->6% chord is the log-length-weighted mean of 2%->4% and 4%->6%
+assert abs(allc[2, 6] - (allc[2, 4] * math.log(2) + allc[4, 6] * math.log(1.5)) / math.log(3)) < 1e-12
 put("mchords", f"3%->6%: normal {chord(e_norm(-0.03), e_norm(-0.06), 3, 6):.6f}; ML t "
                f"{chord(e_ml(-0.03), e_ml(-0.06), 3, 6):.6f}; kurtosis-fit t {chord(e_k(-0.03), e_k(-0.06), 3, 6):.6f}")
 pre = np.array([d < LIMIT_CHANGE for d in dates])

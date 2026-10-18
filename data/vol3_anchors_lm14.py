@@ -8,7 +8,8 @@ the first to the last close / 365.25; A = T / years; counts against a threshold 
 >= x - 1e-12), and the -3% count is confirmed with exact fractions of the two-decimal closes. Calendar years
 2003-2025 run from the last close of the previous year to the last close of the year, 2003 from its first close
 (2003-01-02); 2026 is partial and left out. The small laws (the +2%/-1% bet, LM13's two trades, the four-day bet,
-LM4's +1%/-5% trade, 2008/2009 from the printed returns, +100%/-50%) are exact arithmetic. No simulation.
+LM4's +1%/-5% trade and its Kelly factor 1 + 8R, 2008/2009 from the printed returns, +100%/-50%) are exact
+arithmetic. No simulation, so the seed rule default_rng([e, 20261011]) has nothing to seed.
 
 Run from the repository root (the optional argument is the repository root; default: this file's parent's parent):
     PYTHONUTF8=1 uv run python data/vol3_anchors_lm14.py
@@ -123,8 +124,9 @@ def main() -> None:
         two[v] = two.get(v, 0) + 0.25
     put("e1_X", ", ".join(f"{g(v)}: {g(p)}" for v, p in sorted(two.items())),
         f"F_X {', '.join(g(c) for c in np.cumsum(pX))}")
+    xmed = float(X[np.searchsorted(np.cumsum(pX), 0.5)])
     put("e1_q", f"F^-1(0.1) {g(X[np.searchsorted(np.cumsum(pX), 0.1)])}",
-        f"median {g(X[np.searchsorted(np.cumsum(pX), 0.5)])} (Pr(X<=m) 0.75, Pr(X>=m) 0.75)")
+        f"median {g(xmed)} (Pr(X<={g(xmed)}) {g(pX[X <= xmed].sum())}, Pr(X>={g(xmed)}) {g(pX[X >= xmed].sum())})")
     half = 0.5 * np.log(X)
     put("e1_half", ", ".join(f"{g(v * 100)}%" for v in half),
         f"weighted sum from two-decimal logs {g(0.25 * -28.77 + 0.5 * 5.889 + 0.25 * 40.55)}%")
@@ -167,7 +169,10 @@ def main() -> None:
     # ---- E4
     G = float(tr[-1] / tr[0])
     put("rbar_bp", f"{g(rbar * 1e4)} bp")
-    put("Ar", f"A r_bar {g(A * rbar * 100)}%", f"ln G / years {g(np.log(G) / years * 100)}%")
+    put("Ar", f"A r_bar {g(A * rbar * 100)}%", f"ln G / years {g(np.log(G) / years * 100)}%",
+        f"compound rate exp(A r_bar) - 1 = G^(1/years) - 1 {g(np.expm1(A * rbar) * 100)}%",
+        f"from printed 25.2007^(1/23.7645) - 1 = {g((25.2007 ** (1 / 23.7645) - 1) * 100)}%"
+        f" (from the printed 13.58%: exp(0.1358) - 1 = {g(np.expm1(0.1358) * 100)}%)")
     put("Gfull", g(G))
 
     # ---- E5: the +2%/-1% bet
@@ -192,7 +197,13 @@ def main() -> None:
     m4p, s4p = 0.000625, 0.012084
     put("nm4", g(n4), f"from four-decimal inputs {g(m4p**4 + 6 * m4p**2 * s4p**2 + 3 * s4p**4)}",
         f"from six-decimal inputs {g(0.00062505**4 + 6 * 0.00062505**2 * 0.01208364**2 + 3 * 0.01208364**4)}")
-    put("musig", g((Rbar / s) ** 2))
+    q2 = (Rbar / s) ** 2
+    put("musig", f"(Rbar/s)^2 {g(q2)}",
+        f"third: (Rbar/s)^2/3 {g(q2 / 3 * 100)}% (check n3/(3 Rbar s^2) - 1 {g((n3 / (3 * Rbar * s**2) - 1) * 100)}%)",
+        f"fourth: 2(Rbar/s)^2 + (Rbar/s)^4/3 {g((2 * q2 + q2**2 / 3) * 100)}%"
+        f" (check n4/(3 s^4) - 1 {g((n4 / (3 * s**4) - 1) * 100)}%)",
+        f"from the printed four-figure moments 2.740/2.738 - 1 {g((2.740 / 2.738 - 1) * 100)}%,"
+        f" 6.430/6.396 - 1 {g((6.430 / 6.396 - 1) * 100)}%")
     put("approx", f"3 mu sigma^2 {g(3 * Rbar * s**2)}", f"3 sigma^4 {g(3 * s**4)}",
         f"from four-decimal inputs {g(3 * m4p * s4p**2)}, {g(3 * s4p**4)}",
         f"from six-decimal inputs {g(3 * 0.00062505 * 0.01208364**2)}, {g(3 * 0.01208364**4)}")
@@ -281,7 +292,8 @@ def main() -> None:
     hi = max(pts, key=lambda t: t[1])
     gmax, rmax = max(gaps), max(rels)
     put("x7", f"min drag {lo[0]} {g(lo[1])} bp (s^2/2 {g(lo[2])})", f"max {hi[0]} {g(hi[1])} bp (s^2/2 {g(hi[2])})",
-        f"largest absolute gap {gmax[1]} {g(gmax[0])} bp", f"largest relative {rmax[1]} {g(rmax[0] * 100)}%")
+        f"largest absolute gap {gmax[1]} {g(gmax[0])} bp",
+        f"largest gap relative to half the variance {rmax[1]} {g(rmax[0] * 100)}%")
 
     put("f2drag", f"{g((np.log1p(2 * Rbar) - np.log1p(2 * R).mean()) * 1e4)} bp",
         f"4 x J {g(4 * tr23['drag'] * 1e4)} bp", f"from printed 4 x 0.7316 = {g(4 * 0.7316)}")
@@ -313,11 +325,18 @@ def main() -> None:
     n5 = int((R <= -0.05 + EPS).sum())
     put("p6", f"k from printed {g(k5)}", f"Cantelli {g(1 / (1 + k5**2) * 100)}%", f"Chebyshev {g(1 / k5**2 * 100)}%",
         f"days R <= -5%: {n5} ({g(n5 / T * 100)}%)", f"unrounded k {g((Rbar + 0.05) / s)}")
-    put("p7", f"1/9 {g(100 / 9)}%", f"Pareto tail Pr(X >= x) = x^-1.5, e.g. at x = 4: {g(4**-1.5)}")
+    put("p7", f"Chebyshev 1/3^2 {g(100 / 9)}%", f"Cantelli 1/(1+3^2) {g(100 / (1 + 3**2))}%")
     put("lm1", f"ln(1.5e^0.10 - 0.5e^0.20) {g(np.log(1.5 * np.exp(0.10) - 0.5 * np.exp(0.20)))}",
         f"1.5 x 0.10 - 0.5 x 0.20 = {g(1.5 * 0.10 - 0.5 * 0.20)}", "printed in lm01.md:435: 0.0460, 0.0500")
-    put("p9", f"E sqrt X {g((pX * np.sqrt(X)).sum())}", f"sqrt E X {g(np.sqrt(EX))}",
-        f"E[1/X] {g((pX / X).sum())}", f"1/E X {g(1 / EX)}")
+    # P9: Problem 4's trade at its Kelly exposure f* = p/a - q/b = 8 (lm04.md:718), X = 1 + 8R
+    f4 = 0.9 / 0.05 - 0.1 / 0.01
+    X9 = 1 + f4 * np.array([0.01, -0.05])
+    p9 = np.array([0.9, 0.1])
+    EX9 = float((p9 * X9).sum())
+    put("p9", f"f* = 0.9/0.05 - 0.1/0.01 = {g(f4)}; X in {{{g(X9[0])}, {g(X9[1])}}}, E X {g(EX9)}",
+        f"E ln X {g((p9 * np.log(X9)).sum() * 100)}%", f"ln E X {g(np.log(EX9) * 100)}%",
+        f"E[1/X] {g((p9 / X9).sum())}", f"1/E X {g(1 / EX9)}",
+        f"E sqrt X {g((p9 * np.sqrt(X9)).sum())}", f"sqrt E X {g(np.sqrt(EX9))}")
     mp, sp, skp, kup = 0.1497, 0.2370, 0.19, 5.02
     j2 = sp**2 / (2 * (1 + mp) ** 2)
     j3 = -skp * sp**3 / (3 * (1 + mp) ** 3)

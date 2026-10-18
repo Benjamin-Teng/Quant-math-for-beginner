@@ -9,6 +9,8 @@ return (null on the first row), column Rp the price index's. Conventions:
     asserted equal to an exact count with fractions.Fraction from the two-decimal closes;
   - limit regimes by return date: 7% up to 2015-05-29, 10% from 2015-06-01;
   - blocks: consecutive, non-overlapping, from the first return; the last T mod n returns are left out;
+  - a ratio to the base rate names its denominator (108/5,848 on the pair space, 108/5,849 on all days);
+  - "fall" is a fall of 3% or more (R <= -3%), the brief's term;
   - no simulation, so no random generator.
 Values quoted from earlier modules (LM4, LM5) are recomputed or restated and marked in plans/vol-3-anchors.md.
 
@@ -93,7 +95,8 @@ def compute(proc: Path) -> dict[str, str]:
     gstar = 0.5 * log(1.5) + 0.5 * log(0.75)
     V["lm04"] = f"f* {g(fstar)}; g* {g(gstar)} (printed 25 and 5.889% in lm04.md:345)"
     V["limit"] = "7% to 10% on 2015-06-01 (printed in lm05.md:364)"
-    V["gh"] = "16%; 46% and 50% (quoted: Gigerenzer and Hoffrage 1995, Study 1)"
+    V["gh"] = ("probability formats 16% (standard menu), 28% (short menu); frequency formats 46% (standard menu), "
+               "50% (short menu) (quoted: Gigerenzer and Hoffrage 1995, Study 1)")
 
     # ---- sample
     V["sample"] = f"closes {len(tr)}; T {T}; returns {rd[0]} .. {rd[-1]}"
@@ -126,8 +129,10 @@ def compute(proc: Path) -> dict[str, str]:
     pA_pairs = nA / nP
     V["hit"] = f"{nAB}/{nA} = {pct(hit)}"
     V["fa"] = f"{nB - nAB}/{nP - nA} = {pct(fa)}"
-    V["pAB"] = f"{nAB}/{nB} = {pct(nAB / nB)}; days per crash {g(nB / nAB)}"
-    V["ratio"] = f"Pr(A given B)/Pr(A), Pr(A) = {nA}/{nP}: {g((nAB / nB) / pA_pairs)}"
+    V["pAB"] = f"{nAB}/{nB} = {pct(nAB / nB)}; days per fall {g(nB / nAB)}"
+    nc_all = int(crash.sum())
+    V["ratio"] = (f"Pr(A given B)/Pr(A), Pr(A) = {nA}/{nP} (pair space): {g((nAB / nB) / pA_pairs)}; "
+                  f"with Pr(A) = {nc_all}/{T} (all days): {g((nAB / nB) / (nc_all / T))}")
     V["inv"] = f"Pr(B given A)/Pr(A given B) = {g(hit / (nAB / nB))}"
 
     # ---- knowledge checks
@@ -157,8 +162,8 @@ def compute(proc: Path) -> dict[str, str]:
     y2, t2 = f2[:-1], f2[1:]
     ny, nt, nb2, nu2 = int(y2.sum()), int(t2.sum()), int((y2 & t2).sum()), int((y2 | t2).sum())
     assert nu2 == ny + nt - nb2
-    V["venn"] = (f"yesterday {ny}, today {nt}, both {nb2}, either {nu2}; regions {ny - nb2}, {nb2}, {nt - nb2}, "
-                 f"{nP - nu2}")
+    V["venn"] = (f"today (A) {nt}, yesterday (B) {ny}, both {nb2}, either {nu2}; regions A only {nt - nb2}, "
+                 f"both {nb2}, B only {ny - nb2}, neither {nP - nu2}")
 
     # ---- X3: crash share by yesterday's return, buckets (lo, hi] in %
     yR = R[:-1]
@@ -197,7 +202,7 @@ def compute(proc: Path) -> dict[str, str]:
                      f"hit {ab_in}/{a_in} = {pct(ab_in / a_in)}")
     i_s = rd.index("2015-05-29")
     parts.append(f"straddling pair {rd[i_s]} ({pct(R[i_s])}) -> {rd[i_s + 1]} ({pct(R[i_s + 1])}): "
-                 f"crash {bool(crash[i_s + 1])}, big {bool(big[i_s])}")
+                 f"fall {bool(crash[i_s + 1])}, big {bool(big[i_s])}")
     V["x5"] = "; ".join(parts)
 
     # ---- X6: the empirical distribution function at three points
@@ -255,11 +260,12 @@ def compute(proc: Path) -> dict[str, str]:
                f"Pr(today) {nt}/{nP} = {pct(nt / nP)}; independent both {nP}*0.0431^2 = {g(nP * 0.0431 ** 2)}, "
                f"exact {g(nP * (ny / nP) * (nt / nP))}")
 
-    # ---- E3: crash after crash
+    # ---- E3: a fall after a fall
     yA = crash[:-1]
     ncc = int((yA & A).sum())
     V["e3"] = (f"{ncc} of {int(yA.sum())} = {pct(ncc / yA.sum())}; both {ncc}/{nP} = {pct(ncc / nP)}; "
-               f"ratio to base rate {g((ncc / yA.sum()) / pA_pairs)} (printed 12.04/1.85 = {g(12.04 / 1.85)}); "
+               f"ratio to the base rate {nA}/{nP} (pair space) {g((ncc / yA.sum()) / pA_pairs)}, to {nc_all}/{T} "
+               f"{g((ncc / yA.sum()) / (nc_all / T))} (printed 12.04/1.85 = {g(12.04 / 1.85)}); "
                f"pairs if independent {g(nP * (int(yA.sum()) / nP) * pA_pairs)}")
 
     # ---- E4: inside the tail
@@ -268,7 +274,7 @@ def compute(proc: Path) -> dict[str, str]:
     V["e4"] = (f"Pr(R<=-5% given R<=-3%) {n5}/{nc} = {pct(n5 / nc)}; Pr(R<=-4% given R<=-3%) {n4}/{nc} = {pct(n4 / nc)}; "
                f"mean R of the {nc} days {pct(R[crash].mean())}")
 
-    # ---- E6 and P6: at least one crash in a block
+    # ---- E6 and P6: at least one fall in a block
     p1 = nc / T
 
     def blocks(n: int) -> tuple[int, int, int]:
@@ -279,7 +285,7 @@ def compute(proc: Path) -> dict[str, str]:
     nb20, left20, hit20 = blocks(20)
     V["e6"] = (f"Pr(A) = {nc}/{T} = {pct(p1)}; model 1-(1-108/5849)^20 = {pct(1 - (1 - p1) ** 20)}; "
                f"from the printed 1.8465%: {pct(1 - (1 - 0.018465) ** 20)}; blocks {nb20}, left out {left20}, "
-               f"with a crash {hit20} ({pct(hit20 / nb20)}); model blocks {g(nb20 * (1 - (1 - p1) ** 20))}, "
+               f"with a fall {hit20} ({pct(hit20 / nb20)}); model blocks {g(nb20 * (1 - (1 - p1) ** 20))}, "
                f"from the printed 31.1%: {g(nb20 * 0.311)}")
 
     # ---- E7: total probability and Bayes across the regimes
@@ -318,8 +324,11 @@ def compute(proc: Path) -> dict[str, str]:
     # ---- E10 and P9: wealth multiples at f = 25 (1 + 25 x 2% = 1.5, 1 - 25 x 1% = 0.75)
     up_m, dn_m = 1 + fstar * 0.02, 1 - fstar * 0.01
     vals2 = {"++": up_m ** 2, "+-": up_m * dn_m, "--": dn_m ** 2}
+    hl = [log(v) / 2 for v in vals2.values()]
     V["e10"] = (f"X = {', '.join(g(v) for v in vals2.values())}; pmf 1/4, 1/2, 1/4; F_X(1) = 1/4; "
-                f"half-logs {', '.join(pct(log(v) / 2) for v in vals2.values())}")
+                f"half-logs {', '.join(pct(h) for h in hl)}; weighted average 1/4, 1/2, 1/4 "
+                f"{pct(hl[0] / 4 + hl[1] / 2 + hl[2] / 4)} (g* {pct(gstar)}); of the printed 40.55, 5.889, -28.77: "
+                f"{40.55 / 4 + 5.889 / 2 - 28.77 / 4:.6f}%")
     v3: dict[float, int] = {}
     for seq in product((up_m, dn_m), repeat=3):
         v = round(seq[0] * seq[1] * seq[2], 9)
@@ -350,18 +359,20 @@ def compute(proc: Path) -> dict[str, str]:
                f"{int((e0 & e1).sum())}, 1-3 {int((e0 & e2).sum())}, 2-3 {int((e1 & e2).sum())}; all three "
                f"{int((e0 & e1 & e2).sum())}; union {un3} ({pct(un3 / n3)}); bound {s3} ({pct(s3 / n3)})")
 
-    # ---- P5: three down days in a row
+    # ---- P5: three down days in a row, everything inside the 5,847 triples
     d0, d1, d2 = down[:-2], down[1:-1], down[2:]
     c0, c01, c012 = int(d0.sum()), int((d0 & d1).sum()), int((d0 & d1 & d2).sum())
+    m0, m1, m2 = c0 / n3, int(d1.sum()) / n3, int(d2.sum()) / n3
     V["p5"] = (f"{c0}/{n3} = {g(c0 / n3)}, {c01}/{c0} = {g(c01 / c0)}, {c012}/{c01} = {g(c012 / c01)}; product of "
                f"the printed 0.4519 x 0.4637 x 0.4424 = {pct(0.4519 * 0.4637 * 0.4424)}; exact {c012}/{n3} = "
-               f"{pct(c012 / n3)}; independence ({int(down.sum())}/{T})^3 = {pct(down.mean() ** 3)}, from 0.45204 "
-               f"{pct(0.45204 ** 3)}, from 0.4520 {pct(0.4520 ** 3)}")
+               f"{pct(c012 / n3)}; day margins in the triples {c0}, {int(d1.sum())}, {int(d2.sum())} of {n3} = "
+               f"{g(m0)}, {g(m1)}, {g(m2)}; independence, their product {pct(m0 * m1 * m2)}, from the printed "
+               f"0.4519 x 0.4520 x 0.4522 = {pct(0.4519 * 0.4520 * 0.4522)}")
 
     # ---- P6: the fifty-fifty horizon
     nb38, left38, hit38 = blocks(38)
     V["p6"] = (f"n = ln 0.5/ln(1 - 108/5849) = {g(log(0.5) / log(1 - p1))}; at 37 {pct(1 - (1 - p1) ** 37)}, at 38 "
-               f"{pct(1 - (1 - p1) ** 38)}; blocks of 38: {nb38}, left out {left38}, with a crash {hit38} "
+               f"{pct(1 - (1 - p1) ** 38)}; blocks of 38: {nb38}, left out {left38}, with a fall {hit38} "
                f"({pct(hit38 / nb38)})")
 
     # ---- P7: falls of 5% or more by regime
@@ -388,7 +399,7 @@ def compute(proc: Path) -> dict[str, str]:
     idx = np.arange(5, T)
     prev = np.array([ge(absR[i - 5:i], 0.02).any() for i in idx])
     cw = crash[idx]
-    V["lab5"] = (f"days {len(idx)}; crashes with abs(R) >= 2% in the previous five sessions {int((prev & cw).sum())}/"
+    V["lab5"] = (f"days {len(idx)}; falls with abs(R) >= 2% in the previous five sessions {int((prev & cw).sum())}/"
                  f"{int(cw.sum())} = {pct((prev & cw).sum() / cw.sum())}")
 
     # ---- data trap: total minus price return

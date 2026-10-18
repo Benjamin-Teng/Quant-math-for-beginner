@@ -6,9 +6,11 @@ simple daily return, null on the first row; built and checked by data/vol3_serie
 Conventions: T = 5,849 returns from 2003-01-03; log returns r = ln(1 + R); moments with divisor T; years = calendar
 days between the first and last close / 365.25; A = T / years; a model horizon of tau years is m = round(A * tau)
 whole sessions. Counts against a threshold use the book's guard (R > 1e-12 for an up day) and are checked exactly
-with Fraction on the two-decimal closes. LM17 simulates nothing, so no random generator is created. Numbers printed
-by earlier modules are echoed as printed (file:line in plans/vol-3-anchors.md); numbers owned by LM14 and LM15 are
-recomputed here.
+with Fraction on the two-decimal closes. LM17 simulates nothing, so no random generator is created (the book's seed
+rule, default_rng([e, 20261011]), does not arise). Numbers printed by earlier modules are echoed as printed (file:line
+in plans/vol-3-anchors.md); numbers owned by LM14 and LM15 are recomputed here. The comparison with LM15's annual fit
+refits the daily model to the returns dated 2003-01-03 to 2025-12-31 (calendar years 2003-2025, 2003 from its first
+close). Anchors A17-93 and later were added in the revision after the fresh check, so earlier IDs keep their numbers.
 
 Prints one line per anchor, "A17-NN <value>", in ID order, and writes nothing.
 
@@ -180,7 +182,7 @@ put(f"paths {2**n_rounds}; E W10 {ew10:.5f}; Pr(j>=7) {Fraction(sum(comb(10, j) 
     f" = {176 / 1024:.6f}; contribution {float(contrib):.4f} = {float(contrib) / ew10:.4%}")  # 40
 put(f"A gbar(1) {A * gbar(1):.4%}; A ln(1+Rbar) {A * log(1 + Rb):.4%}; f* {fstar:.4f}, "
     f"A gbar(f*) {A * gbar(fstar):.4%}; zero growth {fzero:.4f}")              # 41
-put(f"1/abs(R_min) {fmax:.4f}; R_min {R[i_min]:.4%} on {dates[i_min]}")           # 42
+put(f"1/abs(R_(1)) {fmax:.4f}; R_(1) {R[i_min]:.4%} on {dates[i_min]}")           # 42
 put("f* = 25, g* = 5.889% (printed in lm04.md:345)")                           # 43
 gs = 0.5 * log(1.5) + 0.5 * log(0.75)
 sg = log(2) / 2
@@ -212,14 +214,19 @@ for y in range(2003, 2026):
     if ret < 0:
         losses.append(f"{y} {float(ret):.2%}")
 put(f"{len(losses)} of 23: " + ", ".join(losses))                               # 50
-put(f"23 x {row(m1)[4]:.6f} = {23 * row(m1)[4]:.4f}; 23 x 0.2374 = {23 * 0.2374:.4f}")  # 51
+in_win = np.array([d <= "2025-12-31" for d in dates])
+r_w = r[in_win]
+rb_w, sr_w = float(r_w.mean()), float(r_w.std())
+p_w = float(stats.norm.cdf(-rb_w * sqrt(m1) / sr_w))
+put(f"{len(r_w)} returns to {dates[int(np.flatnonzero(in_win)[-1])]}: Pr(W_246 < W0) {p_w:.6f}; "
+    f"23 x = {23 * p_w:.4f}")                                                  # 51
 gp, sp = 0.00055170, 0.012107
 qs = (exp(m10 * gp - 1.645 * sp * sqrt(m10)), exp(T * gp - 1.645 * sp * sqrt(T)), exp(T * gp + 1.645 * sp * sqrt(T)))
 put(f"rbar {rb:.6%}, s_r {sr:.5%}; from 0.055170%, 1.2107%, 1.645: ten-year 5% {qs[0]:.4f}, "
     f"sample 5% {qs[1]:.4f}, sample 95% {qs[2]:.2f}")                         # 52
 ms = (1, 2, 5, 10, 20, 60)
 put(", ".join(f"m={m}: {kurt_ex(overlap(r, m)):.5f}" for m in ms))              # 53
-put(", ".join(f"{5.428 / m:.4f}" for m in ms) + f"; 5.43/2 = {5.43 / 2:.4f}")  # 54
+put(", ".join(f"{5.428 / m:.5f}" for m in ms))                               # 54
 put(f"{kurt_ex(R):.4f}")                                                       # 55
 nw = T // 20
 k_first = kurt_ex(r[: nw * 20].reshape(nw, 20).sum(axis=1))
@@ -250,7 +257,7 @@ j100 = int(np.floor((100 * log(1.25) / log(2) + 100) / 2)) + 1
 put(f"E W {1.25**100:.4e}; Pr(j>={j100}) {float(stats.binom.sf(j100 - 1, 100, 0.5)):.4e}; "
     f"Pr(j<=49) {float(stats.binom.cdf(49, 100, 0.5)):.4f}")                  # 66
 put(f"1.05; {0.5 * log(0.9):.5f}; {sqrt(0.9):.5f}")                            # 67
-put(f"Rbar {Rb:.8%}, rbar {rb:.8%}; gap from 7 s.f. {1e4 * (log(1.0006250506) - 0.0005516962):.5f} bp; "
+put(f"Rbar {Rb:.7%}, rbar {rb:.7%}; gap from 6 s.f. {1e4 * (log(1.000625051) - 0.000551696):.5f} bp; "
     f"from 0.062505%, 0.055170%: {1e4 * (log(1.00062505) - 0.00055170):.5f} bp")  # 68
 need = (Z95 * sr / delta) ** 2
 need_p = (1.645 * 0.012107 / 0.7316e-4) ** 2
@@ -273,8 +280,8 @@ dd = 1 - w / np.maximum.accumulate(w)
 put(f"{dd.max():.4%} at {dates_all[int(dd.argmax())]}")                       # 74
 put(f"{thr:.7f} (printed 0.41504, lm04.md:366)")                               # 75
 c10 = coin(10)
-put(f"g* {gs:.7f}; sigma {sg:.7f}; z {c100[3]:.6f}; n=100 exact {c100[0]:.6f}, normal {c100[1]:.7f}, "
-    f"cc {c100[2]:.6f}; normal minus 0.0446355 {c100[1] - 0.0446355:.2e}; n=10 exact {c10[0]:.6f}, "
+put(f"g* {gs:.7f}; sigma_r {sg:.7f}; z {c100[3]:.6f}; n=100 exact {c100[0]:.6f}, normal {c100[1]:.7f}, "
+    f"cc {c100[2]:.6f}; normal minus the boundary 0.044635 {c100[1] - 0.044635:.2e}; n=10 exact {c10[0]:.6f}, "
     f"normal {c10[1]:.6f}, cc {c10[2]:.6f}")                                   # 76
 put(f"{1.96**2 * 0.25 / 0.01**2:.2f}")                                         # 77
 put("1.96 (printed in lm04.md:541)")                                           # 78
@@ -286,7 +293,7 @@ for y in range(2003, 2026):
     ann.append(log(float(trf[year_end[str(y)]] / trf[base])))
 la = np.array(ann)
 put(f"annual log returns mean {la.mean():.5f}, sd {la.std():.5f}; Pr(G<1) {float(stats.norm.cdf(-la.mean() / la.std())):.5f}; "
-    f"s_r sqrt(246) {sr * sqrt(m1):.5f}")                                     # 80
+    f"daily model on 2003-2025: 246 rbar {m1 * rb_w:.5f}, sqrt(246) s_r {sqrt(m1) * sr_w:.5f}")  # 80
 ar = np.abs(r)
 put(f"r lag 1 {corr(r[:-1], r[1:]):.4f}; abs(r) lag 1 {corr(ar[:-1], ar[1:]):.4f}; abs(r) lag 20 {corr(ar[:-20], ar[20:]):.4f}")  # 81
 put(", ".join(f"n={n}: {2 * float(stats.norm.sf(sqrt(n))):.4g}" for n in (1, 4, 25)))  # 82
@@ -307,5 +314,13 @@ rm = A * np.cumsum(r) / n_
 lo_r = 245 + int(rm[245:].argmin())
 put(f"n=246 {rm[245]:.4%}; min {rm[lo_r]:.4%} ({dates[lo_r]}); end {rm[-1]:.4%}")  # 91
 put(f"{sr * sqrt(T):.6f}; exp {exp(sr * sqrt(T)):.4f}")                         # 92
+# ---------------------------------------------------------------- added after the fresh check
+i25 = year_end["2025"]
+put(f"{dates_all[i25]} {float(trf[i25]):.2f} -> {dates_all[-1]} {float(trf[-1]):.2f}: "
+    f"{float(trf[-1] / trf[i25] - 1):.4%}")                                    # 93 the 2026 rise
+nw60 = T // 60
+k60 = kurt_ex(r[: nw60 * 60].reshape(nw60, 60).sum(axis=1))
+k60_off = [kurt_ex(r[o : o + (T - o) // 60 * 60].reshape(-1, 60).sum(axis=1)) for o in range(60)]
+put(f"first return {k60:.4f} ({nw60} windows); offsets 0-59 {min(k60_off):.4f} to {max(k60_off):.4f}")  # 94
 
 print("\n".join(OUT))

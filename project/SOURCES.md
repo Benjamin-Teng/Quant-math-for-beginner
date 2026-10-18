@@ -228,8 +228,9 @@ Every registered FinMind file is fetched, and re-checked byte for byte, through 
   ([pages.ucsd.edu](https://pages.ucsd.edu/~scoulson/203/GG_How_1995.pdf)). Corrected: the paper does not use the term
   "natural frequencies" (a text search finds none); its terms are "frequency formats" and "natural sampling", with
   "standard" and "short" menus. Study 1: 46% (standard menu) and 50% (short menu) Bayesian answers in frequency
-  formats, against 16% and 28% in probability formats, so "from 16% to as much as 50%". A text that says "natural
-  frequencies" must attribute the term to later work, which was not checked.
+  formats, against 16% and 28% in probability formats, so from 16% to 46% with the standard menu and from 28% to 50%
+  with the short menu (each comparison within one menu). A text that says "natural frequencies" must attribute the term
+  to later work, which was not checked.
 - O'Neill, "PCG: A Family of Simple Fast Space-Efficient Statistically Good Algorithms for Random Number Generation",
   Technical Report HMC-CS-2014-0905, Harvey Mudd College Computer Science Department, Claremont, CA, issued
   5 September 2014, 58 pp. — [pcg-random.org/paper.html](https://www.pcg-random.org/paper.html) and the
@@ -262,7 +263,11 @@ Every registered FinMind file is fetched, and re-checked byte for byte, through 
   snippets of the CUP edition, which use the same numbers. §2.4, Theorem 2.4.1 (Etemadi): pairwise independent,
   identically distributed, E|Xᵢ| < ∞ ⇒ Sₙ/n → EXᵢ a.s. (print p. 65); §2.5, Theorem 2.5.10: the same for iid (print
   p. 74); Theorem 2.3.8: E|Xᵢ| = ∞ ⇒ P(|Xₙ| ≥ n i.o.) = 1, so E|Xᵢ| < ∞ is necessary; Theorem 2.2.14: the weak law
-  for iid with E|Xᵢ| < ∞. The PDF's pages differ from print: cite theorem numbers.
+  for iid with E|Xᵢ| < ∞. The PDF's pages differ from print: cite theorem numbers. Also read in the PDF (2026-10-18;
+  this number not compared with the print edition): §2.1.4 "Constructing Independent Random Variables" asks whether
+  independent random variables exist and builds an infinite sequence X₁, X₂, … with given distribution functions on
+  ℝ^ℕ by Theorem 2.1.21 (Kolmogorov's extension theorem): consistent probability measures μₙ on (ℝⁿ, ℛⁿ) have a unique
+  extension P to (ℝ^ℕ, ℛ^ℕ). LM13 cites it for the existence of infinitely many independent trades.
 - Blitzstein & Hwang, section numbers now verified (read 2026-10-18) in the authors' free edition. probabilitybook.net
   redirects to [Google Drive](https://drive.google.com/file/d/1VmkAAGOYCTORq1wxSQqy255qLJjTNvBI/view): file "Blitzstein
   Hwang Probability.pdf", shared from the first author's account, downloads disabled, read through the viewer's page
@@ -287,7 +292,10 @@ Every registered FinMind file is fetched, and re-checked byte for byte, through 
   (p. 64); Jensen Theorem 4.9 (p. 66); WLLN Theorem 5.6 (§5.3, p. 76, proof assumes σ < ∞); CLT Theorem 5.8 (§5.4,
   p. 77); **strong law Theorem 5.18** (§5.7.1, p. 81): iid with E|X₁| < ∞ ⇒ X̄ₙ → μ a.s.; bootstrap variance (8.1)
   (§8.2, p. 109, divisor B).
-- Grinstead & Snell, further locations (CHANCE PDF, read 2026-10-18): §4.1 Theorem 4.1 (independence iff product),
+- Grinstead & Snell, further locations (CHANCE PDF, read 2026-10-18): §6.3 Theorem 6.10 (for real-valued random
+  variables with densities, E(X + Y) = E(X) + E(Y) and E(cX) = cE(X); "The proof is very similar to the proof of
+  Theorem 6.2, and we omit it"; no independence is assumed), which LM14 cites for (14.3) with densities;
+  §4.1 Theorem 4.1 (independence iff product),
   Exercise 7 (pairwise but not mutually independent), Exercise 17 (complements of independent events), Exercise 33;
   §8.2 Example 8.8 (the average of n standard Cauchy variables is standard Cauchy; also §7.2 Example 7.6 and §10.3 by
   characteristic functions); §10.3 "Sketch of the Proof of the Central Limit Theorem" (bounded continuous variables,
@@ -434,7 +442,10 @@ every numeric check ran in the project's venv (NumPy 2.5.3, SciPy 1.18.1).
   distribution and distribution function entries give 分布 first, 分配 second; the mathematics listing pairs "分布；分配" in most compounds but has 分布
   alone for distribution function, conditional distribution and convergence in distribution; 條件分配 and 分配收斂
   appear only in the economics and psychology listings; 高中以下數學名詞 lists both forms. LM5 prints 分配 three times
-  (累積分配函數, 常態分配函數, 常態分配); 累積分配函數 and 常態分配 are listed mathematics forms. Not in 樂詞網, composed from listed parts:
+  (累積分配函數, 常態分配函數, 常態分配); 累積分配函數 and 常態分配 are listed mathematics forms. Quantile-quantile (Q-Q) plot:
+  分位數-分位數點圖 (統計學名詞; found by the queries `QQ plot`, `Q-Q plot` and `Q-Q`, rechecked 2026-10-18). Independent
+  identically distributed (iid): 獨立同分布[的] (數學名詞); 統計學名詞 has only the noun phrase 獨立且相同分布隨機變數.
+  Gambler's fallacy: 賭者謬誤 (統計學名詞, query `fallacy`). Not in 樂詞網, composed from listed parts:
   檢察官謬誤, 標準化動差, 全變異數法則, 條件相關係數, 超越相關係數, 放回重抽樣; the law of the unconscious statistician has
   no entry and keeps its English name; the printed 尾部指數 and 超額峰態 are not in 樂詞網 either.
 

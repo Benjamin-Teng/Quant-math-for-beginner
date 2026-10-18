@@ -8,8 +8,12 @@ LM16 does not read TR23 (plans/vol-3.md, "Data"). Writes nothing.
 Conventions: T = 4,382 simple price returns R_t = P_t / P_{t-1} - 1 between consecutive rows, from 2008-12-02;
 moments divide by T; years = calendar days / 365.25; A = T / years. Counts against a threshold use the guard
 (<= -x + 1e-12, >= x - 1e-12; "inside" d^2 <= k^2 + 1e-12) and the counts on returns are recounted exactly with
-Fraction on the two-decimal closes. LM16 draws no random numbers. A value computed "from printed inputs" uses the
-inputs at the precision the brief prints them.
+Fraction on the two-decimal closes. LM16 draws no random numbers (no seed). A value computed "from printed inputs"
+uses the inputs at the precision the brief prints them.
+
+Revised 2026-10-18 after the fresh check: A16-46 (the widget's four-point interpolation, error over the whole slider
+range) and A16-67 (Problem 7 from the printed mean -1.37) changed; A16-79 (eigenvalues of the pair's covariance
+matrix by (11.2)) and A16-80 (E10 from unrounded inputs) are new.
 
 Run from the repository root (an optional first argument gives the repository root):
     PYTHONUTF8=1 uv run python data/vol3_anchors_lm16.py
@@ -26,7 +30,7 @@ from pathlib import Path
 import numpy as np
 import polars as pl
 from numpy.typing import NDArray
-from scipy import integrate, stats
+from scipy import integrate, special, stats
 from scipy.linalg import solve_triangular
 
 ROOT = Path(sys.argv[1]).resolve() if len(sys.argv) > 1 else Path(__file__).resolve().parents[1]
@@ -114,7 +118,7 @@ put("rho", g(rho))
 put("means", g(100 * m1), g(100 * m2))
 put("sds", g(100 * s1), g(100 * s2))
 
-# LM10's three days, from its printed two-decimal returns (lm10.md:107-109)
+# LM10's three days, from its printed two-decimal returns (lm10.md:106-108)
 r1p = np.array([-9.95, -3.99, -4.47])
 r2p = np.array([-9.89, 0.53, -5.61])
 put("rho3", g(corr(r1p, r2p)))
@@ -280,15 +284,25 @@ sel5 = (x1 >= -0.055 - EPS) & (x1 <= -0.045 + EPS)
 put("E7data", int(sel5.sum()), g(100 * float(x2[sel5].mean())), g(100 * float(x2[sel5].std())),
     int((x2[sel5] <= -0.03 + EPS).sum()))
 
-# P7: Semiconductor = -3%
+# P7: Semiconductor = -3%. The mean is printed -1.37; z and both probabilities follow from that printed mean and the
+# printed standard deviations 0.996 and 1.2173 (PITFALLS section 7).
 cm3 = M2 + beta * (-3 - M1)
-put("P7", g(cm3), g((-2 - cm3) / csd), g(float(stats.norm.cdf((-2 - cm3) / csd))),
-    g(float(stats.norm.cdf((-2 - cm3) / S2))), g(M2 + RH * (-3 - M1)))
+assert f"{cm3:.2f}" == "-1.37" and f"{csd:.3f}" == "0.996"
+z7 = (-2 + 1.37) / 0.996
+put("P7", g(cm3), g(z7), g(float(stats.norm.cdf(z7))), g(float(stats.norm.cdf((-2 + 1.37) / S2))),
+    g(M2 + RH * (-3 - M1)))
 
 # ------------------------------------------------------------------ contours and X6
 put("X5", *(g(100 * (1 - math.exp(-k * k / 2))) for k in (1, 2, 3)),
     *(g(100 * float((d2 <= k * k + EPS).mean())) for k in (1, 2, 3)))
 put("X5S", g(1e4 * s1**2, 7), g(1e4 * c12, 7), g(1e4 * s2**2, 7))
+# Contour axes: (11.2) on X5's printed entries (%^2); semi-axes sqrt(lambda) at k = 1 (% a day), along q_1, q_2
+tr2, det2 = 2.323354 + 1.481729, 2.323354 * 1.481729 - 1.066603**2
+lam1 = tr2 / 2 + math.sqrt(tr2**2 / 4 - det2)
+lam2 = tr2 / 2 - math.sqrt(tr2**2 / 4 - det2)
+ev2 = np.linalg.eigvalsh(1e4 * cov0(np.column_stack([x1, x2])))
+assert abs(ev2[1] - lam1) < 1e-5 and abs(ev2[0] - lam2) < 1e-5
+put("axes", g(lam1), g(lam2), g(math.sqrt(lam1)), g(math.sqrt(lam2)))
 put("X6pair", ", ".join(g(100 * math.exp(-k * k / 2), 6) for k in range(1, 6)),
     ", ".join(g(T * math.exp(-k * k / 2), 6) for k in range(1, 6)),
     ", ".join(str(outside(d2, k * k)) for k in range(1, 6)))
@@ -389,8 +403,10 @@ put("X9rise", ", ".join(str(t[0]) for t in rise), ", ".join(g(t[1]) for t in ris
 put("vtrunc", ", ".join(g(v_two(k)) for k in (1.0, 2.0, 2.5)), ", ".join(g(v_low(k)) for k in (1.0, 2.0, 2.5)))
 put("ell2", g(float(stats.norm.pdf(2.0)) / float(stats.norm.cdf(-2.0))))
 
-# E10: Semiconductor on 7-9 April 2025 in standard deviations, from printed inputs
+# E10: Semiconductor on 7-9 April 2025 in standard deviations, from printed inputs; then from unrounded returns and
+# moments (9 April moves from -2.99 to -3.00, so the text keeps "from printed inputs")
 put("E10", *(g((r_ - M1) / S1) for r_ in r1p))
+put("E10u", *(g(float((x1[i7 + j] - m1) / s1)) for j in range(3)))
 # P10 and KC7: (16.10) from printed inputs
 put("P10", g(bgl(RH, 5.7464)), g(bgl(RH, 0.1143)))
 put("KC7", g(bgl(RH, 2.5251)))
@@ -421,20 +437,62 @@ reg = np.array([d_ <= "2015-05-29" for d_ in dates])
 put("regimes", int(reg.sum()), int((~reg).sum()), g(corr(x1[reg], x2[reg])), g(corr(x1[~reg], x2[~reg])),
     int((~(d2[reg] <= 9 + EPS)).sum()), int((~(d2[~reg] <= 9 + EPS)).sum()))
 
-# ------------------------------------------------------------------ widget: interpolation in a rho grid of step 0.01
-kgrid = [0.05 * j for j in range(51)]
-err = 0.0
-for k in kgrid:
-    lo_r, hi_r = 0.57, 0.58
-    c_lo, c_hi, c_ex = bvn_lower(lo_r, k)[1], bvn_lower(hi_r, k)[1], bvn_lower(RH, k)[1]
-    err = max(err, abs(c_lo + (RH - lo_r) / 0.01 * (c_hi - c_lo) - c_ex))
-put("grid", g(err, 4))
-p_lo, c_lo2 = bvn_lower(0.57, 2.0)
-p_hi, c_hi2 = bvn_lower(0.58, 2.0)
-wgt = (RH - 0.57) / 0.01
-assert f"{c_lo2 + wgt * (c_hi2 - c_lo2):.3f}" == "0.156"          # the widget's initial state
-assert f"{p_lo + wgt * (p_hi - p_lo):.4f}" == "0.0051"
-assert f"{T * (p_lo + wgt * (p_hi - p_lo)):.1f}" == "22.4"
+# ------------------------------------------------------------------ widget: the rho grid (step 0.01) and its error
+# The widget interpolates the joint-event grid in rho by four-point Lagrange (cubic) interpolation; k moves on the
+# grid's own 0.05 steps. The error is measured over the whole slider range, rho = 0, 0.0001, ..., 0.95, at every k.
+GL_X, GL_W = np.polynomial.legendre.leggauss(600)
+
+
+def joint_low(rs: Vec, k: float) -> tuple[Vec, Vec]:
+    """bvn_lower vectorized over rs: Gauss-Legendre on [-14, -k] (checked against quad below)."""
+    c, lo = -k, -14.0
+    x = 0.5 * (c - lo) * GL_X + 0.5 * (c + lo)
+    w = 0.5 * (c - lo) * GL_W * np.exp(-0.5 * x * x) / math.sqrt(2 * math.pi)
+    r_ = rs[:, None]
+    sd = np.sqrt(1 - r_ * r_)
+    a = (c - r_ * x) / sd
+    big_phi, small_phi = special.ndtr(a), np.exp(-0.5 * a * a) / math.sqrt(2 * math.pi)
+    p1 = r_ * x * big_phi - sd * small_phi
+    p2 = (r_ * r_ * x * x + sd * sd) * big_phi - sd * (r_ * x + c) * small_phi
+    p, ex, ey = big_phi @ w, (x * big_phi) @ w, p1 @ w
+    exx, eyy, exy = (x * x * big_phi) @ w, p2 @ w, (x * p1) @ w
+    vx, vy = exx / p - (ex / p) ** 2, eyy / p - (ey / p) ** 2
+    return p, (exy / p - ex * ey / p**2) / np.sqrt(vx * vy)
+
+
+for r_chk, k_chk in ((0.57, 2.0), (rho, 1.0), (0.95, 2.5), (0.0, 0.0)):
+    pv, cv = joint_low(np.array([r_chk]), k_chk)
+    pq, cq = bvn_lower(r_chk, k_chk)
+    assert abs(pv[0] - pq) < 1e-12 and abs(cv[0] - cq) < 1e-12
+
+
+def lag4(yg: Vec, x: Vec, h: float = 0.01) -> Vec:
+    """Four-point Lagrange interpolation on the nodes 0, h, 2h, ... (the four nearest nodes, clamped at the ends)."""
+    i0 = np.clip(np.floor(x / h + 1e-9).astype(np.int64) - 1, 0, len(yg) - 4)
+    t = x / h - i0
+    out = np.zeros_like(x)
+    for a in range(4):
+        la = np.ones_like(x)
+        for b in range(4):
+            if b != a:
+                la = la * (t - b) / (a - b)
+        out = out + la * yg[i0 + a]
+    return out
+
+
+rgrid = np.asarray(np.arange(96) * 0.01, dtype=np.float64)
+rfine = np.asarray(np.arange(9501) * 1e-4, dtype=np.float64)
+err_c = err_p = 0.0
+for j in range(51):
+    pg, cg = joint_low(rgrid, 0.05 * j)
+    pf, cf = joint_low(rfine, 0.05 * j)
+    err_c = max(err_c, float(np.abs(lag4(cg, rfine) - cf).max()))
+    err_p = max(err_p, float(np.abs(lag4(pg, rfine) - pf).max()))
+put("grid", g(err_c, 4), g(err_p, 4), g(T * err_p, 4))
+pg2, cg2 = joint_low(rgrid, 2.0)
+c_init = float(lag4(cg2, np.array([RH]))[0])
+p_init = float(lag4(pg2, np.array([RH]))[0])
+assert f"{c_init:.3f}" == "0.156" and f"{p_init:.4f}" == "0.0051" and f"{T * p_init:.1f}" == "22.4"  # initial state
 
 ORDER = [
     "T", "years", "A", "repairs", "repairs_key", "rho", "rho3", "apr7", "d2apr7", "out9", "exp9", "logmom", "m",
@@ -442,7 +500,7 @@ ORDER = [
     "E4big", "X3", "X4", "X4tot", "X4printed", "means", "rho2", "X5S", "X5", "X6pair", "X6S5", "X8model", "X8low",
     "X8up", "X8prob", "X9two", "X9fall", "X9rise", "grid", "E1joint", "E1cond", "E2", "E3", "lm10S", "E5", "sds",
     "E7", "E7u", "E7data", "E9", "E9p", "E10", "P1", "P4", "P5", "P5w", "P6", "P6res", "P6b", "P7", "P8ret", "Lp",
-    "P8", "P8p", "P10", "py", "freeplan", "regimes", "rho3u", "lm7", "all28",
+    "P8", "P8p", "P10", "py", "freeplan", "regimes", "rho3u", "lm7", "all28", "axes", "E10u",
 ]
 assert sorted(ORDER) == sorted(OUT), set(OUT) ^ set(ORDER)
 for i, key in enumerate(ORDER, 1):
