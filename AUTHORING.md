@@ -193,7 +193,8 @@ note says why.
 |:--|:--|
 | $\Omega$, $\omega$ | sample space; an outcome (sequences of trades or days as $+$/$-$ strings) |
 | $\Pr(\cdot)$, $\Pr(B\mid A)$ | probability and conditional probability (`\mid`), never $P$, the price. Events are sets, $\{R\le-3\%\}$; capital letters $A$, $B$ for events only in a module that does not annualize (LM13), with $A^c$ the complement |
-| $\mathbf 1_A$, $\mathbf 1\{\cdot\}$ | indicator of an event, always with a subscript or braces (bold $\mathbf 1$ alone is the vector of ones) |
+| $\mathcal A$, $\mathcal B$ | an event in a general statement, in a module that annualizes, where $A$ is the annualization factor; LM13, which does not annualize, writes $A$, $B$ |
+| $\mathbf 1_{\mathcal A}$, $\mathbf 1\{\cdot\}$ | indicator of an event, always with a subscript or braces (bold $\mathbf 1$ alone is the vector of ones); $\E[\mathbf 1_{\mathcal A}]=\Pr(\mathcal A)$ is (14.1) |
 | $X$, $Y$, $Z$; $x$, $y$, $z$ | random variables and their values; $Z$ a standard normal; $R$ and $r$ are random returns. A module that writes random variables does not use the data matrix $X$ |
 | $\mathbf X$, $\mathbf Z$ | random vectors; $\mathbf Z$ a standard normal vector ($\mathbf z_t$ stays LM12's whitened data) |
 | $p_X$, $f_X$, $F_X$, $F_X^{-1}$; $\hat F$ | pmf, density, distribution function and quantile function $F_X^{-1}(u):=\min\{x:F_X(x)\ge u\}$, always subscripted ($f$ is an exposure, $p$ a win probability); empirical distribution function of a sample, mass $1/T$ on each observation |
@@ -203,7 +204,8 @@ note says why.
 | $\bar R$, $s$; $\bar r$, $s_r$; $g$, $\sigma_r$ | sample mean and standard deviation of $R$ and of $r$ (divisor $T$); model mean log return per day $g=\E[\ln(1+R)]$ and its standard deviation |
 | $\mathcal N$, $\mathcal N_N$, $t_\nu$, $\chi^2_N$, $\operatorname{Bin}(n,p)$, $\operatorname{Poisson}(\lambda)$, $\operatorname{Exp}(\lambda)$ | distributions; "iid" independent and identically distributed |
 | $n$, $\bar X_n$, $S_n$; $m$ | number of independent draws or trials, their mean and sum ($T$ stays the number of returns in a data sample); number of days summed or compounded in a model, whole sessions ($m=\operatorname{round}(A\tau)$) |
-| $j$, $R_{(j)}$; $k$ | the value of a count in a pmf, the $j$th smallest return; a number of standard deviations, $k\ge0$ |
+| $j$, $R_{(j)}$; $k$ | the value of a count in a pmf, the $j$th smallest return; a number of standard deviations, $k\ge0$, in a module without a required return |
+| $\eta$, $\zeta$ | constants in $\Var(\eta X+\zeta)$ (LM5's letters; $a$, $b$ are a bet's) |
 | $d^2$ | squared Mahalanobis distance $(\mathbf x-\boldsymbol\mu)^{\top}\Sigma^{-1}(\mathbf x-\boldsymbol\mu)$ |
 
 - Subscripted standard symbols are distinct symbols and may sit beside the table: $D_{\text{mod}}$, $D_{\text{Mac}}$,
@@ -213,7 +215,8 @@ note says why.
 - A star marks an optimum or a solution ($f^*$, $x^*$, $\Delta x^*$); do not use it for other special values.
 - Integer indices and counts ($i$, $j$, $k$, $m$, $n$ as a summation index, a step number, an order or a count) are
   not book-wide symbols, but each still has one meaning in a module, and a module that also uses the letter's table
-  meaning ($k$ a required return, $n$ a number of periods, $i$ a periodic rate) picks another letter for the index.
+  meaning ($k$ a required return or a number of standard deviations, $m$ a number of days, $n$ a number of periods or
+  draws, $i$ a periodic rate) picks another letter for the index.
   The notation note lists the counts a module uses.
 - In a module without bets, $a$ and $b$ may be generic constants (an expansion point, the ends of an interval),
   declared in the notation note.
@@ -318,8 +321,9 @@ note says why.
   remember that an untraded contract's settlement price is set by exchange rules.
 - Cite the dataset and retrieval date in the exhibit's `Source:` line.
 - Simulation (from Volume III): each simulated experiment (an example, a problem, an exhibit, a lab part) creates its
-  generator once, at its start, as `np.random.default_rng([20261011, k])` with $k$ the experiment's stated number, and
-  never reseeds it; the stem or note prints the seed. A printed Monte Carlo or bootstrap result states the number of
+  generator once, at its start, as `np.random.default_rng([e, 20261011])` with `e` the experiment's stated number
+  first, as NumPy recommends (varying IDs before the root seed), and never reseeds it; the stem or note prints the
+  seed. A printed Monte Carlo or bootstrap result states the number of
   draws, the seed and its standard error, and keeps only the digits its standard error supports. The numbers script
   re-runs it under the NumPy that `uv.lock` pins. Widgets simulate with `Book.rng(seed)` from a fixed initial state.
 

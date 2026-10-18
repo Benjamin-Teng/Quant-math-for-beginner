@@ -44,7 +44,8 @@ them).
   | $\Omega$, $\omega$ | sample space; an outcome; outcomes of trades or days written as $+$/$-$ strings ($\{++,+-,-+,--\}$) | new; $W$, $L$, $H$, $T$ are taken |
   | $A$, $B$; $A^c$ | events, in LM13 only (LM13 does not annualize); the complement. Other modules write events as sets, $\{R\le-3\%\}$, or name them in the note | $A$ annualizes elsewhere |
   | $\Pr(\cdot)$, $\Pr(B\mid A)$ | probability (LM5's symbol); conditional probability, `\mid` | never $P$, the price |
-  | $\mathbf 1_A$, $\mathbf 1\{\cdot\}$ | indicator of an event, always with a subscript or braces; $\E[\mathbf 1_A]=\Pr(A)$ is LM14's tagged result | bold $\mathbf 1$ alone stays the vector of ones; KaTeX has no blackboard 1 |
+  | $\mathcal A$, $\mathcal B$ | an event in a general statement, in a module that annualizes (LM14–LM18) | new; added to AUTHORING §6 |
+  | $\mathbf 1_{\mathcal A}$, $\mathbf 1\{\cdot\}$ | indicator of an event, always with a subscript or braces; $\E[\mathbf 1_{\mathcal A}]=\Pr(\mathcal A)$ is LM14's (14.1) | bold $\mathbf 1$ alone stays the vector of ones; KaTeX has no blackboard 1 |
   | $X$, $Y$, $Z$; $x$, $y$, $z$ | random variables, capitals; their values, lower case; $Z$ standard normal (LM5); $R$ and $r$ keep their meaning as random returns. In a purely mathematical passage of a module without yields, $y$ may be a generic coordinate or an integration variable, declared (LM15's gamma function) | Volume III does not use the data matrix $X$ (cite (10.2) by its tag) |
   | $\mathbf X$, $\mathbf Z$ | random vectors, bold capitals; $\mathbf Z$ a standard normal vector | $\mathbf z_t$ stays LM12's whitened data vector |
   | $p_X$, $f_X$, $F_X$, $F_X^{-1}$ | pmf, density, distribution function and quantile function $F_X^{-1}(u):=\min\{x:F_X(x)\ge u\}$ of $X$, always with the subscript; $F_R$ is a model's law of $R$ | $f$ is an exposure and $p$ a win probability |
@@ -82,13 +83,18 @@ them).
   within a module. Two recorded exceptions: LM18 uses LM12's *printed* S5 Cholesky factor as model parameters (it
   loads no U28 data); Volume I's 0050 samples are cited, never recomputed under another name.
 - **Return type.** Statistics of one day use simple returns $R$ (as LM5); sums over days use log returns $r$, labelled
-  "log returns" in every caption. One owner per statistic: LM15 owns TR23's tail and kurtosis figures on $R$ (the
-  lm05.md:369 promise); LM17 owns the kurtosis of $m$-day log-return sums and the lag correlations of $\lvert r\rvert$;
-  others cite them.
+  "log returns" in every caption. One owner per statistic, cited elsewhere by module: LM14 owns TR23's full-sample
+  moments of $\hat F$ (Skew −0.34, Kurt 8.27, excess kurtosis 5.27) and the bound tables; LM15 owns the tail measures
+  that need fewer moments (quantiles, exceedance counts, tail-index chords) and the fragility of the kurtosis (the
+  7 April 2025 jump, the removals, the top-ten shares, the two limit regimes), the lm05.md:369 promise; LM17 owns the
+  running sample kurtosis as a law of large numbers that does not settle (the lm05.md:366–368 promise, drawn in its
+  X9 and citing LM15's jump), the kurtosis of $m$-day log-return sums and the lag correlations of $\lvert r\rvert$;
+  LM13 owns the threshold counts it states first (108 days at or below −3%).
 - **Counting.** Every count against a threshold uses one guard (`<= -x + 1e-12`, `>= x - 1e-12`) or exact arithmetic
   (PITFALLS §5): two-decimal index levels make round returns exact ties.
 - **Simulation.** Each simulated experiment (an example, a problem, an exhibit, a lab part) creates its generator once,
-  at its start: `rng = np.random.default_rng([20261011, k])`, with $k$ the experiment's stated number, and never
+  at its start: `rng = np.random.default_rng([e, 20261011])`, with `e` the experiment's stated number first (NumPy's
+  recommended order: varying IDs before the root seed), and never
   reseeds inside it. Different $k$ give independent streams (NumPy's `SeedSequence`), so resizing one experiment
   leaves the others unchanged. The stem or note prints the seed. LM18's reproduction of LM12's lab keeps that lab's
   `default_rng(20261011)`. Every printed Monte Carlo or bootstrap result states the number of draws, the seed and its
@@ -108,7 +114,10 @@ them).
   found in Stage 1: Gigerenzer and Hoffrage (1995) say "frequency formats" and "natural sampling", not "natural
   frequencies" (16% Bayesian answers with probabilities against 46–50% with frequency formats); Blitzstein and Hwang's
   section numbers were inferred from a contents list and are checked in the book before printing; Efron and
-  Tibshirani's section number for the bootstrap standard error is from a secondary contents copy; Grinstead and Snell
+  Tibshirani's section number for the bootstrap standard error (§6.2, Algorithm 6.1, (6.6) with divisor $B-1$) was confirmed from
+  Google Books snippets; the general strong law (iid, $\E\lvert X\rvert<\infty$) is cited to Durrett (2019),
+  Theorem 2.4.1, or Wasserman (2004), Theorem 5.18 (Blitzstein and Hwang's Theorem 10.2.1 assumes a finite variance);
+  Grinstead and Snell
   have no Jensen inequality and no multivariate normal. Section and theorem numbers not in SOURCES are checked before
   they are printed.
 - **Chinese terms.** AUTHORING §1 (樂詞網, statistics or mathematics listing; English in parentheses at first use in
@@ -144,8 +153,12 @@ them).
   (`data/make_lab_data.py`): `taiex_tr.csv` (`date`, `price`, the raw TR23 closes) in LM13–LM15, LM17 and LM18; LM16's
   lab holds only the Volume II sector files and repair cell. Labs write "LM18", never `[[LM18]]` (the generator
   resolves only `ex:` and `eg:` labels).
-- **Problems.** Each stem states its sample, divisor, $A$, rounding and, for a simulation, the seed and the number of
-  draws (PITFALLS §7). Every distractor is computed and fails for a reason worth explaining.
+- **Problems.** Each stem states its sample, divisor, $A$, rounding, the quantile rule where a quantile is asked
+  ($R_{(\lceil uT\rceil)}$, `method="inverted_cdf"`), and, for a simulation, the seed and the number of draws
+  (PITFALLS §7). Every distractor is computed and fails for a reason worth explaining.
+- **Leads and tags.** A module's `leads` are the modules that cite one of its tags or that its text points to with
+  [[LMn]]; a tag's "users" list names only briefs that cite that tag. A module cites another module's exhibit or
+  example in words with [[LMn]] (the builder resolves `[[ex:…]]` only within the module being built).
 
 ## Capability check (2026-10-18)
 
@@ -172,7 +185,7 @@ follows them.
   compound daily rate, $\bar R-R_G=0.7320$ bp against $s^2/2=0.7301$ bp (LM3's (3.9)); LM17 cites LM14 for the daily
   gap and keeps the factor $38.66/25.20$ and $\Pr(W_m>\E W_m)$. C9: LM13 states independence for $n$ discrete random
   variables (product of pmfs; iid named); LM16 states the general $n$-variable definition, $\E[\prod g_i(X_i)]=\prod
-  \E[g_i(X_i)]$ and the variance of an $n$-term sum; LM13 gives no density version. C16: $\E[\mathbf 1_A]=\Pr(A)$ is
+  \E[g_i(X_i)]$ and the variance of an $n$-term sum; LM13 gives no density version. C16: $\E[\mathbf 1_{\mathcal A}]=\Pr(\mathcal A)$ is
   LM14's tagged result. C21: clustering is shown once per tool (LM13 conditional probability, LM15 overdispersion,
   LM16 uncorrelated against dependent, LM17 kurtosis of sums, LM18 what resampling destroys), with one LM26 pointer
   per module. C22: LM16 owns the sum rule (16.3); LM17 cites it and owns $\Var(\bar X_n)=\sigma^2/n$; LM18 states its
@@ -180,8 +193,9 @@ follows them.
   zero; LM17 owns the path statement behind lm04.md:304; LM16 cites LM13. C24: LM14 reuses LM13's two-trade space in
   $+$/$-$ notation and adds the median and the expectation; LM14's problems use another law.
 - **Models.** C2: LM15's lognormal fitted to the 23 calendar-year growth factors and LM17's iid daily model over one
-  year are both kept and named apart; each module prints the other's losing-year probability (30.0% against 23.7%)
-  in one sentence with the reason (independent days and √T scaling; LM19 tests it).
+  year are both kept and named apart, compared on the same window (2003–2025, 2003 from its first close): each module
+  prints the other's losing-year probability in one sentence with both reasons, the larger dispersion of annual log
+  returns and the different mean (LM19 tests the √T scaling).
 - **Inference edge.** C26: LM17 draws the model band without counting exits and gives the $n$ a precision needs as a
   model property, not applied to TR23; LM16 prints the model count's mean and standard deviation beside 177 without
   a ratio; LM18 keeps its bootstrap variance $s^2/T$ as a property of the bootstrap model and says that LM20 derives
@@ -212,6 +226,18 @@ follows them.
   LM18's; five years is $m=1{,}231$ sessions, and every module prints 5.49%; the $t$ model is a lab extension; the
   antithetic option stays in the widget because it shows when the method gains nothing; (18.9) is derived in a Deep
   Dive.
+
+## Editor's decisions after the fresh check (2026-10-18)
+
+A fresh check recomputed all 454 anchors from the raw files (all reproduced; A17-76's definition used the wrong rounding
+boundary) and checked the briefs' claims, cross-references and sources. Decided: the ownership split of "Return type"
+above (cross-check finding 1); $\mathcal A$ for an event in a general statement (finding 2); one leads rule (finding
+3); the median written as a value $x$, never $m$ (finding 4); $k$ scoped in AUTHORING (finding 5); exhibits of other
+modules cited in words (finding 6); NumPy's recommended seed order `[e, 20261011]` (sources); the general strong law
+cited to Durrett or Wasserman; LM16 defines $\chi^2_N$ (the law of a sum of $N$ independent squared standard
+normals, mean $N$), which LM21 and LM32 use; LM17's daily model is compared with LM15's annual fit on 2003–2025.
+Every module's other findings are applied as each report proposes unless a decision above says otherwise; each brief
+records any it declines.
 
 ## Stage 4 changes to earlier modules
 

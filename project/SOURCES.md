@@ -253,6 +253,48 @@ Every registered FinMind file is fetched, and re-checked byte for byte, through 
   (the Project Euclid page could not be fetched: bot challenge). Verified: inference uses only the tail behaviour,
   notably for Zipf-type tails 1 − G(y) = C y^(−α), through the conditional likelihood given the extreme order
   statistics. Not checked: the estimator's formula in the paper's text.
+- Durrett, *Probability: Theory and Examples*, 5th ed., Cambridge Series in Statistical and Probabilistic Mathematics
+  49, Cambridge University Press, 2019 (online 5 April, print 18 April 2019), 430 pp., hardback ISBN
+  978-1-108-47368-2, eBook ISBN 978-1-108-59103-4, DOI [10.1017/9781108591034](https://doi.org/10.1017/9781108591034)
+  — Crossref record and the [CUP page](https://www.cambridge.org/core/books/probability/DD9A1907F810BB14CCFF022CDFC5677A).
+  Verified (read 2026-10-18) in the author's free PDF ([PTE5_011119.pdf](https://sites.math.duke.edu/~rtd/PTE/PTE5_011119.pdf),
+  "Version 5 January 11, 2019", from [his page](https://sites.math.duke.edu/~rtd/PTE/pte.html)) and in Google Books'
+  snippets of the CUP edition, which use the same numbers. §2.4, Theorem 2.4.1 (Etemadi): pairwise independent,
+  identically distributed, E|Xᵢ| < ∞ ⇒ Sₙ/n → EXᵢ a.s. (print p. 65); §2.5, Theorem 2.5.10: the same for iid (print
+  p. 74); Theorem 2.3.8: E|Xᵢ| = ∞ ⇒ P(|Xₙ| ≥ n i.o.) = 1, so E|Xᵢ| < ∞ is necessary; Theorem 2.2.14: the weak law
+  for iid with E|Xᵢ| < ∞. The PDF's pages differ from print: cite theorem numbers.
+- Blitzstein & Hwang, section numbers now verified (read 2026-10-18) in the authors' free edition. probabilitybook.net
+  redirects to [Google Drive](https://drive.google.com/file/d/1VmkAAGOYCTORq1wxSQqy255qLJjTNvBI/view): file "Blitzstein
+  Hwang Probability.pdf", shared from the first author's account, downloads disabled, read through the viewer's page
+  images. Its title page reads "Second Edition ... © 2019 by Taylor & Francis Group, LLC". Its printed contents
+  (pp. vii–ix) confirm every section number above, and Recap, R and Exercises are numbered sections. Read in the text:
+  Theorem 4.5.1 LOTUS (discrete); Theorem 5.3.1 universality of the Uniform (F continuous, strictly increasing);
+  §10.1.1 Cauchy–Schwarz (Theorem 10.1.1), §10.1.2 Jensen (Theorem 10.1.5, equality iff g(X) = a + bX with
+  probability 1), §10.1.3 Markov (Theorem 10.1.10, P(|X| ≥ a) ≤ E|X|/a), Chebyshev (10.1.11), Chernoff (10.1.12);
+  §10.2 assumes iid with finite mean and **finite variance** and states the strong law (Theorem 10.2.1) and the weak
+  law (Theorem 10.2.2, proved by Chebyshev), plus item 10.2.4 on the gambler's fallacy; §10.3, Theorem 10.3.1 (CLT,
+  proved assuming an MGF; the MGF-to-CDF step is omitted). Not compared: the free edition's pages against the print.
+- Efron & Tibshirani, section and algorithm verified (read 2026-10-18) in Google Books' snippet view of the Chapman &
+  Hall/CRC printing ([gLlpIUxRntoC](https://books.google.com/books?id=gLlpIUxRntoC)). CIP "QA276.8.E3745 1993 ...
+  93-4489", ISBN 0-412-04231-2, preface dated June 1993. §6.2 "The bootstrap estimate of standard error" (p. 45);
+  Algorithm 6.1 "The bootstrap algorithm for estimating standard errors" (p. 47); (6.6) se_B = {Σ_b [θ̂*(b) −
+  θ̂*(·)]²/(B − 1)}^{1/2}, θ̂*(·) = Σ_b θ̂*(b)/B; (6.7) se_B → the ideal bootstrap estimate se_F̂(θ̂*) as B → ∞;
+  Figure 6.1 (p. 48). Wasserman's (8.1) (§8.2, p. 109) divides by B instead.
+- Wasserman, locations verified (read 2026-10-18) in Google Books snippets of ISBN 978-0-387-40272-7
+  ([th3fbFI1DaMC](https://books.google.com/books?id=th3fbFI1DaMC)): the three axioms in §1.3 (p. 5); Theorem 1.8,
+  continuity of probabilities (p. 7, before §1.4's heading); §2.10 (pp. 39–40), the N(μ, Σ) density (2.10) for Σ
+  symmetric positive definite and Theorem 2.43 (X = μ + Σ^{1/2}Z ~ N(μ, Σ), and conversely); Chebyshev Theorem 4.2
+  (p. 64); Jensen Theorem 4.9 (p. 66); WLLN Theorem 5.6 (§5.3, p. 76, proof assumes σ < ∞); CLT Theorem 5.8 (§5.4,
+  p. 77); **strong law Theorem 5.18** (§5.7.1, p. 81): iid with E|X₁| < ∞ ⇒ X̄ₙ → μ a.s.; bootstrap variance (8.1)
+  (§8.2, p. 109, divisor B).
+- Grinstead & Snell, further locations (CHANCE PDF, read 2026-10-18): §4.1 Theorem 4.1 (independence iff product),
+  Exercise 7 (pairwise but not mutually independent), Exercise 17 (complements of independent events), Exercise 33;
+  §8.2 Example 8.8 (the average of n standard Cauchy variables is standard Cauchy; also §7.2 Example 7.6 and §10.3 by
+  characteristic functions); §10.3 "Sketch of the Proof of the Central Limit Theorem" (bounded continuous variables,
+  mgf convergence; the step to distributions not proved).
+- Glasserman (2003), §4.2, p. 207 (Google Books snippet, [e9GWUsQkPNMC](https://books.google.com/books?id=e9GWUsQkPNMC),
+  read 2026-10-18): antithetic sampling reduces variance when Cov(Yᵢ, Ỹᵢ) < 0 (4.29); "A simple sufficient condition
+  ensuring this is monotonicity of the mapping from inputs to outputs".
 
 ## Python (Volume III)
 
@@ -312,6 +354,45 @@ every numeric check ran in the project's venv (NumPy 2.5.3, SciPy 1.18.1).
   [`scipy.special.gammaln`](https://docs.scipy.org/doc/scipy/reference/generated/scipy.special.gammaln.html): ln|Γ(x)|,
   "the same function as the Python standard library function math.lgamma". Checked: poisson(3) mean = var = 3;
   chi2(4) mean 4, var 8; gammaln(5) = ln 24.
+- NumPy seeding ([Random Generator](https://numpy.org/doc/stable/reference/random/generator.html),
+  [SeedSequence](https://numpy.org/doc/stable/reference/random/bit_generators/generated/numpy.random.SeedSequence.html),
+  [Parallel Random Number Generation](https://numpy.org/doc/stable/reference/random/parallel.html), read 2026-10-18).
+  `default_rng` accepts "array_like[ints]" (non-negative), passed to `SeedSequence`, whose entropy may be a
+  "sequence[int]". Seeds that differ in one ID give streams that are independent "with very high probability"
+  (collision probability about n²·2⁻¹²⁸). NumPy recommends "the varying IDs before the unvarying root seed": the form
+  `[worker_id, root_seed]` is "Good", while `[root_seed, worker_id]` "will *work*, but it's less flexible", because
+  `spawn` appends after the user's seed. Checked in NumPy 2.5.3: `default_rng([20261011, 1])` does not coincide with
+  `SeedSequence(20261011).spawn(2)[1]`.
+- NumPy [`Generator.random`](https://numpy.org/doc/stable/reference/random/generated/numpy.random.Generator.random.html):
+  "Return random floats in the half-open interval [0.0, 1.0)" (0 possible).
+  [`standard_normal`](https://numpy.org/doc/stable/reference/random/generated/numpy.random.Generator.standard_normal.html):
+  mean 0, standard deviation 1.
+  [`numpy.quantile`](https://numpy.org/doc/stable/reference/generated/numpy.quantile.html): default `method='linear'`
+  (Hyndman & Fan 7); `'inverted_cdf'` (H&F 1, discontinuous) returns order statistic ⌈qn⌉ (checked for LM14's nine
+  levels at T = 5,849 and for qn integer).
+  [`median`](https://numpy.org/doc/stable/reference/generated/numpy.median.html) averages the two middle values when
+  N is even; [`std`](https://numpy.org/doc/stable/reference/generated/numpy.std.html) `ddof=0` by default;
+  [`cov`](https://numpy.org/doc/stable/reference/generated/numpy.cov.html) divides by N − 1 by default (`bias=True`
+  for N); [`log1p`](https://numpy.org/doc/stable/reference/generated/numpy.log1p.html) gives nan below −1.
+- SciPy v1.18.0: [`norm`](https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.norm.html) `ppf` = inverse
+  cdf, `sf` = 1 − cdf ("sometimes more accurate"), `moment` = non-central moment;
+  [`rv_continuous.expect`](https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.rv_continuous.expect.html)
+  integrates numerically with `quad` and cannot check that the integral exists;
+  [`rv_continuous.stats`](https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.rv_continuous.stats.html)
+  `'k'` = Fisher's (excess) kurtosis;
+  [`rv_discrete`](https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.rv_discrete.html)
+  `values=(xk, pk)` with integer, unique `xk`, and a discrete `ppf` is the smallest x_k with F(x_k) ≥ q
+  ([tutorial](https://docs.scipy.org/doc/scipy/tutorial/stats/discrete.html));
+  [`binom`](https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.binom.html) shapes n, p;
+  [`optimize.brentq`](https://docs.scipy.org/doc/scipy/reference/generated/scipy.optimize.brentq.html) needs a sign
+  change on [a, b]. `norm.fit` returning the divisor-T standard deviation was computed, not read.
+- Python 3.13 [`fractions.Fraction`](https://docs.python.org/3.13/library/fractions.html): a string such as
+  `'1.414213'` parses exactly (`Fraction(1414213, 1000000)`), unlike a float. Checked: `Fraction('4524.92')` =
+  113123/25.
+- Polars 2.0 [`Expr.shift`](https://docs.pola.rs/api/python/stable/reference/expressions/api/polars.Expr.shift.html)
+  leaves nulls in the vacated rows unless given `fill_value`;
+  [`Expr.std`](https://docs.pola.rs/api/python/stable/reference/expressions/api/polars.Expr.std.html) defaults to
+  `ddof=1` (divisor N − 1).
 
 ## Taiwan facts (Volume III)
 
