@@ -80,14 +80,18 @@
       case "n5": s = a.toFixed(5); break;
       case "n6": s = a.toFixed(6); break;
       // 2.00e−5: the chart font (Archivo, latin subset) has ¹ ² ³ but not ⁰ ⁴–⁹ ⁻, so no superscript exponents
-      case "sci0": case "sci1": case "sci2": case "sci3":
-        s = a === 0 ? "0" : a.toExponential(+f.charAt(3)).replace("e+", "e").replace("e-", "e−"); break;
-      // significant figures, trailing zeros dropped as by printf's %g, thousands separated as by n0
-      case "sig2": case "sig3": case "sig4": s = a.toLocaleString("en-US", { maximumSignificantDigits: +f.charAt(3) }); break;
+      case "sci0": case "sci1": case "sci2": case "sci3": s = a === 0 ? "0" : expo(a, +f.charAt(3)); break;
+      // k significant figures, trailing zeros kept as by printf's %#g (1.20, 0.00100, 0.0) and thousands separated as
+      // by n0; outside 1e−4 <= |v| < 1e6, after rounding, the same digits in the sci form (1.23e6)
+      case "sig2": case "sig3": case "sig4":
+        var k = +f.charAt(3), e = a === 0 ? 0 : +a.toExponential(k - 1).split("e")[1];
+        s = e >= -4 && e < 6 ? a.toLocaleString("en-US", { minimumSignificantDigits: k, maximumSignificantDigits: k }) : expo(a, k - 1);
+        break;
       default: s = String(Math.round(a * 1e6) / 1e6);
     }
     return (neg ? "−" : "") + s;
   }
+  function expo(a, d) { return a.toExponential(d).replace("e+", "e").replace("e-", "e−"); }   // 2.00e−5, 1.2e6
   Book.fmt = fmt;
   var MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
   function fmtDate(t, mode) {
@@ -104,7 +108,9 @@
   // (0.025 in pct0 as "3%"), so niceStep takes 2 units, or the format's own unit, instead
   var RES = { pct0: 1e-2, pct1: 1e-3, pct2: 1e-4, pct3: 1e-5, bp: 1e-5, x0: 1, x1: 0.1, x2: 1e-2,
               n0: 1, n1: 0.1, n2: 1e-2, n3: 1e-3, n4: 1e-4, n5: 1e-5, n6: 1e-6 };
-  // sci and sig print digits relative to the size of the number: the coarsest is that of the largest tick, |big|
+  // sci and sig print digits relative to the size of the number: the coarsest is that of the largest tick, |big|.
+  // On a range narrow for those digits, or one that straddles a decade (9.6e−6 to 1.04e−5 in sci1), the ticks can
+  // collapse to a single label: give such an axis more digits or a tfmt.
   function tickRes(f, big) {
     var k = /^(sci|sig)(\d)$/.exec(f || "");
     if (!k) return RES[f];
@@ -125,6 +131,7 @@
   }
   function logTicks(lo, hi) {
     var t = [], base = [1, 2, 5];
+    if (!(lo > 0 && hi < Infinity)) return t;   // a log axis needs a positive, finite range (else the loop never ends)
     for (var e = Math.floor(Math.log10(lo)) - 1; e <= Math.ceil(Math.log10(hi)) + 1; e++)
       for (var i = 0; i < 3; i++) { var v = base[i] * Math.pow(10, e); if (v >= lo * 0.999 && v <= hi * 1.001) t.push(v); }
     if (t.length > 8) t = t.filter(function (v) { return Math.abs(Math.log10(v) - Math.round(Math.log10(v))) < 1e-9; });
@@ -166,7 +173,7 @@
   function color(c) { return /^\d$/.test(String(c)) ? "var(--series-" + c + ")" : c; }
 
   /* ---------------- line chart ---------------- */
-  // spec: {x:{type:'num'|'date',label,fmt,min,max,ticks,tickLabels}, y:{type:'lin'|'log',label,fmt,min,max,ticks},
+  // spec: {x:{type:'num'|'date',label,fmt,tfmt,min,max,ticks,tickLabels}, y:{type:'lin'|'log',label,fmt,tfmt,min,max,ticks},
   //        series:[{name,color,dash,area,width,fmt,step,quiet,opacity,x:[],y:[]}], ann:[{type:'vline'|'hline'|'point'|'band',dash,...}], height}
   // step: a post-step line, y[i] holding from x[i] to x[i+1] (histograms on bin edges, distribution functions).
   // A band series has lo and hi instead of y: the region between them is filled (opacity 0.18) under every line.
@@ -196,18 +203,22 @@
     var narrow = W < 460;
     var m = { l: narrow ? 46 : 58, r: spec.endLabels && !narrow ? (spec.endMargin || 96) : 16, t: 12, b: spec.x.label ? 44 : 30 };
     var svg = el("svg", { viewBox: "0 0 " + W + " " + H, role: "img", "aria-label": spec.alt || spec.title || null }, wrap);
-    // data range, in a loop (Math.min.apply fails on very long argument lists, such as dozens of quiet paths)
+    // data range, in a loop (Math.min.apply fails on very long argument lists, such as dozens of quiet paths). A step
+    // also reaches x[i+1]; on a log axis a value <= 0 does not count towards the y range (it would give no decades)
+    var isLog = spec.y.type === "log";
     var xmn = Infinity, xmx = -Infinity, ymn = Infinity, ymx = -Infinity;
     series.forEach(function (s) {
-      var band = isBand(s), lo = band ? s.lo : s.y, hi = band ? s.hi : s.y;
-      for (var i = 0; i < s.x.length; i++) {
+      var band = isBand(s), lo = band ? s.lo : s.y, hi = band ? s.hi : s.y, n = s.x.length;
+      for (var i = 0; i < n; i++) {
         var a = lo[i], b = hi[i];
         if (a == null || !isFinite(a) || b == null || !isFinite(b)) continue;
-        xmn = Math.min(xmn, s.x[i]); xmx = Math.max(xmx, s.x[i]); ymn = Math.min(ymn, a, b); ymx = Math.max(ymx, a, b);
+        xmn = Math.min(xmn, s.x[i]); xmx = Math.max(xmx, s.x[i]);
+        if (s.step && i + 1 < n) { xmn = Math.min(xmn, s.x[i + 1]); xmx = Math.max(xmx, s.x[i + 1]); }
+        if (!isLog || a > 0) { ymn = Math.min(ymn, a); ymx = Math.max(ymx, a); }
+        if (!isLog || b > 0) { ymn = Math.min(ymn, b); ymx = Math.max(ymx, b); }
       }
     });
     var x0 = spec.x.min != null ? spec.x.min : xmn, x1 = spec.x.max != null ? spec.x.max : xmx;
-    var isLog = spec.y.type === "log";
     var y0 = spec.y.min != null ? spec.y.min : ymn, y1 = spec.y.max != null ? spec.y.max : ymx;
     if (!isLog && spec.y.min == null) { var pad = (y1 - y0) * 0.06 || 1; y0 -= pad; if (spec.y.max == null) y1 += pad; }
     if (isLog) { y0 = y0 * 0.9; y1 = y1 * 1.1; }
@@ -229,7 +240,8 @@
     });
     if (!isLog && y0 < 0 && y1 > 0) el("line", { class: "zero", x1: m.l, x2: W - m.r, y1: Y(0), y2: Y(0) }, svg);
     var dt = spec.x.type === "date" ? dateTicks(x0, x1, narrow) : null;
-    var xt = dt ? dt.t : (spec.x.ticks || linTicks(x0, x1, narrow ? 4 : 7, spec.x.fmt));
+    var xtf = spec.x.tfmt || spec.x.fmt;   // tick labels; the tooltip header keeps x.fmt
+    var xt = dt ? dt.t : (spec.x.ticks || linTicks(x0, x1, narrow ? 4 : 7, xtf));
     var xl = !dt && spec.x.ticks && spec.x.tickLabels;   // optional text for each of x.ticks
     el("line", { x1: m.l, x2: W - m.r, y1: H - m.b, y2: H - m.b }, ax);
     xt.forEach(function (v, i) {
@@ -237,7 +249,7 @@
       var t = el("text", { x: X(v), y: H - m.b + 16, "text-anchor": "middle" }, svg);
       if (dt && dt.mode === "month") t.textContent = fmtDate(v, i === 0 || new Date(v).getUTCMonth() === 0 ? "monthyear" : "month");
       else if (dt) t.textContent = fmtDate(v, dt.mode === "year" ? "year" : null);
-      else t.textContent = xl && xl[i] != null ? xl[i] : fmt(v, spec.x.fmt);
+      else t.textContent = xl && xl[i] != null ? xl[i] : fmt(v, xtf);
     });
     if (spec.x.label) { var tx = el("text", { class: "ttl-y", x: m.l + (W - m.l - m.r) / 2, y: H - 6, "text-anchor": "middle" }, svg); setText(tx, spec.x.label); }
     if (spec.y.label) { var ty = el("text", { class: "ttl-y", x: m.l, y: m.t - 2 + 0, "text-anchor": "start" }, svg); ty.textContent = ""; host.setAttribute("data-ylabel", spec.y.label); }
@@ -253,11 +265,14 @@
       for (var i = 0; i < xa.length; i++) { vx.push(xa[i]); vy.push(ya[i]); if (i + 1 < xa.length) { vx.push(xa[i + 1]); vy.push(ya[i]); } }
       return { x: vx, y: vy };
     }
-    function bandPath(s) {   // one closed outline per run of points where lo and hi both exist: along hi, back along lo
+    // one closed outline per run of points where lo and hi both exist: along hi, back along lo. On a log axis a value
+    // <= 0 is drawn at the floor of the axis (cy clamps it there), so a band from 0 keeps its shape
+    function bandPath(s) {
       var l = verts(s.x, s.lo, s.step), h = verts(s.x, s.hi, s.step), d = "", run = [];
       var pt = function (v) { return function (i) { return X(l.x[i]).toFixed(1) + "," + cy(v[i]); }; };
+      var fin = function (v) { return v != null && isFinite(v); };
       for (var i = 0; i <= l.x.length; i++) {
-        if (i < l.x.length && ok(l.y[i]) && ok(h.y[i])) { run.push(i); continue; }
+        if (i < l.x.length && fin(l.y[i]) && fin(h.y[i])) { run.push(i); continue; }
         if (run.length > 1) d += "M" + run.map(pt(h.y)).join("L") + "L" + run.reverse().map(pt(l.y)).join("L") + "Z";
         run = [];
       }
@@ -357,7 +372,7 @@
         if (dots[k]) { dots[k].setAttribute("cx", X(xi)); dots[k].setAttribute("cy", Y(yv)); dots[k].setAttribute("visibility", "visible"); }
         rows.push({ s: s, v: yv, hi: hv, xv: xi });
       });
-      if (px == null) return;
+      if (px == null) { leave(); return; }   // no series has a value here: no stale tooltip from the last point
       cross.setAttribute("x1", px); cross.setAttribute("x2", px); cross.setAttribute("visibility", "visible");
       var head = spec.x.type === "date" ? fmtDate(rows[0].xv) : (spec.x.tipLabel || "") + fmt(rows[0].xv, spec.x.fmt);
       tip.innerHTML = '<div class="hd">' + head + "</div>" + rows.map(function (rw) {
@@ -915,10 +930,13 @@
       x = (((((AA[0] * r + AA[1]) * r + AA[2]) * r + AA[3]) * r + AA[4]) * r + AA[5]) * q /
           (((((AB[0] * r + AB[1]) * r + AB[2]) * r + AB[3]) * r + AB[4]) * r + 1);
     }
-    var u = (Math.abs(x) <= 0.67448975 ? PhiHalf(x) - (p - 0.5) : Phi(x) - p) / phi(x);
+    if (x <= -37.5193) return x;   // p below the smallest normal double, where Phi underflows: Acklam's value stands
+    var u =(Math.abs(x) <= 0.67448975 ? PhiHalf(x) - (p - 0.5) : Phi(x) - p) / phi(x);
     return x - u / (1 + x * u / 2);
   }
-  // log Γ(x), x > 0: Lanczos (g = 7, nine terms): Γ(z) = √(2π) t^(z − 1/2) e^(−t) A(z), t = z + 6.5, for z >= 1/2
+  // log Γ(x), x > 0: Lanczos (g = 7, nine terms): Γ(z) = √(2π) t^(z − 1/2) e^(−t) A(z), t = z + 6.5, for z >= 1/2.
+  // The error is relative (about 1e-15) except where log Γ is near 0, around x = 1 and x = 2: there it is absolute,
+  // a few 1e-15 (the sum of terms of size 1 to 10 that cancel), so the relative error there is unbounded.
   var LG = [0.99999999999980993, 676.5203681218851, -1259.1392167224028, 771.32342877765313, -176.61502916214059,
             12.507343278686905, -0.13857109526572012, 9.9843695780195716e-6, 1.5056327351493116e-7];
   function lanczosA(z) { var a = LG[0]; for (var k = 1; k < 9; k++) a += LG[k] / (z - 1 + k); return a; }
@@ -960,13 +978,19 @@
     return Math.exp(lgammaDiff(nu / 2, 0.5) - 0.5 * Math.log(nu * Math.PI) - (nu + 1) / 2 * l1);
   }
   // 2 Pr(T <= −|x|) = I_w(ν/2, 1/2) with w = ν/(ν + x²) = 1/(1 + s), s = x²/ν; 1 − w = s/(1 + s) is formed directly.
-  // Relative error about 1e-12 up to ν = 1e4; beyond, the continued fraction cancels near w = 1 and the error grows
-  // about in proportion to ν (some 5e-11 at ν = 1e6), while the normal approximation is still worse there.
+  // Relative error about 1e-12 up to ν = 1e4; beyond, the continued fraction cancels near w = 1 and its error grows
+  // about in proportion to ν (4e-11 at ν = 1e6, 2e-9 at 1e8). Above ν = 1e8 the normal approximation of A&S 26.7.8
+  // takes over: its error falls as 1/ν² and grows with |x| (1e-8 just above 1e8 at x = −37, 1e-10 at ν = 1e9, and from
+  // ν = 1e10 on below the 2e-13 that Phi's own rounding leaves in the far tail).
   function tCdf(x, nu) {
     if (isNaN(x) || !(nu > 0)) return NaN;
     if (nu === Infinity) return Phi(x);
     if (x === 0) return 0.5;
     if (!isFinite(x)) return x > 0 ? 1 : 0;
+    if (nu > 1e8) {   // Abramowitz & Stegun 26.7.8, as R's pt uses for large ν: Phi(x (1 − g) / √(1 + 2x²g)), g = 1/(4ν)
+      var g = 1 / (4 * nu), xx = x * x;
+      return Phi(isFinite(xx) ? x * (1 - g) / Math.sqrt(1 + 2 * xx * g) : (x > 0 ? 1 : -1) * (1 - g) / Math.sqrt(2 * g));
+    }
     var a = nu / 2, u = Math.abs(x / Math.sqrt(nu)), big = u > 1e150, s = u * u;
     var w = big ? 0 : 1 / (1 + s), v = big ? 1 : s / (1 + s);
     var lw = big ? -2 * Math.log(u) : -Math.log1p(s), lv = big ? 0 : Math.log(s) - Math.log1p(s);
@@ -1044,7 +1068,8 @@
 
   /* ---------------- seeded random numbers (Book.rng) ---------------- */
   // Book.rng(seed): sfc32 (C. Doty-Humphrey's small fast counting generator, from PractRand), its four words filled
-  // from the integer seed (taken modulo 2^32) by splitmix32. The same seed gives the same numbers in every browser:
+  // from the seed, a whole number taken modulo 2^32 (anything else throws), by splitmix32. The same seed gives the
+  // same numbers in every browser:
   // uniform() and int() use integer arithmetic only, and normal() takes its logarithm from lnDet below instead of
   // Math.log, whose last bit may differ between JavaScript engines. It does not reproduce NumPy's streams: a widget
   // and a lab given the same seed draw different numbers.
@@ -1056,6 +1081,8 @@
     return e * 0.6931471803691238 + (e * 1.9082149292705877e-10 + 2 * s);   // ln 2 in two parts (fdlibm)
   }
   Book.rng = function (seed) {
+    if (typeof seed !== "number") throw new TypeError("Book.rng(seed): the seed must be a number");
+    if (!isFinite(seed) || seed !== Math.floor(seed)) throw new RangeError("Book.rng(seed): the seed must be a whole number");
     var w = seed >>> 0;
     function sm() {   // splitmix32: a Weyl sequence through a 32-bit integer hash
       w = w + 0x9e3779b9 | 0;
@@ -1098,7 +1125,8 @@
   //   button: label only
   // onChange(values, id): values is {key or id: value}, a number for a slider and a string for a select; id names the
   // control that changed (null from fire()). Slider and select input is coalesced to one call per animation frame, so
-  // a slow redraw never queues up; a button click calls at once. Returns {el, values(), fire()}: fire() calls onChange
+  // a slow redraw never queues up; when several controls change within one frame, id names the last of them (values
+  // holds every current value). A button click calls at once. Returns {el, values(), fire()}: fire() calls onChange
   // now, for the first drawing (Book.controls does not) and for host.__redraw.
   Book.controls = function (host, defs, onChange) {
     var box = document.createElement("div"); box.className = "controls";

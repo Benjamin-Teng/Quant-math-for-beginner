@@ -41,6 +41,9 @@ out.rng = q.rng.map(([seed, kind, n, arg]) => {
   return v;
 });
 out.fmt = q.fmt.map(([v, f]) => B.fmt(v, f));
+out.seeds = [undefined, null, NaN, Infinity, "abc", "7", 2026.7, -1, 2 ** 40].map(s => {   // what Book.rng(seed) throws
+  try { B.rng(s); return "accepted"; } catch (e) { return e.constructor.name; }
+});
 process.stdout.write(JSON.stringify(out, (k, v) => typeof v === "number" && !isFinite(v) ? String(v) : v));
 """
 
@@ -81,8 +84,14 @@ def t_lower(x, nu):   # Pr(T <= x) in mpmath
     return tail if x < 0 else 1 - tail
 
 
-def phi_inv(p):
-    return mpmath.findroot(lambda x: mpmath.ncdf(x) - mpf(p), float(special.ndtri(p)))
+def phi_inv(p):   # on the log scale, so that it also works for p below the smallest normal double
+    start = float(special.ndtri(p))
+    start = start if math.isfinite(start) else -math.sqrt(-2 * math.log(p))
+    return mpmath.findroot(lambda x: mpmath.log(mpmath.ncdf(x)) - mpmath.log(mpf(p)), start)
+
+
+def abs_err(got, ref):
+    return np.abs(np.asarray(got, float) - np.asarray(ref, float))
 
 
 TRUTH: dict[str, Callable[..., Any]] = {   # the same functions in mpmath, for the points where SciPy and book.js disagree
@@ -104,7 +113,10 @@ z_all = np.concatenate([np.linspace(-37, 37, 4001), [-4.1074386, -0.67448975, 0.
                                                        -5.6568542494923815, 0.0, 1e-300, -1e-10, -36.99]])
 p_inv = np.concatenate([np.logspace(-300, np.log10(0.5), 3001), 1 - np.logspace(-16, np.log10(0.5), 1001),
                         0.5 + np.logspace(-16, -1, 151), 0.5 - np.logspace(-16, -1, 151), [0.5, 0.02425, 0.97575]])
+p_sub = np.concatenate([np.logspace(-323.3, np.log10(2.2e-308), 60), [5e-324, 2e-308]])   # below the smallest normal
 x_lg = np.concatenate([np.logspace(-12, 12, 2001), np.linspace(0.5, 3, 501), [0.5, 1.0, 1.5, 2.0]])
+near = np.logspace(-14, -1, 80)
+x_lz = np.concatenate([1 - near, 1 + near, 2 - near, 2 + near, [1.0, 2.0]])   # where log Γ crosses 0
 x_t = np.concatenate([-np.logspace(-6, 6, 241), [0.0], np.logspace(-6, 6, 121)])
 LAMS = [1e-3, 0.1, 0.5, 1, 2.5, 7, 20, 100, 1000, 1e4]
 NS, PS = [1, 2, 5, 10, 50, 250, 1000, 5000], [1e-4, 0.01, 0.1, 0.3, 0.5, 0.73, 0.99, 0.9999]
@@ -119,13 +131,19 @@ cases = []   # (function, domain, args, SciPy values, error function, metric, to
 cases.append(("phi", "z in [−37, 37]", [[z] for z in z_all], stats.norm.pdf(z_all), rel_err, "rel", 1e-12))
 cases.append(("Phi", "z in [−37, 37]", [[z] for z in z_all], special.ndtr(z_all), rel_err, "rel", 1e-12))
 cases.append(("PhiInv", "p in [1e−300, 1 − 1.1e−16]", [[p] for p in p_inv], special.ndtri(p_inv), rel_err, "rel", 1e-12))
+cases.append(("PhiInv", "p in [5e−324, 2.2e−308): Acklam only", [[p] for p in p_sub], special.ndtri(p_sub), rel_err, "rel", 2e-9))
 cases.append(("lgamma", "x in [1e−12, 1e12]", [[x] for x in x_lg], special.gammaln(x_lg), mixed_err, "mixed", 1e-13))
-for nus, tol in (([0.1, 0.5, 1, 1.5, 2, 3, 4.5, 10, 30, 100, 1e3, 1e4], 1e-12), ([1e5, 1e6], 1e-10)):
+cases.append(("lgamma", "x within 0.1 of 1 and 2 (log Γ near 0)", [[x] for x in x_lz], special.gammaln(x_lz), abs_err, "abs", 5e-15))
+# tCdf: the continued fraction loses accuracy about in proportion to ν, and above ν = 1e8 the normal approximation of
+# A&S 26.7.8 takes over, whose error is largest just above the switch, in the far tail (about 1e-8 at x = −37)
+T_GROUPS = (([0.1, 0.5, 1, 1.5, 2, 3, 4.5, 10, 30, 100, 1e3, 1e4], 1e-12, 1e-12), ([1e5, 1e6], 1e-12, 1e-10),
+            ([1e8, 1.01e8, 2e8, 1e9, 1e10, 1e12, 1e14, 1e15, 1e16, 1e17], 1e-12, 2e-8))
+for nus, tol_pdf, tol_cdf in T_GROUPS:
     t_args = [(x, nu) for nu in nus for x in x_t]
     xs, ns = cols(t_args)
     dom = f"ν {nus[0]:g}..{nus[-1]:g}, |x| 1e−6..1e6"
-    cases.append(("tPdf", dom, [list(a) for a in t_args], stats.t.pdf(xs, ns), rel_err, "rel", tol))
-    cases.append(("tCdf", dom, [list(a) for a in t_args], special.stdtr(ns, xs), rel_err, "rel", tol))
+    cases.append(("tPdf", dom, [list(a) for a in t_args], stats.t.pdf(xs, ns), rel_err, "rel", tol_pdf))
+    cases.append(("tCdf", dom, [list(a) for a in t_args], special.stdtr(ns, xs), rel_err, "rel", tol_cdf))
 # Poisson and binomial: far in a tail the probability is e^−(a few hundred), and its relative error is about k ulps
 # (the rounding of k/λ inside Loader's bd0, multiplied by k): 2e-12 covers k up to 1e4
 pois = [(k, lam) for lam in LAMS for k in range(int(lam + 12 * math.sqrt(lam) + 25))]
@@ -151,8 +169,12 @@ PINNED_U = [0.17210804602121343, 0.12454267537089636, 0.5156590064802732]
 PINNED_N = [-0.07261409412934218, -0.0831477966486868, 0.49182617315333926]
 FMT = [(2.000355e-5, "sci2", "2.00e−5"), (-2.000355e-5, "sci1", "−2.0e−5"), (9.996e-5, "sci2", "1.00e−4"),
        (12345.0, "sci1", "1.2e4"), (1.0, "sci3", "1.000e0"), (0.0, "sci2", "0"), (3e-7, "sci0", "3e−7"),
-       (-123456.789, "sig3", "−123,000"), (0.000123456, "sig2", "0.00012"), (1.5, "sig3", "1.5"),
-       (1234.5678, "sig4", "1,235"), (0.1234567, "n6", "0.123457"), (0.0, "sig2", "0")]
+       (-123456.789, "sig3", "−123,000"), (0.000123456, "sig2", "0.00012"), (1.5, "sig3", "1.50"),
+       (1.2, "sig3", "1.20"), (0.0009995, "sig3", "0.00100"), (1234.5678, "sig4", "1,235"), (0.0, "sig2", "0.0"),
+       (0.0, "sig3", "0.00"), (999999.7, "sig3", "1.00e6"), (1234567.0, "sig3", "1.23e6"), (999499.0, "sig3", "999,000"),
+       (0.00009996, "sig3", "0.000100"), (0.0000123, "sig2", "1.2e−5"), (-3.21e-9, "sig2", "−3.2e−9"),
+       (0.1234567, "n6", "0.123457")]
+SEEDS = ["TypeError", "TypeError", "RangeError", "RangeError", "TypeError", "TypeError", "RangeError", "accepted", "accepted"]
 
 res = run_js({"dist": [[c[0], c[2]] for c in cases], "rng": rng_q, "fmt": [[v, f] for v, f, _ in FMT]})
 
@@ -208,6 +230,7 @@ checks = [
     ("int(7) covers 0..6 evenly (chi-square p > 0.001)", bool(set(np.unique(ints)) == set(range(7)) and
                                                              stats.chisquare(np.bincount(ints.astype(int))).pvalue > 1e-3)),
     ("int(2^32) in 0..2^32 − 1, whole numbers", bool(big.min() >= 0 and big.max() <= 2**32 - 1 and np.all(big == np.floor(big)))),
+    ("seed undefined, null, NaN, Infinity, 'abc', '7', 2026.7 throw; −1 and 2^40 accepted", res["seeds"] == SEEDS),
 ]
 print(f"\nBook.rng (seed {SEED}):")
 for label, ok in checks:
