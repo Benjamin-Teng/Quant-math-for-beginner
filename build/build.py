@@ -362,6 +362,22 @@ def check_ellipses(cid, spec):
         if not mid - r >= -1e-12 * abs(mid):
             raise SystemExit(f"chart {cid}: ellipse {i}: cov is not positive semi-definite (src/data/{cid}.json)")
 
+def check_bands(cid, spec):
+    """A line chart's band series has lo and hi instead of y, each one number or null per x; book.js pairs them with x
+    point by point, so arrays of another length would draw a wrong shape without any error."""
+    if spec.get("type", "line") != "line":
+        return
+    for i, s in enumerate(spec.get("series") or [], 1):
+        if not isinstance(s, dict) or ("lo" not in s and "hi" not in s):
+            continue
+        x, lo, hi = s.get("x"), s.get("lo"), s.get("hi")
+        if not (isinstance(x, list) and isinstance(lo, list) and isinstance(hi, list) and len(lo) == len(x) == len(hi)):
+            raise SystemExit(f"chart {cid}: band series {i}: lo and hi must be arrays as long as x (src/data/{cid}.json)")
+        if "y" in s:
+            raise SystemExit(f"chart {cid}: band series {i}: give lo and hi instead of y, not both (src/data/{cid}.json)")
+        if not all(v is None or _finite(v) for v in lo + hi):
+            raise SystemExit(f"chart {cid}: band series {i}: lo and hi hold numbers or null (src/data/{cid}.json)")
+
 def inline_charts(html_s):
     used = re.findall(r'data-chart="([\w-]+)"', html_s)
     blobs = []
@@ -373,6 +389,7 @@ def inline_charts(html_s):
             raise SystemExit(f"chart {cid}: unknown type {spec.get('type')!r}; use one of {', '.join(sorted(CHART_TYPES))} "
                              f"(src/data/{cid}.json)")
         check_ellipses(cid, spec)
+        check_bands(cid, spec)
         alt = spec.get("alt")   # the svg is role="img": it needs a text alternative that the renderers read as spec.alt
         if not (isinstance(alt, str) and alt.strip()):
             raise SystemExit(f"chart {cid}: the spec needs a non-empty 'alt' string (src/data/{cid}.json)")

@@ -78,6 +78,12 @@
       case "n3": s = a.toFixed(3); break;
       case "n4": s = a.toFixed(4); break;
       case "n5": s = a.toFixed(5); break;
+      case "n6": s = a.toFixed(6); break;
+      // 2.00e−5: the chart font (Archivo, latin subset) has ¹ ² ³ but not ⁰ ⁴–⁹ ⁻, so no superscript exponents
+      case "sci0": case "sci1": case "sci2": case "sci3":
+        s = a === 0 ? "0" : a.toExponential(+f.charAt(3)).replace("e+", "e").replace("e-", "e−"); break;
+      // significant figures, trailing zeros dropped as by printf's %g, thousands separated as by n0
+      case "sig2": case "sig3": case "sig4": s = a.toLocaleString("en-US", { maximumSignificantDigits: +f.charAt(3) }); break;
       default: s = String(Math.round(a * 1e6) / 1e6);
     }
     return (neg ? "−" : "") + s;
@@ -97,7 +103,13 @@
   // the finest step each tick format can print; 2.5 units of it, or a finer step, would print rounded labels
   // (0.025 in pct0 as "3%"), so niceStep takes 2 units, or the format's own unit, instead
   var RES = { pct0: 1e-2, pct1: 1e-3, pct2: 1e-4, pct3: 1e-5, bp: 1e-5, x0: 1, x1: 0.1, x2: 1e-2,
-              n0: 1, n1: 0.1, n2: 1e-2, n3: 1e-3, n4: 1e-4, n5: 1e-5 };
+              n0: 1, n1: 0.1, n2: 1e-2, n3: 1e-3, n4: 1e-4, n5: 1e-5, n6: 1e-6 };
+  // sci and sig print digits relative to the size of the number: the coarsest is that of the largest tick, |big|
+  function tickRes(f, big) {
+    var k = /^(sci|sig)(\d)$/.exec(f || "");
+    if (!k) return RES[f];
+    return big > 0 && isFinite(big) ? Math.pow(10, Math.floor(Math.log10(big)) - +k[2] + (k[1] === "sig" ? 1 : 0)) : undefined;
+  }
   function niceStep(span, n, res) {
     var raw = span / Math.max(1, n), p = Math.pow(10, Math.floor(Math.log10(raw))), r = raw / p;
     var st = (r <= 1 ? 1 : r <= 2 ? 2 : r <= 2.5 ? 2.5 : r <= 5 ? 5 : 10) * p;
@@ -106,7 +118,7 @@
     return st;
   }
   function linTicks(lo, hi, n, f) {
-    var res = f === "x1" && Math.max(Math.abs(lo), Math.abs(hi)) >= 10 ? 1 : RES[f];   // x1 prints whole numbers from 10
+    var big = Math.max(Math.abs(lo), Math.abs(hi)), res = f === "x1" && big >= 10 ? 1 : tickRes(f, big);   // x1 prints whole numbers from 10
     var st = niceStep(hi - lo, n, res), t = [], v = Math.ceil(lo / st - 1e-9) * st;
     for (; v <= hi + st * 1e-9; v += st) t.push(Math.abs(v) < st * 1e-9 ? 0 : v);
     return t;
@@ -155,17 +167,24 @@
 
   /* ---------------- line chart ---------------- */
   // spec: {x:{type:'num'|'date',label,fmt,min,max,ticks,tickLabels}, y:{type:'lin'|'log',label,fmt,min,max,ticks},
-  //        series:[{name,color,dash,area,x:[],y:[]}], ann:[{type:'vline'|'hline'|'point'|'band',...}], height}
+  //        series:[{name,color,dash,area,width,fmt,step,quiet,opacity,x:[],y:[]}], ann:[{type:'vline'|'hline'|'point'|'band',dash,...}], height}
+  // step: a post-step line, y[i] holding from x[i] to x[i+1] (histograms on bin edges, distribution functions).
+  // A band series has lo and hi instead of y: the region between them is filled (opacity 0.18) under every line.
+  // quiet: a thin translucent line (opacity 0.35) with no legend entry, tooltip row, hover dot or end label, for dozens
+  // of simulated paths. Bands are drawn first, then quiet lines, then the other lines, each group in the given order.
+  function isBand(s) { return !!(s.lo && s.hi); }
   Book.lineChart = function (host, spec) {
     host.innerHTML = "";
     host.classList.add("chart");
     var series = spec.series || [];
-    if (series.length > 1 || spec.legend) {
+    var keyed = series.filter(function (s) { return !s.quiet; });   // the series with a legend entry and a tooltip row
+    if (keyed.length > 1 || spec.legend) {
       var lg = document.createElement("div"); lg.className = "legend";
-      series.forEach(function (s) {
+      keyed.forEach(function (s) {
         var k = document.createElement("span"); k.className = "key";
-        var sw = document.createElement("i"); sw.className = "sw" + (s.dash ? " dash" : "");
+        var sw = document.createElement("i"); sw.className = "sw" + (isBand(s) ? " band" : s.dash ? " dash" : "");
         sw.style.background = color(s.color); sw.style.color = color(s.color);
+        if (isBand(s)) sw.style.opacity = Math.min(1, 1.6 * (s.opacity != null ? s.opacity : 0.18));   // a small swatch needs more ink than a wide band
         var nm = document.createElement("span"); nm.innerHTML = rich(s.name == null ? "" : s.name);   // a_1 / A^T as sub- and superscripts, as in the other chart types
         k.appendChild(sw); k.appendChild(nm); lg.appendChild(k);
       });
@@ -177,11 +196,19 @@
     var narrow = W < 460;
     var m = { l: narrow ? 46 : 58, r: spec.endLabels && !narrow ? (spec.endMargin || 96) : 16, t: 12, b: spec.x.label ? 44 : 30 };
     var svg = el("svg", { viewBox: "0 0 " + W + " " + H, role: "img", "aria-label": spec.alt || spec.title || null }, wrap);
-    var xs = [], ys = [];
-    series.forEach(function (s) { s.x.forEach(function (v, i) { var yv = s.y[i]; if (yv != null && isFinite(yv)) { xs.push(v); ys.push(yv); } }); });
-    var x0 = spec.x.min != null ? spec.x.min : Math.min.apply(null, xs), x1 = spec.x.max != null ? spec.x.max : Math.max.apply(null, xs);
+    // data range, in a loop (Math.min.apply fails on very long argument lists, such as dozens of quiet paths)
+    var xmn = Infinity, xmx = -Infinity, ymn = Infinity, ymx = -Infinity;
+    series.forEach(function (s) {
+      var band = isBand(s), lo = band ? s.lo : s.y, hi = band ? s.hi : s.y;
+      for (var i = 0; i < s.x.length; i++) {
+        var a = lo[i], b = hi[i];
+        if (a == null || !isFinite(a) || b == null || !isFinite(b)) continue;
+        xmn = Math.min(xmn, s.x[i]); xmx = Math.max(xmx, s.x[i]); ymn = Math.min(ymn, a, b); ymx = Math.max(ymx, a, b);
+      }
+    });
+    var x0 = spec.x.min != null ? spec.x.min : xmn, x1 = spec.x.max != null ? spec.x.max : xmx;
     var isLog = spec.y.type === "log";
-    var y0 = spec.y.min != null ? spec.y.min : Math.min.apply(null, ys), y1 = spec.y.max != null ? spec.y.max : Math.max.apply(null, ys);
+    var y0 = spec.y.min != null ? spec.y.min : ymn, y1 = spec.y.max != null ? spec.y.max : ymx;
     if (!isLog && spec.y.min == null) { var pad = (y1 - y0) * 0.06 || 1; y0 -= pad; if (spec.y.max == null) y1 += pad; }
     if (isLog) { y0 = y0 * 0.9; y1 = y1 * 1.1; }
     var X = function (v) { return m.l + (v - x0) / (x1 - x0 || 1) * (W - m.l - m.r); };
@@ -216,19 +243,47 @@
     if (spec.y.label) { var ty = el("text", { class: "ttl-y", x: m.l, y: m.t - 2 + 0, "text-anchor": "start" }, svg); ty.textContent = ""; host.setAttribute("data-ylabel", spec.y.label); }
     // series
     var sg = el("g", { class: "series" }, svg);
-    series.forEach(function (s) {
-      var d = "", pen = false;
-      for (var i = 0; i < s.x.length; i++) {
-        var yv = s.y[i];
-        if (yv == null || !isFinite(yv) || (isLog && yv <= 0) || s.x[i] < x0 || s.x[i] > x1) { pen = false; continue; }
-        d += (pen ? "L" : "M") + X(s.x[i]).toFixed(1) + "," + Y(Math.min(Math.max(yv, isLog ? y0 : y0 - (y1 - y0)), y1 + (y1 - y0))).toFixed(1);
+    var cy = function (v) { return Y(Math.min(Math.max(v, isLog ? y0 : y0 - (y1 - y0)), y1 + (y1 - y0))).toFixed(1); };
+    var ok = function (v) { return v != null && isFinite(v) && !(isLog && v <= 0); };
+    // a step series turns into vertices (x0,y0) (x1,y0) (x1,y1) (x2,y1) ...: a missing y[i+1] still ends step i at x[i+1].
+    // It is not cut at the x range (the clip path does that), so a step that crosses the edge reaches it.
+    function verts(xa, ya, step) {
+      if (!step) return { x: xa, y: ya };
+      var vx = [], vy = [];
+      for (var i = 0; i < xa.length; i++) { vx.push(xa[i]); vy.push(ya[i]); if (i + 1 < xa.length) { vx.push(xa[i + 1]); vy.push(ya[i]); } }
+      return { x: vx, y: vy };
+    }
+    function bandPath(s) {   // one closed outline per run of points where lo and hi both exist: along hi, back along lo
+      var l = verts(s.x, s.lo, s.step), h = verts(s.x, s.hi, s.step), d = "", run = [];
+      var pt = function (v) { return function (i) { return X(l.x[i]).toFixed(1) + "," + cy(v[i]); }; };
+      for (var i = 0; i <= l.x.length; i++) {
+        if (i < l.x.length && ok(l.y[i]) && ok(h.y[i])) { run.push(i); continue; }
+        if (run.length > 1) d += "M" + run.map(pt(h.y)).join("L") + "L" + run.reverse().map(pt(l.y)).join("L") + "Z";
+        run = [];
+      }
+      return d;
+    }
+    var order = series.filter(isBand)
+      .concat(series.filter(function (s) { return s.quiet && !isBand(s); }), series.filter(function (s) { return !s.quiet && !isBand(s); }));
+    order.forEach(function (s) {
+      if (isBand(s)) {
+        el("path", { class: "bandfill", d: bandPath(s), style: "fill:" + color(s.color) + ";fill-opacity:" + (s.opacity != null ? s.opacity : 0.18) }, sg);
+        return;
+      }
+      var v = verts(s.x, s.y, s.step), d = "", pen = false;
+      for (var i = 0; i < v.x.length; i++) {
+        var yv = v.y[i];
+        if (!ok(yv) || (!s.step && (v.x[i] < x0 || v.x[i] > x1))) { pen = false; continue; }
+        d += (pen ? "L" : "M") + X(v.x[i]).toFixed(1) + "," + cy(yv);
         pen = true;
       }
       if (s.area && !isLog) {
         var base = Y(Math.max(y0, Math.min(0, y1)));
         el("path", { class: "area", d: d + "L" + X(s.x[s.x.length - 1]).toFixed(1) + "," + base + "L" + X(s.x[0]).toFixed(1) + "," + base + "Z", style: "fill:" + color(s.color) }, sg);
       }
-      el("path", { class: "line", d: d, style: "stroke:" + color(s.color) + (s.dash ? ";stroke-dasharray:5 4" : "") + (s.width ? ";stroke-width:" + s.width : "") }, sg);
+      el("path", { class: s.quiet ? "line quiet" : "line", d: d, style: "stroke:" + color(s.quiet ? s.color || "var(--muted)" : s.color) +
+        (s.dash ? ";stroke-dasharray:5 4" : "") + (s.width || s.quiet ? ";stroke-width:" + (s.width || 0.8) : "") +
+        (s.quiet ? ";stroke-opacity:" + (s.opacity != null ? s.opacity : 0.35) : "") }, sg);
     });
     // clip region line overflow: simple rect mask
     var cid = "c" + Math.random().toString(36).slice(2, 8);
@@ -239,10 +294,10 @@
     var ag = el("g", { class: "ann" }, svg);
     (spec.ann || []).forEach(function (a) {
       if (a.type === "vline") {
-        el("line", { x1: X(a.x), x2: X(a.x), y1: m.t, y2: H - m.b }, ag);
+        el("line", { x1: X(a.x), x2: X(a.x), y1: m.t, y2: H - m.b, "stroke-dasharray": a.dash ? "4 3" : null }, ag);
         if (a.label) { var t = el("text", { x: X(a.x) + (a.anchor === "end" ? -5 : 5), y: m.t + 11 + (a.dy || 0), "text-anchor": a.anchor || "start" }, ag); setText(t, a.label); }
       } else if (a.type === "hline") {
-        el("line", { x1: m.l, x2: W - m.r, y1: Y(a.y), y2: Y(a.y) }, ag);
+        el("line", { x1: m.l, x2: W - m.r, y1: Y(a.y), y2: Y(a.y), "stroke-dasharray": a.dash ? "4 3" : null }, ag);
         if (a.label) { var t2 = el("text", { x: W - m.r - 4, y: Y(a.y) - 5, "text-anchor": "end" }, ag); setText(t2, a.label); }
       } else if (a.type === "point") {
         el("circle", { class: "dot", cx: X(a.x), cy: Y(a.y), r: 4.5, style: "fill:" + color(a.color || "1") }, ag);
@@ -252,6 +307,7 @@
     // end labels (skip if they would collide)
     if (spec.endLabels && !narrow) {
       var ends = series.map(function (s) {
+        if (s.quiet || isBand(s)) return null;
         for (var i = s.x.length - 1; i >= 0; i--) if (s.y[i] != null && isFinite(s.y[i])) return { s: s, y: Y(s.y[i]), v: s.y[i] };
         return null;
       }).filter(Boolean).sort(function (a, b) { return a.y - b.y; });
@@ -270,32 +326,51 @@
     }
     // crosshair + tooltip
     var cross = el("line", { class: "cross", y1: m.t, y2: H - m.b, x1: -10, x2: -10, visibility: "hidden" }, svg);
-    var dots = series.map(function (s) { return el("circle", { class: "dot", r: 4, style: "fill:" + color(s.color), visibility: "hidden" }, svg); });
+    var dots = series.map(function (s) { return s.quiet || isBand(s) ? null : el("circle", { class: "dot", r: 4, style: "fill:" + color(s.color), visibility: "hidden" }, svg); });
     var hit = el("rect", { x: m.l, y: m.t, width: W - m.l - m.r, height: H - m.t - m.b, fill: "transparent", style: "cursor:crosshair" }, svg);
     function nearest(arr, v) { var lo = 0, hi = arr.length - 1; while (hi - lo > 1) { var mid = (lo + hi) >> 1; if (arr[mid] < v) lo = mid; else hi = mid; } return Math.abs(arr[lo] - v) <= Math.abs(arr[hi] - v) ? lo : hi; }
+    function stepAt(arr, v) {   // the step holding at v: the last i with arr[i] <= v; -1 outside arr[0] .. arr[n-1]
+      if (!(v >= arr[0] && v <= arr[arr.length - 1])) return -1;
+      var lo = 0, hi = arr.length - 1;
+      while (lo < hi) { var mid = (lo + hi + 1) >> 1; if (arr[mid] <= v) lo = mid; else hi = mid - 1; }
+      return lo;
+    }
     function move(ev) {
       var r = svg.getBoundingClientRect(), sx = (ev.clientX - r.left) * W / r.width;
       var xv = x0 + (sx - m.l) / (W - m.l - m.r) * (x1 - x0);
-      var rows = [], px = null;
+      var rows = [], px = null, at = [], snap = xv;
+      // lines and bands report their point nearest the pointer; the last one with a value places the crosshair
       series.forEach(function (s, k) {
-        var i = nearest(s.x, xv), yv = s.y[i];
-        if (yv == null || !isFinite(yv)) { dots[k].setAttribute("visibility", "hidden"); return; }
-        px = X(s.x[i]);
-        dots[k].setAttribute("cx", px); dots[k].setAttribute("cy", Y(yv)); dots[k].setAttribute("visibility", "visible");
-        rows.push({ s: s, v: yv, xv: s.x[i] });
+        if (s.quiet || s.step) return;
+        var i = nearest(s.x, xv), lo = isBand(s) ? s.lo[i] : s.y[i], hi = isBand(s) ? s.hi[i] : lo;
+        if (lo == null || !isFinite(lo) || hi == null || !isFinite(hi)) return;
+        at[k] = i; px = X(s.x[i]); snap = s.x[i];
+      });
+      // step series report the step under the crosshair (under the pointer when no other series has a value there)
+      series.forEach(function (s, k) {
+        if (s.quiet) return;
+        var i = s.step ? stepAt(s.x, snap) : at[k], band = isBand(s);
+        var yv = i == null || i < 0 ? null : band ? s.lo[i] : s.y[i], hv = band && yv != null ? s.hi[i] : yv;
+        if (yv == null || !isFinite(yv) || hv == null || !isFinite(hv)) { if (dots[k]) dots[k].setAttribute("visibility", "hidden"); return; }
+        var xi = s.step ? snap : s.x[i];
+        if (px == null) px = X(xi);
+        if (dots[k]) { dots[k].setAttribute("cx", X(xi)); dots[k].setAttribute("cy", Y(yv)); dots[k].setAttribute("visibility", "visible"); }
+        rows.push({ s: s, v: yv, hi: hv, xv: xi });
       });
       if (px == null) return;
       cross.setAttribute("x1", px); cross.setAttribute("x2", px); cross.setAttribute("visibility", "visible");
       var head = spec.x.type === "date" ? fmtDate(rows[0].xv) : (spec.x.tipLabel || "") + fmt(rows[0].xv, spec.x.fmt);
       tip.innerHTML = '<div class="hd">' + head + "</div>" + rows.map(function (rw) {
-        return '<div class="tk"><i style="background:' + color(rw.s.color) + '"></i><span>' + rich(rw.s.name) + "</span><b>" + fmt(rw.v, rw.s.fmt || spec.y.fmt) + "</b></div>";
+        var f = rw.s.fmt || spec.y.fmt, band = isBand(rw.s);   // a band's row: "lo – hi" beside a square swatch
+        return '<div class="tk"><i style="background:' + color(rw.s.color) + (band ? ";height:0.6rem;border-radius:2px;opacity:0.45" : "") + '"></i><span>' +
+          rich(rw.s.name) + "</span><b>" + (band ? fmt(rw.v, f) + " – " + fmt(rw.hi, f) : fmt(rw.v, f)) + "</b></div>";
       }).join("");
       tip.hidden = false;
       var wr = wrap.getBoundingClientRect(), left = px * r.width / W + (r.left - wr.left) + 12;
       if (left + tip.offsetWidth > wr.width) left = px * r.width / W + (r.left - wr.left) - tip.offsetWidth - 12;
       tip.style.left = Math.max(0, left) + "px"; tip.style.top = "8px";
     }
-    function leave() { tip.hidden = true; cross.setAttribute("visibility", "hidden"); dots.forEach(function (d) { d.setAttribute("visibility", "hidden"); }); }
+    function leave() { tip.hidden = true; cross.setAttribute("visibility", "hidden"); dots.forEach(function (d) { if (d) d.setAttribute("visibility", "hidden"); }); }
     hit.addEventListener("pointermove", move); hit.addEventListener("pointerdown", move); hit.addEventListener("pointerleave", leave);
     if (spec.y.label) {
       var cap = document.createElement("div"); cap.className = "kbd-note"; cap.style.margin = "0 0 0.2rem"; cap.innerHTML = rich(spec.y.label);
@@ -643,7 +718,7 @@
     // grid, tick labels, the lines x = 0 and y = 0
     var xt, yt;
     if (equal && !xs.ticks && !ys.ticks) {   // one tick step for both axes, so equal distances look equal
-      var st = niceStep(Math.max(x1 - x0, y1 - y0), narrow ? 5 : 8, RES[xs.tfmt || xs.fmt]);
+      var st = niceStep(Math.max(x1 - x0, y1 - y0), narrow ? 5 : 8, tickRes(xs.tfmt || xs.fmt, Math.max(Math.abs(x0), Math.abs(x1), Math.abs(y0), Math.abs(y1))));
       xt = ticksWithStep(x0, x1, st); yt = ticksWithStep(y0, y1, st);
     } else {
       xt = xs.ticks || linTicks(x0, x1, narrow ? 4 : 7, xs.tfmt || xs.fmt);
@@ -779,6 +854,286 @@
     var f = Book[CHART_TYPES[spec.type || "line"]];
     if (!f) throw new Error("unknown chart type: " + spec.type);
     return f(host, spec);
+  };
+
+  /* ---------------- probability distributions (Book.dist) ---------------- */
+  // For widgets. build/qa/test_bookjs_dist.py checks every function against SciPy: run it after any change here.
+  var SQRT2PI = 2.5066282746310002, LN_SQRT_2PI = 0.9189385332046728, LN_SQRT_PI = 0.5723649429247001, EPS = 2.220446049250313e-16;
+  function expHalfSq(z) {   // exp(−z²/2), with z² split so that its rounding error does not grow with z (Cody)
+    var h = Math.trunc(z * 16) / 16;
+    return Math.exp(-h * h / 2) * Math.exp(-(z - h) * (z + h) / 2);
+  }
+  function phi(z) { return z === Infinity || z === -Infinity ? 0 : expHalfSq(z) / SQRT2PI; }
+  // Phi: W. J. Cody's rational approximations (Math. Comp. 1969), as in R's pnorm; relative error near 1e-15 in both tails
+  var CA = [2.2352520354606839287, 161.02823106855587881, 1067.6894854603709582, 18154.981253343561249, 0.065682337918207449113],
+      CB = [47.20258190468824187, 976.09855173777669322, 10260.932208618978205, 45507.789335026729956],
+      CC = [0.39894151208813466764, 8.8831497943883759412, 93.506656132177855979, 597.27027639480026226, 2494.5375852903726711,
+            6848.1904505362823326, 11602.651437647350124, 9842.7148383839780218, 1.0765576773720192317e-8],
+      CD = [22.266688044328115691, 235.38790178262499861, 1519.377599407554805, 6485.558298266760755, 18615.571640885098091,
+            34900.952721145977266, 38912.003286093271411, 19685.429676859990727],
+      CP = [0.21589853405795699, 0.1274011611602473639, 0.022235277870649807, 0.001421619193227893466, 2.9112874951168792e-5,
+            0.02307344176494017303],
+      CQ = [1.28426009614491121, 0.468238212480865118, 0.0659881378689285515, 0.00378239633202758244, 7.29751555083966205e-5];
+  function PhiHalf(z) {   // Phi(z) − 1/2 for |z| <= 0.67448975, without the cancellation of Phi(z) − 0.5
+    var zz = z * z, num = CA[4] * zz, den = zz;
+    for (var i = 0; i < 3; i++) { num = (num + CA[i]) * zz; den = (den + CB[i]) * zz; }
+    return z * (num + CA[3]) / (den + CB[3]);
+  }
+  function Phi(z) {
+    if (isNaN(z)) return NaN;
+    var y = Math.abs(z), t, i, num, den;
+    if (y <= 0.67448975) return 0.5 + PhiHalf(z);
+    if (y <= 5.656854249492381) {   // up to √32
+      num = CC[8] * y; den = y;
+      for (i = 0; i < 7; i++) { num = (num + CC[i]) * y; den = (den + CD[i]) * y; }
+      t = (num + CC[7]) / (den + CD[7]);
+    } else if (y < 37.5193) {       // beyond, the lower tail is below the smallest normal double
+      var r = 1 / (z * z); num = CP[5] * r; den = r;
+      for (i = 0; i < 4; i++) { num = (num + CP[i]) * r; den = (den + CQ[i]) * r; }
+      t = (0.3989422804014327 - r * (num + CP[4]) / (den + CQ[4])) / y;
+    } else return z > 0 ? 1 : 0;
+    var tail = expHalfSq(y) * t;    // Pr(Z > |z|)
+    return z > 0 ? 1 - tail : tail;
+  }
+  // PhiInv: P. J. Acklam's rational approximation (relative error 1.15e-9) and one Halley step. Above 1/2 it works on
+  // 1 − p, which is exact there; near 1/2 the step compares Phi(x) − 1/2 with p − 1/2, both free of cancellation.
+  var AA = [-39.69683028665376, 220.9460984245205, -275.9285104469687, 138.3577518672690, -30.66479806614716, 2.506628277459239],
+      AB = [-54.47609879822406, 161.5858368580409, -155.6989798598866, 66.80131188771972, -13.28068155288572],
+      AC = [-0.007784894002430293, -0.3223964580411365, -2.400758277161838, -2.549732539343734, 4.374664141464968, 2.938163982698783],
+      AD = [0.007784695709041462, 0.3224671290700398, 2.445134137142996, 3.754408661907416];
+  function PhiInv(p) {
+    if (!(p >= 0 && p <= 1)) return NaN;
+    if (p === 0) return -Infinity;
+    if (p === 1) return Infinity;
+    if (p > 0.5) return -PhiInv(1 - p);
+    var x, q, r;
+    if (p < 0.02425) {
+      q = Math.sqrt(-2 * Math.log(p));
+      x = (((((AC[0] * q + AC[1]) * q + AC[2]) * q + AC[3]) * q + AC[4]) * q + AC[5]) / ((((AD[0] * q + AD[1]) * q + AD[2]) * q + AD[3]) * q + 1);
+    } else {
+      q = p - 0.5; r = q * q;
+      x = (((((AA[0] * r + AA[1]) * r + AA[2]) * r + AA[3]) * r + AA[4]) * r + AA[5]) * q /
+          (((((AB[0] * r + AB[1]) * r + AB[2]) * r + AB[3]) * r + AB[4]) * r + 1);
+    }
+    var u = (Math.abs(x) <= 0.67448975 ? PhiHalf(x) - (p - 0.5) : Phi(x) - p) / phi(x);
+    return x - u / (1 + x * u / 2);
+  }
+  // log Γ(x), x > 0: Lanczos (g = 7, nine terms): Γ(z) = √(2π) t^(z − 1/2) e^(−t) A(z), t = z + 6.5, for z >= 1/2
+  var LG = [0.99999999999980993, 676.5203681218851, -1259.1392167224028, 771.32342877765313, -176.61502916214059,
+            12.507343278686905, -0.13857109526572012, 9.9843695780195716e-6, 1.5056327351493116e-7];
+  function lanczosA(z) { var a = LG[0]; for (var k = 1; k < 9; k++) a += LG[k] / (z - 1 + k); return a; }
+  function lgamma(x) {
+    if (!(x > 0)) return NaN;
+    if (x === Infinity) return Infinity;
+    if (x < 0.5) return lgamma(x + 1) - Math.log(x);
+    var t = x + 6.5;
+    return LN_SQRT_2PI + (x - 0.5) * Math.log(t) - t + Math.log(lanczosA(x));
+  }
+  // log Γ(z + h) − log Γ(z) from the Lanczos terms, without subtracting two large logarithms (Student-t for large ν)
+  function lgammaDiff(z, h) {
+    if (z < 0.5) return lgamma(z + h) - lgamma(z);
+    var t = z + 6.5;
+    return (z - 0.5) * Math.log1p(h / t) + h * (Math.log(t + h) - 1) + Math.log(lanczosA(z + h) / lanczosA(z));
+  }
+  // continued fraction of the regularized incomplete beta function (Numerical Recipes, modified Lentz)
+  function betacf(x, a, b) {
+    var TINY = 1e-300, c = 1, d = 1 - (a + b) * x / (a + 1);
+    d = 1 / (Math.abs(d) < TINY ? TINY : d);
+    var h = d;
+    for (var m = 1; m <= 20000; m++) {
+      var m2 = 2 * m, aa = m * (b - m) * x / ((a - 1 + m2) * (a + m2));
+      d = 1 + aa * d; d = 1 / (Math.abs(d) < TINY ? TINY : d);
+      c = 1 + aa / c; if (Math.abs(c) < TINY) c = TINY;
+      h *= d * c;
+      aa = -(a + m) * (a + b + m) * x / ((a + m2) * (a + 1 + m2));
+      d = 1 + aa * d; d = 1 / (Math.abs(d) < TINY ? TINY : d);
+      c = 1 + aa / c; if (Math.abs(c) < TINY) c = TINY;
+      var del = d * c; h *= del;
+      if (Math.abs(del - 1) <= EPS) break;
+    }
+    return h;
+  }
+  function tPdf(x, nu) {
+    if (isNaN(x) || !(nu > 0)) return NaN;
+    if (nu === Infinity) return phi(x);
+    var u = Math.abs(x / Math.sqrt(nu)), l1 = u > 1e150 ? 2 * Math.log(u) : Math.log1p(u * u);   // log(1 + x²/ν)
+    return Math.exp(lgammaDiff(nu / 2, 0.5) - 0.5 * Math.log(nu * Math.PI) - (nu + 1) / 2 * l1);
+  }
+  // 2 Pr(T <= −|x|) = I_w(ν/2, 1/2) with w = ν/(ν + x²) = 1/(1 + s), s = x²/ν; 1 − w = s/(1 + s) is formed directly.
+  // Relative error about 1e-12 up to ν = 1e4; beyond, the continued fraction cancels near w = 1 and the error grows
+  // about in proportion to ν (some 5e-11 at ν = 1e6), while the normal approximation is still worse there.
+  function tCdf(x, nu) {
+    if (isNaN(x) || !(nu > 0)) return NaN;
+    if (nu === Infinity) return Phi(x);
+    if (x === 0) return 0.5;
+    if (!isFinite(x)) return x > 0 ? 1 : 0;
+    var a = nu / 2, u = Math.abs(x / Math.sqrt(nu)), big = u > 1e150, s = u * u;
+    var w = big ? 0 : 1 / (1 + s), v = big ? 1 : s / (1 + s);
+    var lw = big ? -2 * Math.log(u) : -Math.log1p(s), lv = big ? 0 : Math.log(s) - Math.log1p(s);
+    var front = Math.exp(a * lw + 0.5 * lv - (LN_SQRT_PI - lgammaDiff(a, 0.5)));   // w^a (1 − w)^(1/2) / B(ν/2, 1/2)
+    var p = w < (a + 1) / (a + 2.5) ? 0.5 * front * betacf(w, a, 0.5) / a : 0.5 - front * betacf(v, 0.5, a);
+    return x < 0 ? p : 1 - p;
+  }
+  // C. Loader's saddle-point form of λ^x e^−λ / x! (as in R's dpois_raw and dbinom_raw): accurate to rounding for any
+  // size of x and λ, where a difference of log-gammas such as k log λ − λ − log k! loses digits
+  function stirlerr(n) {   // log n! − log(√(2πn) (n/e)^n), n > 0
+    if (n <= 15) return lgamma(n + 1) - (n + 0.5) * Math.log(n) + n - LN_SQRT_2PI;
+    var nn = n * n;
+    if (n > 500) return (1 / 12 - 1 / 360 / nn) / n;
+    if (n > 80) return (1 / 12 - (1 / 360 - 1 / 1260 / nn) / nn) / n;
+    if (n > 35) return (1 / 12 - (1 / 360 - (1 / 1260 - 1 / 1680 / nn) / nn) / nn) / n;
+    return (1 / 12 - (1 / 360 - (1 / 1260 - (1 / 1680 - 1 / 1188 / nn) / nn) / nn) / nn) / n;
+  }
+  function bd0(x, np) {   // x log(x/np) + np − x, by a series when x is near np
+    if (Math.abs(x - np) < 0.1 * (x + np)) {
+      var v = (x - np) / (x + np), s = (x - np) * v, ej = 2 * x * v;
+      v *= v;
+      for (var j = 1; j < 1000; j++) { ej *= v; var s1 = s + ej / (2 * j + 1); if (s1 === s) return s1; s = s1; }
+    }
+    return x * Math.log(x / np) + np - x;
+  }
+  function dpois(x, lam) { return Math.exp(-stirlerr(x) - bd0(x, lam)) / Math.sqrt(2 * Math.PI * x); }   // x > 0, λ > 0
+  // regularized incomplete gamma P(a, x), or Q(a, x) = 1 − P when upper: the series below x = a + 1, the continued
+  // fraction above it (Numerical Recipes), so that whichever of P and Q is small keeps its relative accuracy
+  function incGamma(a, x, upper) {
+    if (!(x > 0)) return upper ? 1 : 0;
+    if (x === Infinity) return upper ? 0 : 1;
+    var f = a * dpois(a, x), r, i;   // x^a e^−x / Γ(a)
+    if (x < a + 1) {
+      var del = 1 / a, sum = del;
+      for (i = 1; i < 100000 && Math.abs(del) > Math.abs(sum) * EPS; i++) { del *= x / (a + i); sum += del; }
+      r = sum * f;
+      return upper ? 1 - r : r;
+    }
+    var b = x + 1 - a, c = 1e300, d = 1 / b, h = d;
+    for (i = 1; i < 100000; i++) {
+      var an = -i * (i - a); b += 2;
+      d = an * d + b; d = 1 / (Math.abs(d) < 1e-300 ? 1e-300 : d);
+      c = b + an / c; if (Math.abs(c) < 1e-300) c = 1e-300;
+      var dl = d * c; h *= dl;
+      if (Math.abs(dl - 1) <= EPS) break;
+    }
+    r = f * h;
+    return upper ? r : 1 - r;
+  }
+  function isCount(k) { return k >= 0 && k === Math.floor(k) && isFinite(k); }
+  function poissonPmf(k, lam) {
+    if (!(lam >= 0)) return NaN;
+    if (!isCount(k)) return 0;
+    if (lam === 0 || k === 0) return k === 0 ? Math.exp(-lam) : 0;
+    return dpois(k, lam);
+  }
+  function poissonCdf(k, lam) {   // Pr(N <= k) = Q(floor(k) + 1, λ)
+    if (!(lam >= 0) || isNaN(k)) return NaN;
+    if (k < 0) return 0;
+    if (lam === 0 || k === Infinity) return 1;
+    return incGamma(Math.floor(k) + 1, lam, true);
+  }
+  function binomPmf(k, n, p) {
+    if (!isCount(n) || !(p >= 0 && p <= 1)) return NaN;
+    if (!isCount(k) || k > n) return 0;
+    if (p === 0 || p === 1) return k === (p === 0 ? 0 : n) ? 1 : 0;
+    if (k === 0) return Math.exp(n * Math.log1p(-p));
+    if (k === n) return Math.exp(n * Math.log(p));
+    var q = 1 - p, lc = stirlerr(n) - stirlerr(k) - stirlerr(n - k) - bd0(k, n * p) - bd0(n - k, n * q);   // Loader, as dbinom_raw
+    return Math.exp(lc - 0.5 * (Math.log(2 * Math.PI) + Math.log(k) + Math.log1p(-k / n)));
+  }
+  function chi2Cdf(x, k) { return isNaN(x) || !(k > 0) ? NaN : incGamma(k / 2, x / 2, false); }
+  Book.dist = { phi: phi, Phi: Phi, PhiInv: PhiInv, lgamma: lgamma, tPdf: tPdf, tCdf: tCdf,
+                poissonPmf: poissonPmf, poissonCdf: poissonCdf, binomPmf: binomPmf, chi2Cdf: chi2Cdf };
+
+  /* ---------------- seeded random numbers (Book.rng) ---------------- */
+  // Book.rng(seed): sfc32 (C. Doty-Humphrey's small fast counting generator, from PractRand), its four words filled
+  // from the integer seed (taken modulo 2^32) by splitmix32. The same seed gives the same numbers in every browser:
+  // uniform() and int() use integer arithmetic only, and normal() takes its logarithm from lnDet below instead of
+  // Math.log, whose last bit may differ between JavaScript engines. It does not reproduce NumPy's streams: a widget
+  // and a lab given the same seed draw different numbers.
+  function lnDet(x) {   // ln x for 0 < x <= 1 from +, −, ×, ÷ only: x = m 2^e, m in [√½, √2), ln m = 2 atanh((m − 1)/(m + 1))
+    var e = 0;
+    while (x < 0.7071067811865476) { x *= 2; e--; }   // exact: doubling only changes the exponent
+    var z = (x - 1) / (x + 1), z2 = z * z, t = z, s = 0;
+    for (var k = 1; k <= 25; k += 2) { s += t / k; t *= z2; }   // |z| < 0.172: thirteen terms reach 1e-17
+    return e * 0.6931471803691238 + (e * 1.9082149292705877e-10 + 2 * s);   // ln 2 in two parts (fdlibm)
+  }
+  Book.rng = function (seed) {
+    var w = seed >>> 0;
+    function sm() {   // splitmix32: a Weyl sequence through a 32-bit integer hash
+      w = w + 0x9e3779b9 | 0;
+      var t = Math.imul(w ^ w >>> 16, 0x21f0aaad);
+      t = Math.imul(t ^ t >>> 15, 0x735a2d97);
+      return (t ^ t >>> 15) >>> 0;
+    }
+    var a = sm(), b = sm(), c = sm(), d = sm(), spare = null;
+    function next() {   // one 32-bit output of sfc32; d is its counter
+      var t = (a + b | 0) + d | 0;
+      d = d + 1 | 0; a = b ^ b >>> 9; b = c + (c << 3) | 0; c = (c << 21 | c >>> 11) + t | 0;
+      return t >>> 0;
+    }
+    for (var i = 0; i < 12; i++) next();   // mix the seed through the state before the first output
+    function uniform() { return ((next() >>> 5) * 67108864 + (next() >>> 6)) / 9007199254740992; }   // 53 bits, [0, 1)
+    return {
+      uniform: uniform,
+      normal: function () {   // Marsaglia's polar method; the second variate of each pair is kept for the next call
+        if (spare !== null) { var z = spare; spare = null; return z; }
+        var x, y, s;
+        do { x = 2 * uniform() - 1; y = 2 * uniform() - 1; s = x * x + y * y; } while (s >= 1 || s === 0);
+        var f = Math.sqrt(-2 * lnDet(s) / s);
+        spare = y * f;
+        return x * f;
+      },
+      int: function (n) {   // 0 .. n − 1, all equally likely: draws past the last whole multiple of n are redrawn
+        if (!(n >= 1 && n <= 4294967296 && n === Math.floor(n))) throw new RangeError("rng.int(n): n must be an integer from 1 to 2^32");
+        var lim = 4294967296 - 4294967296 % n, r;
+        do r = next(); while (r >= lim);
+        return r % n;
+      }
+    };
+  };
+
+  /* ---------------- widget controls (Book.controls) ---------------- */
+  // Book.controls(host, defs, onChange) appends a <div class="controls"> to host, in the markup of the modules' own
+  // controlsHTML copies. defs: [{type: 'range' (default) | 'select' | 'button', id, key, label, ...}]
+  //   range:  min, max, step, value; fmt (a Book.fmt code, or a function of the value) for the live value by the label
+  //   select: options [[value, text], ...] (or plain strings), value (the option selected at first)
+  //   button: label only
+  // onChange(values, id): values is {key or id: value}, a number for a slider and a string for a select; id names the
+  // control that changed (null from fire()). Slider and select input is coalesced to one call per animation frame, so
+  // a slow redraw never queues up; a button click calls at once. Returns {el, values(), fire()}: fire() calls onChange
+  // now, for the first drawing (Book.controls does not) and for host.__redraw.
+  Book.controls = function (host, defs, onChange) {
+    var box = document.createElement("div"); box.className = "controls";
+    box.innerHTML = defs.map(function (d) {
+      if (d.type === "button") return '<button type="button" id="' + d.id + '">' + d.label + "</button>";
+      if (d.type === "select")
+        return '<label for="' + d.id + '">' + d.label + '<select id="' + d.id + '">' + d.options.map(function (o) {
+          var v = Array.isArray(o) ? o[0] : o;
+          return '<option value="' + v + '"' + (d.value != null && String(d.value) === String(v) ? " selected" : "") + ">" + (Array.isArray(o) ? o[1] : o) + "</option>";
+        }).join("") + "</select></label>";
+      return '<label for="' + d.id + '">' + d.label + ' <span class="v" id="' + d.id + '-v"></span>' +
+        '<input type="range" id="' + d.id + '" min="' + d.min + '" max="' + d.max + '" step="' + d.step + '" value="' + d.value + '"></label>';
+    }).join("");
+    host.appendChild(box);
+    var els = defs.map(function (d, i) { var c = box.children[i]; return d.type === "button" ? c : c.querySelector(d.type === "select" ? "select" : "input"); });
+    function values() {
+      var o = {};
+      defs.forEach(function (d, i) { if (d.type !== "button") o[d.key || d.id] = d.type === "select" ? els[i].value : +els[i].value; });
+      return o;
+    }
+    function show(i) {   // a slider's live value
+      var d = defs[i], v = +els[i].value;
+      box.children[i].querySelector(".v").textContent = typeof d.fmt === "function" ? d.fmt(v) : d.fmt ? fmt(v, d.fmt) : String(v);
+    }
+    var queued = false, last = null;
+    defs.forEach(function (d, i) {
+      if (d.type === "button") { els[i].addEventListener("click", function () { onChange(values(), d.id); }); return; }
+      if (d.type !== "select") show(i);
+      els[i].addEventListener("input", function () {
+        if (d.type !== "select") show(i);
+        last = d.id;
+        if (!queued) { queued = true; requestAnimationFrame(function () { queued = false; onChange(values(), last); }); }
+      });
+    });
+    return { el: box, values: values, fire: function () { onChange(values(), null); } };
   };
 
   /* render every data chart on the page; re-render on width change */
