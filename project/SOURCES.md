@@ -67,7 +67,7 @@ Every registered FinMind file is fetched, and re-checked byte for byte, through 
 |:--|:--|
 | White House fact sheet, 2 April 2025 (whitehouse.gov; official, US) | the reciprocal tariffs behind the April 2025 sell-off: a 10% baseline from 5 April, higher country rates from 9 April (read 2026-10-11) |
 | TechNews [2026-05-26 weight gap](https://finance.technews.tw/2026/05/26/weight-gap/) and SETN news 1844764 (2026-05-27) | 00631L replication: TAIEX futures 160.87%, TSMC 39.63%; TSMC weight 43.7% in TAIEX vs 60.9% in Taiwan 50 (as of 2026-05-19) |
-| TechNews 2025-04-07 (black Monday records), Taiwan News zh/news/6078269 | 7 April 2025 tariff sell-off |
+| TechNews 2025-04-07 (black Monday records), Taiwan News zh/news/6078269 | 7 April 2025 tariff sell-off; TechNews reports 936 listed stocks (1,702 with the OTC market) closing limit-down that day (re-read 2026-10-18 for LM13–LM15) |
 | TechNews 2022-12-30 (TWD depreciation), 2025-05-05 (TWD surge); FTV News 2025505W0BEA | USD/TWD 30.708 at end-2022; 31.064 on 2 May 2025; 30.145 on 5 May 2025 |
 | TechNews 2025-06-10 (0050 one-into-four) | 0050 split timing |
 | TechNews 2025-02-04, ctee.com.tw exchange/792949 and 20250204700571 | bond ETF background (LM7) |
@@ -289,7 +289,9 @@ Every registered FinMind file is fetched, and re-checked byte for byte, through 
   θ̂*(·)]²/(B − 1)}^{1/2}, θ̂*(·) = Σ_b θ̂*(b)/B; (6.7) se_B → the ideal bootstrap estimate se_F̂(θ̂*) as B → ∞;
   Figure 6.1 (p. 48). Wasserman's (8.1) (§8.2, p. 109) divides by B instead.
 - Wasserman, locations verified (read 2026-10-18) in Google Books snippets of ISBN 978-0-387-40272-7
-  ([th3fbFI1DaMC](https://books.google.com/books?id=th3fbFI1DaMC)): the three axioms in §1.3 (p. 5); Theorem 1.8,
+  ([th3fbFI1DaMC](https://books.google.com/books?id=th3fbFI1DaMC)): the three axioms in §1.3 (p. 5), Definition 1.5,
+  whose third axiom is additivity over a sequence of disjoint events (countable additivity; read for LM13's
+  verification); Theorem 1.8,
   continuity of probabilities (p. 7, before §1.4's heading); §2.10 (pp. 39–40), the N(μ, Σ) density (2.10) for Σ
   symmetric positive definite and Theorem 2.43 (X = μ + Σ^{1/2}Z ~ N(μ, Σ), and conversely); Chebyshev Theorem 4.2
   (p. 64); Jensen Theorem 4.9 (p. 66); WLLN Theorem 5.6 (§5.3, p. 76, proof assumes σ < ∞); CLT Theorem 5.8 (§5.4,
@@ -307,6 +309,8 @@ Every registered FinMind file is fetched, and re-checked byte for byte, through 
   generalized inverse (2.14) and Figure 2.6; §4.1.3 "Small-Sample Issues", p. 200: the bias from estimating the
   control-variate coefficient is typically of order 1/n, against a standard error of order 1/√n (Google Books search
   within [e9GWUsQkPNMC](https://books.google.com/books?id=e9GWUsQkPNMC), read 2026-10-18 for LM18's review).
+- Durrett (2019), Theorem 1.7.2: Fubini's theorem, for f ≥ 0 or ∫|f| < ∞ (read in the author's free PDF,
+  2026-10-18, for LM16's verification; numbered as in that PDF).
 - Durrett (2019), Theorem 2.2.3: the L² weak law for uncorrelated random variables with a common mean and bounded
   variances (read in the author's free PDF, 2026-10-18, for LM17's review; numbered as in that PDF).
 - Glasserman (2003), §4.2, p. 207 (Google Books snippet, [e9GWUsQkPNMC](https://books.google.com/books?id=e9GWUsQkPNMC),
@@ -445,7 +449,8 @@ every numeric check ran in the project's venv (NumPy 2.5.3, SciPy 1.18.1).
   `https://terms.naer.edu.tw/search/?query_term=<q>&query_field=title&query_op=&match_type=phrase&page_size=100`,
   plus `&filter_bool=and&filter_term=%27%E7%B5%B1%E8%A8%88%E5%AD%B8%E5%90%8D%E8%A9%9E%27&filter_field=subcategory_1.raw&filter_op=term&tabaction=browse`
   for statistics (`filter_term=%27%E6%95%B8%E5%AD%B8%E5%90%8D%E8%A9%9E%27` for mathematics); the empty `query_op=` is
-  required, or a filtered search ignores the query and browses the whole listing. Entry pages (`/detail/<hash>/`)
+  required, or a filtered search ignores the query and browses the whole listing. Found later (2026-10-18, LM18's
+  revision): 蒙地卡羅估計量 (Monte Carlo estimator, 統計學名詞). Entry pages (`/detail/<hash>/`)
   depend on the search session and are not cited. 分布 and 分配: the statistics listing writes 分布 in every Volume III
   compound (常態分布, 二項分布, 聯合分布, 條件分布, 累積分布函數, 依分布收斂, 經驗分布函數) and its bare
   distribution and distribution function entries give 分布 first, 分配 second; the mathematics listing pairs "分布；分配" in most compounds but has 分布

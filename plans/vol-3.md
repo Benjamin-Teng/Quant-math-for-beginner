@@ -1577,8 +1577,8 @@ TR23's daily Jensen gap (E10), the gap at $f=2$ (KC §7), $A\bar r$ (E4), the da
 top-ten shares); E6 (the lognormal fitted to 23 annual growth factors). LM16: (16.1) independence and the product rule;
 (16.2) covariance and correlation; (16.3) the sum rule; uncorrelated against independent.
 
-**Leads:** `[18, 19, 20, 21, 22, 26, 34, 36, 38, 41, 42, 45]`: tag users and pointer targets (LM18 cites (17.1),
-(17.2), (17.4)–(17.6)).
+**Leads:** `[18, 19, 20, 21, 22, 26, 34, 36, 38, 41, 42, 45]`: tag users and pointer targets (LM18 cites (17.1)
+and (17.4)–(17.6)).
 
 **Forward links honoured.**
 
@@ -2124,7 +2124,7 @@ their English names, described in Chinese (兩次計算共用同一組隨機數;
   relative gap (`n3`); series 1 root-mean-square gap of 200 runs (experiment 12) at $n$ = 100, 500, 1,000, 4,382,
   10,000, 50,000; series 2 (18.9), dashed; `point` LM12's 0.0250 at 4,382. Note: LM12's printed $L$,
   `np.cov(..., ddof=0)`; at 4,382 the formula gives 0.0289, the runs $0.0301\pm0.0007$ (20 batches of 10 runs; relative
-  standard error at most 2.6%); 82 of the 200 runs ($41\%\pm4\%$) come at or below 0.0250 [A18-21]; slope −1/2.
+  standard error below 2.7%); 82 of the 200 runs ($41\%\pm3\%$) come at or below 0.0250 [A18-21]; slope −1/2.
 - X4 `line` §5 "Error against evaluations": $x$ numeric $\log_{10}$ of evaluations (0–10, `tickLabels`), $y$ log,
   relative error (`sci`); Simpson, LM5's printed errors ÷ $2.000355\times10^{-5}$ at 9 … 1,025 evaluations (0.484 …
   $1.23\times10^{-6}$ at 257 … $4.83\times10^{-9}$) [A18-22]; formulas $223.6/\sqrt n$ (plain) and $2.153/\sqrt n$
