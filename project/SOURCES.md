@@ -450,7 +450,7 @@ every numeric check ran in the project's venv (NumPy 2.5.3, SciPy 1.18.1).
   plus `&filter_bool=and&filter_term=%27%E7%B5%B1%E8%A8%88%E5%AD%B8%E5%90%8D%E8%A9%9E%27&filter_field=subcategory_1.raw&filter_op=term&tabaction=browse`
   for statistics (`filter_term=%27%E6%95%B8%E5%AD%B8%E5%90%8D%E8%A9%9E%27` for mathematics); the empty `query_op=` is
   required, or a filtered search ignores the query and browses the whole listing. Found later (2026-10-18, LM18's
-  revision): 蒙地卡羅估計量 (Monte Carlo estimator, 統計學名詞). Entry pages (`/detail/<hash>/`)
+  revision): 蒙地卡羅估計量 (Monte Carlo estimator, 數學名詞; a re-run of the search lists it there, not in 統計學名詞). Entry pages (`/detail/<hash>/`)
   depend on the search session and are not cited. 分布 and 分配: the statistics listing writes 分布 in every Volume III
   compound (常態分布, 二項分布, 聯合分布, 條件分布, 累積分布函數, 依分布收斂, 經驗分布函數) and its bare
   distribution and distribution function entries give 分布 first, 分配 second; the mathematics listing pairs "分布；分配" in most compounds but has 分布

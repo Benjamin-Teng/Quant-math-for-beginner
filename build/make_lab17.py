@@ -284,7 +284,7 @@ print(lev)   # [[eg:leverageeg]]
 show("W_T at f = 4", lev["W_T"][2], ",.1f", "2,127.8")
 show("A gbar at f = 4 (%)", 100 * lev["A gbar"][2], ".2f", "32.24")
 d_star = log(1 + fstar * Rb) - gbar(fstar)
-show("Pr(W > EW) at f*", stats.norm.sf(sqrt(T) * d_star / sdl(fstar)), ".3f", "0.028")
+show("Pr(W > EW) at f*, normal approximation", stats.norm.sf(sqrt(T) * d_star / sdl(fstar)), ".3f", "0.028")
 wl = np.concatenate([[1.0], np.exp(np.cumsum(np.log1p(fstar * R)))])
 dd = 1 - wl / np.maximum.accumulate(wl)
 show("largest drawdown at f* (%)", 100 * dd.max(), ".1f", "98.5")
@@ -342,7 +342,7 @@ md(r"""
 
 [[ex:lognormal]] from (17.6), the normal approximation; then the model's exact law of the sum, the calendar years 2003–2025 (2003 from its first close, exact arithmetic on the closes), the daily model refitted to them ([[eg:lognormaleg]]) and the widget's grid of $(f,\bar g(f),s_r(f))$.
 
-The exact law needs no approximation: the sum of $m$ independent draws from TR23's empirical law has the $m$-th power of one draw's Fourier transform. Place each centred log return on a lattice of step $10^{-5}$ (its mass split between the two neighbouring points, which keeps the mean), raise the FFT to the power $m$ and transform back.
+The exact law needs no approximation: the sum of $m$ independent draws from TR23's empirical law has the $m$-th power of one draw's Fourier transform. Place each centred log return on a lattice of step $10^{-5}$ (its mass split between the two neighbouring points, which keeps the mean), raise the FFT to the power $m$ and transform back. From that law come every column of [[ex:lognormal]] but the mean path, and the largest gaps from (17.6) that its note bounds by 0.2 points and 0.2%.
 """)
 
 code(r"""
@@ -365,27 +365,52 @@ show("sample: loss (%)", 100 * x6["Pr(W<W0)"][2], ".3f", "0.025")
 
 # the model's exact law of the m-day sum, by FFT on a lattice of step H (the sum centred on m * mean)
 H, NPT = 1e-5, 2**22
-yc = (r - rb) / H
-lat = np.floor(yc).astype(np.int64)
-w_up = yc - lat
-pmf1 = (np.bincount(lat % NPT, weights=(1 - w_up) / T, minlength=NPT)
-        + np.bincount((lat + 1) % NPT, weights=w_up / T, minlength=NPT))
-phi1 = np.fft.fft(pmf1)
 
 
-def exact_below(m, c):
-    # Pr(sum of m log returns - m * mean < c), each lattice mass spread evenly over its cell
-    pm = np.fft.fftshift(np.fft.ifft(phi1**m).real)
+def lattice_ft(x):
+    # Fourier transform of the empirical law of x - mean(x) on the lattice, each mass split between two neighbours
+    y = (x - x.mean()) / H
+    lo = np.floor(y).astype(np.int64)
+    w_hi = y - lo
+    pmf = (np.bincount(lo % NPT, weights=(1 - w_hi) / len(x), minlength=NPT)
+           + np.bincount((lo + 1) % NPT, weights=w_hi / len(x), minlength=NPT))
+    return np.fft.fft(pmf)
+
+
+def exact_law(ft, m):
+    # lattice pmf of the centred m-day sum (index NPT/2 is 0) and its cumulative sums
+    pm = np.fft.fftshift(np.fft.ifft(ft**m).real)
+    return pm, np.cumsum(pm)
+
+
+def law_cdf(pm, cum, c):
+    # Pr(centred sum < c), each lattice mass spread evenly over its cell
     k = c / H + NPT // 2
     j = int(np.floor(k + 0.5))
-    return pm[:j].sum() + (k - (j - 0.5)) * pm[j]
+    return cum[j - 1] + (k - (j - 0.5)) * pm[j]
 
 
-exact = {m: exact_below(m, -m * rb) for m in (round(A), round(10 * A), T)}
-for m, p in exact.items():
-    print(f"m = {m:,}: loss probability by (17.6) {stats.norm.cdf(-rb * sqrt(m) / sr):.4%}, exact {p:.4%}")
-show("exact loss probability, one year (%)", 100 * exact[round(A)], ".2f", "23.62")
-show("exact loss probability, the sample (%)", 100 * exact[T], ".3f", "0.026")
+def law_quantile(pm, cum, u):
+    # the c with Pr(centred sum < c) = u
+    j = int(np.searchsorted(cum, u))
+    return (j - 0.5 - NPT // 2 + (u - cum[j - 1]) / pm[j]) * H
+
+
+ft_r = lattice_ft(r)
+rows, gap_p, gap_q = [], [], []
+for k, m in enumerate((round(A), round(10 * A), T)):
+    pm, cum = exact_law(ft_r, m)
+    q = [exp(m * rb + law_quantile(pm, cum, u)) for u in (0.05, 0.5, 0.95)]
+    rows.append({"m": m, "median": q[1], "5%": q[0], "95%": q[2], "Pr(W<W0)": law_cdf(pm, cum, -m * rb),
+                 "Pr(W>EW)": 1 - law_cdf(pm, cum, m * delta)})
+    gap_p += [abs(x6[c][k] - rows[-1][c]) for c in ("Pr(W<W0)", "Pr(W>EW)")]
+    gap_q += [abs(x6[c][k] / rows[-1][c] - 1) for c in ("5%", "median", "95%")]
+exact6 = pl.DataFrame(rows)
+print(exact6)   # the exact law, against (17.6) in the table above
+print(f"largest gaps from (17.6): {100 * max(gap_p):.3f} points (probabilities), {100 * max(gap_q):.3f}% (quantiles)")
+assert max(gap_p) < 0.002 and max(gap_q) < 0.002   # the note: at most 0.2 points and 0.2%
+show("exact loss probability, one year (%)", 100 * exact6["Pr(W<W0)"][0], ".2f", "23.62")
+show("exact loss probability, the sample (%)", 100 * exact6["Pr(W<W0)"][2], ".3f", "0.026")
 
 yearly = (df.with_columns(pl.col("date").str.slice(0, 4).alias("year"))
             .group_by("year", maintain_order=True).agg(pl.col("price").last().alias("last")).sort("year"))
@@ -409,8 +434,11 @@ show("refitted daily mean log return (%)", 100 * r_w.mean(), ".6f", "0.047292")
 show("refitted daily standard deviation (%)", 100 * r_w.std(), ".5f", "1.18352")
 show("246 x refitted mean (%)", 100 * 246 * r_w.mean(), ".3f", "11.634")
 show("sqrt(246) x refitted standard deviation (%)", 100 * sqrt(246) * r_w.std(), ".3f", "18.563")
-show("refitted daily model: losing-year chance (%)", 100 * p_w, ".2f", "26.54")
-show("expected losing years", 23 * p_w, ".2f", "6.10")
+show("refitted daily model: losing-year chance by (17.6) (%)", 100 * p_w, ".2f", "26.54")
+show("losing years of 23 by (17.6)", 23 * p_w, ".2f", "6.10")
+pm, cum = exact_law(lattice_ft(r_w), 246)
+p_w_exact = law_cdf(pm, cum, -246 * r_w.mean())
+print(f"the refitted model's exact law: losing-year chance {p_w_exact:.2%}, {23 * p_w_exact:.2f} losing years of 23")
 la = np.array(ann)
 show("LM15's annual fit: Pr(G < 1) (%)", 100 * stats.norm.cdf(-la.mean() / la.std()), ".1f", "30.0")
 

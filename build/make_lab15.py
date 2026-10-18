@@ -285,7 +285,7 @@ m = round(T / ((np.datetime64(tr["date"][-1]) - np.datetime64(tr["date"][0])).as
 show("m", m, "d", "246")
 show("model's annual mean", m * w.mean(), ".4f", "0.1163")
 show("model's annual standard deviation", math.sqrt(m) * w.std(), ".4f", "0.1856")
-show("model's Pr(losing year), %", 100 * stats.norm.cdf(-m * w.mean() / (math.sqrt(m) * w.std())), ".1f", "26.5")
+show("model's Pr(losing year), LM17's normal approximation, %", 100 * stats.norm.cdf(-m * w.mean() / (math.sqrt(m) * w.std())), ".1f", "26.5")
 g = np.linspace(0.5, 1.9, 300)
 plt.plot(g, lg.cdf(g), label="lognormal")
 plt.step(np.r_[0.5, np.sort(G), 1.9], np.r_[0, np.arange(1, 24) / 23, 1], where="post", label="TAIEX, 23 years")
@@ -440,7 +440,7 @@ show("P12 t at +5%", T * stats.t.sf(0.05, nu_m, loc_m, sc_m), ".1f", "22.0")
 md(r"""
 ### Extension: a Student-t for five-session log returns
 
-Sum the daily log returns $r_t=\ln(1+R_t)$ over non-overlapping blocks of five sessions, and fit a Student-t to these five-session log returns by maximum likelihood. Compare its $\nu$ and the 1% quantile of the five-session log returns with the daily ones. Treat the comparison as a stability check and draw no conclusion yet: LM17 studies sums of log returns, their kurtosis included, and LM19 the sampling error of such statistics.
+Sum the daily log returns $r_t=\ln(1+R_t)$ over non-overlapping blocks of five sessions, and fit a Student-t to these five-session log returns by maximum likelihood. Compare its $\nu$ and the 1% quantile of the five-session log returns with those of the daily log returns (the module's 3.065 and −3.567% are for simple returns). Treat the comparison as a stability check and draw no conclusion yet: LM17 studies sums of log returns, their kurtosis included, and LM19 the sampling error of such statistics.
 """)
 
 code(r"""
@@ -448,6 +448,9 @@ r = np.log1p(R)                               # daily log returns
 n5 = T // 5
 r5 = r[: n5 * 5].reshape(n5, 5).sum(axis=1)   # non-overlapping five-session log returns
 nu5, loc5, sc5 = stats.t.fit(r5)
+nu1 = stats.t.fit(r)[0]                       # daily log returns, like with like
+print(f"{T} daily log returns: Student-t nu {nu1:.3f}; "
+      f"1% quantile {100 * np.quantile(r, 0.01, method='inverted_cdf'):.3f}% (log return)")
 print(f"{n5} five-session log returns: Student-t nu {nu5:.3f}; "
       f"1% quantile {100 * np.quantile(r5, 0.01, method='inverted_cdf'):.3f}% (log return)")
 # your code: other block lengths (10, 20); LM17 computes the kurtosis of such sums

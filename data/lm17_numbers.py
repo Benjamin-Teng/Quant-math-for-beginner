@@ -661,6 +661,11 @@ has("X6 note: size of the error", "differ by at most 0.2 points for the probabil
 chk("X6 note: exact loss probability, one year (%)", 100 * exact_rows[246][0], ".2f", "23.62")
 chk("X6 note: exact loss probability, the sample (%)", 100 * exact_rows[5849][0], ".3f", "0.026")
 assert f"{100 * row(5849)[4]:.3f}" == "0.025" and f"{100 * row(246)[4]:.2f}" == "23.74"
+# the overview and Section 3's 中文導讀 print 0.32 without a qualifier: the exact law gives it too (V2 of
+# reviews/lm17.md); the 0.028 at f* is the normal approximation's (E5), and both places now say so
+chk("overview: exact Pr(W > EW) over the sample", exact_rows[5849][1], ".2f", "0.32")
+has("overview: 0.028 named as the normal approximation", "about 0.028 by the normal approximation")
+has("Section 3 box: 0.028 as an approximation", "只剩約 0.028")
 
 fp = "median {:.5f}; mean path {:.5f}; 5% {:.5f}; 95% {:.5f}; Pr(W<W0) {:.6f}; Pr(W>EW) {:.5f}"
 anchor("A17-47", fp.format(*row(m1)))
@@ -714,6 +719,7 @@ p_w = float(Phi(-rb_w * sqrt(m1) / sr_w))
 chk("E8: returns 2003-2025", len(r_w), ",", "5,664")
 chk("E8: refitted daily model, losing-year chance", 100 * p_w, ".2f", "26.54")
 chk("E8: expected losing years", 23 * p_w, ".2f", "6.10")
+has("X6 note: 6.10 named as (17.6)'s (V1 of reviews/lm17.md)", "(17.6) gives 6.10 losing years")
 chk("E8: expected losing years from printed 26.54%", 23 * 0.2654, ".2f", "6.10")
 la = np.array(ann)
 chk("E8: LM15's fit, Pr(G < 1)", 100 * float(Phi(-la.mean() / la.std())), ".1f", "30.0")

@@ -705,7 +705,9 @@ for lit in ("`default_rng([1, 20261011])`", "`default_rng([16, 20261011])`", "`d
             "`default_rng([3, 20261011])`", "`default_rng([5, 20261011])`", "`default_rng([6, 20261011])`",
             "`default_rng([8, 20261011])`", "`default_rng([9, 20261011])`", "`default_rng([10, 20261011])`",
             "`default_rng([12, 20261011])`", "`default_rng([14, 20261011])`", "y = (G < 1).astype(float)",
-            "import numpy as np\n\n    T, m = 5849, 1231"):
+            "import numpy as np\n\n    T, m = 5849, 1231",
+            "6 (antithetic), seeded `default_rng([e, 20261011])` with `e` the experiment's number",
+            "From `default_rng([2, 20261011])`, `norm.ppf(rng.random(3))`"):
     has(f"literal {lit}", lit)
 has("LM12's draws", "4,382 standard normal draws")
 has("1,025 evaluations", "$4.83\\times10^{-9}$ at 1,025")

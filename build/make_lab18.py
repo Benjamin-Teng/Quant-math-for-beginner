@@ -253,7 +253,7 @@ code(r"""
 for x, p in zip(stats.norm.ppf(u3), ("-1.0817", "-0.0916", "-0.9382")):
     show("norm.ppf(u)", x, ".4f", p)
 for x, p in zip(rng(2).standard_normal(3), ("0.1679", "0.2891", "0.7095")):
-    show("standard_normal(3), stream 2 re-created", x, ".4f", p)
+    show("standard_normal(3), default_rng([2, 20261011]) re-created", x, ".4f", p)
 """)
 
 md(r"""

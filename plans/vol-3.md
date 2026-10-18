@@ -1241,9 +1241,9 @@ The 28-dimensional all-down comparison: not in Volume III.
 **Uses before taught.**
 
 - "Independent normal variables are jointly normal, and a normal vector's law is fixed by $\boldsymbol\mu$ and $\Sigma$
-  (stated without proof; Blitzstein and Hwang 2019, §7.5)." The density (16.7), $\Sigma$ PD: "stated without proof;
-  Wasserman 2004, §2.10: his equation (2.10) and Theorem 2.43" (SOURCES); Deep Dive 2 draws $N=2$. The writer
-  reads §7.5's statements before citing them.
+  (stated without proof; Wasserman 2004, §2.10, Theorem 2.43, for a positive definite $\Sigma$)." The density (16.7),
+  $\Sigma$ PD: "stated without proof; Wasserman 2004, §2.10: his equation (2.10) and Theorem 2.43" (SOURCES); Deep Dive
+  2 draws $N=2$. Blitzstein and Hwang's §7.5 could not be read, so it is not cited (verification 1).
 - "SciPy's `stats.chi2` gives $\chi^2_N$'s tails for $N>2$; [[LM21]] builds tests on it." The definition is LM16's;
   no $\chi^2_N$ density.
 - "That a sum of many independent days is nearly normal is the central limit theorem of [[LM17]]." (§4)

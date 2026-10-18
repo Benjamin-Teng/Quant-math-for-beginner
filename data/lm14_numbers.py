@@ -558,6 +558,8 @@ truth("+100%/-50%: mu 25%, sigma 75%, drag 25, sigma^2/2 28.125 exact, second or
       abs(hm["mu"] - 0.25) < 1e-15 and abs(hm["sd"] - 0.75) < 1e-15 and abs(hm["drag"] - 0.25) < 1e-15
       and hm["var"] / 2 == 0.28125 and abs(hm["t2"] - 0.18) < 1e-15 and abs(hm["t2"] + hm["t3"] + hm["t4"] - 0.2124) < 1e-15)
 truth("28.125 would tie at two decimals", tie(28.125, ".2f"))
+truth("+100%/-50%: (3.9)'s mu - sigma^2/2 = -3.125% exactly, a two-decimal tie (the widget prints three)",
+      (hm["mu"] - hm["var"] / 2) * 100 == -3.125 and tie(-3.125, ".2f"))
 chk("+100%/-50% Jensen gap", hm["jensen"] * 100, ".2f", "22.31")
 has("X8 row daily", f"| TAIEX, daily (bp) | {Rbar * 100:.4f}% | {s * 100:.4f}% | {(Rbar - RG) * 1e4:.4f} | {s**2 / 2 * 1e4:.4f} | "
     f"{J * 1e4:.4f} | {tr23['t2'] * 1e4:.4f} | {(tr23['t2'] + tr23['t3'] + tr23['t4']) * 1e4:.4f} |")

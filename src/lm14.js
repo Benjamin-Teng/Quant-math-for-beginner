@@ -75,15 +75,15 @@
           { type: "point", x: L.mu, y: L.g, color: "2", label: "average of the logs", dx: 8, dy: 16 }
         ]
       });
-      // points to two decimals, or to three where two would sit on a rounding tie (+100%/−50%: σ²/2 = 28.125)
-      function pts(v) {
-        var x = Math.abs(v) * 1e4, tie = Math.abs(x - Math.floor(x) - 0.5) < 1e-6;
-        return fmt(v * 100, tie ? "n3" : "n2");
-      }
+      // percentages and points to two decimals, or to three where two would sit on a rounding tie
+      // (+100%/−50%: σ²/2 = 28.125 points, μ − σ²/2 = −3.125%)
+      function tie(v) { var x = Math.abs(v) * 1e4; return Math.abs(x - Math.floor(x) - 0.5) < 1e-6; }
+      function pts(v) { return fmt(v * 100, tie(v) ? "n3" : "n2"); }
+      function pc2(v) { return fmt(v, tie(v) ? "pct3" : "pct2"); }
       out.innerHTML =
         "<div><span>Mean μ · standard deviation σ</span><b>" + fmt(L.mu, "pct1") + " · " + fmt(L.sd, "pct1") + "</b></div>" +
         "<div><span>Average of the logs g · log of the average ln(1 + μ)</span><b>" + fmt(L.g, "pct3") + " · " + fmt(L.lnmu, "pct3") + "</b></div>" +
-        "<div><span>Compound rate R<sub>G</sub> · (3.9)'s μ − σ²/2</span><b>" + fmt(L.RG, "pct2") + " · " + fmt(L.mu - L.half, "pct2") + "</b></div>" +
+        "<div><span>Compound rate R<sub>G</sub> · (3.9)'s μ − σ²/2</span><b>" + pc2(L.RG) + " · " + pc2(L.mu - L.half) + "</b></div>" +
         "<div><span>Jensen gap ln(1 + μ) − g · drag μ − R<sub>G</sub> (points)</span><b>" + pts(L.jensen) + " · " + pts(L.drag) + "</b></div>" +
         "<div><span>σ²/2 · second order σ²/(2(1 + μ)²) (points)</span><b>" + pts(L.half) + " · " + pts(L.second) + "</b></div>";
     }

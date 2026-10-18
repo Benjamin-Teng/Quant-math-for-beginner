@@ -375,7 +375,9 @@ rho_direct = float(np.corrcoef(down[:-1].astype(float), down[1:].astype(float))[
 assert format(rho_direct, ".4f") == "0.0214", rho_direct                             # the lag-1 correlation itself
 has("rho1 text", "(0.0214 from the unrounded frequencies)")
 has("covariance defined", r"Their covariance $\E[X_1X_2]-\E[X_1]\E[X_2]$ ([[LM16]]) is $0.4521\times(0.4639-0.4521)$")
-has("both days 0.4521", "indicate falls on adjacent days, each with frequency 0.4521")
+has("both days 0.4521", "indicate falls on adjacent days, both taken at frequency 0.4521 (the first day's is 0.4519)")
+chk("Pr(down) on the first day of the pairs", float(down[:-1].mean()), ".4f", "0.4519")    # 2,643 / 5,848, LM13's 0.4519
+assert int(down[:-1].sum()) == 2643
 chk("block variance with rho1, from printed inputs", 20 * 0.548 * 0.452 * (1 + 2 * (19 / 20) * 0.0215), ".2f", "5.16")
 chk("block variance with rho1, unrounded", 20 * p_hat * (1 - p_hat) * (1 + 2 * (19 / 20) * (pc - pd_) / (1 - pd_)),
     ".2f", "5.16")
@@ -582,6 +584,10 @@ chk("LM17 model mean", mu_w, ".4f", "0.1163")
 chk("LM17 model sd", sd_w, ".4f", "0.1856")
 chk("LM17 model Pr(losing year), %", 100 * float(stats.norm.cdf(-mu_w / sd_w)), ".1f", "26.5")
 chk("LM17 model from the printed 0.1163, 0.1856, %", 100 * float(stats.norm.cdf(-0.1163 / 0.1856)), ".1f", "26.5")
+# VX2: 26.5% is (17.6)'s normal approximation of that model (LM17 prints 26.54% by (17.6)), and the text says so
+has("E6 normal approximation", "By [[LM17]]'s normal approximation, a losing year then has probability 26.5%.")
+has("overview about 26.5%", "a model of independent days gives about 26.5%")
+has("zh normal approximation", "以常態逼近（normal approximation）計算，虧損年機率降為約 26.5%")
 anchor("A15-64", f"Pr(loss year) = Phi(-mean/sd) = {float(stats.norm.cdf(-mu_w / sd_w)):.6f}")
 chk("rbar, %", 100 * rbar, ".5f", "0.05517")
 chk("s_r, %", 100 * s_r, ".4f", "1.2107")
@@ -843,7 +849,8 @@ assert T * stats.t.sf(0.03, nu_m, loc_m, sc_m) > e_ml(-0.03) and T * stats.t.sf(
 has("P12 lower tail", "In the lower tail it understates at −3% (79.0 against 108) and overstates at −5% (19.6 against 15)")
 has("P12 centre", "Centred at +0.0997%, the Student-t even expects more large rises than large falls")
 has("P12 stem", "Why can no symmetric model centred near the median fit both tails?")
-# X11: SciPy's method of moments for t matches the first three raw moments (rv_continuous.fit) and fails on TR23
+# X11, V2: SciPy's method of moments matches the first k raw moments, k the number of free parameters (rv_continuous.fit;
+# three for t: df, loc, scale), and it fails on TR23
 with warnings.catch_warnings():
     warnings.simplefilter("ignore")
     try:
@@ -853,7 +860,17 @@ with warnings.catch_warnings():
         mm_fails = True
 assert mm_fails, "stats.t.fit(R, method='MM') no longer raises on TR23: revise the trap in the scipy exhibit"
 print("CHECK stats.t.fit(R, method='MM') raises ValueError on TR23 ok")
-has("MM trap", "fits the first three raw moments, not the kurtosis of (15.12), and on TR23 it stops with an error")
+has("MM trap", "matches the first three raw moments of `t`, one per free parameter, not (15.12)'s kurtosis; fails on TR23")
+assert stats.t.shapes == "df" and stats.t.numargs + 2 == 3     # df plus loc and scale: three free parameters
+has("choice: the years", "The lognormal row uses the calendar years 2003–2025, 2003 from its first close.")
+has("E10 lead-in", "TR23 shows both points, but a deep chord rests on a few days and moves too.")
+has("zh chord caveat", "門檻越深越陡，但深處的弦只靠少數幾天，同樣不穩")
+# VX8: each TR23 data exhibit after the case names its source as the case's
+assert TEXT.count("Source: as [[ex:case]].") == 8
+# VX5, VX4, VX6: the boxes name the index, and gloss these terms at first use
+assert "台股" not in TEXT and TEXT.count("加權股價報酬指數") == 6
+for term in ("樣本峰態（sample kurtosis）", "年度對數報酬（log return）", "的密度（density）"):
+    has(f"zh gloss {term}", term)
 
 # ====================================================================== Section 8 and the problems
 has("code: guard", "down5 = int((R <= -0.05 + 1e-12).sum())        # 15 days: the guard")
