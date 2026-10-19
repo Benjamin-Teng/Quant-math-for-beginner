@@ -652,15 +652,18 @@ not name. "Bibliographic data only" means nothing in the text was read.
   consistent under heteroskedasticity, plus a direct test.
 - Newey & West, "A Simple, Positive Semi-Definite, Heteroskedasticity and Autocorrelation Consistent Covariance
   Matrix", *Econometrica* 55(3): 703–708, 1987, DOI [10.2307/1913610](https://doi.org/10.2307/1913610); end page not in
-  Crossref. Abstract: positive semi-definite by construction and consistent. The Bartlett weights are not confirmed in
-  the paper itself. The Society's web page lists West first; Crossref has Newey, West.
+  Crossref; 703–708 on RePEc, NBER's page and the Econometric Society's page. Abstract: positive semi-definite by
+  construction and consistent. The weights are read in the working paper (Stage 3, round 1, below); the journal text
+  was not reached. The Society's web page lists West first; Crossref has Newey, West.
 - Andrews, "Heteroskedasticity and Autocorrelation Consistent Covariance Matrix Estimation", *Econometrica* 59(3):
-  817–858, 1991, DOI [10.2307/2938229](https://doi.org/10.2307/2938229); end page not in Crossref. Abstract: optimal
+  817–858, 1991, DOI [10.2307/2938229](https://doi.org/10.2307/2938229); end page not in Crossref (RePEc gives 817–858,
+  and the issue's next article starts at p. 859). Abstract: optimal
   kernel and bandwidth, and data-dependent automatic bandwidths. The plug-in constants (for example 1.1447) are
   unconfirmed.
 - Lintner, "The Valuation of Risk Assets and the Selection of Risky Investments in Stock Portfolios and Capital
-  Budgets", *REStat* 47(1): 13–37, 1965, DOI [10.2307/1924119](https://doi.org/10.2307/1924119); the end page comes
-  from JSTOR's citation string as carried by OpenAlex. Bibliographic data only.
+  Budgets", *REStat* 47(1): 13–37, 1965, DOI [10.2307/1924119](https://doi.org/10.2307/1924119). The end page came
+  from JSTOR's citation string as carried by OpenAlex, which on 2026-10-19 gave 13–13; Crossref's issue listing starts
+  the next article at p. 38, which is consistent with 37. Bibliographic data only.
 - Hansen, B. E., "A Modern Gauss–Markov Theorem", *Econometrica* 90(3): 1283–1294, 2022, DOI
   [10.3982/ECTA19255](https://doi.org/10.3982/ECTA19255); Pötscher & Preinerstorfer's comment, *Econometrica* 92(3):
   913–924 (2024 in Crossref), DOI [10.3982/ECTA20819](https://doi.org/10.3982/ECTA20819), with Hansen's reply at
@@ -708,11 +711,11 @@ not name. "Bibliographic data only" means nothing in the text was read.
   not this article.
 - Gelman et al., *Bayesian Data Analysis*, 3rd ed., Chapman & Hall/CRC Texts in Statistical Science, ©2013, 675 pp.,
   ISBN 978-1-4398-4095-5. The authors offer a free PDF for non-commercial use (errata fixed to 20 February 2025; its
-  pages may differ from print; its URL was not recorded). The survey confirmed in that PDF: §2.5 "Normal distribution
+  pages may differ from print), at <https://sites.stat.columbia.edu/gelman/book/BDA3.pdf>; re-read in Stage 3, round 1
+  (below). The survey confirmed in that PDF: §2.5 "Normal distribution
   with known variance", p. 39; eq. (2.10), p. 40: "the posterior precision equals the prior precision plus the data
   precision"; §3.3 normal data with a conjugate prior, p. 67; §5.5 the eight schools, p. 119; §5.8 the bibliographic
-  note on Stein. The fresh check lists (2.10) as unverified (it did not re-read it); re-read it in the document before
-  it is printed (plans/vol-4.md, "References").
+  note on Stein.
 - MacLean, Thorp & Ziemba (2010), already in this list (with Kelly 1956) without a DOI: its DOI is
   [10.1080/14697688.2010.506108](https://doi.org/10.1080/14697688.2010.506108), title "Long-term capital growth: the
   good and bad properties of the Kelly and fractional Kelly capital growth criteria" (Crossref).
@@ -775,8 +778,9 @@ What each source claims; no source found derives fractional Kelly as *the* Bayes
 - Hamilton, *Time Series Analysis*, Princeton University Press, 1994, ISBN 978-0-691-04289-3, 816 pp. Chapters from
   Project MUSE (titles as the survey shortened them): 3 Stationary ARMA, pp. 43–71; 10 Covariance-Stationary Vector
   Processes, pp. 257–290; 17 Unit Roots, pp. 475–543; 19 Cointegration, pp. 571–629; 20 FIML for cointegrated
-  systems, pp. 630–656; 21 Heteroskedasticity, pp. 657–676. Where Newey–West appears is unconfirmed; theorem and
-  equation numbers unconfirmed.
+  systems, pp. 630–656; 21 Heteroskedasticity, pp. 657–676. Newey–West: §10.5, [10.5.15], pp. 281–283, and p. 220;
+  unit roots with drift: §17.4, Cases 3 and 4, pp. 495–497 (Stage 3, round 1, below). Other theorem and equation
+  numbers unconfirmed.
 - Box, Jenkins, Reinsel & Ljung, *Time Series Analysis: Forecasting and Control* (title from Open Library's ISBN
   record, secondary, read again in Stage 1), 5th ed., Wiley, 720 pp., ISBN 978-1-118-67502-1. Wiley says June 2015;
   library catalogues say 2016. Chapters not checked.
@@ -812,16 +816,17 @@ What each source claims; no source found derives fractional Kelly as *the* Bayes
 
 ### LM26
 
-- *RiskMetrics — Technical Document*, 4th ed., J.P. Morgan/Reuters, New York, 17 December 1996 (PDF hosted by MSCI;
-  its URL was not recorded). The survey confirmed: §5.3.2 "Choosing the decay factor", p. 97: λ = 0.94 for the daily
+- *RiskMetrics — Technical Document*, 4th ed., J.P. Morgan/Reuters, New York, 17 December 1996 (PDF hosted by MSCI at
+  <https://www.msci.com/documents/10199/5915b101-4206-4ba0-aee2-3449d5c7e95a>, file "td4e.pdf"; re-read in Stage 3,
+  round 1, below). The survey confirmed: §5.3.2 "Choosing the decay factor", p. 97: λ = 0.94 for the daily
   data set and 0.97 for the monthly; the criterion is the root mean squared error of the variance forecast, Eq. [5.30]
   in §5.3.2.1; the single λ is a weighted average across 480+ series, Eqs. [5.32]–[5.35]; Table 5.9, p. 100: 550 days
-  used in production, 75 effective at 0.94; Eq. [5.23]: σ²ₜ₊₁|ₜ = 0.94σ²ₜ|ₜ₋₁ + 0.06r²ₜ. The fresh check lists §5.3.2
-  as unverified (it did not re-read it); re-read it in the document before it is printed.
+  used in production, 75 effective at 0.94; Eq. [5.23]: σ²ₜ₊₁|ₜ = 0.94σ²ₜ|ₜ₋₁ + 0.06r²ₜ.
 - Engle, "Autoregressive Conditional Heteroscedasticity with Estimates of the Variance of United Kingdom Inflation",
-  *Econometrica* 50(4), 1982, DOI [10.2307/1912773](https://doi.org/10.2307/1912773): pp. 987–1008 per the Econometric
-  Society's issue listing (the next article starts at p. 1009), 987–1007 per RePEc; Crossref gives the first page
-  only. **Unresolved.**
+  *Econometrica* 50(4): 987–1007, 1982, DOI [10.2307/1912773](https://doi.org/10.2307/1912773). JSTOR's cover page
+  ("Vol. 50, No. 4 (Jul., 1982), pp. 987-1007", read 2026-10-19 in a JSTOR-downloaded copy on a university site) and
+  RePEc give 987–1007; the Econometric Society's page gives 987–1008 (the next article starts at p. 1009); Crossref
+  gives the first page only.
 - Andersen & Bollerslev, "Answering the Skeptics: Yes, Standard Volatility Models do Provide Accurate Forecasts",
   *IER* 39(4): 885–905, 1998, DOI [10.2307/2527343](https://doi.org/10.2307/2527343) (end page not in Crossref). Read
   in a JSTOR copy: the out-of-sample R-squared of GARCH(1,1) against squared returns is 0.047 (DM–$) and 0.026 (¥–$);
@@ -831,21 +836,34 @@ What each source claims; no source found derives fractional Kelly as *the* Bayes
   2003, DOI [10.1111/1468-0262.00418](https://doi.org/10.1111/1468-0262.00418). Abstract read (its content not recorded
   by the survey).
 - Andersen, Bollerslev, Diebold & Labys, "Great Realisations", *Risk*, 2000, issue (3): 105–108 (Kellogg listing).
-  Volume 13 is unverified. That this article introduced the signature plot is **unconfirmed**.
+  Volume 13 is unverified. That this article introduced the signature plot is **unconfirmed**. Hansen and Lunde's 2004
+  working paper (below) says the plots "were introduced by" Andersen, Bollerslev, Diebold and Labys (2000) and cites
+  "Great realizations", *Risk* 13(3): 105–108: a secondary source for both points.
 - Zhang, Mykland & Aït-Sahalia, "A Tale of Two Time Scales", *JASA* 100(472): 1394–1411, 2005, DOI
-  [10.1198/016214505000000169](https://doi.org/10.1198/016214505000000169). Read in the published PDF: the five
-  estimators, §1.2; `TSRV = [Y,Y]^avg − (n̄/n)[Y,Y]^all`, §1.2.5; the small-sample adjustment, eq. (64), §4.2;
+  [10.1198/016214505000000169](https://doi.org/10.1198/016214505000000169); the subtitle "Determining Integrated
+  Volatility With Noisy High-Frequency Data" is printed on p. 1394 (Crossref omits it). Read in the published PDF
+  (<https://www.princeton.edu/~yacine/twoscales.pdf>, re-read 2026-10-19): the five estimators, §1.2; §1.2.5 "The
+  First-Best Approach: Subsampling and Averaging, and Bias-Correction", p. 1396: `TSRV = [Y,Y]^avg −
+  (n̄/n)[Y,Y]^all`, over "the two time scales"; Section 4, p. 1402, the theory; the small-sample adjustment, eq. (64), §4.2;
   K = c·n^(2/3), with rate n^(−1/6).
 - Patton, "Volatility forecast comparison using imperfect volatility proxies", *J. Econometrics* 160(1): 246–256,
   2011, DOI [10.1016/j.jeconom.2010.03.034](https://doi.org/10.1016/j.jeconom.2010.03.034). Abstract read on Duke's
   page. MSE and QLIKE as members of a robust family are confirmed in the 2006 working version (Section 3); the
-  published text was not seen.
+  published text was not seen. Working paper: Quantitative Finance Research Centre, University of Technology Sydney,
+  Research Paper 175, April 2006 (RePEc uts:rpaper:175; title page "This version: 13 April, 2006"), read 2026-10-19 at
+  <https://www.uts.edu.au/sites/default/files/qfr-archive-02/QFR-rp175.pdf>: Definition 1, p. 4, a loss is robust if
+  it ranks forecasts by expected loss as the true conditional variance would, with "some conditionally unbiased
+  volatility proxy"; Section 3, p. 13, assumption A1 $E_{t-1}[\hat\sigma_t^2]=\sigma_t^2$; Propositions 2–3, p. 14 (MSE
+  the only robust loss in the forecast error, QLIKE the only one in the standardized error); QLIKE, eq. (6), p. 6:
+  $\log h_t+\hat\sigma_t^2/h_t$.
 - Hansen & Lunde, "A forecast comparison of volatility models: does anything beat a GARCH(1,1)?", *JAE* 20(7):
   873–889, 2005, DOI [10.1002/jae.800](https://doi.org/10.1002/jae.800). Abstract: 330 ARCH-type models compared; for
   DM–$ no evidence that GARCH(1,1) is beaten; for IBM, GARCH(1,1) is inferior to models with a leverage effect.
 - Hansen & Lunde, "Realized Variance and Market Microstructure Noise", *JBES* 24(2): 127–161, 2006, DOI
-  [10.1198/073500106000000071](https://doi.org/10.1198/073500106000000071). Abstract: microstructure noise is
-  time-dependent and correlated with increments in the efficient price.
+  [10.1198/073500106000000071](https://doi.org/10.1198/073500106000000071). Abstract (OpenAlex's copy, read 2026-10-19;
+  the publisher's page was blocked): in the Dow Jones Industrial Average stocks, microstructure noise is
+  time-dependent and correlated with increments in the efficient price. The September 2004 working paper (NYU Stern
+  copy) says the same of the 30 stocks and means serial dependence of the noise (p. 2 and the conclusion).
 - Bibliographic data only: Bollerslev, "Generalized autoregressive conditional heteroskedasticity", *J. Econometrics*
   31(3): 307–327, 1986, DOI [10.1016/0304-4076(86)90063-1](https://doi.org/10.1016/0304-4076(86)90063-1);
   Barndorff-Nielsen & Shephard, "Econometric Analysis of Realized Volatility and its Use in Estimating Stochastic
@@ -955,36 +973,90 @@ Bibliographic data come from Crossref (`api.crossref.org/works/<doi>`, read 2026
   fourth moment (a stronger sufficient condition). Hyndman & Athanasopoulos, *Forecasting: principles and practice*,
   3rd ed., OTexts, 2021, §2.9: the ±1.96/√T rule for white noise, without a moment condition.
 
+Batch B (LM23–LM26), read 2026-10-19:
+
+- Newey & West (1987), working-paper version: NBER Technical Working Paper 55, April 1986 ("Revised, February 1986"),
+  <https://www.nber.org/papers/t0055>, a 14-page scan read page by page. Eq. (5), p. 3:
+  $\hat S_T=\hat\Omega_0+\sum_{j=1}^m w(j,m)[\hat\Omega_j+\hat\Omega_j']$ with $w(j,m)=1-j/(m+1)$, "the modified
+  Bartlett weights"; Theorem 1, p. 4: $\hat S_T$ is positive semi-definite; Theorem 2, pp. 5–6: consistency under mixing
+  and moment bounds when $m(T)\to\infty$ and $m(T)/T^{1/4}\to0$ (for an MA(∞) with iid innovations, slower than
+  $T^{1/2}$ suffices). The journal text was not reached (JSTOR's bot check), so the journal's equation numbers are not
+  cited. Hamilton (1994) states the same rate on p. 282 and attributes [10.5.15] to Newey and West (1987).
+- Hamilton (1994), Google Books snippets of the 2020 reissue (ISBN 978-0-691-21863-2; its pages match the 1994
+  contents): §10.5, "Newey-West Estimator", [10.5.15], pp. 281–283; p. 220 (ch. 8). §17.4, Case 3, pp. 495–497: with a
+  constant and no trend in the regression and a random walk with drift as the true process, "both estimated
+  coefficients are asymptotically Gaussian" and the usual t and F statistics apply. Case 4, p. 497: with a constant and
+  a trend, the true drift "turns out not to matter" (the Dickey–Fuller law).
+- West, "Asymptotic Normality, When Regressors Have a Unit Root", *Econometrica* 56(6): 1397–1417, 1988, DOI
+  [10.2307/1913104](https://doi.org/10.2307/1913104) (end page from RePEc and Hamilton's reference list; the issue's
+  next article starts at p. 1419). RePEc abstract: OLS estimators are asymptotically normal when the nonstationary
+  regressors share a unit root and their first differences have a nonzero mean. An alternative source for Case 3.
+- Gelman et al. (2013), BDA3, re-read in the authors' PDF (printed page = PDF page − 10; every page reads "This
+  electronic edition is for non-commercial purposes only"): (2.10), p. 40, $1/\tau_1^2=1/\tau_0^2+1/\sigma^2$, and the
+  sentence after it on precisions; (2.12), p. 42, with $n$ observations and "the data precision, $n/\sigma^2$". §3.3,
+  p. 67: the conjugate prior $\mu\mid\sigma^2\sim\mathrm N(\mu_0,\sigma^2/\kappa_0)$, $\sigma^2\sim\text{Inv-}\chi^2(\nu_0,\sigma_0^2)$;
+  (3.7)–(3.9), p. 68; p. 69, "Analytic form of the marginal posterior distribution of μ": $t_{\nu_n}(\mu\mid\mu_n,
+  \sigma_n^2/\kappa_n)$. §3.3's $t$ holds under this prior, whose variance for $\mu$ scales with $\sigma^2$; §3.2, p. 66, gives
+  $t_{n-1}(\bar y,s^2/n)$ under the noninformative prior; BDA3 states no $t$ for a prior SD fixed apart from $\sigma$. The authors'
+  contents file titles §2.5 "Estimating a normal mean with known variance"; print pagination unconfirmed.
+- Wasserman (2004), Springer's front matter and the chapter page: ch. 11 "Bayesian Inference", pp. 175–192, DOI
+  [10.1007/978-0-387-21736-9_11](https://doi.org/10.1007/978-0-387-21736-9_11); §11.2 "The Bayesian Method", p. 176.
+  The page-one preview (pp. 175–176) shows §11.2's three steps (prior, model, posterior); the rest was not reached.
+- Efron & Hastie, *Computer Age Statistical Inference: Algorithms, Evidence, and Data Science*, Cambridge University
+  Press, 2016, DOI [10.1017/CBO9781316576533](https://doi.org/10.1017/CBO9781316576533) (Crossref). Read in the authors'
+  free PDF (<https://hastie.su.domains/CASI/>, "for personal use only", corrected 5 March 2021): §7.1, (7.12)–(7.13),
+  pp. 92–93, the James–Stein estimator toward the grand mean, $\hat M+\hat B(x_i-\hat M)$ with $\hat B=1-(N-3)/S$,
+  unbiased "as long as $N>3$"; (7.14), p. 93, its risk $NB+3(1-B)$ under (7.7), which with unit noise variance
+  and $B=\sigma_0^2/(1+\sigma_0^2)$ equals LM24's $N-(N-3)/(1+\sigma_0^2)$ (proof in endnote 2, pp. 105–106); the James–Stein Theorem, (7.15)–(7.16), p. 93: for $N\ge4$ the expected total squared error is below
+  $N$ for every $\mu$; §7.5, pp. 104–105, the positive part $\max(\hat B,0)$; endnote 1, (7.49)–(7.50), p. 105:
+  $E[1/\chi^2_\nu]=1/(\nu-2)$. The source of LM24's (24.4).
+- Efron & Morris (1975), re-read: (1.4), p. 311, shrinking toward "any initial guess"; (1.12), p. 312, the positive
+  part for a fixed target; (2.3), p. 312, the grand-mean rule with $k-3$, credited to Lindley; (2.4), p. 312, its risk
+  bound. Their reference [13] gives James and Stein (1961) as pp. 361–79 (a secondary source for the end page).
+  Efron & Morris (1973): OpenAlex's abstract covers $k\ge3$, a fixed target and the positive part only.
+- *RiskMetrics — Technical Document* (1996), re-read: §5.3.2 "Choosing the decay factor" starts on p. 97 (the chapter
+  contents, p. 75, say 96); p. 97: "over 480 time series", and "across 450 time series" later on that page. §5.3.2.2,
+  "How RiskMetrics chooses its optimal decay factor", pp. 99–100: each of 480 series has the λ minimizing the RMSE of
+  Eq. [5.30] (§5.3.2.1, p. 98); λ = 0.94 is "a weighted average of individual optimal decay factors where the weights
+  are a measure of individual forecast accuracy". §5.3.1.2 "Volatility and correlation", p. 93: effective days
+  $K=\ln\Gamma_L/\ln\lambda$ at a tolerance level $\Gamma_L$, Eqs. [5.25]–[5.26]. Table 5.7, p. 94: 74 days at λ = 0.94
+  and 1% (151 at 0.97); Table 3.1, p. 39, the same. Table 5.9, p. 100, "Summary of RiskMetrics volatility and
+  correlation forecasts": 0.94, 550 days in production, 75 effective, with no tolerance level named; footnote: the
+  sample mean of daily returns is set to zero.
+- End pages confirmed from RePEc and Crossref's issue listings (the next article's first page): White (1980)
+  817–838; Engle & Granger (1987) 251–276; Johansen (1991) 1551–1580; Brenner & Kroner (1995) 23–42; Andersen &
+  Bollerslev (1998) 885–905; Andrews (1991) 817–858. Newey & West (1987) 703–708 from RePEc, NBER and the Society's
+  page (Crossref does not bound it: the next issue starts at p. 749); Engle (1982) 987–1007 (its row).
+
 ### Open points (Volume IV)
 
 Each of these must be settled before what depends on it is printed. Until then the briefs print the result *stated
 without proof*, name the work without the missing detail, or label a mechanism a hypothesis.
 
 - **Bibliographic details:**
-  - end pages: Engle (1982); James and Stein (1961); Moors (1988); Jarque and Bera (1987), from a primary source;
-    and those Crossref does not hold (Newey and West 1987, Andrews 1991, Engle and Granger 1987, Johansen 1991,
-    Brenner and Kroner 1995);
-  - the *Risk* volume of "Great Realisations";
+  - end pages: James and Stein (1961; two secondary sources give 379); Moors (1988); Jarque and Bera (1987), from a
+    primary source;
+  - the *Risk* volume of "Great Realisations" (a secondary source gives 13);
   - Casella and Berger's year;
   - the JFE pagination of Merton's Appendix A;
   - the author order of Drees et al.;
   - the DOI of Hansen's (2024) reply;
   - Lahiri's hardcover ISBN;
   - the title and DOI of Martens, Kofman and Vorst (1998);
-  - the URLs of the RiskMetrics and BDA3 PDFs.
 - **Texts, sections and numbers still to read:**
-  - Casella and Berger's theorem numbers, and the section contents of Casella and Berger and of Wasserman;
+  - Casella and Berger's theorem numbers, the section contents of Casella and Berger, and Wasserman's §11.2 after
+    p. 176;
   - Lo and MacKinlay's (1988) equation numbers;
   - Hill's (1975) formula as printed, and where Embrechts et al. treat the Hill estimator;
-  - Gelman et al.'s (2.10) and RiskMetrics §5.3.2, re-read in the documents;
   - Harvey, Liu and Zhu's section numbers;
   - Efron and Tibshirani's BCa and moving-blocks sections;
   - the originals of Bonferroni (1936), Rao (1945), Memmel (2003) and Politis and Romano (1992, the circular block
     bootstrap, a book chapter);
   - Jorion's (1986) shrinkage target;
   - Andrews' (1991) plug-in constants;
-  - the Bartlett weights in Newey and West (1987), and the journal version of Newey and West (1994);
-  - where Hamilton treats Newey–West, and every theorem or equation number in Greene, Hayashi and Hamilton;
+  - the journal text of Newey and West (1987) (its weights and theorems are read in the 1986 working paper), and the
+    journal version of Newey and West (1994);
+  - every theorem or equation number in Greene and Hayashi, and Hamilton's beyond §10.5 and §17.4;
   - the Kim & White and Joanes & Gill texts.
 - **Sources for results the briefs state without proof:**
   - $\operatorname{Var}\hat\rho_k\approx1/T$ and its normal limit (LM19, (19.6); candidates Tsay 2010 or Box, Jenkins,
@@ -993,11 +1065,10 @@ without proof*, name the work without the missing detail, or label a mechanism a
   - the consistency of the iid bootstrap (LM22, (22.2));
   - the regression's $t_{T-d}$ law (LM23): Blitzstein and Hwang do not state it (above), and Hayashi and Greene are
     unchecked;
-  - the James–Stein dominance theorem toward the grand mean, with $N-3$, $N\ge4$ and the positive part (LM24, (24.4));
-  - Gelman et al. §3.3, the posterior under unknown $\sigma$ (LM24; only its title is checked);
   - the ARMA likelihood sandwich and the MLE's large-sample law (LM25).
 - **LM26's sources:**
-  - the origin of the volatility signature plot;
+  - the origin of the volatility signature plot (Hansen and Lunde's 2004 working paper credits Andersen, Bollerslev,
+    Diebold and Labys 2000, a secondary source);
   - the causes of the signature (stale prices, the bounce of heavy stocks, TWSE's matching rules), which stay
     hypotheses until a source states them for the TAIEX;
   - Roll (1984) and Lo and MacKinlay (1990), which the LM26 brief names for bid–ask bounce and nonsynchronous trading;
@@ -1014,6 +1085,11 @@ Closed in Stage 1 (2026-10-19): the $t$ and $\chi^2$ laws of normal samples (Bli
 Ex. 10.4.3 and Def. 10.4.4; the $t_{n-1}$ law of the studentized mean follows from them in one line, which a module
 shows); the source of the lag rule $\lfloor4(T/100)^{2/9}\rfloor$ (statsmodels' default HAC lag, and Newey and
 West's (1994) pilot lag, not their recommended HAC lag); the Saturday sessions (TWSE's history page).
+
+Closed in Stage 3, round 1 (2026-10-19): the James–Stein theorem toward the grand mean (Efron and Hastie 2016); BDA3's
+(2.10) and §3.3; the Bartlett weights (Newey and West's 1986 working paper); where Hamilton treats Newey–West; the
+end pages of Engle (1982), Newey and West (1987), Andrews (1991), Engle and Granger (1987), Johansen (1991) and
+Brenner and Kroner (1995); RiskMetrics §5.3.2 and its effective days; the URLs of the RiskMetrics and BDA3 PDFs.
 
 ## Python (Volume III)
 
@@ -1586,6 +1662,17 @@ statsmodels pages are under `https://www.statsmodels.org/stable/generated/`, arc
 | innovation (time series) | 新息 (數學名詞); 創新項 has no entry | 新息 |
 | effective window, unconditional variance, realized variance | no entry | the book's own forms 有效窗口, 無條件變異數, 實現變異數 (LM3's) |
 | normal-equivalent scale, iid band, iid factor, data weight | no entry | the book's own forms 常態等效尺度, 獨立同分布區間, 獨立同分布因子, 資料權重 |
+
+Batch B (LM23–LM26), 樂詞網 searched 2026-10-19 with curl (21 query strings, 統計學名詞 and 數學名詞):
+
+| English | 樂詞網 | Book |
+|:--|:--|:--|
+| homoscedasticity (the -sk- spelling has no entry) | 變異數齊一性 (統計學名詞); 同方差性 (數學名詞) | 變異數齊一性 |
+| homoscedastic | 變異數齊一的 (統計學名詞); homoscedastic model 變異數齊一模型 | 變異數齊一 (as in 誤差若變異數齊一) |
+| lag | 落階；落期；遲延期數 (統計學名詞); lag operator 落後運算子; 數學名詞 compounds only | 落期 (decision XB2) |
+| lagged variable or value | no 統計 or 數學 entry (經濟學名詞 落遲變數) | described: 落後一期的值 |
+| 同質變異, 落後項, 落後變數, 滯後 | no entry in 統計 or 數學 | not used |
+| partial autocorrelation | 偏自我相關 (統計學名詞; coefficient 偏自我相關係數) | 偏自我相關 |
 
 ## Writing style (AUTHORING §1, checked 2026-10-11)
 

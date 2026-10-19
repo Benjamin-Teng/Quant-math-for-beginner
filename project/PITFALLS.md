@@ -229,7 +229,10 @@ unless stated.
   Taylor error.
 - "=" where "≈" belongs, and approximations whose dropped order is not stated.
 - Wrong causal story: LM4 blamed the ±10% days for the quadratic Kelly rule's overshoot (the cause is kurtosis); LM7
-  blamed fat tails for a gap partly due to a dropped squared mean.
+  blamed fat tails for a gap partly due to a dropped squared mean, and LM24's draft repeated it (at full Kelly the
+  gap was 8% squared mean, 43% tails and 49% skewness). Before naming a cause, remove it and recompute: the
+  normal law with the same mean and SD, then the days mirrored about their mean, which keeps the tails and drops
+  the skewness.
 - Statistical terms misused: a raw third moment called skewness.
 - Printed numbers that do not recompute from the printed inputs (rounding); tables whose parts do not sum as printed;
   partial years silently omitted.

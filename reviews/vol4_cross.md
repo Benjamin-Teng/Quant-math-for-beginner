@@ -154,3 +154,29 @@ The VX9 precedent is one form per work. **Module: LM22.**
 - **X11:** accepted: LM26 says that LM5 asked it for 0050 and answers on TR23.
 - **Observations:** weekly series are allowed by decision X37 (no change); LM26 names the samples behind 66% and 68%;
   the Glossary coinages go into SOURCES with the source check.
+
+## Round 1, batch B additions (2026-10-19)
+
+The consolidations of LM23–LM26 found items that also fall on other modules. Decided by the editor:
+
+- **XB1 (dividend datasets):** LM23's m11 applies to LM20 too. The manifest holds dividend files for 0050 and 00679B
+  only, so lm20.md:401 and :636 print "`TaiwanStockPrice` (0050, 00631L) and `TaiwanStockDividendResult` (0050)" as
+  LM23 does.
+- **XB2 (lag):** 樂詞網's statistics listing gives 落階；落期；遲延期數 for "lag" (SOURCES, Chinese terms (Volume IV),
+  batch B). The noun is 落期（lag） at its first use in each box: LM19 (line 263) and LM23 (line 260, both occurrences)
+  change 落後期. LM26's 落後項 (line 81) means lagged values, which 樂詞網 does not list: it becomes
+  「…對自己前幾期的值（lagged values）做迴歸」. A plain phrase such as 落後 1 期 or 落後一期的值 stays.
+- **XB3 (homoskedastic):** 樂詞網 gives 變異數齊一性 (homoscedasticity) and 變異數齊一的 (homoscedastic). LM23's box reads
+  「誤差若變異數齊一（homoskedastic）且彼此不相關」; a Glossary row, if any, prints 變異數齊一性.
+- **XB4 (本模組):** a box calls its module 本模組, as LM1 and LM18 do: lm23.md:331 and lm26.md:333 change 本章.
+- **XB5 (covariance citations):** (16.3) is the variance of a sum and (16.4) the covariance of $M\mathbf X+\mathbf b$.
+  LM23 (m3), LM24 (m5) and LM25 (m4) cite (16.4) for covariances. LM19–LM22's citations of (16.3) are for variances
+  of sums and stay.
+- **XB6 (documentation links):** every statsmodels link in Volume IV points to v0.15.0, the locked version, as LM25
+  does (LM19 line 569, LM21 line 537, LM23 line 575, LM26 line 562; the v0.15.0 pages return HTTP 200). SciPy links
+  keep the unversioned form of the published modules.
+- **X10, refined (LM24 m3):** LM24 declares $k$ once, as Section 2's cell index, and writes a chi-square law's degrees
+  of freedom as $\nu$, as AUTHORING §6 does for $t_\nu$.
+- **Briefs and anchors:** from Stage 3 the modules and their numbers scripts are authoritative (plans/vol-4.md
+  preface). The departures the records list (LM23 C1, M2, m16; LM24 A1, m11; LM25 M1, M3, m16, A2; LM26 m4) are recorded
+  in the module records, not copied back.
