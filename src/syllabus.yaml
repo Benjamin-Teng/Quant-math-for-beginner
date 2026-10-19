@@ -2,6 +2,9 @@ title: From Calculus to Kelly
 subtitle: A quantitative curriculum for statistical modeling, portfolio optimization and optimal leverage
 # Edition notes, newest first. A module is linked from the site only when its entry below has `status: published`.
 editions:
+  - version: "0.5"
+    date: 20 October 2026
+    notes: "Volume IV complete: LM19–LM26 with their labs, from the description of returns and the √T rule through estimation and maximum likelihood, hypothesis tests with multiple-testing corrections, the iid and block bootstraps, linear regression with heteroskedasticity- and autocorrelation-robust standard errors, and Bayesian inference with James–Stein shrinkage, to ARMA models, unit roots and the futures–spot basis, and GARCH with realized variance from intraday TAIEX data, on TAIEX's total-return index from 2003 and its price index, the TWSE sector indices, Taiwan ETFs (0050 and 00631L), TAIEX futures and the intraday TAIEX from 2005. Each module passed an independent review, a blind solve of every question, a full audit of its numbers from the raw data and a check across the volume, then three verified revision rounds, a closing check with an adversarial second check of every item and a fresh final check; each editorial decision was checked by a fresh agent before it was applied. The labs add statsmodels and arch. Charts gain a log x axis, shared x values and banded scatter plots, and an exhibit's caption keeps its paragraphs. Volumes I–III now link forward to the Volume IV modules that build on them, and a few Chinese terms follow Volume IV's forms (波動率, 作多, 波動群聚現象)."
   - version: "0.4"
     date: 18 October 2026
     notes: "Volume III complete: LM13–LM18 with their labs, from sample spaces, conditional probability and Bayes' rule through random variables, expectation and Jensen's inequality, the distributions markets produce (normal, lognormal, Student-t, Poisson), joint distributions, the multivariate normal and crash correlation, and the laws of large numbers and the central limit theorem, to Monte Carlo simulation and the bootstrap, on TAIEX's total-return index from 2003 and the TWSE sector indices. Each module passed an independent review, a blind solve of every question, a full audit of its numbers from the raw data and a check across the volume, then two verified revision rounds and a closing check with an adversarial second check of every new item. Charts gain step lines, bands and simulated paths, and widgets share a seeded random-number generator and distribution functions. Volumes I and II now link forward to the Volume III modules that build on them, and LM5 writes 分布 for distribution in its Chinese text, as Volume III does. Getting Started states the seed rule for simulations, and the Research hygiene page adds the labels model, hypothetical and constructed."
@@ -57,14 +60,14 @@ volumes:
     title: Statistical Inference and Econometrics
     blurb: Turning a return series into estimates you can defend, with their uncertainty attached.
     lms:
-      - {n: 19, title: "Descriptive Statistics of Returns", desc: "Location, dispersion, shape; the √T rule and when it fails."}
-      - {n: 20, title: "Estimation Theory and Maximum Likelihood", desc: "Bias, variance, MSE; why SE(μ̂) = σ/√T ignores sampling frequency."}
-      - {n: 21, title: "Hypothesis Testing and Multiple Testing", desc: "p-values, power, Bonferroni and FDR; the t > 3 hurdle for strategies."}
-      - {n: 22, title: "Resampling Methods", desc: "Block and stationary bootstrap; confidence intervals for Sharpe and Kelly."}
-      - {n: 23, title: "Linear Regression", desc: "From simple to multiple OLS in matrix form; HAC errors; CAPM beta and factor models."}
-      - {n: 24, title: "Bayesian Inference and Shrinkage", desc: "Priors, posteriors, James–Stein; when fractional Kelly is a Bayesian answer."}
-      - {n: 25, title: "Time Series I: ARMA, Unit Roots and Cointegration", desc: "Stationarity, mean reversion, the futures–spot basis."}
-      - {n: 26, title: "Time Series II: Volatility Models", desc: "EWMA, GARCH, and realized volatility from intraday TAIEX data."}
+      - {n: 19, title: "Descriptive Statistics of Returns", desc: "Location, dispersion, shape; the √T rule and when it fails.", status: published}
+      - {n: 20, title: "Estimation Theory and Maximum Likelihood", desc: "Bias, variance, MSE; why the standard error of an annualized mean depends on the years of data, not the sampling frequency.", status: published}
+      - {n: 21, title: "Hypothesis Testing and Multiple Testing", desc: "p-values, power, Bonferroni and FDR; the t > 3 hurdle for strategies.", status: published}
+      - {n: 22, title: "Resampling Methods", desc: "Block and stationary bootstrap; confidence intervals for Sharpe and Kelly.", status: published}
+      - {n: 23, title: "Linear Regression", desc: "From simple to multiple OLS in matrix form; HAC errors; CAPM beta and factor models.", status: published}
+      - {n: 24, title: "Bayesian Inference and Shrinkage", desc: "Priors, posteriors, James–Stein; when fractional Kelly is a Bayesian answer.", status: published}
+      - {n: 25, title: "Time Series I: ARMA, Unit Roots and Cointegration", desc: "Stationarity, mean reversion, the futures–spot basis.", status: published}
+      - {n: 26, title: "Time Series II: Volatility Models", desc: "EWMA, GARCH, and realized volatility from intraday TAIEX data.", status: published}
   - id: V
     title: Portfolio Optimization
     blurb: Mean–variance theory, the convex machinery to solve it, and the estimation error that breaks it.

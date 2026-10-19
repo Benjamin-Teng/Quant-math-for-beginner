@@ -1,11 +1,13 @@
-# TODO — handoff (2026-10-19)
+# TODO — handoff (2026-10-20)
 
 > 給接手的 Claude Code：先讀 `CLAUDE.md`，再依下列順序執行。每完成一項就 commit 並直接 push 到 `main`，並用繁體中文向 Benjamin 回報。
 
 ## Where things stand
 
-- **Volumes I–III are published (edition 0.4, 2026-10-18).** LM13–LM18 joined the site with A4 PDFs and executed
-  labs. Volume III's record, in order:
+- **Volumes I–IV are published (edition 0.5, 2026-10-20).** LM19–LM26 joined the site with A4 PDFs and executed
+  labs; their record is under "Volume IV (edition 0.5)" below.
+- **Volume III (edition 0.4, 2026-10-18).** LM13–LM18 joined the site with A4 PDFs and executed labs. Volume III's
+  record, in order:
   - Stage 1: TR23 (the TAIEX total-return index from 2003, `data/vol3_series.py`, checked against the price index on
     every date); the owner-approved chart kit (`step`, bands, `quiet`, `dash`, `x.tfmt`, `n6`/`sci`/`sig`,
     `Book.controls`/`Book.rng`/`Book.dist`, tested by `build/qa/test_bookjs_dist.py`); AUTHORING §6's Probability
@@ -65,21 +67,21 @@
   points for LM11's Exhibit 3); the significant-figure codes came with the Volume III kit. The modules work without
   them.
 
-## Next: Volume IV (edition 0.5)
+## Volume IV (edition 0.5) — published; next: batch 4, Volumes V and VI
 
-Follow [`plans/ROADMAP.md`](plans/ROADMAP.md): batch 3 is Volume IV (LM19–LM26, Statistical Inference and
-Econometrics), which needs Volumes II and III, then V + VI, VII, VIII and IX. Each batch repeats Stages 1–4 and bumps
-the edition. Ask the owner about code, site, repository and his standing rules, and about the open decisions at the
+Follow [`plans/ROADMAP.md`](plans/ROADMAP.md): batch 3, Volume IV (LM19–LM26, Statistical Inference and
+Econometrics), is published; batch 4 is Volumes V and VI, then VII, VIII and IX. Each batch repeats Stages 1–4 (as
+described below for Volume IV) and bumps the edition. Ask the owner about code, site, repository and his standing rules, and about the open decisions at the
 end of the roadmap before the batch that needs them; content is the editor's call. Volume IV's intraday data,
 packages and chart-kit additions are approved (ROADMAP, "Decided by the owner").
 
-**Status (2026-10-20): Stages 1–3 are complete; Stage 4 (publication, edition 0.5) is next.** Stage 3's record, in
+**Status (2026-10-20): Volume IV is published (edition 0.5); Stages 1–4 are complete.** Stage 3's record, in
 order, is in `reviews/lm19.md` … `lm26.md` and `reviews/vol4_cross.md`: round 1 (reviewer, blind solver, number
 auditor, consolidation with an adversarial re-check, cross-module check X1–X11), revisions 1–3 each verified by fresh
 agents with a volume re-check (XB1–XB11), the closing check with an adversarial second check of every item (three
 majors, all fixed), the closing fixes, a fresh final check per module and for the volume, and the last fixes,
 verified (every module READY TO PUBLISH; front matter consistent). The editor's decisions were each checked by a fresh
-agent before the writers applied them. Stage 4 applies `plans/vol-4.md`'s "Stage 4 changes to earlier modules". The
+agent before the writers applied them. Stage 4 applied `plans/vol-4.md`'s "Stage 4 changes to earlier modules", rebuilt every number, chart, page and PDF with `./build.sh --data --pdf`, and passed a fresh verification (links, leads both ways, rendering, PDFs). The
 owner approved (2026-10-19) that a blank line in an exhibit caption starts a new paragraph (`build/build.py`); LM17's
 two split captions change at this publication. Stage 1's material is in
 [`plans/vol-4.md`](plans/vol-4.md) (shared decisions, the capability check and the owner's answers, the editor's

@@ -44,14 +44,14 @@
 <li><a href="lm/lm18.html"><span class="k">LM18</span><span>Monte Carlo Simulation and the Bootstrap</span></a></li>
 </ol>
 <h2>Vol IV · Statistical Inference and Econometrics</h2><ol>
-<li><span title="Planned"><span class="k">LM19</span><span>Descriptive Statistics of Returns</span></span></li>
-<li><span title="Planned"><span class="k">LM20</span><span>Estimation Theory and Maximum Likelihood</span></span></li>
-<li><span title="Planned"><span class="k">LM21</span><span>Hypothesis Testing and Multiple Testing</span></span></li>
-<li><span title="Planned"><span class="k">LM22</span><span>Resampling Methods</span></span></li>
-<li><span title="Planned"><span class="k">LM23</span><span>Linear Regression</span></span></li>
-<li><span title="Planned"><span class="k">LM24</span><span>Bayesian Inference and Shrinkage</span></span></li>
-<li><span title="Planned"><span class="k">LM25</span><span>Time Series I: ARMA, Unit Roots and Cointegration</span></span></li>
-<li><span title="Planned"><span class="k">LM26</span><span>Time Series II: Volatility Models</span></span></li>
+<li><a href="lm/lm19.html"><span class="k">LM19</span><span>Descriptive Statistics of Returns</span></a></li>
+<li><a href="lm/lm20.html"><span class="k">LM20</span><span>Estimation Theory and Maximum Likelihood</span></a></li>
+<li><a href="lm/lm21.html"><span class="k">LM21</span><span>Hypothesis Testing and Multiple Testing</span></a></li>
+<li><a href="lm/lm22.html"><span class="k">LM22</span><span>Resampling Methods</span></a></li>
+<li><a href="lm/lm23.html"><span class="k">LM23</span><span>Linear Regression</span></a></li>
+<li><a href="lm/lm24.html"><span class="k">LM24</span><span>Bayesian Inference and Shrinkage</span></a></li>
+<li><a href="lm/lm25.html"><span class="k">LM25</span><span>Time Series I: ARMA, Unit Roots and Cointegration</span></a></li>
+<li><a href="lm/lm26.html"><span class="k">LM26</span><span>Time Series II: Volatility Models</span></a></li>
 </ol>
 <h2>Vol V · Portfolio Optimization</h2><ol>
 <li><span title="Planned"><span class="k">LM27</span><span>Portfolio Return and Risk</span></span></li>
@@ -88,7 +88,7 @@
 <li><span title="Planned"><span class="k">LM50</span><span>Capstone C: Multi-Strategy Allocation and Monitoring</span></span></li>
 </ol></nav>
 <main class="page" id="main"><header class="lm-head"><h1 class="lm-title">Research hygiene</h1><p class="lm-sub">Six rules that keep a result from market data honest, and the labels that results carry from Volume II on.</p></header>
-<div class="co zh"><div class="co-h"><span class="tag">導讀</span><span class="t">這一頁講什麼</span></div><p>用市場資料算出來的數字，看起來很精確，卻可能誤導。下面六條規則讓結果站得住腳。從第二卷起，每個會估計、選模型或回測的模組，都會用一個短框說明它用了哪幾條規則，以及結果該怎麼解讀；更完整的處理在 <span class="coming" title="LM21 Hypothesis Testing and Multiple Testing — coming in Volume IV">LM21</span>、<span class="coming" title="LM33 The Statistics of the Sharpe Ratio — coming in Volume VI">LM33</span> 和 <span class="coming" title="LM34 Backtesting Without Fooling Yourself — coming in Volume VI">LM34</span>。</p>
+<div class="co zh"><div class="co-h"><span class="tag">導讀</span><span class="t">這一頁講什麼</span></div><p>用市場資料算出來的數字，看起來很精確，卻可能誤導。下面六條規則讓結果站得住腳。從第二卷起，每個會估計、選模型或回測的模組，都會用一個短框說明它用了哪幾條規則，以及結果該怎麼解讀；更完整的處理在 <a href="lm/lm21.html">LM21</a>、<span class="coming" title="LM33 The Statistics of the Sharpe Ratio — coming in Volume VI">LM33</span> 和 <span class="coming" title="LM34 Backtesting Without Fooling Yourself — coming in Volume VI">LM34</span>。</p>
 </div>
 <p>A number computed from market data can look precise and still mislead. The six rules below keep the book's results
 honest. From Volume II on, every module that estimates, selects or backtests carries a short note. The note says
@@ -101,7 +101,7 @@ the time.</p>
 the test window after it, as in <a href="lm/lm07.html">LM7</a>: weights estimated on 2017–2021 and tested on 2022–2026. Fit every input on
 the estimation window only. That includes means, covariance matrices, principal components and any rescaling.</p>
 </section><section class="sec unnum" id="keep-selection-apart-from-evaluation"><h2 class="plain"><span class="ttl">Keep selection apart from evaluation</span></h2><p>Choose a model or a parameter on one stretch of data, and judge it once on another. Count the versions you tried.
-The more versions you try, the more likely it is that the best one is only lucky. <span class="coming" title="LM21 Hypothesis Testing and Multiple Testing — coming in Volume IV">LM21</span> and <span class="coming" title="LM33 The Statistics of the Sharpe Ratio — coming in Volume VI">LM33</span> measure that
+The more versions you try, the more likely it is that the best one is only lucky. <a href="lm/lm21.html">LM21</a> and <span class="coming" title="LM33 The Statistics of the Sharpe Ratio — coming in Volume VI">LM33</span> measure that
 risk.</p>
 </section><section class="sec unnum" id="put-costs-inside-the-strategy"><h2 class="plain"><span class="ttl">Put costs inside the strategy</span></h2><p>Taxes, broker fees, slippage, financing and delays belong in the strategy while it is built. A strategy that trades
 more pays more, so one constant subtracted at the end hides the difference. <span class="coming" title="LM34 Backtesting Without Fooling Yourself — coming in Volume VI">LM34</span> gives Taiwan's official rates.</p>
@@ -150,7 +150,7 @@ the fifth, from Volume III on, marks the answer of a probability model:</p>
 <p>Volume III also marks invented bets, positions and records as <strong>hypothetical</strong>, and examples built to make a point as
 <strong>constructed</strong> (<a href="lm/lm13.html">LM13</a>, <a href="lm/lm16.html">LM16</a>).</p>
 
-<div class="co note"><div class="co-h"><span class="tag">Note</span><span class="t">Where the book goes deeper</span></div><p><span class="coming" title="LM21 Hypothesis Testing and Multiple Testing — coming in Volume IV">LM21</span> covers multiple testing. <span class="coming" title="LM33 The Statistics of the Sharpe Ratio — coming in Volume VI">LM33</span> covers the Probabilistic and Deflated Sharpe ratios. <span class="coming" title="LM34 Backtesting Without Fooling Yourself — coming in Volume VI">LM34</span> covers
+<div class="co note"><div class="co-h"><span class="tag">Note</span><span class="t">Where the book goes deeper</span></div><p><a href="lm/lm21.html">LM21</a> covers multiple testing. <span class="coming" title="LM33 The Statistics of the Sharpe Ratio — coming in Volume VI">LM33</span> covers the Probabilistic and Deflated Sharpe ratios. <span class="coming" title="LM34 Backtesting Without Fooling Yourself — coming in Volume VI">LM34</span> covers
 look-ahead and survivorship bias, costs, walk-forward testing and the probability of backtest overfitting.</p>
 </div>
 </section></main>

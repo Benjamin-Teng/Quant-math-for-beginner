@@ -639,7 +639,7 @@ check(rule, 11.8, 1, "PP13: quadratic rule for the counterexample"); check(f_bin
 md(r"""
 ### Extension: walk-forward Kelly
 
-The module's warning is that an in-sample optimum is not a recommendation. Test it. At each month-end from November 2017, estimate $f^*$ on the trailing 729 days, cap it to $[0,3]$, and hold that leverage for the next month. Compare the realized log growth with constant $f=1$ and with a constant half of the full-sample $f^*$ (which uses future data and is therefore not a fair benchmark either). The scaffold below builds the month-end schedule and the walk-forward leverage; complete the comparison and explain the result with Sections 4 and 7. LM22 (resampling) and LM45 (Kelly under uncertainty) return to this question.
+The module's warning is that an in-sample optimum is not a recommendation. Test it. At each month-end from November 2017, estimate $f^*$ on the trailing 729 days, cap it to $[0,3]$, and hold that leverage for the next month. Compare the realized log growth with constant $f=1$ and with a constant half of the full-sample $f^*$ (which uses future data and is therefore not a fair benchmark either). The scaffold below builds the month-end schedule and the walk-forward leverage; complete the comparison and explain the result with Sections 4 and 7. LM22 (bootstrap intervals for the Kelly fraction), LM34 (walk-forward tests) and LM45 (Kelly under uncertainty) return to this question.
 """)
 
 code(r"""

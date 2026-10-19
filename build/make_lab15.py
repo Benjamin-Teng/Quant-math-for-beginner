@@ -440,7 +440,7 @@ show("P12 t at +5%", T * stats.t.sf(0.05, nu_m, loc_m, sc_m), ".1f", "22.0")
 md(r"""
 ### Extension: a Student-t for five-session log returns
 
-Sum the daily log returns $r_t=\ln(1+R_t)$ over non-overlapping blocks of five sessions, and fit a Student-t to these five-session log returns by maximum likelihood. Compare its $\nu$ and the 1% quantile of the five-session log returns with those of the daily log returns (the module's 3.065 and −3.567% are for simple returns). Treat the comparison as a stability check and draw no conclusion yet: LM17 studies sums of log returns, their kurtosis included, and LM19 the sampling error of such statistics.
+Sum the daily log returns $r_t=\ln(1+R_t)$ over non-overlapping blocks of five sessions, and fit a Student-t to these five-session log returns by maximum likelihood. Compare its $\nu$ and the 1% quantile of the five-session log returns with those of the daily log returns (the module's 3.065 and −3.567% are for simple returns). Treat the comparison as a stability check and draw no conclusion yet: LM17 studies sums of log returns, their kurtosis included. LM19 shows how such statistics vary with the sample, and LM20 gives a fitted $\nu$ its standard error.
 """)
 
 code(r"""

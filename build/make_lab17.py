@@ -483,7 +483,7 @@ ax.set_xticks(range(6), [str(m) for m in ms]); ax.set_xlabel("m"); ax.set_title(
 
 
 def corr(a, b):
-    # the correlation of the pairs (a_t, b_t), as LM16 defines it; LM26 treats the autocorrelation convention
+    # the correlation of the pairs (a_t, b_t), as LM16 defines it; LM19 defines the autocorrelation convention
     return np.corrcoef(a, b)[0, 1]
 
 

@@ -568,7 +568,7 @@ md(r"""
 The module compares calendar years. Here the first component's share of U28's correlation matrix is computed over rolling windows of 250 returns, every fifth date: a **descriptive** picture, not in the text.
 
 1. When was the share highest and lowest, and which market episodes do those windows contain?
-2. Repeat with windows of 60 returns. How much of the movement is sampling noise? [[LM20]] gives the tools to answer; here, compare the two curves.
+2. Repeat with windows of 60 returns. How much of the movement is sampling noise? LM22's block bootstrap answers it for 2017 and 2020; LM20 explains why the delta method cannot. Here, compare the two curves.
 3. Track $\lvert\cos\theta\rvert$ between each window's $\mathbf q_1$ and the full sample's. Does the first direction ever turn by more than 15°?
 """)
 
