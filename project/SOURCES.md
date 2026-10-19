@@ -93,10 +93,18 @@ intraday files, one request a day, with `data/fetch_intraday.py` and its own man
   before 2014-12-29. `data/fetch_intraday.py --check` prints every regime's first and last day from the download.
 - On every one of the 8 days the fresh check sampled (2005–2025), timestamps increase strictly and the 13:30:00 value
   equals the `TaiwanStockPrice` close (for example 6426.39, 8606.37, 22470.1).
-- The closing call auction freezes the index: on 2025-06-27, 59 equal values from 13:25:05 to 13:29:55. On 2014-12-29
-  the 13:25:00 value already equals the frozen value; before 2014-12-29 there is no 13:25:05 timestamp. TWSE's trading-system page,
-  already under "Taiwan exchanges, regulators and official pages", gives the closing call auction from 13:25; which
-  auction rules applied in the earlier regimes was not checked.
+- The closing call auction freezes the index, on every day of every regime (A26-42; checked again 2026-10-19 with our
+  own script over all 5,351 files of `data/raw/intraday/taiex5s/`):
+  - The freeze starts at the first value after 13:25:00: 13:26:00, 13:25:15, 13:25:10 or 13:25:05, by regime. Every
+    value from there to the last one before 13:30:00 is equal: on 1,503 of 1,503 one-minute days, 764 of 764
+    fifteen-second, 214 of 214 ten-second and 2,870 of 2,870 five-second days. On 2025-06-27, for example, 59 equal
+    values run from 13:25:05 to 13:29:55.
+  - The 13:25:00 value is not part of the freeze: it differs from the frozen value on 365, 124, 28 and 1,115 of those
+    days.
+  - The 13:30:00 value (the close) differs from the frozen value on every day.
+  - TWSE's trading-system page, already under "Taiwan exchanges, regulators and official pages", gives the closing
+    call auction from 13:25. The data show the freeze in every regime, but which auction rules applied in the earlier
+    regimes was not checked.
 - `TaiwanStockEvery5SecondsIndex` (Backer, 291 KB a day) gave the same 3,241 values on 2025-06-27, with 0 differences.
 
 ### TaiwanFuturesKBar (night-session dating)
@@ -108,8 +116,23 @@ intraday files, one request a day, with `data/fetch_intraday.py` and its own man
   on D − 1 and 15:00–23:59 of the night that begins on D. So one night is split across two minute-bar dates and filed
   under a third date in `TaiwanFuturesDaily`, and a full download needs calls on Saturdays and post-holiday days
   (Saturday 2025-06-28 has 336 rows).
-- The regular session's bars run 08:45–13:44 in 2020 and 2025; a 13:45 bar with a tiny volume (its close equals the
-  daily close) appears in 2011 and 2017.
+- Bars are labelled by their start minute. This is an inference from the 2025 labels; FinMind's page was not read on
+  it. The near month's first regular-session label is 08:45:00 on all 243 trading days, night labels run
+  15:00:00–04:59:00, and a bar labelled with the closing minute itself (13:45:00, or 05:00:00 at night) appears only
+  on some days, with 2–16 contracts at 13:45:00 and 2–36 at 05:00:00. Labels that mark a bar's first minute fit all
+  three.
+- 2025, near month (TX23's contract on the previous date, A26-39), checked 2026-10-19 with our own script over
+  `data/raw/intraday/tx1m/2025/` and `data/raw/vol4/TX__1998-07-21__2026-10-16.csv`:
+  - The last regular-session label is 13:44:00 on 211 of 243 days, or 13:45:00 on 30. The 13:45:00 bar has a tiny
+    volume (2–10 contracts; the median near-month bar from 08:45:00 to 13:44:00 has 276), and its close equals the
+    daily close (`TaiwanFuturesDaily` `close`) on all 30.
+  - The other two days are the limit-locked 2025-04-07 (last label 13:40:00, 103 bars) and 2025-04-10 (13:42:00,
+    90 bars).
+  - The last bar's close equals the daily close on 243 of 243 days.
+  - Over all monthly contracts, 31 dates have a 13:45:00 bar (32 bars, volume 2–16, each close equal to that
+    contract's daily close). The night session has a 05:00:00 bar on 5 of the 297 dates.
+- The survey's test days of other years: bars to 13:44 in 2020, and a 13:45 bar in 2011 and 2017. Only 2025 is
+  downloaded.
 - Summed regular-session minute volume is not the daily volume: the ratio ran from 0.54 to 2.00 on 4 days, about 2 for
   the near month and below 1 for the next month in roll weeks. Cause unverified (consistent with minute bars counting
   both sides and leaving out spread legs).
@@ -851,7 +874,7 @@ Bibliographic data come from Crossref (`api.crossref.org/works/<doi>`, read 2026
 - Newey & West (1994), already listed. Read in [NBER Technical Working Paper 144](https://www.nber.org/papers/t0144), "Automatic Lag Selection in Covariance Matrix Estimation", September 1993. The cover lists Kenneth D. West first, then Whitney K. Newey. The PDF is a scan; its pages were extracted locally.
   - p. 7, (2-2), "For clarity, assume that the Bartlett kernel is used". The **lag selection parameter** n = [4(T/100)^{2/9}] truncates the sums ŝ⁽¹⁾ = 2Σⱼ₌₁ⁿ jσ̂ⱼ and ŝ⁽⁰⁾ = σ̂₀ + 2Σⱼ₌₁ⁿ σ̂ⱼ.
   - Then γ̂ = 1.1447{(ŝ⁽¹⁾/ŝ⁽⁰⁾)²}^{1/3}, and the HAC truncation lag is "m = [γ̂T^{1/3}]" ("We recommend initially setting"). The recommended procedure first prewhitens with a VAR(1) (p. 6).
-  - So **⌊4(T/100)^{2/9}⌋ is Newey and West's pilot lag, not the HAC lag they recommend.** As a HAC lag it is statsmodels' default (see "Python" below), which answers open point (f).
+  - So **⌊4(T/100)^{2/9}⌋ is Newey and West's pilot lag, not the HAC lag they recommend.** As a HAC lag it is statsmodels' default (see "Python" below), which closes the open point on the lag rule's source.
   - The definition of the brackets was not seen. The journal version (*RES* 61(4): 631–653) was not read.
   - The 1.1447 here is Newey and West's Bartlett constant, which arch also uses. It does not settle the open point on Andrews' (1991) constants.
 
@@ -892,25 +915,63 @@ Bibliographic data come from Crossref (`api.crossref.org/works/<doi>`, read 2026
 
 ### Open points (Volume IV)
 
-Before any of these is printed: Engle's (1982) end page; James and Stein's (1961) end page; the origin of the
-volatility signature plot and the *Risk* volume of "Great Realisations"; Jorion's (1986) shrinkage target; Casella and
-Berger's theorem numbers and year; Lo and MacKinlay's (1988) equation numbers; Hill's (1975) formula as printed, and
-where Embrechts et al. treat the Hill estimator; the JFE pagination of Merton's Appendix A; Gelman et al.'s (2.10) and
-RiskMetrics §5.3.2, re-read in the documents; Harvey, Liu and Zhu's section numbers; Efron and Tibshirani's BCa and
-moving-blocks sections; the originals of Bonferroni (1936), Rao (1945), Memmel (2003) and Politis and Romano (1992,
-the circular block bootstrap, a book chapter); Andrews' (1991) plug-in constants; the Bartlett weights in Newey and
-West (1987); where Hamilton treats Newey–West; every theorem or equation number in Greene, Hayashi and Hamilton; the
-end pages that Crossref does not hold (Newey and West 1987, Andrews 1991, Engle and Granger 1987, Johansen 1991,
-Brenner and Kroner 1995); the author order of Drees et al.; the DOI of Hansen's (2024) reply; Lahiri's hardcover ISBN;
-the title and DOI of Martens, Kofman and Vorst (1998); the URLs of the RiskMetrics and BDA3 PDFs.
+Each of these must be settled before what depends on it is printed. Until then the briefs print the result *stated
+without proof*, name the work without the missing detail, or label a mechanism a hypothesis.
+
+- **Bibliographic details:**
+  - end pages: Engle (1982); James and Stein (1961); Moors (1988); Jarque and Bera (1987), from a primary source;
+    and those Crossref does not hold (Newey and West 1987, Andrews 1991, Engle and Granger 1987, Johansen 1991,
+    Brenner and Kroner 1995);
+  - the *Risk* volume of "Great Realisations";
+  - Casella and Berger's year;
+  - the JFE pagination of Merton's Appendix A;
+  - the author order of Drees et al.;
+  - the DOI of Hansen's (2024) reply;
+  - Lahiri's hardcover ISBN;
+  - the title and DOI of Martens, Kofman and Vorst (1998);
+  - the URLs of the RiskMetrics and BDA3 PDFs.
+- **Texts, sections and numbers still to read:**
+  - Casella and Berger's theorem numbers, and the section contents of Casella and Berger and of Wasserman;
+  - Lo and MacKinlay's (1988) equation numbers;
+  - Hill's (1975) formula as printed, and where Embrechts et al. treat the Hill estimator;
+  - Gelman et al.'s (2.10) and RiskMetrics §5.3.2, re-read in the documents;
+  - Harvey, Liu and Zhu's section numbers;
+  - Efron and Tibshirani's BCa and moving-blocks sections;
+  - the originals of Bonferroni (1936), Rao (1945), Memmel (2003) and Politis and Romano (1992, the circular block
+    bootstrap, a book chapter);
+  - Jorion's (1986) shrinkage target;
+  - Andrews' (1991) plug-in constants;
+  - the Bartlett weights in Newey and West (1987), and the journal version of Newey and West (1994);
+  - where Hamilton treats Newey–West, and every theorem or equation number in Greene, Hayashi and Hamilton;
+  - the Kim & White and Joanes & Gill texts.
+- **Sources for results the briefs state without proof:**
+  - $\operatorname{Var}\hat\rho_k\approx1/T$ and its normal limit (LM19, (19.6); candidates Tsay 2010 or Box, Jenkins,
+    Reinsel and Ljung);
+  - the $\chi^2_1$ law of (21.5) for two series (LM21);
+  - the consistency of the iid bootstrap (LM22, (22.2));
+  - the regression's $t_{T-d}$ law (LM23): Blitzstein and Hwang do not state it (above), and Hayashi and Greene are
+    unchecked;
+  - the James–Stein dominance theorem toward the grand mean, with $N-3$, $N\ge4$ and the positive part (LM24, (24.4));
+  - Gelman et al. §3.3, the posterior under unknown $\sigma$ (LM24; only its title is checked);
+  - the ARMA likelihood sandwich and the MLE's large-sample law (LM25).
+- **LM26's sources:**
+  - the origin of the volatility signature plot;
+  - the causes of the signature (stale prices, the bounce of heavy stocks, TWSE's matching rules), which stay
+    hypotheses until a source states them for the TAIEX;
+  - Roll (1984) and Lo and MacKinlay (1990), which the LM26 brief names for bid–ask bounce and nonsynchronous trading;
+    neither is in this file, and their details are unverified;
+  - TWSE's history of its matching method (periodic call auctions, continuous trading) and of its tick-size table;
+  - Glosten, Jagannathan and Runkle, for the asymmetry term (arch's `o=1`). The text names the asymmetry with Hansen
+    and Lunde's (2005) "leverage effect" instead (plans/vol-4.md, the LM26 decisions);
+  - Corsi (2009), which must be checked in Crossref before HAR is named.
+- **Taiwan:** a TAIFEX page on Saturday sessions.
+- **Chinese terms (樂詞網):** 標準化殘差 (standardized residual), 損失函數 (loss function) and 樣本外 (out of sample),
+  for LM26; 均值回歸 (mean reversion), marked "editor" in the terms table, for LM25.
 
 Closed in Stage 1 (2026-10-19): the $t$ and $\chi^2$ laws of normal samples (Blitzstein and Hwang Ex. 7.5.9,
 Ex. 10.4.3 and Def. 10.4.4; the $t_{n-1}$ law of the studentized mean follows from them in one line, which a module
 shows); the source of the lag rule $\lfloor4(T/100)^{2/9}\rfloor$ (statsmodels' default HAC lag, and Newey and
-West's (1994) pilot lag, not their recommended HAC lag); the Saturday sessions (TWSE's history page). New: Moors'
-(1988) end page; the Kim & White and Joanes & Gill texts; the journal version of Newey and West (1994); Jarque and
-Bera's (1987) end page from a primary source; a TAIFEX page on Saturday sessions; Casella and Berger and Wasserman's
-section contents are still unread.
+West's (1994) pilot lag, not their recommended HAC lag); the Saturday sessions (TWSE's history page).
 
 ## Python (Volume III)
 
@@ -1161,6 +1222,10 @@ statsmodels pages are under `https://www.statsmodels.org/stable/generated/`, arc
   - The pilot lag in `_alpha_q` is n = ⌈4(nobs/100)^{2/9}⌉ (`kernel.py:337`). arch rounds up, Newey and West print [·], and statsmodels takes the floor.
   - The bandwidth is 1.1447(α̂T)^{1/3}, capped at nobs − 1 (`:362–374`).
   - So arch's default Bartlett lag is **not** the book's rule.
+- `cov_type` of [`ARCHModel.fit`](https://bashtage.github.io/arch/univariate/generated/generated/arch.univariate.base.ARCHModel.fit.html), for LM26. Read 2026-10-19 after the fresh check, on the page (titled "arch 8.0.0", HTML fetched with curl) and in the venv source; run in the venv.
+  - The page: `cov_type: 'robust' | 'classic' = 'robust'`. "Supported options are 'robust', which does not assume the Information Matrix Equality holds and 'classic' which does. In the ARCH literature, 'robust' corresponds to Bollerslev-Wooldridge covariance estimator." The docstring is the same (`univariate/base.py:644–648`). The page names Bollerslev and Wooldridge without a year or title; no brief cites them, so the article is not looked up.
+  - Code (`univariate/base.py:941–988`): both use numerical derivatives of the negative log-likelihood (`_loglikelihood` returns the "Negative of model loglikelihood", `:460–481`). With H = `approx_hess(…)`/nobs, "classic" is H⁻¹/nobs. "robust" is H⁻¹SH⁻¹/nobs, where S is `np.cov` of the per-observation scores from `approx_fprime` (centred, divisor nobs − 1).
+  - The result uses the robust form only when `cov_type == "robust"`, and the classic form for any other value (`:1989–1992`). The argument is not validated, so a misspelling silently gives classic errors. Checked: on a simulated GARCH(1,1) series, `cov_type="Classic"` gave the classic standard errors, and the parameters are the same under both options.
 
 #### SciPy 1.18 (Stage 1 check)
 
@@ -1226,6 +1291,23 @@ statsmodels pages are under `https://www.statsmodels.org/stable/generated/`, arc
   - The `cov_type` options are 'opg'; 'oim' ("observed information matrix estimator, calculated using the method of Harvey (1989)"); 'approx' ("… numerical approximation of the Hessian matrix"); 'robust', 'robust_approx' and 'none'.
   - "Default is 'opg' unless memory conservation is used …, in which case the default is 'approx'". The code agrees (`tsa/statespace/mlemodel.py:2800–2801`).
   - The ARIMA.fit page says 'oim' for the memory-conservation case. It disagrees with the code.
+- [`het_arch`](https://www.statsmodels.org/v0.15.0/generated/statsmodels.stats.diagnostic.het_arch.html), for LM26. Read 2026-10-19 after the fresh check, on the page (titled "statsmodels 0.15.0", HTML fetched with curl) and in the venv source; run in the venv.
+  - Signature: `het_arch(resid, nlags=None, store=False, ddof=0, *, result_object=None)` (page; `stats/diagnostic.py:936–938`).
+  - The page says `result_object` returns "an LMTestResult NamedTuple instead of a plain tuple". With `store=False`, "the legacy four-element tuple is returned by default and a FutureWarning is issued". "In release 0.16.0 or after July 2027, whichever is later, the default will change to always return an LMTestResult." The fields are `lm`, `lmpval`, `fval`, `fpval` and `res_store`. Notes: "verified against R:FinTS::ArchTest".
+  - Code: it returns `acorr_lm(resid**2, …)` (`:997–999`), squaring `resid` as given, with no demeaning. `acorr_lm` regresses the squares on a constant and `nlags` lags, dropping the first `nlags` rows (`:892–894`). It sets LM = (nobs − ddof)·R², where nobs is the number of rows kept, and takes the χ² upper tail with `nlags` degrees of freedom (`:905–906`). The default lag is min(10, nobs // 5) (`:888`).
+  - Run on 2,000 simulated normals with `nlags=5`: `result_object=True` returned an `LMTestResult` with no warning, and the default returned a four-element tuple with a FutureWarning. A NumPy regression gave the same LM and p-value (difference 0.0).
+
+#### NumPy 2.5 and Polars 2.0 (Stage 1 check)
+
+- [`polynomial.hermite_e.hermegauss`](https://numpy.org/doc/2.5/reference/generated/numpy.polynomial.hermite_e.hermegauss.html), for LM24. Read 2026-10-19 after the fresh check, on the page (titled "NumPy v2.5 Manual", HTML fetched with curl) and in the venv source (NumPy 2.5.3); run in the venv.
+  - `hermegauss(deg)` returns the sample points and the weights. They "will correctly integrate polynomials of degree 2*deg - 1 or less over the interval [-inf, inf] with the weight function f(x) = exp(-x^2/2)" (quoted without the page's TeX markup).
+  - `deg` "must be >= 1"; deg 0 raises a ValueError. Notes: "The results have only been tested up to degree 100".
+  - The weights are scaled so that they integrate 1 against exp(−x²/2), so they sum to √(2π) (`polynomial/hermite_e.py:1619`). A standard-normal expectation is therefore Σ wₖ g(xₖ)/√(2π).
+  - Checked with `hermegauss(5)`: the weights sum to 2.50663 = √(2π). E Z⁴ = 3 and E Z⁸ = 105 come out to within 2e-13, but E Z¹⁰ gives 825 against 945, because degree 10 exceeds 2·5 − 1 = 9.
+- [`read_csv`](https://docs.pola.rs/api/python/stable/reference/api/polars.read_csv.html), for LM26 and `data/derived/vol4_rv.csv`. Read 2026-10-19 after the fresh check, on the page (HTML fetched with curl) and in the venv source (Polars 2.0.0); run in the venv.
+  - The docs' version switcher labels `stable` "2 (stable)" and names no minor version.
+  - `comment_prefix: str | None = None`: "A string used to indicate the start of a comment line. Comment lines are skipped during parsing. Common examples of comment prefixes are # and //." The installed docstring is the same (`io/csv/functions.py:154–156`; `read_csv` starts at `:74`, the parameter at `:91`).
+  - Run: `pl.read_csv("data/derived/vol4_rv.csv", comment_prefix="#")` gives 5,351 rows and 21 columns. Without it, Polars raises a `ComputeError` ("found more fields than defined in 'Schema'").
 
 ## Taiwan facts (Volume III)
 
@@ -1251,6 +1333,17 @@ statsmodels pages are under `https://www.statsmodels.org/stable/generated/`, arc
   "Jun 1: The daily price fluctuation limit is raised from 7% to 10%."; 60th-anniversary book
   [p. 181](https://www.twse.com.tw/staticFiles/product/publication/twse60/html/181/): "104 年 6 月 1 日起，我國市場之漲跌幅度由
   7% 放寬為 10%"). The formal notice itself was not looked up.
+
+## Taiwan facts (Volume IV)
+
+- TWSE [company history (zh)](https://www.twse.com.tw/zh/about/company/history.html), read 2026-10-19: "108年 01.01 施行週末補行上班日，證券市場不交易亦不交割". The [English page](https://www.twse.com.tw/en/about/company/history.html) says: "2019 Jan 1 The TWSE forgoes Saturday trading and settlement, even with the presence of work."
+- TWSE [市場開休市日期](https://www.twse.com.tw/zh/trading/holiday.html), read through its JSON (`rwd/zh/holidaySchedule`):
+  - 2024: "於2月17日（星期六）補行上班，但不交易亦不交割";
+  - 2025: the same wording for 2月8日;
+  - 2018–2020 return no rows.
+- Inference, not stated on either page: before 2019 the market traded on Saturday make-up workdays, which would explain TR23's 23 Saturday sessions (2006–2018).
+- Not checked: whether those 23 dates match the government's make-up workdays.
+- TAIFEX: no official page was found; only news covers it.
 
 ## Chinese terms (Volume III)
 
@@ -1373,14 +1466,14 @@ statsmodels pages are under `https://www.statsmodels.org/stable/generated/`, arc
 | ARCH model | 自我迴歸條件變異數非齊一模型 | — | — |
 | GARCH | 廣義自我迴歸條件變異數非齊一模型; IGARCH 整合廣義自我迴歸條件變異數非齊一模型 | — | 廣義自我迴歸條件變異數非齊一模型 (GARCH) |
 | EWMA | EWMA model 指數加權移動平均模型; exponential smoothing 指數平滑 | — | 指數加權移動平均模型 |
-| realized volatility, realized variance | no entry in any listing (integrated variance: none) | — | 已實現波動率, 已實現變異數 (book's own) |
+| realized volatility, realized variance | no entry in any listing (integrated variance: none) | — | 實現波動率, 實現變異數 (book's own; 實現變異數 as LM3 printed it, lm03.md:710) |
 | microstructure noise | no entry; noise 雜訊；噪音; high-frequency data 高頻資料 | 雜訊 | 市場微結構雜訊 (book's own); 高頻資料 |
 
 - The rows from Gauss–Markov to error correction that the survey reported without a listing are all 統計學名詞 entries
   in its saved results (read again in Stage 1).
 - The book's own forms have no 樂詞網 entry and are printed with their English in every box that uses them:
-  區塊自助重抽法 (block bootstrap), 平穩自助重抽法 (stationary bootstrap), 已實現變異數 (realized variance),
-  已實現波動率 (realized volatility), 市場微結構雜訊 (market microstructure noise).
+  區塊自助重抽法 (block bootstrap), 平穩自助重抽法 (stationary bootstrap), 實現變異數 (realized variance, LM3's printed
+  form, lm03.md:710), 實現波動率 (realized volatility), 市場微結構雜訊 (market microstructure noise).
 - Forms that differ from the listing only by spacing: the listing writes Bonferroni校正 and 增廣Dickey-Fuller檢定 with no
   space between Latin letters and Chinese; plans/vol-4.md writes "Bonferroni 校正" and "增廣 Dickey-Fuller 檢定". The
   book should choose one style.
@@ -1422,17 +1515,6 @@ statsmodels pages are under `https://www.statsmodels.org/stable/generated/`, arc
 | quartile; octile | 四分位數; 八分位數 | 四分位數; — | 四分位數, 八分位數 |
 | measure of location, dispersion | 位置量數, 離勢量數 | — | — |
 | sensitivity curve | 敏感度曲線 | — | 敏感度曲線 |
-
-## Taiwan facts (Volume IV)
-
-- TWSE [company history (zh)](https://www.twse.com.tw/zh/about/company/history.html), read 2026-10-19: "108年 01.01 施行週末補行上班日，證券市場不交易亦不交割". The [English page](https://www.twse.com.tw/en/about/company/history.html) says: "2019 Jan 1 The TWSE forgoes Saturday trading and settlement, even with the presence of work."
-- TWSE [市場開休市日期](https://www.twse.com.tw/zh/trading/holiday.html), read through its JSON (`rwd/zh/holidaySchedule`):
-  - 2024: "於2月17日（星期六）補行上班，但不交易亦不交割";
-  - 2025: the same wording for 2月8日;
-  - 2018–2020 return no rows.
-- Inference, not stated on either page: before 2019 the market traded on Saturday make-up workdays, which would explain TR23's 23 Saturday sessions (2006–2018).
-- Not checked: whether those 23 dates match the government's make-up workdays.
-- TAIFEX: no official page was found; only news covers it.
 
 ## Writing style (AUTHORING §1, checked 2026-10-11)
 

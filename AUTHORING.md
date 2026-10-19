@@ -139,7 +139,9 @@ that teaches something.
 
 **One symbol, one meaning.** Within a module a symbol has exactly one meaning. The book-wide symbols below keep their
 meaning in every module; a module may add local symbols in its notation note but may not reuse a book-wide symbol
-for something else.
+for something else, except where a row below scopes the reuse to named modules or to a kind of module (for example LM25's $b_t$, $a_j$,
+$u_t$, $\zeta_t$, $K$; LM23's $h_t$; LM26's $u_i$, $h$, $K$): the module then does not use the book-wide meaning,
+and its notation note declares the local one.
 
 **Common notation first** (owner, 2026-10-11). Use the symbols a reader meets in standard textbooks and in practice
 ($\sigma$ for a volatility, $\rho$ for a correlation, $\Sigma$ for a covariance matrix, $\beta$ for a regression slope,
@@ -197,7 +199,7 @@ note says why.
 | $\mathbf 1_{\mathcal A}$, $\mathbf 1\{\cdot\}$ | indicator of an event, always with a subscript or braces (bold $\mathbf 1$ alone is the vector of ones); $\E[\mathbf 1_{\mathcal A}]=\Pr(\mathcal A)$ is (14.1) |
 | $X$, $Y$, $Z$; $x$, $y$, $z$ | random variables and their values; $Z$ a standard normal; $R$ and $r$ are random returns. A module that writes random variables does not use the data matrix $X$ |
 | $\mathbf X$, $\mathbf Z$ | random vectors; $\mathbf Z$ a standard normal vector ($\mathbf z_t$ stays LM12's whitened data) |
-| $p_X$, $f_X$, $F_X$, $F_X^{-1}$; $\hat F$, $\hat F^{-1}$, $\E_{\hat F}$ | pmf, density, distribution function and quantile function $F_X^{-1}(u):=\min\{x:F_X(x)\ge u\}$, always subscripted ($f$ is an exposure, $p$ a win probability); empirical distribution function of a sample, mass $1/T$ on each observation, its quantile function (order statistics) and expectation under it |
+| $p_X$, $f_X$, $F_X$, $F_X^{-1}$; $\hat F$, $\hat F^{-1}$, $\E_{\hat F}$ (also $\Var_{\hat F}$, $\Pr_{\hat F}$, LM22) | pmf, density, distribution function and quantile function $F_X^{-1}(u):=\min\{x:F_X(x)\ge u\}$, always subscripted ($f$ is an exposure, $p$ a win probability); empirical distribution function of a sample, mass $1/T$ on each observation, its quantile function (order statistics) and expectation under it |
 | $u$, $U$ | a probability level in $F^{-1}(u)$; a value of a uniform random variable $U\sim\operatorname{Unif}(0,1)$ |
 | $\E$, $\Var$, $\Cov$, $\operatorname{Corr}$; $\operatorname{Skew}$, $\operatorname{Kurt}$ | expectation, variance, covariance, correlation (macros `\E`, `\Var`, `\Cov`); standardized third and fourth moments, excess kurtosis $\operatorname{Kurt}-3$ |
 | $\mu_X$, $\sigma_X$, $\sigma_{XY}$, $\rho_{XY}$ | moments of random variables; unsubscripted $\mu$, $\sigma$, $\rho$ stay the return's. A population correlation is $\rho$, a sample one $\hat\rho$ in a module with both |
@@ -225,9 +227,10 @@ note):
 | $\varepsilon_t$, $\hat\varepsilon_t$; $\eta_t$; $\xi_t$ | a regression's error and residual (LM23), LM26's innovation $\varepsilon_t=\sigma_t\xi_t$; white noise of an AR or MA model (LM25); an iid standardized innovation, mean 0, variance 1, normal or scaled Student $t$ (LM26; $Z$ stays a standard normal) |
 | $X$, $d$ | LM23's $T\times d$ design matrix, first column $\mathbf 1$, and its number of coefficients (LM23 writes no random variable $X$) |
 | $\rho_k$, $\hat\rho_k$, $\gamma_k$, $\hat\gamma_k$ | autocorrelation and autocovariance at lag $k$, model and sample; $\hat\rho_k$ uses the full-sample mean and divisor $T$ in numerator and denominator (LM19). $\gamma$ without a lag keeps its meaning above |
-| $\operatorname{VR}(m)$ | variance ratio: the variance of overlapping $m$-day log-return sums, centred at $m\bar r$, over $m$ times the daily variance (LM19's (19.8); LM22, LM25) |
+| $\operatorname{VR}(m)$ | variance ratio: the variance of overlapping $m$-day log-return sums, centred at $m\bar r$, over $m$ times the daily variance (LM19's (19.8); LM22, LM25; LM26 writes (19.7)'s ratio without the symbol) |
 | $\phi_j$, $\theta_j$; $\delta$ | AR and MA coefficients, always subscripted ($\phi_1$ even in an AR(1); $\varphi$ stays the normal density); the Dickey–Fuller coefficient $\delta=\phi_1-1$ (LM25) |
-| $F_t$, $S_t$ | TX settlement price and TAIEX close (LM25; LM6 writes $F$, $S$; $F_X$ keeps its subscript) |
+| $F_t$, $S_t$ | TX settlement price and TAIEX close (LM23 in E6's contract count, $200F_t$ a contract; LM25; LM6 writes $F$, $S$; $F_X$ keeps its subscript) |
+| $b_t$, $a_j$, $u_t$, $\zeta_t$, $K$; $h_t$; $u_i$, $h$ | LM25's log basis, ADF lag coefficients, one-day white noise, the persistent part's innovation and the Ljung–Box lag count; LM23's hat values; LM26's intraday noise and sampling interval (and its lag count $K$) — local, declared; each displaces a book-wide meaning its module does not use ($b$, $a$ a bet's; $u$ a probability level; $\zeta$ LM5's constant; $K$ a second matrix; $h$ a generic function) |
 | $\sigma_t^2$, $\sigma^2_{t+1\mid t}$ | conditional variance of day $t$; its forecast made on day $t$ (LM26) |
 | $\mathrm{RV}_t$ | realized variance of day $t$, the sum of squared intraday log returns at a stated interval (LM26; the table's $\mathrm{RV}$ is the same idea on simple returns) |
 | $B$, $\ell$ | number of bootstrap resamples; block length or mean block length (LM22), Newey–West lag (LM23); neither module writes a likelihood |
@@ -235,7 +238,8 @@ note):
 | $\operatorname{med}$ | a sample median, $\hat F^{-1}(\tfrac12)$, upright (LM19); a tilde means centred ($\tilde X$, $\tilde r_t$) |
 
 Words with one meaning each: "unconditional variance" is GARCH's $\omega/(1-\alpha-\beta)$ (LM26) and "long-run
-variance" the HAC target (LM23). Not used: $R^2$ for R-squared, a star for a bootstrap draw ($\bar R_{\text{boot}}$),
+variance" the HAC target (LM23); "leverage" is $f>1$ (a regression point's influence is its hat value, LM23; LM26 quotes Hansen and Lunde's
+"leverage effect" as their term). Not used: $R^2$ for R-squared, a star for a bootstrap draw ($\bar R_{\text{boot}}$),
 $L$ for a lag operator (write $x_{t-1}$), $\tau$ for a Dickey–Fuller statistic, $Z_t$ for a non-normal innovation.
 
 - Subscripted standard symbols are distinct symbols and may sit beside the table: $D_{\text{mod}}$, $D_{\text{Mac}}$,

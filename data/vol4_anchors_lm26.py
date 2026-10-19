@@ -7,7 +7,8 @@ window 09:30:00-13:30:00 for h = 5s, 10s, 15s, 30s, 1m, 5m, 10m, 15m, 30m, NaN w
 sampling; o2, the squared log change from the previous TAIEX close to 09:30:00), TX23 from
 data/processed/vol4_tx23.parquet (data/vol4_series.py; the held near-month contract per date), the raw 5-second TAIEX
 files data/raw/intraday/taiex5s/<year>/<date>.csv and the raw TX 1-minute bars of 2025,
-data/raw/intraday/tx1m/2025/<date>.csv (data/fetch_intraday.py), and the TX daily file data/raw/vol4/TX__*.csv. The
+data/raw/intraday/tx1m/2025/<date>.csv (data/fetch_intraday.py), and the TX daily file
+data/raw/vol4/TX__1998-07-21__2026-10-16.csv (TaiwanFuturesDaily; its close column is the "daily close" of A26-39). The
 raw intraday files serve only anchors marked "raw": no intraday value is printed, only statistics. The script writes
 nothing.
 
@@ -21,9 +22,10 @@ Conventions.
 - Intraday: RV_t(h) = sum of squared log changes of the TAIEX price index on the grid 09:30:00, 09:30:00 + h, ...,
   13:30:00 (14,400 s / h returns); r_o,t^2 = o2 (previous close -> 09:30:00). The daily target V_t(h) = 1e4 (o2 +
   rv_h) in %^2; the main target is V_t := V_t(15 min). Intraday autocorrelations ("raw") pool within-day pairs only:
-  rho_1 = sum over days of sum_t r_t r_{t-1} / sum over days of sum_t r_t^2 (uncentred, as the requested per-day
-  columns c1_<h> of vol4_rv.csv would give it); the centred version subtracts the group's mean intraday return
-  (LM19's (19.5) with divisor = number of returns) and is a check row. A period's signature is the ratio of the
+  rho_1 = sum over days of sum_t r_t r_{t-1} / sum over days of sum_t r_t^2 (uncentred); the centred version
+  subtracts the group's mean intraday return (LM19's (19.5) with divisor = number of returns) and is a check row.
+  The noise level of A26-38 is sqrt(-gamma_1) with gamma_1 = sum over days of sum_t r_t r_{t-1} / sum over days of
+  the number of returns (2,880 a 5-second day, not the 2,879 pairs), uncentred. A period's signature is the ratio of the
   period's mean RV(h) to its mean RV(5 min).
 - TX bars: a bar's label is the minute it starts (the regular session's labels run 08:45-13:44, sometimes with a
   13:45 bar, and the last regular bar's close equals TaiwanFuturesDaily's close), so the price at 09:30:00 is the
@@ -37,8 +39,9 @@ Conventions.
   arch's to 1e-6. Standard errors: "classic" = the inverse of -l'' (arch's numerical Hessian; LM20's (20.6)), "robust"
   = arch's default sandwich H^-1 J H^-1 / T with J the sample covariance (divisor T - 1) of the per-day scores.
   EWMA: sigma^2_{t+1|t} = lam sigma^2_{t|t-1} + (1 - lam) r_t^2 with lam = 0.94 (RiskMetrics) and zero mean, started
-  at the mean of r^2 over TR23's first 246 returns. Rolling 60-day: the mean of the last 60 r^2. Yesterday's V: V_t
-  as the forecast for t + 1. EWMA of V: lam = 0.94 on V_t, started at the first T5S day's V.
+  at the mean of r^2 over TR23's first 246 returns. Rolling 60-day: the mean of the last 60 (100 r)^2, days t - 60
+  .. t - 1, divisor 60, not demeaned. Yesterday's V: V_t as the forecast for t + 1. EWMA of V: f_{t+1} = lam f_t +
+  (1 - lam) V_t with lam = 0.94, started with f = V on the first T5S day (2005-01-03).
 - Out of sample: W = round(5A) = 1,231 returns (LM17's five years). At the first session s of each calendar month
   with s >= W, both GARCH models are refitted on r_{s-W}..r_{s-1}; the recursion is restarted at the window's first
   day with that window's backcast and run with the new parameters through the month's last session; the forecast of
@@ -58,12 +61,13 @@ Conventions.
   paths, standard deviation of the batch medians with divisor 20, over sqrt(20)).
 - Counts against a threshold use the guard (R <= -0.03 + 1e-12 for a fall of 3% or more).
 - Rounding: v(x, shown, *printed) prints x to `shown` decimals and appends " NEAR(d)" for each printed precision d
-  (decimals) at which x lies within a tenth of a unit of the d-th decimal of a rounding boundary; sci() does the same
-  for a mantissa. Every printed form of the brief is checked here at the precision it is printed.
+  (decimals) at which x lies within a tenth of a unit of the d-th decimal of a rounding boundary; a flagged value is
+  shown to at least d + 2 decimals, so the line shows how near it is. sci() does the same for a mantissa. Every
+  printed form of the brief is checked here at the precision it is printed.
 
 Prints one line per anchor, "A26-NN <value>", in ID order.
 
-Run:  PYTHONUTF8=1 .venv/Scripts/python.exe data/vol4_anchors_lm26.py [repository root]
+Run:  PYTHONUTF8=1 uv run python data/vol4_anchors_lm26.py [repository root]
 """
 import datetime as dt
 import math
@@ -110,9 +114,10 @@ def near(x: float, d: int) -> bool:
     return abs(y - math.floor(y) - 0.5) < 0.1
 
 
-def v(x: float, shown: int, *printed: int) -> str:
-    flags = [str(d) for d in printed if near(x, d)]
-    return f"{x:.{shown}f}" + (f" NEAR({','.join(flags)})" if flags else "")
+def v(x: float, shown: int, *printed: int, sign: bool = False) -> str:
+    flagged = [d for d in printed if near(x, d)]
+    shown = max([shown] + [d + 2 for d in flagged])     # a flagged value always shows two digits past its flag
+    return f"{x:{'+' if sign else ''}.{shown}f}" + (f" NEAR({','.join(map(str, flagged))})" if flagged else "")
 
 
 def sci(x: float, shown: int, printed: int) -> str:
@@ -298,22 +303,25 @@ NAMES = {"roll60": "rolling 60-day", "ewma": "EWMA 0.94", "garch_n": "GARCH norm
 i7, i2, i8 = pos["2025-04-07"], pos["2025-04-02"], pos["2025-04-08"]
 assert i7 == i2 + 1
 rank = int(np.argsort(R)[0])
-put(6, f"2025-04-07: R {R[i7]:.4%} (rank 1 of {T}: {rank == i7}); r {y[i7]:.4f}%; 2025-04-02 r {y[i2]:.4f}%")
+put(6, f"2025-04-07: R {v(100 * R[i7], 4, 2, 4)}% (rank 1 of {T}: {rank == i7}); r {v(y[i7], 4, 2, 4)}%; 2025-04-02 r "
+       f"{y[i2]:.4f}%")
 case = []
 for k in ("garch_n", "ewma", "roll60", "v_prev"):
     f = FC[k][i7]
-    case.append(f"{NAMES[k]} {math.sqrt(f):.4f}% a day ({v(ann(f), 2, 1)}% a year), r/sigma {y[i7] / math.sqrt(f):.3f}")
+    case.append(f"{NAMES[k]} {v(math.sqrt(f), 4, 2, 4)}% a day ({v(ann(f), 2, 1)}% a year), r/sigma "
+                f"{v(y[i7] / math.sqrt(f), 3, 1)}")
 put(7, "forecasts for 2025-04-07 made on 2025-04-02: " + "; ".join(case))
-put(8, f"2025-04-07: V {V15[i7]:.4f} %^2 (sqrt {math.sqrt(V15[i7]):.4f}%), o2 share {1e4 * O2[rv_dates.index('2025-04-07')] / V15[i7]:.4%}, "
-       f"r^2 {y[i7] ** 2:.4f} %^2; V/r^2 {V15[i7] / y[i7] ** 2:.4f}")
-case8 = [f"{NAMES[k]} {math.sqrt(FC[k][i8]):.4f}% ({ann(FC[k][i8]):.2f}% a year)" for k in ("garch_n", "ewma", "roll60", "v_prev")]
+put(8, f"2025-04-07: V {V15[i7]:.4f} %^2 (sqrt {v(math.sqrt(V15[i7]), 4, 2, 4)}%), o2 share "
+       f"{v(100 * (1e4 * O2[rv_dates.index('2025-04-07')] / V15[i7]), 4, 2)}%, r^2 {v(y[i7] ** 2, 4, 4)} %^2; V/r^2 {V15[i7] / y[i7] ** 2:.4f}")
+case8 = [f"{NAMES[k]} {v(math.sqrt(FC[k][i8]), 4, 2, 4)}% ({ann(FC[k][i8]):.2f}% a year)" for k in ("garch_n", "ewma", "roll60",
+                                                                                                        "v_prev")]
 put(9, "forecasts for 2025-04-08 made on 2025-04-07: " + "; ".join(case8) + f"; V on 2025-04-08 {V15[i8]:.4f} %^2 "
-       f"(sqrt {math.sqrt(V15[i8]):.4f}%); r {y[i8]:.4f}%")
+       f"(sqrt {v(math.sqrt(V15[i8]), 4, 2, 4)}%); r {v(y[i8], 4, 2, 4)}%")
 pre = np.arange(i7 - 20, i7)
 post = np.arange(i7, i7 + 20)
-put(10, f"20 sessions to 2025-04-02 ({dates[pre[0]]}..): realized sqrt(A mean V) {ann(float(V15[pre].mean())):.2f}%; "
-        f"20 from 2025-04-07 (..{dates[post[-1]]}): {ann(float(V15[post].mean())):.2f}%; GARCH normal forecasts over those 20: "
-        f"{ann(float(FC['garch_n'][post].mean())):.2f}%; EWMA {ann(float(FC['ewma'][post].mean())):.2f}%")
+put(10, f"20 sessions to 2025-04-02 ({dates[pre[0]]}..): realized sqrt(A mean V) {v(ann(float(V15[pre].mean())), 2, 1)}%; "
+        f"20 from 2025-04-07 (..{dates[post[-1]]}): {v(ann(float(V15[post].mean())), 2, 1)}%; GARCH normal forecasts over those "
+        f"20: {v(ann(float(FC['garch_n'][post].mean())), 2, 1)}%; EWMA {v(ann(float(FC['ewma'][post].mean())), 2, 1)}%")
 
 # ---------------------------------------------------------------- section 2: ARCH test
 yc = y - y.mean()
@@ -332,28 +340,30 @@ def arch_test(x: Vec, K: int) -> tuple[Vec, float, float, float]:
 
 
 b1, r21, lm1, p1 = arch_test(yc, 1)
-put(11, f"K=1 on r - rbar (%): a {b1[0]:.4f}, b_1 {v(b1[1], 4, 3)}, R-squared {r21:.5f}, LM (T-1)R2 {lm1:.2f}, "
+put(11, f"K=1 on r - rbar (%): a {v(b1[0], 4, 4)}, b_1 {v(b1[1], 4, 3, 4)}, R-squared {r21:.5f}, LM (T-1)R2 {v(lm1, 2, 1)}, "
         f"p {sci(p1, 3, 1)} (LM19's rho_hat_1(r^2) 0.194, A19-40)")
 b5, r25, lm5, p5 = arch_test(yc, 5)
-put(12, f"K=5: a {b5[0]:.4f}, b_1..b_5 {', '.join(f'{x:.4f}' for x in b5[1:])}, sum b {b5[1:].sum():.4f}, "
-        f"R-squared {r25:.5f}, LM {v(lm5, 2, 0, 1)}, p {sci(p5, 3, 1)}; chi2_5 5% point {stats.chi2.ppf(0.95, 5):.4f}")
+put(12, f"K=5: a {b5[0]:.4f}, b_1..b_5 {', '.join(f'{x:.4f}' for x in b5[1:])}, sum b {v(float(b5[1:].sum()), 4, 3)}, "
+        f"R-squared {v(r25, 5, 3)}, LM {v(lm5, 2, 0, 1)}, p {sci(p5, 3, 1)}; chi2_5 5% point "
+        f"{v(float(stats.chi2.ppf(0.95, 5)), 4, 2)}")
 xin = (y - pn[0]) / cvn
 _, r2x, lmx, px = arch_test(xin - xin.mean(), 5)
 put(13, f"K=5 on GARCH-normal standardized residuals: R-squared {r2x:.5f}, LM {v(lmx, 2, 1)}, p {v(px, 4, 2, 3)}")
 
 # ---------------------------------------------------------------- section 3: EWMA
 wts = (1 - LAM) * LAM ** np.arange(10000)
-put(14, f"weights sum {wts.sum():.10f}; effective window 1/(1-lam) {1 / (1 - LAM):.4f}; mean lag lam/(1-lam) "
-        f"{LAM / (1 - LAM):.4f}; weight half-life ln(1/2)/ln(lam) {math.log(0.5) / math.log(LAM):.4f} days; weight on the "
-        f"last 75 days {1 - LAM**75:.4%}; lam^75 {LAM**75:.5f}")
-put(15, f"start sigma^2 = mean r^2 of the first 246 returns {ew[0]:.4f} %^2; lam^1231 {LAM**1231:.3e} (first OOS day)")
+put(14, f"weights sum {wts.sum():.10f}; effective window 1/(1-lam) {v(1 / (1 - LAM), 4, 1)}; mean lag lam/(1-lam) "
+        f"{LAM / (1 - LAM):.4f}; weight half-life ln(1/2)/ln(lam) {v(math.log(0.5) / math.log(LAM), 4, 1)} days; weight on "
+        f"the last 75 days {v(100 * (1 - LAM**75), 4, 1)}%; lam^75 {LAM**75:.5f}")
+put(15, f"start sigma^2 = mean r^2 of the first 246 returns {v(ew[0], 4, 2)} %^2; lam^1231 {sci(LAM**1231, 3, 0)} "
+        f"(first OOS day)")
 s_a = math.sqrt(ew[i7])
 s_b = math.sqrt(ew[i8])
 hand = LAM * ew[i7] + (1 - LAM) * y[i7] ** 2
 assert abs(hand - ew[i8]) < 1e-12
-put(16, f"sigma for 2025-04-07 {v(s_a, 4, 2, 3)}% ({ew[i7]:.4f} %^2); for 2025-04-08 {v(s_b, 4, 2, 3)}% = sqrt(0.94 x "
-        f"{ew[i7]:.4f} + 0.06 x {y[i7] ** 2:.4f}) = sqrt({0.94 * ew[i7]:.4f} + {0.06 * y[i7] ** 2:.4f}); from the printed "
-        f"1.560 and -10.203: {math.sqrt(0.94 * 1.560**2 + 0.06 * 10.203**2):.4f}")
+put(16, f"sigma for 2025-04-07 {v(s_a, 4, 2, 3, 4)}% ({v(ew[i7], 4, 4)} %^2); for 2025-04-08 {v(s_b, 4, 2, 3, 4)}% = "
+        f"sqrt(0.94 x {ew[i7]:.4f} + 0.06 x {y[i7] ** 2:.4f}) = sqrt({v(0.94 * ew[i7], 4, 4)} + {v(0.06 * y[i7] ** 2, 4, 4)}); "
+        f"from the printed 1.560 and -10.203: {math.sqrt(0.94 * 1.560**2 + 0.06 * 10.203**2):.4f}")
 lams = np.round(np.arange(0.800, 0.9951, 0.005), 3)
 qv = []
 hV = V15[oos]
@@ -366,18 +376,20 @@ for lam in lams:
 qv_arr = np.array(qv)
 ib = int(qv_arr.argmin())
 put(17, f"QLIKE of EWMA r^2 on the OOS days against V, lam = 0.800..0.995 (step 0.005): best lam {lams[ib]:.3f} QLIKE "
-        f"{qv_arr[ib]:.4f}; lam 0.94 {qv_arr[list(lams).index(0.94)]:.4f}; lam 0.97 {qv_arr[list(lams).index(0.97)]:.4f}; "
-        f"lam 0.80 {qv_arr[0]:.4f}; GARCH normal {float(qlike(hV, FC['garch_n'][oos]).mean()):.4f}")
+        f"{v(float(qv_arr[ib]), 4, 4)}; lam 0.94 {v(float(qv_arr[list(lams).index(0.94)]), 4, 4)}; lam 0.97 "
+        f"{v(float(qv_arr[list(lams).index(0.97)]), 4, 4)}; lam 0.80 {qv_arr[0]:.4f}; GARCH normal "
+        f"{v(float(qlike(hV, FC['garch_n'][oos]).mean()), 4, 4)}")
 
 # ---------------------------------------------------------------- section 4: GARCH
 sen, ser = gn_c.std_err.to_numpy(), gn.std_err.to_numpy()
-put(18, "GARCH normal, full TR23: " + ", ".join(f"{nm} {pv:.6f} (classic {sc:.6f}, robust {sr:.6f})" for nm, pv, sc, sr in
-        zip(("g", "omega", "alpha", "beta"), pn, sen, ser)) + f"; loglik {gn.loglikelihood:.4f}")
-put(19, f"backcast {bc_full:.6f} %^2; hand loglik {ll_hand:.6f}, minus arch {ll_hand - gn.loglikelihood:.2e}; "
+put(18, "GARCH normal, full TR23: " + ", ".join(f"{nm} {v(pv, 6, 4)} (classic {v(sc, 6, 4)}, robust {v(sr, 6, 4)})"
+                                                for nm, pv, sc, sr in zip(("g", "omega", "alpha", "beta"), pn, sen, ser))
+        + f"; loglik {v(gn.loglikelihood, 4, 2)}")
+put(19, f"backcast {v(bc_full, 6, 2)} %^2; hand loglik {ll_hand:.6f}, minus arch {ll_hand - gn.loglikelihood:.2e}; "
         f"max |sigma^2 hand - arch| {np.max(np.abs(s2_hand[:T] - cvn**2)):.1e}")
 pers = pn[2] + pn[3]
 uvar = pn[1] / (1 - pers)
-put(20, f"alpha+beta {v(pers, 6, 4)}; unconditional variance omega/(1-alpha-beta) {v(uvar, 6, 3)} %^2 (sigma "
+put(20, f"alpha+beta {v(pers, 6, 5, 6)}; unconditional variance omega/(1-alpha-beta) {v(uvar, 6, 3, 4)} %^2 (sigma "
         f"{v(math.sqrt(uvar), 6, 3)}% a day); annualized "
         f"{v(ann(uvar), 4, 2)}%; TR23's sqrt(A) s_r 18.99% (LM19, A19-54)")
 
@@ -402,17 +414,21 @@ se_pers_r = math.sqrt(covr[2, 2] + covr[3, 3] + 2 * covr[2, 3])
 se_pers_c = math.sqrt(covc[2, 2] + covc[3, 3] + 2 * covc[2, 3])
 z975 = float(stats.norm.ppf(0.975))
 lo_p, hi_p = pers - z975 * se_pers_r, pers + z975 * se_pers_r
+# E5 prints the half-life to one decimal, its SE to one, both intervals' half-lives in whole sessions and the
+# interval for alpha+beta to five decimals
 put(21, f"half-life ln(1/2)/ln(alpha+beta) {v(hl_n, 4, 1)} sessions; delta-method SE classic {v(se_hl_c, 4, 1)}, robust "
-        f"{v(se_hl_r, 4, 1)}; robust delta interval {hl_n - z975 * se_hl_r:.2f} to {hl_n + z975 * se_hl_r:.2f}; SE(alpha+beta) "
-        f"classic {se_pers_c:.5f}, robust {se_pers_r:.5f}; robust interval for alpha+beta {lo_p:.5f} to {hi_p:.5f}, mapped to "
-        f"half-lives {hl_of(lo_p):.2f} to {hl_of(hi_p):.2f}")
+        f"{v(se_hl_r, 4, 1)}; robust delta interval {v(hl_n - z975 * se_hl_r, 2, 0)} to {v(hl_n + z975 * se_hl_r, 2, 0)}; "
+        f"SE(alpha+beta) classic {se_pers_c:.5f}, robust {v(se_pers_r, 5, 4)}; robust interval for alpha+beta "
+        f"{v(lo_p, 5, 5)} to {v(hi_p, 5, 5)}, mapped to half-lives {v(hl_of(lo_p), 2, 0)} to {v(hl_of(hi_p), 2, 0)}")
 stc, strr = gt_c.std_err.to_numpy(), gt.std_err.to_numpy()
 pers_t = pt[2] + pt[3]
 hl_t, se_hlt = half_life(pt, gt.param_cov.to_numpy())
-put(22, "GARCH t, full TR23: " + ", ".join(f"{nm} {pv:.6f} (classic {sc:.6f}, robust {sr:.6f})" for nm, pv, sc, sr in
-        zip(("g", "omega", "alpha", "beta", "nu"), pt, stc, strr)) + f"; loglik {gt.loglikelihood:.4f}; ell gain "
-        f"{gt.loglikelihood - gn.loglikelihood:.2f}; alpha+beta {pers_t:.6f}; half-life {v(hl_t, 4, 1)} (robust SE "
-        f"{se_hlt:.2f}); unconditional variance {v(pt[1] / (1 - pers_t), 6, 3)} %^2, annualized {ann(pt[1] / (1 - pers_t)):.2f}%")
+put(22, "GARCH t, full TR23: " + ", ".join(f"{nm} {v(pv, 6, d)} (classic {v(sc, 6, d)}, robust {v(sr, 6, d)})"
+                                           for nm, d, pv, sc, sr in zip(("g", "omega", "alpha", "beta", "nu"), (4, 4, 4, 4, 2),
+                                                                        pt, stc, strr))
+        + f"; loglik {v(gt.loglikelihood, 4, 2)}; ell gain {v(gt.loglikelihood - gn.loglikelihood, 2, 2)}; alpha+beta "
+        f"{v(pers_t, 6, 5)}; half-life {v(hl_t, 4, 1)} (robust SE {se_hlt:.2f}); unconditional variance "
+        f"{v(pt[1] / (1 - pers_t), 6, 3)} %^2, annualized {v(ann(pt[1] / (1 - pers_t)), 2, 2)}%")
 xit = (y - pt[0]) / cvt
 moments = []
 for nm, x in (("xi normal", xin), ("xi t", xit), ("r", y)):
@@ -425,15 +441,16 @@ lbn = acorr_ljungbox(np.abs(xin), lags=[10]).to_numpy()
 lbt = acorr_ljungbox(np.abs(xit), lags=[10]).to_numpy()
 lbr = acorr_ljungbox(np.abs(y), lags=[10]).to_numpy()
 lbn2 = acorr_ljungbox(xin**2, lags=[10]).to_numpy()
-put(24, f"Q_LB(10) |xi| normal {v(lbn[0, 0], 2, 1)} p {lbn[0, 1]:.4f}; |xi| t {lbt[0, 0]:.2f} p {lbt[0, 1]:.4f}; xi^2 normal "
-        f"{lbn2[0, 0]:.2f} p {lbn2[0, 1]:.4f}; |r| {lbr[0, 0]:.2f} (LM25's 1,820, A25-22); chi2_10 5% point "
+put(24, f"Q_LB(10) |xi| normal {v(lbn[0, 0], 2, 1)} p {v(lbn[0, 1], 4, 3)}; |xi| t {v(lbt[0, 0], 2, 1)} p {lbt[0, 1]:.4f}; "
+        f"xi^2 normal {lbn2[0, 0]:.2f} p {lbn2[0, 1]:.4f}; |r| {v(lbr[0, 0], 2, 0)} (LM25's 1,820, A25-22); chi2_10 5% point "
         f"{stats.chi2.ppf(0.95, 10):.4f}")
 den4 = 1 - pers**2 - 2 * pn[2] ** 2
 kurt_n = 3 * (1 - pers**2) / den4
 kxi = 3 * (pt[4] - 2) / (pt[4] - 4)
 cond_t = pers_t**2 + (kxi - 1) * pt[2] ** 2
 put(25, f"normal GARCH: 1-(a+b)^2-2a^2 {den4:.6f}; Kurt 3(1-(a+b)^2)/(...) {v(kurt_n, 4, 2)}, excess {v(kurt_n - 3, 4, 2)}; "
-        f"t GARCH: Kurt(xi) 3(nu-2)/(nu-4) {kxi:.4f}; (a+b)^2+(Kurt(xi)-1)a^2 {cond_t:.6f} (>= 1: no finite fourth moment)")
+        f"t GARCH: Kurt(xi) 3(nu-2)/(nu-4) {v(kxi, 4, 2)}; (a+b)^2+(Kurt(xi)-1)a^2 {v(cond_t, 6, 3)} (>= 1: no finite fourth "
+        f"moment)")
 s2_7 = s2_hand[i7 + 1]
 assert abs(s2_7 - (pn[1] + pn[2] * (y[i7] - pn[0]) ** 2 + pn[3] * cvn[i7] ** 2)) < 1e-12
 fcarch = gn.forecast(horizon=250, start=i7, reindex=False).variance.to_numpy()[0]
@@ -446,18 +463,22 @@ def path(s2next: float, m_max: int = 250) -> Vec:
 
 p7 = path(s2_7)
 assert np.max(np.abs(p7 - fcarch)) < 1e-9
-put(26, f"from 2025-04-07 (full-sample normal fit): sigma_t {cvn[i7]:.4f}%, sigma_t+1|t {math.sqrt(s2_7):.4f}% ({s2_7:.4f} %^2); "
-        + ", ".join(f"m={m}: {math.sqrt(p7[m - 1]):.4f}%" for m in (1, 5, 20, 44, 60, 250))
-        + "; annualized average over m days: " + ", ".join(f"m={m} {ann(float(p7[:m].mean())):.2f}%" for m in (1, 20, 250))
+P26_M = {1: (3,), 5: (2,), 20: (2, 3), 44: (2,), 60: (2,), 250: (2,)}     # printed precisions of the m-step forecasts
+P26_AVG = {1: (2,), 20: (2, 1), 250: (2, 1)}                                # and of the annualized averages
+put(26, f"from 2025-04-07 (full-sample normal fit): sigma_t {v(float(cvn[i7]), 4, 3)}%, sigma_t+1|t {v(math.sqrt(s2_7), 4, 3)}% "
+        f"({v(s2_7, 4, 4)} %^2); "
+        + ", ".join(f"m={m}: {v(math.sqrt(p7[m - 1]), 4, *d)}%" for m, d in P26_M.items())
+        + "; annualized average over m days: " + ", ".join(f"m={m} {v(ann(float(p7[:m].mean())), 2, *d)}%"
+                                                          for m, d in P26_AVG.items())
         + f"; arch forecast equal (max diff {np.max(np.abs(p7 - fcarch)):.0e})")
 s2_T = s2_hand[T]
 pT = path(s2_T)
-put(27, f"from 2026-10-08: sigma_T+1|T {math.sqrt(s2_T):.4f}% ({s2_T:.4f} %^2, {ann(s2_T):.2f}% a year); m=250: "
-        f"{math.sqrt(pT[-1]):.4f}%; annualized average over 20 days {ann(float(pT[:20].mean())):.2f}%, 250 days "
-        f"{ann(float(pT.mean())):.2f}%; unconditional {ann(uvar):.2f}%")
-put(28, f"widget initial state: alpha {pn[2]:.4f}, beta {pn[3]:.4f}, unconditional variance {uvar:.4f} %^2 "
-        f"({ann(uvar):.2f}% a year), start {math.sqrt(s2_7):.3f}% (after 2025-04-07) or {math.sqrt(s2_T):.3f}% (2026-10-08); "
-        f"half-life {hl_n:.1f}")
+put(27, f"from 2026-10-08: sigma_T+1|T {v(math.sqrt(s2_T), 4, 3)}% ({s2_T:.4f} %^2, {v(ann(s2_T), 2, 2)}% a year); m=250: "
+        f"{math.sqrt(pT[-1]):.4f}%; annualized average over 20 days {v(ann(float(pT[:20].mean())), 2, 2)}%, 250 days "
+        f"{v(ann(float(pT.mean())), 2, 2)}%; unconditional {v(ann(uvar), 2, 2)}%")
+put(28, f"widget initial state: alpha {v(pn[2], 4, 4)}, beta {v(pn[3], 4, 4)}, unconditional variance {v(uvar, 4, 4)} %^2 "
+        f"({v(ann(uvar), 2, 2)}% a year), start {v(math.sqrt(s2_7), 3, 3)}% (after 2025-04-07) or {v(math.sqrt(s2_T), 3, 3)}% "
+        f"(2026-10-08); half-life {v(hl_n, 1, 1)}")
 fall = R <= -0.03 + EPS
 rise = R > 0.03 + EPS
 idf = np.flatnonzero(fall[:-1])
@@ -469,8 +490,9 @@ Femp = np.searchsorted(np.sort(xin), zthr, side="right") / T
 Fnor = stats.norm.cdf(zthr)
 put(29, f"observed: {len(idf)} falls of 3% or more, {int(fall[idf + 1].sum())} followed by a fall; {len(idr)} rises above 3%, "
         f"{int(fall[idr + 1].sum())} followed by a fall; {int(fall[1:].sum())} falls on days 2..T. GARCH normal, xi's own "
-        f"distribution: expected {v(float(Femp[idf].sum()), 2, 1)} after falls ({Femp[idf].mean():.4f}), {Femp[idr].sum():.2f} after "
-        f"rises ({Femp[idr].mean():.4f}), {Femp[:-1].sum():.1f} on all days ({Femp[:-1].mean():.4f}); normal xi: "
+        f"distribution: expected {v(float(Femp[idf].sum()), 2, 1)} after falls ({Femp[idf].mean():.4f}), "
+        f"{v(float(Femp[idr].sum()), 2, 1)} after rises ({Femp[idr].mean():.4f}), {v(float(Femp[:-1].sum()), 1, 1)} on all days "
+        f"({Femp[:-1].mean():.4f}); normal xi: "
         f"{Fnor[idf].sum():.2f}, {Fnor[idr].sum():.2f}, {Fnor[:-1].sum():.1f}")
 _, mi = np.unique(np.array(month), return_inverse=True)
 nm_ = int(mi.max()) + 1
@@ -479,7 +501,8 @@ cnt = np.bincount(mi, weights=big.astype(float), minlength=nm_)
 obs_disp = float(cnt.var() / cnt.mean())
 
 
-def simulate(e: int, p: Vec, dist: str) -> str:
+def simulate(e: int, p: Vec, dist: str, pr: dict[str, tuple[int, ...]]) -> str:
+    """One experiment; pr gives the printed precisions of each statistic (batch SEs at three decimals)."""
     rng = np.random.default_rng([e, SEED])
     npath = 1000
     g, om, al, be = p[:4]
@@ -500,15 +523,19 @@ def simulate(e: int, p: Vec, dist: str) -> str:
         disp[k] = c.var() / c.mean()
     yc_ = ys - ys.mean(axis=1, keepdims=True)
     kurt = (yc_**4).mean(axis=1) / (yc_**2).mean(axis=1) ** 2 - 3
-    return (f"dispersion median {v(qinv(disp, 0.5), 4, 2)} (batch SE {batch_se_median(disp):.4f}), 5% {v(qinv(disp, 0.05), 6, 2)}, "
-            f"95% {v(qinv(disp, 0.95), 6, 2)}, share >= observed {np.mean(disp >= obs_disp - 1e-12):.3f}; excess kurtosis median "
-            f"{qinv(kurt, 0.5):.3f} (batch SE {batch_se_median(kurt):.3f}), 5% {qinv(kurt, 0.05):.3f}, 95% {qinv(kurt, 0.95):.3f}, "
-            f"share >= 5.428 {np.mean(kurt >= 5.428):.3f}")
+    return (f"dispersion median {v(qinv(disp, 0.5), 4, *pr['disp_med'])} (batch SE {v(batch_se_median(disp), 4, 3)}), 5% "
+            f"{v(qinv(disp, 0.05), 6, *pr['disp_q'])}, 95% {v(qinv(disp, 0.95), 6, *pr['disp_q'])}, share >= observed "
+            f"{v(float(np.mean(disp >= obs_disp - 1e-12)), 3, *pr['disp_share'])}; excess kurtosis median "
+            f"{v(qinv(kurt, 0.5), 3, *pr['kurt_med'])} (batch SE {v(batch_se_median(kurt), 3, 3)}), 5% "
+            f"{v(qinv(kurt, 0.05), 3, *pr['kurt_q'])}, 95% {v(qinv(kurt, 0.95), 3, *pr['kurt_q'])}, share >= 5.428 "
+            f"{v(float(np.mean(kurt >= 5.428)), 3, *pr['kurt_share'])}")
 
 
-put(30, f"observed months {nm_}, monthly count variance/mean {obs_disp:.4f} (LM15's 3.02); experiment 1 (GARCH normal, "
-        f"1,000 paths): " + simulate(1, pn, "normal"))
-put(31, "experiment 2 (GARCH t, 1,000 paths): " + simulate(2, pt, "t"))
+put(30, f"observed months {nm_}, monthly count variance/mean {v(obs_disp, 4, 2)} (LM15's 3.02); experiment 1 (GARCH normal, "
+        f"1,000 paths): " + simulate(1, pn, "normal", {"disp_med": (2,), "disp_q": (2,), "disp_share": (2,),
+                                                       "kurt_med": (2,), "kurt_q": (), "kurt_share": (3,)}))
+put(31, "experiment 2 (GARCH t, 1,000 paths): " + simulate(2, pt, "t", {"disp_med": (2,), "disp_q": (), "disp_share": (),
+                                                                         "kurt_med": (1,), "kurt_q": (1,), "kurt_share": (2,)}))
 
 # ---------------------------------------------------------------- section 5: realized variance (file)
 d_arr = np.array(rv_dates)
@@ -528,7 +555,10 @@ for pname, m in periods.items():
         if not np.isnan(x).any():
             ratios[name] = float(np.mean(x)) / m5
     sig[pname] = ratios
-    lines.append(f"{pname} ({int(m.sum())} days): " + ", ".join(f"{k} {v(val, 6, 2, 3)}" for k, val in ratios.items()))
+    # X4 prints three decimals, and two for a ratio of 10 or more (three for 2025's 10.541); E8 prints 2025's 5 s as 24.3
+    prec = {"2025": {"5s": (1, 2), "15s": (3,)}}.get(pname, {})
+    lines.append(f"{pname} ({int(m.sum())} days): " + ", ".join(
+        f"{k} {v(val, 6, *prec.get(k, (2,) if val >= 10 else (3,)))}" for k, val in ratios.items()))
 put(32, "mean RV(h)/mean RV(5m): " + "; ".join(lines))
 lines = []
 for s in (60, 15, 10, 5):
@@ -591,8 +621,8 @@ vr5 = float(np.mean(RV["10s"][m5s]) / np.mean(RV["5s"][m5s]) - 1)
 vr15 = float(np.mean(RV["30s"][m15]) / np.mean(RV["15s"][m15]) - 1)
 r5m = pooled(np.ones(len(rv_dates), bool), "m5", False)
 vr5m = float(np.mean(RV["10m"]) / np.mean(RV["5m"]) - 1)
-put(34, f"pooled rho_1 (raw) against RV(2h)/RV(h) - 1 (file): 5 s, 5-second days {r5:.4f} vs {vr5:.4f}; 15 s, 15-second days "
-        f"{r15:.4f} vs {vr15:.4f}; 5 min, all days {r5m:.4f} vs {vr5m:.4f}")
+put(34, f"pooled rho_1 (raw) against RV(2h)/RV(h) - 1 (file): 5 s, 5-second days {v(r5, 4, 3)} vs {v(vr5, 4, 3)}; 15 s, "
+        f"15-second days {v(r15, 4, 4)} vs {v(vr15, 4, 3)}; 5 min, all days {v(r5m, 4, 3)} vs {v(vr5m, 4, 3)}")
 yr_lines = []
 maxdiff = 0.0
 rows_1m = {}
@@ -603,17 +633,18 @@ for yy in sorted(set(ryear)):
     maxdiff = max(maxdiff, abs(a1 - pooled(m, "m1", True)), abs(a5 - pooled(m, "m5", True)))
     rows_1m[yy] = (a1, a5)
     ratio = float(np.mean(RV["1m"][m]) / np.mean(RV["5m"][m]))
-    yr_lines.append(f"{yy} {v(a1, 4, 2, 3)} / {v(a5, 4, 2, 3)} / {ratio:.3f}")
+    yr_lines.append(f"{yy} {v(a1, 4, 2, 3)} / {v(a5, 4, 2, 3)} / {v(ratio, 3, 3)}")
 put(35, "by year, rho_1 of 1-minute / 5-minute returns (raw, uncentred, pooled) / RV(1m)/RV(5m) (file): " + "; ".join(yr_lines)
         + f"; max |uncentred - centred| {maxdiff:.1e}; iid SE of a year's 1-minute rho_1 1/sqrt(240 x 246) "
-        f"{1 / math.sqrt(240 * 246):.4f}")
+        f"{v(1 / math.sqrt(240 * 246), 4, 3)}")
 m25 = ryear == "2025"
 rd = PA["rho1_day"][m25]
 ratio_day = RV["5s"][m25] / RV["5m"][m25]
-put(36, f"2025, each day's rho_1 of 5-second returns (own mean, divisor n): min {rd.min():.4f}, 25% {qinv(rd, 0.25):.4f}, "
-        f"median {qinv(rd, 0.5):.4f}, 75% {qinv(rd, 0.75):.4f}, max {rd.max():.4f} ({int(m25.sum())} days); RV(5s)/RV(5m) per "
-        f"day: median {qinv(ratio_day, 0.5):.2f}, max {ratio_day.max():.2f} ({rv_dates[int(np.flatnonzero(m25)[ratio_day.argmax()])]}); "
-        f"pooled 2025 rho_1 {pooled(m25, 'f', False):.4f}")
+put(36, f"2025, each day's rho_1 of 5-second returns (own mean, divisor n): min {v(float(rd.min()), 4, 2)}, 25% "
+        f"{v(qinv(rd, 0.25), 4, 2)}, median {v(qinv(rd, 0.5), 4, 2)}, 75% {v(qinv(rd, 0.75), 4, 2)}, max {v(float(rd.max()), 4, 2)} "
+        f"({int(m25.sum())} days); RV(5s)/RV(5m) per day: median {v(qinv(ratio_day, 0.5), 2, 1)}, max "
+        f"{v(float(ratio_day.max()), 2, 1)} ({rv_dates[int(np.flatnonzero(m25)[ratio_day.argmax()])]}); pooled 2025 rho_1 "
+        f"{v(pooled(m25, 'f', False), 4, 3)}")
 p25 = pooled(m25, "f", False)
 put(37, f"MA(1) noise reading, -rho_1 = sigma_u^2/(var e + 2 sigma_u^2) <= 1/2: noise share 2|rho_1| of a 5-second return's "
         f"variance: 2025 {v(2 * abs(p25), 4, 2)}, 5-second days {2 * abs(r5):.4f}")
@@ -621,7 +652,7 @@ noise = []
 for yy in [str(x) for x in range(2015, 2027)]:
     m = ryear == yy
     g1 = PA["f_p1"][m].sum() / PA["f_n"][m].sum()
-    noise.append(f"{yy} {1e4 * math.sqrt(-g1):.3f}")
+    noise.append(f"{yy} {v(1e4 * math.sqrt(-g1), 3, 1, 3)}")     # gamma_1: lag-1 products over the returns (not pairs)
 put(38, "sqrt(-gamma_1) of 5-second log returns, bp (pooled, uncentred; check rows): " + ", ".join(noise))
 
 # ---------------------------------------------------------------- TX 1-minute bars, 2025
@@ -669,39 +700,42 @@ put(39, f"TX near month 2025: {len(tx_days)} days; first label {sorted(first_lab
         f"bar in 09:29-13:29: {dict(miss_days)}")
 TXA = {h: np.array(val) for h, val in TXRV.items()}
 keep = np.array([d not in miss_days for d in tx_days])
-txr = ", ".join(f"{h}m {float(TXA[h].mean() / TXA[5].mean()):.4f}" for h in (1, 10, 15, 30))
+txr = ", ".join(f"{h}m {v(float(TXA[h].mean() / TXA[5].mean()), 4, 2)}" for h in (1, 10, 15, 30))
 txr_k = ", ".join(f"{h}m {float(TXA[h][keep].mean() / TXA[5][keep].mean()):.4f}" for h in (1, 10, 15, 30))
 put(40, f"TX 2025 mean RV(h)/RV(5m): {txr}; without the {len(miss_days)} locked days: {txr_k}; pooled rho_1 of 1-minute "
-        f"returns {sum(tx_p1) / sum(tx_ss):.4f}; annualized sqrt(A mean RV): " +
+        f"returns {v(sum(tx_p1) / sum(tx_ss), 4, 3)}; annualized sqrt(A mean RV): " +
         ", ".join(f"{h}m {v(100 * math.sqrt(A * float(TXA[h].mean())), 4, 1, 2)}%" for h in (1, 5, 10, 15, 30)))
 idx25 = np.flatnonzero(m25)
 assert [rv_dates[i] for i in idx25] == tx_days
 ixv = ", ".join(f"{name} {v(100 * math.sqrt(A * float(np.mean(RV[name][m25]))), 4, 1, 2)}%" for name, _ in IV)
-rat = ", ".join(f"{name} {float(np.mean(RV[name][m25])) / float(TXA[h].mean()):.3f}" for name, h in
+rat = ", ".join(f"{name} {v(float(np.mean(RV[name][m25])) / float(TXA[h].mean()), 3, 2)}" for name, h in
                 (("1m", 1), ("5m", 5), ("10m", 10), ("15m", 15), ("30m", 30)))
 put(41, f"TAIEX 2025 annualized sqrt(A mean RV(h)): {ixv}; index/TX mean RV: {rat}; TAIEX 2025 pooled rho_1 of 1-minute "
-        f"returns {rows_1m['2025'][0]:.4f}")
+        f"returns {v(rows_1m['2025'][0], 4, 3)}")
 aus = []
 for s in (60, 15, 10, 5):
     m = reg == s
     aus.append(f"{s}s: frozen on {int(PA['frozen_all'][m].sum())} of {int(m.sum())} days, share of RV(5m) "
-               f"{float(PA['auct2'][m].mean() / np.mean(RV['5m'][m])):.4f}")
+               f"{v(float(PA['auct2'][m].mean() / np.mean(RV['5m'][m])), 4, 3)}")
 put(42, "closing auction (values from 13:25:00 + one step to 13:30:00 - one step all equal; (ln P_13:30 - ln P_13:25)^2 "
         "over mean RV(5m), against 1/48 = 0.0208): " + "; ".join(aus))
 mo = np.isin(np.array(rv_dates), [dates[i] for i in oos])
-put(43, f"o2 share of V: mean 1e4 o2 / mean V, all {len(rv_dates)} days {float(np.mean(1e4 * O2) / np.mean(Vt['15m'])):.4f}, "
-        f"OOS days {float(np.mean(1e4 * O2[mo]) / np.mean(Vt['15m'][mo])):.4f}; " +
+put(43, f"o2 share of V: mean 1e4 o2 / mean V, all {len(rv_dates)} days "
+        f"{v(float(np.mean(1e4 * O2) / np.mean(Vt['15m'])), 4, 2)}, OOS days "
+        f"{v(float(np.mean(1e4 * O2[mo]) / np.mean(Vt['15m'][mo])), 4, 2)}; " +
         ", ".join(f"{s}s {float(np.mean(O2[reg == s]) / np.mean(O2[reg == s] + RV['15m'][reg == s])):.4f}" for s in (60, 15, 10, 5)))
 y2 = y[i05:] ** 2
 dV = Vt["15m"] - y2
 nl_all = math.floor(4 * (len(dV) / 100) ** (2 / 9))
 y2o = y[oos] ** 2
 dVo = V15[oos] - y2o
-put(44, f"mean V {np.mean(Vt['15m']):.4f} vs mean r^2 {np.mean(y2):.4f} %^2 over the 5,351 days: ratio {np.mean(Vt['15m']) / np.mean(y2):.4f}, "
-        f"difference t-stat (Newey-West, {nl_all} lags) {dV.mean() / nw_se(dV, nl_all):.2f}; OOS days ratio "
-        f"{V15[oos].mean() / y2o.mean():.4f}, t {dVo.mean() / nw_se(dVo, 9):.2f}; V(5m) ratio {np.mean(Vt['5m']) / np.mean(y2):.4f}, "
-        f"V(30m) {np.mean(Vt['30m']) / np.mean(y2):.4f}; by year V/r^2: " +
-        ", ".join(f"{yy} {np.mean(Vt['15m'][ryear == yy]) / np.mean(y2[ryear == yy]):.3f}" for yy in ("2008", "2020", "2024", "2025")))
+put(44, f"mean V {np.mean(Vt['15m']):.4f} vs mean r^2 {np.mean(y2):.4f} %^2 over the 5,351 days: ratio "
+        f"{v(float(np.mean(Vt['15m']) / np.mean(y2)), 4, 3)}, difference t-stat (Newey-West, {nl_all} lags) "
+        f"{v(float(dV.mean() / nw_se(dV, nl_all)), 2, 2)}; OOS days ratio {v(float(V15[oos].mean() / y2o.mean()), 4, 3)}, t "
+        f"{dVo.mean() / nw_se(dVo, 9):.2f}; V(5m) ratio {np.mean(Vt['5m']) / np.mean(y2):.4f}, V(30m) "
+        f"{np.mean(Vt['30m']) / np.mean(y2):.4f}; by year V/r^2: " +
+        ", ".join(f"{yy} {v(float(np.mean(Vt['15m'][ryear == yy]) / np.mean(y2[ryear == yy])), 3, *d)}"
+                  for yy, d in (("2008", (3,)), ("2020", ()), ("2024", ()), ("2025", (3,)))))
 
 # ---------------------------------------------------------------- section 6: forecast evaluation
 nl = math.floor(4 * (len(oos) / 100) ** (2 / 9))
@@ -709,8 +743,10 @@ put(45, f"W {W} = round(5A); first OOS day {dates[first]} (window {dates[first -
         f"({dates[oos[0]]} .. {dates[oos[-1]]}); refits per model {len(refits['normal'])}; Newey-West lags {nl}")
 pr = np.array([p for _, p in refits["normal"]])
 apr = next(p for d_, p in refits["normal"] if d_ == "2025-04-01")
-put(46, f"rolling GARCH normal: alpha {pr[:, 2].min():.4f}..{pr[:, 2].max():.4f}, beta {pr[:, 3].min():.4f}..{pr[:, 3].max():.4f}, "
-        f"alpha+beta {(pr[:, 2] + pr[:, 3]).min():.4f}..{(pr[:, 2] + pr[:, 3]).max():.4f}; refit of 2025-04-01: g {apr[0]:.4f}, "
+pab = pr[:, 2] + pr[:, 3]
+put(46, f"rolling GARCH normal: alpha {v(float(pr[:, 2].min()), 4, 3)}..{v(float(pr[:, 2].max()), 4, 3)}, beta "
+        f"{v(float(pr[:, 3].min()), 4, 3)}..{v(float(pr[:, 3].max()), 4, 3)}, alpha+beta {v(float(pab.min()), 4, 3)}.."
+        f"{v(float(pab.max()), 4, 3)}; refit of 2025-04-01: g {apr[0]:.4f}, "
         f"omega {apr[1]:.4f}, alpha {apr[2]:.4f}, beta {apr[3]:.4f}, alpha+beta {apr[2] + apr[3]:.4f}")
 LOSS: dict[str, dict[str, tuple[Vec, Vec]]] = {}
 targets = {"V15": V15[oos], "V5": np.array([Vmap["5m"][dates[i]] for i in oos]),
@@ -725,10 +761,10 @@ for k in FC:
     bmz, semz, r2mz = ols_hc0(X, h)
     chk = sm.OLS(h, X).fit(cov_type="HC0")
     assert np.allclose(chk.bse, semz, rtol=1e-9)
-    tab.append(f"{NAMES[k]}: mean f {v(float(f.mean()), 6, 3)}, MSE {v(float(se_.mean()), 3, 2)}, QLIKE {v(float(ql.mean()), 4, 3)}, a "
-               f"{bmz[0]:.3f} ({semz[0]:.3f}), b {bmz[1]:.3f} ({semz[1]:.3f}), t(b=1) {(bmz[1] - 1) / semz[1]:.2f}, "
-               f"R-squared {v(r2mz, 4, 3)}")
-put(47, f"target V (mean {targets['V15'].mean():.4f} %^2): " + "; ".join(tab))
+    tab.append(f"{NAMES[k]}: mean f {v(float(f.mean()), 6, 3)}, MSE {v(float(se_.mean()), 3, 2)}, QLIKE {v(float(ql.mean()), 4, 4)}, "
+               f"a {bmz[0]:.3f} ({semz[0]:.3f}), b {v(float(bmz[1]), 3, 3)} ({v(float(semz[1]), 3, 3)}), t(b=1) "
+               f"{(bmz[1] - 1) / semz[1]:.2f}, R-squared {v(r2mz, 4, 3)}")
+put(47, f"target V (mean {v(float(targets['V15'].mean()), 4, 3)} %^2): " + "; ".join(tab))
 dl = []
 for k in ("garch_t", "ewma", "roll60", "v_prev", "ewma_v"):
     for lname, fn in (("MSE", lambda h, f: (h - f) ** 2), ("QLIKE", qlike)):
@@ -738,7 +774,11 @@ for k in ("garch_t", "ewma", "roll60", "v_prev", "ewma_v"):
             hac = sm.OLS(d, np.ones(len(d))).fit(cov_type="HAC", cov_kwds={"maxlags": nl})
             assert abs(float(hac.bse[0]) - se_nw) < 1e-10 * se_nw
         tt = d.mean() / se_nw
-        dl.append(f"{NAMES[k]} {lname} {d.mean():+.4f} (SE {se_nw:.4f}, t {v(tt, 2, 1)}, p {2 * stats.norm.sf(abs(tt)):.4f})")
+        # E10 prints EWMA's two differences (QLIKE 4 decimals, MSE 3) and its QLIKE p-value (3); X7 every t-stat (2)
+        p_mean = ((4,) if lname == "QLIKE" else (3,)) if k == "ewma" else ()
+        p_p = (3,) if (k, lname) == ("ewma", "QLIKE") else ()
+        dl.append(f"{NAMES[k]} {lname} {v(float(d.mean()), 4, *p_mean, sign=True)} (SE {se_nw:.4f}, t {v(float(tt), 2, 2)}, p "
+                  f"{v(float(2 * stats.norm.sf(abs(tt))), 4, *p_p)})")
 put(48, "loss minus GARCH normal's, V target: " + "; ".join(dl))
 rob = []
 for tg in ("V5", "V30", "r2"):
@@ -755,8 +795,9 @@ mzr = []
 for tg in ("V15", "r2"):
     X = np.column_stack([np.ones(len(oos)), FC["garch_n"][oos]])
     bmz, semz, r2mz = ols_hc0(X, targets[tg])
-    mzr.append(f"{tg}: a {bmz[0]:.4f} ({semz[0]:.4f}), b {bmz[1]:.4f} ({semz[1]:.4f}), t(b=1) {(bmz[1] - 1) / semz[1]:.2f}, "
-               f"R-squared {r2mz:.4f}")
+    d3, d2 = ((3,), (2,)) if tg == "V15" else ((), ())     # E10 prints a, b, their SEs and t for V; R-squared for both
+    mzr.append(f"{tg}: a {v(float(bmz[0]), 4, *d3)} ({v(float(semz[0]), 4, *d3)}), b {v(float(bmz[1]), 4, *d3)} "
+               f"({v(float(semz[1]), 4, *d3)}), t(b=1) {v(float((bmz[1] - 1) / semz[1]), 2, *d2)}, R-squared {v(r2mz, 4, 3)}")
 put(50, "Mincer-Zarnowitz, GARCH normal (HC0): " + "; ".join(mzr) + "; Andersen-Bollerslev's 0.047 and 0.026 against squared "
         "returns (SOURCES)")
 oy = np.array([dates[i][:4] for i in oos])
@@ -768,7 +809,7 @@ for yy in sorted(set(oy)):
     qe = float(qlike(targets["V15"][m], FC["ewma"][oos][m]).mean())
     qp = float(qlike(targets["V15"][m], FC["v_prev"][oos][m]).mean())
     win_e += int(qn < qe)
-    by.append(f"{yy} ({int(m.sum())}) {qn:.4f} / {qe:.4f} / {qp:.4f}")
+    by.append(f"{yy} ({int(m.sum())}) {v(qn, 4, 3)} / {v(qe, 4, 3)} / {v(qp, 4, 3)}")     # X8 prints three decimals
 put(51, "QLIKE by year, GARCH normal / EWMA / yesterday's V: " + "; ".join(by) + f"; GARCH normal below EWMA in {win_e} of "
         f"{len(set(oy))} years")
 iso = [dt.date.fromisoformat(d).isocalendar()[:2] for d in dates]
@@ -779,10 +820,15 @@ for w_ in w25:
     wk.append((dates[ids[-1]], ids))
 i_w = next(j for j, (_, ids) in enumerate(wk) if i7 in ids)
 _, ids7 = wk[i_w]
-put(52, f"2025 weekly points: {len(wk)} weeks; week of 2025-04-07 ({dates[ids7[0]]}..{dates[ids7[-1]]}, {len(ids7)} sessions): "
-        f"realized sqrt(A mean V) {ann(float(V15[ids7].mean())):.2f}%, GARCH normal {ann(float(FC['garch_n'][ids7].mean())):.2f}%, "
-        f"EWMA {ann(float(FC['ewma'][ids7].mean())):.2f}%, yesterday's V {ann(float(FC['v_prev'][ids7].mean())):.2f}%; "
-        f"2025 means: realized {ann(float(V15[[i for _, ids in wk for i in ids]].mean())):.2f}%")
+ids25 = [i for _, ids in wk for i in ids]
+own25 = sum(1 for w_ in w25 if w_[0] == 2025)
+other25 = "".join(f" and {w_[0]}-W{w_[1]:02d} ({dates[ids[0]]}..{dates[ids[-1]]})" for w_, (_, ids) in zip(w25, wk)
+                   if w_[0] != 2025)
+put(52, f"2025 weekly points: {len(wk)} weeks (the {len(ids25)} sessions dated 2025 by ISO week: {own25} weeks of ISO year 2025"
+        f"{other25}); week of 2025-04-07 ({dates[ids7[0]]}..{dates[ids7[-1]]}, {len(ids7)} sessions): realized sqrt(A mean V) "
+        f"{v(ann(float(V15[ids7].mean())), 2, 2)}%, GARCH normal {v(ann(float(FC['garch_n'][ids7].mean())), 2, 2)}%, EWMA "
+        f"{v(ann(float(FC['ewma'][ids7].mean())), 2, 2)}%, yesterday's V {v(ann(float(FC['v_prev'][ids7].mean())), 2, 2)}%; "
+        f"2025 means: realized {v(ann(float(V15[ids25].mean())), 2, 2)}%")
 sens = []
 for wv in (1000, 2461):
     rg2 = rolling_garch(wv, False)
@@ -802,42 +848,44 @@ extra = sorted({ig, ie} - set(wends))
 real_w = [(ids[-1], ann(float(np.mean(V15[ids])))) for ids in wkall.values() if dates[ids[0]] >= "2005-01-03"]
 jr = int(np.argmax([x for _, x in real_w]))
 put(54, f"weekly chart: {len(wends)} ISO weeks (last session of each), plus {len(extra)} extreme dates; GARCH normal sigma_t max "
-        f"{ann(float(cvn[ig] ** 2)):.2f}% a year on {dates[ig]}; EWMA sigma_t|t-1 max {ann(float(ew[ie])):.2f}% on {dates[ie]}; "
-        f"weekly realized max {real_w[jr][1]:.2f}% (week ending {dates[real_w[jr][0]]}); realized weeks {len(real_w)}")
+        f"{v(ann(float(cvn[ig] ** 2)), 2, 2)}% a year on {dates[ig]}; EWMA sigma_t|t-1 max {v(ann(float(ew[ie])), 2, 2)}% on "
+        f"{dates[ie]}; weekly realized max {v(real_w[jr][1], 2, 2)}% (week ending {dates[real_w[jr][0]]}); realized weeks "
+        f"{len(real_w)}")
 
 # ---------------------------------------------------------------- knowledge checks and problems
 k1 = [b1[0] + b1[1] * x**2 for x in (3.0, 0.5)]
 k1p = [1.1779 + 0.1960 * x**2 for x in (3.0, 0.5)]
-put(55, f"KC 2: ARCH(1) fit after |r - rbar| = 3% and 0.5%: {k1[0]:.4f} and {k1[1]:.4f} %^2 (sd {math.sqrt(k1[0]):.4f}%, "
-        f"{math.sqrt(k1[1]):.4f}%); from the printed 1.1779 and 0.1960: {k1p[0]:.4f}, {k1p[1]:.4f} (sd {v(math.sqrt(k1p[0]), 4, 2)}%, "
-        f"{v(math.sqrt(k1p[1]), 4, 2)}%)")
+put(55, f"KC 2: ARCH(1) fit after |r - rbar| = 3% and 0.5%: {v(k1[0], 4, 2)} and {v(k1[1], 4, 2)} %^2 (sd "
+        f"{v(math.sqrt(k1[0]), 4, 2)}%, {v(math.sqrt(k1[1]), 4, 2)}%); from the printed 1.1779 and 0.1960: {v(k1p[0], 4, 2)}, "
+        f"{v(k1p[1], 4, 2)} (sd {v(math.sqrt(k1p[0]), 4, 2)}%, {v(math.sqrt(k1p[1]), 4, 2)}%)")
 put(56, f"lam 0.97: 1/(1-lam) {v(1 / 0.03, 4, 1)}; mean lag lam/(1-lam) {v(0.97 / 0.03, 4, 1)}; weight half-life "
-        f"{v(math.log(0.5) / math.log(0.97), 4, 1)} days")
+        f"{v(math.log(0.5) / math.log(0.97), 4, 1, 2)} days")
 put(57, f"alpha+beta 0.98: half-life {v(hl_of(0.98), 4, 1)}; 0.5/(1-0.98) {0.5 / 0.02:.1f}; 1/(1-0.98) {1 / 0.02:.1f}; "
-        f"alpha+beta 0.990978 (t fit): {hl_of(0.990978):.2f}")
-put(58, f"QLIKE at f = V/2: {2 - math.log(2) - 1:.4f}; at f = 2V: {0.5 + math.log(2) - 1:.4f}; MSE with V = 1: "
+        f"alpha+beta 0.990978 (t fit): {v(hl_of(0.990978), 2, 1)}")
+put(58, f"QLIKE at f = V/2: {v(2 - math.log(2) - 1, 4, 4)}; at f = 2V: {v(0.5 + math.log(2) - 1, 4, 4)}; MSE with V = 1: "
         f"{(1 - 0.5) ** 2:.2f} and {(1 - 2) ** 2:.2f}")
 u2 = 0.025 / (1 - 0.09 - 0.89)
 u2b = 0.025 / (1 - 0.89)
-put(59, f"Problem 2: omega/(1-alpha-beta) {u2:.4f} %^2, annualized sqrt(246.12 x) {math.sqrt(246.12 * u2):.4f}%; omega/(1-beta) "
-        f"{u2b:.4f} %^2 -> {v(math.sqrt(246.12 * u2b), 4, 1)}%; sqrt(1.25) {math.sqrt(u2):.4f}% (a day)")
+put(59, f"Problem 2: omega/(1-alpha-beta) {u2:.4f} %^2, annualized sqrt(246.12 x) {v(math.sqrt(246.12 * u2), 4, 1)}%; "
+        f"omega/(1-beta) {u2b:.4f} %^2 -> {v(math.sqrt(246.12 * u2b), 4, 1)}%; sqrt(1.25) {v(math.sqrt(u2), 4, 2)}% (a day)")
 put(60, f"Problem 5: 1 + rho_1 with rho_1 = -0.40: {1 - 0.40:.2f}; 1 + 2 rho_1 {1 - 0.80:.2f}; 1 - rho_1 {1 + 0.40:.2f}")
-put(61, f"KC 6: 15-second days, RV(30s)/RV(15s) = {np.mean(RV['30s'][m15]) / np.mean(RV['15s'][m15]):.4f} (file); 1 + pooled "
-        f"rho_1 (raw) {1 + r15:.4f}")
-put(62, f"KC 5: robust/classic SE ratio: alpha {ser[2] / sen[2]:.3f}, beta {ser[3] / sen[3]:.3f}, omega {ser[1] / sen[1]:.3f}, "
-        f"g {ser[0] / sen[0]:.3f}")
+put(61, f"KC 6: 15-second days, RV(30s)/RV(15s) = {v(float(np.mean(RV['30s'][m15]) / np.mean(RV['15s'][m15])), 4, 4)} (file); "
+        f"1 + pooled rho_1 (raw) {1 + r15:.4f}")
+put(62, f"KC 5: robust/classic SE ratio: alpha {v(ser[2] / sen[2], 3, 2, 1)}, beta {v(ser[3] / sen[3], 3, 1)}, omega "
+        f"{v(ser[1] / sen[1], 3, 1)}, g {ser[0] / sen[0]:.3f}")
 z5 = -4.107   # LM5's threshold in standard deviations (make_lab05.py:529)
 xo = (y[oos] - np.array([next(p for d_, p in refits["normal"] if d_[:7] == dates[i][:7])[0] for i in oos])) / np.sqrt(FC["garch_n"][oos])
 put(63, f"standardized residuals at or below -4.107: in-sample GARCH normal {int((xin <= z5 + EPS).sum())} of {T} (normal model expects "
-        f"{T * stats.norm.cdf(z5):.3f}); raw returns standardized by TR23's s: {int(((y - y.mean()) / y.std() <= z5 + EPS).sum())}; "
+        f"{v(float(T * stats.norm.cdf(z5)), 3, 3)}); raw returns standardized by TR23's s: {int(((y - y.mean()) / y.std() <= z5 + EPS).sum())}; "
         f"out of sample (rolling GARCH normal) {int((xo <= z5 + EPS).sum())} of {len(oos)} (expects {len(oos) * stats.norm.cdf(z5):.3f}); "
         f"smallest in-sample xi {xin.min():.3f} on {dates[int(xin.argmin())]}")
 big2 = np.abs(R[:-1]) >= 0.02 - EPS
 nxt = np.abs(R[1:])
 exi = float(np.mean(np.abs(xin)))
 pred = exi * snext[:-1] / 100
-put(64, f"after |R| >= 2% ({int(big2.sum())} days): next-day mean |R| {nxt[big2].mean():.4%}, after the others {nxt[~big2].mean():.4%}, "
-        f"all {nxt.mean():.4%}; GARCH normal mean |xi| {exi:.4f} x sigma_t+1|t: {pred[big2].mean():.4%} and {pred[~big2].mean():.4%}; "
+put(64, f"after |R| >= 2% ({int(big2.sum())} days): next-day mean |R| {v(100 * float(nxt[big2].mean()), 4, 2)}%, after the "
+        f"others {v(100 * float(nxt[~big2].mean()), 4, 2)}%, all {nxt.mean():.4%}; GARCH normal mean |xi| {exi:.4f} x "
+        f"sigma_t+1|t: {v(100 * float(pred[big2].mean()), 4, 2)}% and {v(100 * float(pred[~big2].mean()), 4, 2)}%; "
         f"rho_hat_1 of |r| 0.161 (LM17, lm17.md:392)")
 ns = [14400 // h for _, h in IV[:6]]
 mv = [float(np.mean(RV[name][m5s]) / np.mean(RV["5m"][m5s])) for name, _ in IV[:6]]
@@ -845,6 +893,7 @@ slopes = [(mv[j] - mv[j + 1]) / (ns[j] - ns[j + 1]) for j in range(5)]
 put(65, "5-second days, rise of mean RV(h)/RV(5m) per extra return a day between neighbouring intervals (constant under iid "
         "noise): " + ", ".join(f"{IV[j][0]}-{IV[j + 1][0]} {s_ * 1e3:.3f}e-3" for j, s_ in enumerate(slopes)))
 put(66, "by year, RV(10m)/RV(5m) - 1 (file; approximates the 5-minute rho_1 by A26-34): " +
-        ", ".join(f"{yy} {float(np.mean(RV['10m'][ryear == yy]) / np.mean(RV['5m'][ryear == yy]) - 1):.3f}" for yy in sorted(set(ryear))))
+        ", ".join(f"{yy} {v(float(np.mean(RV['10m'][ryear == yy]) / np.mean(RV['5m'][ryear == yy]) - 1), 3, 3)}"
+                  for yy in sorted(set(ryear))))
 
 print("\n".join(OUT))

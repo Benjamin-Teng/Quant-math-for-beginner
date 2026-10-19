@@ -14,6 +14,12 @@ when the file is missing (FinMind's free plan lacks that dataset; the lab then d
 Volume III's labs get taiex_tr.csv, the TAIEX total-return index as FinMind serves it (raw/vol3/), from which they
 build TR23 (data/vol3_series.py checks it against the price index); LM16's lab gets the two sector files instead.
 
+Volume IV's labs combine those files as their briefs name them (plans/vol-4.md, "Lab parts"). LM25's lab adds
+taiex_price.csv, the TAIEX price index on TR23's dates (raw/vol3/ to mid-2007, then raw/sectors/), and tx_daily.csv,
+the TX regular-session monthly rows (raw/vol4/), from which it builds TX23 (data/vol4_series.py's rules). LM26's lab
+gets vol4_rv.csv, the committed per-day realized variances (data/derived/, built by data/vol4_rv.py from the
+5-second download, which no lab needs).
+
     uv run python data/make_lab_data.py            # write labs/LMNN_lab/data/*
     uv run python data/make_lab_data.py --check    # compare with existing files, write nothing
 """
@@ -25,6 +31,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 RAW = ROOT / "data" / "raw"
+DERIVED = ROOT / "data" / "derived"
 
 def read(path):
     with open(path, newline="", encoding="utf-8") as f:
@@ -119,6 +126,15 @@ def build():
     taiex_tr_2025 = text(*merged("lm06/TAIEX_TR__*.csv", drop=("stock_id",)))
     sectors = {"sectors_close_raw.csv": sectors_raw(), "sectors_close_repairs.csv": sector_repairs()}
     tr23 = {"taiex_tr.csv": copy("vol3/TAIEX_TR__2003-01-01__2026-10-08.csv")}
+    tx_daily = {"tx_daily.csv": copy("vol4/TX__1998-07-21__2026-10-16.csv")}
+    h1, r1 = merged("vol3/TAIEX__*.csv")
+    h2, r2 = merged("sectors/TAIEX__*.csv")
+    assert h1 == h2 and r1[-1][0] < r2[0][0]              # the vol3 file ends before the sector files begin
+    tr_dates = [line.split(",")[0] for line in tr23["taiex_tr.csv"].splitlines()[1:]]
+    prices = [r for r in r1 + r2 if tr_dates[0] <= r[0] <= tr_dates[-1]]
+    assert [r[0] for r in prices] == tr_dates               # TR23's 5,850 dates, no gap, no extra
+    taiex_price = {"taiex_price.csv": text(h1, prices)}
+    rv = {"vol4_rv.csv": (DERIVED / "vol4_rv.csv").read_text(encoding="utf-8")}
     etfs = {**common, "00631L_daily_raw.csv": p631,
             "00679B_daily_raw.csv": p679, "00679B_dividends.csv": copy("00679B_dividends.csv")}
     return {
@@ -143,6 +159,14 @@ def build():
         "LM16_lab": {**sectors},                  # LM16 works on Volume II's U28 sample only
         "LM17_lab": {**tr23},
         "LM18_lab": {**tr23},
+        "LM19_lab": {**tr23},
+        "LM20_lab": {**tr23, **common, "00631L_daily_raw.csv": p631, **sectors},
+        "LM21_lab": {**tr23},
+        "LM22_lab": {**tr23, **sectors},
+        "LM23_lab": {**sectors, **common, "00631L_daily_raw.csv": p631, **tr23},
+        "LM24_lab": {**tr23, **sectors},
+        "LM25_lab": {**tr23, **taiex_price, **tx_daily},
+        "LM26_lab": {**tr23, **rv},
     }
 
 if __name__ == "__main__":

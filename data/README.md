@@ -161,6 +161,10 @@ the editor's exploration for the Volume II briefs (`processed/vol2_anchors.txt`)
   does not apply (several contracts a date, and the spread is against the settlement); `vol4_series.py` checks all of
   the above and builds TX23. On 2008-10-27 TX fell by its 7% limit and TAIEX by 4.6%, so the near-month log basis
   reached −7.9%, the sample's widest. `vol4/` holds only this file; the intraday files are in `intraday/`.
+  `vol4_anchors_lm19.py` … `vol4_anchors_lm26.py` print every number of the Volume IV briefs, one line per anchor of
+  `../plans/vol-4-anchors.md`, from the `processed/` files (TR23, U28, the 0050/00631L pairs, TX23); LM26's also reads
+  `derived/vol4_rv.csv`, this TX file and the intraday download in `raw/intraday/` (T5S and the 2025 TX bars, for the
+  anchors marked raw), so it needs that download. They write nothing.
 - `vol4_settlement/` (Volume IV, retrieved 2026-10-19; Backer, optional):
   `TaiwanFuturesFinalSettlementPrice` for TX, monthly contracts only (`contract_month` of six digits; the weekly
   `YYYYMMWn` rows are left out), columns `date,contract_month,settlement_price`: 277 official final settlement prices,
@@ -183,9 +187,11 @@ the editor's exploration for the Volume II briefs (`processed/vol2_anchors.txt`)
     the 13:30:00 value the day's (`TaiwanStockPrice`, within 0.005), and checks every value and the steps between
     consecutive values (`fetch_intraday.py --help`).
   - `tx1m`: `TaiwanFuturesKBar` (Sponsor) for TX, calendar 2025, columns
-    `date,futures_id,contract_date,minute,open,high,low,close,volume`, every listed month and calendar spread. A date
-    holds 00:00–04:59 of the night session that began the session before, then 08:45–13:45 (a 13:45:00 bar on one
-    of the ten test days) and 15:00–23:59 of its own sessions. Saturdays and the first day of a holiday hold only that
+    `date,futures_id,contract_date,minute,open,high,low,close,volume`, every listed month and calendar spread. A bar
+    is labelled by its start minute (inferred from the labels). A date holds 00:00–04:59 of the night session that began the session before,
+    then 08:45–13:44 and 15:00–23:59 of its own sessions. A bar labelled with the closing minute itself appears on
+    some dates: 13:45:00 on 31 dates of 2025 (on 30 of the 243 trading days for the near month), with a tiny volume
+    and a close equal to the daily close, and 05:00:00 on 5 (`../project/SOURCES.md`, "TaiwanFuturesKBar"). Saturdays and the first day of a holiday hold only that
     00:00–04:59 tail; later holiday days and Sundays answer no rows. The calendar is the 243 trading days of 2025 plus the 54 calendar days after one (297
     requests); a day off the trading calendar that answers no rows is listed with `rows` 0 and no file, while an
     empty trading day is retried like a T5S day.

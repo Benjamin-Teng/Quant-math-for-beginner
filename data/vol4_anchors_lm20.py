@@ -327,10 +327,10 @@ put(31, f"annual sd {v(100 * sa, 3)}%, SE s/sqrt(2n) {v(100 * se_a, 2)} points, 
     f"to {v(100 * (sa + Z * se_a), 1)}%; daily-based {v(100 * sqrt(246) * srw, 3)}% (SE plug-in "
     f"{v(100 * se_daily, 2)}); gap {v(100 * (sa - sqrt(246) * srw), 1)} points = "
     f"{v((sa - sqrt(246) * srw) / se_a, 1)} SE")
-c_lo, c_hi = stats.chi2.ppf(0.025, n_y - 1), stats.chi2.ppf(0.975, n_y - 1)
-put(32, f"withdrawn (X32: the chi-square interval stays out until its source is read; not printed); recomputed for "
-    f"reference: chi2_22 quantiles {c_lo:.4f}, {c_hi:.4f}; interval for sigma {100 * sa * sqrt(n_y / c_hi):.5f}% to "
-    f"{100 * sa * sqrt(n_y / c_lo):.5f}%")
+c_lo, c_hi = float(stats.chi2.ppf(0.025, n_y - 1)), float(stats.chi2.ppf(0.975, n_y - 1))
+# normal model: n s^2 / sigma^2 = (n - 1) s_u^2 / sigma^2 ~ chi2_{n-1} (Blitzstein and Hwang, Ex. 10.4.3)
+put(32, f"chi2_22 2.5% and 97.5% quantiles {v(c_lo, 2, extra=2)}, {v(c_hi, 2, extra=2)}; interval for sigma "
+    f"s sqrt(n / chi2) {v(100 * sa * sqrt(n_y / c_hi), 1)}% to {v(100 * sa * sqrt(n_y / c_lo), 1)}%")
 
 
 def hill(x0: str) -> tuple[int, float, float]:

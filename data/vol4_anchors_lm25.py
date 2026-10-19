@@ -68,7 +68,7 @@ Conventions.
 
 Prints one line per anchor, "A25-NN <value>", in ID order; a withdrawn anchor keeps its line.
 
-Run:  PYTHONUTF8=1 .venv/Scripts/python.exe data/vol4_anchors_lm25.py [repository root]
+Run:  PYTHONUTF8=1 uv run python data/vol4_anchors_lm25.py [repository root]
 """
 import datetime as dt
 import json
@@ -487,8 +487,9 @@ put(30, "pacf(b) k=1..5: " + ", ".join(v(float(x), 5, 3) for x in pacf_b[:5])
 fit_b = ArmaFit(BP * b)
 fit_ar1 = ArmaFit(BP * b, (1, 0, 0))
 p_b, se_p = fit_b.params, fit_b.bse
+# E10 prints phi1 to five decimals, its SE to four, and the SE to six where the half-life SE is derived from it
 put(31, f"ARMA(1,1) on b (bp), maximum likelihood: mean {v(p_b[0], 4, 1)} (SE {v(se_p[0], 4, 1)}), phi1 "
-        f"{v(p_b[1], 6, 3)} (SE {v(se_p[1], 6, 4)}), theta1 {v(p_b[2], 6, 3)} (SE {v(se_p[2], 6, 3)}), sigma2 "
+        f"{v(p_b[1], 9, 5)} (SE {v(se_p[1], 7, 4, 6)}), theta1 {v(p_b[2], 6, 3)} (SE {v(se_p[2], 6, 3)}), sigma2 "
         f"{v(p_b[3], 3, 1)} bp^2 (SE {se_p[3]:.2f}); SEs from -l''; llf {fit_b.llf:.4f} (default fit "
         f"{fit_b.llf_default:.4f}); AIC {fit_b.aic:.1f} vs AR(1) {fit_ar1.aic:.1f}")
 put(32, "model ACF k=1,2,5,10,20: ARMA "
@@ -615,7 +616,7 @@ for name, x in versions:
     kp = f"p {v(kk[1], 4, 3)}" if kk[1] > 0.01 else f"p {kk[1]:.3f}, the table's bound"
     vt.append(f"{name}: mean {v(BP * float(x.mean()), 3, 1)}, s {v(BP * float(x.std()), 3, 2)}, DF t {v(tdf, 3, 1)}, "
               f"ADF {v(aa[0], 3, 2)} ({aa[2]} lags, p {aa[1]:.1e}), KPSS {v(kk[0], 4, 2)} ({kp}), "
-              f"AR phi {v(1 + dd, 5, 3)} (half-life {v(half_life(1 + dd), 4, 2)}), ARMA phi {v(pp[1], 5, 3)} "
+              f"AR phi {v(1 + dd, 5, 4)} (half-life {v(half_life(1 + dd), 4, 2)}), ARMA phi {v(pp[1], 9, 5)} "
               f"theta {v(pp[2], 5, 3)} (half-life {v(half_life(pp[1]), 4, 2)})")
 put(54, " | ".join(vt))
 su2, sz2, sx2, vdb = noise_split(p_b[1], p_b[2], p_b[3])
@@ -674,8 +675,10 @@ put(67, "tests on TX23: ln S 3 (ADF 'ct', DF 'c', KPSS) + b 3 (DF, ADF, KPSS) + 
         f"+ error-correction slopes 2 + four versions on D x 3 = 12 + the two regimes' DF 2 = {3 + 3 + 1 + 1 + 2 + 12 + 2}")
 hl = half_life(p_b[1])
 hse = hl_se(p_b[1], se_p[1])
-put(68, f"ARMA half-life {v(hl, 4, 1, 2)} sessions, delta-method SE {v(hse, 4, 2)} (from phi1's SE {se_p[1]:.6f}, "
-        f"-l''); 95% interval {v(hl - 1.96 * hse, 4, 2)} .. {v(hl + 1.96 * hse, 4, 2)}")
+put(68, f"ARMA half-life {v(hl, 4, 1, 2)} sessions, delta-method SE {v(hse, 4, 2, 3)} (from phi1's SE {se_p[1]:.7f}, "
+        f"-l''; from the inputs as printed, phi1 {round(p_b[1], 5):.5f} and SE {round(se_p[1], 6):.6f}: "
+        f"{v(hl_se(round(p_b[1], 5), round(se_p[1], 6)), 5, 3)}); 95% interval {v(hl - 1.96 * hse, 4, 2)} .. "
+        f"{v(hl + 1.96 * hse, 4, 2)}")
 put(69, "withdrawn (cross-check section 8, LM25 Q9: the 10,000-walk run of experiment 3 is not printed)")
 
 # ---------------------------------------------------------------- additions of the revision (70-71)

@@ -1,4 +1,4 @@
-# TODO — handoff (2026-10-18)
+# TODO — handoff (2026-10-19)
 
 > 給接手的 Claude Code：先讀 `CLAUDE.md`，再依下列順序執行。每完成一項就 commit 並直接 push 到 `main`，並用繁體中文向 Benjamin 回報。
 
@@ -70,20 +70,31 @@
 Follow [`plans/ROADMAP.md`](plans/ROADMAP.md): batch 3 is Volume IV (LM19–LM26, Statistical Inference and
 Econometrics), which needs Volumes II and III, then V + VI, VII, VIII and IX. Each batch repeats Stages 1–4 and bumps
 the edition. Ask the owner about code, site, repository and his standing rules, and about the open decisions at the
-end of the roadmap before the batch that needs them; content is the editor's call. Volume IV's intraday data are
-approved (ROADMAP, "Decided by the owner"); its packages (statsmodels, arch, per ROADMAP's Volume IV row) are not yet,
-so they go into the Stage 1 capability check.
+end of the roadmap before the batch that needs them; content is the editor's call. Volume IV's intraday data,
+packages and chart-kit additions are approved (ROADMAP, "Decided by the owner").
 
-**Status (2026-10-19).** Steps 1–2 are done and step 3 is under way ([`plans/vol-4.md`](plans/vol-4.md)): the shared
-decisions, the spines and the capability check, after a survey and a fresh adversarial check. The owner approved A
-(statsmodels 0.15.0 and arch 8.0.0, smoke-tested in an empty environment), B (TX23 by `data/vol4_series.py`; T5S by
-`data/fetch_intraday.py` with its own manifest; `data/vol4_rv.py`), B′ (per-day realized variances committed in
-`data/derived/vol4_rv.csv`), C (log $x$, `x.values`, scatter `tickLabels` and bands, size checks) and E (TX 1-minute
-bars for 2025); not D. Each piece was built, reviewed by a fresh agent, fixed and re-reviewed (published pages pixel-
-and byte-identical). AUTHORING §6–§9, PITFALLS §3, SOURCES (Volume IV) and the ROADMAP decision are updated. Next:
-the T5S download (about 90 minutes) and `vol4_rv.py`; the LM19–LM25 briefs and anchors are being drafted, LM26's after
-the download; then the cross-check, the independent anchor recomputation, the editor's decisions, the revised briefs
-and a fresh check of the whole of Stage 1.
+**Status (2026-10-19): Stage 1 is complete; Stage 2 (writing) is next.** Everything is in
+[`plans/vol-4.md`](plans/vol-4.md) (shared decisions, the capability check and the owner's answers, the editor's
+decisions on the survey and the drafts, the eight briefs) and [`plans/vol-4-anchors.md`](plans/vol-4-anchors.md) (488
+anchors, printed by `data/vol4_anchors_lm19.py` … `lm26.py`). The record, in order:
+
+- Survey of the published book's promises to LM19–LM26, the notation, the data, the packages, the sources and the
+  chart kit; spines; a fresh adversarial check of the spines.
+- Capability check: the owner approved A (statsmodels 0.15.0 and arch 8.0.0; smoke-tested in an empty environment,
+  every tracked output reproduced), B (TX23 by `data/vol4_series.py`; T5S, the 5-second TAIEX 2005–2026, by
+  `data/fetch_intraday.py` with its own manifest; `data/vol4_rv.py`), B′ (per-day realized variances committed in
+  `data/derived/vol4_rv.csv`), C (log $x$, `x.values`, scatter `tickLabels` and bands, chart and page size checks) and
+  E (TX 1-minute bars for 2025); not D. Each piece was built, reviewed by a fresh agent, fixed and re-reviewed
+  (published pages pixel- and byte-identical). The download: 5,351 T5S days and 297 TX requests (243 trading days and 54 night-session tails), every day checked.
+- Briefs: seven drafters (LM19–LM25), a cross-check (X1–X40), an independent recomputation of the drafts' 415 anchors (all
+  reproduced), the editor's decisions, seven revisers (the rows they added or changed recomputed independently
+  afterwards); LM26 drafted on the full download; a fresh check of the whole
+  (no critical finding; LM26's 66 anchors recomputed, all reproduced) and its fixes, verified by a fresh agent.
+- Shared files: AUTHORING §6 (the Volume IV statistics table and amendments), §7–§9; PITFALLS §3 (futures spreads
+  against settlement; an intraday index opens at the previous close); SOURCES (Volume IV: papers, Python facts, data
+  sets, FinMind's terms, 樂詞網, Taiwan facts); ROADMAP's owner decisions; `data/make_lab_data.py` (LM19–LM26 entries).
+- Stage 2 needs from the editor, when the writers ask: `build.sh` `DATA_STEPS` for `data/lm19_numbers.py` …
+  `lm26_charts.py`, `data/README.md` rows, and the Stage 4 list in `plans/vol-4.md`.
 
 **Stage 1, before any writer starts**, as Volume III did (`plans/vol-3.md` is the model):
 

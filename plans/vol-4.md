@@ -1,4 +1,4 @@
-# Volume IV — Statistical Inference and Econometrics: shared decisions and spines
+# Volume IV — Statistical Inference and Econometrics: shared decisions and briefs
 
 Volume IV turns the probability models of Volume III into estimates a reader can defend. A sample mean becomes an
 estimator with a standard error, a frequency a test, a slope a regression coefficient with an interval, a past mean a
@@ -8,12 +8,13 @@ the assumption fails (ROADMAP, "Module boundaries").
 
 The reader reads English as a second language and wants the tools learned systematically (SPEC §2). Worked examples,
 diagrams and formulas carry each module; the prose connects them. Volumes I–III are published: link to their results
-with [[LMn]] instead of repeating them, and honour every forward link they make to LM19–LM26 (listed per spine).
+with [[LMn]] instead of repeating them, and honour every forward link they make to LM19–LM26 (listed per brief).
 
 This file holds the editor's Stage 1 decisions (2026-10-19): the shared decisions, the capability check and the
 owner's answers, the decisions on the survey, its fresh check and the drafts, and one brief per module. Each brief
-was drafted from the editor's spine by one agent, checked across the volume by a fresh agent, its anchors recomputed
-independently from the data, decided by the editor and revised. Every number a brief quotes is an anchor in
+was drafted by one agent from the editor's spine (the spines are in `plans/vol-4.md` at commit bcfa0d4, not in this
+file), checked across the volume by a fresh agent, its anchors recomputed independently from the data, decided by
+the editor and revised. Every number a brief quotes is an anchor in
 `plans/vol-4-anchors.md`, printed by `data/vol4_anchors_lmNN.py`. Until Stage 3 this brief and the anchors are the
 plan; from Stage 3 the module sources and their numbers scripts are authoritative (as in `plans/vol-3.md`).
 
@@ -22,7 +23,7 @@ plan; from Stage 3 the module sources and their numbers scripts are authoritativ
 - **Length and voice.** AUTHORING §1: at most 6,000 words of prose and 36 pages; first drafts under 5,500 words;
   sentences average under 16 words and never exceed 30; paragraphs at most 80 words; connectors kept.
   `uv run python build/qa/style.py src/lmNN.md` shows no FAIL before a draft is handed back. Volume III's modules ran
-  about 5,700 words in six or seven sections; each spine below is cut to fit that.
+  about 5,700 words in six or seven sections; each brief below is cut to fit that.
 - **Section pattern.** A small numeric case or a picture first, then the definition, estimator or test with all its
   conditions, a short derivation, a worked example on Taiwan data, at most one pitfall, the 中文導讀 and the
   knowledge check. Each estimator is first computed by hand in NumPy from its formula; a package is then
@@ -260,7 +261,8 @@ chi-square quantiles in `Book.dist` (LM24's beta–binomial posterior is a stati
   LM26's") to LM19.
 - **The annual-volatility gap.** On 2003–2025 log returns, LM17's 18.563% against LM15's 22.207% needs a variance
   ratio of 1.43, but VR(246) is about 1.05 there (fresh check); the full TR23 gives about 1.2, and beyond a year VR
-  falls below 1 (0.75 at $m=492$, 0.44–0.62 at $m=1{,}231$, where the overlapping estimator is biased down). So LM19
+  falls below 1 (0.783 at $m=492$ and 0.619 at $m=1{,}231$ centred at $m\bar r$, as decided below; the overlapping
+  estimator is biased down there). So LM19
   compares the three numbers on one sample and return type, shows VR($m$) up to $m=1{,}231$ with the bias stated, and
   says that most of the gap is the sampling error of 23 annual values, which LM20 measures.
 - **The multiple-testing case.** Sector-minus-index differences measure beta and dividend yields, not skill (10 of 28
@@ -303,7 +305,8 @@ chi-square quantiles in `Book.dist` (LM24's beta–binomial posterior is a stati
 ## Editor's decisions on the LM19–LM25 drafts (2026-10-19)
 
 Seven drafters wrote the briefs and anchor scripts from the spines; a fresh agent cross-checked them as a set (findings
-X1–X40) and seven fresh agents recomputed every anchor from the definitions and the data (all 415 reproduced). The
+X1–X40) and seven fresh agents recomputed every anchor from the definitions and the data (all 415 reproduced; A19-56's median had followed np.median against the
+stated quantile rule, which was then applied). The
 editor's decisions follow; each brief is revised to them, and LM26's brief starts from them.
 
 - **No full daily series in published files** (X37). No chart, widget or other published file carries a daily series
@@ -329,8 +332,10 @@ editor's decisions follow; each brief is revised to them, and LM26's brief start
   $\lfloor4(T/100)^{2/9}\rfloor$ lags (statsmodels' default HAC lag, which is Newey and West's (1994) pilot lag,
   not their recommended lag: the text says so; arch rounds up and is not used for it), no small-sample
   correction, normal reference. LM19's and LM25's robust standard error of $\hat\rho_k$ is HC0-type.
-- **Resampling** (X12). Printed numbers use the stationary bootstrap with the book's block-length rule (LM22: the
-  largest Politis–White stationary estimate among the squared demeaned series the statistic uses, rounded), never
+- **Resampling** (X12). Printed numbers use the stationary bootstrap with the book's block-length rule (LM22: one
+  length per sample and statistic family, the largest Politis–White stationary estimate among the squared demeaned
+  simple-return series the statistic involves, rounded: 145 for every TR23 statistic, whether on $R$ or on $r$),
+  never
   called "the" right length; circular blocks get one sentence; $B=10{,}000$ unless stated.
 - **Tests** (X13). A normal reference and two-sided tests unless the text says otherwise; Dickey–Fuller and KPSS are
   one-sided and say so; Ljung–Box uses the upper tail.
@@ -348,10 +353,15 @@ editor's decisions follow; each brief is revised to them, and LM26's brief start
 - **LM25's ARMA** (X16, recompute finding 1). The default fit stops short of the likelihood maximum: fit with
   `method="innovations_mle"` (or restart from it), assert that the log-likelihood does not rise further, and take
   standard errors from the observed information, the numerical Hessian of $-\ell$ (`cov_type="approx"`; statsmodels'
-  `"oim"` is Harvey's formula), as LM20 teaches. Walks are $x_t=z_1+\dots+z_t$.
+  `"oim"` is Harvey's formula), as LM20 teaches. Walks are $x_t=z_1+\dots+z_t$. The fit's last unprinted digits
+  depend on the optimizer's tolerance (about $10^{-7}$ from a Newton-refined maximum; four Value-column digits of
+  A25-54 and A25-56 sit on a boundary there), so `lm25_numbers.py` compares ARMA values at their printed precision.
 - **LM23** (recompute findings). Residual dispersion by tercile is the root mean square (what White's errors use),
   with the cut rule stated; overlapping-residual autocorrelations use LM19's $\hat\rho_k$; a t-stat says its method;
   the contract count of a TX hedge uses $200F_t$ (LM8's convention; TX23's $F_t$ on the last date), not the index.
+- **Words.** "Leverage" stays the book's ($f>1$, 00631L's $L=2$): LM23 calls a regression point's influence its
+  hat value. "Microstructure noise", stale prices and price bounce are named as hypotheses in LM25 and LM26, never
+  as established mechanisms.
 - **Notation** (X17–X24; AUTHORING §6 amended). $\ell$ is LM22's block length and LM23's Newey–West lag (neither
   writes a likelihood); LM19 writes the median $\operatorname{med}$ (a tilde means centred); $\hat f:=\bar R/s^2$ from
   LM20, $\hat f^*$ the exact in-sample root of (4.5) (LM22, LM24), $f_{\mathrm B}$ LM24's Bayes fraction with
@@ -362,8 +372,12 @@ editor's decisions follow; each brief is revised to them, and LM26's brief start
   $h_t$, $\alpha_{\mathrm J}$ and $\beta_{j,\text{null}}$, and LM22's Deep Dive $\sigma_\psi$ are local, declared;
   LM25's $m$ is only the VR horizon.
 - **Leads and tags** (X25–X29). As the cross-check lists them; the Stage 4 table below replaces the earlier list.
-- **Sources** (X32–X36). The $t$ and $\chi^2$ laws of normal samples are read in Blitzstein and Hwang §10.4 before
-  they are cited; until then each module writes *stated without proof* and LM20's $\chi^2$ interval stays out;
+- **Sources** (X32–X36). The $t$ and $\chi^2$ laws of normal samples are cited to Blitzstein and Hwang as SOURCES
+  records them (read 2026-10-19): Ex. 10.4.3 for $(n-1)S^2/\sigma^2\sim\chi^2_{n-1}$, Ex. 7.5.9 for the
+  independence of the mean and variance, Def. 10.4.4 for $t_n$; the book does not state the $t_{n-1}$ law of the
+  studentized mean, so LM20 and LM21 show its one-line derivation from those three; LM20's $\chi^2$ interval for the
+  23 annual values returns, cited to Ex. 10.4.3, under the normal model it states; the $\chi^2$ density and a
+  regression's $t_{T-d}$ stay *stated without proof*;
   Gauss–Markov stays at chapter level (Hayashi §1.3 or Greene ch. 4), for linear estimators only. SOURCES' arch line
   is corrected (`optimal_block_length` returns columns `stationary` and `circular`; the docstring says otherwise). The
   briefs' Python facts, new references and 樂詞網 terms are checked and recorded in SOURCES before Stage 2. No Welch
@@ -390,8 +404,9 @@ editor's decisions follow; each brief is revised to them, and LM26's brief start
   intraday returns by year comes from the identity between adjacent intervals' realized variances, not from new
   columns. The forecast target is the opening return squared plus the 15-minute realized variance (the signature
   flattens near 15 minutes in most years; the ranking is the same at 5 and 30 minutes). Stale prices and price bounce
-  are hypotheses, labelled so, until a source in SOURCES states either; the data show positive lag-1 autocorrelation
-  of 1-minute index returns before 2013 and negative after, and TX's 2025 signature is flat. The asymmetry after falls
+  are hypotheses, labelled so, until a source in SOURCES states either; the data show the ratio of 1-minute to 5-minute
+  realized variance below 1 in 2005–2012 and 2020 and above 1 in the other years from 2013 (pooled lag-1
+  autocorrelations of 1-minute returns are positive in 2006–2012 and negative from 2013; 2005's is negative too), and TX's 2025 signature is flat. The asymmetry after falls
   is named in words with Hansen and Lunde's (2005) "leverage effect"; HAR is named only once Corsi (2009) is in
   SOURCES; GARCH standard errors cite LM20's theory and arch's documented options. The weekly volatility paths and the
   model-only widget pass the no-full-series rule. The case's rolling fit and E4's full-sample fit are both kept,
@@ -405,8 +420,8 @@ Collected here as the briefs add them; applied at publication with the edition n
 - `build/make_lab17.py:486`: the autocorrelation convention is LM19's.
 - `build/make_lab11.py:571`: the literal `[[LM20]]` goes (wording below).
 - Leads of Volumes I–III gain the Volume IV modules that cite them (cross-check X25–X29, checked against the
-  current front matter; LM26's additions come with its brief): lm01 20; lm02 20, 23; lm03 19, 25; lm04 19, 21, 22, 24;
-  lm05 19, 20, 21, 26; lm06 23; lm07 20; lm10 23, 24; lm11 20, 22, 24; lm12 20, 25; lm13 20, 22; lm14 21, 22, 24;
+  current front matter): lm01 20; lm02 20, 23; lm03 19, 25, 26; lm04 19, 21, 22, 24;
+  lm05 19, 20, 21, 26; lm06 23; lm07 20; lm10 23, 24; lm11 20, 22, 24; lm12 20, 25; lm13 20, 22; lm14 21, 22, 24, 26;
   lm15 23, 24; lm16 25; lm17 23, 24, 25; lm18 21, 23, 25.
 - `build/make_lab11.py:571`: "LM20 and LM22 give the tools; LM22 answers it for 2017 and 2020"; `make_lab15.py:443`
   and `make_lab17.py:486`: LM19's wording; `make_lab04.py:642`: LM22's wording (the briefs give each).
@@ -416,16 +431,17 @@ Collected here as the briefs add them; applied at publication with the edition n
 ## LM19 Descriptive Statistics of Returns
 
 Stage 1 brief, revised 2026-10-19 after the cross-check and the independent recomputation. Each number carries its
-anchor ID at its first appearance; `data/vol4_anchors_lm19.py` prints them all, and its rows are in `anchors.md` beside
-this brief (for `plans/vol-4-anchors.md`). Numbers quoted from published modules carry their file:line instead.
+anchor ID at its first appearance; `data/vol4_anchors_lm19.py` prints them all, and its rows are in
+`plans/vol-4-anchors.md`. Numbers quoted from published modules carry their file:line instead.
 
 Revised to the editor's decisions (`plans/vol-4.md`, "Editor's decisions on the LM19–LM25 drafts"): LM19 owns TR23's
 $\sqrt A\,s$ and Sharpe ratio on $R$ (X1); $\operatorname{VR}(m)$ is the overlapping estimator (19.8) only, and the
 weighted sum of autocorrelations is an identity column (X9, X10); the median is $\operatorname{med}$ (X18); every
 median and quantile, X7's included, is $\hat F^{-1}(u)$; the robust shape measures and the adjusted moments are
-definitions, unattributed until the papers are read (X36); the Saturday sessions are named, not explained (X14); tag
-users and leads as X1 and X27 give them; every printed value is rounded from its unrounded value and flagged near a
-boundary.
+definitions, unattributed until the papers are read (X36); the Saturday sessions follow the "Calendar" decision
+(TWSE's 2019 stop stated, their link to the 23 sessions written as an inference); tag users and leads as X1 and X27
+give them, reconciled with the citing briefs after the fresh check; every printed value is rounded from its unrounded
+value and flagged near a boundary.
 
 **Prereq:** `[1, 3, 4, 5, 10, 14, 15, 16, 17, 18]`.
 
@@ -460,12 +476,13 @@ boundary.
   standard deviation of Monte Carlo draws with divisor $n$ (lm18.md:47), for the standard error of a mean.
 
 **Leads:** `[20, 21, 22, 23, 24, 25, 26, 32, 33]`. LM20: standard errors of every statistic here, the sampling error of
-the 23 annual values, cites (19.1), (19.7); LM21: $s_{\mathrm u}$ in its t-stat and the number of looks behind thirty
-autocorrelations, cites (19.1), (19.6); LM22: a block-bootstrap interval for $\operatorname{VR}(m)$, cites (19.5), (19.7),
-(19.8); LM23: the long-run variance behind HAC errors, cites (19.7); LM24: TR23's $\sqrt A\,s$ and Sharpe ratio from X8;
-LM25: weak stationarity, the robust band, Ljung–Box and the variance-ratio test, cites (19.5), (19.6), (19.7), (19.8);
-LM26: models of the clustering in X4, cites (19.3), (19.5), (19.6); LM32: drawdowns, a path statistic (pointer in §3);
-LM33: the Sharpe ratio under correlated returns, cites (19.9).
+the 23 annual values, cites (19.1), (19.5), (19.7), (19.8); LM21: $s_{\mathrm u}$ in its t-stat and the number of looks
+behind thirty autocorrelations, cites (19.1), (19.6); LM22: a block-bootstrap interval for $\operatorname{VR}(m)$, cites
+(19.5), (19.7), (19.8); LM23: the overlap residuals' autocorrelations and the long-run variance behind HAC errors,
+cites (19.5), (19.7); LM24: TR23's $A\bar R$, $\sqrt A\,s$ and Sharpe ratio from X8; LM25: weak stationarity, the
+robust band, Ljung–Box and the variance-ratio test, cites (19.5), (19.6), (19.7), (19.8); LM26: models of the
+clustering in X4 and the intraday variance ratios, cites (19.3), (19.5), (19.6), (19.7); LM32: drawdowns, a path
+statistic (pointer in §3); LM33: the Sharpe ratio under correlated returns, cites (19.9).
 
 **Forward links honoured.** The spine's list was complete: a grep of `src/lm*.md`, `src/pages/*.md` and
 `build/make_lab*.py` for "LM19" finds exactly its 14 lines. Two related lines name another module and are kept
@@ -509,8 +526,9 @@ $\hat\rho_k$ for $r$, $\lvert r\rvert$ and $r^2$, $k\le30$. The variance of an $
 the book's one variance ratio $\operatorname{VR}(m)$, the overlapping estimator, with its iid expectation, and the
 non-overlapping $\operatorname{VR}_{\mathrm n}(m)$ (19.8); TR23's $\operatorname{VR}(m)$ for $m=2,\dots,1{,}231$.
 Annualization of the mean, variance, volatility and Sharpe ratio, with the Sharpe ratio of $m$-day sums (19.9). TR23's
-annual volatility $\sqrt A\,s=18.96\%$ and Sharpe ratio $0.0517$ a day, $0.81$ a year, both on $R$ with $r_f=0$
-(18.99%, 0.0456 and 0.715 on $r$) [A19-54]: [[LM20]]–[[LM24]] cite them. Weekly, monthly and yearly log returns from
+annual mean $A\bar R=15.38\%$, annual volatility $\sqrt A\,s=18.96\%$ and Sharpe ratio $0.0517$ a day, $0.81$ a year,
+all on $R$ with $r_f=0$ (13.58%, 18.99%, 0.0456 and 0.715 on $r$) [A19-54]: [[LM20]]–[[LM24]] cite them, and
+[[LM20]] gives their standard errors. Weekly, monthly and yearly log returns from
 daily data; the three annual volatilities on 2003–2025 and the 246 grids of one-year blocks.
 
 **Leaves.**
@@ -536,7 +554,7 @@ daily data; the three annual volatilities on 2003–2025 and the 246 grids of on
   [[LM25]] defines this and tests for it."
 - §5: "That $\hat\rho_k$ is approximately normal for large $T$ is *stated without proof* (a central limit theorem for
   dependent terms, beyond [[LM17]]'s (17.5)); [[LM25]] widens the band for clustering." Its reference waits for the
-  open point below (Questions, 2).
+  open point below ("Open before Stage 2", 1).
 - §5 pitfall: "Thirty looks at one band find about 1.5 bars outside by chance alone; [[LM21]] counts such looks."
 - §6: "As $m$ grows, $\gamma_0$ times the model's ratio tends to the long-run variance that [[LM23]]'s HAC errors
   estimate"; "[[LM25]] turns $\operatorname{VR}(m)$ into a test, and [[LM22]] puts an interval around it."
@@ -548,8 +566,9 @@ $T=5{,}849$ simple returns [A19-02] from 2003-01-03; 8,680 calendar days $=23.76
 [A19-04]. All 5,849 returns are distinct and none is exactly zero [A19-05] (`Fraction` on the closes), so order
 statistics, quartiles and MAD have no ties (half the days, 2,925, lie within MAD of the median, checked exactly
 [A19-26]). TR23 holds 23 Saturday sessions, 14 October 2006 to 22 December 2018 [A19-69]; they stay in every sample
-and group (`plans/vol-4.md`, "Calendar"). The text names them in X1's note and explains them only after an official
-calendar page is in SOURCES. Two named sub-samples, never mixed within a statistic:
+and group (`plans/vol-4.md`, "Calendar"). X1's note names them and says that TWSE's history page states that the
+market stopped trading on Saturday make-up workdays from 2019 (SOURCES, "Taiwan facts (Volume IV)"); that the 23
+sessions were such days is an inference, written as one. Two named sub-samples, never mixed within a statistic:
 
 - **2003–2025**: the 5,664 log returns [A19-06] dated 2003-01-03 → 2025-12-31, the calendar years of LM15 and LM17
   (2003 from its first close; 239–251 sessions a year, mean 246.26 [A19-06]). A year is 246 sessions, LM17's $m$; it
@@ -566,7 +585,9 @@ np.random.default_rng([1, 20261011])`, created once, 10,000 samples of 5,849 iid
 mean carries its standard error (divisor $n$, as LM18). Published files carry statistics, never the daily series
 (`plans/vol-4.md`, X37): X3 is thinned to weekly points, the widget embeds variance ratios. Scripts:
 `data/lm19_numbers.py` (every printed value, asserted against the anchors; `Fraction` checks; the rounding-boundary
-flags), `data/lm19_charts.py` (X1, X3, X4, X5, X7 and the widget block); lab file `taiex_tr.csv`, built locally.
+flags), `data/lm19_charts.py` (X1, X3, X4, X5, X7 and the widget block), both in `build.sh` `DATA_STEPS` after
+`data/vol3_series.py` and listed in `data/README.md`; lab file `taiex_tr.csv`, built locally (`data/make_lab_data.py`
+gains `"LM19_lab": {**tr23}`).
 
 **Hygiene declaration.** *Descriptive*: every TR23 statistic, X1, X3–X7, the grids. *In-sample*: X2's normal law with
 TR23's own $\bar R$ and $s$ (as [[LM14]] labels its normal comparison). *Model*: (19.2), the iid band (19.6), the iid
@@ -653,8 +674,8 @@ week of E1 is the sample's most volatile week and says so.
 - §8: Polars' `std()` on the 23 calendar-year log returns prints 22.706%, not 22.207%: its default divides by 22
   [A19-61].
 
-中文導讀 (樂詞網, English in parentheses at first use in each box; SOURCES "Chinese terms (Volume IV)" plus the terms
-this brief looked up, which the editor records in SOURCES before Stage 2):
+中文導讀 (樂詞網, English in parentheses at first use in each box; SOURCES "Chinese terms (Volume IV)", including the
+terms this brief looked up, now recorded there):
 
 - §3 "一般的一天與平均的一天": 敘述統計 (descriptive statistics), 中位數 (median), 截尾平均數 (trimmed mean),
   四分位距 (interquartile range), 中位數絕對離差 (median absolute deviation), 平均絕對偏差 (mean absolute deviation;
@@ -665,6 +686,9 @@ this brief looked up, which the editor records in SOURCES before Stage 2):
 - §5: 自我相關 (autocorrelation), 自我相關函數 (autocorrelation function), 時間序列 (time series), 獨立同分布 (iid),
   波動群聚現象 (volatility clustering).
 - §7: 變異數比 (variance ratio), 平穩 (stationary), 波動率, 標準誤 (standard error, pointing to LM20).
+
+Sample autocorrelation, sample skewness and sample kurtosis have no 樂詞網 entry: the boxes write 樣本 plus the listed
+term, as LM15 printed 樣本峰態.
 
 Deep Dives: §5 "Why the iid band is ±1.96/√T": for iid $x_t$ with variance $\gamma_0$, replace $\bar x$ by $\E x_t$
 (an error of order $1/T$); the products $(x_t-\E x_t)(x_{t-k}-\E x_t)$, $t=k+1,\dots,T$, have mean 0 and are
@@ -684,7 +708,9 @@ $0.791\pm0.005$ at $m=1{,}231$ (standard errors of a mean, divisor $n$), against
   y 0–25% (`tfmt: "pct0"`). Note: standard deviations of 5,664 daily, 1,185 weekly (ISO weeks, 1–6 sessions), 276
   monthly and 23 calendar-year log-return sums (2003 from its first close), each with divisor = the number of periods
   ([[LM15]]'s convention for the years); a year is 246 sessions ([[LM17]]), 1,185 ÷ 23 = 51.52 weeks or 12 months. The
-  sample keeps its 23 Saturday sessions (2006–2018); each of the 17 six-session weeks holds one [A19-69]. Source:
+  sample keeps its 23 Saturday sessions (2006–2018); each of the 17 six-session weeks holds one [A19-69]. TWSE's
+  history page states that the market stopped trading on Saturday make-up workdays from 2019; that these 23 sessions
+  were such days is an inference. Source:
   FinMind `TaiwanStockTotalReturnIndex` (data_id TAIEX), retrieved 18 October 2026; dividends reinvested, no costs.
   Computations: `data/lm19_numbers.py`. Shows: three ways of scaling short returns agree; the years do not.
 - X2 `summary` (table, §2–§4; cited first in §2): rows mean; median; 5% trimmed mean; $s$; $s_{\mathrm u}$; mean
@@ -860,15 +886,15 @@ X5, X6, E9, experiment $e=1$; 7 annualization: X1 by Polars periods, X7, E10, X8
   residuals; LM20 and LM21 cite LM14's printed moments).
 - (19.4) $\operatorname{Skew}_{\mathrm Q}$, $\operatorname{Kurt}_{\mathrm O}$, definitions; quantiles by $\hat F^{-1}$ (no
   user yet).
-- (19.5) $\hat\gamma_k=\frac1T\sum_{t=k+1}^T(x_t-\bar x)(x_{t-k}-\bar x)$, $\hat\rho_k=\hat\gamma_k/\hat\gamma_0$ (LM22,
-  LM25, LM26).
+- (19.5) $\hat\gamma_k=\frac1T\sum_{t=k+1}^T(x_t-\bar x)(x_{t-k}-\bar x)$, $\hat\rho_k=\hat\gamma_k/\hat\gamma_0$ (LM20,
+  LM22, LM23, LM25, LM26).
 - (19.6) $\Var\hat\rho_k\approx1/T$ for iid $x_t$ with finite variance; band $\pm1.96/\sqrt T$ (LM21, LM25, LM26).
 - (19.7) $\Var r_t^{(m)}=m\gamma_0+2\sum_{k=1}^{m-1}(m-k)\gamma_k$, so the model's ratio is
   $\Var r_t^{(m)}/(m\gamma_0)=1+2\sum_{k=1}^{m-1}(1-k/m)\rho_k$, for a weakly stationary series (LM20, LM22, LM23,
-  LM25, LM33).
+  LM25, LM26, LM33).
 - (19.8) $\operatorname{VR}(m):=\frac{\frac1{T-m+1}\sum_{t=m}^{T}(r_t^{(m)}-m\bar r)^2}{m\,s_r^2}$, with iid factor
   $\approx(1-m/T)/(1-1/T)$; $\operatorname{VR}_{\mathrm n}(m)$ the same ratio on the $\lfloor(T-o)/m\rfloor$ consecutive
-  blocks after $o$ skipped returns (LM22, LM25).
+  blocks after $o$ skipped returns (LM20, LM22, LM25).
 - (19.9) $\mathrm{SR}(m)=\sqrt m\,\mathrm{SR}\big/\sqrt{\Var r_t^{(m)}/(m\gamma_0)}$ for log-return sums with constant
   mean, under (19.7)'s conditions, estimated with $\operatorname{VR}(m)$ in the denominator (LM33).
 
@@ -891,9 +917,9 @@ X5, X6, E9, experiment $e=1$; 7 annualization: X1 by Polars periods, X7, E10, X8
   18.96% and 0.81 are cited by later modules.
 - Inference edge: no standard error, interval or test on any TR23 number; the grids' range is not an interval; the
   sentence on the robust band gives no number (0.0205 is LM25's [A19-41]).
-- Rounding: every printed value is rounded from its unrounded value, never from a rounded figure; `anchors.md` flags
-  each one within a tenth of a unit of a boundary. The tight ones: [[LM17]]'s pair correlation 0.0394 (0.03935009);
-  X6's 1.047 and 1.140; X2's 0.868%, −0.2768, 0.1055% and the extra day's 1.216%; X7's median 19.13%; 19.05% (the
+- Rounding: every printed value is rounded from its unrounded value, never from a rounded figure;
+  `plans/vol-4-anchors.md` flags each one within a tenth of a unit of a boundary. The tight ones: [[LM17]]'s pair
+  correlation 0.0394 (0.03935009); X6's 1.047 and 1.140; X2's 0.868%, −0.2768, 0.1055% and the extra day's 1.216%; X7's median 19.13%; 19.05% (the
   printed 1.0536 also gives it); 18.12% (the printed 5.2296% also gives it); the robust annual scales print one decimal
   (13.7%, 13.6%), because the literal 1.349 would change the second.
 - Chart text: "sample mean", no hats; "√" is allowed; formula punctuation ("$5\%$", "$m$-day" → "an m-day" in
@@ -913,41 +939,20 @@ X5, X6, E9, experiment $e=1$; 7 annualization: X1 by Polars periods, X7, E10, X8
   with the sample, and LM20 measures their sampling error".
 - lm15.md:263 is reworded with LM20's wording; LM19's E10 agrees that the data do not establish a direction.
 
-**Questions for the editor** (what remains open after the decisions of 2026-10-19).
+**Open before Stage 2** (sources not yet read; until then the text is written as the decisions say):
 
-1. *Readings of the decisions; veto any.* (a) "The weighted sum appears only as LM19's identity column": X6 keeps it
-   (and E8 quotes its 1.280), and X5 drops its "from autocorrelations" series. (b) "One variance-ratio estimator": E9
-   no longer prints the own-mean ratio 0.444 or its iid factor 0.757; LM18's 0.283 stays LM18's, and A19-50 keeps both
-   unprinted with the factor's formula stated. (c) The model's ratio in (19.7) and (19.9) gets no symbol, so
-   $\operatorname{VR}(m)$ keeps §6's one meaning; KC §6 and Problems 5 and 7 ask for "the ratio of (19.7)". (d) X4's
-   tooltips print five decimals (the pitfall on lag 29 already asked for it); `anchors.md` checks all 60 bars there.
-2. *Applied as the decisions say for an unread source* (to recheck when the source is read):
-   - the band's approximate normality is *stated without proof*, with no reference yet: where Tsay (2010) or Box,
-     Jenkins, Reinsel and Ljung state $\Var\hat\rho_k\approx1/T$ and the normal limit (cross-check open point (g));
-   - quartile skewness, octile kurtosis and the adjusted moments are printed as definitions, unattributed (Kim and
-     White 2004, Moors 1988 with its end page missing, Joanes and Gill 1998: Crossref only);
-   - the Saturday sessions are named, not explained, until an official calendar page is in SOURCES (open point (i)).
-3. *For SOURCES before Stage 2* (the editor's records, not questions): statsmodels 0.15.0 `robust_skewness` and
-   `robust_kurtosis` as read in the installed source (`stats/stattools.py:142-217, 301-390`: `np.percentile` with
-   linear interpolation, equal to the book's values here because $T-1$ is a multiple of 8; `kr2` minus the normal's
-   1.2331 when `excess=True`); `acf(..., fft=False)`; SciPy `stats.t.ppf` (Problem 10); and the 樂詞網 terms checked on
-   2026-10-19 with SOURCES' URL pattern (統計學名詞 and 數學名詞 listings): trimmed mean 截尾平均數 (統計); interquartile
-   range 四分位距；四分位數間距 (統計), 四分位[數間]距 (數學) → 四分位距; median absolute deviation 中位數絕對離差 (統計);
-   mean absolute deviation: 統計 none, 平均絕對偏差 (數學); robust statistics 穩健統計, robustness 穩健性, robust
-   estimation 穩健估計 (統計); quartile 四分位數 (both); octile 八分位數 (統計); sensitivity curve 敏感度曲線 (統計);
-   measure of location 位置量數, measure of dispersion 離勢量數 (統計); sample autocorrelation, sample skewness, sample
-   kurtosis: no entry (the boxes write 樣本 + the listed term, as LM15 printed 樣本峰態).
-4. *Shared files* (accepted, cross-check §8): `data/make_lab_data.py` gains `"LM19_lab": {**tr23}`; `build.sh`
-   `DATA_STEPS` gains `data/lm19_numbers.py data/lm19_charts.py` after `data/vol3_series.py`'s Volume III block (they
-   read only TR23); `data/README.md` lists the two scripts.
+1. A source for $\Var\hat\rho_k\approx1/T$ and the normal limit of $\hat\rho_k$ (Tsay 2010, or Box, Jenkins, Reinsel
+   and Ljung): until it is read, the band's approximate normality is *stated without proof*.
+2. The texts of Kim and White (2004), Moors (1988, end page) and Joanes and Gill (1998): until they are read,
+   quartile skewness, octile kurtosis and the adjusted moments are printed as definitions, unattributed.
 
 ## LM20 Estimation Theory and Maximum Likelihood
 
 Stage 1 brief, revised 2026-10-19 after the cross-check and the independent recomputation. It follows the editor's
 decisions (`plans/vol-4.md`, "Editor's decisions on the LM19–LM25 drafts") and the cross-check's findings X1, X2, X5,
-X19, X25, X27, X32, X34, X35, X37 and §8. Each number carries its anchor ID at its first appearance;
-`data/vol4_anchors_lm20.py` prints them all (`anchors.md` beside this brief). Numbers quoted from published modules
-cite their file:line instead.
+X19, X25, X27, X32, X34, X35, X37 and §8, and to the fresh check's findings after them. Each number carries its anchor
+ID at its first appearance; `data/vol4_anchors_lm20.py` prints them all (rows in `plans/vol-4-anchors.md`). Numbers
+quoted from published modules cite their file:line instead.
 
 **Prereq:** `[1, 2, 4, 5, 7, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19]`.
 
@@ -981,10 +986,10 @@ cite their file:line instead.
 - LM18: (18.2) (lm18.md:141), (18.3) (lm18.md:147), (18.8) (lm18.md:337); "derives the same $s/\sqrt T$" and
   0.01580% (lm18.md:339, cited there; also lm18.md:345); $s_Y/\sqrt{2n}$ (lm18.md:150); batch standard errors
   (lm18.md:153).
-- LM19 (published with LM20): (19.1) $s_{\mathrm u}$, introduced in one paragraph; (19.5) $\hat\rho_k$, (19.7) and
-  (19.8) $\operatorname{VR}(m)$, which test the iid assumption the standard errors make; the annual-volatility gap it
-  hands over; TR23's point estimates $\sqrt A\,s=18.96\%$ and Sharpe ratio 0.0517 a day, 0.81 a year (LM19 owns them;
-  LM20 owns their standard errors and intervals).
+- LM19 (published with LM20): (19.1) $s_{\mathrm u}$, introduced in one paragraph; (19.5) $\hat\rho_k$, (19.7) the
+  model's ratio and (19.8) $\operatorname{VR}(m)$, which test the iid assumption the standard errors make; the
+  annual-volatility gap it hands over; TR23's point estimates $A\bar R=15.38\%$, $\sqrt A\,s=18.96\%$ and Sharpe ratio
+  0.0517 a day, 0.81 a year (LM19 owns them; LM20 owns their standard errors and intervals).
 
 **Leads:** `[21, 22, 23, 24, 25, 26, 30, 32, 33, 45]`: tag users and pointer targets (LM21's interval duality and
 tests, LM22's bootstrap against (20.8)–(20.9), LM23's standard errors, LM24's MSE and prior, LM25's maximum likelihood
@@ -1034,16 +1039,17 @@ pointer), LM33's Sharpe ratio, LM45's Kelly sizing).
 bridge to LM24; consistency, stated. $\operatorname{SE}(\bar R)=\sigma/\sqrt T$ from (16.3) and (17.1), estimated by
 $s/\sqrt T$, and its annual form $\sqrt A\,\sigma/\sqrt\tau$ (20.2); Merton's point and [[ex:merton]]; the bias of
 $s^2$ and the unbiased $s_{\mathrm u}^2$ (20.3). Confidence intervals (20.4): the normal approximation by (17.5), the
-$t_{T-1}$ interval of a normal model (*stated without proof*), coverage ([[ex:coverage]], the widget), the interval
-against years of data ([[ex:years]]). Likelihood, log-likelihood, the normal MLE (20.5), the MLE of $\mathcal N_N$
+$t_{T-1}$ interval of a normal model (its law in one line from Blitzstein and Hwang's Ex. 7.5.9, Ex. 10.4.3 and
+Def. 10.4.4), coverage ([[ex:coverage]], the widget), the interval against years of data ([[ex:years]]). Likelihood, log-likelihood, the normal MLE (20.5), the MLE of $\mathcal N_N$
 stated with Deep Dive 1 (why $\hat\Sigma$ divides by $T$); the Student-t MLE on TR23 with standard errors from the
 observed information ([[ex:fits]]) and its profile log-likelihood ([[ex:profile]]); Fisher information, asymptotic
 normality (20.6) and Cramér–Rao (20.7), stated, with Deep Dive 2. The delta method (20.8); the standard errors of the
 annualized volatility, the plug-in Kelly fraction $\hat f:=\bar R/s^2$ and the Sharpe ratio under iid returns (20.9);
-the sampling error of 23 annual values (LM19's gap). The Hill estimator (20.10) derived as a Pareto MLE, with its
-standard error, at LM13's and LM15's thresholds. Values owned (one owner per statistic; cross-check X1): every
-standard error and interval in [[ex:case]] and [[ex:delta]]; $\hat f=4.28$ with its standard errors; the standard
-errors and intervals of [[LM19]]'s 18.96% and 0.81, whose point estimates LM20 cites; the $t$ fit's standard errors,
+the sampling error of 23 annual values (LM19's gap), by the delta method and by the $\chi^2$ interval of a normal
+model. The Hill estimator (20.10) derived as a Pareto MLE, with its standard error, at LM13's and LM15's thresholds.
+Values owned (one owner per statistic; cross-check X1): every standard error and interval in [[ex:case]] and
+[[ex:delta]]; $\hat f=4.28$ with its standard errors; the standard errors and intervals of [[LM19]]'s 15.38%, 18.96%
+and 0.81, whose point estimates LM20 cites; the $t$ fit's standard errors,
 profile and regime standard errors; the Hill estimates; the coverage and sampling-distribution simulations; the
 standard errors of $\hat\rho$, of the up-day frequency $\hat\theta$ and of the monthly Poisson mean (problems).
 
@@ -1090,7 +1096,7 @@ generalized Pareto) → not in the book, one sentence. The adjusted skewness and
   $s=1.2385\%$ [A20-05], recomputed under LM20's name as the shared decisions allow (LM4's interval).
 - No TX23 and no T5S. No published file carries a daily series (editor's rule, X37): the charts plot standard errors
   by sampling interval, Hill estimates by threshold, model curves and simulated histograms; the widget simulates.
-- Seeds (AUTHORING §8; the array shapes are in `anchors.md`): experiment 1, [[ex:sampling]] (`default_rng([1,
+- Seeds (AUTHORING §8; the array shapes are in `plans/vol-4-anchors.md`): experiment 1, [[ex:sampling]] (`default_rng([1,
   20261011])`, 10,000 one-year samples of 246 days, normal draws first, then Student-t draws with LM15's $\nu$);
   experiment 2, [[ex:coverage]] (`[2, 20261011]`, 100,000 samples per cell in chunks of 10,000, normal block then $t_3$
   block for each $T$); experiment 3, Problem 11 (`[3, 20261011]`, 20,000 samples); experiment 4 (`[4, 20261011]`), 20
@@ -1124,7 +1130,8 @@ probability and its frequency, X5), $\boldsymbol\theta$, $\operatorname{Bias}$, 
 $\mathcal L(\theta)$, $\ell(\theta)$, $\mathcal I(\theta)$, $H$ ([[LM7]]'s Hessian, here of $\ell$), $\nabla$, $\eta$
 ([[LM5]]'s constant), $n$ (simulated samples), $m$ (days in a sum), $\nu$, $\alpha$ (a tail index, as [[LM15]]),
 $\rho$, $\hat\rho$ (Problem 6), $\boldsymbol\mu$, $\Sigma$, $\hat\Sigma$, $\mathbf R_t$, $N$, $\lambda_k$ and $L$ (Deep
-Dive 1 only), $\lambda$ (Problem 8's Poisson mean), $^{\top}$, $\operatorname{tr}$, $\det$, $I$. Local:
+Dive 1 only), $\lambda$ (Problem 8's Poisson mean), $\chi^2_N$ (E8's interval, $\chi^2_{22}$), $^{\top}$,
+$\operatorname{tr}$, $\det$, $I$. Local:
 
 | Symbol | Meaning | Check |
 |:--|:--|:--|
@@ -1141,8 +1148,8 @@ Formulas write skewness and kurtosis as $\operatorname{Skew}(R)$ and $\operatorn
 for a vector, never a new letter. The 95% interval writes its level in words or as "95%": $\alpha$ is the tail index.
 Charts carry no Greek (AUTHORING §7): "degrees of freedom", "tail index", "sample mean". Not used: $P$, $\kappa$,
 $q$ (as a quantile), $p$ for a frequency ($\hat\theta$, X5), $\theta$ as an angle, $\mathcal L$ as a Lagrangian, $I$
-for information, $\beta$, $\rho_k$, $\chi^2_N$ (no $\chi^2$ interval, X32), $\hat f^*$ and $f_{\mathrm B}$ (LM22's
-and LM24's), $\operatorname{med}$ (the median is written in words), a star for a simulated draw.
+for information, $\beta$, $\rho_k$, $\hat f^*$ and $f_{\mathrm B}$ (LM22's and LM24's), $\operatorname{med}$ (the
+median is written in words), a star for a simulated draw.
 
 **Motivating case: "What 23.8 years pin down"** (box, about 140 words)
 
@@ -1158,7 +1165,7 @@ Resolved: (a) the mean's precision: §3, (20.2), E2, [[ex:years]] (3.89 points [
 §3, Merton (1980), [[ex:merton]]; (c) the volatility's precision: §7, (20.8), E8 (0.33 points with the sample
 kurtosis, 0.175 for normal days [A20-10]); (d) the Kelly fraction $\hat f$: §7, (20.9), E9 (2.10 to 6.46); the whole
 set in [[ex:case]]. The case says "independent" once and the hygiene note says what LM19 checks. The 15.38% and the
-4.28 are LM20's to print with their errors; the 18.96% is [[LM19]]'s estimate, here given its standard error.
+18.96% are [[LM19]]'s estimates (its X8), here given their standard errors; the 4.28 is LM20's, with its errors.
 
 **Sections** (prose words, AUTHORING §1 count):
 
@@ -1167,14 +1174,14 @@ set in [[ex:case]]. The case says "independent" once and the hygiene note says w
 | 1 | Introduction | framing paragraph; case + [[ex:case]]; roadmap; notation and hygiene notes | 380 |
 | 2 | Estimators, Bias and Mean Squared Error {1} | a statistic before the data are drawn is a random variable; [[ex:sampling]] (one-year samples from models fitted to TR23; under the $t$ model the volatility's spread is itself erratic, about 4 points, 3.3 to 4.6 over 20 further runs [A20-51]); $\theta$, $\hat\theta$; bias, variance, (20.1) $\operatorname{MSE}=\Var+\operatorname{Bias}^2$; E1: $\eta\bar R$, $\eta^*=T\,\mathrm{SR}^2/(1+T\,\mathrm{SR}^2)$, 0.397 for one year and 0.940 for the sample [A20-12]; consistency stated ((17.2) for $\bar R$); pitfall: unbiased is not best; 中文導讀 | 575 |
 | 3 | The Standard Error of a Mean {2} | (20.2) from (16.3) and (17.1), uncorrelated days with a common mean and variance; $s/\sqrt T$ consistent (stated); E2: 0.01580% a day [A20-13] ([[LM18]]'s (18.8)), 3.89 points a year; the annual form $\sqrt A\,\sigma/\sqrt\tau$; (1.12): $A\bar r=\ln(P_T/P_0)/\tau$, so finer sampling leaves the estimate itself unchanged; Merton (1980); [[ex:merton]]; ±1 point at 95% needs 1,381 years [A20-14]; (20.3) by expanding $\sum(X_i-\bar X)^2$; E3: $s_{\mathrm u}/s$ is 1.0000855 on TR23 and 1.0225 on 23 annual values (22/23 = 0.9565 for $\E s^2/\sigma^2$, $s_{\mathrm u}=22.706\%$) [A20-15], LM10's 1.000114 cited; pitfall: annualizing the mean's SE by $\sqrt A$ (0.25 instead of 3.89 points [A20-42]); 中文導讀 | 600 |
-| 4 | Confidence Intervals {3} | definition by coverage; (20.4): $\bar R\pm1.96\,s/\sqrt T$ by (17.5) and (15.6); the $t_{T-1}$ interval with $s_{\mathrm u}$ for normal days (*stated without proof* until Blitzstein and Hwang §10.4 is read, X32); E4: 7.8% to 23.0% a year; $F_Y^{-1}(0.975)=1.96037$ against 1.95996 at $T-1=5{,}848$ [A20-16]; one year of data, ±37.2 points [A20-18]; [[ex:coverage]] (experiment 2) [A20-17]; [[ex:years]]; widget; pitfall: "95% probability that $\mu$ is inside" ([[LM24]] gives that statement a meaning) | 520 |
+| 4 | Confidence Intervals {3} | definition by coverage; (20.4): $\bar R\pm1.96\,s/\sqrt T$ by (17.5) and (15.6); the $t_{T-1}$ interval with $s_{\mathrm u}$ for normal days, its law in one line: by Blitzstein and Hwang's Ex. 7.5.9 $\bar R$ and $s_{\mathrm u}^2$ are independent, by Ex. 10.4.3 $V=(T-1)s_{\mathrm u}^2/\sigma^2\sim\chi^2_{T-1}$, and with $Z=\sqrt T(\bar R-\mu)/\sigma$ Def. 10.4.4 gives $Z/\sqrt{V/(T-1)}=\sqrt T(\bar R-\mu)/s_{\mathrm u}\sim t_{T-1}$ (X32); E4: 7.8% to 23.0% a year; $F_Y^{-1}(0.975)=1.96037$ against 1.95996 at $T-1=5{,}848$ [A20-16]; one year of data, ±37.2 points [A20-18]; [[ex:coverage]] (experiment 2) [A20-17]; [[ex:years]]; widget; pitfall: "95% probability that $\mu$ is inside" ([[LM24]] gives that statement a meaning) | 540 |
 | 5 | Maximum Likelihood {4} | $\mathcal L(\theta)=\prod_tf_R(R_t;\theta)$ for iid days (a density keeps its subscript; $f$ is an exposure), $\ell=\ln\mathcal L$; (20.5) the normal MLE derived ($\hat\sigma=s$, divisor $T$); E5 (LM5's 0050 fit is the MLE); $\mathcal N_N$ stated (why (10.2) divides by $T$), Deep Dive 1; E6: the Student-t on TR23 by numerical maximization, $\nu=3.065$, location 0.0997%, scale 0.7761% with standard errors 0.144, 0.0124%, 0.0138% [A20-20]; $\ell$ rises by 561.8 over the normal [A20-19]; the fit's standard deviation 1.317% (SE 0.045) against $s=1.2084\%$ [A20-21]; [[ex:fits]]; pitfall: the $t$ location is not the mean (skewness); 中文導讀 (with §6) | 560 |
 | 6 | Fisher Information and the Cramér–Rao Bound {5} | score, $\mathcal I(\theta)$, observed information $-\ell''(\hat\theta)$; (20.6) asymptotic normality, conditions, stated; E7: the normal's information gives $\sigma/\sqrt T$ and $s/\sqrt{2T}=0.0112\%$ [A20-24], [[LM18]]'s $s_Y/\sqrt{2n}$; [[ex:profile]]: the profile log-likelihood of $\nu$ against its parabola (2.80 to 3.37 against 2.78 to 3.35 [A20-23]); $\hat\nu$ and the scale correlate 0.68 [A20-22]; (20.7) Cramér–Rao stated, attained by $\bar R$ in the normal model, Deep Dive 2; the $t$ location's 0.0124% against $\bar R$'s 0.0158% (ratio 0.78 [A20-25]) holds only inside the $t$ model; regimes: $\nu$ 2.990 (SE 0.195) and 3.237 (SE 0.223) [A20-26]; pitfall: an information-based SE assumes the model (Problem 8) | 540 |
-| 7 | The Delta Method {6} | (20.8) from (7.1) and (16.4) ((10.4)'s quadratic form); one-parameter case first: $s=\sqrt{s^2}$, $\Var(s^2)\approx(\operatorname{Kurt}-1)\sigma^4/T$ by the sum rule; E8: annual volatility 18.96% ([[LM19]]'s) ± 0.33 (sample skewness −0.34, kurtosis 8.27 [A20-27], [[LM14]]'s) or ± 0.175 (normal); the 23 annual values: 22.207% ± 3.27, interval 15.8% to 28.6%, so LM17's 18.563% (± 0.34) lies 1.1 standard errors below [A20-31]; (20.9) for $\hat f=\bar R/s^2$ and $\bar R/s$; E9: $\hat f=4.28\pm1.11$ (mean only 1.08), interval 2.10 to 6.46 [A20-28]; Sharpe ratio ([[LM19]]'s 0.0517 a day, 0.81 a year) ± 0.0132 a day, ± 0.21 a year, ≈ $1/\sqrt\tau=0.205$ [A20-29]; 0050: 5.68, mean only 1.50 → 2.74 to 8.62 = LM4's 2.7 to 8.6, full 1.53 → 2.68 to 8.68 [A20-30]; [[ex:delta]]; LM11's eigenvalue share and LM22; pitfall: a plug-in SE needs the moments it plugs in (under $\nu<4$ the fourth is infinite); 中文導讀 | 600 |
+| 7 | The Delta Method {6} | (20.8) from (7.1) and (16.4) ((10.4)'s quadratic form); one-parameter case first: $s=\sqrt{s^2}$, $\Var(s^2)\approx(\operatorname{Kurt}-1)\sigma^4/T$ by the sum rule; E8: annual volatility 18.96% ([[LM19]]'s) ± 0.33 (sample skewness −0.34, kurtosis 8.27 [A20-27], [[LM14]]'s) or ± 0.175 (normal); the 23 annual values: 22.207% ± 3.27, interval 15.8% to 28.6%, so LM17's 18.563% (± 0.34) lies 1.1 standard errors below [A20-31]; under a normal model for the years, Ex. 10.4.3's $23s^2/\sigma^2=22s_{\mathrm u}^2/\sigma^2\sim\chi^2_{22}$ gives the interval 17.6% to 32.1% for $\sigma$ (quantiles 10.98 and 36.78) [A20-32]; (20.9) for $\hat f=\bar R/s^2$ and $\bar R/s$; E9: $\hat f=4.28\pm1.11$ (mean only 1.08), interval 2.10 to 6.46 [A20-28]; Sharpe ratio ([[LM19]]'s 0.0517 a day, 0.81 a year) ± 0.0132 a day, ± 0.21 a year, ≈ $1/\sqrt\tau=0.205$ [A20-29]; 0050: 5.68, mean only 1.50 → 2.74 to 8.62 = LM4's 2.7 to 8.6, full 1.53 → 2.68 to 8.68 [A20-30]; [[ex:delta]]; LM11's eigenvalue share and LM22; pitfall: a plug-in SE needs the moments it plugs in (under $\nu<4$ the fourth is infinite); 中文導讀 | 600 |
 | 8 | The Hill Estimator of a Tail Index {7} | power tail above $x_0$, conditional (Pareto) density $\alpha x_0^{\alpha}x^{-\alpha-1}$; (20.10) $\hat\alpha=k/\sum\ln(x_i/x_0)$, information $1/\alpha^2$, $\operatorname{SE}=\hat\alpha/\sqrt k$; Hill (1975) takes $x_0$ at an order statistic; E10: at 3%, $k=108$, $\hat\alpha=3.63\pm0.35$, interval 2.9 to 4.3 [A20-33]; at 2%, 4%, 5%: 2.49 (0.16), 4.93 (0.74), 4.76 (1.23) [A20-34]; [[ex:hill]]; LM15's chords (2.09 to 5.03; 4.17) and $\nu=3.065$ beside it; pitfall: the threshold trades bias against variance, and clustered losses make $\hat\alpha/\sqrt k$ too small; 中文導讀 | 420 |
 | 9 | Estimation in Python {8} | `ddof` passed explicitly (NumPy 0, Polars 1); `stats.t.fit` and a tighter `minimize(method="Nelder-Mead")`; a central-difference Hessian in NumPy, checked at two step sizes; `stats.t.ppf`; the seed rule; `np.quantile(..., method="inverted_cdf")` for $\hat F^{-1}$; lab box | 180 |
 | — | Summary (7) / Problems (12) / Solutions | | 140 / 420 / 520 |
-| | **Total** | | **5,455** |
+| | **Total** | | **5,475** |
 
 **Elements.** 10 examples (E1 §2; E2, E3 §3; E4 §4; E5, E6 §5; E7 §6; E8, E9 §7; E10 §8). Knowledge checks:
 
@@ -1197,13 +1204,11 @@ set in [[ex:case]]. The case says "independent" once and the hygiene note says w
 抽樣分布 (sampling distribution), 偏誤 (bias), 均方誤差 (mean squared error), 不偏估計量 (unbiased estimator),
 一致估計量 (consistent estimator)); §3 (標準誤 (standard error), 樣本變異數 (sample variance); 信賴區間 (confidence
 interval) may join here for §4); §5–§6 (概度函數 (likelihood function), 最大概度估計 (maximum likelihood estimation),
-費雪訊息 (Fisher information), 克萊姆-饒歐下界 (Cramér–Rao lower bound)); §7 (標準誤, the delta method); §8 (希爾估計量
-(Hill estimator); 尾部指數 (tail index), LM5's and LM15's printed form, no 樂詞網 entry). Five boxes for eight
-sections. Six terms are not yet looked up in 樂詞網 (X34): delta method, observed information, asymptotic normality,
-efficiency, Pareto distribution, profile likelihood. Until they are, each box prints the book's form with its English
-every time (cross-check §8); proposed book forms, to be replaced by 樂詞網's where it has an entry: Delta 方法 (delta
-method), 觀測訊息 (observed information), 漸近常態性 (asymptotic normality), 有效性 (efficiency), 柏拉圖分布 (Pareto
-distribution), 剖面概度 (profile likelihood).
+費雪訊息 (Fisher information), 觀察訊息矩陣 (observed information matrix), 漸近常態性 (asymptotic normality), 效率
+(efficiency), 剖面概度 (profile likelihood), 克萊姆-饒歐下界 (Cramér–Rao lower bound)); §7 (標準誤, delta法 (delta
+method)); §8 (希爾估計量 (Hill estimator), 帕累托分布 (Pareto distribution); 尾部指數 (tail index), LM5's and LM15's
+printed form, no 樂詞網 entry). Five boxes for eight sections. delta法, 觀察訊息矩陣, 漸近常態性, 效率, 帕累托分布 and
+剖面概度 are 樂詞網's statistics forms (SOURCES, "Chinese terms (Volume IV)").
 
 Deep Dives:
 
@@ -1221,14 +1226,14 @@ Deep Dives:
 
 **Exhibits.**
 
-- `case` (table, §1): TR23, daily simple returns, iid. Rows: mean, % a year ($A\bar R$): 15.38, SE 3.89, 7.8 to 23.0,
-  "(20.2)"; volatility, % a year ($\sqrt A\,s$, [[LM19]]'s estimate): 18.96, 0.33, 18.3 to 19.6, "delta method, sample
+- `case` (table, §1): TR23, daily simple returns, iid. Rows: mean, % a year ($A\bar R$, [[LM19]]'s estimate): 15.38,
+  SE 3.89, 7.8 to 23.0, "(20.2)"; volatility, % a year ($\sqrt A\,s$, [[LM19]]'s estimate): 18.96, 0.33, 18.3 to 19.6, "delta method, sample
   kurtosis"; Kelly fraction $\hat f=\bar R/s^2$ (daily): 4.28, 1.11, 2.10 to 6.46, "delta method"; Sharpe ratio a year
   ($r_f=0$, [[LM19]]'s estimate): 0.81, 0.21, 0.40 to 1.22, "delta method, iid"; Student-t degrees of freedom: 3.065,
   0.144, 2.78 to 3.35, "observed information";
   tail index (Hill, the 108 losses of 3% or more): 3.63, 0.35, 2.9 to 4.3, "Pareto information" [A20-08]–[A20-11],
   [A20-20], [A20-23], [A20-28], [A20-29], [A20-33]. Every interval follows from the printed estimate and SE (checked in
-  `anchors.md`). Note: in-sample; each standard error states its model; Sections 3–8 derive the columns. Source:
+  `plans/vol-4-anchors.md`). Note: in-sample; each standard error states its model; Sections 3–8 derive the columns. Source:
   FinMind `TaiwanStockTotalReturnIndex` (TAIEX), retrieved 18 October 2026; Computations: `data/lm20_numbers.py` and
   `LM20_lab.ipynb`.
 - `sampling` (two stacked `line` charts with `step` series, §2): experiment 1, 10,000 one-year samples of 246 days from
@@ -1261,8 +1266,8 @@ Deep Dives:
   100, 246; columns: normal model, $\bar R\pm1.96\,s/\sqrt T$ (simulated; exact $2F_{t_{T-1}}(1.96\sqrt{(T-1)/T})-1$);
   normal model, $t_{T-1}$ interval with $s_{\mathrm u}$; $t_3$ model, both intervals. Values (%, one decimal): 84.5
   (exact 84.6), 95.0, 86.1, 96.4 / 90.4 (90.4), 95.1, 91.5, 96.0 / 93.6 (93.6), 94.9, 94.2, 95.6 / 94.6 (94.6), 95.0,
-  94.9, 95.3 / 94.8 (94.8), 95.0, 95.0, 95.2 [A20-17]. Note: model; the exact column states the $t_{T-1}$ law
-  (*stated without proof*, X32); the $t_3$ draws are built from four normals, as the widget's.
+  94.9, 95.3 / 94.8 (94.8), 95.0, 95.0, 95.2 [A20-17]. Note: model; the exact column uses the $t_{T-1}$ law derived
+  in §4 (X32); the $t_3$ draws are built from four normals, as the widget's.
 - `fits` (table, §5–§6): TR23 daily returns in %. Rows: normal ($\hat\mu=\bar R$, $\hat\sigma=s$, SEs 0.0158 and 0.0112
   [A20-24]); Student-t, full sample (3.065 (0.144), 0.0997 (0.0124), 0.7761 (0.0138); standard deviation 1.317 (0.045));
   7% limit, 3,077 returns ($\nu$ 2.990 (0.195)); 10% limit, 2,772 returns (3.237 (0.223)) [A20-20], [A20-21], [A20-26];
@@ -1320,7 +1325,8 @@ capability D was not approved), checked at $T$ = 5, 10, 20, 30, 100, 250: 2.7764
 - E7 §6 `info`: $\mathcal I(\mu)=1/\sigma^2$, $\mathcal I(\sigma)=2/\sigma^2$; SEs 0.0158% and 0.0112% [A20-24]; Cramér–Rao
   attained by $\bar R$; the $t$ location's 0.0124% [A20-25].
 - E8 §7 `vol`: $\operatorname{SE}(\sqrt A\,s)=\sqrt A\,s\sqrt{(\operatorname{Kurt}-1)/(4T)}$: 0.33 (Kurt 8.27) and 0.175
-  (Kurt 3) [A20-10]; the 23 annual values [A20-31]; regimes' $s$ 1.257 ± 0.026 and 1.152 ± 0.035 [A20-39] (stability
+  (Kurt 3) [A20-10]; the 23 annual values by the delta method [A20-31] and by the $\chi^2_{22}$ interval of a normal
+  model, 17.6% to 32.1% (Blitzstein and Hwang Ex. 10.4.3; SciPy's `stats.chi2.ppf`) [A20-32]; regimes' $s$ 1.257 ± 0.026 and 1.152 ± 0.035 [A20-39] (stability
   check; their difference is LM21's to test).
 - E9 §7 `kelly`: (20.9); TR23 and 0050 as in [[ex:delta]] [A20-28]–[A20-30]; the interval is symmetric by
   construction, the true sampling distribution of $\hat f$ need not be ([[LM22]]).
@@ -1363,7 +1369,7 @@ and draws. No test, so no null or level beyond "95% interval".
     two intervals barely meet (bias at the low threshold, variance at the high one).
 11. Python, experiment 3 (`default_rng([3, 20261011])`, 20,000 normal samples of $T=5$): coverage of $\bar X\pm1.96\,s/\sqrt5$
     (divisor 5) and of the $t_4$ interval: 84.3% (MC SE 0.26) and 94.8% (0.16); exact 84.6% from
-    $2F_{t_4}(1.96\sqrt{4/5})-1$ (the $t$ law *stated without proof*) [A20-47]; is the gap chance?
+    $2F_{t_4}(1.96\sqrt{4/5})-1$ (the $t$ law of §4) [A20-47]; is the gap chance?
 12. MC: years of iid data for the annual Sharpe ratio's SE to fall to 0.1 (annual SR 0.5, normal). **A** about 100.
     B 10 (no square). C 384 ($1.96^2/0.1^2$: half-width taken for the SE) [A20-48].
 
@@ -1384,15 +1390,16 @@ its delta-method interval in each limit regime. Labs write plain "LM21", never `
   uncorrelated days with a common mean and variance (LM21, LM22, LM23, LM24, LM30, LM33, LM45).
 - (20.3) $\E s^2=\tfrac{T-1}T\sigma^2$, $s_{\mathrm u}^2$ unbiased; same conditions (LM21, LM23).
 - (20.4) $\bar R\pm1.96\,s/\sqrt T$ (large $T$, (17.5)); $\bar R\pm F_Y^{-1}(0.975)\,s_{\mathrm u}/\sqrt T$,
-  $Y\sim t_{T-1}$, exact for iid normal days (*stated without proof*, X32) (LM21, LM22, LM23, LM24).
+  $Y\sim t_{T-1}$, exact for iid normal days (from Blitzstein and Hwang Ex. 7.5.9, Ex. 10.4.3 and Def. 10.4.4, X32)
+  (LM21, LM22, LM23, LM24).
 - (20.5) normal MLE $\hat\mu=\bar R$, $\hat\sigma=s$; for $\mathcal N_N$, $\bar{\mathbf R}$ and (10.2) when $\hat\Sigma$
   is positive definite (LM23, LM24, LM26, LM30).
 - (20.6) $\hat\theta\approx\mathcal N\big(\theta,1/(T\mathcal I(\theta))\big)$; SE from $-\ell''(\hat\theta)$ (or $-H$);
-  iid, correct model, interior $\theta$, smooth density, support free of $\theta$, $0<\mathcal I<\infty$ (LM21, LM23,
-  LM25, LM26).
-- (20.7) $\Var\hat\theta\ge1/(T\mathcal I(\theta))$ for unbiased $\hat\theta$, regularity conditions (LM23, LM24).
+  iid, correct model, interior $\theta$, smooth density, support free of $\theta$, $0<\mathcal I<\infty$ (LM21, LM25,
+  LM26).
+- (20.7) $\Var\hat\theta\ge1/(T\mathcal I(\theta))$ for unbiased $\hat\theta$, regularity conditions (LM24).
 - (20.8) $\Var h(\hat{\boldsymbol\theta})\approx\nabla h^{\top}\Cov(\hat{\boldsymbol\theta})\,\nabla h$; $h$
-  differentiable, $\nabla h\ne\mathbf 0$, $\hat{\boldsymbol\theta}$ approximately normal (LM22, LM23, LM25, LM26, LM33, LM45).
+  differentiable, $\nabla h\ne\mathbf 0$, $\hat{\boldsymbol\theta}$ approximately normal (LM22, LM25, LM26, LM33, LM45).
 - (20.9) $T\Var(\hat f)\approx\big[1-2\,\mathrm{SR}\operatorname{Skew}+\mathrm{SR}^2(\operatorname{Kurt}-1)\big]/\sigma^2$,
   $T\Var(\bar R/s)\approx1-\mathrm{SR}\operatorname{Skew}+\tfrac14\mathrm{SR}^2(\operatorname{Kurt}-1)$; iid, finite
   fourth moment (LM22, LM33, LM45).
@@ -1417,24 +1424,27 @@ its delta-method interval in each limit regime. Labs write plain "LM21", never `
 - The $t$ location (0.0997%) is the centre of a symmetric model fitted to skewed data, not the mean (0.0625%); its
   smaller SE is efficiency inside that model only.
 - Rounding: print intervals at the precision their printed inputs reproduce (7.8 to 23.0, 18.3 to 19.6, 2.9 to 4.3,
-  0.535 to 0.561). Every printed form is rounded from the unrounded value and checked at its printed precision; the
-  forms within a tenth of a unit of a rounding boundary are flagged in `anchors.md` (for example 1,381 years, 0.33,
+  0.535 to 0.561, 17.6 to 32.1). Every printed form is rounded from the unrounded value and checked at its printed
+  precision; the forms within a tenth of a unit of a rounding boundary are flagged in `plans/vol-4-anchors.md` (for
+  example 1,381 years, 0.33,
   0.18, 3.63, 0.5480, 23.76).
 - `t.fit`'s $\nu$ (3.06522) and a tighter search's (3.06526) differ in the fifth figure; a numerical Hessian is checked at
   two step sizes; scale is not $\sigma$ ((15.11)).
 - Mixing samples: TR23 (total return), U28 (price indices, no dividends), LM4's 0050 common dates; never in one statistic.
-- Ownership: $\bar R$, $s$, skewness and kurtosis are [[LM14]]'s (and [[LM19]]'s in Volume IV); $\sqrt A\,s=18.96\%$
-  and the Sharpe ratio 0.0517 a day, 0.81 a year are [[LM19]]'s (X1); the 23 annual values' 0.22207 [[LM15]]'s; 18.563%
+- Ownership: $\bar R$, $s$, skewness and kurtosis are [[LM14]]'s (and [[LM19]]'s in Volume IV); $A\bar R=15.38\%$,
+  $\sqrt A\,s=18.96\%$ and the Sharpe ratio 0.0517 a day, 0.81 a year are [[LM19]]'s (X8); the 23 annual values' 0.22207 [[LM15]]'s; 18.563%
   [[LM17]]'s; the chords [[LM15]]'s; 108 [[LM13]]'s; LM20 owns $\hat f=4.28$, the standard errors, intervals and fits.
 - References (SOURCES, sections and theorem numbers only where confirmed): Wasserman (2004) §6.3.1–§6.3.2, §9.3–§9.5,
-  §9.7–§9.9 (cited by section only after each is read against the claim, open point (b)); Merton (1980), Appendix A
+  §9.7–§9.9 (cited by section only after each is read against the claim, "Open before Stage 2")); Merton (1980), Appendix A
   (read in NBER WP 444; JFE pagination open); Rao (1945, reprint 1992) and Casella and Berger for Cramér–Rao (theorem
   numbers and year unconfirmed: cite the book, not a theorem number, until confirmed); Hill (1975) for the
   conditional-likelihood approach (formula as printed open; the text derives it); Drees, de Haan and Resnick (2000) for
   the Hill plot (author order open); Lo (2002) for the LM33 pointer; [[LM18]] (and its Glasserman 2003, §9.1.2) for
-  batch standard errors. The $t_{T-1}$ law of a normal sample is read in Blitzstein and Hwang §10.4 before it is cited
-  (X32); until then (20.4)'s exact form, the coverage table's exact column and Problem 11's exact value are *stated
-  without proof*, and the module prints no $\chi^2$ interval for $\sigma$ (A20-32 withdrawn).
+  batch standard errors. Blitzstein and Hwang (2019) as SOURCES records them (X32): Ex. 7.5.9, Ex. 10.4.3 and
+  Def. 10.4.4 give (20.4)'s exact form, the coverage table's exact column and Problem 11's exact value through §4's
+  one-line derivation (the book does not state the $t_{T-1}$ law of the studentized mean itself, so the text cites the
+  three items, not "§10.4"); Ex. 10.4.3 gives E8's $\chi^2_{22}$ interval for $\sigma$ under a normal model of the
+  years, whose quantiles come from SciPy (no $\chi^2$ density is needed).
 - Notation: $\alpha$ is the tail index, so levels are "95%"; $k$ is Hill's count, not a lag; $\tau$ is years of data;
   no Greek in chart text.
 
@@ -1449,40 +1459,20 @@ its delta-method interval in each limit regime. Labs write plain "LM21", never `
   the 23-value estimate, so "understate" claims a direction the data do not establish. New wording (accepted, plan's
   Stage 4 list): "give a smaller annual spread, a gap that [[LM19]] and [[LM20]] weigh against its sampling error".
 
-**Questions for the editor.**
+**Open before Stage 2** (open in SOURCES; the brief cites only what SOURCES confirms):
 
-1. *Spread across seeds.* The decision on Monte Carlo errors asks for the spread across seeds of the $t$ model's
-   standard deviations. To keep AUTHORING §8's rule (one generator per experiment, created once, never reseeded), the
-   brief draws the 20 further runs in turn from one generator, as experiment 4 (`default_rng([4, 20261011])`), and
-   prints their spread and range [A20-51]. The runs are independent, so the spread is the same quantity. Accept, or
-   use 20 seeds literally (which needs an exception to §8)?
-2. *Chinese book forms.* Until 樂詞網 is searched (X34), the boxes print a book form with its English. The brief
-   proposes Delta 方法, 觀測訊息, 漸近常態性, 有效性, 柏拉圖分布 and 剖面概度 (中文導讀 paragraph above). Accept these as
-   placeholders?
-
-**Decided, not yet applicable** (each is written as the decision says for that case; to be done before Stage 2):
-
-- Blitzstein and Hwang §10.4 to be read for the $t_{T-1}$ law (X32); until then (20.4)'s exact form, the coverage
-  table's exact column and Problem 11's exact value say *stated without proof*, and A20-32's $\chi^2$ interval stays
-  withdrawn.
-- Wasserman §6.3.2, §9.7 and §9.9 to be read against the claims before the text cites them by section (X34, open point
-  (b)); Merton's JFE pagination, Hill's (1975) formula as printed, Casella and Berger's theorem numbers and year, Drees
-  et al.'s author order and Rao's 1945 original stay open in SOURCES; the brief cites only what SOURCES confirms.
-- Python facts to record in SOURCES from the pinned versions (X34): `Generator.standard_t`;
-  `scipy.optimize.minimize(method="Nelder-Mead")` with `xatol`, `fatol`, `maxiter`, `maxfev`; `ppf` and `logpdf` of
-  `stats.t` and `stats.norm`; `np.quantile(..., method="inverted_cdf")`.
-- 樂詞網 lookups for the six terms above (X34).
-- LM19's tag numbers (19.1), (19.5), (19.7), (19.8) are cited as LM19's draft brief numbers them; LM20 follows any
-  renumbering in LM19's revision.
+- Wasserman §6.3.2, §9.7 and §9.9, read against the claims before the text cites them by section (X34).
+- Merton's JFE pagination, Hill's (1975) formula as printed, Casella and Berger's theorem numbers and year, Drees et
+  al.'s author order and Rao's 1945 original.
 
 ## LM21 Hypothesis Testing and Multiple Testing
 
 Stage 1 brief, revised 2026-10-19 after the cross-check and the independent recomputation. Drafted from the editor's
-spine (`plans/vol-4.md`, "LM21") and revised to its section "Editor's decisions on the LM19–LM25 drafts (2026-10-19)",
-the cross-check's findings (X1–X40) and the recomputation's items; "Changes in this revision" lists each. Each number
-carries its anchor ID at its first appearance; `data/vol4_anchors_lm21.py` prints all 61 (`anchors.md` beside this
-brief). Numbers that published modules printed cite their file:line. As in Volume III's briefs, § counts the
-Introduction as §1, so §k is the module's Section k−1.
+spine (`plans/vol-4.md` at commit bcfa0d4, "### LM21") and revised to the section "Editor's decisions on the LM19–LM25
+drafts (2026-10-19)", the cross-check's findings (X1–X40), the recomputation's items and the fresh check; "Changes in
+this revision" lists each. Each number carries its anchor ID at its first appearance; `data/vol4_anchors_lm21.py`
+prints all 61 (rows in `plans/vol-4-anchors.md`). Numbers that published modules printed cite their file:line. As
+in Volume III's briefs, § counts the Introduction as §1, so §k is the module's Section k−1.
 
 **Prereq:** `[4, 5, 13, 14, 15, 16, 17, 18, 19, 20]`. What each supplies:
 
@@ -1514,14 +1504,14 @@ Introduction as §1, so §k is the module's Section k−1.
   (lm17.md:392, LM17's figure, LM19's statistic).
 - LM20 (brief): (20.2) $\operatorname{SE}(\bar R)=\sigma/\sqrt T$, estimated by $s/\sqrt T$ (0.01580% a day, A20-13);
   (20.3) $s_{\mathrm u}^2$ unbiased; (20.4) the 95% interval, for the annual mean 7.8% to 23.0% a year (A20-09), and
-  $t_{T-1}$ for a normal model; the standard error of a sample variance, which depends on the kurtosis. LM20 owns
+  $t_{T-1}$ for a normal model; (20.6), whose normal information gives the standard error of a sample variance,
+  $\sigma^2\sqrt{2/n}$ for nearly normal data (Problem 7; in general it depends on the kurtosis). LM20 owns
   every standard error and interval that LM21 quotes.
 
 **Leads:** `[22, 23, 24, 25, 26, 33, 34]`: the expected tag users and the pointer targets (LM22 bootstraps (21.1)
 and (21.2) and sets its regime test beside LM21's 0.041; LM23 applies (21.1) and (21.6)–(21.8) to the 28 alphas; LM24
-sets a posterior probability beside (21.2) and cites the t-stat 3.955678; LM25 and LM26 report p-values by (21.2),
-LM25's Ljung–Box statistic being a sum of terms like (21.5); LM33 cites (21.4) and (21.9); LM34 cites (21.6) and
-(21.9)). The cross-check confirmed the list.
+sets a posterior probability beside (21.2) and cites the t-stat 3.955678; LM25 and LM26 report p-values by (21.2);
+LM33 cites (21.4) and (21.9); LM34 cites (21.6) and (21.9)). The cross-check confirmed the list.
 
 **Forward links honoured.** Rechecked by `grep -n "LM21"` over `src/lm*.md`, `src/lm*.js`, `src/pages/*.md`,
 `build/make_lab*.py` and `src/syllabus.yaml`: the spine missed none. The syllabus line is added as a promise.
@@ -1623,7 +1613,9 @@ pair space of 5,848 pairs and LM15's 292 blocks of 20 sessions (the first 5,840 
 family by the return's date, weekdays Monday 1,151, Tuesday 1,181, Wednesday 1,183, Thursday 1,168, Friday 1,143 and
 23 Saturday sessions [A21-07], months from 369 (February) to 532 (March) [A21-08]. The 23 Saturday sessions
 (2006-10-14 to 2018-12-22, listed in A21-07) belong to no weekday and to every "rest" (the editor's decision); the text
-calls them "Saturday sessions" and explains them only after an official calendar page is in SOURCES. Cleaning: none
+calls them "Saturday sessions" and says that TWSE's history page states that the market stopped trading on Saturday
+make-up workdays from 2019 (SOURCES, "Taiwan facts (Volume IV)"); that the 23 sessions were such days is an
+inference, written as one. Cleaning: none
 beyond `vol3_series.py`; no return is exactly 0 (`Fraction` on the two-decimal closes: 3,205 up, 2,644 down
 [A21-09]). Counts against a threshold use the guard (`R > 1e-12`, `R <= -0.03 + 1e-12`) and are checked exactly with
 `Fraction`; constructed p-values are compared with `Fraction`. Seeds (AUTHORING §8): experiment 8 (E8: 10,000
@@ -1642,8 +1634,7 @@ hold 17 statistics, X7 eleven record points and model curves, X2, X3 and the wid
 `taiex_tr.csv` is built locally and never published.
 
 **Hygiene declaration.** *In-sample:* every test on TR23 (E2–E4, E6–E8, the regimes, Problems 7 and 9): each runs
-on the data that suggested it. The module runs 29 tests on TR23 [A21-58] (28 if Problem 9 is dropped) and says so
-beside the calendar family. *Stability check:* the two limit regimes (X1, E4) and Wednesday in each (E8). *Model:* the
+on the data that suggested it. The module runs 29 tests on TR23 [A21-58] and says so beside the calendar family. *Stability check:* the two limit regimes (X1, E4) and Wednesday in each (E8). *Model:* the
 null laws (X2), the power curves and years (X3, E5, KC §4), the shuffled-date null (E8), the maximum of $m$ null
 statistics and the random rules (X7, E10), the widget, Problem 11, the knowledge checks of §4, §6 and §8.
 *Hypothetical:* LM13's manager (E1, Problem 6). *Constructed:* E9's p-values, the knowledge checks of §2, §3, §5, §7
@@ -1702,13 +1693,13 @@ and standard deviation are [[LM19]]'s statistics ($s$, divisor $T$); the t-stats
 |:--|:--|:--|--:|
 | 1 | Introduction | a positive mean, and days that look special; case + X1; roadmap; notation and hygiene notes | 380 |
 | 2 | What a Test Decides {1} | small case first: LM13's manager, 8 of 12 under $\theta=\tfrac12$ (E1); $H_0$, $H_1$ fixed in advance, one- or two-sided; statistic, null law, rejection region, level, size; p-value (21.2) and why it is uniform under a continuous null; the 2×2 of decisions and truths: type I and II errors, power; E1's 4% power [A21-46]; E2 (up days, $\theta_0=\tfrac12$, exact binomial (15.1) and normal (17.5)); pitfall: a p-value is not $\Pr(H_0)$, and "not rejected" is not "true" | 600 |
-| 3 | Testing a Mean Return {2} | (21.1) with conditions (iid, finite variance, large $T$: approximately $\mathcal N(0,1)$ by (17.5) and LM20; exactly $t_{T-1}$ for iid normal returns, *stated without proof* until Blitzstein and Hwang §10.4 is read and cited); X2; E3 (TR23); duality with LM20's interval (20.4); uncorrelated is enough for $\Var\bar R=\sigma^2/T$ ((16.3)), autocorrelation is not (LM19, LM23); (21.3), the two-sample statistic with unpooled variances, and its conditions; E4 (the regimes); pitfall: significant in one period and not in the other is not a significant difference | 650 |
+| 3 | Testing a Mean Return {2} | (21.1) with conditions (iid, finite variance, large $T$: approximately $\mathcal N(0,1)$ by (17.5) and LM20; exactly $t_{T-1}$ for iid normal returns, in one line: by Blitzstein and Hwang's Ex. 7.5.9 $\bar R$ and $s_{\mathrm u}^2$ are independent, by Ex. 10.4.3 $V=(T-1)s_{\mathrm u}^2/\sigma^2\sim\chi^2_{T-1}$, so with $Z=\sqrt T(\bar R-\mu)/\sigma$ Def. 10.4.4 makes $Z/\sqrt{V/(T-1)}$, the t-stat at $\mu_{\text{null}}=\mu$, a $t_{T-1}$ variable (as [[LM20]]'s (20.4)); X2; E3 (TR23); duality with LM20's interval (20.4); uncorrelated is enough for $\Var\bar R=\sigma^2/T$ ((16.3)), autocorrelation is not (LM19, LM23); (21.3), the two-sample statistic with unpooled variances, and its conditions; E4 (the regimes); pitfall: significant in one period and not in the other is not a significant difference | 650 |
 | 4 | Power and the Years a Sharpe Ratio Needs {3} | power as a function of the true mean; under $H_1$ the t-stat is approximately $\mathcal N(\mathrm{SR}\sqrt\tau,1)$, since $\bar R/s\cdot\sqrt T=\mathrm{SR}\sqrt\tau$; (21.4) from (5.5); X3; E5; TR23's 3.956 as $0.8115\times\sqrt{23.7645}$, with LM19's 0.81 [A21-19]; pitfall: more frequent data do not help (LM20) | 480 |
 | 5 | Testing Frequencies and Independence {4} | LM13's sign table (X4); (21.5) with the Deep Dive; the null law $\chi^2_1$ through LM19's (19.6) and LM16's definition (one series on consecutive days; for two series *stated without proof*); E6; E7 (falls after falls); what clustering does: (16.3) with positive covariances widens a count's spread; LM16's 177 days ($z=18.5$ from LM16's printed U28 counts [A21-26]) and its S5 days as 4,382 tests on $\chi^2_5$ at 1% (43.8 rejections expected, 291 found [A21-27]); LM16's crash correlation and lab gaps → LM22; pitfall: two-proportion tests on clustered days | 600 |
 | 6 | Many Tests at Once {5} | the calendar family defined before looking (12 months, 5 weekdays, each against the rest); X5; one rejection against $17\times0.05=0.85$ expected ((14.1), (14.3)); FWER $1-0.95^{17}=0.58$ [A21-29] for independent tests ((13.7)); E8 (shuffled dates; Bonferroni and Šidák adjustments; Wednesday by regime); Bonferroni from (13.2), (21.6); the 29 tests of this module | 550 |
 | 7 | Holm and the False Discovery Rate {6} | Holm's step-down rule (21.7) and its Deep Dive; FDR defined in words; Benjamini–Hochberg (21.8), independence stated (BH 1995), equal to the FWER when every null is true; Benjamini–Yekutieli in one sentence; E9 (constructed: 1, 3, 5 rejections [A21-47]); X6 (the calendar: none); pitfall: choosing the rule after seeing the p-values | 550 |
 | 8 | Searching Many Strategies: the Hurdle of 3 {7} | (21.9) from (16.1); medians of the maximum; X7; E10 (10,000 random rules on TR23, with Monte Carlo errors); Harvey, Liu and Zhu's "t-statistic greater than 3.0"; $\lvert t\rvert=3$ as Bonferroni for about 18.5 tests [A21-34]; LM4's warning; LM33, LM34 (White 2000, Romano and Wolf 2005); widget | 460 |
-| 9 | Tests in Python {8} | the t-stat by hand against `stats.t.sf` and `stats.norm.sf`; `stats.binom.sf`, `stats.chi2.sf`; `multipletests` with `method` always given (its default is Holm–Šidák); `stats.false_discovery_control`; SciPy's test functions and their defaults (`ttest_ind`'s `equal_var=True`, `chi2_contingency`'s Yates correction; recorded in SOURCES before Stage 2); lab box | 170 |
+| 9 | Tests in Python {8} | the t-stat by hand against `stats.t.sf` and `stats.norm.sf`; `stats.binom.sf`, `stats.chi2.sf`; `multipletests` with `method` always given (its default is Holm–Šidák); `stats.false_discovery_control`; SciPy's test functions and their defaults (`ttest_ind`'s `equal_var=True`, `chi2_contingency`'s Yates correction, `jarque_bera`'s divisor-$T$ moments; SOURCES, "SciPy 1.18 (Stage 1 check)"); lab box | 170 |
 | — | Summary (7) / Problems (11) / Solutions | | 120 / 380 / 460 |
 | | **Total** | | **5,400** |
 
@@ -1886,10 +1877,10 @@ stated, rounding, and for Problem 11 the seed and the draws.
    both, 859 and 538 single, 4,382 days; the script recounts them on U28, A21-61): the table 347, 512, 191, 3,332;
    $\hat\rho=0.423$; $\chi^2=784$ [A21-54]. Why the $\chi^2_1$ law is doubtful (clustered days; §5) and why the
    conclusion stands (any reasonable widening leaves $\chi^2$ far beyond 3.84). The ratio 3.29 recomputes as 3.2902.
-9. Jarque–Bera, kept only if a Jarque–Bera paper is verified and recorded in SOURCES before Stage 2; otherwise
-   dropped (cross-check X34; question 1). Stated without proof:
-   $\mathrm{JB}=\frac T6\big(\operatorname{Skew}^2+\tfrac14(\operatorname{Kurt}-3)^2\big)$ is approximately $\chi^2_2$
-   under iid normal returns. From [[LM14]]'s printed −0.34 and 5.27: $\mathrm{JB}=6{,}881$; by (16.9) the tail is
+9. Jarque–Bera (the editor's decision): the statistic as SciPy's `jarque_bera` computes it,
+   $\mathrm{JB}=\frac T6\big(\operatorname{Skew}^2+\tfrac14(\operatorname{Kurt}-3)^2\big)$ with divisor-$T$ moments
+   (SOURCES, "SciPy 1.18 (Stage 1 check)"), Jarque and Bera (1980) cited as its origin (bibliographic only); that it is
+   approximately $\chi^2_2$ under iid normal returns is stated without proof. From [[LM14]]'s printed −0.34 and 5.27: $\mathrm{JB}=6{,}881$; by (16.9) the tail is
    $e^{-\mathrm{JB}/2}$, about $10^{-1494}$; unrounded moments give 6,875 and $10^{-1493}$ [A21-55]. What the
    rejection says and what it does not (fat tails are known; the test sizes them).
 10. Python: the calendar family (12 months, 5 weekdays, each against the rest of TR23) by hand with (21.3), the
@@ -1908,7 +1899,7 @@ the guard and the `Fraction` check, weekday and month columns (the weekday conve
 and `stats.t.sf`, X1, X2; 3 (21.3) and E4, X3, E5; 4 the sign table and (21.5) by hand, E6 with and without Yates,
 E7, E1 and Problem 6 with `stats.binom`, a pointer to LM13's lab question (make_lab13.py:463); 5 the calendar family,
 X5, E8 with experiment 8; 6 Holm and Benjamini–Hochberg by hand, `multipletests`, `false_discovery_control`, X6, E9;
-7 experiment 10, X7, E10 with its batch standard error, (21.9); 8 Problems 7, 9 (if kept), 10, 11. Extension
+7 experiment 10, X7, E10 with its batch standard error, (21.9); 8 Problems 7, 9, 10, 11. Extension
 (stability check): the calendar family in each limit regime (34 tests) under Holm and Benjamini–Hochberg. Labs write
 "LM22", never `[[LM22]]`.
 
@@ -1916,12 +1907,12 @@ X5, E8 with experiment 8; 6 Holm and Benjamini–Hochberg by hand, `multipletest
 
 - (21.1) $\text{t-stat}=(\bar R-\mu_{\text{null}})/(s_{\mathrm u}/\sqrt T)$; under $H_0$ approximately
   $\mathcal N(0,1)$ for iid returns with finite variance and large $T$; exactly $t_{T-1}$ for iid normal returns
-  (*stated without proof*; Blitzstein and Hwang 2019, §10.4, cited once read) (LM22, 23, 33).
+  (Blitzstein and Hwang 2019, Ex. 7.5.9, Ex. 10.4.3 and Def. 10.4.4, combined in §3's one line) (LM22, 23, 33).
 - (21.2) two-sided p-value $2\Phi(-\lvert\text{t-stat}\rvert)$ (one-sided $\Phi(-\text{t-stat})$); uniform on
   $(0,1)$ under a continuous null (LM22, 23, 24, 25, 26).
 - (21.3) $(\bar R_1-\bar R_2)/\sqrt{s_{\mathrm u,1}^2/T_1+s_{\mathrm u,2}^2/T_2}$, the two-sample statistic with
   unpooled variances; two independent groups, iid within each, finite variances, large $T_1$, $T_2$; approximately
-  $\mathcal N(0,1)$ under $\mu_1=\mu_2$ (LM22, 33).
+  $\mathcal N(0,1)$ under $\mu_1=\mu_2$ (LM33).
 - (21.4) power $\approx\Phi\big(\mathrm{SR}\sqrt\tau-\Phi^{-1}(1-\tfrac\alpha2)\big)+\Phi\big(-\mathrm{SR}\sqrt\tau-\Phi^{-1}(1-\tfrac\alpha2)\big)$,
   and, when the second term is negligible,
   $\tau\approx\big((\Phi^{-1}(1-\tfrac\alpha2)+\Phi^{-1}(\text{power}))/\mathrm{SR}\big)^2$; iid returns, $\sigma$
@@ -1930,7 +1921,7 @@ X5, E8 with experiment 8; 6 Holm and Benjamini–Hochberg by hand, `multipletest
 - (21.5) $\chi^2=\sum_{\text{cells}}(\text{observed}-\text{expected})^2/\text{expected}=n\hat\rho^2$ for a 2×2 table;
   approximately $\chi^2_1$ when the $n$ pairs are independent and identically distributed and the two indicators
   independent: for one series on consecutive days from (19.6) and LM16's $\chi^2_N$, for two series *stated without
-  proof* (question 2) (LM25).
+  proof* (the editor's decision) (in-module; no later user yet).
 - (21.6) with each of $m$ tests at level $\alpha/m$, FWER $\le m_0\alpha/m\le\alpha$ under any dependence ((13.2));
   for $m$ independent tests of true nulls at level $\alpha$, FWER $=1-(1-\alpha)^m$; expected false rejections
   $m_0\alpha$ under any dependence ((14.1), (14.3)) (LM23, 33, 34).
@@ -1952,8 +1943,7 @@ X5, E8 with experiment 8; 6 Holm and Benjamini–Hochberg by hand, `multipletest
 - "Significant in one period, not in the other" is not a difference (E4: 1.08).
 - Divisors and defaults: $s_{\mathrm u}$ in t-stats, $s$ in the Sharpe ratio and every printed standard deviation;
   Polars' `std` defaults to `ddof=1`; `multipletests` defaults to Holm–Šidák; SciPy's `chi2_contingency` applies Yates'
-  correction to a 2×2 table and `ttest_ind` pools variances unless told otherwise (`equal_var=False`; recorded in
-  SOURCES before Stage 2).
+  correction to a 2×2 table and `ttest_ind` pools variances unless told otherwise (`equal_var=False`; SOURCES).
 - Benjamini–Hochberg's guarantee needs independent statistics; the calendar's 17 are dependent (the months partition
   the days), and the shuffle shows the FWER barely moves (0.580 against 0.582). Benjamini–Yekutieli for any
   dependence.
@@ -1970,9 +1960,10 @@ X5, E8 with experiment 8; 6 Holm and Benjamini–Hochberg by hand, `multipletest
   statistics; Benjamini and Yekutieli (2001) through SciPy's documented use of its Theorem 1.3; Harvey, Liu and Zhu
   (2016), the abstract's sentence only; White (2000) and Romano and Wolf (2005) by their abstracts; Wasserman (2004,
   ch. 10; §10.2 p-values, §10.7 multiple testing, its coverage unconfirmed) and Casella and Berger (2nd ed., ch. 8;
-  the year, 2001 or 2002, is open) for the framework; Blitzstein and Hwang (2019) §10.4 for the $t$ law of (21.1),
-  cited only once read (until then *stated without proof*); no paper for the two-sample statistic (21.3); a
-  Jarque–Bera paper only if verified (Problem 9); Lo (2002) via LM19; Merton (1980) via LM20.
+  the year, 2001 or 2002, is open) for the framework; Blitzstein and Hwang (2019) Ex. 7.5.9, Ex. 10.4.3 and
+  Def. 10.4.4 for the $t$ law of (21.1) (the book does not state that law itself, so the text shows the one line and
+  never cites "§10.4"); no paper for the two-sample statistic (21.3); Jarque and Bera (1980) as the origin of Problem
+  9's statistic (bibliographic only), with SciPy's formula; Lo (2002) via LM19; Merton (1980) via LM20.
 
 **Stage 4 for earlier modules.** `leads` gain 21 in lm04.md:6 (LM21 cites lm04.md:541 and 563; cross-check X29),
 lm05.md:6 ((5.5)), lm14.md:6 ((14.1), (14.3), (14.5)) and lm18.md:6 ((18.2) and the batch standard error), as in the
@@ -1987,9 +1978,10 @@ link above is kept as printed.
 - Shuffled dates kept as *Model* (X7); statistics from LM16's printed counts labelled, and the counts recounted on U28
   (X8, new A21-61).
 - Two-sample statistic named without Welch; SciPy's `equal_var=False` named (X35); script labels changed to match.
-- The $t$ law of (21.1) *stated without proof* until Blitzstein and Hwang §10.4 is read (X32); (21.5)'s two-series
-  case likewise. Python facts and the Jarque–Bera paper go to SOURCES before Stage 2 (X34); Problem 9 is dropped if
-  no paper is verified.
+- After the fresh check (X32, X34, the editor's decisions): the $t$ law of (21.1) is derived in one line from
+  Blitzstein and Hwang's Ex. 7.5.9, Ex. 10.4.3 and Def. 10.4.4; (21.5)'s two-series case stays *stated without proof*;
+  Problem 9 stays, with SciPy's formula and Jarque and Bera (1980) as its origin; the SciPy facts are in SOURCES; the
+  Saturday sessions follow the "Calendar" decision; (21.5) no longer lists LM25 (its prerequisites cite only (21.2)).
 - Tag (19.6) cited for the band (X27); lm04 added to Stage 4 (X29); published files hold no daily series (X37).
 - Recomputation 1: E8's permutation is `R[perm]` on fixed dates. 2: E10's standard deviation uses the book's $s$
   (divisor 10,000; 0.9952 → 0.9951, printed 0.995) and now carries a batch standard error, its mean a standard error
@@ -2001,27 +1993,17 @@ link above is kept as printed.
   prints 0.04884; E2 prints 7.3; E8 writes $17\,p_{(1)}$ and Šidák's 0.267 from the unrounded $p_{(1)}$; the 1.99 of
   A21-25 is no longer listed (only 2.0 prints).
 
-**Open points this brief waits on** (written as the editor's decisions say until they close): Blitzstein and Hwang
-§10.4 for the $t$ law (X32); a Jarque–Bera paper (X34); SciPy's `ttest_1samp`, `ttest_ind`, `chi2_contingency`,
-`binomtest` and `jarque_bera` recorded in SOURCES "Python (Volume IV)" (X34; checked in code by the drafter); whether
-Wasserman §10.7 covers Bonferroni and Benjamini–Hochberg; Casella and Berger's year and theorem numbers; Harvey, Liu
-and Zhu's section numbers (only the abstract is cited); an official calendar page for the Saturday sessions (X14).
-
-**Questions for the editor.**
-
-1. Problem 9 if no Jarque–Bera paper is verified: drop it, as X34 decides (10 problems, 28 tests on TR23), or replace
-   it with E7's tail by the Poisson limit (15.4), $2.0\times10^{-7}$ against the exact $1.2\times10^{-7}$ (A21-25)?
-   The replacement keeps 11 problems and needs no new source, but the spine's Jarque–Bera problem would go.
-2. The $\chi^2_1$ law of (21.5) for two series (Problems 4 and 8): which reference should SOURCES add (Wasserman
-   ch. 10 or Casella and Berger, once read)? Until then the brief writes it *stated without proof*; the sign table's
-   case follows from (19.6).
+**Open before Stage 2** (open in SOURCES; until they close the text cites as the decisions say): whether Wasserman
+§10.7 covers Bonferroni and Benjamini–Hochberg; Casella and Berger's year and theorem numbers; Harvey, Liu and Zhu's
+section numbers (only the abstract is cited).
 
 ## LM22 Resampling Methods
 
 Stage 1 brief, revised 2026-10-19 after the cross-check and the independent recomputation. Drafted from the editor's
-spine (`plans/vol-4.md`, "LM22 Resampling Methods") and revised to the editor's decisions on the drafts (same file).
-Each number carries its anchor ID at its first appearance; `data/vol4_anchors_lm22.py` prints them all (`anchors.md`
-beside this brief). Numbers quoted from published modules cite their file and line.
+spine (`plans/vol-4.md` at commit bcfa0d4, "### LM22 Resampling Methods") and revised to the editor's decisions on the
+drafts (same file) and to the fresh check. Each number carries its anchor ID at its first appearance;
+`data/vol4_anchors_lm22.py` prints them all (rows in `plans/vol-4-anchors.md`). Numbers quoted from published modules
+cite their file and line.
 
 **Prereq:** `[4, 11, 13, 14, 16, 17, 18, 19, 20, 21]`.
 
@@ -2050,12 +2032,13 @@ beside this brief). Numbers quoted from published modules cite their file and li
   Sharpe ratio times $\sqrt A$ only for uncorrelated returns; Lo 2002). LM19 owns the estimates the case starts from:
   TR23's Sharpe ratio, 0.0517 a day and 0.81 a year, and its volatility $\sqrt A\,s=18.96\%$, both on $R$ with $r_f=0$;
   $\hat\rho_1(\lvert r\rvert)=0.161$ and $\operatorname{VR}(20)=1.036$.
-- LM20 (same batch): $\hat f:=\bar R/s^2=4.28$ and every standard error and interval of the delta method, (20.8) and
-  (20.9), as LM20's `delta` table prints them: the Sharpe ratio's SE 0.207 (plug-in skewness and kurtosis) and 0.205
+- LM20 (same batch): (20.2) $\operatorname{SE}(\bar R)$, behind §3's relative error $1/(\widehat{\mathrm{SR}}\sqrt T)$;
+  (20.4)'s normal interval, the pattern of the delta-method intervals; $\hat f:=\bar R/s^2=4.28$ and every standard
+  error and interval of the delta method, (20.8) and (20.9), as LM20's `delta` table prints them: the Sharpe ratio's SE 0.207 (plug-in skewness and kurtosis) and 0.205
   (normal), interval 0.40 to 1.22; $\hat f$'s SE 1.111 (plug-in), 1.085 (normal) and 1.082 (mean only), interval 2.10
   to 6.46; the volatility's SE 0.33 points (plug-in).
-- LM21 (same batch): null and alternative, test statistic, p-value, size; the t-stat $\bar R/(s_{\mathrm u}/\sqrt T)$,
-  3.96 on TR23 and 2.05 in the 7% regime, with two-sided normal p-values $7.6\times10^{-5}$ and 0.041; the duality of
+- LM21 (same batch): null and alternative, test statistic, p-value, size; the t-stat (21.1),
+  $\bar R/(s_{\mathrm u}/\sqrt T)$, 3.96 on TR23 and 2.05 in the 7% regime, with two-sided normal p-values (21.2), $7.6\times10^{-5}$ and 0.041; the duality of
   a test and an interval; the shuffled-date null (*Model*); the rule that every test reports how many tests ran on the
   same data.
 
@@ -2173,8 +2156,11 @@ defaults.
   the crash correlation (iid, block); 10–13 PC1's shares (2017 iid, 2017 block, 2020 iid, 2020 block); 14, 15 LM18's
   windows (block, iid); 16–18 the tests (7% regime iid, 7% regime block, full sample block); 19 the §8 knowledge check;
   20 the arch check (§9); 21 Problem 6; 22, 23 Problem 11; 24 the widget's precomputed histograms.
-- Block length used for every printed number (the book's rule, §6): $\ell=145$ for TR23 and its full-sample test, 130
-  for the U28 pair, 7 (2017) and 18 (2020) for the PC1 shares, 108 in the 7% regime, 36 in the 10% regime (Problem 11).
+- Block length used for every printed number (the book's rule, §6, as the editor's "Resampling" decision words it:
+  one length per sample and statistic family, the largest Politis–White stationary estimate among the squared
+  demeaned simple-return series the statistic involves, rounded): $\ell=145$ for every TR23 statistic, whether on $R$
+  or on $r$, and its full-sample test; 130 for the U28 pair, 7 (2017) and 18 (2020) for the PC1 shares, 108 in the 7%
+  regime, 36 in the 10% regime (Problem 11).
 - No full daily series in a published file (the editor's rule, X37): X5 is thinned to every fifth session; the widget
   embeds precomputed histograms, not returns.
 
@@ -2277,10 +2263,10 @@ $\hat f^*=4.14$ ([[LM17]]'s, [A22-06]) gets the same treatment in E3.
 
 中文導讀 in §2 (自助重抽法 (bootstrap), 重抽樣 (resampling), 抽樣分布 (sampling distribution), 標準誤 (standard
 error), 信賴區間 (confidence interval), 百分位數信賴區間 (percentile confidence interval), 基本信賴區間 (basic
-interval) and 偏誤加速校正之自助重抽信賴區間 (BCa), the last two the book's own forms printed with their English
-until the 樂詞網 lookup; the idea: $\hat F$ stands in for the unknown law, and $B$ only buys simulation accuracy), §5
-(區塊自助重抽法 (block bootstrap), 平穩自助重抽法 (stationary bootstrap), 移動區塊 (moving block), 循環區塊 (circular
-block), 區塊長度 (block length), all the book's own forms printed with their English; 波動群聚現象 (volatility
+interval), the book's own form (樂詞網 has no entry), and 樂詞網's 偏誤加速校正之自助重抽信賴區間 (BCa); the idea: $\hat F$
+stands in for the unknown law, and $B$ only buys simulation accuracy), §5 (區塊自助重抽法 (block bootstrap),
+平穩自助重抽法 (stationary bootstrap), 移動區塊 (moving block), 循環區塊 (circular block), 區塊長度 (block length), all
+the book's own forms, since 樂詞網 has no entries (SOURCES), printed with their English; 波動群聚現象 (volatility
 clustering), 自我相關 (autocorrelation), 波動率 (volatility); the idea: blocks carry calm and turbulent stretches
 whole, so the volatility interval widens fourfold while the Kelly interval barely moves), §7 (偏誤 (bias), 變異數比
 (variance ratio), 信賴區間; the idea: a skewed or biased bootstrap distribution separates the percentile and basic
@@ -2392,7 +2378,9 @@ sampler, and its numbers are NumPy's, reproducible from the seed; the text quote
   3.9 times, a relative SE of 6.84% against 1.75% [A22-24]; interval 16.5% to 21.5% [A22-14]. Moving and circular
   blocks give SEs of 1.12 points (X7) [A22-25].
 - E6 §6, "A block length for TR23": `optimal_block_length` gives 3.07 (stationary) and 3.51 (circular) on $R$, 144.59
-  and 165.52 on $(R-\bar R)^2$, 144.02 on $(r-\bar r)^2$; its cap is 230 [A22-08]. The book's rule takes 145. X6: the
+  and 165.52 on $(R-\bar R)^2$, 144.02 on $(r-\bar r)^2$; its cap is 230 [A22-08]. The book's rule takes the
+  stationary estimate on the squared demeaned simple returns, 144.59, rounded: 145 for every TR23 statistic, on $R$ or
+  on $r$ (one length per sample, so $\operatorname{VR}(20)$ and $\hat\rho_1(\lvert r\rvert)$ use 145 too). X6: the
   volatility's SE ratio is 1.18 at $\ell=2$, 3.91 at 145 and 4.63 at 400, still rising; the Sharpe ratio's stays at or
   below 1.15 [A22-26].
 - E7 §7, "Is the crash correlation below the model's by chance?": U28 pair, 223 days with $\lvert R_t-\bar R\rvert\ge2s$
@@ -2483,8 +2471,8 @@ own numbers and says that two intervals are a stability check, not a test on lat
 - (22.2) the $1-\alpha$ percentile interval $\big[\hat F_{\text{boot}}^{-1}(\tfrac\alpha2),\hat F_{\text{boot}}^{-1}
   (1-\tfrac\alpha2)\big]$ and basic interval $\big[2\hat\theta-\hat F_{\text{boot}}^{-1}(1-\tfrac\alpha2),\,2\hat\theta-
   \hat F_{\text{boot}}^{-1}(\tfrac\alpha2)\big]$, with $\hat F_{\text{boot}}^{-1}(u)=\hat\theta_{\text{boot},(\lceil
-  uB\rceil)}$; approximate, under the bootstrap's consistency (stated without proof; its reference waits for open
-  point (c)) (LM33, LM34, LM45).
+  uB\rceil)}$; approximate, under the bootstrap's consistency (stated without proof; its reference waits for a source,
+  "Open before Stage 2") (LM33, LM34, LM45).
 - (22.3) the stationary bootstrap: a new block at each position after the first with probability $1/\ell$, otherwise
   the next day (day $T$ followed by day 1); $\Pr(\text{a block lasts at least }j\text{ days})=(1-1/\ell)^{j-1}$, mean
   length $\ell$; every position uniform on the $T$ days (LM33, LM45).
@@ -2540,31 +2528,19 @@ own numbers and says that two intervals are a stability check, not a test on lat
   (Kelly under uncertainty) return to this question."
 - lm18.md:366 keeps "none here ([[LM22]])": LM22's E9 supplies the value.
 
-**Questions for the editor.**
-
-1. **X7 and the stationary-only rule.** X12 says printed numbers use the stationary bootstrap and circular blocks get
-   one sentence. This brief keeps X7 as the one exhibit that prints moving and circular blocks beside the stationary
-   bootstrap (it is outcome 4's evidence and Problem 9's setting), and gives circular blocks one sentence in §5's
-   prose. Agree, or drop X7's moving and circular rows?
-2. **The widget's precomputed design (X37).** 5 statistics × 11 lengths (iid and X6's ten stationary lengths) × 3
-   replicates of $B=1{,}000$, from a new experiment 24 in `data/lm22_charts.py`; the reader can no longer choose $B$.
-   Agree?
-3. **Sources still to read before Stage 2** (X34; until then the text follows the decisions): a source for the iid
-   bootstrap's consistency (open point (c); (22.2) and §2 say *stated without proof*); the content of Wasserman's §8.3
-   and §8.5.2 (open point (b); Deep Dive (a) is derived without attribution); Efron and Tibshirani's BCa and
-   moving-block sections (cited by chapter); Politis and Romano (1992), the circular bootstrap's original (Lahiri
-   §2.7.1 cited instead).
-4. **Chinese terms** (X34): 基本信賴區間 (basic interval), 移動區塊 (moving block), 循環區塊 (circular block), 區塊長度
-   (block length) and 偏誤加速校正之自助重抽信賴區間 (BCa) are printed as the book's own forms with their English until
-   the 樂詞網 lookup; the lookup is still to do.
+**Open before Stage 2** (sources still to read, X34; until then the text follows the decisions): a source for the iid
+bootstrap's consistency ((22.2) and §2 say *stated without proof*); the content of Wasserman's §8.3 and §8.5.2 (Deep
+Dive (a) is derived without attribution); Efron and Tibshirani's BCa and moving-block sections (cited by chapter);
+Politis and Romano (1992), the circular bootstrap's original (Lahiri §2.7.1 cited instead).
 
 ## LM23 Linear Regression
 
 Stage 1 brief, revised 2026-10-19 after the cross-check and the independent recomputation. Drafted from the editor's
-spine (`plans/vol-4.md:586–629`); revised to the editor's decisions (`plans/vol-4.md:301–372`), the cross-check's
-findings X6, X11, X17, X22, X27, X32, X34, X35, X37, X39, X40 and its §8, and the recomputation's items 2a–2h and 3.
-Every number carries its anchor ID at first appearance; `data/vol4_anchors_lm23.py` prints them all (58 rows, `## LM23`
-of the anchors file). Numbers quoted from published modules carry their file:line instead.
+spine (`plans/vol-4.md` at commit bcfa0d4, "### LM23 Linear Regression"); revised to the editor's decisions
+(`plans/vol-4.md`, "Editor's decisions on the LM19–LM25 drafts"), the cross-check's findings X6, X11, X17, X22, X27,
+X32, X34, X35, X37, X39, X40 and its §8, the recomputation's items 2a–2h and 3, and the fresh check. Every number
+carries its anchor ID at first appearance; `data/vol4_anchors_lm23.py` prints them all (58 rows, `## LM23` of
+`plans/vol-4-anchors.md`). Numbers quoted from published modules carry their file:line instead.
 
 **Prereq:** `[2, 6, 8, 9, 10, 11, 12, 15, 16, 17, 18, 19, 20, 21, 22]`. What each supplies:
 
@@ -2592,19 +2568,20 @@ of the anchors file). Numbers quoted from published modules carry their file:lin
   276).
 - LM18: the batch standard error (lm18.md:153) and its slope of $G$ on $\ln G$, $\hat\beta=2.18$, batch SE 0.01,
   exact 2.1584 (lm18.md:286), on the paths of experiment 3 (lm18.md:155).
-- LM19 (spine, `plans/vol-4.md:417–426`): $\hat\rho_k$ and its convention (full-sample mean, divisor $T$ in numerator
-  and denominator), used for the overlap residuals of §5; annualization (a mean times $A$).
-- LM20 (spine, `plans/vol-4.md:466–477`): estimator, bias, consistency, $\operatorname{SE}$, intervals, $s_{\mathrm u}$;
-  the normal MLE divides by $T$.
-- LM21 (spine, `plans/vol-4.md:516–524`): $H_0$, $H_1$, p-value, size, the one-sample t-test, family-wise error,
-  Bonferroni, Holm, the false discovery rate and Benjamini–Hochberg; the rule that every test reports how many tests
-  ran on the same data.
-- LM22 (spine, `plans/vol-4.md:561–568`): the block bootstrap, named once as the resampling alternative to HAC.
+- LM19 (brief above): (19.5) $\hat\rho_k$ and its convention (full-sample mean, divisor $T$ in numerator and
+  denominator), used for the overlap residuals of §5; (19.7), whose $\Var r_t^{(m)}/m$ tends to the long-run variance
+  of §5 as $m$ grows; annualization (a mean times $A$).
+- LM20 (brief above): estimator, bias, consistency; (20.2) $\operatorname{SE}$; (20.3) $s_{\mathrm u}$; (20.4)
+  intervals; (20.5) the normal MLE divides by $T$.
+- LM21 (brief above): $H_0$, $H_1$, size; the one-sample t-test (21.1) and its p-value (21.2); family-wise error and
+  Bonferroni (21.6), Holm (21.7), the false discovery rate and Benjamini–Hochberg (21.8); the rule that every test reports how many tests ran on the same data.
+- LM22 (brief above): the block bootstrap, named once as the resampling alternative to HAC.
 
 **Leads:** `[25, 26, 27, 30, 33, 34]` (X6: LM24 cites LM23 by a pointer only): LM25 (OLS for AR and Dickey–Fuller
-regressions, spurious regression, (23.2)–(23.4)), LM26 (auxiliary regressions, the ARCH test and Mincer–Zarnowitz,
-(23.1), (23.4), (23.6); HC0 and the lag rule, its lag named in words), LM27 and LM30 (factor risk, (23.8)), LM33 (HAC
-for a Sharpe ratio, (23.7)), LM34 (data snooping, pointed to from §7 and the lab).
+regressions, spurious regression, (23.1)–(23.4), (23.6)), LM26 (auxiliary regressions, the ARCH test and
+Mincer–Zarnowitz, (23.1), (23.4), (23.6); HC0, and Newey–West for loss differences, (23.7), with the lag rule), LM27
+and LM30 (factor risk, (23.8)), LM33 (HAC for a Sharpe ratio, (23.7)), LM34 (data snooping, pointed to from §7 and the
+lab).
 
 **Forward links honoured.**
 
@@ -2626,7 +2603,7 @@ pointer but holds the number lm18.md:153 promises to explain; it is added here.
 **Outcomes** ("After this module you should be able to:"):
 
 1. write the linear regression model in matrix form, compute OLS estimates, residuals and $s_\varepsilon^2=\text{RSS}/(T-d)$, and state the assumptions under which OLS is unbiased and best among linear unbiased estimators
-2. compute standard errors, t-stats, confidence intervals and prediction intervals for a regression, identify high-leverage days, and interpret R-squared as a statistic
+2. compute standard errors, t-stats, confidence intervals and prediction intervals for a regression, identify days with large hat values, and interpret R-squared as a statistic
 3. explain why heteroskedastic or autocorrelated errors invalidate the classical standard errors, and compute White and Newey–West standard errors, choosing the lag and checking its effect
 4. estimate a market model for a sector index, interpret its beta and intercept, and explain why a raw-return intercept on price indices is not Jensen's alpha
 5. size a hedge by regression, and judge a beta's stability across halves, calendar years and rolling windows
@@ -2640,10 +2617,12 @@ $\Var(\boldsymbol\varepsilon\mid X)=\sigma_\varepsilon^2I$, optional normality);
 $\Var(\hat{\boldsymbol\beta}\mid X)=\sigma_\varepsilon^2(X^{\top}X)^{-1}$ (23.2) from (16.4); $s_\varepsilon^2$ (23.3)
 and its unbiasedness via $\operatorname{tr}(I-\Pi)=T-d$; Gauss–Markov for linear unbiased estimators only, proved in a
 Deep Dive and cited at chapter level (Hayashi §1.3 or Greene ch. 4, X32); t-stats and intervals (23.4), the $t_{T-d}$
-law under normal errors *stated without proof* (X32: no source read yet), the normal approximation for large $T$;
-confidence and prediction intervals for a fitted value and leverage (23.5); R-squared as a statistic, adjusted R-squared
-and the F test in one sentence each; the sandwich (23.6) and White's estimator (HC0); the long-run variance and
-Newey–West (23.7) with Bartlett weights, the book's lag rule (X11) and `use_correction`; overlapping $m$-day
+law under normal errors *stated without proof* (X32: Blitzstein and Hwang do not state it, and Hayashi and Greene are
+unchecked), the normal approximation for large $T$; confidence and prediction intervals for a fitted value and the
+hat value (23.5); R-squared as a statistic, adjusted R-squared and the F test in one sentence each; the sandwich (23.6)
+and White's estimator (HC0); the long-run variance and Newey–West (23.7) with Bartlett weights, the book's lag rule
+(statsmodels' default HAC lag, which is Newey and West's (1994) pilot lag, not their recommended lag; X11) and
+`use_correction`; overlapping $m$-day
 sums and their MA($m-1$) residuals; a lag curve that does not level off as the signature of a drifting beta; the
 market model, beta and alpha; the CAPM's statement; Jensen's alpha and the decomposition (23.8) of a raw-return
 intercept on price indices ($r_f$ and dividend yields); U28's 28 betas and alphas with three SE methods; their
@@ -2684,7 +2663,8 @@ book, one sentence each. Bootstrap standard errors of a beta → LM22's tools, o
 - **Electronic** (aggregate outside U28, same parquet, same dates, no missing close; *constructed* factor
   $R_{\text{el},t}-R_{\text{mkt},t}$) [A23-06].
 - **LM2's sample**: `data/processed/etf_daily_returns.parquet`, 2,902 common-date total-return pairs of 0050 and
-  00631L, 2014-11-03 → 2026-10-08 [A23-07], recomputed under LM23's name (plans/vol-4.md:103–106).
+  00631L, 2014-11-03 → 2026-10-08 [A23-07], recomputed under LM23's name (`plans/vol-4.md`, "Data", recorded uses of
+  earlier samples).
 - **TR23 file on U28's dates**: `data/processed/vol3_taiex.parquet`; its price-index return `Rp` equals U28's TAIEX
   return on all 4,382 dates, so $q_{\text{mkt}}=A\cdot\overline{(R-R_p)}=3.46\%$ a year, the TAIEX's dividend yield
   over U28's window (total return 20.23-fold against 10.91-fold) [A23-08]. One statistic of one file, labelled
@@ -2698,8 +2678,9 @@ book, one sentence each. Bootstrap standard errors of a beta → LM22's tools, o
   $d$ coefficients; $s_\varepsilon^2=\text{RSS}/(T-d)$; descriptive $s$, $s_x$, correlations with divisor $T$
   (`ddof=0`, passed explicitly). Classical SE $s_\varepsilon^2(X^{\top}X)^{-1}$; White's HC0 without a
   degrees-of-freedom factor; Newey–West with Bartlett weights $1-k/(\ell+1)$ and the book's lag rule
-  $\ell=\lfloor4(T/100)^{2/9}\rfloor$ (X11; its attribution is an open point): 9 at 4,382, 8 at 2,902, 7 at 2,191, 4
-  for a year or 250 returns [A23-04]; no small-sample correction. Normal reference for every t-stat and p-value
+  $\ell=\lfloor4(T/100)^{2/9}\rfloor$, which the text calls statsmodels' default HAC lag and Newey and West's (1994)
+  pilot lag, not their recommended lag (X11; SOURCES, "LM23 (added)"): 9 at 4,382, 8 at 2,902, 7 at 2,191, 4 for a
+  year or 250 returns [A23-04]; no small-sample correction. Normal reference for every t-stat and p-value
   (two-sided), since $T-d\ge241$ ($t_{4380}$ and $t_{241}$ quantiles 1.9605 and 1.9699 against 1.9600 [A23-19]); E1
   alone uses $t_2$. Every t-stat names its method (classical, White or HAC). Sample autocorrelations are LM19's
   $\hat\rho_k$; sample quantiles are $\hat F^{-1}(u)$ (`inverted_cdf`). An intercept prints in bp a day and as $A$
@@ -2749,7 +2730,7 @@ note:
 | $\Gamma_k$, $\hat\Gamma_k$ | $\E[\varepsilon_t\varepsilon_{t-k}\mathbf x_t\mathbf x_{t-k}^{\top}]$ and its sample version (divisor $T$) | matrix version of $\gamma_k$; LM23 writes no scalar $\gamma$ |
 | $\ell$ | the Newey–West lag (statsmodels' `maxlags`) | §6's $B$, $\ell$ row: LM22's block length, LM23's lag; neither writes a likelihood (X17); $L$ is 00631L's multiple |
 | $\beta_{j,\text{null}}$ | the value of $\beta_j$ under $H_0$ in (23.4) | as LM21's $\mu_{\text{null}}$; clear of LM24's $\beta_0$ (X22) |
-| $h_t$, $h_0$ | leverage of date $t$, the $t$th diagonal entry of $\Pi$; of a new point $\mathbf x_0$ | subscripted; $\mathbf h$ (LM8's holdings) not used |
+| $h_t$, $h_0$ | hat value of date $t$, the $t$th diagonal entry of $\Pi$; of a new point $\mathbf x_0$ | subscripted; $\mathbf h$ (LM8's holdings) not used; "leverage" keeps the book's meaning ($f>1$) |
 | $\alpha_{\text{J}}$ | Jensen's alpha, on total excess returns | subscripted $\alpha$ |
 | $q_i$, $q_{\text{mkt}}$ | dividend yields a year, continuous as in LM6 | LM23 has no bets; the FDR level is written in words |
 | $\text{RSS}$ | residual sum of squares $\lVert\hat{\boldsymbol\varepsilon}\rVert^2$ | upright |
@@ -2781,9 +2762,9 @@ Bonferroni's 0.00179 [A23-40]).
 |:--|:--|:--|--:|
 | 1 | Introduction | regression as measurement with an error bar; case + X1; roadmap; notation and hygiene notes | 360 |
 | 2 | The Linear Model and Its Assumptions {1} | LM12's design is $X$; (23.1); the four assumptions listed as a theorem's hypotheses; unbiasedness; (23.2) from (16.4); simple regression $\Var\hat\beta=\sigma_\varepsilon^2/(Ts_x^2)$, the $1/T$ rate of lm18.md:153; (23.3) by $\operatorname{tr}(I-\Pi)=T-d$ (12.2); for normal errors the MLE divides by $T$ ([[LM20]]); E1; Gauss–Markov for linear unbiased estimators, Deep Dive (chapter-level reference); pitfall: spurious regression pointer ([[LM25]]); 導讀; KC | 620 |
-| 3 | Standard Errors, Intervals and Leverage {2} | (23.4), $t_{T-d}$ *stated without proof*, normal for large $T$; E2; R-squared as a statistic (adjusted, F test one sentence each; LM12's accounting identity); (23.5): confidence and prediction intervals, $h_t$, $\sum_th_t=d$; X2; E3 (7 April 2025, $h=0.171$, 21 times the average); 導讀; KC ($\beta=1$) | 600 |
-| 4 | Heteroskedasticity and White's Standard Errors {3} | the sandwich (23.6) from (16.4); White's estimator, conditions stated without proof (White 1980); E4 on LM18's paths; the market model's ratio White/classical 1.19–1.91; FinancialInsurance's White SE three times the classical in 2025 (E3 cross-reference); KC (LM16's slope) | 440 |
-| 5 | Overlapping Returns and Newey–West {3} | overlapping 20-day sums, MA(19) residuals (LM19's $\hat\rho_1=0.953$ against 19/20); long-run variance; (23.7), Bartlett weights, PSD (Newey and West 1987); the book's lag rule; E5; X5; X4: the lag curve and the drift diagnosis; pitfall: an SE that grows with $\ell$; one sentence each on [[LM22]]'s block bootstrap and on [[LM33]], which applies the long-run variance to a Sharpe ratio; 導讀 (heteroskedasticity, HAC); KC | 560 |
+| 3 | Standard Errors, Intervals and Hat Values {2} | (23.4), $t_{T-d}$ *stated without proof*, normal for large $T$; E2; R-squared as a statistic (adjusted, F test one sentence each; LM12's accounting identity); (23.5): confidence and prediction intervals, the hat value $h_t$ (a point's influence, never called leverage, which stays the book's $f>1$), $\sum_th_t=d$; X2; E3 (7 April 2025, $h=0.171$, 21 times the average); 導讀; KC ($\beta=1$) | 600 |
+| 4 | Heteroskedasticity and White's Standard Errors {3} | the sandwich (23.6) from (16.4); White's estimator, conditions stated without proof (White 1980); E4 on LM18's paths; the market model's ratio White/classical 1.19–1.91 [A23-26]; FinancialInsurance's White SE three times the classical in 2025 (E3 cross-reference); KC (LM16's slope) | 440 |
+| 5 | Overlapping Returns and Newey–West {3} | overlapping 20-day sums, MA(19) residuals (LM19's $\hat\rho_1=0.953$ against 19/20); long-run variance; (23.7), Bartlett weights, PSD (Newey and West 1987); the book's lag rule, stated as statsmodels' default HAC lag and Newey and West's (1994) pilot lag, not the lag they recommend; E5; X5; X4: the lag curve and the drift diagnosis; pitfall: an SE that grows with $\ell$; one sentence each on [[LM22]]'s block bootstrap and on [[LM33]], which applies the long-run variance to a Sharpe ratio; 導讀 (heteroskedasticity, HAC); KC | 560 |
 | 6 | The Market Model: Beta, Alpha and Hedging {4,5} | market model; CAPM stated (Campbell, Lo and MacKinlay ch. 5; Sharpe 1964 and Lintner 1965 as origins); Jensen's alpha (Jensen 1968); (23.8) with sizes; X3 (28 betas, intervals, halves: 25 of 28 move beyond 1.96 HAC SEs); X8 rolling betas; E6 hedge (LM8's promise, contracts at $200F_t$; out of sample); E7 (LM2's slope); 導讀 (beta, alpha, Jensen, 市場模型); KC | 650 |
 | 7 | Twenty-Eight Alphas {6} | X6; counts by method (1, 1, 2) against 1.4; Bonferroni, Holm, BH applied (LM21's); correlation across sectors; E8 with experiment 1; the case resolved; one sentence on [[LM34]]; 導讀 (多重假設檢定); KC | 480 |
 | 8 | A Factor Named in Advance {7} | two-factor model, the constructed electronics factor; LM11's warning; collinearity, (23.9) VIF, (12.6); reparametrization keeps the fit; X7; E9; Semiconductor sits inside Electronic (partly mechanical loading); halves' cosine 0.807 against PC2's 0.297; Fama–MacBeth one sentence; KC | 420 |
@@ -2814,9 +2795,9 @@ Bonferroni's 0.00179 [A23-40]).
 (R-squared)), §5 (變異數非齊一性 (heteroskedasticity), 自我相關 (autocorrelation), 穩健標準誤 (robust standard error),
 變異數非齊一與自我相關一致估計量 (HAC)), §6 (beta and alpha kept in English; Jensen's alpha; 殘差; 市場模型 (market
 model)), §7 (多重假設檢定 (multiple testing), 族系誤差率, 偽發現率, Bonferroni 校正, 資料偵伺). All but 市場模型 are on
-the plan's list (`plans/vol-4.md:144–158`). "Market model" and "collinearity" await the 樂詞網 lookup before Stage 2
-(X34); until then the §6 box prints the book's form 市場模型 with its English, and collinearity (§8, no box) stays in
-English. Deep Dives: §2 "Why OLS is best among linear unbiased estimators" (linear estimators only, X32): any linear
+the plan's list (`plans/vol-4.md`, "Chinese terms"); 市場模型 (market model) and 共線性 (collinearity) are 樂詞網's
+statistics forms (SOURCES, "Chinese terms (Volume IV)"); collinearity (§8, no box) is written in English in the text.
+Deep Dives: §2 "Why OLS is best among linear unbiased estimators" (linear estimators only, X32): any linear
 unbiased $M\mathbf y$ has $MX=I$; write $M=(X^{\top}X)^{-1}X^{\top}+K$ with $KX=0$, so
 $\Var(M\mathbf y\mid X)=\sigma_\varepsilon^2(X^{\top}X)^{-1}+\sigma_\varepsilon^2KK^{\top}$ by (16.4) ($M$, $K$ as §6's
 generic matrices; $C$ stays E8's correlation matrix); reference Hayashi §1.3 or Greene ch. 4 at chapter level. §5
@@ -2913,7 +2894,8 @@ $s_\varepsilon$ (22 × 28 × 10 numbers, about 60 KB), computed by `data/lm23_ch
 - E6 §6 `hedge` (LM8's promise; hypothetical NT\$100 million of FinancialInsurance, hedged with TX at NT\$200 a point):
   the variance-minimizing ratio is the beta, (16.8)'s; full sample 0.8234 (R-squared 0.5916), last 250 returns 0.3085
   (0.1989); a contract is worth $200F_t$ (LM8), and TX's settlement price on 8 October 2026 was $F_t=49{,}357$ (TX23,
-  the 202610 contract), so the notional hedge is 10.13 contracts and the beta hedges 8.34 or 3.12 [A23-36]. Out of
+  the 202610 contract), so the notional hedge is 10.13 contracts and the beta hedges 8.34 or 3.12, about 3 contracts
+  [A23-36]. Out of
   sample:
   the first half's 1.1556 applied in the second half cuts variance by 0.19%, the notional hedge (ratio 1) by 23.09%, the
   second half's own 0.5784 by 49.29% [A23-37]. A regression hedge is only as good as the beta's stability.
@@ -2957,9 +2939,9 @@ gives the seed and draws.
    count). **B** 2. C 4 (BH's count at a 5% false discovery rate) [A23-55]. The solution adds that statsmodels'
    default `"hs"` (Holm–Šidák) also gives 2 here, and why the default must still be overridden.
 7. Derive (23.2) from (16.4), then $\E[\text{RSS}\mid X]=(T-d)\sigma_\varepsilon^2$ from $\operatorname{tr}(I-\Pi)=T-d$.
-8. Leverage in a simple regression: show $h_t=\tfrac1T+(x_t-\bar x)^2/(Ts_x^2)$ and $\sum_th_t=2$; for 7 April 2025 from
-   the printed 2025 inputs (TAIEX mean 0.1062%, $s_x=1.5405\%$ with divisor 243, $x_t=-9.6997\%$), $h=0.1709$ [A23-56,
-   A23-21]. Python part: recompute the year's leverages.
+8. Hat values in a simple regression: show $h_t=\tfrac1T+(x_t-\bar x)^2/(Ts_x^2)$ and $\sum_th_t=2$; for 7 April 2025
+   from the printed 2025 inputs (TAIEX mean 0.1062%, $s_x=1.5405\%$ with divisor 243, $x_t=-9.6997\%$), $h=0.1709$
+   [A23-56, A23-21]. Python part: recompute the year's hat values.
 9. Hedge (hypothetical): NT\$50 million in a sector with $\beta=0.75$ and R-squared 0.5 on the TAIEX, TX settling at
    $F_t=20{,}000$, NT\$200 a point: 9.375 contracts (9), against 12.50 by notional; the hedged SD is $\sqrt{0.5}=0.7071$ of the
    unhedged [A23-57]; why the in-sample R-squared overstates the reduction (E6).
@@ -2978,7 +2960,7 @@ gives the seed and draws.
 (U28 and Electronic, rebuilt with LM16's repair cell), `0050_daily_raw.csv`, `0050_dividends.csv`,
 `00631L_daily_raw.csv` (LM2's pairs, built as LM2's lab builds them), `taiex_tr.csv` (TR23, for $q_{\text{mkt}}$ and
 LM18's paths)): 1 data, $T$, $A$, halves, the lag rule; 2 OLS by hand, E1, E2, statsmodels with every option; 3 X2,
-E3, leverage; 4 E4 (LM18's paths, seed [3, 20261011]), LM16's slope; 5 X4, E5, X5; 6 X3, X8, E6, E7; 7 X6, the three
+E3, hat values; 4 E4 (LM18's paths, seed [3, 20261011]), LM16's slope; 5 X4, E5, X5; 6 X3, X8, E6, E7; 7 X6, the three
 corrections, E8 (experiment 1); 8 X7, E9; 9 problems 8, 11, 12. E6's contract count takes TX23's $F_t=49{,}357$ as a
 printed input (cited to `data/vol4_series.py`), so the lab needs no futures file. Extension (*Out-of-sample*, "one
 rule fixed in advance", X40): hedge FinancialInsurance each month with the trailing 250-return beta and compare the
@@ -2991,9 +2973,9 @@ is LM34's subject. Labs write plain "LM22" and "LM34", never `[[LM22]]`.
   of full column rank (LM25, 26, 27, 30).
 - (23.2) $\E[\hat{\boldsymbol\beta}\mid X]=\boldsymbol\beta$ when $\E[\boldsymbol\varepsilon\mid X]=\mathbf 0$;
   $\Var(\hat{\boldsymbol\beta}\mid X)=\sigma_\varepsilon^2(X^{\top}X)^{-1}$ when also $\Var(\boldsymbol\varepsilon\mid X)
-  =\sigma_\varepsilon^2I$; simple regression $\sigma_\varepsilon^2/(Ts_x^2)$ (LM25, 26).
+  =\sigma_\varepsilon^2I$; simple regression $\sigma_\varepsilon^2/(Ts_x^2)$ (LM25).
 - (23.3) $s_\varepsilon^2=\text{RSS}/(T-d)$, $\E[s_\varepsilon^2\mid X]=\sigma_\varepsilon^2$ under (23.2)'s conditions
-  (LM25, 26).
+  (LM25).
 - (23.4) $\text{t-stat}(\hat\beta_j)=(\hat\beta_j-\beta_{j,\text{null}})/\operatorname{SE}(\hat\beta_j)$; $t_{T-d}$
   under normal errors (*stated without proof*), approximately $\mathcal N(0,1)$ for large $T$; interval
   $\hat\beta_j\pm\Phi^{-1}(0.975)\operatorname{SE}$ (LM25, whose DF t-stat is not $t$; LM26).
@@ -3003,7 +2985,7 @@ is LM34's subject. Labs write plain "LM22" and "LM34", never `[[LM22]]`.
   $\sum_t\hat\varepsilon_t^2\mathbf x_t\mathbf x_t^{\top}$ for the middle; independent rows, large $T$ (LM25, 26).
 - (23.7) Newey–West: $\hat\Gamma_0+\sum_{k=1}^{\ell}\big(1-\tfrac{k}{\ell+1}\big)(\hat\Gamma_k+\hat\Gamma_k^{\top})$ in
   place of $X^{\top}\Sigma_\varepsilon X/T$; stationary products with fading dependence, $\ell\to\infty$ slower than $T$
-  (stated), with the book's lag rule (LM33).
+  (stated), with the book's lag rule (LM26, LM33).
 - (23.8) $\alpha=\alpha_{\text{J}}+(1-\beta)\,r_f/A-(q_i-\beta q_{\text{mkt}})/A$ per day, for a price-index market
   model; $r_f$, $q$ simple a year, spread evenly (LM27, 30, 33).
 - (23.9) $\operatorname{VIF}=1/(1-\hat\rho^2)$ for two regressors, the factor by which collinearity multiplies a
@@ -3021,8 +3003,9 @@ is LM34's subject. Labs write plain "LM22" and "LM34", never `[[LM22]]`.
 - A raw intercept on price indices is not Jensen's alpha: say the $r_f$ and dividend terms of (23.8) every time.
 - Counts at a threshold move with the method (Optoelectronic −1.965 under HAC, −1.935 classical): report the method,
   then correct for 28 tests; never call one in 28 a discovery.
-- Leverage and limit days: 7 April 2025 has 21 times 2025's average leverage, and its returns were capped by the 10%
-  limit; robust SEs are themselves noisy when a few days dominate (E3).
+- Hat values and limit days: 7 April 2025 has 21 times 2025's average hat value, and its returns were capped by the
+  10% limit; robust SEs are themselves noisy when a few days dominate (E3). A point's influence is its hat value,
+  never its "leverage" (the book's $f>1$).
 - The factor: *constructed*, Electronic contains Semiconductor and the other electronics sectors, so their loadings are
   partly mechanical; the TAIEX contains every sector. Never call LM11's PC2 "electronics".
 - LM12's accounting identity: a high R-squared of TAIEX on its sectors is not evidence; R-squared describes.
@@ -3030,54 +3013,32 @@ is LM34's subject. Labs write plain "LM22" and "LM34", never `[[LM22]]`.
 - Ownership: LM2's, LM16's and LM18's numbers are recomputed and cited to their modules; LM21 owns the corrections, LM23
   applies them; LM22 owns block-bootstrap intervals.
 - References (SOURCES; chapter level where theorem numbers are unconfirmed): White (1980), Newey and West (1987), the
-  lag rule as the book's rule (its attribution is an open point), the CAPM from Campbell, Lo and MacKinlay ch. 5 with
-  Sharpe (1964) and Lintner (1965) as origins (X35), Jensen (1968) and Fama and MacBeth (1973) (Crossref read by the
-  drafter 2026-10-19; recorded in SOURCES before Stage 2, X34), Gauss–Markov for linear estimators at chapter level
-  (Hayashi §1.3 or Greene (2018) ch. 4), the $t_{T-d}$ law *stated without proof* until a source is read (X32), Strang
-  (2016) §4.2 via LM12.
+  lag rule as statsmodels' default HAC lag and Newey and West's (1994) pilot lag, not their recommended lag (their
+  NBER Technical Working Paper 144, p. 7, as SOURCES records it; X11), the CAPM from Campbell, Lo and MacKinlay ch. 5
+  with Sharpe (1964) and Lintner (1965) as origins (X35), Jensen (1968) and Fama and MacBeth (1973) (bibliographic,
+  SOURCES), Gauss–Markov for linear estimators at chapter level (Hayashi §1.3 or Greene (2018) ch. 4), the $t_{T-d}$
+  law *stated without proof* (X32: Blitzstein and Hwang do not state it), Strang (2016) §4.2 via LM12.
 
 **Stage 4 for earlier modules.** `leads` gain 23 in lm02.md:6, lm06.md:6 (the $r_f$ proxy and $q$), lm10.md:6
 (positive definiteness of $X^{\top}X$), lm15.md:6 ((15.9) for $t_{T-d}$), lm17.md:6 ((17.1), (17.5)) and lm18.md:6, all
 on the plan's Stage 4 list (X25–X29); lm08, lm09, lm11, lm12 and lm16 already list 23. No wording change: lm18.md:286's
 "batch standard error 0.01" is a correct report of a noisy estimate, which E4 explains (cross-check §8: no change).
 
-**Questions for the editor.**
+**Open before Stage 2** (open in SOURCES; the text is written as the decisions say):
 
-The draft's eight questions are settled (cross-check §8 and the editor's decisions): the alpha count is reported by
-all three methods (Q1); $\lfloor4(T/100)^{2/9}\rfloor$ is the book's lag rule, its attribution open (Q2, X11); $\ell$,
-$\mathbf x_t$, $\Sigma_\varepsilon$, $q_i$, $q_{\text{mkt}}$, $R_{\text{mkt},t}$, $R_{\text{el},t}$ are accepted and the
-null value is $\beta_{j,\text{null}}$ (Q3, X17, X22); lm18.md:286 stays as printed (Q4); E6's *Out-of-sample* label,
-the partly mechanical factor and E3's warning stand (Q5–Q7); the sources follow X32–X35 (Q8). Open now:
-
-1. **X2 under the daily-series rule (X37).** X2 publishes 243 daily return pairs of one year (FinancialInsurance and
-   the TAIEX, 2025). The brief stores them sorted by the TAIEX return, without dates, reading them as "sorted values"
-   that the rule allows; the one labelled point (7 April 2025) is cited in the text. Is that reading right, or should
-   X2 show only a thinned or binned cloud plus the cited points?
-2. **What could not be applied yet** (written as the decisions say for that case; each is checked before Stage 2):
-   - the $t_{T-d}$ law is *stated without proof* in (23.4) and §3: no source read (X32 names Blitzstein and Hwang
-     §10.4 for the laws of normal samples; whether it, Hayashi or Greene states a regression's $t_{T-d}$ is unchecked);
-   - Gauss–Markov is cited at chapter level only (Hayashi §1.3 or Greene ch. 4; theorem numbers unconfirmed; Hansen
-     2022 not cited);
-   - the lag rule's attribution (statsmodels' `cov_hac_simple` default, `sandwich_covariance.py:585, 607`; Newey and
-     West 1994 is bibliographic only): the text calls it the book's rule;
-   - the Bartlett weights are not confirmed in Newey and West (1987) (SOURCES' open point): the §5 Deep Dive cites
-     the paper only for positive semi-definiteness, which its abstract states;
-   - Jensen (1968) and Fama and MacBeth (1973) await their SOURCES entries (X34);
-   - 樂詞網 terms for "market model" and "collinearity" (X34): the §6 box prints the book's form 市場模型 with its
-     English until then;
-   - the Python facts the brief prints (HC0 against HC1, `get_robustcov_results`' HC1 default, `use_correction` in
-     `OLS.fit` against `cov_hac_simple`, `multipletests`' Holm–Šidák default) are recorded in SOURCES before Stage 2.
-3. **E6's last contract count.** The last-250 hedge is 3.12485 contracts, flagged as 0.015 of a unit from 3.125
-   [A23-36]; the brief prints 3.12 (and the solution can say "about 3 contracts"). Print it as 3.12, or round to whole
-   contracts throughout E6 (10, 8, 3)?
+- The Bartlett weights in Newey and West (1987): the §5 Deep Dive cites the paper only for positive
+  semi-definiteness, which its abstract states.
+- Theorem numbers in Hayashi and Greene: Gauss–Markov stays at chapter level (Hansen 2022 not cited), and the
+  $t_{T-d}$ law of (23.4) stays *stated without proof*.
 
 ## LM24 Bayesian Inference and Shrinkage
 
 Stage 1 brief, revised 2026-10-19 after the cross-check and the independent recomputation. Drafted from the editor's
-spine (`plans/vol-4.md`, "LM24 Bayesian Inference and Shrinkage") and revised to "Editor's decisions on the LM19–LM25
-drafts (2026-10-19)" and the cross-check's findings that touch LM24 (X1, X3, X6, X19, X20, X32, X34, X37 and its §8
-answers). Each number carries its anchor ID at its first appearance (A24-61, added at the revision, breaks the order);
-`data/vol4_anchors_lm24.py` prints them all. Numbers quoted from published modules cite file:line; numbers owned by
+spine (`plans/vol-4.md` at commit bcfa0d4, "### LM24 Bayesian Inference and Shrinkage") and revised to "Editor's
+decisions on the LM19–LM25 drafts (2026-10-19)", the cross-check's findings that touch LM24 (X1, X3, X6, X19, X20,
+X32, X34, X37 and its §8 answers) and the fresh check. Each number carries its anchor ID at its first appearance
+(A24-61, added at the revision, breaks the order); `data/vol4_anchors_lm24.py` prints them all (rows in
+`plans/vol-4-anchors.md`). Numbers quoted from published modules cite file:line; numbers owned by
 another Volume IV module cite it with [[LMn]].
 
 **Prereq:** `[4, 10, 11, 13, 14, 15, 16, 17, 19, 20, 21]`. LM4: (4.2) the second-order growth $g(f)\approx
@@ -3163,9 +3124,10 @@ Carlo.
 - §7 pitfall: "Haircuts for a backtest's Sharpe ratio are [[LM33]]'s."
 - §5: the James–Stein dominance theorem (24.4), *stated without proof*; its source toward the grand mean is an open
   point (below).
-- §5 Deep Dive and Problem 8: the chi-square density and the chi-square law of a sum of squared deviations, *stated
-  without proof* (only the law's definition is in [[LM16]], lm16.md:360–361); Blitzstein and Hwang §10.4 is read
-  before it is cited (plans/vol-4.md, Sources).
+- §5 Deep Dive and Problem 8: the $\chi^2_{N-1}$ law of a sum of squared deviations from the sample mean, cited to
+  Blitzstein and Hwang's Ex. 10.4.3 (the definition of $\chi^2_N$ is [[LM16]]'s, lm16.md:360–361); the $\chi^2_k$
+  density stays *stated without proof*, because only the book's Theorem 10.4.2 ($\chi^2_n$ is
+  $\operatorname{Gamma}(n/2,1/2)$) was read, not the Gamma density of its §8.4 (plans/vol-4.md, "Sources").
 
 **Data role.** Two samples, never mixed in one statistic.
 
@@ -3283,14 +3245,13 @@ weighs a mean by its precision); (c) the sceptic: §7, E10, X7 (a prior centred 
 中文導讀 in §2 (貝氏推論, 事前分布, 事後分布, 概度函數 (likelihood function), 共軛事前分布, 貝他(β)分布 (beta
 distribution)), §3 (精確度 (precision), 事後分布), §4 (可靠區間 (credible interval) against 信賴區間, p值), §6 (收縮估計量,
 經驗貝氏估計量, James-Stein 估計量, 總平均數 (grand mean)) and §7 (分數凱利 (fractional Kelly), LM4's glossary form,
-lm04.md:740). 貝他(β)分布, 精確度, 可靠區間, James-Stein 估計量 and 總平均數 are not on plans/vol-4.md's list: the drafter
-found them in 樂詞網's 統計學名詞 listing on 2026-10-19 (curl, phrase search); until they are recorded in SOURCES
-(cross-check X34), each prints with its English in every box that uses it. Deep Dives: §3 "Completing the square":
+lm04.md:740). 貝他(β)分布, 精確度, 可靠區間, James-Stein 估計量 and 總平均數 are not on plans/vol-4.md's list; they are
+樂詞網's 統計學名詞 forms, recorded in SOURCES ("Chinese terms (Volume IV)"). Deep Dives: §3 "Completing the square":
 $-\frac{(\mu-\mu_0)^2}{2\sigma_0^2}-\frac{T(\bar R-\mu)^2}{2\sigma^2}$ is a quadratic in $\mu$ with leading coefficient
 $-\tfrac12(1/\sigma_0^2+T/\sigma^2)$, so the posterior is normal with that precision and the mean of (24.3), without
-(16.8). §5 "Why $N-3$": under the model of §5, $\sum_i(\bar R_i-\bar{\bar R})^2/(\sigma_0^2+\sigma^2/T)$ has the law
-$\chi^2_{N-1}$ (*stated without proof*; Blitzstein and Hwang §10.4 to be read); with the $\chi^2_k$ density (stated)
-and (15.8), $\E[1/\chi^2_k]=\Gamma(k/2-1)/(2\Gamma(k/2))=1/(k-2)$ for $k>2$, so
+(16.8). §5 "Why $N-3$": under the model of §5 the $\bar R_i$ are iid $\mathcal N(\mu_0,\sigma_0^2+\sigma^2/T)$, so
+$\sum_i(\bar R_i-\bar{\bar R})^2/(\sigma_0^2+\sigma^2/T)$ has the law $\chi^2_{N-1}$ (Blitzstein and Hwang Ex. 10.4.3);
+with the $\chi^2_k$ density (*stated without proof*) and (15.8), $\E[1/\chi^2_k]=\Gamma(k/2-1)/(2\Gamma(k/2))=1/(k-2)$ for $k>2$, so
 $(N-3)(\sigma^2/T)/\sum_i(\bar R_i-\bar{\bar R})^2$ is an unbiased estimate of $1-c$.
 
 **Exhibits.**
@@ -3421,7 +3382,8 @@ a hypothesis.
    A 75% (half Kelly read the wrong way round). B 50%. **C** 0 (the plug-in is twice Kelly) [A24-55].
 7. Derive (24.3) by completing the square, then check (16.6) at $A\sigma_0=10$: 100 = 86.9 + 13.1 (E4).
 8. Under §5's model, show that $(N-3)(\sigma^2/T)/\sum_i(\bar R_i-\bar{\bar R})^2$ is unbiased for $1-c$, using the
-   $\chi^2_{N-1}$ law (stated without proof) and $\E[1/\chi^2_k]=1/(k-2)$, derived from the stated density and (15.8).
+   $\chi^2_{N-1}$ law (Blitzstein and Hwang Ex. 10.4.3) and $\E[1/\chi^2_k]=1/(k-2)$, derived from the density (stated
+   without proof) and (15.8).
 9. TR23 with a prior centred at zero, $A\sigma_0=5$ points, from the printed 15.38%, 3.89 and 18.96%: $c=0.623$;
    posterior mean 9.6%, SD 3.1; 95% interval 3.6% to 15.6%; $\Pr(\mu\le0)=0.0009$; Bayes fraction 2.67; prior worth 14.4
    years [A24-56].
@@ -3493,7 +3455,7 @@ not a new test. Labs write "LM20", never `[[LM20]]`.
 - References (SOURCES; open points marked): Bayes' rule for a parameter and the normal model, Gelman et al. (2013),
   §2.5, (2.10) (open: re-read before printing), §3.3 for unknown $\sigma$ (open: only its title is checked); James and
   Stein (1961) (open: end page) and a read source for the dominance theorem toward the grand mean (open); Blitzstein
-  and Hwang §10.4 for the chi-square law (read before it is cited); Efron and Morris (1975), read, for the batting
+  and Hwang Ex. 10.4.3 for the chi-square law (its density *stated without proof*); Efron and Morris (1975), read, for the batting
   averages; Efron and Morris (1973), bibliographic only, for the empirical-Bayes view; Browne and Whitt (1996),
   abstract, for the posterior-mean rule; Thorp (2006) §7.3 and MacLean, Thorp and Ziemba (2010) for prudential
   fractional Kelly; Rising and Wyner (2012), abstract, for "reduced estimation error"; Jorion (1986) named only (open:
@@ -3512,38 +3474,22 @@ data give no partial-shrinkage example (accepted): E8's reverse direction is a s
 and Efron and Morris (1975) show shrinkage working. The derivation's approximation is LM4's second-order growth, exact
 under GBM; on TR23 it overstates the fraction by 0.14 at full Kelly and 0.10 at $c=0.869$ (E9).
 
-**Questions for the editor** (open after the revision; the drafter's ten questions are answered by the cross-check's
-§8 and the editor's decisions).
-
-1. **Monte Carlo digits near a boundary.** E6's James–Stein average 15.542 and Problem 10's raw average 28.046 print
-   as 15.5 and 28.0, within a tenth of a unit of the boundary, with standard errors (0.045, 0.053) larger than that
-   distance: another seed could print 15.6 or 28.1. The brief prints them with their standard errors and the theory
-   values (15.5, 28). Accept, or raise the draws?
-2. **LM20's pointers to LM24.** LM20's brief points to LM24 for the best $\eta$ and lists LM24 among the users of
-   (20.1), (20.5) and (20.7). The revision cites all three (§3, §5) and adds A24-61 ($\eta^*=0.940$ is $c$ at a prior
-   SD equal to the mean). Confirm, or LM20 drops LM24 from those lists.
-
-**Open points that block printing, not decisions** (checked and recorded in SOURCES before Stage 2; until then the
-text is written as the decisions say):
+**Open before Stage 2** (open in SOURCES; until then the text is written as the decisions say):
 
 - (a) A read source for the James–Stein dominance theorem toward the grand mean with $N-3$, $N\ge4$, and the positive
   part (cross-check X34 d): Efron and Morris (1973) is bibliographic only, Efron and Morris (1975) was read for its
   Table 1, Wasserman §12.7 is known from the contents only. Until then (24.4)'s theorem is *stated without proof*.
-- (b) The $\chi^2_{N-1}$ law and the $\chi^2_k$ density: Blitzstein and Hwang §10.4 (X32). Until then *stated without
-  proof* (Deep Dive, Problem 8).
+- (b) The $\chi^2_k$ density: Blitzstein and Hwang's Gamma density (§8.4) is unread, so the density stays *stated
+  without proof* (Deep Dive, Problem 8); the $\chi^2_{N-1}$ law itself is cited to Ex. 10.4.3.
 - (c) Gelman et al. §3.3 for the posterior under unknown $\sigma$ (X34 e) and (2.10) re-read; James and Stein's (1961)
   end page; Jorion's (1986) target (named only, so it blocks nothing).
-- (d) The 樂詞網 terms found by the drafter (X34): 可靠區間 (credible interval), 精確度 (precision), 貝他(β)分布 (beta
-  distribution; 數學名詞 β分布), 貝他(β)-二項模型 (beta-binomial model), James-Stein 估計量, 收縮 (shrinkage), 總平均數
-  (grand mean), 超參數 (hyperparameter), 充分統計量 (sufficient statistic).
-- (e) Python facts (X34): `stats.beta` (`sf`, `ppf`, `std`), `optimize.brentq`, `numpy.polynomial.hermite_e.hermegauss`.
 
 ## LM25 Time Series I: ARMA, Unit Roots and Cointegration
 
 Stage 1 brief, revised 2026-10-19 after the cross-check and the independent recomputation. Drafted the same day from
-the editor's spine (`plans/vol-4.md`, "### LM25") and revised to the editor's decisions ("Editor's decisions on the
-LM19–LM25 drafts"). Each number carries its anchor ID at its first appearance; `data/vol4_anchors_lm25.py` prints
-them all (rows in this brief's `anchors.md`: 72 rows, A25-69 withdrawn). Numbers quoted from published modules carry
+the editor's spine (`plans/vol-4.md` at commit bcfa0d4, "### LM25") and revised to the editor's decisions ("Editor's
+decisions on the LM19–LM25 drafts") and the fresh check. Each number carries its anchor ID at its first appearance;
+`data/vol4_anchors_lm25.py` prints them all (rows in `plans/vol-4-anchors.md`: 72 rows, A25-69 withdrawn). Numbers quoted from published modules carry
 their file:line instead. Tags of LM19–LM23 are cited as their Stage 1 briefs number them.
 
 **Prereq:** `[3, 6, 12, 16, 17, 18, 19, 20, 21, 23]`. The spine's draft list plus LM3, LM17 and LM18, which the text
@@ -3560,17 +3506,18 @@ cites for a result (accepted, cross-check §8).
   the slope from covariances (lm12.md:120); (12.4) R-squared (lm12.md:126).
 - LM16: (16.1) independence (lm16.md:129); (16.2) covariance and correlation (lm16.md:142); (16.3) the variance of a
   sum (lm16.md:197), used for the random walk, the robust band and the variance ratio.
-- LM17: (17.5) the central limit theorem (lm17.md:276), the normal approximation behind every band; the lag
-  correlations 0.039 of $r$ and 0.161 of $\lvert r\rvert$ (lm17.md:392).
+- LM17: (17.5) the central limit theorem (lm17.md:276), the normal approximation behind every band; its pair
+  correlations 0.039 of $r$ and 0.161 of $\lvert r\rvert$ (lm17.md:392), named once beside [[LM19]]'s $\hat\rho_1$.
 - LM18: (18.2)–(18.3) the Monte Carlo standard error (lm18.md:141–147); batch standard errors with divisor 20
   (lm18.md:153).
 - LM19: (19.5) $\hat\rho_k$ (full-sample mean, divisor $T$); (19.6) the iid band $\pm1.96/\sqrt T$; (19.7) the
-  variance of an $m$-day sum and the identity $\operatorname{VR}(m)=1+2\sum_{k<m}(1-k/m)\rho_k$; (19.8) the
-  overlapping estimator $\operatorname{VR}(m)$; TR23's $\hat\rho_k$.
+  variance of an $m$-day sum and the model's ratio $1+2\sum_{k<m}(1-k/m)\rho_k$ (no symbol); (19.8) the overlapping
+  estimator $\operatorname{VR}(m)$; TR23's $\hat\rho_k$ of $r$ and $\lvert r\rvert$ (0.0393 and 0.161 at lag 1).
 - LM20: (20.6) asymptotic normality of the MLE, standard errors from $-\ell''$; (20.8) the delta method.
 - LM21: (21.2) p-values; the rule that every test reports how many tests ran on the same data.
-- LM23: (23.3) $s_\varepsilon^2=\text{RSS}/(T-d)$; (23.4) t-stats; (23.6) the sandwich and White's HC0 errors;
-  spurious regression is left to LM25.
+- LM23: (23.1) OLS and (23.2) its classical variance (the AR and DF regressions, E4's classical SE); (23.3)
+  $s_\varepsilon^2=\text{RSS}/(T-d)$; (23.4) t-stats; (23.6) the sandwich and White's HC0 errors; spurious regression
+  is left to LM25.
 
 **Leads:** `[26, 33, 34, 36, 39]` (cross-check X26): pointer targets in the text (LM26 models the clustering that
 widens the band; LM33 the Sharpe ratio under autocorrelation; LM34 tests on later data, named in the hygiene note;
@@ -3588,7 +3535,7 @@ link, lm06.md:650, the spine's. The other rows are the spine's "stay consistent"
 | lm06.md:611–624 | the 2025 monthly table; daily changes SD 83.4 points | §7: X6 averages 2003–2026 by calendar month; E10's 2025 check |
 | lm06.md:671–676 | settlement from the last minute before 13:45; annualizing noise | §7: the one-day noise $\sigma_u$ of E10 and the widget; the pitfall cites lm06.md:676 |
 | lm06.md:605–607 | settlements set by rule on thin back months | §1, Data role: TX23 holds the near month only (median volume 81,889 [A25-05]) |
-| lm15.md:100–103; lm16.md:168; lm17.md:392 | lag-1 values 0.0215 (down-day indicators, TR23), 0.040 (U28 price index), 0.039 and 0.161 (TR23 $r$ and $\lvert r\rvert$) | §3: LM25's $\hat\rho_1(r)$ is LM17's 0.039; $\lvert r\rvert$'s 0.161 is LM17's; the other two are other statistics or samples and are not compared |
+| lm15.md:100–103; lm16.md:168; lm17.md:392 | lag-1 values 0.0215 (down-day indicators, TR23), 0.040 (U28 price index), 0.039 and 0.161 (TR23 $r$ and $\lvert r\rvert$) | §3: $\hat\rho_1$ of $r$ (0.0393) and of $\lvert r\rvert$ (0.161) are [[LM19]]'s [A19-38, A19-39], which LM17's pair correlations (lm17.md:392) match; the other two are other statistics or samples and are not compared |
 | plans/vol-3.md:321 (LM13's frozen brief) | "Autocorrelation → LM25" | superseded by the Stage 1 decision: LM19 owns $\hat\rho_k$ and $\operatorname{VR}(m)$; LM25 the robust band, Ljung–Box and the variance-ratio test |
 | syllabus.yaml:66 | "Stationarity, mean reversion, the futures–spot basis." | §2, §4, §7 |
 
@@ -3753,7 +3700,7 @@ persistent part, SE 0.56 [A25-68]); (c) noise: §7, E10 (64% of a day's change [
 | 4 | Autoregressive and Moving-Average Models {3} | AR(1) (25.1): stationarity $\lvert\phi_1\rvert<1$, mean, variance, $\rho_k=\phi_1^k$ (derived); half-life (25.2); MA(1) (25.3): $\rho_1=\theta_1/(1+\theta_1^2)$, zero beyond; partial autocorrelation as the last OLS coefficient; ACF and PACF signatures; ARMA(1,1) named; AR estimation by OLS ((12.1), [[LM23]]); E4; X3; pitfall: a half-life read from a noisy series is too short | 600 |
 | 5 | Unit Roots and the Dickey–Fuller Test {4} | $\Delta x_t=c+\delta x_{t-1}+\eta_t$ (25.7), $H_0:\delta=0$ against $\delta<0$, one-sided; why the t-stat shifts left (Deep Dive, stated); E5, X4; ADF lags (25.8) and statsmodels' AIC choice; MacKinnon p-values; trend for a drifting series; E6; KPSS in one paragraph (reverse null, one-sided, table p-values); pitfall: reading the DF t-stat against $-1.645$ [A25-37] | 620 |
 | 6 | Spurious Regression and Cointegration {5} | two independent random walks, E7, X5; why (residuals not stationary); differencing fixes the test but loses the level; cointegration defined; the basis as a known vector $(1,-1)$, so a unit-root test on $b_t$ is a cointegration test (Brenner and Kroner 1995 on the carry); Engle–Granger for an estimated vector, E8; the error-correction model in two sentences; Johansen and threshold cointegration in one sentence each; pitfall: testing $\hat\beta=1$ with the classical standard error | 540 |
-| 7 | The TX Basis as a Time Series {6} | convergence at expiry (X7: carry and dividends shrink with $\tau$); roll jumps (−37.5 bp on average, −144.7 in June [A25-49]); the dividend season as a seasonal mean (X6, (6.25) in logs); E9, X8: four versions tested; the signal-plus-noise reading (25.9), E10 with the fit at the likelihood maximum and $-\ell''$ standard errors, the sandwich caveat in one sentence, widget; the 15-minute gap of lm06.md:672 (option E pending); stability by limit regime; KPSS's verdict read; pitfall: annualizing or ranking a one-day basis (lm06.md:676) | 680 |
+| 7 | The TX Basis as a Time Series {6} | convergence at expiry (X7: carry and dividends shrink with $\tau$); roll jumps (−37.5 bp on average, −144.7 in June [A25-49]); the dividend season as a seasonal mean (X6, (6.25) in logs); E9, X8: four versions tested; the signal-plus-noise reading (25.9), E10 with the fit at the likelihood maximum and $-\ell''$ standard errors, the sandwich caveat in one sentence with a pointer to [[LM26]], widget; the 15-minute gap of lm06.md:672 named, with one sentence pointing to [[LM26]], which uses TX's 2025 one-minute bars (X9 is dropped); stability by limit regime; KPSS's verdict read; pitfall: annualizing or ranking a one-day basis (lm06.md:676) | 680 |
 | 8 | Time Series in Python {7} | `acf`, `pacf(method="ols")`, `acorr_ljungbox` (DataFrame → `.to_numpy()`), `adfuller` and `kpss` with `result_object=True`, `coint(return_results=True)`, `ARIMA` (`method="innovations_mle"`, a restart, `cov_type="approx"`); matching `adfuller(maxlag=0, autolag=None)` to the hand regression; rolled against roll-free changes; lab box | 230 |
 | — | Summary (7) / Problems (12) / Solutions | | 140 / 400 / 520 |
 | | **Total** | | **5,300** |
@@ -3762,7 +3709,7 @@ persistent part, SE 0.56 [A25-68]); (c) noise: §7, E10 (64% of a day's change [
 
 - §2: a random walk with daily standard deviation 1.2%: 6.0% after 25 sessions, 12.0% after 100; an AR(1) with
   $\phi_1=0.9$ and the same innovations stays within a stationary standard deviation of 2.753% [A25-16].
-- §3: $\lvert r\rvert$'s lag-1 autocorrelation 0.161 ([[LM17]], lm17.md:392) has a robust standard error of 0.0240 and
+- §3: $\lvert r\rvert$'s lag-1 autocorrelation 0.161 ([[LM19]]'s, [A19-39]) has a robust standard error of 0.0240 and
   a robust t-stat of 6.7 [A25-22]: outside both bands; clustering is dependence of sizes, which [[LM26]] models.
 - §4: an MA(1) with $\theta_1=-0.36$ has $\rho_1=-0.319$ and $\rho_2=0$; an AR(1) with $\phi_1=0.5$ has a half-life of
   1 session [A25-27].
@@ -3777,8 +3724,9 @@ persistent part, SE 0.56 [A25-68]); (c) noise: §7, E10 (64% of a day's change [
 - §8: `adfuller(b)` reports −9.00 with 28 lags [A25-41]; `maxlag=0, autolag=None` reproduces the hand regression's
   −27.20, and `result_object=True` avoids the FutureWarning (SOURCES).
 
-中文導讀 (each 3–6 sentences, the intuition, not a translation; 樂詞網 terms from plans/vol-4.md with the English at
-first use in each box; terms not yet looked up print the book's form with its English, cross-check §8):
+中文導讀 (each 3–6 sentences, the intuition, not a translation; 樂詞網 terms from plans/vol-4.md and SOURCES
+"Chinese terms (Volume IV)" with the English at first use in each box; a term without a 樂詞網 statistics entry prints
+the book's form with its English):
 
 - §2: 時間序列 (time series), 平穩 (stationary), 白噪音 (white noise), 隨機漫步 (random walk), 獨立同分布; why a
   price level has no mean to return to and its changes may.
@@ -3786,11 +3734,11 @@ first use in each box; terms not yet looked up print the book's form with its En
   (robust standard error), 波動群聚現象 (volatility clustering); Ljung–Box 檢定 keeps its English name (no 樂詞網
   entry); why clustering widens the band.
 - §4: 自我迴歸模型 (AR), 移動平均模型 (MA), 自我迴歸移動平均模型 (ARMA), 偏自我相關函數 (PACF); 半衰期 (half-life),
-  the book's form until 樂詞網 is checked.
+  the book's form (樂詞網 lists it only outside statistics; SOURCES).
 - §5: 單根 (unit root), 單根檢定 (unit root test), 增廣 Dickey-Fuller 檢定 (augmented Dickey–Fuller test), 對立假設
   (alternative hypothesis); why −1.645 is the wrong yardstick.
 - §6: 共整合 (cointegration), 誤差修正模型 (error correction model), 迴歸 (regression); 虛假迴歸 (spurious regression),
-  the book's form until 樂詞網 is checked.
+  樂詞網's statistics form (SOURCES).
 - §7: 基差 (basis; LM6's box), 白噪音, 平穩; the basis's three deterministic parts and the noise, tied to LM6's box.
 
 Deep Dives: §3 "Where the robust band comes from": under $H_0$ the centred returns $\tilde r_t$ are a martingale
@@ -3850,15 +3798,15 @@ ch. 17; MacKinnon 1996 for the tables).
   only to about 35 bp: the noise floor of §7.
 - X8 `versions` (table, §7, E9): rows $b_t$; $b_t-r_f\tau$; the residual $b_t-r_f\tau+q_{\text{real}}\tau$; $b_t$ minus
   its calendar-month mean. Columns: mean (bp), $s$ (bp), DF t-stat, ADF t-stat (lags), KPSS (p-value), AR(1)
-  $\hat\phi_1$ (half-life), ARMA $\phi_1$, $\theta_1$ (half-life). Values [A25-54]: −25.6, 58.11, −27.2, −9.03 (28),
-  0.62 (0.021), 0.775 (2.72), 0.906, −0.355 (7.01); −35.3, 59.11, −27.4, −9.15 (28), 0.62 (0.021), 0.772 (2.68),
-  0.896, −0.327 (6.28); −17.8, 47.67, −32.3, −7.75 (33), 0.77 (≤0.010, the table's bound), 0.697 (1.92), 0.891,
-  −0.414 (5.99); 0.0, 53.24, −30.3, −8.51 (28), 0.96 (≤0.010), 0.728 (2.19), 0.872, −0.323 (5.05). Note: D; ARMA fits
+  $\hat\phi_1$ (half-life), ARMA $\phi_1$, $\theta_1$ (half-life); $\hat\phi_1$ prints four decimals and $\phi_1$ five,
+  so that each half-life follows from the printed coefficient by (25.2). Values [A25-54]: −25.6, 58.11, −27.2, −9.03
+  (28), 0.62 (0.021), 0.7751 (2.72), 0.90584, −0.355 (7.01); −35.3, 59.11, −27.4, −9.15 (28), 0.62 (0.021), 0.7723
+  (2.68), 0.89557, −0.327 (6.28); −17.8, 47.67, −32.3, −7.75 (33), 0.77 (≤0.010, the table's bound), 0.6974 (1.92),
+  0.89075, −0.414 (5.99); 0.0, 53.24, −30.3, −8.51 (28), 0.96 (≤0.010), 0.7284 (2.19), 0.87168, −0.323 (5.05). Note: D; ARMA fits
   at the likelihood maximum; MacKinnon's 5% point about −2.86 (A25-37's value is for 5,849 observations); KPSS's 5%
   point 0.463 [A25-40].
-- X9 `gap` (optional, option E, §7): TX's last 1-minute price at 13:30 against its settlement, 2025 near month, and
-  the basis rebuilt at 13:30. Kept only if the 2025 TX 1-minute download and the check of the bar timestamp
-  convention are done by Stage 2 (cross-check §8); no anchors yet.
+- X9 is dropped (fresh check): TX's 2025 one-minute bars and their timestamp check are [[LM26]]'s (its X5), and §7
+  says so in one sentence.
 
 **Widget `ar1noise` — "A mean-reverting basis with one-day noise."** `Book.controls`: $\phi_1$ (0 to 1, step 0.01,
 initial 0.91); noise $\sigma_u$ (0 to 40 bp, step 1, initial 22); a "new path" button (seed 1, 2, …). Fixed:
@@ -3912,14 +3860,16 @@ only model values (7.35, −2.87). The widget holds no market series.
   fails KPSS at the 5% level; the AR(1) half-lives run from 1.92 to 2.72 sessions and the ARMA ones from 5.05 to 7.01
   [A25-54]. Removing carry, dividends or the month's mean changes the speed little: what is removed is slow.
 - E10 §7: ARMA(1,1) on $b_t$ in bp at the likelihood maximum (statsmodels' default fit stops short of it; the fit
-  starts from `innovations_mle` and a restart does not raise $\ell$): mean −25.5 (SE 3.2), $\phi_1=0.906$ (SE 0.0071),
+  starts from `innovations_mle` and a restart does not raise $\ell$): mean −25.5 (SE 3.2), $\phi_1=0.90620$ (SE 0.0071),
   $\theta_1=-0.355$ (SE 0.017), $\sigma_\eta^2=1{,}257.0$ bp², standard errors from $-\ell''$ (20.6) [A25-31]. Read as
   a persistent AR(1) plus one-day noise (25.9): $\sigma_u=22.2$ bp, $\sigma_\zeta=22.8$ bp, persistent standard
   deviation 53.8 bp; the noise is 64% of the variance of a day's change and 14.5% of the level's; the model's
-  daily-change SD 39.11 bp against the sample's 38.91 [A25-55]. Half-life of the persistent part 7.04 sessions,
-  delta-method SE 0.56 (20.8), interval 5.95–8.13 [A25-68]. These standard errors assume the model is right; the
-  basis's volatility changes across years (E1), and the likelihood's sandwich, the analogue of [[LM23]]'s (23.6),
-  *stated without proof*, gives $\operatorname{SE}(\phi_1)=0.0146$ and the interval 4.78–9.30 [A25-71]. Stability
+  daily-change SD 39.11 bp against the sample's 38.91 [A25-55]. Half-life of the persistent part 7.04 sessions from
+  the printed $\phi_1$ by (25.2), delta-method SE 0.556 by (20.8) from $\operatorname{SE}(\phi_1)=0.007055$ (six
+  decimals, so that 0.556 follows), interval 5.95–8.13 [A25-31, A25-68]. These standard errors
+  assume the model is right; the basis's volatility changes across years (E1), and the likelihood's sandwich, the
+  analogue of [[LM23]]'s (23.6), *stated without proof*, gives $\operatorname{SE}(\phi_1)=0.0146$ and the interval
+  4.78–9.30 [A25-71]; [[LM26]] meets the same sandwich as arch's robust standard errors of a GARCH fit. Stability
   check: before and from 1 June 2015, $\phi_1=0.90$ and 0.91, $\sigma_u=25.74$ and 17.45 bp [A25-56]. In 2025 alone
   $\sigma_u=23.4$ bp [A25-57], about 56 index points, and the 242 daily changes within 2025 had a standard deviation
   of 84.5 points [A25-59] (LM6's 83.4 used other months and roll rule, lm06.md:624).
@@ -3979,10 +3929,10 @@ $b_t$ year by year. Labs write "LM26", never `[[LM26]]`.
   $\lvert\phi_1\rvert<1$, then $\E x_t=c/(1-\phi_1)$, $\Var x_t=\sigma_\eta^2/(1-\phi_1^2)$, $\rho_k=\phi_1^k$ (LM26:
   GARCH's squared returns as an ARMA; LM39: the discrete Ornstein–Uhlenbeck).
 - (25.2) half-life $\ln\frac12/\ln\phi_1$, $0<\phi_1<1$ (LM26's GARCH half-life; LM39).
-- (25.3) MA(1) $x_t=c+\eta_t+\theta_1\eta_{t-1}$: $\rho_1=\theta_1/(1+\theta_1^2)$, $\rho_k=0$ for $k\ge2$ (LM26 for
-  bid–ask bounce in high-frequency returns).
+- (25.3) MA(1) $x_t=c+\eta_t+\theta_1\eta_{t-1}$: $\rho_1=\theta_1/(1+\theta_1^2)$, $\rho_k=0$ for $k\ge2$ (LM26: the
+  MA(1) autocorrelation of high-frequency returns under its noise model, a hypothesis there).
 - (25.4) $\operatorname{SE}_{\text{rob}}(\hat\rho_k)=\sqrt{\sum_{t>k}\tilde r_t^2\tilde r_{t-k}^2}\big/\sum_t\tilde r_t^2$,
-  HC0-type; martingale-difference null, finite fourth moments, large $T$ (LM26, LM33).
+  HC0-type; martingale-difference null, finite fourth moments, large $T$ (LM33).
 - (25.5) $Q_{\text{LB}}(K)=T(T+2)\sum_{k=1}^K\hat\rho_k^2/(T-k)\approx\chi^2_K$ under iid data, large $T$ (*stated
   without proof*, Ljung and Box 1978); upper tail (LM26).
 - (25.6) the variance-ratio t-stat $(\operatorname{VR}(m)-1)/\operatorname{SE}$, $\operatorname{VR}(m)$ LM19's (19.8),
@@ -3993,14 +3943,14 @@ $b_t$ year by year. Labs write "LM26", never `[[LM26]]`.
   (one-sided), MacKinnon's critical values (LM39 if it tests a spread).
 - (25.8) ADF: (25.7) plus $\sum_{j=1}^Ja_j\Delta x_{t-j}$.
 - (25.9) $b_t=x_t+u_t$ with $x_t$ an AR(1) and $u_t$ independent white noise has ARMA(1,1) autocorrelations with
-  $\sigma_u^2=-\theta_1\sigma_\eta^2/\phi_1$ (LM26: microstructure noise in realized variance).
+  $\sigma_u^2=-\theta_1\sigma_\eta^2/\phi_1$ (LM26: the noise model of realized variance, a hypothesis there).
 
 **Pitfalls to pre-empt.**
 
 - Conditions every time: stationarity of an AR(1) needs $\lvert\phi_1\rvert<1$; Ljung–Box's $\chi^2$ needs iid data;
   the robust band a martingale-difference null and finite fourth moments; the robust VR test also zero cross-lag
   terms; the DF tables a constant (or a trend) as specified and white-noise errors (ADF lags otherwise).
-- White noise is not iid: TR23's returns are close to uncorrelated but their sizes are not (0.161, lm17.md:392).
+- White noise is not iid: TR23's returns are close to uncorrelated but their sizes are not (0.161, [[LM19]]'s).
 - Rolled against roll-free differences; a roll day links two contracts (E4, Problem 9); the June roll moves the basis
   by about 145 bp.
 - A half-life from a noisy series is short: 2.7 sessions for the AR(1) against 7.0 for the persistent part.
@@ -4023,45 +3973,28 @@ $b_t$ year by year. Labs write "LM26", never `[[LM26]]`.
 - References (SOURCES; chapters, not theorem numbers): Hamilton (1994, ch. 3, 17, 19); Tsay (2010, §2.1–2.7, §8.5–8.6);
   Dickey and Fuller (1979); Said and Dickey (1984); MacKinnon (1994, 1996, 2010); Kwiatkowski et al. (1992); Ljung and
   Box (1978); Engle and Granger (1987); Johansen (1988, 1991); Brenner and Kroner (1995); Dwyer, Locke and Yu (1996);
-  Lin, Chen and Hwang (2003); Roope and Zurbruegg (2002); Greene (2018, ch. 21) for spurious regression; Hull (2022)
-  and MacKinlay and Ramaswamy (1988) as in LM6. Lo and MacKinlay (1988) only after their text is read (X9).
+  Lin, Chen and Hwang (2003); Roope and Zurbruegg (2002); Granger and Newbold (1974, bibliographic only) as the origin
+  of spurious regression, with Greene (2018, ch. 21) at chapter level; Hull (2022) and MacKinlay and Ramaswamy (1988)
+  as in LM6. Lo and MacKinlay (1988) only after their text is read (X9).
 
 **Stage 4 for earlier modules.** As the plan's Stage 4 list: `leads` gain 25 in lm03.md:6, lm12.md:6, lm16.md:6,
 lm17.md:6 and lm18.md:6 (lm06.md:6 already lists 25). No wording changes.
 
-**Applied provisionally** (a decision applied as written for the case where its source is not yet read):
+**Open before Stage 2** (a decision applied as written while its source is unread):
 
 - The variance-ratio test is not attributed to Lo and MacKinlay (1988) until their text and robust statistic are
-  read (X9; SOURCES open point (h)).
-- Spurious regression is cited to Greene (2018, ch. 21) at chapter level; Granger and Newbold (1974) only after a
-  Crossref check (X34).
+  read (X9).
 - The ARMA MLE's large-sample law and the likelihood sandwich are *stated without proof*; the Hamilton chapter that
   treats ARMA likelihoods is not in SOURCES' chapter list, and no source for the sandwich is recorded yet.
-- 半衰期, 虛假迴歸 (or 偽迴歸), 均值回歸 and 轉倉 print the book's form with the English until 樂詞網 is checked.
-- Python facts to record in SOURCES before Stage 2: `acorr_ljungbox`'s statistic and default lags; `kpss`'s clipped
-  p-values; `pacf`'s default `"ywadjusted"`; ARIMA's constant as the mean; ARIMA's default `cov_type="opg"`; its
-  `"oim"` (Harvey 1989, `mlemodel.py:1282–1405`) against `"approx"` (numerical Hessian); `method="innovations_mle"`;
-  the result-object fields.
-
-**Questions for the editor.**
-
-1. *ARMA standard errors.* The decision names `cov_type="oim"` "as LM20 teaches". In statsmodels 0.15.0 `"oim"` is
-   Harvey's information formula, $\operatorname{SE}(\phi_1)=0.0068$; LM20's $-\ell''$ is `"approx"`, 0.0071, equal to
-   a central-difference Hessian to five digits [A25-71]. The brief prints $-\ell''$. Confirm. Then: keep E10's sandwich
-   sentence ($\operatorname{SE}(\phi_1)=0.0146$, half-life interval 4.78–9.30), or cut it to a pointer to [[LM26]]?
-   The OPG value, 0.00385, is about half of $-\ell''$'s; the gap says the Gaussian model's assumptions fail.
-2. *Median volume.* The quantile decision makes every median $\hat F^{-1}(\frac12)$: 81,889, the lower of the middle
-   pair 81,889 and 81,932 [A25-05]. The rounding decision names the mean of that pair, 81,910.5. The brief follows the
-   quantile decision. Confirm.
-3. *Robust variance-ratio test.* (25.6)'s robust form drops the cross-lag terms. Keeping them widens the standard
-   error by up to 25% at $m=20$ and changes no verdict [A25-72]. Print the simpler form with the check (as now), or
-   the full form?
+- A Chinese form for "mean reversion": 樂詞網 has no statistics entry, and SOURCES leaves the form to the editor;
+  until then a box that needs it prints the English.
 
 ## LM26 Time Series II: Volatility Models
 
-Stage 1 brief, drafted 2026-10-19 from the editor's spine (`plans/vol-4.md`, "### LM26") under the editor's decisions
-on the LM19–LM25 drafts. Each number carries its anchor ID at its first appearance; `data/vol4_anchors_lm26.py`
-prints them all (rows in this brief's `anchors.md`: 66 rows, A26-01 to A26-66). Numbers quoted from published modules
+Stage 1 brief, drafted 2026-10-19 from the editor's spine (`plans/vol-4.md` at commit bcfa0d4, "### LM26 Time Series
+II: Volatility Models") under the editor's decisions on the LM19–LM25 drafts, and revised the same day to the
+editor's LM26 decisions and the fresh check. Each number carries its anchor ID at its first appearance;
+`data/vol4_anchors_lm26.py` prints them all (rows in `plans/vol-4-anchors.md`: 66 rows, A26-01 to A26-66). Numbers quoted from published modules
 carry their file:line instead, and numbers from the sibling briefs their anchor IDs (LM19, LM21, LM25 as revised on
 2026-10-19). Tags of LM19–LM25 are cited as their Stage 1 briefs number them.
 
@@ -4104,13 +4037,13 @@ Stage 4 list already gives to LM19. No page in `src/pages/` names LM26.
 |:--|:--|:--|
 | lm05.md:529 | 0050 needs $\sigma=1.859\%$ a day (29.0% a year) for nine −5% days; "Part of that shape comes from volatility that changes over time ([[LM26]])" | §5, E6 on TR23: a normal GARCH implies excess kurtosis 3.51 [A26-25] of the data's 5.428 (lm17.md:387); its standardized residuals keep 2.57 [A26-23]. LM5's 0050 numbers are cited, not recomputed |
 | `make_lab05.py:529` | standardize by a trailing 60-day $\sigma$ or an EWMA; "if volatility clustering explained everything" the count at −4.107 would be near 0.058 | §7's rolling 60-day and EWMA forecasts; E6 answers on TR23: 17 days at or below −4.107 standardized by $s$, 9 after GARCH, 0.117 under the normal model [A26-63]; the lab points back |
-| lm13.md:159; `make_lab13.py:463` | falls after a fall of 3% or more 12.04%, after a rise 4.48%, overall 1.85%; "[[LM26]] models them" | §5, E7: GARCH expects 7.8 falls after the 108 falls and 5.4 after the 67 rises [A26-29]; the asymmetry is named and left to the lab's extension |
+| lm13.md:159; `make_lab13.py:463` | falls after a fall of 3% or more 12.04%, after a rise 4.48%, overall 1.85%; "[[LM26]] models them" | §5, E7: GARCH expects 7.8 falls after the 108 falls and 5.4 after the 67 rises [A26-29]; the asymmetry is named in words with Hansen and Lunde's (2005) "leverage effect" and left to the lab's extension |
 | lm15.md:163, 170 | monthly counts of large moves overdispersed 3.02 times; "[[LM26]] models it" | §5, E7: experiment 1, median ratio 3.15 [A26-30] |
 | lm16.md:168, 170 | sizes correlate 0.183; next-day size 1.28% after $\lvert R\rvert\ge2\%$ against 0.75% (U28); "[[LM26]] models how tomorrow's spread depends on today's move" | §4 (26.3) and KC §2; §5, E7 on TR23: 1.27% after such days against 0.80%, GARCH 1.35% and 0.79% [A26-64]. U28's numbers are cited, not recomputed |
-| lm17.md:392 | $\lvert r\rvert$ correlates 0.161 at lag 1 and 0.123 at 20; "[[LM26]] models such changing volatility" | §4: persistence 0.9844, half-life 44.2 sessions [A26-20, A26-21]; §5: $Q_{\text{LB}}(10)$ of $\lvert\hat\xi_t\rvert$ 27.6 against $\lvert r\rvert$'s 1,820 [A26-24] |
+| lm17.md:392 | $\lvert r\rvert$ correlates 0.161 at lag 1 and 0.123 at 20; "[[LM26]] models such changing volatility" | §4: persistence 0.98443, half-life 44.2 sessions [A26-20, A26-21]; §5: $Q_{\text{LB}}(10)$ of $\lvert\hat\xi_t\rvert$ 27.6 against $\lvert r\rvert$'s 1,820 [A26-24] |
 | lm18.md:379, 381 | resamples give monthly variance 0.598 against 1.846; "volatility that depends on yesterday's is the subject of [[LM26]]" | §4 (26.3); §5, E7: GARCH paths restore the clustering that resampling destroys |
 | reviews/lm17.md:36; `make_lab17.py:486` | "the autocorrelation convention stays LM26's" | superseded by the Stage 1 decision: LM19 owns $\hat\rho_k$ (plan, Stage 4) |
-| lm03.md:391, 710 | $\mathrm{RV}=\sum_tR_t^2$, Glossary 實現變異數 | §6: $\mathrm{RV}_t(h)$ is the same idea on intraday log returns; the Chinese term is question 3 |
+| lm03.md:391, 710 | $\mathrm{RV}=\sum_tR_t^2$, Glossary 實現變異數 | §6: $\mathrm{RV}_t(h)$ is the same idea on intraday log returns; the Chinese terms are LM3's 實現變異數 and 實現波動率 (the editor's decision) |
 | syllabus.yaml:67 | "EWMA, GARCH, and realized volatility from 5-second TAIEX data." | §3, §4–§5, §6 |
 
 **Outcomes** ("After this module you should be able to:"):
@@ -4119,7 +4052,7 @@ Stage 4 list already gives to LM19. No page in `src/pages/` names LM26.
 2. compute an EWMA variance by hand, with its weights, effective window and RiskMetrics' choice $\lambda=0.94$
 3. state the GARCH(1,1) model with its conditions, and derive its unconditional variance, its multi-step forecasts and the half-life of a shock
 4. fit GARCH(1,1) by maximum likelihood with normal and Student $t$ innovations, compute the log-likelihood by hand, and check the fit with standardized residuals
-5. compute realized variance from intraday data, read a volatility signature plot, and explain how microstructure noise and stale prices move it
+5. compute realized variance from intraday data, read a volatility signature plot, and state the hypotheses (microstructure noise, stale prices) that could explain how it moves with the sampling interval
 6. evaluate variance forecasts out of sample with MSE and QLIKE against a noisy realized-variance target, and with Mincer–Zarnowitz regressions
 7. run these tools in Python with arch and statsmodels on NumPy arrays, matching each package result to a calculation by hand
 
@@ -4139,9 +4072,9 @@ Mincer–Zarnowitz, robustness to the proxy, the window).
   $\lvert r\rvert$ → LM25 (cited, 1,820).
 - Value-at-risk from a volatility forecast → LM32. Volatility targeting → LM31. Covariance forecasting → LM30 and LM31,
   one sentence. Stochastic volatility in continuous time → LM39. Tests on later data → LM34.
-- Named in one sentence each, not developed: HAR regressions of realized variance on its daily, weekly and monthly
-  averages (no source in SOURCES yet: question 7); the two-scale estimator of Zhang, Mykland and Aït-Sahalia (2005,
+- Named in one sentence each, not developed: the two-scale estimator of Zhang, Mykland and Aït-Sahalia (2005,
   §1.2.5); asymmetric GARCH (arch's `o=1` term), the lab's extension; jumps and realized kernels, not in the book.
+  HAR regressions are not named until Corsi (2009) is in SOURCES (the editor's decision).
 - No resampling: every printed standard error is analytic (classic, robust, HC0 or Newey–West), so LM22's block rule
   does not arise.
 
@@ -4159,7 +4092,8 @@ Mincer–Zarnowitz, robustness to the proxy, the window).
   $A=246.12$ (lm17.md:248) [A26-01, a check row]. Every daily model uses $r_t$ in percent (arch is given $100r_t$), so
   variances are in %² a day; annualized volatilities are $\sqrt{A}$ times a daily one.
 - **T5S** (`data/derived/vol4_rv.csv`, built by `data/vol4_rv.py` from FinMind `TaiwanVariousIndicators5Seconds`,
-  retrieved 2026-10-19, and TWSE's TAIEX closes): 5,351 sessions, 2005-01-03 → 2026-10-08, sampled every 60 s (1,503
+  retrieved 2026-10-19, and the TAIEX closes of FinMind `TaiwanStockPrice`, which give `o2`'s previous close and check
+  each day's 09:00:00 and 13:30:00 values; TWSE credited as the original source of both): 5,351 sessions, 2005-01-03 → 2026-10-08, sampled every 60 s (1,503
   days, to 2011-01-14), 15 s (764 days, 2011-01-17 → 2014-02-21), 10 s (214 days, to 2014-12-27) and 5 s (2,870 days,
   from 2014-12-29) [A26-02]; its dates are TR23's from 2005-01-03 [A26-03]. On the window 09:30:00–13:30:00 a day has
   2,880 five-second returns down to 16 fifteen-minute and 8 thirty-minute ones [A26-04]. The opening return
@@ -4167,25 +4101,30 @@ Mincer–Zarnowitz, robustness to the proxy, the window).
   target is $V_t:=r_{\mathrm o,t}^2+\mathrm{RV}_t(15\text{ min})$ in %², the price index's close-to-close day in 17
   squared pieces. TR23's squared log returns and the price index's differ by less than 0.01% in total on these days
   [A26-05], so dividends do not separate the two days at the digits printed.
-- **Raw T5S** (`data/raw/intraday/taiex5s/`, not committed): only for statistics that the derived file cannot give yet
-  (the pooled intraday autocorrelations by year, the daily autocorrelations of 2025, the closing auction); question 1
-  proposes per-day columns so that the lab can rebuild them. Nothing published carries an intraday value.
+- **Raw T5S** (`data/raw/intraday/taiex5s/`, not committed): only for statistics that the derived file cannot give
+  (the pooled intraday $\hat\rho_1$ of E8, E9, KC §6 and X5's note, the daily autocorrelations of 2025, the closing
+  auction). The derived file keeps its approved columns (the editor's decision): X6 plots ratios of adjacent intervals'
+  realized variances from the file instead. Each number computed from the raw download says so where it is printed
+  ("from the raw download"); `data/lm26_numbers.py` computes them, and the lab's optional part recomputes the 2025 ones
+  from the 243 files of 2025. Nothing published carries an intraday value.
 - **TX 1-minute bars, 2025** (option E; `data/raw/intraday/tx1m/2025/`, FinMind `TaiwanFuturesKBar`, Sponsor): the
   near-month contract held during day $t$ is TX23's contract on the previous date (`data/processed/vol4_tx23.parquet`).
   A bar's label is the minute it starts: the regular session's first label is 08:45:00 on every day, the last 13:44:00
-  on 211 days and 13:45:00 on 30, and the last bar's close equals `TaiwanFuturesDaily`'s close on
+  on 211 days, 13:45:00 on 30, and 13:40:00 and 13:42:00 on the two limit-locked days, 7 and 10 April 2025 (243 in
+  all); the last bar's close equals `TaiwanFuturesDaily`'s close on
   243 of 243 days [A26-39]. So the price at 09:30:00 is the close of the 09:29 bar, and a minute without a bar keeps
-  the previous close (only on 7 and 10 April 2025, limit-locked). Text exhibit only; no lab reads it.
+  the previous close (only on those two limit-locked days). Text exhibit only; no lab reads it.
 - **Out of sample:** the estimation window is $\operatorname{round}(5A)=1{,}231$ returns (lm17.md:537); both GARCH models are
   refitted at the first session of each month on the previous 1,231 returns (226 refits), and forecasts run from
   2008-01-02 to 2026-10-08, 4,609 days [A26-45].
 - **Divisors and conventions:** sample moments divide by $T$ (LM19's (19.3)); $\hat\rho_k$ as (19.5), intraday ones
-  pooled over a period's days with within-day pairs only; quantiles and medians are $\hat F^{-1}(u)$
-  (`method="inverted_cdf"`); counts against a threshold use the guard ($R\le-0.03+10^{-12}$).
+  pooled over a period's days with within-day pairs only; quantiles and medians use [[LM14]]'s quantile function
+  (`method="inverted_cdf"`), written in words; counts against a threshold use the guard ($R\le-0.03+10^{-12}$).
 - **Tests:** two-sided with a normal reference unless named; the ARCH test and Ljung–Box use the upper tail of
-  $\chi^2_K$. Standard errors: classic ($-\ell''$) and robust (sandwich) for the GARCH fits; HC0 for Mincer–Zarnowitz;
-  Newey–West (Bartlett, $\lfloor4(n/100)^{2/9}\rfloor=9$ lags for 4,609 days, no small-sample correction) for loss
-  differences.
+  $\chi^2_K$. Standard errors: classic ($-\ell''$) and robust (sandwich) for the GARCH fits, citing [[LM20]]'s (20.6)
+  for the theory and arch's documented `cov_type` options; HC0 for Mincer–Zarnowitz; Newey–West (Bartlett, no
+  small-sample correction) for loss differences, with [[LM23]]'s lag rule $\lfloor4(\text{days}/100)^{2/9}\rfloor$:
+  9 lags for the 4,609 out-of-sample days.
 - **Seeds:** `rng = np.random.default_rng([e, 20261011])`, created once per experiment: 1 the full-sample normal GARCH,
   2 the full-sample $t$ GARCH; 1,000 paths of 5,849 days each, $\sigma_t^2$ started at the unconditional variance, one
   draw per path each day ($t$ draws `rng.standard_t(nu) * sqrt((nu - 2)/nu)`). Medians carry LM18's batch standard
@@ -4211,20 +4150,22 @@ $t$, $A$, $g$ (the model's mean daily log return, §6's $g=\E[\ln(1+R)]$), $\sig
 $\sigma_{t+m\mid t}^2$, $\sigma^2$ (the unconditional variance $\omega/(1-\alpha-\beta)$, §6's $\sigma$ of a model),
 $\varepsilon_t$, $\hat\varepsilon_t$, $\xi_t$, $\hat\xi_t$, $\eta_t$ (Deep Dive 1 only, LM25's), $\omega$, $\alpha$, $\beta$ (GARCH coefficients; levels are
 written "the 5% level"), $\lambda$ (EWMA decay), $\nu$ (Student $t$ degrees of freedom; Volume IV has no constraints),
-$\theta$, $\ell(\theta)$, $\mathrm{RV}_t$, $\rho_k$, $\hat\rho_k$, $\operatorname{VR}(m)$, $\operatorname{MSE}$,
-$\operatorname{SE}$, $H_0$, $\chi^2_K$, $\Phi$, $\E$, $\Var$, $\Cov$, $\operatorname{Kurt}$, $\operatorname{Skew}$,
-$m$, $k$, $Q_{\text{LB}}(K)$ (LM25's). Local symbols, declared:
+$\theta$, $\ell(\theta)$, $\mathrm{RV}_t$, $\rho_k$, $\hat\rho_k$, $\operatorname{MSE}$, $\operatorname{SE}$, $H_0$,
+$\chi^2_K$, $\Phi$, $\E$, $\Var$, $\Cov$, $\operatorname{Kurt}$, $\operatorname{Skew}$, $m$, $k$, $Q_{\text{LB}}(K)$
+(LM25's). No $\operatorname{VR}(m)$: (19.7)'s model ratio, which (26.6) uses, has no symbol (the one-estimator
+decision). Local symbols, declared:
 
 | Symbol | Meaning | Check |
 |:--|:--|:--|
 | $V_t$ | the daily variance target $r_{\mathrm o,t}^2+\mathrm{RV}_t(15\text{ min})$, in %² | §6's $V$ is the SVD's, in modules with an SVD; LM26 has none (LM7 printed $V$ for a mix's variance, lm07.md:416) |
 | $r_{\mathrm o,t}$ | the opening return, $\ln$ of the 09:30:00 value over the previous close | a log return, subscripted |
 | $\mathrm{RV}_t(h)$, $h$ | realized variance of day $t$ on a grid of interval $h$; the interval in seconds or minutes | §6's $h$ is a generic function where $f$ or $g$ have their meaning; LM26 has no generic function |
-| $n$ | intraday returns a day, $14{,}400\text{ s}/h$ | a count |
+| $n$ | intraday returns a day, $14{,}400\text{ s}/h$ | a count; the lag rule writes its day count in words |
 | $i$ | the intraday interval index | LM26 has no interest rate or asset index |
 | $x_i$, $x_i^{\mathrm e}$, $u_i$, $\sigma_u$, $\sigma_{\mathrm e}$ | observed intraday log index, its efficient part, the noise, their standard deviations (§6, Deep Dive 3) | LM25's $u_t$, $x_t$ (generic series) carried over; LM26 writes no probability level $u$ (quantiles in words) |
 | $K$; $a$, $b_j$; $a$, $b$ | lags of the ARCH test; its regression's coefficients; the Mincer–Zarnowitz intercept and slope | §6 gives $a$, $b$ to LM26's auxiliary regressions; $K$ as LM25's $Q_{\text{LB}}(K)$ |
-| $m$ | a forecast horizon in sessions, and in (26.6) the number of intervals summed | both "periods summed", §6's $m$ |
+| $m$ | a forecast horizon in sessions | §6's $m$, periods summed |
+| $J$ | the number of $h$-intervals in a coarser interval $Jh$, (26.6) and X6 | a count; LM25's $J$ (ADF lags) does not occur here |
 
 Not used: $q$ (no bet or dividend yield: the ARCH order is $K$), $p$ for an order, $L$ for a lag operator, $Z_t$ for an
 innovation ($\xi_t$), $R^2$ for R-squared, $\mu$ for the GARCH mean ($g$), a star for an efficient price ($x^{\mathrm
@@ -4269,28 +4210,29 @@ stretch.
 - §2: the ARCH(1) regression gives $a=1.1779$, $b_1=0.1960$ [A26-11]. After a 3% surprise it predicts 2.94 %² for
   tomorrow (1.72%), after a 0.5% one 1.23 %² (1.11%) [A26-55]: today's size moves tomorrow's spread (lm16.md:170).
 - §3: with $\lambda=0.97$ the effective window is 33.3 days and the weights' half-life 22.76 days [A26-56].
-- §4: $\alpha+\beta=0.98$ gives a half-life of 34.3 sessions; TR23's $t$ fit, 0.9910, gives 76.5 [A26-57].
+- §4: $\alpha+\beta=0.98$ gives a half-life of 34.3 sessions; TR23's $t$ fit, 0.99098, gives 76.5 [A26-57].
 - §5: why is the robust standard error of $\hat\alpha$ 1.80 times the classic one [A26-62]? The sandwich does not assume
   normal $\xi_t$, and the standardized residuals have excess kurtosis 2.57 [A26-23].
 - §6: on the 15-second days $\mathrm{RV}(30\text{ s})/\mathrm{RV}(15\text{ s})=0.7189$, so the pooled $\hat\rho_1$ of
-  15-second returns is about −0.281 [A26-61]; the raw data give −0.2815 [A26-34].
+  15-second returns is about −0.281 [A26-61]; the raw download gives −0.2815 [A26-34].
 - §7: a forecast half the target scores QLIKE 0.3069, one double the target 0.1931; MSE (target 1 %²) scores 0.25 and
   1 [A26-58]: QLIKE punishes forecasts that are too low, MSE those that are too high.
 - §8: arch warns when the residual variance lies outside [0.1, 10,000) (SOURCES, "arch 8.0.0"), so it is given
   $100r_t$; why does `res.params` need `.to_numpy()` before NumPy arithmetic?
 
 中文導讀 (each 3–6 sentences, the intuition, not a translation; 樂詞網 terms from plans/vol-4.md with the English at
-first use in each box; terms not yet looked up print the book's form with its English):
+first use in each box; the book's own forms and terms not yet looked up print with their English):
 
 - §2: 波動群聚現象 (volatility clustering), 條件變異數 (conditional variance), 自我迴歸條件變異數非齊一模型 (ARCH
   model), 虛無假設 (null hypothesis); why returns can be uncorrelated while their sizes are not.
 - §3: 指數加權移動平均模型 (EWMA), 波動率 (volatility); a memory that fades instead of a window that drops days.
-- §4: 廣義自我迴歸條件變異數非齊一模型 (GARCH); 半衰期 (half-life), the book's form until 樂詞網 is checked; a shock
-  that decays toward a long-run level.
+- §4: 廣義自我迴歸條件變異數非齊一模型 (GARCH); 半衰期 (half-life), the book's form (樂詞網 lists it only outside
+  statistics); a shock that decays toward a long-run level.
 - §5: 最大概度估計 (maximum likelihood estimation), 概度函數 (likelihood function), 標準誤 (standard error), 穩健標準誤
   (robust standard error); 標準化殘差 (standardized residual), to look up.
-- §6: 已實現變異數 (realized variance) or LM3's 實現變異數 (question 3), 高頻資料 (high-frequency data), 市場微結構雜訊
-  (market microstructure noise), 自我相關 (autocorrelation); why the finest data are not the best data.
+- §6: 實現變異數 (realized variance) and 實現波動率 (realized volatility), LM3's printed form and the book's own (the
+  editor's decision), 高頻資料 (high-frequency data), 市場微結構雜訊 (market microstructure noise, named as a
+  hypothesis), 自我相關 (autocorrelation); why the finest data are not the best data.
 - §7: 均方誤差 (mean squared error); 損失函數 (loss function) and 樣本外 (out-of-sample), to look up; judging a forecast
   against a noisy measurement.
 
@@ -4317,8 +4259,8 @@ the noise is not iid (Hansen and Lunde 2006, abstract: noise is time-dependent).
 **Exhibits.**
 
 - X1 `case` (table, §1): two rows (forecast made on 2 April for 7 April; made on 7 April for 8 April) × columns GARCH
-  (rolling), EWMA 0.94, rolling 60-day, yesterday's $V$, realized $\sqrt{V_t}$, $r_t$; daily %, four significant
-  figures. Values: 1.7222, 1.5605, 1.3226, 0.7004, realized 10.0859, $r$ −10.2029 [A26-07, A26-08]; 3.6031, 2.9215,
+  (rolling), EWMA 0.94, rolling 60-day, yesterday's $V$, realized $\sqrt{V_t}$, $r_t$; daily %, four decimals.
+  Values: 1.7222, 1.5605, 1.3226, 0.7004, realized 10.0859, $r$ −10.2029 [A26-07, A26-08]; 3.6031, 2.9215,
   1.8665, 10.0859, realized 3.3873, $r$ −4.0990 [A26-09]. Note: forecasts out of sample (§7's design); $V_t$ is the
   opening return squared plus the 15-minute realized variance of 09:30–13:30; on 7 April 99.99% of $V_t$ came before
   09:30 (the index opened at its limit) [A26-08]. Source: FinMind `TaiwanStockTotalReturnIndex` (TAIEX), retrieved 18
@@ -4335,18 +4277,19 @@ the noise is not iid (Hansen and Lunde 2006, abstract: noise is time-dependent).
 - X3 `garchfit` (table, §5): rows $g$ (% a day), $\omega$ (%²), $\alpha$, $\beta$, $\nu$, $\alpha+\beta$, $\sigma^2$
   (%²) and $\sqrt{A\sigma^2}$, half-life (sessions), $\ell$; columns normal (estimate, classic SE, robust SE) and $t$
   (estimate, classic SE, robust SE). Normal: 0.0809 (0.0123, 0.0126); 0.0249 (0.0040, 0.0068); 0.0913 (0.0076,
-  0.0137); 0.8932 (0.0086, 0.0151); —; 0.9844; 1.597, 19.83%; 44.2; −8,647.25 [A26-18, A26-20, A26-21]. $t$: 0.0965
+  0.0137); 0.8932 (0.0086, 0.0151); —; 0.98443; 1.597, 19.83%; 44.2; −8,647.25 [A26-18, A26-20, A26-21]. $t$: 0.0965
   (0.0114, 0.0114); 0.0149 (0.0036, 0.0043); 0.0663 (0.0081, 0.0104); 0.9247 (0.0090, 0.0117); 5.54 (0.41, 0.41);
-  0.9910; 1.651, 20.16%; 76.5; −8,463.90 [A26-22]. Note: TR23, 5,849 log returns in percent; arch 8.0.0, constant
+  0.99098; 1.651, 20.16%; 76.5; −8,463.90 [A26-22]. Note: TR23, 5,849 log returns in percent; arch 8.0.0, constant
   mean, recursion started from arch's backcast (2.78 %² [A26-19]); classic errors from $-\ell''$, robust from the
-  sandwich; in-sample.
+  sandwich (arch's `cov_type` options; theory in [[LM20]]'s (20.6), stated without proof under dependence);
+  $\alpha+\beta$ prints five decimals so that each half-life follows from it by (25.2); in-sample.
 - X4 `signature` (`line`, §6): `x.type: "log"`, x the interval in seconds, `x.values` 5, 10, 15, 30, 60, 300, 600, 900,
   1,800 with `ticks` and `tickLabels` "5 s", "10 s", "15 s", "30 s", "1 min", "5 min", "10 min", "15 min", "30 min";
   y log, ratio of the period's mean $\mathrm{RV}(h)$ to its mean $\mathrm{RV}(5\text{ min})$, 0.4–30 (`fmt: "n3"`,
   `tfmt: "n1"`). Four series (`null` where the sampling is coarser than $h$): "2005–2010 (1-minute data)", 1,493 days:
   0.483, 1, 1.164, 1.134, 1.096; "2011–2012 (15-second data)", 487 days from 17 January 2011: 0.699, 0.630, 0.580, 1,
   1.125, 1.106, 1.122; "2015–2026 (5-second data)", 2,867 days: 11.71, 7.248, 5.222, 2.913, 1.730, 1, 0.952, 0.944,
-  0.930; "2025", 243 days: 24.26, 14.88, 10.54, 5.602, 2.968, 1, 0.743, 0.642, 0.559 [A26-32] (2025 is inside the
+  0.930; "2025", 243 days: 24.26, 14.88, 10.541, 5.602, 2.968, 1, 0.743, 0.642, 0.559 [A26-32] (2025 is inside the
   third series; the note says so). Dashed `hline` 1. Note: TAIEX price index, window 09:30–13:30; ratios of means;
   descriptive; the regime checks in [A26-33]; the 2013–2014 sessions (15- and 10-second data) fall between the second
   and third series and are in X6. Several flagged values (A26-32) print three decimals as listed. Source: FinMind
@@ -4355,16 +4298,19 @@ the noise is not iid (Hansen and Lunde 2006, abstract: noise is time-dependent).
   09:30–13:30 in 2025, $\sqrt{A\cdot\text{mean }\mathrm{RV}(h)}$, 8–80% (`fmt: "pct2"`). Series "TAIEX (5-second data)":
   65.27, 51.12, 43.02, 31.36, 22.83, 13.25, 11.42, 10.62, 9.91 [A26-41]; "TX near month (1-minute bars)": 9.26 (1 min),
   9.28, 9.36, 9.17, 9.29 [A26-40]. Note: 243 sessions of 2025; TX's 1-minute returns have $\hat\rho_1=-0.011$, the
-  index's −0.421 [A26-40, A26-41]; the index's variance is 6.08, 2.04, 1.34 and 1.14 times TX's at 1, 5, 15 and 30
+  index's −0.421, both from the raw downloads [A26-40, A26-41]; the index's variance is 6.08, 2.04, 1.34 and 1.14 times TX's at 1, 5, 15 and 30
   minutes [A26-41]; two limit-locked days leave TX's ratios unchanged to four decimals [A26-40]. Source: as X4 and
   FinMind `TaiwanFuturesKBar` (TX), retrieved 19 October 2026.
-- X6 `byyear` (`bar`, §6): categories 2005–2026; series "lag-1 autocorrelation, 1-minute returns" and "lag-1
-  autocorrelation, 5-minute returns" (`fmt: "n3"`), pooled within-day pairs, uncentred; `hline` 0. Values [A26-35]:
-  1-minute from +0.48 (2008) to −0.42 (2025), positive in 2006–2012, negative from 2013, near zero in 2020 (−0.04);
-  5-minute from +0.24 (2006) to −0.25 (2025), below −0.1 only in 2024 and 2025. Note: centring changes no value by more
-  than 0.0005; a year's 1-minute value has an iid standard error of about 0.004 [A26-35], far below the changes between
-  years; descriptive. Needs question 1's per-day columns; the fallback plots $\mathrm{RV}(1\text{ min})/\mathrm{RV}(5\text{
-  min})$ and $\mathrm{RV}(10\text{ min})/\mathrm{RV}(5\text{ min})-1$ by year from the present file [A26-35, A26-66].
+- X6 `byyear` (two stacked `bar` charts, §6; two quantities on different scales): categories 2005–2026, ratios of a
+  year's mean realized variances at adjacent intervals, from `vol4_rv.csv` (`fmt: "n3"`). Top, "RV(1 min) ÷ RV(5 min)",
+  `hline` 1: from 0.397 (2008) to 2.968 (2025), below 1 in 2005–2012 and 2020, above 1 in every other year [A26-35].
+  Bottom, "RV(10 min) ÷ RV(5 min) − 1", `hline` 0: from 0.256 (2007) to −0.257 (2025), below −0.1 only in 2024
+  (−0.177) and 2025 [A26-66]. Note: by (26.6) with $J=5$, $\E\,\mathrm{RV}(5\text{ min})/\E\,\mathrm{RV}(1\text{ min})$
+  is (19.7)'s model ratio $1+2\sum_{k<5}(1-k/5)\rho_k$ of 1-minute returns, so a top bar below 1 says that 1-minute
+  returns within five minutes correlate positively on balance, above 1 negatively; by (26.6) with $J=2$ a bottom bar
+  is about $\hat\rho_1$ of 5-minute returns (over all days the ratio and the pooled $\hat\rho_1$ from the raw download
+  are both 0.056, A26-34). Neither series is itself a lag-1 autocorrelation; descriptive; price index, window
+  09:30–13:30.
 - X7 `losses` (table, §7): six rows (rolling 60-day, EWMA 0.94, GARCH normal, GARCH $t$, yesterday's $V$, EWMA of $V$)
   × mean forecast (%²), MSE (%⁴), QLIKE, Mincer–Zarnowitz $b$ (HC0 SE), R-squared, t-stat of the QLIKE difference
   against GARCH normal. Values [A26-47, A26-48]: 1.466, 11.48, 0.5774, 0.763 (0.059), 0.093, 4.82; 1.464, 10.80, 0.5153,
@@ -4381,15 +4327,18 @@ the noise is not iid (Hansen and Lunde 2006, abstract: noise is time-dependent).
   2025's realized volatility 23.33% [A26-52]. Note: out of sample; weekly means, not the daily series.
 
 **Widget `garchterm` — "How a variance forecast returns to its mean."** `Book.controls`: $\alpha$ (0 to 0.25, step
-0.001, initial 0.0913), $\beta$ (0.60 to 1.00, step 0.001, initial 0.8932), a select "starting point": "the evening of 7
-April 2025" ($\sigma_{t+1\mid t}=3.517\%$) or "8 October 2026" (1.092%) [A26-28]. The unconditional variance stays at
+0.001), $\beta$ (0.60 to 1.00, step 0.001), a select "starting point": "the evening of 7 April 2025"
+($\sigma_{t+1\mid t}=3.517\%$) or "8 October 2026" (1.092%) [A26-28]. The initial $\alpha$ and $\beta$ are the
+full-sample fit's unrounded 0.091254 and 0.893178, shown as 0.0913 and 0.8932 [A26-18], so that the initial readouts
+equal E4's (the rounded 0.0913 and 0.8932 sum to 0.9845, whose half-life is not E4's 44.2); the writer checks that
+`Book.controls` keeps an initial value off its step grid, or uses a finer step. The unconditional variance stays at
 TR23's fitted 1.5971 %² (19.83% a year), so $\omega=1.5971(1-\alpha-\beta)$; when $\alpha+\beta\ge1$ the widget sets
 $\omega=0$ (EWMA, flat at 1; growing above 1) and says "no unconditional variance". `line` chart, x horizon $m$ =
 1–250 sessions, y annualized volatility (0–80%): "forecast for day $t+m$" $\sqrt{A\sigma_{t+m\mid t}^2}$ and "average
 over the next $m$ days" $\sqrt{A\cdot\frac1m\sum_{j\le m}\sigma_{t+j\mid t}^2}$, dashed `hline` 19.83%, dashed `vline` at
-the half-life. Readouts: $\alpha+\beta$, the half-life (25.2), the unconditional volatility, the 20- and 250-day
-averages. Initial state (PDF): 55.18% at $m=1$, 51.83% over 20 days, 32.57% over 250, half-life 44.2 [A26-26]. Model
-numbers only: no market series, no random draws.
+the half-life. Readouts: $\alpha+\beta$ (five decimals, so that the half-life follows from it), the half-life (25.2),
+the unconditional volatility, the 20- and 250-day averages. Initial state (PDF): 55.18% at $m=1$, 51.83% over 20 days, 32.57% over 250 [A26-26], half-life 44.2
+[A26-21, A26-28]. Model numbers only: no market series, no random draws.
 
 **Examples** (results recomputed from the printed inputs):
 
@@ -4406,17 +4355,19 @@ numbers only: no market series, no random draws.
 - E3 §3: which $\lambda$? Out of sample against $V_t$, QLIKE is 0.5153 at 0.94, 0.5436 at 0.97 and lowest, 0.5087, at
   0.905; GARCH scores 0.5032 [A26-17]. Picking 0.905 uses the test days, so it is an in-sample choice; RiskMetrics fixed
   0.94 across hundreds of series by the root mean squared error of variance forecasts (§5.3.2, re-read first).
-- E4 §4 (full-sample normal fit): on the evening of 7 April, $\sigma_{t+1\mid t}=3.517\%$ (12.3695 %²); the forecasts
-  fall to 3.42%, 3.10%, 2.66% and 1.35% at $m$ = 5, 20, 44 and 250 sessions, toward $\sigma=1.264\%$ a day [A26-20]; the average
-  over the next 20 days is 51.8% a year and over 250 days 32.6% [A26-26]. On 8 October 2026 the forecast was 1.092%
+- E4 §4 (full-sample normal fit, $\alpha+\beta=0.98443$, $\sigma^2=1.5971$ %²): on the evening of 7 April,
+  $\sigma_{t+1\mid t}=3.517\%$ (12.3695 %²); by (26.4) the forecasts fall to 3.42%, 3.10%, 2.66% and 1.35% at $m$ = 5,
+  20, 44 and 250 sessions, and the average over the next 20 days is 51.8% a year and over 250 days 32.6% [A26-26],
+  toward $\sigma=1.264\%$ a day [A26-20]. On 8 October 2026 the forecast was 1.092%
   (17.13% a year), below the unconditional 19.83%, and rises toward it [A26-27]. arch's `forecast` gives the same
   values (difference $2\times10^{-14}$).
 - E5 §5 (X3): the normal GARCH on TR23 by maximum likelihood: $\hat g=0.0809\%$, $\hat\omega=0.0249$ %²,
   $\hat\alpha=0.0913$, $\hat\beta=0.8932$, $\ell=-8{,}647.25$; the NumPy likelihood with arch's backcast equals arch's to
-  $10^{-6}$ [A26-18, A26-19]. $\alpha+\beta=0.9844$ and $\sigma^2=1.597$ %², 19.83% a year against the sample's 18.99%
-  [A19-54] [A26-20]. Half-life 44.2 sessions; the delta method (20.8) with robust errors gives 16.1, an interval of 12.7
-  to 75.7; mapping the interval for $\alpha+\beta$ (0.9734 to 0.9954, robust SE 0.0056) gives 25.7 to 151.6 sessions
-  [A26-21]: near 1 the half-life is poorly determined and its interval is lopsided. The $t$ row: $\hat\nu=5.54$, $\ell$
+  $10^{-6}$ [A26-18, A26-19]. $\alpha+\beta=0.98443$ and $\sigma^2=1.597$ %², 19.83% a year against the sample's
+  18.99% [A19-54] [A26-20]. Half-life 44.2 sessions; the delta method (20.8) with robust errors gives an SE of 16.1
+  and an interval of 13 to 76 sessions; mapping the interval for $\alpha+\beta$ (0.97342 to 0.99544, from the
+  unrounded estimate and robust SE 0.0056) gives 26 to 152 sessions [A26-21]: near 1 the half-life is poorly
+  determined and its interval is lopsided. (Whole sessions, so that each end follows from the printed inputs.) The $t$ row: $\hat\nu=5.54$, $\ell$
   higher by 183.35, half-life 76.5 [A26-22].
 - E6 §5: standardized residuals $\hat\xi_t=(r_t-\hat g)/\hat\sigma_t$: excess kurtosis 2.57 against $r_t$'s 5.428
   (lm17.md:387), skewness −0.59 against −0.47 [A26-23]; $Q_{\text{LB}}(10)$ of $\lvert\hat\xi_t\rvert$ 27.6 (p-value
@@ -4428,7 +4379,8 @@ numbers only: no market series, no random draws.
 - E7 §5, what GARCH explains (in-sample; then *Model*): after the 108 falls of 3% or more, 13 next days fell ([[LM21]],
   A21-25; lm13.md:159); GARCH with the residuals' own distribution expects 7.8, against 2.0 for independent days; after
   the 67 rises it expects 5.4 where 3 fell [A26-29]. The model raises the risk after any large move; the data raise it
-  more after falls, an asymmetry GARCH(1,1) cannot express. After $\lvert R_t\rvert\ge2\%$ the next day's size averaged
+  more after falls, an asymmetry GARCH(1,1) cannot express, named in words with Hansen and Lunde's (2005, abstract)
+  "leverage effect" (their term, quoted; the book's leverage stays $f>1$); the lab's extension fits it. After $\lvert R_t\rvert\ge2\%$ the next day's size averaged
   1.27% against 0.80% after other days; GARCH predicts 1.35% and 0.79% [A26-64] ([[LM16]]'s U28 pattern, on TR23).
   Experiment 1 (`default_rng([1, 20261011])`, 1,000 paths): the variance-to-mean ratio of monthly counts of
   $\lvert R\rvert\ge3\%$ has median 3.15 (batch SE 0.035), 5% to 95% of paths 2.04 to 5.14, against TR23's 3.02
@@ -4436,17 +4388,19 @@ numbers only: no market series, no random draws.
   lm15.md:48) [A26-30]. The same paths' excess kurtosis has median only 1.63
   (5.3% reach 5.428); with $t$ innovations (experiment 2) 7.0 [A26-30, A26-31].
 - E8 §6: the variance ratio read backwards. On the 5-second days $\mathrm{RV}(10\text{ s})/\mathrm{RV}(5\text{ s})-1=
-  -0.381$ against the pooled $\hat\rho_1=-0.380$; on the 15-second days −0.281 and −0.2815; at 5 minutes 0.056 both ways
-  [A26-34]. By the noise model, $\hat\rho_1=-0.386$ in 2025 means noise supplies 77% of a 5-second return's variance
-  [A26-37]; the year's daily values run from −0.52 to −0.19, the middle half from −0.41 to −0.33 [A26-36]. The spine's
-  test days (plans/vol-4.md:735–737, not printed) sit inside that range; $\mathrm{RV}(5\text{ s})/\mathrm{RV}(5\text{ min})$ was 24.3 for the
-  year's means and 25.2 for the median day, up to 62.6 [A26-32, A26-36].
-- E9 §6 (X5): the index against its future, 2025. The TAIEX's 1-minute returns have $\hat\rho_1=-0.421$ and an
-  annualized window volatility of 22.8%; the near-month TX's have −0.011 and 9.26%, flat from 1 to 30 minutes (ratios
-  1.00, 1.02, 0.98, 1.00 to 5 minutes) [A26-40, A26-41]. Even at 30 minutes the index's variance is 1.14 times TX's
-  [A26-41]. Whatever moves the index at high frequency is not in the market's price of the index; candidate causes
-  (prices of slow stocks that update late, the bounce of heavy stocks between bid and ask) are hypotheses here (question
-  4).
+  -0.381$ from the file against the pooled $\hat\rho_1=-0.380$ from the raw download; on the 15-second days −0.281 and
+  −0.2815; at 5 minutes 0.056 both ways [A26-34]. By the noise model (a hypothesis), $\hat\rho_1=-0.386$ in 2025 (raw
+  download) means noise supplies 77% of a 5-second return's variance [A26-37]; the year's daily values, from the raw
+  download, run from −0.52 to −0.19, the middle half from −0.41 to −0.33 [A26-36]. The spine's 2025 test days
+  (`plans/vol-4.md` at commit bcfa0d4, LM26's spine: −0.36 to −0.46; not printed) sit inside that range; the claim is
+  made for the 2025 test days only. $\mathrm{RV}(5\text{ s})/\mathrm{RV}(5\text{ min})$ was 24.3 for the year's means
+  and 25.2 for the median day, up to 62.6 [A26-32, A26-36].
+- E9 §6 (X5): the index against its future, 2025. The TAIEX's 1-minute returns have $\hat\rho_1=-0.421$ (from the raw
+  download) and an annualized window volatility of 22.8%; the near-month TX's have −0.011 and 9.26%, flat from 1 to 30
+  minutes (ratios 1.00, 1.02, 0.98, 1.00 to 5 minutes) [A26-40, A26-41]. Even at 30 minutes the index's variance is
+  1.14 times TX's [A26-41]. Whatever moves the index at high frequency is not in the market's price of the index;
+  candidate causes (prices of slow stocks that update late, the bounce of heavy stocks between bid and ask) are named
+  as hypotheses, since no source in SOURCES states either for the TAIEX.
 - E10 §7 (X7): out of sample against $V_t$, GARCH normal has the lowest QLIKE (0.5032) and MSE (10.37 %⁴); EWMA is
   worse by 0.0121 in QLIKE (Newey–West t-stat 1.83, p-value 0.067) and by 0.428 in MSE (t-stat 2.98); GARCH $t$ differs
   from normal by 1.40 and 0.62 standard errors; yesterday's $V$ is worst (t-stat 11.96 in QLIKE) [A26-47, A26-48].
@@ -4461,7 +4415,7 @@ from 2 January 2008), units (%², %⁴), $A=246.12$, the divisor ($T$), the targ
 (classic, robust, HC0, Newey–West with 9 lags), the test's null and side, and for a simulation the seed and the number
 of paths.
 
-1. MC: EWMA with $\lambda=0.97$; its effective window. A 22.8 days (the weights' half-life). **B** 33.3 days. C 32.3
+1. MC: EWMA with $\lambda=0.97$; its effective window. A 22.76 days (the weights' half-life). **B** 33.3 days. C 32.3
    days ($\lambda/(1-\lambda)$, the mean lag) [A26-56].
 2. MC: GARCH(1,1) with $\omega=0.025$ %², $\alpha=0.09$, $\beta=0.89$, $A=246.12$; the unconditional annualized
    volatility. **A** 17.5%. B 7.5% ($\omega/(1-\beta)$: $\alpha$ forgotten). C 1.12% ($\sqrt{1.25}$, a daily value)
@@ -4475,13 +4429,13 @@ of paths.
 5. MC: 5-second returns with pooled $\hat\rho_1=-0.40$ and no other autocorrelation; $\mathrm{RV}(10\text{ s})/
    \mathrm{RV}(5\text{ s})$ is about A 1.40 (sign reversed). **B** 0.60. C 0.20 ($1+2\rho_1$, counting each pair twice)
    [A26-60].
-6. Derive (26.4) from (26.3); apply it from 7 April 2025 (12.3695 %², $\alpha+\beta=0.9844$, $\sigma^2=1.5971$ %²):
-   $\sigma_{t+20\mid t}=3.097\%$, the 20-day average 51.8% a year [A26-26].
+6. Derive (26.4) from (26.3); apply it from 7 April 2025 (12.3695 %², $\alpha+\beta=0.984432$, $\sigma^2=1.5971$ %²):
+   $\sigma_{t+20\mid t}=3.097\%$, the 20-day average 51.8% a year [A26-20, A26-26].
 7. Show that EWMA's weights sum to 1, that its effective window is $1/(1-\lambda)$, and that EWMA is GARCH with
    $\omega=0$, $\alpha=1-\lambda$, $\beta=\lambda$, whose $m$-step forecast is flat (Deep Dive 1).
-8. Derive $\E\,\mathrm{RV}(2h)=(1+\rho_1)\E\,\mathrm{RV}(h)$ from (19.7) with $m=2$ (pooled pairs, the day's edge
-   ignored); under the noise model show $\rho_1\ge-\frac12$ and that noise supplies the share $2\lvert\rho_1\rvert$ of
-   a return's variance; apply to 2025's −0.386: 77% [A26-37].
+8. Derive $\E\,\mathrm{RV}(2h)=(1+\rho_1)\E\,\mathrm{RV}(h)$ from (19.7) for a sum of two returns (pooled pairs, the
+   day's edge ignored); under the noise model show $\rho_1\ge-\frac12$ and that noise supplies the share
+   $2\lvert\rho_1\rvert$ of a return's variance; apply to 2025's −0.386 (from the raw download): 77% [A26-37].
 9. Derive the kurtosis of Deep Dive 2 for normal $\xi_t$, evaluate it at X3's normal fit (6.51), and explain why
    experiment 1's paths have a median of only 1.63 [A26-25, A26-30].
 10. Python: the normal GARCH log-likelihood by hand in NumPy with arch's backcast; compare with `arch_model(...).fit()`
@@ -4497,10 +4451,12 @@ and `vol4_rv.csv`, a copy of the committed `data/derived/vol4_rv.csv`; `make_lab
 $T$, $A$; `vol4_rv.csv` with `comment_prefix="#"`, its regimes, $V_t$; 2 E1 by hand and with `het_arch`; 3 EWMA by hand
 (E2), its weights, X2's EWMA line, E3's $\lambda$ grid; 4 the GARCH likelihood by hand, arch's normal and $t$ fits with
 both error types (E5, X3), standardized residuals (E6), the term structure (E4, the widget's values); 5 E7 with
-experiment 1 (and experiment 2 as an option, its run time stated); 6 X4 and E8 from the file, the by-year ratios of X6's
-fallback; 7 the out-of-sample comparison (X7, X8, X9, E10) with Newey–West and HC0 checked against statsmodels; 8
-Problems 10–12. Optional part (needs the 2025 T5S files, 243 calls): the daily $\hat\rho_1$ of 5-second returns
-(E8's range). Extension: arch's asymmetric term (`o=1`), refitted on TR23 and E7's two counts recomputed; does the
+experiment 1 (and experiment 2 as an option, its run time stated); 6 X4, X6's by-year ratios and E8's file values;
+7 the out-of-sample comparison (X7, X8, X9, E10) with Newey–West and HC0 checked against statsmodels; 8 Problems 10–12.
+Optional part (needs the 2025 T5S files, 243 calls), the route to the 2025 numbers printed "from the raw download":
+the daily $\hat\rho_1$ of 5-second returns (E8's range), the pooled 5-second $\hat\rho_1$ of 2025 (E8's −0.386) and the
+1-minute $\hat\rho_1$ (E9's −0.421); the pooled values over all years need the full download (`data/lm26_numbers.py`).
+Extension: arch's asymmetric term (`o=1`), refitted on TR23 and E7's two counts recomputed; does the
 model now expect more falls after falls than after rises? Labs write "LM31", never `[[LM31]]`.
 
 **Cross-module tags** (probable users):
@@ -4516,11 +4472,13 @@ model now expect more falls after falls than after rises? Labs write "LM31", nev
 - (26.4) $\sigma^2=\omega/(1-\alpha-\beta)$; $\sigma_{t+m\mid t}^2=\sigma^2+(\alpha+\beta)^{m-1}(\sigma_{t+1\mid t}^2-
   \sigma^2)$; half-life $\ln\frac12/\ln(\alpha+\beta)$ by (25.2); (26.3)'s conditions (LM31, LM32).
 - (26.5) $\ell(\theta)=-\frac12\sum_t\big[\ln2\pi+\ln\sigma_t^2+\varepsilon_t^2/\sigma_t^2\big]$, normal $\xi_t$, given
-  a start value $\sigma_1^2$; its maximizer's large-sample normality under dependence is *stated without proof*
-  (question 6) (LM32).
+  a start value $\sigma_1^2$; its maximizer's large-sample normality under dependence is *stated without proof*,
+  citing [[LM20]]'s (20.6) for the theory and arch's documented `cov_type` options for the classic and robust errors
+  (the editor's decision) (LM32).
 - (26.6) $\mathrm{RV}_t(h)=\sum_{i=1}^n(x_i-x_{i-1})^2$, $n=14{,}400\text{ s}/h$; with returns stationary within the day,
-  $\E\,\mathrm{RV}(mh)=\operatorname{VR}(m)\,\E\,\mathrm{RV}(h)$ by (19.7), and $\E\,\mathrm{RV}(2h)=(1+\rho_1)\E\,
-  \mathrm{RV}(h)$ (pooled, day edges ignored) (LM30, LM39).
+  $\E\,\mathrm{RV}(Jh)=\big[1+2\sum_{k=1}^{J-1}(1-k/J)\rho_k\big]\E\,\mathrm{RV}(h)$, (19.7)'s ratio for the
+  $h$-returns ($\rho_k$ their lag-$k$ autocorrelation), and $\E\,\mathrm{RV}(2h)=(1+\rho_1)\E\,\mathrm{RV}(h)$ (pooled,
+  day edges ignored) (LM30, LM39).
 - (26.7) $x_i=x_i^{\mathrm e}+u_i$, iid efficient returns and iid noise independent of them: $\rho_1=-\sigma_u^2/
   (\sigma_{\mathrm e}^2+2\sigma_u^2)\in[-\frac12,0]$ and $\E\,\mathrm{RV}(h)=n\sigma_{\mathrm e}^2+2n\sigma_u^2$ (LM39).
 - (26.8) losses for a variance forecast $f$ and proxy $V$: $\operatorname{MSE}=(V-f)^2$, $\text{QLIKE}=V/f-\ln(V/f)-1
@@ -4534,8 +4492,8 @@ model now expect more falls after falls than after rises? Labs write "LM31", nev
 - Conditions every time: (26.3) needs $\omega>0$, $\alpha,\beta\ge0$ and $\alpha+\beta<1$ for an unconditional
   variance; the kurtosis formula a positive denominator; the ARCH test's $\chi^2_K$ iid errors with a fourth moment;
   Patton's robustness a conditionally unbiased proxy.
-- The finest interval is not the best: at 5 seconds noise supplies most of a return's variance; at 5 minutes the 2025
-  index still carried twice TX's variance (2.04, [A26-41]).
+- The finest interval is not the best: read through the noise model (a hypothesis), noise supplies most of a 5-second
+  return's variance; at 5 minutes the 2025 index still carried twice TX's variance (2.04, [A26-41]).
 - A realized variance from 09:00:00 contains the overnight gap (PITFALLS §3); $V_t$ keeps it as one squared return,
   which is two thirds of $V_t$ [A26-43] and most of its noise.
 - $V_t$ is 0.933 of $r_t^2$ on average (Newey–West t-stat −3.26; 0.918 in 2025, 1.011 in 2008) [A26-44]: the intraday
@@ -4549,8 +4507,9 @@ model now expect more falls after falls than after rises? Labs write "LM31", nev
   only 2.54 [A26-48]).
 - Data traps: $A=246.12$, never 252; $r_t$ in percent for arch, in decimals in the text's formulas only where said;
   arch's `params` is a pandas Series (`.to_numpy()`); `het_arch` without `result_object=True` warns; the 10-second regime
-  has no 15-second grid (NaN); TX bars are labelled by their start; the closing auction freezes the index from 13:25:05
-  (every day of every regime, [A26-42]).
+  has no 15-second grid (NaN); TX bars are labelled by their start; the closing auction freezes the index from the
+  first value after 13:25:00 (13:25:00 plus one sampling step) to the last value before 13:30:00, on every day of
+  every regime ([A26-42], from the raw download).
 - Ownership: $\hat\rho_k$ of TR23 and the iid band are [[LM19]]'s; the robust band and $\lvert r\rvert$'s Ljung–Box are
   [[LM25]]'s; LM26's are the ARCH test, EWMA, GARCH, the T5S statistics and the forecast comparison.
 - Notation: $\alpha$ is a GARCH coefficient, so the level is "the 5% level"; $\nu$ the $t$'s degrees of freedom;
@@ -4559,59 +4518,26 @@ model now expect more falls after falls than after rises? Labs write "LM31", nev
   (1986; bibliographic only, read its abstract first); *RiskMetrics — Technical Document* (1996, §5.3.2, Table 5.9;
   re-read first); Andersen and Bollerslev (1998); Andersen, Bollerslev, Diebold and Labys (2003; abstract read);
   Zhang, Mykland and Aït-Sahalia (2005, §1.2.5); Hansen and Lunde (2005; 2006, abstracts); Patton (2011; the 2006
-  working paper's Section 3); Tsay (2010, ch. 3, §3.6, §7.2) at chapter level; Barndorff-Nielsen and Shephard (2002)
-  only after it is read. No signature-plot origin is attributed (open point).
+  working paper's Section 3); Tsay (2010, ch. 3, §3.6, §7.2) at chapter level, not for the GARCH standard errors,
+  which cite [[LM20]]'s (20.6) and arch's documented options; Barndorff-Nielsen and Shephard (2002) only after it is
+  read. No signature-plot origin is attributed (open point); Corsi (2009) is not cited, so HAR is not named.
 
 **Stage 4 for earlier modules.** `leads` gain 26 in lm03.md:6 and lm14.md:6 (lm05.md:6 is in the plan's list already;
-lm13, lm15–lm18 list 26). Tag user lists in the sibling briefs: (19.7) gains LM26; (23.7) gains LM26. If question 3 is
-decided for 已實現變異數, lm03.md:710's 實現變異數 changes with the edition note; otherwise the plan's term changes.
+lm13, lm15–lm18 list 26). The sibling briefs' tag lists of (19.7) and (23.7) now include LM26. lm03.md:710's
+實現變異數 stays: LM26 uses LM3's term (the editor's decision), so no wording changes.
 
-**Applied provisionally** (a decision applied as written for the case where its source is not yet read):
+**Open before Stage 2** (the editor's LM26 decisions answer the drafter's questions; these sources and records are
+still open, and until they close the text is written as the decisions say):
 
 - The ARCH test's $\chi^2_K$ law, the GARCH MLE's large-sample normality and the sandwich are *stated without proof*;
-  Engle (1982) and Tsay (2010, ch. 3) are cited at article and chapter level until read.
+  Engle (1982) is cited at article level (its end page is open), the GARCH standard errors to [[LM20]]'s (20.6) and
+  arch's documented `cov_type` options.
 - RiskMetrics' $\lambda=0.94$, its criterion and the 75 effective days are printed only after §5.3.2 and Table 5.9 are
   re-read (SOURCES open point).
 - QLIKE's normalized form (zero for a perfect forecast) is checked in Patton's text before printing; the MSE and QLIKE
   robustness is cited to the 2006 working paper's Section 3 as SOURCES records it.
-- The causes of the signature (stale prices, the bounce of heavy stocks, TWSE's matching rules) are hypotheses; no
-  source in SOURCES states them for the TAIEX.
-- 半衰期, 標準化殘差, 損失函數 and 樣本外 print the book's form with the English until 樂詞網 is checked.
-
-**Questions for the editor.**
-
-1. *Per-day lag-1 sums in the derived file.* X6, E8's pooled values and the 2025 daily range need intraday products that
-   `vol4_rv.csv` lacks. Proposed: `data/vol4_rv.py` adds `c1_<h>`, the sum of products of consecutive returns per day
-   on each grid (a per-day statistic, no signed return or price), so the lab rebuilds X6 exactly (uncentred; centring
-   changes nothing above 0.0005 [A26-35]). Without it, X6 plots the two RV ratios by year and the text prints the raw
-   values as computed by `data/lm26_numbers.py` from the download. Which?
-2. *The target's interval.* The brief picks 15 minutes: the signature is within 4% of its 30-minute value in 2005–2010
-   (1.134 against 1.096) and within 2% in 2015–2026 (0.944 against 0.930) [A26-32], with 16 returns a day. 2024 and
-   2025 are not flat at any interval (2025's 15-minute variance is 1.34 times TX's [A26-41]). The forecast ranking is
-   the same at 5, 15 and 30 minutes and against $r_t^2$ [A26-49]. Confirm 15 minutes, or prefer 30 (the spine named
-   5)?
-3. *Chinese term.* LM3's Glossary prints 實現變異數 for realized variance (lm03.md:710); the plan decided 已實現變異數 and
-   已實現波動率 (book's own forms). AUTHORING §1 keeps an earlier module's term for the same concept. Keep LM3's
-   實現變異數 and 實現波動率, or change lm03.md:710 at Stage 4?
-4. *Causes of the signature.* The data show positive 1-minute autocorrelation in 2006–2012 (up to +0.48), negative from
-   2013 (to −0.42 in 2025), the switch inside FinMind's 15-second regime, and a 5-second noise level that jumps from
-   1.4–1.8 bp in 2015–2023 to 3.7 and 4.8 bp in 2024–2025 [A26-35, A26-38], while TX shows none of it [A26-40]. The
-   spine's two mechanisms fit the signs, but SOURCES holds no source for them. Candidates to verify before any cause is
-   printed: TWSE's history of its matching method (periodic call auctions, continuous trading) and its tick-size table,
-   and TSMC's daily price (FinMind `TaiwanStockPrice` 2330, one call) for the tick hypothesis; Roll (1984) and Lo and
-   MacKinlay (1990) on bid–ask bounce and nonsynchronous trading are not in SOURCES and are unverified. Until then the
-   text labels both mechanisms hypotheses.
-5. *Asymmetry.* E7's 13-against-3 asymmetry is the lab's extension (`o=1`). Naming it needs a source (Glosten,
-   Jagannathan and Runkle, not in SOURCES) or Hansen and Lunde's (2005) abstract wording ("leverage effect"). Which?
-6. *Sources for GARCH inference.* Bollerslev (1986) is bibliographic only; nothing in SOURCES states the GARCH MLE's
-   asymptotic normality or the sandwich (arch's "robust", Bollerslev and Wooldridge 1992 not in SOURCES). Read Tsay
-   (2010, ch. 3) or Bollerslev (1986) before Stage 2, or keep *stated without proof* with Tsay at chapter level?
-7. *HAR.* Name it in one sentence without a source, or add Corsi (2009) to SOURCES after a Crossref check?
-8. *X2 under the no-full-series rule.* X2 carries two weekly-sampled variance paths (GARCH in-sample, EWMA) and a weekly
-   realized mean. Each week gives two linear equations in that week's five squared returns, so no daily value can be
-   rebuilt; confirm.
-9. *Two GARCH fits in the text.* The case and §7 use the rolling (out-of-sample) model (3.60% for 8 April), E4 and the
-    widget the full-sample fit (3.517%). Confirm that both appear, each labelled.
-10. *Extra forecasts.* The spine named three; the brief adds the rolling 60-day variance (the LM5 lab's window), GARCH
-    $t$ and the EWMA of $V_t$ (yesterday's $V$ alone is far worse than every model, t-stat 11.96 in QLIKE [A26-48]).
-    Keep six rows in X7?
+- The causes of the signature (stale prices, the bounce of heavy stocks, TWSE's matching rules) stay hypotheses until a
+  source in SOURCES states one for the TAIEX. Candidates to verify: TWSE's history of its matching method and its
+  tick-size table; Roll (1984) and Lo and MacKinlay (1990), not in SOURCES and unverified.
+- Corsi (2009): HAR is named only once it is in SOURCES.
+- 樂詞網 lookups for 標準化殘差, 損失函數 and 樣本外 (until then each prints with its English).

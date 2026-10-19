@@ -90,7 +90,7 @@ Who owns what where modules touch; a brief may refine a line but not move a topi
 - `TaiwanStockPriceAdj` (adjusted prices) is a useful cross-check of the hand-built total-return series.
 
 **FinMind access: the owner has a Sponsor plan** (2026-10-10). It allows 6,000 API calls an hour and every dataset
-marked Free, Backer or Sponsor in `list_datasets`. Intraday datasets need a `data_id` and return one day per request
+marked Free, Backer or Sponsor in `list_datasets`. Intraday datasets return one day per request and some need a `data_id`
 (whole-day, all-product downloads are Sponsor Pro only), so 15 years of TX minute bars is about 3,700 calls, well
 inside an hour. The licence is non-commercial, forbids redistributing raw data and requires citing FinMind.
 
