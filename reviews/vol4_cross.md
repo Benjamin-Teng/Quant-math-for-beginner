@@ -180,3 +180,38 @@ The consolidations of LM23–LM26 found items that also fall on other modules. D
 - **Briefs and anchors:** from Stage 3 the modules and their numbers scripts are authoritative (plans/vol-4.md
   preface). The departures the records list (LM23 C1, M2, m16; LM24 A1, m11; LM25 M1, M3, m16, A2; LM26 m4) are recorded
   in the module records, not copied back.
+
+## Revision 1 re-check (X2), 2026-10-19
+
+A fresh, read-only agent checked the eight revised modules as one volume (`scratch/rev1/X2.md`). Every X and XB
+decision is applied where it falls; every tag, label and cross-module number agrees. Its findings, with the editor's
+decisions after a fresh adversarial re-check of the major items (`scratch/rev1/chk/`):
+
+| # | Severity | Finding | Decision |
+|:--|:--|:--|:--|
+| 1 | major | LM22 (L34, L47, L139) and LM21 (L172) describe the annual Sharpe ratio on simple returns as holding for uncorrelated days, against LM19's [[ex:rules]] and the plan's "Sharpe ratio" decision. The re-check confirmed it and found two more sentences in LM20 (L153, L407). | XB8 below; the wording is in the module records. |
+| 2 | major | LM26's E1 prints $\chi^2$ p-values for the ARCH test without the fourth-moment caveat that LM19 and LM20 apply. Confirmed; the re-check refuted in part X2's "exceeds every draw" (a $t_{3.065}$ law reaches 224.8 about twice in 10,000) and "reject whatever the reference law", and found a permutation reference that needs no moment. The same-root scan found the caveat missing in LM20, LM22, LM23, LM25 and LM26. | XB7 below; LM26 adds a permutation experiment. |
+| 3 | minor | The Stage 4 list lacks lm15 → 22. | Added (plans/vol-4.md). |
+| 4 | minor | The iid band has three Chinese forms. | 獨立同分布區間（iid band） in LM19's §4 box and LM25's §5 box. |
+| 5 | minor | Basic terms are glossed in some boxes only. | XB10 below. |
+| 6 | minor | LM21 L282 points to LM22 for a statement LM22 does not make. | Reworded (LM21's record). |
+| 7 | minor | LM22 alone tags its own forms in the Glossary. | XB9 below. |
+| 8 | trivial | Two attributions (LM26 L251, LM22 L163). | Fixed as proposed. |
+| 9 | trivial | Reference forms (journal "&", Patton's initials, NumPy's pinned page, "equation 5"). | Fixed as proposed. |
+
+Decided by the editor:
+
+- **XB7 (fourth moment):** a test, p-value, standard error or interval whose reference law needs a finite fourth
+  moment of returns is flagged at its first use in each module (nominal, approximate, or resting on practice), in one
+  sentence that cites [[LM19]] or [[LM15]]'s $\nu=3.065$ fit (LM20: its own Section 7). Where a reference without
+  that moment exists and is cheap (LM26's permutation), the module adds it. Places: LM20 L47 and L410; LM22 L89 and
+  L196; LM23 L131; LM25 after L170; LM26 E1 and after L387.
+- **XB8 (√A):** $\sqrt A$ annualization of a Sharpe ratio or a volatility is exact only for log returns on uncorrelated
+  days and a convention on simple returns ([[LM19]]; Lo 2002); no sentence says that uncorrelated days suffice.
+  Places: LM20 L153 and L407; LM21 L172; LM22 L34, L47 and L139.
+- **XB9 (own forms):** a module prints the book's own Chinese forms without a tag, as LM1–LM18 do; SOURCES records
+  them ("Chinese terms (Volume IV)", revision 1). LM22 drops its tags and its prose remark; LM26 drops its remark on
+  半衰期.
+- **XB10 (glosses):** every Chinese technical term gets its English at its first use in each box, basic terms
+  included (變異數, 平均數, 標準差, 殘差, 迴歸, 估計量, 標準誤, 對數報酬, 波動率, 條件變異數 and the like), as AUTHORING §1 asks and LM20
+  and LM23 already do. Places as X2 lists them, in the module records.

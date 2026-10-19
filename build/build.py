@@ -247,8 +247,10 @@ def render_callout(block, ctx):
     if typ == "exhibit":
         note = ""
         nm = re.search(r"(?ms)^(Note|Source|Sources)s?:\s*(.+)\Z", inner)
-        if nm:
-            note = f'<div class="ex-note">{md_inline(nm.group(0))}</div>'; inner = inner[:nm.start()].rstrip()
+        if nm:  # a blank line in the note starts a new paragraph of it
+            note = "".join(f'<div class="ex-note">{md_inline(part)}</div>'
+                           for part in re.split(r"\n(?:[ \t]*\n)+", nm.group(0).rstrip()))
+            inner = inner[:nm.start()].rstrip()
         return (f'<figure class="exhibit" id="ex{ctx.n["exhibit"]}"><figcaption class="ex-bar">{label}: {md_inline(title)}</figcaption>'
                 f'<div class="ex-body">{render_blocks(inner, ctx)}</div>{note}</figure>')
     body = render_blocks(inner, ctx)

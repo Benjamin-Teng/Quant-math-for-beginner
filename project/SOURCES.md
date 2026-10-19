@@ -839,7 +839,8 @@ What each source claims; no source found derives fractional Kelly as *the* Bayes
   Volume 13 is unverified. That this article introduced the signature plot is **unconfirmed**. Hansen and Lunde's 2004
   working paper (below) says the plots "were introduced by" Andersen, Bollerslev, Diebold and Labys (2000) and cites
   "Great realizations", *Risk* 13(3): 105–108: a secondary source for both points.
-- Zhang, Mykland & Aït-Sahalia, "A Tale of Two Time Scales", *JASA* 100(472): 1394–1411, 2005, DOI
+- Zhang, Mykland & Aït-Sahalia (Lan Zhang, Per A. Mykland, Yacine Aït-Sahalia; Crossref writes "Per A"), "A Tale of Two Time
+  Scales", *JASA* 100(472): 1394–1411, 2005, DOI
   [10.1198/016214505000000169](https://doi.org/10.1198/016214505000000169); the subtitle "Determining Integrated
   Volatility With Noisy High-Frequency Data" is printed on p. 1394 (Crossref omits it). Read in the published PDF
   (<https://www.princeton.edu/~yacine/twoscales.pdf>, re-read 2026-10-19): the five estimators, §1.2; §1.2.5 "The
@@ -953,7 +954,8 @@ Bibliographic data come from Crossref (`api.crossref.org/works/<doi>`, read 2026
 
 #### Stage 3, round 1 (2026-10-19)
 
-- Brockwell & Davis, *Time Series: Theory and Methods*, 2nd ed., Springer Series in Statistics, Springer-Verlag, New
+- Brockwell & Davis (Peter J. Brockwell, Richard A. Davis, in Crossref), *Time Series: Theory and Methods*, 2nd ed.,
+  Springer Series in Statistics, Springer-Verlag, New
   York, 1991, DOI [10.1007/978-1-4419-0320-4](https://doi.org/10.1007/978-1-4419-0320-4) (Crossref gives the 2009
   reprint's ISBNs 978-1-4419-0319-8 and 978-1-4419-0320-4; the 1991 copyright page gives 0-387-97429-6). Read
   2026-10-19 in Google Books' preview (id ZW_ThhYQiXIC): p. 222 as a page image; pp. 220–223 and 308 in snippets.
@@ -1002,7 +1004,8 @@ Batch B (LM23–LM26), read 2026-10-19:
 - Wasserman (2004), Springer's front matter and the chapter page: ch. 11 "Bayesian Inference", pp. 175–192, DOI
   [10.1007/978-0-387-21736-9_11](https://doi.org/10.1007/978-0-387-21736-9_11); §11.2 "The Bayesian Method", p. 176.
   The page-one preview (pp. 175–176) shows §11.2's three steps (prior, model, posterior); the rest was not reached.
-- Efron & Hastie, *Computer Age Statistical Inference: Algorithms, Evidence, and Data Science*, Cambridge University
+- Efron & Hastie (Bradley Efron, Trevor Hastie, in Crossref), *Computer Age Statistical Inference: Algorithms,
+  Evidence, and Data Science*, Cambridge University
   Press, 2016, DOI [10.1017/CBO9781316576533](https://doi.org/10.1017/CBO9781316576533) (Crossref). Read in the authors'
   free PDF (<https://hastie.su.domains/CASI/>, "for personal use only", corrected 5 March 2021): §7.1, (7.12)–(7.13),
   pp. 92–93, the James–Stein estimator toward the grand mean, $\hat M+\hat B(x_i-\hat M)$ with $\hat B=1-(N-3)/S$,
@@ -1059,8 +1062,6 @@ without proof*, name the work without the missing detail, or label a mechanism a
   - every theorem or equation number in Greene and Hayashi, and Hamilton's beyond §10.5 and §17.4;
   - the Kim & White and Joanes & Gill texts.
 - **Sources for results the briefs state without proof:**
-  - $\operatorname{Var}\hat\rho_k\approx1/T$ and its normal limit (LM19, (19.6); candidates Tsay 2010 or Box, Jenkins,
-    Reinsel and Ljung);
   - the $\chi^2_1$ law of (21.5) for two series (LM21);
   - the consistency of the iid bootstrap (LM22, (22.2));
   - the regression's $t_{T-d}$ law (LM23): Blitzstein and Hwang do not state it (above), and Hayashi and Greene are
@@ -1086,7 +1087,8 @@ Ex. 10.4.3 and Def. 10.4.4; the $t_{n-1}$ law of the studentized mean follows fr
 shows); the source of the lag rule $\lfloor4(T/100)^{2/9}\rfloor$ (statsmodels' default HAC lag, and Newey and
 West's (1994) pilot lag, not their recommended HAC lag); the Saturday sessions (TWSE's history page).
 
-Closed in Stage 3, round 1 (2026-10-19): the James–Stein theorem toward the grand mean (Efron and Hastie 2016); BDA3's
+Closed in Stage 3, round 1 (2026-10-19): the source of LM19's (19.6) (Brockwell and Davis 1991, Theorem 7.2.2 and
+Example 7.2.1); the James–Stein theorem toward the grand mean (Efron and Hastie 2016); BDA3's
 (2.10) and §3.3; the Bartlett weights (Newey and West's 1986 working paper); where Hamilton treats Newey–West; the
 end pages of Engle (1982), Newey and West (1987), Andrews (1991), Engle and Granger (1987), Johansen (1991) and
 Brenner and Kroner (1995); RiskMetrics §5.3.2 and its effective days; the URLs of the RiskMetrics and BDA3 PDFs.
@@ -1613,7 +1615,7 @@ statsmodels pages are under `https://www.statsmodels.org/stable/generated/`, arc
 
 | English | 統計學名詞 | 數學名詞 | Book (proposed) |
 |:--|:--|:--|:--|
-| delta method | delta法；δ法 | — | delta法 |
+| delta method | delta法；δ法 | — | delta 法 (X7's spacing) |
 | observed information | only "observed information matrix" 觀察訊息矩陣 | — | 觀察訊息(矩陣) |
 | asymptotic normality | 漸近常態性 | 漸近正規性；漸近常態性 | 漸近常態性 |
 | efficiency | 效率；有效性; efficient estimator 有效估計量; relative efficiency 相對效率；相對有效性 | 效率; 有效估計量; 相對效率 | 效率 |
@@ -1673,6 +1675,21 @@ Batch B (LM23–LM26), 樂詞網 searched 2026-10-19 with curl (21 query strings
 | lagged variable or value | no 統計 or 數學 entry (經濟學名詞 落遲變數) | described: 落後一期的值 |
 | 同質變異, 落後項, 落後變數, 滯後 | no entry in 統計 or 數學 | not used |
 | partial autocorrelation | 偏自我相關 (統計學名詞; coefficient 偏自我相關係數) | 偏自我相關 |
+
+Revision 1 (LM19–LM26), 樂詞網 searched 2026-10-19 with curl (46 query strings, all listings, 統計學名詞 and 數學名詞).
+The book's own forms are recorded here and printed in the modules without a tag (decision XB9).
+
+| English | 樂詞網 | Book |
+|:--|:--|:--|
+| drift | 漂移項 (統計學名詞; also 參數漂移, Pitman漂移); 數學名詞 only zero drift 零點漂移 | 漂移項 |
+| log-likelihood | 對數概度；對數概似 (統計學名詞) | 對數概度 |
+| ARCH test | 自我迴歸條件變異數非齊一檢定 (統計學名詞) | the listed form |
+| Lagrange multiplier test | 拉格朗日乘數檢定 (統計學名詞) | not printed |
+| opening return | no entry (opening price 開盤價格, 管理學名詞) | 開盤報酬, the book's own form |
+| basic (bootstrap) interval | no entry | 基本信賴區間, the book's own form |
+| moving block, circular block (bootstrap) | no entry in 統計 or 數學 | 移動區塊, 循環區塊, the book's own forms |
+| block length | no entry in 統計; 數學名詞 分組長度 is the coding sense | 區塊長度, the book's own form |
+| effective sample size | 有效樣本數 (統計學名詞); effective observations or days: no entry | not printed |
 
 ## Writing style (AUTHORING §1, checked 2026-10-11)
 

@@ -86,7 +86,7 @@ unless stated.
   with the five rows of 2007-03-12 as the only exception in TR23's window). Back months often trade a few lots a day, so their
   settlements are partly exchange-determined: report volume when a result leans on them.
 - **Futures vs index timing:** TAIEX closes on a 13:25–13:30 call auction; the TX daily settlement comes from the last
-  minute before 13:45. Daily changes in the near-month basis therefore had a standard deviation of about 83 points in 2025, mostly timing noise. Example: on 2025-06-30
+  minute before 13:45. Daily changes in the near-month basis therefore had a standard deviation of about 83 points over same-contract pairs from April to October 2025 (LM6; over all of 2025, 81 points with the rolls and 77 without, LM25), mostly timing noise. Example: on 2025-06-30
   TAIEX fell 1.44% (about 40 points of it ex-dividend) while the July TX settled +0.10%.
 - **An intraday index opens at the previous close** (2026-10-19, Volume IV). `TaiwanVariousIndicators5Seconds` prints
   the previous day's TAIEX close at 09:00:00, and the index takes about a minute to absorb the opening gap (stocks open

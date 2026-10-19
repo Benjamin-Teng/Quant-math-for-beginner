@@ -111,7 +111,7 @@ period. YAML strings with backslashes need double escaping inside double quotes 
 | `> [!definition] Term` | precise English definition |
 | `> [!theorem]`, `> [!proposition]`, `> [!result]` | statements; a proof follows or sits in a Deep Dive |
 | `> [!example] Title {#label}` + nested `> > [!solution]` | worked example (8–10 per module) |
-| `> [!exhibit] Title {#label}` | numbered table or chart; a final `Note:` or `Source:` line becomes the caption |
+| `> [!exhibit] Title {#label}` | numbered table or chart; a final `Note:` or `Source:` line becomes the caption, and a blank `>` line inside it starts a new paragraph of the caption |
 | `> [!pitfall] Title` | a common mistake and its fix |
 | `> [!zh] 標題` | 中文導讀 |
 | `> [!deepdive]- Title` | optional rigorous proof, collapsed |
@@ -167,7 +167,7 @@ note says why.
 | $\varphi$, $\Phi$ | standard normal density and distribution function |
 | $B_t$ | standard Brownian motion ($W$ stays wealth, so $dW_t=W_t(\mu\,dt+\sigma\,dB_t)$ reads unambiguously); a module without Brownian motion may use $B$ for a balance, or (LM18) the number of bootstrap resamples, declared in its notation note |
 | $y$, $i$, $v$, $k$, $\gamma$ | yield to maturity or IRR; periodic interest rate; discount factor $1/(1+i)$; required return; growth rate of dividends or cash flows (simple, per period) |
-| $\lambda$, $\nu$, $\mathcal L$ | multiplier of an equality constraint (with a subscript, $\lambda_k$ is an eigenvalue: table below); multipliers of inequality constraints (KKT), or in a module about distributions a Student $t$'s degrees of freedom (a module uses one of the two); Lagrangian. In a module about distributions without constraints, $\lambda$ is a Poisson mean or an exponential rate. Volume IV has no constraints: there $\mathcal L(\theta)$ is a likelihood, and LM26's $\lambda$ is the EWMA decay |
+| $\lambda$, $\nu$, $\mathcal L$ | multiplier of an equality constraint (with a subscript, $\lambda_k$ is an eigenvalue: table below); multipliers of inequality constraints (KKT), or in a module about distributions a Student $t$'s degrees of freedom, and in LM24 a chi-square law's (a module uses one of the two); Lagrangian. In a module about distributions without constraints, $\lambda$ is a Poisson mean or an exponential rate. Volume IV has no constraints: there $\mathcal L(\theta)$ is a likelihood, and LM26's $\lambda$ is the EWMA decay |
 | $h$, $u$; $\psi$ | generic functions in modules where $f$ or $g$ already have their book-wide meaning ($f$, $g$, $h$ are fine in purely mathematical modules; from Volume III $u$ is instead a probability level or a uniform draw, table below); constraint functions, $\psi(x)=b$ or $\psi_i(x)\le b_i$ (there $b$ is a constraint level, not a bet's gain: a module uses one of the two) |
 
 **Vectors and matrices** (from Volume II; LM7 already writes vectors, transposes and $\Sigma$ this way):
@@ -419,10 +419,10 @@ bundled):
 - The module's companion-lab box keeps the sentence that says what the notebook rebuilds, minus any claim about bundled
   data or a snapshot, and then, in a paragraph of its own (four sentences), says: "The notebook reads FinMind files that you download once with your own token. From the repository root, run
   `uv run python data/fetch_finmind.py`, then `uv run python data/make_lab_data.py`. FinMind's licence does not allow
-  the book to redistribute the data. After that, the notebook runs offline." LM26's box adds a fifth sentence: "The
-  realized variances come with the repository (`data/derived/vol4_rv.csv`); rebuilding them needs the 5-second TAIEX
+  the book to redistribute the data. After that, the notebook runs offline." LM26's box adds two sentences: "The
+  realized variances come with the repository (`data/derived/vol4_rv.csv`). Rebuilding them needs the 5-second TAIEX
   download, `uv run python data/fetch_intraday.py --series taiex5s` (5,351 requests, about nine hours on a free
-  FinMind account, re-run after each hourly stop)."
+  registered FinMind account at 600 calls an hour, re-run after each hourly stop)."
 - The notebook's first cell: "**Environment.** From the repository root, `uv sync` installs the locked Python
   environment (`uv.lock`). Open this notebook with the `.venv` kernel, or run `uv run --with jupyterlab jupyter lab`."
 - The lab's README runs `uv sync` and `uv run --with jupyterlab jupyter lab labs/LMNN_lab/LMNN_lab.ipynb` from the
