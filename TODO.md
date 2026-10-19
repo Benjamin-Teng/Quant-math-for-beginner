@@ -42,6 +42,8 @@
   live site (the domain in `docs/CNAME`) and keeps same-page anchors as internal PDF links; before, Chromium printed
   them as `file:///` paths on the author's disk. After `./build.sh --pdf`, `grep -ac 'file:///' docs/pdf/*.pdf`
   gives 0 for every file.
+- **Mobile Contents drawer and Start or Resume reading** (owner-requested, `3c3f4c5`): checked by the owner on
+  2026-10-19. The reading record (`ftck-last-read`, localStorage) keeps its rule: opening a module records it.
 - The brief and anchors keep the plan and the corrected facts (preface of `plans/vol-2.md`); values and wording that
   a revision changes in a module are not copied back. Four of the closing check's six refuted items (LM8 C1, CX1–CX3) rest on this rule; reviews/README.md gives the
   reasons for CX4 and CX5.
@@ -55,11 +57,6 @@
 - Optional, site code: the front page's install block (`build/build_index.py`, the `git clone … cd …` line) is
   755 px wide in print against the 680 px text width (`build/qa/print_width.py docs/index.html`). It was so in 0.2;
   on screen it scrolls inside its box, and the front page has no PDF.
-- Check once on a real iPhone (owner-requested drawer, 2026-10-18; no WebKit browser was available for the five
-  review rounds): on a module page scrolled half-way, tap Contents, scroll the drawer, close it, and confirm the top
-  bar stays visible and the page does not jump; turn the phone with the drawer open and close it.
-- Owner's call on the reading record (`ftck-last-read`): it records a module as soon as it is opened, so a quick
-  look at another module changes the front page's Resume button; say if only scrolling should count.
 - Optional, `book.js`: two minor items the last review left (each tested in a scratch copy): relock directly in the
   drawer's ResizeObserver callback (one frame of the wrong page behind the backdrop on a reflow), and add
   `main [data-widget] > *` to the drawer's scroll anchors (a widget filling the reading line can miss the place by
@@ -76,6 +73,13 @@ the edition. Ask the owner about code, site, repository and his standing rules, 
 end of the roadmap before the batch that needs them; content is the editor's call. Volume IV's intraday data are
 approved (ROADMAP, "Decided by the owner"); its packages (statsmodels, arch, per ROADMAP's Volume IV row) are not yet,
 so they go into the Stage 1 capability check.
+
+**Status (2026-10-19).** Steps 1 and 2 are drafted in [`plans/vol-4.md`](plans/vol-4.md): the shared decisions, the
+spines and the capability check, after a survey of the published book, the data, the packages and the sources, and a
+fresh adversarial check of the draft. The capability check (A packages, B data pipeline, B′ what is committed from
+T5S, C chart kit, D `Book.dist`/`Book.rng`, E optional TX minute bars) waits for the owner's decision; the next steps
+are the approved builds, AUTHORING §6's Volume IV notation, SOURCES, the data download (T5S on the owner's computer,
+about one hour of quota) and the briefs.
 
 **Stage 1, before any writer starts**, as Volume III did (`plans/vol-3.md` is the model):
 
