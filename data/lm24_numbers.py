@@ -387,9 +387,13 @@ chk("pitfall: c with sqrt(A)", c_wrong, ".4f", "0.9994")
 # KC section 3
 chk("KC3 nine times 3.59", 9 * n0_10 / A, ".1f", "32.3")
 chk("KC3 unrounded worth, three decimals (K1)", n0_10 / A, ".3f", "3.594")
+assert abs(n0_10 / A - (vol / 0.10) ** 2) < 1e-12                       # the worth in years is (sqrt(A) s / A sigma0)^2
+chk("KC3 sqrt(A) s, three decimals (N-2)", 100 * vol, ".3f", "18.957")
+chk("KC3 worth from printed 18.957 (N-2)", (18.957 / 10) ** 2, ".3f", "3.594")
 chk("KC3 from printed 3.594", 9 * 3.594, ".1f", "32.3")
+chk("KC3 from printed 18.957, nine times", 9 * (18.957 / 10) ** 2, ".1f", "32.3")
 chk("KC3 from printed 3.59", 9 * 3.59, ".1f", "32.3")
-has("KC3 answer (K1)", "nine times the unrounded 3.594: 32.3 years")
+has("KC3 answer (N-2)", "nine times the unrounded worth, $(18.957/10)^2=3.594$: 32.3 years")
 anchor("A24-19", f"A sigma0 = 10 worth {v(n0_10 / A, 2)} years; c = 0.9 needs 9 x that = {v(9 * n0_10 / A, 1)} years "
        f"(from printed 3.59: {9 * 3.59:.2f})")
 anchor("A24-31", f"{v(C.Z975, 2, extra=4)} (lm15.md:194 prints 1.9600)")
@@ -515,6 +519,10 @@ has("Efron and Hastie reference", "§7.1 (the James–Stein estimator toward the
 has("Wasserman citation (M2 c)", "(Wasserman 2004, ch. 11)")
 has("Wasserman reference (M2 c)", "New York: Springer, ch. 11 (Bayesian inference)")
 assert "Chopra" not in RAW_MD and "\\Gamma(a+1)" not in RAW_MD and "\\chi^2_k" not in RAW_MD   # m1; m3 (a, nu)
+# N-4: the first Deep Dive declares m and v in its first sentence; the notation note scopes x in Section 5's Deep Dive
+has("N-4 Deep Dive", "> [!deepdive]- Completing the square\n> Let $m$ and $v>0$ be numbers. By (24.1),")
+assert "for numbers $m$ and $v>0$" not in RAW_MD
+has("N-4 notation", "$x$ a value of $\\theta$ (in Section 5's Deep Dive, the argument of the $\\chi^2_\\nu$ density);")
 anchor("A24-42", f"Experiment 1, 10,000 cross-sections: raw {mcs(e1['raw'])}; JS {mcs(e1['js'])}; positive part "
        f"{mcs(e1['pp'])}; Bayes 0.5x {mcs(e1['bayes'])}; mean c_hat (positive part) "
        f"{v(float(e1['c_pp'].mean()), 2, extra=2)}; mean unclipped 1 - 25/S {v(float(e1['c_js'].mean()), 2, extra=2)}")
@@ -544,11 +552,16 @@ assert abs(float(np.sqrt((noise_i**2).mean())) - nz_r) < 1e-15          # E7's n
 chk("M3 smallest sector noise", 100 * float(noise_i.min()), ".1f", "4.8")
 chk("M3 largest sector noise", 100 * float(noise_i.max()), ".1f", "9.7")
 chk("M3 ratio of the noise variances (about 4)", float(noise_i.max() / noise_i.min()) ** 2, ".0f", "4")
-assert bool((noise_i > sp1).all())                                     # the spread lies below every sector's noise
-assert 25 * float(noise_i.min()) ** 2 / (28 * sp1**2) > 1                # so c_hat = 0 under any average of the noises
+b_min = (C.N - 3) * float(noise_i.min()) ** 2 / (C.N * sp1**2)          # 1 - c_hat if every noise were the smallest
+assert b_min > 1                                                       # so c_hat = 0 under any average of the noises
+print(f"N-1: 1 - c_hat with every sector at the smallest noise {b_min:.4f}; from printed 4.8, 4.50: "
+      f"{25 * 4.8**2 / (28 * 4.50**2):.4f}")
+assert 25 * 4.8**2 / (28 * 4.50**2) > 1                                 # the same from the printed values
 has("M3 paragraph", "the sectors' noise variances differ by a factor of about 4 (half-widths 9 to 19 points in [[ex:forest]])")
 has("M3 known", "Their average, estimated from 2,191 returns, is treated as known.")
-has("M3 spread", "the spread, 4.50, lies below every sector's noise (4.8 to 9.7 points)")
+has("M3 smallest noise (N-1)", "(24.4) gives $\\hat c=0$ even if every sector had the smallest noise, 4.8 points (the largest "
+    "is 9.7), so $\\hat c=0$ does not depend on the averaging")
+assert "lies below every sector's noise" not in RAW_MD
 has("M3 l.289", "sum to zero each day, still co-move and have unequal noise")
 anchor("A24-44", f"first half: noise {v(nz_r, 1, pct=True)}; spread SD (divisor 28) {v(sp1, 1, pct=True)}; 1 - c_hat "
        f"{v(b_r, 2)}; c_hat {c_r:g}")
@@ -819,6 +832,16 @@ anchor("A24-59", f"16 of 24, Beta(98,90): mean {98 / 188:.5f}; Pr(theta>=0.55) {
        f"LM13 18.02% (lm13.md:530)")
 thirds = [len(a) for a in np.array_split(np.arange(C.T28), 3)]
 anchor("A24-60", f"thirds of {C.T28}: {thirds} -> sorted {sorted(thirds)}")
+# N-3: the lab's thirds (np.array_split of U28's 4,382 returns): each third's means against the next third's
+parts = np.array_split(C.X, 3)
+assert [len(p) for p in parts] == [1461, 1461, 1460]                  # the lengths the lab's extension prints
+for k, (rho_p, slope_p) in enumerate((("0.13", "0.09"), ("0.24", "0.61"))):
+    mk, mn = parts[k].mean(axis=0), parts[k + 1].mean(axis=0)
+    chk(f"thirds {k + 1} -> {k + 2}: correlation of the means", float(np.corrcoef(mk, mn)[0, 1]), ".2f", rho_p)
+    chk(f"thirds {k + 1} -> {k + 2}: hindsight slope", C.c_opt(mk, mn), ".2f", slope_p)
+has("N-3 thirds", "The reverse direction and the lab's thirds show how much the misses move; in the thirds the correlation "
+    "is 0.13 and 0.24, and the hindsight slope 0.09 and 0.61.")
+has("N-3 paragraph", "\n\nThe misses, the hindsight slope and the case's correlation come from one fixed split")
 anchor("A24-37", f"inputs A Rbar {A * Rb:.8f}; sqrt(A) s {vol:.8f}; years {years:.6f}; fhat {fhat:.6f}; initial readouts "
        f"at A sigma0 0.10: years {v(years, 2)}; SE {v(A * se, 2, pct=True)}; c {v(c10, 3)}; mean "
        f"{v(A * pm10, 1, pct=True)}; SD {v(A * psd10, 1, pct=True)}; 95% {v(A * (pm10 - C.Z975 * psd10), 1, pct=True)} to "
@@ -846,6 +869,21 @@ tags = re.findall(r"\\tag\{(24\.\d+)\}", RAW_MD)
 assert tags == ["24.1", "24.2", "24.3", "24.4", "24.5"], tags
 assert "\t" not in RAW_MD and "\b" not in RAW_MD and "\f" not in RAW_MD
 print(f"labels: {len(ex_labels)} exhibits, {len(eg_labels)} examples, every exhibit cited; tags {', '.join(tags)}")
+# XB10: the English at the first use of each Chinese term in each box (the boxes in order)
+zh_boxes = re.findall(r"> \[!zh\][^\n]*\n((?:>[^\n]*\n?)+)", RAW_MD)
+assert len(zh_boxes) == 5, len(zh_boxes)
+GLOSSES = [["二項資料（binomial data）", "事後平均數（posterior mean）", "資料權重（data's weight）"],
+           ["變異數（variance）", "平均數（mean）", "常態分布（normal distribution）", "標準差（standard deviation）",
+            "資料權重（data's weight）"],
+           ["可靠區間（credible interval）", "信賴區間（confidence interval）"],
+           ["估計值（estimate）", "離差（deviation）", "橫斷面平均（cross-sectional mean）"],
+           ["波動率（volatility）", "期望對數成長（expected log growth）", "貝氏下注（Bayes bet）",
+            "事前標準差（prior standard deviation）", "估計值（estimate）", "資料權重（data's weight）"]]
+for k, (box, glosses) in enumerate(zip(zh_boxes, GLOSSES)):
+    for g in glosses:
+        term = g.split("（")[0]
+        assert term in box and box.index(term) == box.index(g), (k + 1, g)   # the first use carries the English
+print(f"XB10: {sum(map(len, GLOSSES))} first-use glosses checked in the {len(zh_boxes)} boxes")
 
 # ====================================================================== report
 body = TEXT.split("\n## Glossary", 1)[0]

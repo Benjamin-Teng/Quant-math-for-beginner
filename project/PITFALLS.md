@@ -234,6 +234,10 @@ unless stated.
   normal law with the same mean and SD, then the days mirrored about their mean, which keeps the tails and drops
   the skewness.
 - Statistical terms misused: a raw third moment called skewness.
+- A reference law that needs moments the data lack: LM26's draft printed $\chi^2$ p-values below $10^{-100}$ for an
+  ARCH test on TR23, whose Student $t$ fit ($\nu=3.065$) has no fourth moment; LM20, LM22, LM23 and LM25 had
+  standard errors with the same gap. Name the moment each test, standard error or interval needs, flag it where
+  the data may lack it (decision XB7), and where a moment-free reference is cheap use it (LM26: a permutation).
 - Printed numbers that do not recompute from the printed inputs (rounding); tables whose parts do not sum as printed;
   partial years silently omitted.
 - Conventions mixed: 365 vs 365.25 days, 243.1 vs 243.8 vs 252 sessions, rates per day vs per year.

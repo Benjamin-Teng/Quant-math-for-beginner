@@ -256,7 +256,7 @@ show("from the printed inputs", (0.0804 - 0.0464) / sqrt(0.0227**2 + 0.0219**2),
 """)
 
 md(r"""
-[[ex:power]] and [[eg:years]]: (21.4) for four annual Sharpe ratios, and the years for 80% power. TR23's annual ratio is $\sqrt A\,\bar R/s$ with $r_f=0$ (LM19's statistic).
+[[ex:power]] and [[eg:years]]: (21.4) for four annual Sharpe ratios, and the years for 80% power. TR23's annual ratio is $\sqrt A\,\bar R/s$ with $r_f=0$, LM19's statistic; on simple returns the factor $\sqrt A$ is a convention.
 """)
 
 code(r"""

@@ -62,7 +62,7 @@ Companion notebook to **From Calculus to Kelly, LM26**. It rebuilds the module's
 | Part | Rebuilds |
 |:--|:--|
 | 1 | Data: TR23's log returns in percent, $T$, $A$; `vol4_rv.csv`, its sampling regimes and the daily target $V_t$ |
-| 2 | The ARCH test by hand and with `het_arch` ([[eg:archtest]]) and the knowledge check's ARCH(1) forecasts |
+| 2 | The ARCH test by hand and with `het_arch` ([[eg:archtest]]), its permutation reference (experiment 3) and the knowledge check's ARCH(1) forecasts |
 | 3 | EWMA by hand ([[eg:ewmahand]]), its weights, and $\lambda$ in hindsight ([[eg:lambda]]) |
 | 4 | GARCH: the likelihood by hand, arch's normal and $t$ fits with classic and robust errors ([[eg:fit]], [[ex:garchfit]]), standardized residuals ([[eg:resid]]), Deep Dive 2, the term structure ([[eg:term]], the widget) and [[ex:vol]] |
 | 5 | What GARCH explains ([[eg:explains]]) with experiments 1 and 2 |
@@ -74,7 +74,7 @@ Companion notebook to **From Calculus to Kelly, LM26**. It rebuilds the module's
 
 **Environment.** From the repository root, `uv sync` installs the locked Python environment (`uv.lock`). Open this notebook with the `.venv` kernel, or run `uv run --with jupyterlab jupyter lab`.
 
-**Data.** The notebook reads FinMind files that you download once with your own token. From the repository root, run `uv run python data/fetch_finmind.py`, then `uv run python data/make_lab_data.py`. FinMind's licence does not allow the book to redistribute the data. After that, the notebook runs offline. The realized variances come with the repository (`data/derived/vol4_rv.csv`); rebuilding them needs the 5-second TAIEX download, `uv run python data/fetch_intraday.py --series taiex5s` (5,351 requests, about nine hours on a free registered FinMind account at 600 calls an hour, re-run after each hourly stop).
+**Data.** The notebook reads FinMind files that you download once with your own token. From the repository root, run `uv run python data/fetch_finmind.py`, then `uv run python data/make_lab_data.py`. FinMind's licence does not allow the book to redistribute the data. After that, the notebook runs offline. The realized variances come with the repository (`data/derived/vol4_rv.csv`). Rebuilding them needs the 5-second TAIEX download, `uv run python data/fetch_intraday.py --series taiex5s` (5,351 requests, about nine hours on a free registered FinMind account at 600 calls an hour, re-run after each hourly stop).
 
 `data/` then holds `taiex_tr.csv` (`date`, `price`: the daily closes of the TAIEX total-return index, FinMind `TaiwanStockTotalReturnIndex`, data_id TAIEX, 2 January 2003 to 8 October 2026) and `vol4_rv.csv` (one row per session from 3 January 2005: the sampling interval `regime_s`, the realized variances `rv_<h>` of the window 09:30:00–13:30:00 at nine intervals with their return counts `n_<h>`, and `o2`, the squared log change from the previous close to 09:30:00; derived from FinMind `TaiwanVariousIndicators5Seconds` and `TaiwanStockPrice`, TWSE the original source). The notebook reads nothing outside `data/`.
 
@@ -241,6 +241,38 @@ show("K=5: sum of the slopes", float(b5[1:].sum()), ".3f", "0.529")
 for x, v_, s_ in ((3.0, "2.94", "1.72"), (0.5, "1.23", "1.11")):
     show(f"knowledge check: variance after a {x}% surprise", 1.1779 + 0.1960 * x**2, ".2f", v_)
     show(f"knowledge check: its root", math.sqrt(1.1779 + 0.1960 * x**2), ".2f", s_)
+""")
+
+md(r"""
+These $\chi^2$ p-values are nominal: (26.1) needs a finite fourth moment, which LM15's fit ($\nu=3.065$) lacks (LM19).
+
+Experiment 3 needs no moment. As in LM21, it shuffles TR23's days 20,000 times with one generator, `np.random.default_rng([3, 20261011])`, and computes both statistics on each shuffle. A shuffle keeps every return but breaks any dependence between days, so the shuffles show how large the statistics get without clustering. The cell takes about ten seconds.
+""")
+
+code(r"""
+def arch_lm(x, K):
+    # the statistic (T - K) R-squared alone, for the shuffles (arch_test above also calls het_arch)
+    z = x[K:] ** 2
+    X = np.column_stack([np.ones(len(x) - K)] + [x[K - j - 1 : len(x) - j - 1] ** 2 for j in range(K)])
+    b, *_ = np.linalg.lstsq(X, z, rcond=None)
+    e = z - X @ b
+    return (len(x) - K) * (1 - float(e @ e) / float((z - z.mean()) @ (z - z.mean())))
+
+
+NPERM = 20_000
+rng3 = np.random.default_rng([3, SEED])
+perm1, perm5 = np.empty(NPERM), np.empty(NPERM)
+t0 = time.time()
+for i in range(NPERM):
+    xs = yc[rng3.permutation(T)]          # the mean is unchanged, so xs is the shuffled series' own residual
+    perm1[i], perm5[i] = arch_lm(xs, 1), arch_lm(xs, 5)
+print(f"{NPERM:,} shuffles in {time.time() - t0:.0f} s")
+show("largest shuffled statistic, K=1", perm1.max(), ".1f", "84.1")
+show("largest shuffled statistic, K=5", perm5.max(), ".1f", "88.0")
+print(f"shuffles at or above the observed 224.8 and 696.3: {int((perm1 >= lm1).sum())} and {int((perm5 >= lm5).sum())}")
+q1, q5 = (float(np.quantile(p, 0.99, method="inverted_cdf")) for p in (perm1, perm5))
+print(f"99% points of the shuffles: {q1:.2f} (K=1) and {q5:.2f} (K=5); of chi2_1 and chi2_5: "
+      f"{stats.chi2.ppf(0.99, 1):.2f} and {stats.chi2.ppf(0.99, 5):.2f}")
 """)
 
 md(r"""
@@ -709,7 +741,7 @@ plt.show()
 """)
 
 md(r"""
-[[eg:vrback]] from the file: by (26.6) with $J=2$, $\mathrm{RV}(2h)/\mathrm{RV}(h)-1$ estimates $\rho_1$ of the returns over $h$, a ratio of the period's means. Deep Dive 3: under (26.7) the mean RV would rise by the same amount for every extra return a day. Each rise is the mean of a per-day series, so it gets a Newey–West standard error across the 5-second days.
+[[eg:vrback]] from the file: by (26.6) with $J=2$, $\mathrm{RV}(2h)/\mathrm{RV}(h)-1$ estimates $\rho_1$ of the returns over $h$, a ratio of the period's means. Deep Dive 3: under (26.7) the mean RV would rise by the same amount for every extra return a day. Each rise is the mean of a per-day series, so it gets a Newey–West standard error across the 5-second days. These errors need a finite fourth moment of returns (LM19), so they are nominal; the share of days on which the largest rise exceeds the smallest needs no moment.
 """)
 
 code(r"""
@@ -736,6 +768,9 @@ for j, d_ in enumerate(per_day):
 jx, jn = int(np.argmax(rise_per)), int(np.argmin(rise_per))
 d_x = per_day[jx] - per_day[jn]
 print(f"largest minus smallest: {d_x.mean():.3e}, t-stat {d_x.mean() / nw_se(d_x, nl5):.2f}")
+show("the extremes' per-day correlation", float(np.corrcoef(per_day[jx], per_day[jn])[0, 1]), ".2f", "0.93")
+show("Newey-West t-stat of their per-day difference", float(d_x.mean() / nw_se(d_x, nl5)), ".1f", "10.6")
+show("days on which the largest rise exceeds the smallest (%)", 100 * float(np.mean(d_x > 0)), ".0f", "88")
 """)
 
 code(r"""
@@ -1074,7 +1109,7 @@ nbf.write(nb, LAB / "LM26_lab.ipynb")
 
 (LAB / "README.md").write_text("""# LM26 Lab — Time Series II: Volatility Models
 
-Companion to *From Calculus to Kelly*, Learning Module 26. The notebook rebuilds the module's exhibits and computational examples (the ARCH test, EWMA by hand and in hindsight, GARCH(1,1) fitted by hand and with arch under normal and Student-t innovations, standardized residuals, the term structure of a forecast, what GARCH explains with two simulated experiments, the volatility signature and the ratios of realized variances by year, and the out-of-sample comparison of six variance forecasts), computes the widget's starting values, works the computational practice problems and ends with an asymmetric GARCH.
+Companion to *From Calculus to Kelly*, Learning Module 26. The notebook rebuilds the module's exhibits and computational examples (the ARCH test with its permutation reference, EWMA by hand and in hindsight, GARCH(1,1) fitted by hand and with arch under normal and Student-t innovations, standardized residuals, the term structure of a forecast, what GARCH explains with two simulated experiments, the volatility signature and the ratios of realized variances by year, and the out-of-sample comparison of six variance forecasts), computes the widget's starting values, works the computational practice problems and ends with an asymmetric GARCH.
 
 ## Run
 
@@ -1091,13 +1126,13 @@ The notebook is saved with its outputs, so you can read it before running it. To
 uv run jupyter nbconvert --to notebook --execute --inplace LM26_lab.ipynb
 ```
 
-It ran in about 25 seconds when the book was built, although the out-of-sample comparison refits two GARCH models every month, about 1,300 fits in all.
+It ran in about 35 seconds when the book was built, although the out-of-sample comparison refits two GARCH models every month, about 1,300 fits in all.
 
 `build/make_lab26.py` generates the notebook and this README: edit the generator, not the generated files.
 
 ## Data (FinMind; not in the repository)
 
-The notebook reads FinMind files that you download once with your own token. From the repository root, run `uv run python data/fetch_finmind.py`, then `uv run python data/make_lab_data.py`. FinMind's licence does not allow the book to redistribute the data. After that, the notebook runs offline. The realized variances come with the repository (`data/derived/vol4_rv.csv`); rebuilding them needs the 5-second TAIEX download, `uv run python data/fetch_intraday.py --series taiex5s` (5,351 requests, about nine hours on a free registered FinMind account at 600 calls an hour, re-run after each hourly stop).
+The notebook reads FinMind files that you download once with your own token. From the repository root, run `uv run python data/fetch_finmind.py`, then `uv run python data/make_lab_data.py`. FinMind's licence does not allow the book to redistribute the data. After that, the notebook runs offline. The realized variances come with the repository (`data/derived/vol4_rv.csv`). Rebuilding them needs the 5-second TAIEX download, `uv run python data/fetch_intraday.py --series taiex5s` (5,351 requests, about nine hours on a free registered FinMind account at 600 calls an hour, re-run after each hourly stop).
 
 The same steps in a shell (`data/raw/` and this folder's `data/` are git-ignored):
 

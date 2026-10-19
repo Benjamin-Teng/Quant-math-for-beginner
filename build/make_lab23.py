@@ -78,7 +78,7 @@ Companion notebook to **From Calculus to Kelly, LM23**. It repairs the sector cl
 
 `data/` then holds `sectors_close_raw.csv` (the closes FinMind's `TaiwanStockPrice` serves for TAIEX and the 30 TWSE sector indices, one column per series), `sectors_close_repairs.csv` (the 561 closes that FinMind copied from another date or series, each with its official 13:30:00 value from `TaiwanStockEvery5SecondsIndex`), `taiex_tr.csv` (the TAIEX total-return index, `TaiwanStockTotalReturnIndex`), and `0050_daily_raw.csv`, `0050_dividends.csv` and `00631L_daily_raw.csv` (LM2's funds). The notebook reads nothing outside `data/`.
 
-**Conventions (as in the module).** U28: daily simple price returns (no dividends) of the 28 leaf TWSE sector indices and the TAIEX price index between consecutive TAIEX-calendar dates, closes 2008-12-01 to 2026-10-08, $T=4{,}382$ returns. OLS with an intercept; $s_\varepsilon^2=\text{RSS}/(T-d)$; classical standard errors $s_\varepsilon^2(X^{\top}X)^{-1}$; White's HC0 with no degrees-of-freedom factor; Newey–West with Bartlett weights $1-k/(\ell+1)$, no small-sample correction and the lag $\ell=\lfloor4(T/100)^{2/9}\rfloor$ unless stated. Descriptive means, standard deviations and correlations divide by $T$ (`ddof=0`). t-stats and p-values use the normal reference, two-sided, except LM12's four points ($t_2$). Quantiles are $\hat F^{-1}(u)$ (`method="inverted_cdf"`). Every count against a threshold uses the guard `1e-12`. Fits and tests are in-sample; halves, years and rolling windows are stability checks; the hedges of [[eg:hedge]] and of the extension are judged out of sample.
+**Conventions (as in the module).** U28: daily simple price returns (no dividends) of the 28 leaf TWSE sector indices and the TAIEX price index between consecutive TAIEX-calendar dates, closes 2008-12-01 to 2026-10-08, $T=4{,}382$ returns. OLS with an intercept; $s_\varepsilon^2=\text{RSS}/(T-d)$; classical standard errors $s_\varepsilon^2(X^{\top}X)^{-1}$; White's HC0 with no degrees-of-freedom factor; Newey–West with Bartlett weights $1-k/(\ell+1)$, no small-sample correction and the lag $\ell=\lfloor4(T/100)^{2/9}\rfloor$ unless stated. Descriptive means, standard deviations and correlations divide by $T$ (`ddof=0`). t-stats and p-values use the normal reference, two-sided, except LM12's four points ($t_2$). Daily returns may lack a finite fourth moment (LM19), so these normal references are approximations. Quantiles are $\hat F^{-1}(u)$ (`method="inverted_cdf"`). Every count against a threshold uses the guard `1e-12`. Fits and tests are in-sample; halves, years and rolling windows are stability checks; the hedges of [[eg:hedge]] and of the extension are judged out of sample.
 """)
 
 code(r"""
@@ -700,7 +700,7 @@ for name, h, pr in (("first-half beta", hb["first"][0], "0.19"), ("ratio 1", 1.0
 """)
 
 md(r"""
-**[[eg:etf]].** LM2's slope of 00631L on 0050 with an error bar, the designed multiple 2, and the extreme calendar years 2015–2025. These use the funds' own files, so they do not change on the free plan.
+**[[eg:etf]].** LM2's slope of 00631L on 0050 with an error bar, the designed multiple 2, and the calendar years 2015–2025: the count of years beyond 1.96 standard errors, then the extremes. These use the funds' own files, so they do not change on the free plan.
 """)
 
 code(r"""
@@ -714,6 +714,15 @@ show("interval, low", f2["b"][1] - 1.96 * f2["se_n"][1], ".3f", "1.845", kept=Tr
 show("interval, high", f2["b"][1] + 1.96 * f2["se_n"][1], ".3f", "1.928", kept=True)
 yr = np.array([d[:4] for d in etf_dates])
 by = {y: ols(R631[yr == y], design(R50[yr == y])) for y in sorted(set(yr)) if "2015" <= y <= "2025"}
+# first a count that uses all 11 years
+zy = {y: (f["b"][1] - f2["b"][1]) / f["se_n"][1] for y, f in by.items()}
+print(pl.DataFrame({"year": list(zy), "slope": [round(by[y]["b"][1], 3) for y in zy],
+                    "Newey-West SE": [round(by[y]["se_n"][1], 4) for y in zy], "z": [round(v, 2) for v in zy.values()]}))
+beyond = [str(y) for y, v in zy.items() if abs(v) > 1.96 + EPS]
+print("years more than 1.96 own SEs from the full-sample slope:", beyond)
+show("their count", len(beyond), "d", "4", kept=True)
+show("expected if the slope were constant, 11 x 0.05", 11 * 0.05, ".2f", "0.55", kept=True)
+# then the extremes, which were picked from the 11 years
 lo, hi = min(by, key=lambda y: by[y]["b"][1]), max(by, key=lambda y: by[y]["b"][1])
 print("extreme years:", lo, hi)
 show("2024 slope", by["2024"]["b"][1], ".3f", "1.717", kept=True)
@@ -722,14 +731,6 @@ show("2024 Newey-West (4)", by["2024"]["se_n"][1], ".4f", "0.0759", kept=True)
 show("2021 Newey-West (4)", by["2021"]["se_n"][1], ".4f", "0.0776", kept=True)
 show("z of the difference", (by["2021"]["b"][1] - by["2024"]["b"][1]) /
      sqrt(by["2021"]["se_n"][1] ** 2 + by["2024"]["se_n"][1] ** 2), ".1f", "2.5", kept=True)
-# the extremes were picked from 11 years; a count over all 11 uses every year
-zy = {y: (f["b"][1] - f2["b"][1]) / f["se_n"][1] for y, f in by.items()}
-print(pl.DataFrame({"year": list(zy), "slope": [round(by[y]["b"][1], 3) for y in zy],
-                    "Newey-West SE": [round(by[y]["se_n"][1], 4) for y in zy], "z": [round(v, 2) for v in zy.values()]}))
-beyond = [str(y) for y, v in zy.items() if abs(v) > 1.96 + EPS]
-print("years more than 1.96 own SEs from the full-sample slope:", beyond)
-show("their count", len(beyond), "d", "4", kept=True)
-show("expected if the slope were constant, 11 x 0.05", 11 * 0.05, ".2f", "0.55", kept=True)
 """)
 
 md(r"""
@@ -769,7 +770,7 @@ show("BH's smallest adjusted p", multipletests(p_c, method="fdr_bh")[1].min(), "
 """)
 
 md(r"""
-**[[eg:alpha28]], experiment 1.** The residuals of the 28 market models are correlated, and with one shared regressor so are the intercepts' errors. Draw 100,000 vectors of 28 null t-stats from $\mathcal N_{28}(\mathbf 0,C)$, $C$ the residual correlation matrix with the sectors in U28's alphabetical order, as `rng.standard_normal((100_000, 28)) @ L.T` with $L$ the Cholesky factor of $C$ and `default_rng([1, 20261011])` created once. Count the entries beyond ±1.96 with the guard. Monte Carlo standard errors: binomial for a probability, the standard deviation over $\sqrt B$ for the mean count, and the delta method for the count's standard deviation.
+**[[eg:alpha28]], experiment 1.** The residuals of the 28 market models are correlated, and with one shared regressor so are the intercepts' errors. Draw 100,000 vectors of 28 null t-stats from $\mathcal N_{28}(\mathbf 0,C)$, $C$ the residual correlation matrix, as `rng.standard_normal((100_000, 28)) @ L.T` with `L = np.linalg.cholesky(C)` and the sectors in U28's column order, Python's `sorted` of their FinMind names (ElectricMachinery before ElectricalCable), and `default_rng([1, 20261011])` created once. Count the entries beyond ±1.96 with the guard. Monte Carlo standard errors: binomial for a probability, the standard deviation over $\sqrt B$ for the mean count, and the delta method for the count's standard deviation.
 """)
 
 code(r"""
@@ -779,7 +780,8 @@ iu = np.triu_indices(28, 1)
 show("residual correlation, min", C[iu].min(), ".3f", "-0.430")
 show("residual correlation, max", C[iu].max(), ".3f", "0.462")
 show("residual correlation, mean", C[iu].mean(), ".3f", "0.112")
-assert U28 == sorted(U28)                                       # the columns of C, in U28's alphabetical order
+assert U28 == sorted(U28)                                       # the columns of C: U28's column order, Python's sorted
+assert U28.index("ElectricMachinery") < U28.index("ElectricalCable")   # a case-folded order would swap these two
 rng1 = np.random.default_rng([1, 20261011])                    # experiment 1, created once
 B = 100_000
 L = np.linalg.cholesky(C)

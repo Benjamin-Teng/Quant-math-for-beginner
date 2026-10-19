@@ -388,7 +388,7 @@ show("Monte Carlo SE at 95%, points", 100 * sqrt(0.95 * 0.05 / 100_000), ".2f", 
 md(r"""
 ## Part 5 — Maximum likelihood
 
-[[eg:normalmle]]: the normal MLE is $\bar R$ and $s$ with divisor $T$. The 0050 sample is LM4's: one-session total returns on the 2,902 dates common to 0050 and 00631L, with the cash dividend added on ex-dates and the previous close restated per new share on split days (0050 4-for-1 on 2025-06-18; 00631L 22-for-1 on 2026-03-31). Every close is first checked against FinMind's `spread` column.
+[[eg:normalmle]]: the normal MLE is $\bar R$ and $s$ with divisor $T$. The 0050 sample is LM4's: total returns on the 2,902 dates common to 0050 and 00631L, each from the previous common date (two span a fund's split halt), with the cash dividend added on ex-dates and the previous close restated per new share on split days (0050 4-for-1 on 2025-06-18; 00631L 22-for-1 on 2026-03-31). Every close is first checked against FinMind's `spread` column.
 """)
 
 code(r"""
@@ -507,7 +507,7 @@ plt.title("[[ex:profile]]"); plt.legend(); plt.show()
 md(r"""
 ## Part 6 — Information and the delta method
 
-[[eg:info]], [[eg:vol]] (with the $\chi^2_{22}$ interval of a normal model for the 23 annual values) and [[eg:kelly]], collected in [[ex:delta]]. The plug-in standard errors use the sample's skewness and kurtosis; "normal" uses 0 and 3; "mean only" keeps the first term of (20.9).
+[[eg:info]], [[eg:vol]] (with the $\chi^2_{22}$ interval of a normal model for the 23 annual values) and [[eg:kelly]], collected in [[ex:delta]]. The plug-in standard errors use the sample's skewness and kurtosis; "normal" uses 0 and 3; "mean only" keeps the first term of (20.9). The volatility's, the Kelly fraction's and the Sharpe ratio's standard errors need a finite fourth moment, which the Student-t fit ($\nu=3.065$) lacks, so they are nominal; [[ex:merton]]'s volatility errors and the regimes' 0.026 and 0.035 rest on the sample kurtosis too.
 """)
 
 code(r"""

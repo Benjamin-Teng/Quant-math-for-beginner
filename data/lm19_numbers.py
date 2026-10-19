@@ -710,8 +710,12 @@ pc("E4: upper quartile", q3, 4, "0.6812")
 pc("E4: IQR", q3 - q1, 4, "1.1716")
 nm("E4: IQR from the printed quartiles", 0.6812 + 0.4904, 4, "1.1716")
 pc("E4: MAD", mad_full, 4, "0.5889")
+# no two returns lie equally far from the median (exact distances), so exactly ceil(T/2) lie within one MAD;
+# rank 2,924's distance is 0.588219%, so the rounded "within 0.5889%" would count only 2,924
 assert n_in == 2925 == ceil(T / 2) and len(devF) == len(set(devF)) and n_distinct == T
-has("E4: ceil(T/2) days", "as no two returns tie, exactly $\\lceil T/2\\rceil=2,925$ days lie within 0.5889% of the median")
+assert devF[2923] < madF and sum(abs(x - medF) <= Fraction("0.005889") for x in RF) == 2924
+has("E4: ceil(T/2) days", "as no two returns lie equally far from the median, exactly $\\lceil T/2\\rceil=2,925$ days lie "
+    "within one MAD of it")
 pc("E4: 1.4826 MAD", full["1.4826MAD"], 3, "0.873")
 nm("E4: 1.4826 x printed 0.5889", 1.4826 * 0.5889, 3, "0.873")
 pc("E4: IQR/1.349", full["IQR/1.349"], 3, "0.868")
@@ -934,9 +938,10 @@ for m in X6_M:
     has(f"X6 row m = {m}", row)
     for v in vals6:
         near(f"X6 m={m}", v, 3)
-    # the note: VR(m) stays close to the identity column up to m = 60 and departs from it beyond
+    # the note: VR(m) stays close to the identity column up to m = 60 and departs from it at 246 and 1,231 days
     assert (abs(vals6[0] - vals6[1]) < 0.006) if m <= 60 else (abs(vals6[0] - vals6[1]) > 0.07), m
-has("X6 note: identity", "$\\operatorname{VR}(m)$ stays close to it up to $m=60$ and departs from it beyond")
+assert [m for m in X6_M if m > 60] == [246, 1231], X6_M
+has("X6 note: identity", "$\\operatorname{VR}(m)$ stays close to it up to $m=60$ and departs from it at 246 and 1,231 days")
 nm("E9: sd of ln G (LM18's)", sd_own, 3, "0.283")
 nm("E9: mean ln G (LM18's)", float(s1231.mean()), 3, "0.502")
 nm("E9: sqrt(m) s_r (LM18's)", sqm, 3, "0.425")
@@ -992,6 +997,8 @@ for row_ in ("| Mean simple return | 0.0625% | $\\times A$ | 15.38% | never (a c
 has("overview 6", "On simple returns these rules are conventions: TR23 averages 15.38% a year")
 has("Summary", "on simple returns the rules are conventions")
 has("box 7", "簡單報酬（simple return）套用這些規則只是慣例")
+has("box of Section 5: the iid band's form", "落在獨立同分布區間（iid band）$\\pm1.96/\\sqrt T$ 之內")
+assert "iid 的區間" not in MD_RAW and "numpy.org/doc/stable" not in MD_RAW
 ann_simple = float(np.expm1(ann).mean())
 pc("LM14's 14.97%", ann_simple, 2, "14.97")
 pc("E10: sqrt(246) s_r", v_day, 3, "18.563")

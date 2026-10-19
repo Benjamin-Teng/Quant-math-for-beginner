@@ -586,9 +586,15 @@ show("   at 145", ratio[145]["vol"], ".2f", "3.91")
 show("   at 400", ratio[400]["vol"], ".2f", "4.63")
 show("Sharpe ratio at 3", ratio[3]["SR"], ".2f", "1.05"); show("   at 145", ratio[145]["SR"], ".2f", "1.13")
 show("   peak", max(v["SR"] for v in ratio.values()), ".2f", "1.15")
-show("   at the length", max(ratio, key=lambda e: ratio[e]["SR"]), "d", "50")
+show("   two largest at the lengths", " and ".join(map(str, sorted(sorted(ratio, key=lambda e: ratio[e]["SR"])[-2:]))),
+     "s", "50 and 100")
 show("Kelly fraction, peak", max(v["Kelly"] for v in ratio.values()), ".2f", "1.24")
-show("   at the length", max(ratio, key=lambda e: ratio[e]["Kelly"]), "d", "50")
+show("   two largest at the lengths", " and ".join(map(str, sorted(sorted(ratio, key=lambda e: ratio[e]["Kelly"])[-2:]))),
+     "s", "50 and 100")
+for k in ("SR", "Kelly"):                                           # so the peak lies between 50 and 100 days
+    d_, se_d = ratio[50][k] - ratio[100][k], math.hypot(bse(G4[50][k], np.std), bse(G4[100][k], np.std)) / IID[k].std()
+    print(f"   {k}: ratio at 50 minus at 100 = {d_:.4f}, Monte Carlo SE {se_d:.4f} (batches, B = 2,000 each)")
+    assert abs(d_) < 2 * se_d
 show("VR(20) at 145", ratio[145]["VR20"], ".2f", "0.93")
 show("Sharpe SE from 3 to 145, % change", 100 * (ratio[145]["SR"] / ratio[3]["SR"] - 1), ".0f", "8")
 show("Kelly SE from 3 to 145, % change", 100 * (ratio[145]["Kelly"] / ratio[3]["Kelly"] - 1), ".0f", "14")
@@ -728,6 +734,10 @@ show("iid: share SE, points", 100 * ws15.se, ".1f", "8.4")
 show("   SD of ln G percentile", wd15.lo, ".2f", "0.19"); show("   ...", wd15.hi, ".2f", "0.58")
 show("   SD of ln G resampled mean", wd15.mean, ".3f", "0.357")
 print(f"   1 - m/T = {1 - M5 / T:.3f}: overlapping windows understate the variance even for independent days")
+# about the windows' own mean (as 0.283 is computed), the exact expected variance of iid days, over m s_r^2
+nw, lag = T - M5 + 1, np.arange(-(M5 - 1), M5)
+own = 1 - float(((nw - np.abs(lag)) * (M5 - np.abs(lag))).sum()) / (M5 * nw**2)
+show("   shortfall about their own mean, %", 100 * (1 - own), ".0f", "24")
 """)
 
 code(r"""

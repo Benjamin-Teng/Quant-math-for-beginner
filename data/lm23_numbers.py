@@ -451,6 +451,8 @@ same("smallest T - d of the later fits (widget's 2026)", min(v["T"] for v in c.w
 chk("t_183 quantile", c.Q_T[183], ".3f", "1.973")
 chk("normal quantile", c.Q_N, ".3f", "1.960")
 chk("t_183 excess (%)", 100 * (c.Q_T[183] / c.Q_N - 1), ".1f", "0.7")
+has("fourth-moment caveat (decision XB7)", "Daily returns may lack a finite fourth moment ([[LM19]]), so these normal "
+    "references are approximations.")
 chk("s_eps T-2 (%)", 100 * sqrt(SEMI.s2), ".5f", "0.66239")
 chk("s_eps T (%)", 100 * c.SEMI_SDT, ".5f", "0.66224")
 chk("s_x (%)", 100 * c.SX, ".3f", "1.137")
@@ -755,8 +757,15 @@ chk("residual correlation max", RC.max(), ".3f", "0.462")
 chk("residual correlation mean", RC.mean(), ".3f", "0.112")
 same("pairs", len(RC), 378)
 chk("experiment 1 draws", c.B1, ",", "100,000")
-same("U28's sectors in alphabetical order (experiment 1's columns)", list(c.NAMES), sorted(c.NAMES))
-has("experiment 1 call", "`rng.standard_normal((100_000, 28)) @ L.T`")
+same("U28's column order is Python's sorted (experiment 1's columns)", list(c.NAMES), sorted(c.NAMES))
+same("sorted puts ElectricMachinery before ElectricalCable (case-folded order would not)",
+     (c.NAMES.index("ElectricMachinery") < c.NAMES.index("ElectricalCable"),
+      sorted(c.NAMES, key=str.casefold) == list(c.NAMES)), (True, False))
+has("experiment 1 call", "`rng.standard_normal((100_000, 28)) @ L.T` with `L = np.linalg.cholesky(C)`")
+has("experiment 1 column order (Problem 12)", "the sectors in U28's column order, Python's `sorted` of their FinMind "
+    "names (ElectricMachinery before ElectricalCable)")
+has("experiment 1 column order (example)", "U28's column order (Problem 12 gives the call)")
+assert "alphabetical" not in TEXT and "$L$ its Cholesky" not in TEXT and "$L$ the Cholesky" not in TEXT
 chk("count mean", c.CNT_MEAN, ".2f", "1.41")
 chk("count mean SE", c.CNT_MEAN_SE, ".3f", "0.005")
 chk("count SD", c.CNT_SD, ".2f", "1.46")
@@ -941,6 +950,19 @@ for kind, lab in re.findall(r"\[\[(ex|eg):([\w-]+)\]\]", RAW):
 tags = re.findall(r"\\tag\{(23\.\d+)\}", RAW)
 assert tags == [f"23.{k}" for k in range(1, 10)], tags
 print(f"labels: {len(ex_labels)} exhibits, {len(eg_labels)} examples, tags {tags[0]}..{tags[-1]}")
+# decision XB10: the English at a term's first use in each box (the editor's named terms and revision 2's own scan)
+ZH = re.findall(r"^> \[!zh\][^\n]*\n> ([^\n]+)", RAW, flags=re.MULTILINE)
+GLOSS = [["迴歸（regression）", "係數（coefficient）", "誤差（error）", "估計量（estimator）", "殘差（residual）",
+          "變異數（variance）"],
+         ["係數（coefficient）", "標準誤（standard error）", "誤差（error）"],
+         ["誤差（error）", "變異數（variance）", "殘差（residual）"],
+         ["迴歸（regression）", "標準誤（standard error）", "變異數（variance）", "殘差（residual）"],
+         ["殘差（residual）"]]
+same("Chinese boxes", len(ZH), len(GLOSS))
+for box, terms in zip(ZH, GLOSS, strict=True):
+    for g in terms:
+        assert g in box and box.index(g) <= box.index(g.split("（")[0]), ("XB10: no English at first use", g)
+print("XB10: the named terms carry their English at first use in each box")
 
 # ====================================================================== report
 body = TEXT.split("\n## Glossary", 1)[0].split("\n---\n", 1)[1]

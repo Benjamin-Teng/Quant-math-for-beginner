@@ -94,7 +94,7 @@ from lm25_common import (
     years,
     yr,
 )
-from scipy import stats
+from scipy import optimize, special, stats
 from statsmodels.stats.diagnostic import acorr_ljungbox
 from statsmodels.tsa.stattools import acf, adfuller, coint, pacf
 
@@ -726,6 +726,23 @@ chk("t iid", float(rho[0]) / se_iid, ".2f", "3.01")
 chk("t iid from printed", 0.0393 / 0.013076, ".2f", "3.01")
 chk("t rob", float(rho[0] / rob[0]), ".2f", "1.92")
 chk("t rob from printed", 0.0393 / 0.0205, ".2f", "1.92")
+# XB7: (25.4) needs a finite fourth moment. Leaving the largest product of (25.4)'s lag-1 sum, 9 and 10 April 2025
+# (9.1% of it), out of the numerator only; rho_hat_1 keeps every product. The standard error is printed to five
+# decimals because 0.0393 / 0.0195 = 2.015 would round to 2.02 (PITFALLS section 7).
+c_r = r - r.mean()
+prod1 = c_r[1:] ** 2 * c_r[:-1] ** 2                 # element j pairs the returns of dates[j + 2] and dates[j + 1]
+j_apr = dates.index("2025-04-10") - 2
+assert (dates[j_apr + 1], dates[j_apr + 2]) == ("2025-04-09", "2025-04-10") and int(prod1.argmax()) == j_apr
+assert abs(math.sqrt(float(prod1.sum())) / float(c_r @ c_r) - float(rob[0])) < 1e-15
+se_drop = math.sqrt(float(prod1.sum() - prod1[j_apr])) / float(c_r @ c_r)
+chk("XB7 SE without 9-10 April 2025", se_drop, ".5f", "0.01954")
+chk("XB7 t without 9-10 April 2025", float(rho[0]) / se_drop, ".2f", "2.01")
+chk("XB7 t from printed", 0.0393 / 0.01954, ".2f", "2.01")
+cross1 = c_r[1:] * c_r[:-1]                           # the editor's note: dropping it from rho_hat_1 too
+assert f"{float(cross1.sum() - cross1[j_apr]) / float(c_r @ c_r):.4f}" == "0.0455"
+assert f"{float(cross1.sum() - cross1[j_apr]) / float(c_r @ c_r) / se_drop:.2f}" == "2.33"
+has("XB7 flag", "Formula (25.4) needs a finite fourth moment, which TR23 may lack ([[LM19]]).")
+has("XB7 sentence", "Leaving the product of 9 and 10 April 2025 out of (25.4)'s sum lowers the standard error")
 assert len(out_iid) == 9 and len(out_rob) == 2
 has("E2 exits", "9 values leave the iid band and 2 leave the robust one")
 chk("expected exits", 0.05 * K, ".1f", "1.5")
@@ -923,20 +940,47 @@ chk("E9 largest shortening (%)", 100 * max(short_ar + short_arma), ".0f", "29")
 chk("E9 largest shortening from printed (%)", 100 * (1 - 1.92 / 2.72), ".0f", "29")
 assert 100 * (1 - 5.05 / 7.01) < 29.5 and max(half_life(vv["arma_phi"]) for vv in VERS) < 7.5
 has("E9 shortening", "shortens the half-lives by up to 29%, but every version still reverts within days")
-# hygiene note: KPSS's rejections for b_t (TX23 0.017; D 0.021 for b_t and b_t - r_f tau) and alpha_F's t-stat fail
-# Bonferroni's correction for the 24 tests on TX23; every DF and ADF verdict lies far from its critical value
+# hygiene note (N2): Bonferroni's correction for the 24 tests on TX23 compares statistics, not p-values from two
+# sources (statsmodels' KPSS p-values stop at the table's bound 0.01, above 0.05 / 24). The KPSS level statistic's
+# limit law is int_0^1 V(r)^2 dr for a Brownian bridge V, the Cramer-von Mises limit; its CDF is the series that
+# SciPy's scipy.stats._hypotests._cdf_cvm_inf evaluates (Csorgo and Faraway 1996, as SciPy's source cites it),
+# written here with public functions. Its 10%, 5%, 2.5% and 1% points reproduce KPSS's table to 0.007.
+def cvm_limit_cdf(x: float) -> float:
+    tot = 0.0
+    for k_ in range(60):
+        y_ = 4 * k_ + 1
+        q_ = y_ * y_ / (16 * x)
+        u_ = math.exp(float(special.gammaln(k_ + 0.5) - special.gammaln(k_ + 1))) / (math.pi**1.5 * math.sqrt(x))
+        z_ = u_ * math.sqrt(y_) * math.exp(-q_) * float(special.kv(0.25, q_))
+        tot += z_
+        if abs(z_) < 1e-16:
+            break
+    return tot
+
+
+def cvm_limit_isf(alpha: float) -> float:
+    return float(optimize.brentq(lambda x: 1 - cvm_limit_cdf(x) - alpha, 0.05, 4.0, xtol=1e-12))
+
+
+kpss_table = {0.10: 0.347, 0.05: 0.463, 0.025: 0.574, 0.01: 0.739}      # statsmodels' "c" table, as printed
+assert max(abs(cvm_limit_isf(a_) - c_) for a_, c_ in kpss_table.items()) < 0.0075
 bonf = 0.05 / 24
-kp_b = [k_b[1], VERS[0]["kpss_p"], VERS[1]["kpss_p"]]
-chk("KPSS p-values for b_t, lowest", min(kp_b), ".3f", "0.017")
-chk("KPSS p-values for b_t, highest", max(kp_b), ".3f", "0.021")
-assert all(0.01 < p_ < 0.05 and p_ > bonf for p_ in kp_b)
+kp_point = cvm_limit_isf(bonf)
+z_point = float(stats.norm.isf(bonf / 2))                               # two-sided, as the lab's p-value 0.0038 is
+chk("Bonferroni KPSS point (limit law at 0.05/24)", kp_point, ".2f", "1.03")
+chk("Bonferroni two-sided normal point", z_point, ".2f", "3.08")
+kp_basis = [k_b[0]] + [vv["kpss"] for vv in VERS]                      # TX23's b_t and D's four versions
+chk("KPSS for the basis, lowest", min(kp_basis), ".2f", "0.62")
+chk("KPSS for the basis, highest", max(kp_basis), ".2f", "0.96")
+assert len(kp_basis) == 5 and max(kp_basis) < kp_point and min(kp_basis) > kpss_table[0.05]
 t_aF = float(bFe[1]) / wF
 chk("alpha_F t-stat (HC0)", t_aF, ".1f", "-2.9")
-assert bonf < 2 * stats.norm.sf(abs(t_aF)) < 0.05
+assert 1.96 < abs(t_aF) < z_point and abs(-2.9) < 3.08
 df_like = [t_b, a_b[0], t_f] + [vv["df"] for vv in VERS] + [vv["adf"] for vv in VERS] + [REG[k]["df"] for k in REG]
 assert max(df_like) < cv["1%"] - 3 and min(t_s, a_ct[0]) > -1 and min(p_s, a_ct[1]) > 0.9
-has("hygiene DF verdicts", "Every DF and ADF verdict lies far from its critical value")
-has("hygiene KPSS", "KPSS's rejections for $b_t$ (p-values 0.017 to 0.021) and $\\hat\\alpha_F$'s t-stat, -2.9")
+has("hygiene DF verdicts", "Every DF and ADF verdict lies far from its critical value.\n>\n> Bonferroni's correction")
+has("hygiene KPSS", "needs a KPSS statistic above 1.03, the limit law's point at 0.05/24. The five for the basis, "
+    "0.62 to 0.96, fall short, and so does $\\hat\\alpha_F$'s t-stat, -2.9, against the two-sided normal point 3.08.")
 chk("X6 neighbouring days on D", rho_hat(b[D], 1), ".3f", "0.775")
 chk("KPSS 5% point", 0.463, ".3f", "0.463")
 # E10

@@ -259,7 +259,9 @@ show("[[eg:taiexpost]] c at 10 points", c10, ".3f", "0.869")
 show("   posterior mean (%)", 100 * m10, ".1f", "13.4")
 show("   posterior SD (points)", 100 * sd10, ".1f", "3.6")
 show("   prior worth (years)", (sqrt(A) * s / 0.10) ** 2, ".2f", "3.59")
-show("knowledge check: the unrounded worth (years)", (sqrt(A) * s / 0.10) ** 2, ".3f", "3.594")
+show("knowledge check: sqrt(A) s (%), three decimals", 100 * sqrt(A) * s, ".3f", "18.957")
+show("   the unrounded worth (years)", (sqrt(A) * s / 0.10) ** 2, ".3f", "3.594")
+show("   the worth from the printed 18.957 (years)", (18.957 / 10) ** 2, ".3f", "3.594")
 show("   years of data for c = 0.9, nine times that", 9 * (sqrt(A) * s / 0.10) ** 2, ".1f", "32.3")
 show("[[eg:split]] variance of the posterior mean (points^2)", c10 * 100, ".1f", "86.9")
 show("   expected posterior variance (points^2)", 1e4 * sd10**2, ".1f", "13.1")
@@ -394,7 +396,10 @@ show28("   1 - c_hat", b_r, ".2f", "2.27")
 noise_i = 100 * A28 * np.sqrt(X1.var(axis=0, ddof=0) / len(X1))   # each sector's own noise (points)
 show28("   smallest and largest sector noise (points)", f"{noise_i.min():.1f} to {noise_i.max():.1f}", "", "4.8 to 9.7")
 show28("   ratio of the noise variances", (noise_i.max() / noise_i.min()) ** 2, ".0f", "4")
-print("   spread below every sector's noise:", bool((noise_i > 100 * a1.std(ddof=0)).all()))
+b_min = 25 * noise_i.min() ** 2 / (28 * (100 * a1.std(ddof=0)) ** 2)   # every sector at the smallest noise
+print(f"   1 - c_hat if every sector had the smallest noise: {b_min:.4f} (above 1, so c_hat = 0); "
+      f"from the printed 4.8 and 4.50: {25 * 4.8**2 / (28 * 4.50**2):.4f}")
+assert b_min > 1 or not FULL_DATA
 d1, d2 = m1 - m1.mean(), m2 - m2.mean()
 show28("   best weight in hindsight", d1 @ d2 / (d1 @ d1), ".2f", "-0.09")
 XD1 = X1 - X1.mean(axis=1, keepdims=True)                 # each day's cross-sectional mean removed
@@ -576,18 +581,21 @@ show("   Pr(theta >= 0.55 | record) (%)", 100 * float(p12), ".1f", "21.6")
 md(r"""
 ### Extension: thirds of U28 (*stability check*)
 
-Split U28 into thirds with `np.array_split` (1,461, 1,461 and 1,460 returns). Estimate $\hat c$ on each third and judge the shrunk means on the next third, as in [[eg:halves]]. Does any third give partial shrinkage, and does it predict the next third better than the grand mean? Then explain why a second split of the same data is a stability check and not a new test: the thirds were chosen after the halves were seen, and they reuse the same 4,382 days (LM21 counts such looks).
+Split U28 into thirds with `np.array_split` (1,461, 1,461 and 1,460 returns). Estimate $\hat c$ on each third and judge the shrunk means on the next third, as in [[eg:halves]]; the cell also prints each pair's correlation of the means and hindsight slope, which Section 6 quotes. Does any third give partial shrinkage, and does it predict the next third better than the grand mean? Then explain why a second split of the same data is a stability check and not a new test: the thirds were chosen after the halves were seen, and they reuse the same 4,382 days (LM21 counts such looks).
 """)
 
 code(r"""
 Xall = smp.select(U28).to_numpy()
 parts = np.array_split(Xall, 3)
 print("third lengths:", [len(p) for p in parts])
-for k in range(2):
+for k, book in enumerate((("0.13", "0.09"), ("0.24", "0.61"))):
     c_k, _, _, _ = james_stein(parts[k])
     mk, mn = parts[k].mean(axis=0), parts[k + 1].mean(axis=0)
     print(f"third {k + 1} -> {k + 2}: c_hat {c_k:.2f}; miss at 0 {100 * miss(mk, mn, 0):.1f}, "
           f"at c_hat {100 * miss(mk, mn, c_k):.1f}, at 1 {100 * miss(mk, mn, 1):.1f} points")
+    dk, dn = mk - mk.mean(), mn - mn.mean()
+    show28("   correlation of the means", np.corrcoef(mk, mn)[0, 1], ".2f", book[0])
+    show28("   hindsight slope (best weight)", dk @ dn / (dk @ dk), ".2f", book[1])
 # your code: repeat with each day's cross-sectional mean removed
 """)
 

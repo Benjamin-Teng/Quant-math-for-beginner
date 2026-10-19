@@ -60,7 +60,7 @@ Companion notebook to **From Calculus to Kelly, LM19**. It rebuilds the module's
 
 | Part | Rebuilds |
 |:--|:--|
-| 1 | Data: TR23's returns, the exact checks (all returns distinct, none zero), $T$, years, $A$, the samples and the Saturday sessions |
+| 1 | Data: TR23's returns, the exact checks (all returns distinct, none zero, no two equally far from the median), $T$, years, $A$, the samples and the Saturday sessions |
 | 2 | Location: [[eg:week]], [[eg:centres]], the trimmed mean by sorting, the knowledge check of Section 2 |
 | 3 | Dispersion: [[eg:weekscale]], [[eg:robustscale]], [[ex:rollscale]] with `sliding_window_view` |
 | 4 | Shape: [[eg:divisor]], [[ex:summary]] with its regime, normal and hypothetical columns, [[eg:oneday]], the closed forms against `bias=False` |
@@ -114,7 +114,7 @@ def qf(x, u):
 md(r"""
 ## Part 1 — Data
 
-Returns between consecutive closes. The closes have two decimals, so exact `Fraction` arithmetic decides whether any two returns tie and whether any is exactly zero (none does, so order statistics and the MAD have no ties). The 2003–2025 sample and the two limit regimes are masks on the return dates.
+Returns between consecutive closes. The closes have two decimals, so exact `Fraction` arithmetic decides whether any two returns tie, whether any is exactly zero and whether any two lie equally far from the median. None does, so the order statistics have no ties, and exactly $\lceil T/2\rceil$ returns lie within one MAD of the median. The 2003–2025 sample and the two limit regimes are masks on the return dates.
 """)
 
 code(r"""
@@ -138,6 +138,10 @@ RF = [closes[i] / closes[i - 1] - 1 for i in range(1, len(closes))]
 print("distinct returns:", len(set(RF)), "of", T, "| exactly zero:", sum(x == 0 for x in RF))
 assert len(set(RF)) == T and all(x != 0 for x in RF)
 assert max(abs(float(a) - b) for a, b in zip(RF, R)) < 1e-15
+medF = sorted(RF)[ceil(T / 2) - 1]
+distF = [abs(x - medF) for x in RF]
+print("distinct distances from the median:", len(set(distF)), "of", T)
+assert len(set(distF)) == T
 
 in25 = dates <= dt.date(2025, 12, 31)
 pre = dates < dt.date(2015, 6, 1)
@@ -334,7 +338,7 @@ for k, d, p in (("mean (%)", 1, "-2.8"), ("median (%)", 1, "-0.4"), ("s (%)", 1,
 md(r"""
 ## Part 5 — Autocorrelation
 
-(19.5) in NumPy, checked against statsmodels' `acf` (which uses the same convention), then [[eg:twoways]] and [[ex:acf]]. The counts against the band use the guard. The knowledge check of Section 5 shows the divisor $T$ at work.
+(19.5) in NumPy, checked against statsmodels' `acf` (which uses the same convention), then [[eg:twoways]] and [[ex:acf]]. The counts against the band use the guard. For $r_t^2$ the band would also need a finite fourth moment of $r_t$, which LM15's maximum-likelihood fit ($\nu=3.065$) lacks, so those values are description only. The knowledge check of Section 5 shows the divisor $T$ at work.
 """)
 
 code(r"""
@@ -586,6 +590,7 @@ for nu, q_, p_ in ((5.0, "0.7267", "0.835"), (3.065, "0.7628", "0.667")):
     show(f"P10 ratio, nu = {nu}", tq * sqrt((nu - 2) / nu) / Z75, ".3f", p_)
 show("P10 TR23", mad(R) / Z75 / s, ".3f", "0.723")
 
+# for r^2 the band would also need a finite fourth moment of r (Part 5): that count is description only
 counts = [int((np.abs(x) >= band - EPS).sum()) for x in (rho_r, rho_a, rho_q)]
 print("P11 lags outside the band (r, |r|, r^2):", counts)
 assert counts == [9, 30, 30]

@@ -28,8 +28,9 @@ autocorrelation is LM19's rho_hat_k (full-sample mean, divisor T in numerator an
 F_hat^-1(u) (np.quantile method="inverted_cdf"). Counts against a threshold use the guard (|t| > c + 1e-12,
 x <= c + 1e-12) and, on two-decimal closes, Fraction. Seeds: LM23's experiment 1 (the correlated null of 28 alpha
 t-stats), rng = np.random.default_rng([1, 20261011]) created once, 100,000 draws of standard_normal((B, 28)) @ L.T
-with L the Cholesky factor of the residual correlation matrix, sectors in U28's alphabetical order (Monte Carlo SEs:
-binomial for a probability, SD/sqrt(B) for the mean count, the delta method for the count's SD); LM18's paths keep
+with L = np.linalg.cholesky(C), C the residual correlation matrix, and the sectors in U28's column order, Python's
+sorted of their FinMind names (ElectricMachinery before ElectricalCable; a case-folded order swaps them). Monte Carlo
+SEs: binomial for a probability, SD/sqrt(B) for the mean count, the delta method for the count's SD. LM18's paths keep
 LM18's default_rng([3, 20261011]).
 """
 import sys

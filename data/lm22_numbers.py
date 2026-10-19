@@ -525,6 +525,27 @@ nu_t = float(stats.t.fit(R)[0])
 chk("LM15's nu", nu_t, ".3f", "3.065")
 assert 2 < nu_t < 4                       # moments of order just above 2 exist (Theorem 3.1), of order above 4 do not
 has("M3 moments", "its moments exist only below order 3.065")
+# review N1 and decision XB7 (revision 2): Theorem 3.1 covers the mean of R_t (moments above order 2 exist), not the
+# statistics that average squares or products of returns, which need moments above order 4 (nu < 4); nor does the
+# iid percentile interval's smooth-function result for R-bar/s, whose mean of R_t^2 needs a finite fourth moment
+has("N1 mean of R_t", "That meets Theorem 3.1's moment condition for the mean of $R_t$ but not Theorem 3.3's.")
+# (the variance ratio and the windows' spread use log returns, so the text says "returns", not R_t)
+has("N1 squares", "average squares or products of returns, for which Theorem 3.1 needs moments of returns above order 4")
+has("N1 practice", "Neither theorem covers them, so their intervals rest on the method's practice")
+has("XB7 fourth moment", "For $\\bar R/s$ one mean is of $R_t^2$, whose variance needs a finite fourth moment; "
+    "[[LM15]]'s $t_{3.065}$ fit lacks it, so TR23's intervals rest on practice.")
+# decision XB8 (revision 2): sqrt(A) annualization is a convention on simple returns ([[LM19]])
+has("XB8 case", "its Sharpe ratio is 0.81 a year and its volatility 18.96% a year, both by [[LM19]]'s $\\sqrt A$ "
+    "convention")
+has("XB8 note", "the Sharpe ratio and the volatility are annualized by $\\sqrt A$, a convention on simple returns "
+    "([[LM19]])")
+has("XB8 relative error", "times $\\sqrt A$, a convention on simple returns, exact only for log returns on "
+    "uncorrelated days ([[LM19]]; Lo 2002)")
+assert "if days are uncorrelated" not in NORM and "as if days were uncorrelated" not in NORM
+# X2 items 8 and 9, XB9 (revision 2)
+has("X2 item 8", "TR23's log returns have the variance ratio $\\operatorname{VR}(20)=1.036$ ([[LM19]])")
+has("X2 item 9", "Patton, A. J., D. N. Politis and H. White (2009)")
+assert "本書譯名" not in NORM and "本書自訂" not in NORM and "基本區間" not in NORM and "百分位數區間" not in NORM
 # the pitfall of section 5: a block of at least m = 1,231 days, by (22.3)
 p_long = (1 - 1 / C.ELL) ** (C.M5 - 1)
 print(f"Pr(a block lasts at least {C.M5} days) = {p_long:.6e}, 1 in {1 / p_long:,.0f}")
@@ -571,8 +592,15 @@ chk("X6 SR at 145", ratio[145]["SR"], ".2f", "1.13")
 chk("X6 VR at 145", ratio[145]["VR20"], ".2f", "0.93")
 chk("X6 SR peak", max(ratio[e]["SR"] for e in ratio), ".2f", "1.15")
 chk("X6 Kelly peak", max(ratio[e]["Kelly"] for e in ratio), ".2f", "1.24")
-assert max(ratio, key=lambda e: ratio[e]["SR"]) == 50 and max(ratio, key=lambda e: ratio[e]["Kelly"]) == 50
-has("X6 peaks", "peak at 1.15 and 1.24, both at $\\ell=50$")
+# review N4 (revision 2): both peaks lie at 50 or 100 days, whose ratios differ by less than two Monte Carlo standard
+# errors of their difference (B = 2,000 at each length), so the text names the range, not one length
+for k in ("SR", "Kelly"):
+    top2 = sorted(sorted(ratio, key=lambda e, k=k: ratio[e][k])[-2:])
+    d50 = ratio[50][k] - ratio[100][k]
+    se_d = sqrt((relb[50][k] * ratio[50][k]) ** 2 + (relb[100][k] * ratio[100][k]) ** 2)
+    print(f"X6 {k}: largest at {top2}; ratio at 50 minus at 100 = {d50:.4f}, Monte Carlo SE {se_d:.4f}")
+    assert top2 == [50, 100] and abs(d50) < 2 * se_d, (k, top2, d50, se_d)
+has("X6 peaks", "peak at 1.15 and 1.24, between $\\ell=50$ and 100")
 chk("SR growth 3 -> 145 %", 100 * (ratio[145]["SR"] / ratio[3]["SR"] - 1), ".0f", "8")
 chk("Kelly growth 3 -> 145 %", 100 * (ratio[145]["Kelly"] / ratio[3]["Kelly"] - 1), ".0f", "14")
 chk("SR growth from printed ratios %", 100 * (1.13 / 1.05 - 1), ".0f", "8")
@@ -750,12 +778,18 @@ print(f"windows, iid: E var / (m s_r^2) = {evar / (M5 * D.sr**2):.4f} against 1 
 assert abs(evar / (M5 * D.sr**2) - (1 - M5 / T)) < 0.05                          # "by about m/T"
 assert abs(float((W15["sd"] ** 2).mean()) - evar) < 3 * float((W15["sd"] ** 2).std()) / sqrt(B)
 assert wd15.mean < sqrt(float((W15["sd"] ** 2).mean()))                          # the mean of SDs lies lower still
-has("E9 m/T", "understate the variance even for independent days, by about $m/T$")
+# review N3 (revision 2): m/T = 21% is the shortfall about m r-bar (LM19's centring); about the windows' own mean,
+# as 0.283 is computed, the exact iid factor is 0.757, a shortfall of 24%
+print(f"m/T = {M5 / T:.4f}; shortfall about the windows' own mean = {1 - evar / (M5 * D.sr**2):.4f}")
+chk("E9 shortfall about their own mean %", 100 * (1 - evar / (M5 * D.sr**2)), ".0f", "24")
+has("E9 m/T", "understate the variance even for independent days, by about $m/T$ ([[LM19]]'s "
+    "$\\operatorname{VR}(m)$), 24% about their own mean")
 # blocks keep LM19's variance ratios above 1 below 340 days (LM19: "first falls below 1 at m = 340")
 vr_m = {m_: float(C.vr(r[None, :], m_)[0]) for m_ in range(2, 341)}
 assert all(vr_m[m_] > 1 for m_ in range(2, 340)) and vr_m[340] < 1
 chk("first m with VR(m) below 1", 340.0, ".0f", "340")
 has("E9 340", "variance ratios above 1 below 340 days")
+has("N2", "that lift the resampled mean to 0.386")
 assert abs(wd14.mean - sqrt(M5) * D.sr) < abs(wd14.mean - sd0)                   # the blocks' mean is nearer 0.425
 assert 0.2 < nz14 / B < 0.4                                                      # "a third of the resamples"
 # the note of the exhibit of earlier estimates: bounds on the ends' batch standard errors

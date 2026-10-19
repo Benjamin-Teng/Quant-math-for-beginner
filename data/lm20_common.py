@@ -9,7 +9,7 @@ Inputs (run their builders first):
   * U28 (Problem 6 only): data/lm10_series.py (Volume II's 28 leaf sector price indices, repaired by
     data/vol2_series.py), T = 4,382 returns 2008-12-02 .. 2026-10-08.
   * LM4's 0050 sample (the delta table's 0050 row and the Example on the normal MLE): column R_0050 of
-    data/processed/etf_daily_returns.parquet, 0050's one-session total returns on the 2,902 common dates of 0050 and
+    data/processed/etf_daily_returns.parquet, 0050's total returns on the 2,902 common dates of 0050 and
     00631L (data/build_series.py).
 
 Conventions (the module's, and plans/vol-4-anchors.md's for A20-nn):

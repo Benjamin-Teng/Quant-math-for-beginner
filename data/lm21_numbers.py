@@ -350,6 +350,15 @@ rho1_log = float((rlc[1:] * rlc[:-1]).sum() / (rlc * rlc).sum())
 print(f"LM19's rho_1 of TR23's log returns: {rho1_log:.6f}")
 chk("new", "LM19's lag-1 autocorrelation of log returns", rho1_log, "0.0393")
 has("LM19's lag-1 autocorrelation", "TR23's log returns have a lag-1 autocorrelation of 0.0393 ([[LM19]])")
+# XB7 (reviews/vol4_cross.md, revision 2): LM20's standard error of a volatility needs a finite fourth moment; the flag
+# cites LM15's Student t fit, maximum likelihood on TR23's simple returns as data/lm15_numbers.py fits it (t.fit)
+nu_ml = float(stats.t.fit(R)[0])
+print(f"LM15's Student t fit on TR23's simple returns: nu {nu_ml:.6f} (< 4: no finite fourth moment)")
+assert 2 < nu_ml < 4
+chk("new", "LM15's Student t fit, nu", nu_ml, "3.065")
+has("XB7 flag", "That standard error needs a finite fourth moment, which [[LM15]]'s Student $t$ fit ($\\nu=3.065$) lacks, "
+    "so it is nominal.")
+has("XB7 flag, the kurtosis", "[[LM20]] gives the kurtosis no standard error at all.")
 # KC section 3
 chk("A21-39", "KC 3 t-stat", 0.04 / (1 / sqrt(900)), "1.20")
 chk("A21-39", "KC 3 days", Fraction(2 * 100, 4) ** 2, "2,500")

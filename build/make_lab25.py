@@ -90,7 +90,7 @@ from pathlib import Path
 import matplotlib.pyplot as plt
 import numpy as np
 import polars as pl
-from scipy import stats
+from scipy import optimize, special, stats
 from statsmodels.stats.diagnostic import acorr_ljungbox
 from statsmodels.tsa.arima.model import ARIMA
 from statsmodels.tsa.stattools import acf, adfuller, coint, kpss, pacf
@@ -317,7 +317,7 @@ show("PACF lag 3", pac[2], ".3f", "0.109")
 md(r"""
 ## Part 5 — Tests for autocorrelation
 
-[[eg:lag1]] compares the iid band with the robust standard error (25.4); [[ex:robust]] does it for 30 lags. [[eg:portmanteau]] adds Ljung–Box (25.5) and the variance-ratio test (25.6) on LM19's overlapping $\operatorname{VR}(m)$. Problems 6 and 12 redo the arithmetic from the printed, rounded inputs.
+[[eg:lag1]] compares the iid band with the robust standard error (25.4), with and without the product of 9 and 10 April 2025; [[ex:robust]] does it for 30 lags. [[eg:portmanteau]] adds Ljung–Box (25.5) and the variance-ratio test (25.6) on LM19's overlapping $\operatorname{VR}(m)$. Problems 6 and 12 redo the arithmetic from the printed, rounded inputs.
 """)
 
 code(r"""
@@ -335,6 +335,18 @@ show("iid SE", se_iid, ".6f", "0.013076")
 show("robust SE lag 1", rob[0], ".4f", "0.0205")
 show("iid t-stat", rho[0] / se_iid, ".2f", "3.01")
 show("robust t-stat", rho[0] / rob[0], ".2f", "1.92")
+
+# (25.4) needs a finite fourth moment, which TR23 may lack (LM19): leave the largest product of its lag-1 sum,
+# 9 and 10 April 2025, out of the numerator (rho_1 keeps every product)
+cr = r - r.mean()
+prod1 = cr[1:] ** 2 * cr[:-1] ** 2          # element j pairs the returns of dates[j + 1] and dates[j + 2]
+j_apr = dates.index("2025-04-10") - 2
+assert int(prod1.argmax()) == j_apr and dates[j_apr + 1] == "2025-04-09"
+print(f"the product of 9 and 10 April 2025 is {prod1[j_apr] / prod1.sum():.1%} of the sum")
+se_drop = math.sqrt(prod1.sum() - prod1[j_apr]) / (cr @ cr)
+show("robust SE lag 1 without 9-10 April 2025", se_drop, ".5f", "0.01954")
+show("its t-stat", rho[0] / se_drop, ".2f", "2.01")
+
 out_iid = [k for k in range(1, 31) if abs(rho[k - 1]) > 1.96 * se_iid]
 out_rob = [k for k in range(1, 31) if abs(rho[k - 1]) > 1.96 * rob[k - 1]]
 print("outside the iid band:", out_iid, "| outside the robust band:", out_rob)
@@ -554,9 +566,13 @@ bF, _, eF = ols(Xb, rF)
 bS, _, eS = ols(Xb, rS)
 show("alpha_F", bF[1], ".4f", "-0.1597")
 show("alpha_F White SE", hc0(Xb, eF)[1], ".3f", "0.055")
-show("alpha_F t-stat (HC0)", bF[1] / hc0(Xb, eF)[1], ".1f", "-2.9")
-print(f"its two-sided p-value {2 * stats.norm.sf(abs(bF[1] / hc0(Xb, eF)[1])):.4f}; Bonferroni's level for 24 tests "
-      f"{0.05 / 24:.5f}")
+t_aF = bF[1] / hc0(Xb, eF)[1]
+show("alpha_F t-stat (HC0)", t_aF, ".1f", "-2.9")
+print(f"its two-sided p-value {2 * stats.norm.sf(abs(t_aF)):.4f}")
+# Bonferroni over the 24 tests on TX23: the two-sided normal point at 0.05/24
+z_bonf = stats.norm.isf(0.05 / 24 / 2)
+show("two-sided normal point at 0.05/24", z_bonf, ".2f", "3.08")
+assert abs(t_aF) < z_bonf
 show("alpha_S", bS[1], "+.4f", "+0.0655")
 show("alpha_S White SE", hc0(Xb, eS)[1], ".3f", "0.040")
 show("alpha_F - alpha_S = roll-free delta", bF[1] - bS[1], ".4f", "-0.2252")
@@ -565,7 +581,7 @@ show("alpha_F - alpha_S = roll-free delta", bF[1] - bS[1], ".4f", "-0.2252")
 md(r"""
 ## Part 8 — The basis as a time series
 
-On sample D: convergence at expiry ([[ex:expiry]]), roll jumps, the dividend season ([[ex:season]]) and the four versions of [[ex:versions]]. Then [[eg:arma]]: the ARMA(1,1) at the likelihood maximum, its standard errors from $-\ell''$ checked against a central-difference Hessian, the delta-method half-life, the sandwich, the regimes and 2025.
+On sample D: convergence at expiry ([[ex:expiry]]), roll jumps, the dividend season ([[ex:season]]) and the four versions of [[ex:versions]]. Their KPSS statistics and TX23's are compared with Bonferroni's point for the 24 tests on TX23, as the module's research-hygiene note does. Then [[eg:arma]]: the ARMA(1,1) at the likelihood maximum, its standard errors from $-\ell''$ checked against a central-difference Hessian, the delta-method half-life, the sandwich, the regimes and 2025.
 """)
 
 code(r"""
@@ -631,6 +647,7 @@ def half_life(phi):
 mb_month = {mm: b[D & (mon == mm)].mean() for mm in range(1, 13)}
 versions = {"b": b[D], "b - carry": (b - RF * tau)[D], "residual": resid[D],
             "b - month mean": (b - np.array([mb_month[mm] for mm in mon]))[D]}
+kpss_basis = [k_b.statistic]                 # TX23's b, then D's four versions
 for name, x in versions.items():
     xb = BP * x
     Xv = np.column_stack([np.ones(len(x) - 1), x[:-1]])
@@ -645,6 +662,37 @@ for name, x in versions.items():
     print(f"{name:15s} mean {mean_txt}  s {xb.std():6.2f}  DF {bv[1] / sv[1]:6.1f}  ADF {av.statistic:6.2f} "
           f"({av.lags})  KPSS {kv.statistic:.2f} ({kp_txt})  AR {1 + bv[1]:.4f} "
           f"({half_life(1 + bv[1]):.2f})  ARMA {fv.params[1]:.5f}, {fv.params[2]:.3f} ({half_life(fv.params[1]):.2f})")
+    kpss_basis.append(kv.statistic)
+""")
+
+code(r"""
+# Bonferroni over the 24 tests on TX23 compares KPSS statistics with the limit law's point at 0.05/24 (statsmodels'
+# p-values stop at the table's bound, 0.01). The limit law is that of the integral of a squared Brownian bridge, the
+# Cramer-von Mises limit; its CDF is the series that SciPy's Cramer-von Mises test evaluates.
+def cvm_limit_cdf(x):
+    tot = 0.0
+    for k in range(60):
+        y = 4 * k + 1
+        q = y * y / (16 * x)
+        z = (math.exp(special.gammaln(k + 0.5) - special.gammaln(k + 1)) / (math.pi**1.5 * math.sqrt(x))
+             * math.sqrt(y) * math.exp(-q) * special.kv(0.25, q))
+        tot += z
+        if abs(z) < 1e-16:
+            break
+    return tot
+
+
+def cvm_limit_isf(alpha):
+    return optimize.brentq(lambda x: 1 - cvm_limit_cdf(x) - alpha, 0.05, 4.0, xtol=1e-12)
+
+
+print("limit-law points at 10%, 5%, 2.5%, 1% (KPSS's table: 0.347, 0.463, 0.574, 0.739):",
+      [round(cvm_limit_isf(a), 3) for a in (0.10, 0.05, 0.025, 0.01)])
+kp_point = cvm_limit_isf(0.05 / 24)
+show("KPSS point at 0.05/24", kp_point, ".2f", "1.03")
+show("lowest KPSS for the basis (TX23's b and D's four versions)", min(kpss_basis), ".2f", "0.62")
+show("highest", max(kpss_basis), ".2f", "0.96")
+assert len(kpss_basis) == 5 and max(kpss_basis) < kp_point
 """)
 
 code(r"""

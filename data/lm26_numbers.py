@@ -812,9 +812,50 @@ chk("LM19's rho_1 of r (recomputed)", rho_19(C.r, 1), ".4f", "0.0393")
 chk("LM19's rho_1 of |r| (recomputed)", rho_19(np.abs(C.r), 1), ".3f", "0.161")
 chk("cited LM25 Ljung-Box (recomputed)", lbr[0, 0], ",.0f", "1,820")
 has("hygiene: two Ljung-Box", "two Ljung–Box (one is [[LM25]]'s, recomputed)")
-assert 3 + 2 + 5 * 2 + 6 + 1 == 22     # ARCH: K=1, K=5, K=5 on xi; LB: |xi|, |r|; 5 x 2 loss differences; 6 MZ; V vs r^2
-has("hygiene: 22 tests", "22 in all")
+# ARCH: K=1, K=5 and K=5 on xi by chi^2, K=1 and K=5 by permutation (experiment 3); LB: |xi|, |r|;
+# 5 x 2 loss differences; 6 MZ; V vs r^2
+assert (3 + 2) + 2 + 5 * 2 + 6 + 1 == 24
+has("hygiene: 24 tests", "Tests on these data number 24 ([[LM21]]'s count).")
+has("hygiene: five ARCH", "They are five ARCH (two by permutation), two Ljung–Box")
+has("hygiene: the permutation's label", "The ARCH tests (also by permutation) and the full-sample fits are **in-sample**.")
 has("E1: what is rejected", "A constant variance is rejected beyond doubt.")
+# XB7: the chi^2 law of (26.1) needs a finite fourth moment, which LM15's maximum-likelihood t fit (nu = 3.065) lacks
+has("E1: nominal p-values", "These $\\chi^2$ p-values are nominal: (26.1) needs a finite fourth moment, which [[LM15]]'s fit "
+                            "($\\nu=3.065$) lacks ([[LM19]]).")
+
+
+# experiment 3 (AUTHORING section 8): LM21's permutation reference for (26.1). One generator; each shuffle permutes
+# TR23's days (the mean is unchanged, so yc[perm] is the shuffled series' own residual); K=1 and K=5 on the same shuffle.
+def arch_lm(x: np.ndarray, K: int) -> float:
+    z = x[K:] ** 2
+    X = np.column_stack([np.ones(len(x) - K)] + [x[K - j - 1 : len(x) - j - 1] ** 2 for j in range(K)])
+    b, *_ = np.linalg.lstsq(X, z, rcond=None)
+    e = z - X @ b
+    return (len(x) - K) * (1 - float(e @ e) / float((z - z.mean()) @ (z - z.mean())))
+
+
+NPERM = 20000
+rng3 = np.random.default_rng([3, SEED])
+perm1, perm5 = np.empty(NPERM), np.empty(NPERM)
+for i_ in range(NPERM):
+    xs_ = yc[rng3.permutation(T)]
+    if i_ == 0:
+        assert abs(het_arch(xs_, nlags=5, result_object=True).lm - arch_lm(xs_, 5)) < 1e-8
+    perm1[i_], perm5[i_] = arch_lm(xs_, 1), arch_lm(xs_, 5)
+assert abs(arch_lm(yc, 1) - lm1) < 1e-8 and abs(arch_lm(yc, 5) - lm5) < 1e-8
+print(f"CHECK exp 3: {NPERM} shuffles; largest K=1 {perm1.max():.4f}, K=5 {perm5.max():.4f}; at or above the observed "
+      f"224.8 / 696.3: {int((perm1 >= lm1).sum())} / {int((perm5 >= lm5).sum())}; 99% points {qinv(perm1, 0.99):.2f}, "
+      f"{qinv(perm5, 0.99):.2f}")
+assert perm1.max() < lm1 and perm5.max() < lm5       # no shuffle reaches the observed statistics
+chk("exp 3: shuffles", NPERM, ",", "20,000")
+chk("exp 3: largest K=1", float(perm1.max()), ".1f", "84.1")
+chk("exp 3: largest K=5", float(perm5.max()), ".1f", "88.0")
+flag("exp 3: largest K=1", float(perm1.max()), 1)
+flag("exp 3: largest K=5", float(perm5.max()), 1)
+has("exp 3: seed", "(experiment 3, `default_rng([3, 20261011])`)")
+has("exp 3: sentence", "Shuffling TR23's days 20,000 times, as [[LM21]] did (experiment 3, `default_rng([3, 20261011])`), "
+                       "gives largest statistics of 84.1 for $K=1$ and 88.0 for $K=5$, so the rejection stands.")
+has("overview: shuffles", "the ARCH test with five lags gives 696.3; the largest of 20,000 shuffles of the days gives 88.0.")
 
 # ---------------------------------------------------------------- section 3
 chk("E2: forecast for 7 April, %^2", ew[i7], ".4f", "2.4351")
@@ -1001,6 +1042,7 @@ chk("DD2: the t condition", cond_t, ".3f", "1.008")
 chk("DD2: the t condition (printed X3)", 0.99098**2 + (3 + 6 / 1.544 - 1) * 0.0663**2, ".3f", "1.008")
 chk("E7: falls", len(idf), "d", "108")
 chk("E7: falls after falls", int(fall[idf + 1].sum()), "d", "13")
+has("E7: LM13's count, LM21's test", "13 next days fell too ([[LM13]]; [[LM21]] tests it)")
 chk("E7: expected after falls", float(Femp[idf].sum()), ".1f", "7.8")
 chk("E7: independent days (LM21's A21-25)", 108 * 108 / 5848, ".1f", "2.0")
 chk("E7: rises", len(idr), "d", "67")
@@ -1082,20 +1124,33 @@ for j, d_ in enumerate(per_day):
           f"{se_j / d_.mean():.3f}")
     assert 0.05 <= se_j / float(d_.mean()) < 0.15        # "about a tenth of itself"
 jx, jn = int(np.argmax(slopes)), int(np.argmin(slopes))
+assert (IV[jx][0], IV[jn][0]) == ("30s", "5s")              # the extremes: 30 s - 1 min and 5 s - 10 s
 d_x = per_day[jx] - per_day[jn]
 t_dd3 = float(d_x.mean() / nw_se(d_x, nl5))
 print(f"CHECK DD3: largest minus smallest {d_x.mean():.3e}, t-stat {t_dd3:.2f}")
-assert 9.5 <= t_dd3 < 11.5                                  # "about ten standard errors" (10.6)
-has("DD3: standard errors", "Each has a Newey–West standard error across days of about a tenth of itself, and the "
-                            "largest and smallest differ by about ten standard errors.")
+has("DD3: standard errors", "Each has a Newey–West standard error across days of about a tenth of itself.")
+# N1: the two extremes' per-day series, their correlation and the Newey-West t-stat of their per-day difference
+chk("DD3: correlation of the extremes", float(np.corrcoef(per_day[jx], per_day[jn])[0, 1]), ".2f", "0.93")
+chk("DD3: t-stat of the extremes' difference", t_dd3, ".1f", "10.6")
+has("DD3: N1", "Day by day the two extremes move together (correlation 0.93), and the Newey–West t-stat of their per-day "
+               "difference is 10.6.")
+# XB7: these Newey-West errors need a finite variance of the per-day series, so a finite fourth moment of returns; the
+# share of days on which the largest rise exceeds the smallest needs no moment
+chk("DD3: days on which the largest rise exceeds the smallest", 100 * float(np.mean(d_x > 0)), ".0f", "88")
+has("DD3: fourth moment", "The Newey–West errors need a finite fourth moment of returns ([[LM19]]), so they are nominal. "
+                          "Yet the largest rise exceeds the smallest on 88% of the days.")
 has("DD3: what is rejected", "So (26.7), with iid efficient returns and iid noise, does not fit.")
+has("(26.7): N2", "Then the log index is [[LM25]]'s persistent part plus noise, (25.9), with a random walk as the persistent "
+                  "part, and its returns form an MA(1), (25.3).")
 has("DD3: Hansen and Lunde", "Hansen and Lunde (2006) find noise that is serially dependent and correlated with the "
                              "efficient returns")
 # after 09:00:00 (excluded: the previous close), 09:30:00 is the first start whose window to 13:30:00 every interval
 # up to 30 minutes divides
 first_ok = next(s for s in range(9 * 3600 + 1, 13 * 3600) if all((13 * 3600 + 30 * 60 - s) % h == 0 for _, h in IV))
 assert first_ok == 9 * 3600 + 30 * 60 and 13 * 3600 + 30 * 60 - first_ok == 14400
-has("grid start", "the 240 minutes from there to 13:30:00 divide evenly into every interval up to 30 minutes")
+assert IV[0][1] == 5 and IV[-1][1] == 1800                  # the intervals used: 5 seconds to 30 minutes
+has("grid start", "the 240 minutes from there to 13:30:00 divide evenly into every interval used here, 5 seconds to 30 "
+                  "minutes")
 has("X5 note: inference", "labelled by their first minute (an inference from the labels)")
 has("m2: what the book does not cover", "Zhang, Mykland and Aït-Sahalia (2005, §1.2.5)")
 chk("auction: 1/48", 100 / 48, ".1f", "2.1")
@@ -1199,6 +1254,10 @@ chk("V against r^2: ratio", float(np.mean(Vt["15m"]) / np.mean(y2)), ".3f", "0.9
 chk("V against r^2: t-stat", t_vr2, ".2f", "-3.26")
 chk("V against r^2: 2025", float(np.mean(Vt["15m"][ryear == "2025"]) / np.mean(y2[ryear == "2025"])), ".3f", "0.918")
 chk("V against r^2: 2008", float(np.mean(Vt["15m"][ryear == "2008"]) / np.mean(y2[ryear == "2008"])), ".3f", "1.011")
+# XB7: the squared-error differences, the Mincer-Zarnowitz residuals and V_t - r_t^2 are linear in a squared return
+# (or V_t), so their standard errors need a finite fourth moment of returns; QLIKE's differences scale by the forecasts
+has("XB7: Section 7's nominal errors", "The MSE t-stats, the HC0 errors of $b$ and the t-stat -3.26 need a finite fourth "
+                                       "moment of returns, which [[LM15]]'s fit lacks ([[LM19]]); they are nominal.")
 assert nl_all == 9
 chk("X8: GARCH below EWMA, years", win_e, "d", "12", in_md=False)
 has("X8: 12 of 19", "GARCH beats EWMA in 12 of 19 years")
@@ -1312,6 +1371,11 @@ for lab in ex_labels:
     assert f"[[ex:{lab}]]" in md_raw, f"exhibit {lab} is never cited"
 for kind, lab in re.findall(r"\[\[(ex|eg):([\w-]+)\]\]", md_raw):
     assert lab in (ex_labels if kind == "ex" else eg_labels), (kind, lab)
+# the ARCH test's form in the statistics listing of the terms site (SOURCES, revision 1): the box at its first use and
+# the Glossary; the book's own forms print without a remark (decision XB9)
+assert "Engle 的自我迴歸條件變異數非齊一檢定（ARCH test）" in md_raw
+assert "| ARCH test | 自我迴歸條件變異數非齊一檢定 |" in md_raw and "ARCH 檢定" not in md_raw
+assert "本書採用一般用法" not in md_raw
 tags = re.findall(r"\\tag\{(26\.\d+)\}", md_raw)
 assert tags == [f"26.{k}" for k in range(1, 10)], tags
 for name in re.findall(r'data-chart="(lm26-[\w-]+)"', md_raw):
