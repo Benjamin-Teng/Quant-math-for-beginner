@@ -1750,6 +1750,15 @@ lookups (2026-10-19, the Volume III URL pattern); forms already recorded above a
 The Book cells above that read "—" are now filled where a module prints the term: precision 精確度 (LM24), ARCH model
 自我迴歸條件變異數非齊一模型 (LM26) and Ljung–Box test Ljung–Box 檢定 (LM25).
 
+Final check (2026-10-20), 樂詞網 searched with curl (40 query strings, all listings, 統計學名詞 and 數學名詞):
+
+| English | 樂詞網 | Book |
+|:--|:--|:--|
+| log basis | no entry (basis 基差 in 經濟學名詞 and 管理學名詞 only) | 對數基差, the book's own form (LM25) |
+| octile kurtosis | no entry (octile 八分位數 and kurtosis 峰態, 統計學名詞) | 八分位數峰態, the book's own form (LM19), as 四分位數偏態 |
+| absolute log return | no entry (absolute value 絕對值, 數學名詞) | 對數報酬絕對值, the book's own form (LM19); not 絕對報酬, which reads as the investment term |
+| third power, fourth power | 三次方；立方 (數學名詞); fourth power no entry | 三次方、四次方 (LM19) |
+
 ## Writing style (AUTHORING §1, checked 2026-10-11)
 
 Read for the Volume II style rules; each statement below was checked against the source by a second agent or by the

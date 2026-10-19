@@ -752,8 +752,10 @@ has("subtitle", "measure it from intraday TAIEX data, and judge the forecasts ag
 has("introduction", "measures a day's variance from intraday index data, and judges the forecasts against that noisy "
                     "measurement.")
 assert "never observed exactly" not in TEXT
-# closing item 3: in Deep Dive 1 the number of substitutions is k (a lag), since n is the intraday count of (26.6)
-has("DD1: k substitutions", "Substitute (26.3) into itself $k$ times:")
+# closing item 3: in Deep Dive 1 the number of applications is k (a lag), since n is the intraday count of (26.6);
+# k applications of (26.3) leave beta^k sigma^2_{t-k} (final check N4: k substitutions would leave beta^(k+1))
+has("DD1: k applications", "Apply (26.3) $k$ times:")
+assert "into itself $k$ times" not in TEXT
 assert "\\beta^k\\sigma_{t-k}^2" in TEXT and "\\beta^n" not in TEXT and "n\\to\\infty" not in TEXT
 has("T5S start", "3 January 2005")
 has("TR23 retrieval", "`TaiwanStockTotalReturnIndex` (TAIEX), retrieved 18 October 2026")
@@ -822,9 +824,11 @@ chk("LM19's rho_1 of |r| (recomputed)", rho_19(np.abs(C.r), 1), ".3f", "0.161")
 chk("cited LM25 Ljung-Box (recomputed)", lbr[0, 0], ",.0f", "1,820")
 has("hygiene: two Ljung-Box", "two Ljung–Box (one is [[LM25]]'s, recomputed)")
 # ARCH: K=1, K=5 and K=5 on xi by chi^2, K=1 and K=5 by permutation (experiment 3); LB: |xi|, |r|;
-# 5 x 2 loss differences; 6 MZ; V vs r^2
-assert (3 + 2) + 2 + 5 * 2 + 6 + 1 == 24
-has("hygiene: 24 tests", "Tests on these data number 24 ([[LM21]]'s count).")
+# 5 x 2 loss differences; 6 MZ; V vs r^2; Deep Dive 3's Newey-West t-stat of the extremes' per-day difference
+# (final check N2)
+assert (3 + 2) + 2 + 5 * 2 + 6 + 1 + 1 == 25
+has("hygiene: 25 tests", "Tests on these data number 25 ([[LM21]]'s count).")
+has("hygiene: the last two tests", "six Mincer–Zarnowitz slopes, $V_t$ against $r_t^2$ and Deep Dive 3's extremes.")
 has("hygiene: five ARCH", "They are five ARCH (two by permutation), two Ljung–Box")
 has("hygiene: the ARCH tests' label", "The ARCH tests and the full-sample fits are **in-sample**.")
 # the shuffles are a simulated null, labelled a model as LM21 and LM22 label theirs (revision 3, F1 with X3 item 3)
@@ -1095,7 +1099,7 @@ flag("exp 1: kurtosis batch SE", SIM[1]["kurt_se"], 3)
 flag("exp 2: kurtosis batch SE", SIM[2]["kurt_se"], 2)
 has("exp 1-2: standard errors", "Experiment 1's paths have a median excess kurtosis of only 1.63, and 5% reach TR23's "
                                 "5.428 (standard errors 0.045 and 0.7 points). Experiment 2 (`default_rng([2, 20261011])`) "
-                                "repeats it with $t$ innovations: median 7.0 (standard error 0.11).")
+                                "repeats it from the $t$ fit: median 7.0 (standard error 0.11).")
 flag("exp 1: batch SE", SIM[1]["disp_se"], 3)
 flag("exp 1: 95%", SIM[1]["disp_q95"], 2)
 has("exp seeds", "`default_rng([1, 20261011])`")
@@ -1275,7 +1279,8 @@ ie_, iv_ = sw.index("ewma"), sw.index("ewma_v")
 sw[ie_], sw[iv_] = sw[iv_], sw[ie_]
 assert ORDERS["r2"] == sw and ORDERS["r2"][-1] == "v_prev"
 has("X7 note: orders", "with $r_t^2$ only the two EWMAs swap places")
-has("orders against r^2", "unbiased up to the tiny squared mean; there only the two EWMAs swap places.")
+has("orders against r^2", "So the QLIKE order is also checked against $r_t^2$, unbiased up to the tiny squared mean; there "
+                          "only the two EWMAs swap places.")
 has("P4: the two GARCH forecasts", "while the two GARCH forecasts keep the two lowest QLIKE scores")
 print("QLIKE orders:", {tg: [NAMES[k] for k in ORDERS[tg]] for tg in ORDERS})
 chk("E10: GARCH QLIKE", X7["garch_n"]["qlike"], ".4f", "0.5032")

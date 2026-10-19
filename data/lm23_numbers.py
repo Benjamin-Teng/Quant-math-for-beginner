@@ -422,7 +422,8 @@ same("U28 tests: alphas, loadings, beta against 1, halves' z", (len(c.T_C), len(
 same("0050/00631L slopes tested: one against 2, the yearly ones", 1 + len(c.FULL2), 12)
 has("hygiene test count", "On the same data the module tests 28 alphas (corrected in Section 7), 28 factor loadings, "
     "one beta against 1 and the 28 changes between the halves. On 0050 and 00631L it tests 12 slopes ([[eg:etf]]).")
-has("hygiene out-of-sample label", "One hedge is **out-of-sample**: judged on the half its ratio did not see.")
+has("hygiene out-of-sample label",
+    "The first-half hedges are **out-of-sample**: each judged on the half its ratio did not see.")
 has("hygiene descriptive class", "Correlations, cosines, R-squared values, variance cuts and $q_{ mkt}$ are "
     "**descriptive**, without standard errors: they describe this sample.")
 
@@ -710,12 +711,14 @@ chk("second half's own reduction (%)", 100 * c.HEDGE_OOS["second"][1], ".2f", "4
 assert abs(c.HEDGE_OOS["second"][1] - c.HB["second"][1]) < 1e-12        # in-sample reduction = R-squared
 same("28 sectors hedged", len(c.HEDGE28), 28)
 assert abs(c.HEDGE28["FinancialInsurance"][0] - c.HEDGE_OOS["first"][1]) < 1e-12    # the same rule as E6's
+assert c.HEDGE28_KEPT == sorted(o / i for o, i in c.HEDGE28.values())[13]     # inverted_cdf: the 14th of 28
 chk("median share of the in-sample cut kept (%)", 100 * c.HEDGE28_KEPT, ".0f", "87")
 same("first-half ratio cuts under 1% or raises the variance",
      c.HEDGE28_FAIL, ["BuildingMaterialConstruction", "Cement", "FinancialInsurance", "Food", "TradingConsumersGoods"])
 has("E6 across sectors", "Across the 28 sectors, the first-half ratio keeps a median 87% of the second half's in-sample "
     "cut. It cuts under 1%, or raises the variance, in five sectors.")
-has("zh box names the selection", "以 beta 降幅最大的金融保險類股為例，前半段估出的避險比例")
+has("zh box names the selection", "以 beta 下降最多（1.156 降到 0.578）的金融保險類股為例，前半段估出的避險比例")
+same("zh box: largest fall in points", c.HALF_SORTED[0][0], "FinancialInsurance")
 has("overview names the sector", "FinancialInsurance's first-half hedge ratio fails in the second half")
 # E7: LM2's slope
 same("LM2 pairs", (len(c.R50), c.ETF_DATES[0], c.ETF_DATES[-1]), (2902, "2014-11-03", "2026-10-08"))

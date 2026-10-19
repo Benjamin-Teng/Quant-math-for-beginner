@@ -280,3 +280,7 @@ A fresh agent checked the volume after the closing fixes (`scratch/fix/X5.md`) b
 | 3 | The Stage 4 list's lab wordings for `make_lab11.py:571` and `make_lab15.py:443` say more than LM20 gives, and the committed notebooks hold the same lines. | Reworded; labs 04, 11, 15 and 17 are regenerated at Stage 4 (plans/vol-4.md). |
 | 4 | LM23's new median uses `np.median`, against the quantile rule. | `inverted_cdf` (LM23's record); the printed 87% holds. |
 | 5 | SOURCES lacks four box forms (對數基差, 八分位數峰態, 對數報酬絕對值, 三次方、四次方). | Added after a 樂詞網 lookup. |
+
+After the last fixes (2026-10-20) a fresh agent checked the front matter of LM19–LM26 against the rule and the Stage 4
+list, and the Stage 4 text items against LM1–LM18's current files: consistent (`scratch/last/X6.md`). The four box
+forms of item 5 are in SOURCES. Stage 3 of Volume IV is complete.

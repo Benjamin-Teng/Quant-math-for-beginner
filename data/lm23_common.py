@@ -398,7 +398,7 @@ for _nm in NAMES:
     _ys = X[H:, J[_nm]]
     _b1 = slope_r2(X[:H, J[_nm]], MKT[:H])[0]
     HEDGE28[_nm] = (1 - float(np.var(_ys - _b1 * _m2, ddof=0)) / float(_ys.var(ddof=0)), slope_r2(_ys, _m2)[1])
-HEDGE28_KEPT = float(np.median([o / i for o, i in HEDGE28.values()]))   # median share of the in-sample cut kept
+HEDGE28_KEPT = float(np.quantile([o / i for o, i in HEDGE28.values()], 0.5, method="inverted_cdf"))  # median share kept
 HEDGE28_FAIL = sorted(nm for nm, (o, _) in HEDGE28.items() if o < 0.01 - EPS)  # cut under 1% or raise the variance
 F2 = ols(R631, design(R50))
 _yr2 = np.array([d[:4] for d in ETF_DATES])

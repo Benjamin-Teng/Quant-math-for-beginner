@@ -73,14 +73,15 @@ the edition. Ask the owner about code, site, repository and his standing rules, 
 end of the roadmap before the batch that needs them; content is the editor's call. Volume IV's intraday data,
 packages and chart-kit additions are approved (ROADMAP, "Decided by the owner").
 
-**Status (2026-10-19): Stages 1 and 2 are complete; Stage 3 is at revision 2.** The drafts are on `main`
-(`157461e`); round 1's records, with the editor's decisions, are `reviews/lm19.md` … `lm26.md` and
-`reviews/vol4_cross.md` (X1–X11, XB1–XB6); the source checks they rest on are in SOURCES (Volume IV, "Stage 3, round
-1"). Revision 1 (`692799a`) was verified per module (every round-1 item resolved) and re-checked as a volume; each
-record's "Revision 1" section and `vol4_cross.md` (XB7–XB10) hold the editor's decisions for revision 2. Then: a
-fresh verifier per module and a volume re-check, the closing check, and Stage 4. The owner approved (2026-10-19) that
-a blank line in an exhibit caption starts a new paragraph (`build/build.py`); LM17's two split captions change at the
-next publication. Stage 1's material is in
+**Status (2026-10-20): Stages 1–3 are complete; Stage 4 (publication, edition 0.5) is next.** Stage 3's record, in
+order, is in `reviews/lm19.md` … `lm26.md` and `reviews/vol4_cross.md`: round 1 (reviewer, blind solver, number
+auditor, consolidation with an adversarial re-check, cross-module check X1–X11), revisions 1–3 each verified by fresh
+agents with a volume re-check (XB1–XB11), the closing check with an adversarial second check of every item (three
+majors, all fixed), the closing fixes, a fresh final check per module and for the volume, and the last fixes,
+verified (every module READY TO PUBLISH; front matter consistent). The editor's decisions were each checked by a fresh
+agent before the writers applied them. Stage 4 applies `plans/vol-4.md`'s "Stage 4 changes to earlier modules". The
+owner approved (2026-10-19) that a blank line in an exhibit caption starts a new paragraph (`build/build.py`); LM17's
+two split captions change at this publication. Stage 1's material is in
 [`plans/vol-4.md`](plans/vol-4.md) (shared decisions, the capability check and the owner's answers, the editor's
 decisions on the survey and the drafts, the eight briefs) and [`plans/vol-4-anchors.md`](plans/vol-4-anchors.md) (488
 anchors, printed by `data/vol4_anchors_lm19.py` … `lm26.py`). The record, in order:

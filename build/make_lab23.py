@@ -708,7 +708,8 @@ for nm in U28:
     ys = X[H:, J[nm]]
     b_1 = slope_r2(X[:H, J[nm]], M[:H])[0]
     cut[nm] = (1 - np.var(ys - b_1 * m2, ddof=0) / np.var(ys, ddof=0), slope_r2(ys, m2)[1])
-show("median share of the in-sample cut kept (%)", 100 * np.median([o / i for o, i in cut.values()]), ".0f", "87")
+kept = np.quantile([o / i for o, i in cut.values()], 0.5, method="inverted_cdf")   # the median, F_hat^-1(1/2)
+show("median share of the in-sample cut kept (%)", 100 * kept, ".0f", "87")
 low = {nm: float(round(100 * o, 2)) for nm, (o, i) in cut.items() if o < 0.01 - EPS}
 print("first-half ratio's cut (%) where under 1% or negative:", low)
 show("sectors cut under 1% or raised", len(low), "d", "5")
