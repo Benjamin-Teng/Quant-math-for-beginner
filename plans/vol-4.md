@@ -118,7 +118,8 @@ plan; from Stage 3 the module sources and their numbers scripts are authoritativ
   basis on log prices; LM26's models on daily log returns in percent (so that the fitted constants are readable and
   arch does not warn about scale), labelled in every caption.
 - **Sharpe ratio.** $\mathrm{SR}=(\mu-r_f)/\sigma$ per day with $r_f=0$ (FinMind has no Taiwan interest-rate series,
-  survey), annualized by $\sqrt A$ only with LM19's condition stated (uncorrelated returns; Lo 2002). LM23's alphas
+  survey), annualized by $\sqrt A$: exact for log returns on uncorrelated days (LM19's (19.9); Lo 2002), a convention on
+  simple returns (round 1, LM19 C1: a compounded year of iid days has a Sharpe ratio of 0.746, not 0.81). LM23's alphas
   are market-model intercepts on raw returns; the text says by how much a risk-free rate of at most 2% a year (LM6's
   proxy) would move them, $(1-\beta)r_f/A$ per day.
 - **Counting.** As Volume III: one guard (`<= -x + 1e-12`, `>= x - 1e-12`) or exact arithmetic (PITFALLS §5).
@@ -317,7 +318,7 @@ editor's decisions follow; each brief is revised to them, and LM26's brief start
   published file carries more than 1,172 dated points of a market series). LM25's X1 and LM22's widget change; LM26
   follows the rule from the start.
 - **Owners** (X1–X8). LM19 owns TR23's $\sqrt A\,s=18.96\%$ and Sharpe ratio $0.0517$ a day, $0.81$ a year, both on
-  $R$ with $r_f=0$ (log-return values in brackets); LM20 owns $\hat f=4.28$ and every standard error and interval
+  $R$ with $r_f=0$ and both conventions on $R$ (exact rules hold for log returns) (log-return values in brackets); LM20 owns $\hat f=4.28$ and every standard error and interval
   (its delta table prints three decimals: 0.207, 0.205; 1.111, 1.085, 1.082); the other modules cite them. LM24
   cites LM21's t-stat with $s_{\mathrm u}$ (3.955678) and says that its own value differs only by the divisor. LM22
   sets its regime test beside LM21's 0.041 and names the reference distribution. LM20 writes the up-day frequency as
@@ -421,8 +422,8 @@ Collected here as the briefs add them; applied at publication with the edition n
 - `build/make_lab11.py:571`: the literal `[[LM20]]` goes (wording below).
 - Leads of Volumes I–III gain the Volume IV modules that cite them (cross-check X25–X29, checked against the
   current front matter): lm01 20; lm02 20, 23; lm03 19, 25, 26; lm04 19, 21, 22, 24;
-  lm05 19, 20, 21, 26; lm06 23; lm07 20; lm10 23, 24; lm11 20, 22, 24; lm12 20, 25; lm13 20, 22; lm14 21, 22, 24, 26;
-  lm15 23, 24; lm16 25; lm17 23, 24, 25; lm18 21, 23, 25.
+  lm05 19, 20, 21, 26; lm06 23; lm07 20, 22; lm10 23, 24; lm11 20, 22, 24; lm12 20, 25; lm13 20, 22; lm14 21, 22,
+  26; lm15 24 (round 1: lm07 gains 22, LM22 m9; lm14 → 24 and lm15 → 23 go with the uncited prerequisites, X2); lm16 25; lm17 23, 24, 25; lm18 21, 23, 25.
 - `build/make_lab11.py:571`: "LM20 and LM22 give the tools; LM22 answers it for 2017 and 2020"; `make_lab15.py:443`
   and `make_lab17.py:486`: LM19's wording; `make_lab04.py:642`: LM22's wording (the briefs give each).
 - lm15.md:263: LM20's rewording ("understate" claims a direction the data do not establish: the gap is 1.1 standard

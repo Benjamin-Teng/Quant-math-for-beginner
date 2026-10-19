@@ -586,11 +586,18 @@ not name. "Bibliographic data only" means nothing in the text was read.
 
 - Künsch, "The Jackknife and the Bootstrap for General Stationary Observations", *Ann. Statist.* 17(3): 1217–1241,
   1989, DOI [10.1214/aos/1176347265](https://doi.org/10.1214/aos/1176347265) (Crossref spells the name "Kunsch").
-  Abstract: blocks of l consecutive observations; consistency if l → ∞ and l/n → 0; the bootstrap selects blocks
-  randomly with replacement.
+  Abstract (the IMS abstract Crossref holds, re-read 2026-10-19), in order: the jackknife and the bootstrap extended to
+  general stationary sequences; the jackknife omits each block of l consecutive data once; for the mean, that is a
+  weighted covariance estimate of the spectral density at zero; "Under appropriate conditions consistency is obtained
+  if l = l(n) → ∞ and l(n)/n → 0"; general statistics approximated by a mean; only then the bootstrap, which selects
+  blocks of length l with replacement. The consistency sentence names no method and precedes the bootstrap, so the
+  abstract ties the conditions to the jackknife and states no bootstrap consistency result. The paper's theorems were
+  not read (Project Euclid blocked the requests). For block-bootstrap consistency cite Lahiri (2003), below.
 - Politis & Romano, "The Stationary Bootstrap", *JASA* 89(428): 1303–1313, 1994, DOI
   [10.1080/01621459.1994.10476870](https://doi.org/10.1080/01621459.1994.10476870). Abstract: blocks of random length
-  with a geometric distribution; the pseudo-series is stationary conditional on the data.
+  with a geometric distribution; the pseudo-series is stationary conditional on the data. Re-read 2026-10-19 on Taylor &
+  Francis's page (OpenAlex's copy is identical): weakly dependent stationary observations; the article develops
+  "fundamental consistency and weak convergence properties" of the scheme. Theorem numbers and conditions not read.
 - Politis & White, "Automatic Block-Length Selection for the Dependent Bootstrap", *Econometric Reviews* 23(1): 53–70,
   2004, DOI [10.1081/ETC-120028836](https://doi.org/10.1081/ETC-120028836). Abstract: optimal block-size estimators
   built on flat-top lag-window spectral estimation. With the next entry, the reference of arch's
@@ -617,7 +624,20 @@ not name. "Bibliographic data only" means nothing in the text was read.
   ISBN 978-1-4419-1848-2, eBook ISBN 978-1-4757-3803-2, LCCN 2003045455; the original hardcover ISBN was not seen.
   Contents (front-matter PDF): §2.5 the moving block bootstrap, p. 25; §2.7.1 circular, p. 33; §2.7.2 stationary,
   p. 34; §3.3 the stationary bootstrap for the sample mean, p. 57; ch. 5 comparison of block methods, p. 115; ch. 7
-  "Empirical Choice of the Block Size", p. 175 (§7.3 subsampling, p. 182; §7.4 nonparametric plug-in, p. 186).
+  "Empirical Choice of the Block Size", p. 175 (§7.3 subsampling, p. 182; §7.4 nonparametric plug-in, p. 186). Read
+  2026-10-19 in Google Books' preview (id e4f8sqm439UC; pp. 49, 55, 58, 64 as page images); the CIP data on p. iv give
+  ISBN 0-387-00928-0, © 2003 Springer-Verlag New York. Chapter 3, "Properties of Block Bootstrap Methods for the
+  Sample Mean": $\{X_i\}$ stationary and strongly mixing with coefficient $\alpha(\cdot)$, $T_n=\sqrt n(\bar X_n-\mu)$;
+  $j=1,2,3,4$ the moving, non-overlapping, circular and stationary block bootstraps.
+  - Theorem 3.1 (p. 49): $E\lVert X_1\rVert^{2+\delta}<\infty$ and $\sum\alpha(n)^{\delta/(2+\delta)}<\infty$ for some
+    $\delta>0$, with $\ell^{-1}+n^{-1}\ell=o(1)$, give $\Var_*(T^*_n(j))\to_p\Sigma_\infty$ for $j=1,2,3$.
+  - Theorem 3.2 (p. 55): the same conditions and a nonsingular $\Sigma_\infty$ give the bootstrap distribution's
+    uniform consistency for $j=1,2,3$; the text adds that the conditions on $\ell$ are also necessary.
+  - Theorem 3.3 (p. 58), "a stronger set of conditions": $E\lVert X_1\rVert^{4+\delta}<\infty$,
+    $\sum n^3\alpha(n)^{\delta/(4+\delta)}<\infty$ and $p+(n^{1/2}p)^{-1}\to0$ ($1/p$ the mean block length) give the
+    stationary bootstrap's variance consistency; Theorem 3.4 (p. 64) its distribution result under
+    $6+\delta$ moments. These are sufficient conditions; TR23's tails (LM15's $\nu=3.065$) do not meet the moment
+    condition of Theorem 3.3, while Theorem 3.1's holds for small $\delta$.
 - Bibliographic data only: Hall, Horowitz & Jing, "On blocking rules for the bootstrap with dependent data",
   *Biometrika* 82(3): 561–574, 1995, DOI [10.1093/biomet/82.3.561](https://doi.org/10.1093/biomet/82.3.561); Efron,
   "Bootstrap Methods: Another Look at the Jackknife", *Ann. Statist.* 7(1): 1–26, 1979, DOI
@@ -912,6 +932,28 @@ Bibliographic data come from Crossref (`api.crossref.org/works/<doi>`, read 2026
   Gopikrishnan et al. (1999) (LM19, LM26); Kelly (1956), Breiman (1961), Thorp (2006), Markowitz (1952), Merton (1972),
   Chopra & Ziemba (1993) (LM24); Hull (2022) (LM25); Strang (2016) §4.2 (LM23); Forbes & Rigobon (2002) (LM26); the
   Volume III entries for Durrett, Glasserman, Grinstead & Snell and Blitzstein & Hwang (LM19, LM20, LM22).
+
+#### Stage 3, round 1 (2026-10-19)
+
+- Brockwell & Davis, *Time Series: Theory and Methods*, 2nd ed., Springer Series in Statistics, Springer-Verlag, New
+  York, 1991, DOI [10.1007/978-1-4419-0320-4](https://doi.org/10.1007/978-1-4419-0320-4) (Crossref gives the 2009
+  reprint's ISBNs 978-1-4419-0319-8 and 978-1-4419-0320-4; the 1991 copyright page gives 0-387-97429-6). Read
+  2026-10-19 in Google Books' preview (id ZW_ThhYQiXIC): p. 222 as a page image; pp. 220–223 and 308 in snippets.
+  §7.2: $\hat\rho(h)=\hat\gamma(h)/\hat\gamma(0)$ with mean-corrected $\hat\gamma$ and divisor $n$, (7.2.1)–(7.2.2).
+  Theorem 7.2.1 (p. 221) assumes a linear process driven by IID(0, σ²) noise with a finite fourth moment; Theorem
+  7.2.2 (p. 222) relaxes the fourth moment. Example 7.2.1, "Independent White Noise" (pp. 222–223): for IID(0, σ²)
+  noise $\hat\rho(1),\dots,\hat\rho(h)$ are approximately iid normal with mean 0 and variance $1/n$. The source of
+  LM19's (19.6): iid with a finite variance (for $r_t^2$ that means a finite fourth moment of $r_t$).
+- Brockwell & Davis, *Introduction to Time Series and Forecasting*, 3rd ed., Springer Texts in Statistics, Springer
+  International Publishing, 2016, DOI [10.1007/978-3-319-29854-2](https://doi.org/10.1007/978-3-319-29854-2), ISBN
+  978-3-319-29852-8. §2.4, Example 2.4.2 "iid Noise", p. 53 (page image): the same result; §1.6(a), p. 30 (snippet):
+  iid with finite variance, bounds $\pm1.96/\sqrt n$.
+- Tsay (2010), §2.2, p. 31 (snippets): for an iid sequence with $E(r_t^2)<\infty$, $\hat\rho_\ell$ is asymptotically
+  normal with mean 0 and variance $1/T$ for each fixed lag, citing Brockwell and Davis (1991), Theorem 7.2.2.
+- Shumway & Stoffer, *Time Series Analysis and Its Applications*, 4th ed., Springer, 2017, DOI
+  [10.1007/978-3-319-52452-8](https://doi.org/10.1007/978-3-319-52452-8): Property 1.2, p. 28, under iid with a finite
+  fourth moment (a stronger sufficient condition). Hyndman & Athanasopoulos, *Forecasting: principles and practice*,
+  3rd ed., OTexts, 2021, §2.9: the ±1.96/√T rule for white noise, without a moment condition.
 
 ### Open points (Volume IV)
 
@@ -1309,6 +1351,16 @@ statsmodels pages are under `https://www.statsmodels.org/stable/generated/`, arc
   - `comment_prefix: str | None = None`: "A string used to indicate the start of a comment line. Comment lines are skipped during parsing. Common examples of comment prefixes are # and //." The installed docstring is the same (`io/csv/functions.py:154–156`; `read_csv` starts at `:74`, the parameter at `:91`).
   - Run: `pl.read_csv("data/derived/vol4_rv.csv", comment_prefix="#")` gives 5,351 rows and 21 columns. Without it, Polars raises a `ComputeError` ("found more fields than defined in 'Schema'").
 
+#### Stage 3, round 1: Python facts (2026-10-19)
+
+- `scipy.stats.bootstrap` (SciPy 1.18.1, `stats/_resampling.py`, read 2026-10-19): default `method='BCa'` (l. 302);
+  `_bca_interval` (l. 110–166) follows Efron & Tibshirani (1993) §14.3 and §15.4 by its own comment. Bias correction
+  (l. 114–119): $\hat z_0=\Phi^{-1}$(share of resamples below $\hat\theta$, ties counted half). Acceleration (l. 121–156):
+  $\hat a=\sum U_i^3/\big(6(\sum U_i^2)^{3/2}\big)$ over the leave-one-out jackknife values. The interval's ends are read
+  off the bootstrap distribution by `stats.quantile` with its default `method='linear'` (l. 663). Resampling is iid
+  for every method. Recomputed (n = 250, B = 4,999): the closed forms agree to about 1e-16. The documentation page gives
+  no formula.
+
 ## Taiwan facts (Volume III)
 
 - TAIEX total-return index (發行量加權股價報酬指數), read 2026-10-18. Dividend rule verified: TWSE
@@ -1515,6 +1567,25 @@ statsmodels pages are under `https://www.statsmodels.org/stable/generated/`, arc
 | quartile; octile | 四分位數; 八分位數 | 四分位數; — | 四分位數, 八分位數 |
 | measure of location, dispersion | 位置量數, 離勢量數 | — | — |
 | sensitivity curve | 敏感度曲線 | — | 敏感度曲線 |
+
+### Stage 3, round 1 additions (2026-10-19)
+
+樂詞網 searched 2026-10-19 with curl (Volume III URL pattern; 82 query strings in all listings, 統計學名詞 and 數學名詞).
+
+| English | 樂詞網 | Book |
+|:--|:--|:--|
+| autocovariance | 自我共變異數 (統計學名詞; function 自我共變異函數) | 自我共變異數 |
+| t-statistic | t統計量 (統計學名詞, headword "t-statistics") | t 統計量 (space as the book writes Latin names) |
+| Sharpe ratio | 夏普比率 (統計學名詞); Sharpe比率 (管理學名詞) | 夏普比率 |
+| sandwich estimator | 夾層估計量 (統計學名詞); 三明治 has no 統計 or 數學 entry | 夾層估計量 |
+| bootstrap test | 自助重抽檢定 (統計學名詞) | 自助重抽檢定 |
+| standardized residual | 標準化殘差 (統計學名詞) | 標準化殘差 |
+| loss function | 損失函數 (統計學名詞, 數學名詞) | 損失函數 |
+| out-of-sample | compounds only: out-of-sample forecasting 樣本外預測 (統計學名詞) | 樣本外 |
+| cost of carry | none in 統計 or 數學; holding cost 持有成本 (管理學名詞) | 持有成本 |
+| innovation (time series) | 新息 (數學名詞); 創新項 has no entry | 新息 |
+| effective window, unconditional variance, realized variance | no entry | the book's own forms 有效窗口, 無條件變異數, 實現變異數 (LM3's) |
+| normal-equivalent scale, iid band, iid factor, data weight | no entry | the book's own forms 常態等效尺度, 獨立同分布區間, 獨立同分布因子, 資料權重 |
 
 ## Writing style (AUTHORING §1, checked 2026-10-11)
 

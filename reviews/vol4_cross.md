@@ -1,0 +1,156 @@
+# Volume IV cross-module checks
+
+## Round 1 (X), 2026-10-19
+
+A fresh, read-only agent checked the eight drafts at `157461e` as one volume and against LM1–LM18; no critical or major item.
+
+I read the drafts, plans/vol-4.md (shared decisions, editor's decisions, Stage 4 list and the briefs' prereq, leads and tag-user lines), AUTHORING §6, SOURCES "Chinese terms (Volume IV)", the ROADMAP boundary table and reviews/vol3_cross.md. The scratch scripts are in scratch/stage3/X:
+
+- xref.py, tagctx.py and fm.py check tags, links and front matter.
+- numshared.py and numquote.py compare numbers across modules.
+- jsonscan.py scans the chart and widget JSON.
+- zh.py dumps the 中文導讀 boxes and Glossaries.
+- spot.py spot-checks values against data/raw.
+
+Nothing in the repository was changed. No critical or major item was found.
+
+## Findings
+
+**X1 (minor). Ownership of TR23's autocorrelations and moments.** In Volume IV, LM19 owns the sample autocorrelations of $r$, $\lvert r\rvert$ and $r^2$ (plans/vol-4.md:110, :254). LM22 follows the decision ("([[LM19]]; [[LM17]]'s pair correlation prints the same)", lm22.md:163), and so does LM25 (lm25.md:69, :149, :203). Three places do not:
+
+- lm21.md:135: "TR23's next-day log returns correlate 0.039 ([[LM17]])". LM19 prints 0.0393 (lm19.md:253).
+- lm26.md:56: "correlate only 0.039, but their sizes correlate 0.161 ([[LM17]])". LM26 itself cites [[LM19]] for 0.194 at lm26.md:29, so it uses two attributions for one family of statistics.
+- lm26.md:240: "skewness −0.59 against −0.47". No owner prints TR23's log-return skewness −0.47: LM19's summary table holds simple-return moments only, and LM17 prints 5.428 but not −0.47.
+
+Fix: LM21 and LM26 cite [[LM19]] (0.0393, 0.161). For −0.47, either LM26 says it computes the value itself, or LM19 adds the log-return skewness and kurtosis to its summary. **Modules: LM21, LM26 (LM19 optional).**
+
+**X2 (minor). Prerequisites with no citation in the text, and the Stage 4 leads built on them.** fm.py finds four prerequisites that the text never cites, by link or by tag:
+
+- LM23 lists 9 and 15 (lm23.md:5). Its brief gives LM9 for rank and exact fits, and LM15's (15.9) for the $t_{T-d}$ law. The draft cites [[LM10]] for rank and [[LM20]] for $t_{T-d}$ (lm23.md:126).
+- LM24 lists 14 (lm24.md:5). Its brief gives (14.3), (14.4) and TR23's moments, but the draft takes them from LM19 and LM20.
+- LM25 lists 18 (lm25.md:5). It prints batch standard errors (lm25.md:220, :266, :459, :488) but never names [[LM18]].
+
+The Stage 4 list adds lm15 → 23, lm14 → 24 and lm18 → 25 (plans/vol-4.md:423–425) on these prerequisites alone. Either add the citations (for example [[LM18]] at the first batch SE, lm25.md:220; (15.9) at lm23.md:126; [[LM14]] in LM24), or drop them from prereq and from the Stage 4 list. **Modules: LM23, LM24, LM25 (plan).**
+
+**X3 (minor). Pointers to LM22 that LM22 does not honour.**
+
+- lm21.md:231 says "[[LM22]] resamples blocks of days to measure the widening" of count tests. lm21.md:238 says LM22 replaces the two-proportion test on shares of extreme days. LM22 resamples no count and no share of extreme days. Its only share is "five-year windows under water", and its regime work is LM16's correlation, in the lab.
+- lm19.md:334 says "[[LM22]] puts an interval on it", meaning VR(1,231) and its ratio to the iid factor. LM22 bootstraps a different statistic: the windows' spread about their own mean, 0.283 (0.20 to 0.68, lm22.md:304), plus VR(20). This one is borderline.
+
+Fix: reword the pointers ("[[LM22]]'s block bootstrap is the tool for this", "an interval on the windows' spread"), or add one LM22 problem that block-bootstraps a count, for example the 13 falls after 108 falls. **Modules: LM21, LM19 (or LM22).**
+
+**X4 (minor). Pointers that contradict the module they cite.**
+
+- lm19.md:157: "How far a sample skewness moves between samples is measured by its standard error ([[LM20]])". The note at lm19.md:194 also points to [[LM20]]. But lm20.md:406 says "the skewness and the kurtosis get no standard error at all". LM19 should say that LM20 explains why they get none.
+- lm20.md:280 (knowledge check): the gain of 561.8 "needs a test ([[LM21]])". But lm20.md:311 calls the likelihood-ratio test "outside this book", and lm21.md:85 says it is not in the book either. Reword the answer to match.
+
+**Modules: LM19, LM20.**
+
+**X5 (minor). Chinese terms that differ between boxes.** None of these is in SOURCES "Chinese terms (Volume IV)":
+
+- Sharpe ratio: 夏普比率（Sharpe ratio） in lm19.md:391 and lm20.md:409, but untranslated "Sharpe ratio" in LM21's box, lm21.md:187.
+- t-statistic: LM22 writes t 統計量（t-statistic） (lm22.md:345), LM25 writes t 值 (lm25.md:200, :250, :296), and LM21 and LM23 keep "t-stat".
+- Sandwich: LM23 writes White 的三明治公式 (lm23.md:260), and LM26 writes 夾層估計量（sandwich estimator） (lm26.md:265).
+
+Choose one form for each and record it in SOURCES. **Modules: LM21, LM22, LM25, LM23/LM26.**
+
+**X6 (minor). A book-coined term printed without its English.** The book's own forms are printed with their English in every box that uses them (plans/vol-4.md:159–161; SOURCES). The box at lm26.md:401 uses 實現變異數 with no "(realized variance)". **Module: LM26.**
+
+**X7 (minor). Glossary conventions for terms without a 樂詞網 entry.**
+
+- LM22 (lm22.md:518, :519, :528) and LM26 (lm26.md:535, :537, :539, :544, :546, :548) print a Chinese description in parentheses. LM23 prints "—" (lm23.md:549, :554, :556).
+- Inside LM26, the boxes use 有效窗口（effective window） (lm26.md:128) and 無條件變異數（unconditional variance） (lm26.md:187) as terms, while its Glossary shows them as parenthesised descriptions.
+- Spacing: LM24's Glossary writes James-Stein估計量 (lm24.md:522), but its box writes James-Stein 估計量 (lm24.md:311), and other modules write Bonferroni 校正 with a space. SOURCES asks for one style.
+
+**Modules: LM22, LM23, LM24, LM26.**
+
+**X8 (trivial). A tag-shaped citation of an outside source.** lm22.md:72 and lm22.md:533 write Efron and Tibshirani's equation as "their (6.6)". That is the book's tag form, and it collides with LM6's (6.6), the annuity future value. Write "their equation 6.6". **Module: LM22.**
+
+**X9 (trivial). One work cited in two forms.**
+
+- Lo (2002) reads "The Statistics of Sharpe Ratios." *Financial Analysts Journal* 58 (4): 36–52 at lm19.md:564, lm20.md:631 and lm21.md:531.
+- LM22 writes "The statistics of Sharpe ratios. … 58(4): 36–52, doi" (lm22.md:537), and its whole reference list uses sentence-case titles without quotes.
+
+The VX9 precedent is one form per work. **Module: LM22.**
+
+**X10 (trivial). Notation details against AUTHORING §6.**
+
+- lm26.md:197 writes the parameter vector as a plain $\theta=(g,\omega,\alpha,\beta)$. §6 and LM20 write a vector as $\boldsymbol\theta$.
+- lm23.md:356 draws $\mathbf Z\sim\mathcal N_{28}(\mathbf 0,C)$, but §6 reserves $\mathbf Z$ for a standard normal vector.
+- LM24 uses $k$ both for a grid index ($x_k$, lm24.md:60) and for the degrees of freedom of $\chi^2_k$ (lm24.md:250, :468), and does not declare it.
+- The same derivation of the $t_{T-1}$ law names its variables differently: LM20 writes $Y\sim t_{T-1}$ and $V\sim\chi^2$ (lm20.md:54), while LM21 writes $Y\sim\chi^2_{T-1}$ (lm21.md:118).
+
+**Modules: LM26, LM23, LM24, LM20/LM21.**
+
+**X11 (trivial). A forward link answered on another sample.** lm26.md:242 answers make_lab05.py:529 ("Part of that shape comes from volatility that changes over time"). LM5's question is about 0050, with a normal count of 0.058 over twelve years. LM26 answers on TR23, with 0.117, and does not say that the sample changed. Add "(LM5 asked it for 0050; on TR23 …)". **Module: LM26.**
+
+## Observations (no change requested)
+
+- **Weekly series near the old cap.** lm25-case-s.json publishes 1,227 weekly TAIEX closes. lm26-vol.json has 1,224 weekly points and lm19-rollscale.json 1,126. All are thinned to weekly or every fifth session, as decision X37 allows, but the first exceeds the "1,172 dated points" precedent quoted at plans/vol-4.md:316–317.
+- **LM26 states the opening-return share three ways:** "two thirds" (lm26.md:23), 66% (lm26.md:325) and 68% (lm26.md:365). The samples probably differ (5,351 days against the 4,609 out-of-sample days) but are not named. This is inside one module.
+- **Glossary coinages not recorded in SOURCES:** 常態等效尺度, 獨立同分布區間, 獨立同分布因子 (LM19) and 資料權重 (LM24). Some box terms are missing there too: 創新項, 損失函數, 標準化殘差, 持有成本.
+
+## Checks that passed
+
+- **Tags.**
+  - Every cross-module tag cited in LM19–LM26 exists, and its content matches what the citing text uses. Volume IV tags: 19.1, 19.3, 19.5–19.8, 20.1, 20.2, 20.4–20.8, 21.1, 21.2, 21.6–21.8, 23.1–23.4, 23.6, 23.7, 25.1–25.3 and 25.5. Earlier tags include 1.9, 1.12, 2.1, 3.9, 4.2, 4.5, 4.15, 6.22, 6.25, 7.1, 10.2, 10.4, 11.6, 12.1–12.4, 12.6, 12.8, 13.2, 13.6–13.9, 13.12, 14.1, 14.3–14.6, 14.12, 15.1, 15.2, 15.6, 15.8–15.11, 16.1–16.10, 17.1, 17.2, 17.5, 18.1, 18.2, 18.6 and 18.8.
+  - Every module's own tag citations are defined.
+  - All `[[ex:]]` and `[[eg:]]` references resolve.
+- **Labels.** No module gives one label to both an exhibit and an example, and there are no duplicate labels. The rendered previews are newer than the sources.
+- **Front matter.**
+  - prereq and leads equal the briefs in all eight modules.
+  - Leads within the volume agree with the later modules' prereqs and with the forward links: LM24 to LM22 and LM23 are pointers only, as decided in X6.
+  - The future leads LM20 → 30 and LM25 → 33 rest on the briefs' tag users.
+  - The Stage 4 lead additions match the drafts' prereqs exactly, apart from X2.
+- **Numbers across modules agree to the printed digits and cite the owner.**
+  - LM19's 15.38%, 18.96% (18.99% on log returns), 0.0517 and 0.81.
+  - LM20's 4.28, 3.89, 0.33, 1.11 (1.111, 1.085, 1.082), 0.21 (0.207, 0.205), 7.8–23.0, 2.10–6.46 and 0.40–1.22.
+  - LM21's t-stat 3.96 (3.955678), $7.6\times10^{-5}$, the one-sided $3.8\times10^{-5}$ and the regime p-value 0.041.
+  - The variance ratios 1.039 (1.0392), 1.047 (1.0465), 1.036 (1.0359), 1.208, 0.619 and the iid factor 0.997.
+  - $\hat\rho_1$ = 0.0393, the iid band ±0.0256 and its outside lags; 0.194; the robust SE 0.0205.
+  - The crash correlation 0.788/0.7884 against 0.860/0.8598, and $\hat\rho$ = 0.5749.
+  - GARCH and EWMA appear only in LM26, and the block length 145 only in LM22.
+  - 23.7645, 246.12, 245.4794, 4,382, 2,191, 1,224 ISO weeks, 524 repaired closes on 38 dates, and LM17's $\hat f^*$ = 4.14.
+  - From data/raw: TX settled at 49,357 on 8 October 2026; the TAIEX price index rose 10.91-fold from 1 December 2008 and 10.90-fold from 2 January 2003; both indices returned −9.6997% on 7 April 2025.
+- **Forward links.** All 71 links from LM1–LM18, the pages and the labs to LM19–LM26 are honoured. The exceptions are the items already on the Stage 4 list (make_lab04.py:642, make_lab11.py:571, make_lab15.py:443, make_lab17.py:486, lm15.md:263) and X11.
+- **Volume-wide decisions, checked in every module.**
+  - No src/data/lm19-*… lm26-* JSON file and no widget carries a daily FinMind series in date order. Dated arrays are weekly or every fifth session; widgets hold statistics, models or the 243 undated 2025 pairs.
+  - Every quantile helper uses inverted_cdf; np.median appears only as the labelled contrast.
+  - HC0 throughout; Newey–West lags of 9, 8, 7 and 4 follow ⌊4(T/100)^{2/9}⌋ with no correction. LM23's ℓ = 19 and 38 for overlapping sums are argued in the text.
+  - Printed bootstrap numbers use the stationary bootstrap.
+  - Tests use a normal reference and two tails; DF and KPSS are stated as one-sided, and Ljung–Box and ARCH use the upper tail.
+  - The 23 Saturday sessions are treated as LM21 treats them.
+  - The volume writes 實現變異數, never 已實現; "hat value" is LM23's; "leverage" keeps the book's meaning.
+- **Notation.**
+  - α, β, θ, ℓ, k, m, c, q, $L$, $K$, $h$ and $u$ each keep one meaning per module, as their notation notes declare and §6 allows, apart from X10.
+  - No $R^2$, $P$ or $^T$ appears for the uses §6 forbids.
+- **Boundaries.**
+  - Each ROADMAP boundary holds: LM12/LM23, LM18/LM22/LM45, LM24/LM30 and LM25–LM26/LM39.
+  - The promises the plan assigned are each kept: LM16's crash correlation and LM11's eigenvalue share in LM22; the factor model in LM23; the MLE of $\mathcal N_N$ in LM20.
+  - Nothing is taught twice beyond the editor-approved one-line $t_{T-1}$ derivation in both LM20 and LM21.
+- **Chinese terms.** Every SOURCES "Book" term, and each Glossary English–Chinese pair, is used consistently across the eight modules, apart from X5–X7. 波動率 and 時間序列 throughout; no 波動度 or 時間數列.
+
+## Editor's decisions on X1–X11 (2026-10-19)
+
+- **X1:** accepted. LM21 and LM26 cite [[LM19]] for 0.0393 and 0.161; LM26 says that it computes the log-return
+  skewness −0.47 itself (LM19's summary table stays on simple returns).
+- **X2:** accepted. LM25 cites [[LM18]] at its first batch standard error, so lm18 → 25 stays. LM23 drops 9 and 15 from
+  its prerequisites (rank and the $t_{T-d}$ law come from [[LM10]] and [[LM20]]) and LM24 drops 14 (its moments come
+  from LM19 and LM20); the Stage 4 list loses lm15 → 23 and lm14 → 24.
+- **X3:** accepted: reword the pointers (LM21 lines 231 and 238: "[[LM22]]'s block bootstrap is the tool for this";
+  LM19 line 334: "an interval on the windows' spread"). No new LM22 problem.
+- **X4:** accepted: LM19 says that [[LM20]] explains why a sample skewness gets no standard error; LM20's line 280 as
+  its record decides.
+- **X5:** decided: 夏普比率（Sharpe ratio） in every box; t 統計量（t-statistic）; 夾層估計量（sandwich estimator）, the
+  statistics listing's form (the source check of 2026-10-19 found no 三明治 entry), in LM23 and LM26. The forms are in
+  SOURCES, "Chinese terms (Volume IV)", Stage 3 round 1 additions; LM26's innovation is 新息.
+- **X6:** accepted: 實現變異數（realized variance） at its first use in each box.
+- **X7:** decided: a Glossary prints the Chinese form a box uses, the book's own form when 樂詞網 has none (marked so in
+  SOURCES), never a description in parentheses and never "—" for a term the module uses in Chinese; a Latin name is
+  separated from the Chinese by a space (James-Stein 估計量, Bonferroni 校正).
+- **X8, X9:** accepted ("their equation 6.6"; one form per work, the house form).
+- **X10:** accepted: LM26 $\boldsymbol\theta$; LM23 names its non-standard normal vector with another letter; LM24
+  declares $k$; LM20 and LM21 align the variable names of the $t_{T-1}$ derivation.
+- **X11:** accepted: LM26 says that LM5 asked it for 0050 and answers on TR23.
+- **Observations:** weekly series are allowed by decision X37 (no change); LM26 names the samples behind 66% and 68%;
+  the Glossary coinages go into SOURCES with the source check.
