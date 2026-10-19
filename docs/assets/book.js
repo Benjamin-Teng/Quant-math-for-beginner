@@ -173,17 +173,29 @@
   function color(c) { return /^\d$/.test(String(c)) ? "var(--series-" + c + ")" : c; }
 
   /* ---------------- line chart ---------------- */
-  // spec: {x:{type:'num'|'date',label,fmt,tfmt,min,max,ticks,tickLabels}, y:{type:'lin'|'log',label,fmt,tfmt,min,max,ticks},
+  // spec: {x:{type:'num'|'date'|'log',label,fmt,tfmt,min,max,ticks,tickLabels,values}, y:{type:'lin'|'log',label,fmt,tfmt,min,max,ticks},
   //        series:[{name,color,dash,area,width,fmt,step,quiet,opacity,x:[],y:[]}], ann:[{type:'vline'|'hline'|'point'|'band',dash,...}], height}
+  // x.values: one x array for every series without its own x. A log x axis, like a log y axis, ignores x <= 0.
   // step: a post-step line, y[i] holding from x[i] to x[i+1] (histograms on bin edges, distribution functions).
   // A band series has lo and hi instead of y: the region between them is filled (opacity 0.18) under every line.
   // quiet: a thin translucent line (opacity 0.35) with no legend entry, tooltip row, hover dot or end label, for dozens
   // of simulated paths. Bands are drawn first, then quiet lines, then the other lines, each group in the given order.
   function isBand(s) { return !!(s.lo && s.hi); }
+  // one closed outline per run of points where x, lo and hi all exist: along hi, back along lo (line and scatter bands);
+  // xok, when given, leaves out the x it rejects
+  function bandOutline(xa, lo, hi, pt, xok) {
+    var d = "", run = [], fin = function (v) { return v != null && isFinite(v); };
+    for (var i = 0; i <= xa.length; i++) {
+      if (i < xa.length && fin(xa[i]) && (!xok || xok(xa[i])) && fin(lo[i]) && fin(hi[i])) { run.push(i); continue; }
+      if (run.length > 1) d += "M" + run.map(function (j) { return pt(xa[j], hi[j]); }).join("L") + "L" + run.reverse().map(function (j) { return pt(xa[j], lo[j]); }).join("L") + "Z";
+      run = [];
+    }
+    return d;
+  }
   Book.lineChart = function (host, spec) {
     host.innerHTML = "";
     host.classList.add("chart");
-    var series = spec.series || [];
+    var xs0 = spec.x.values, series = (spec.series || []).map(function (s) { return s.x || !xs0 ? s : Object.assign({}, s, { x: xs0 }); });
     var keyed = series.filter(function (s) { return !s.quiet; });   // the series with a legend entry and a tooltip row
     if (keyed.length > 1 || spec.legend) {
       var lg = document.createElement("div"); lg.className = "legend";
@@ -205,13 +217,14 @@
     var svg = el("svg", { viewBox: "0 0 " + W + " " + H, role: "img", "aria-label": spec.alt || spec.title || null }, wrap);
     // data range, in a loop (Math.min.apply fails on very long argument lists, such as dozens of quiet paths). A step
     // also reaches x[i+1]; on a log axis a value <= 0 does not count towards the y range (it would give no decades)
-    var isLog = spec.y.type === "log";
+    var isLog = spec.y.type === "log", xLog = spec.x.type === "log";
+    var xok = function (v) { return !xLog || v > 0; };
     var xmn = Infinity, xmx = -Infinity, ymn = Infinity, ymx = -Infinity;
     series.forEach(function (s) {
       var band = isBand(s), lo = band ? s.lo : s.y, hi = band ? s.hi : s.y, n = s.x.length;
       for (var i = 0; i < n; i++) {
         var a = lo[i], b = hi[i];
-        if (a == null || !isFinite(a) || b == null || !isFinite(b)) continue;
+        if (a == null || !isFinite(a) || b == null || !isFinite(b) || !xok(s.x[i])) continue;
         xmn = Math.min(xmn, s.x[i]); xmx = Math.max(xmx, s.x[i]);
         if (s.step && i + 1 < n) { xmn = Math.min(xmn, s.x[i + 1]); xmx = Math.max(xmx, s.x[i + 1]); }
         if (!isLog || a > 0) { ymn = Math.min(ymn, a); ymx = Math.max(ymx, a); }
@@ -219,10 +232,13 @@
       }
     });
     var x0 = spec.x.min != null ? spec.x.min : xmn, x1 = spec.x.max != null ? spec.x.max : xmx;
+    if (xLog) { if (!(x0 > 0)) x0 = xmn; if (!(x1 > x0)) x1 = Math.max(xmx, x0); }   // a log x axis needs 0 < x0 <= x1
     var y0 = spec.y.min != null ? spec.y.min : ymn, y1 = spec.y.max != null ? spec.y.max : ymx;
     if (!isLog && spec.y.min == null) { var pad = (y1 - y0) * 0.06 || 1; y0 -= pad; if (spec.y.max == null) y1 += pad; }
     if (isLog) { y0 = y0 * 0.9; y1 = y1 * 1.1; }
-    var X = function (v) { return m.l + (v - x0) / (x1 - x0 || 1) * (W - m.l - m.r); };
+    var X = xLog
+      ? function (v) { return m.l + (Math.log(v) - Math.log(x0)) / (Math.log(x1) - Math.log(x0) || 1) * (W - m.l - m.r); }
+      : function (v) { return m.l + (v - x0) / (x1 - x0 || 1) * (W - m.l - m.r); };
     var Y = isLog
       ? function (v) { return H - m.b - (Math.log(v) - Math.log(y0)) / (Math.log(y1) - Math.log(y0)) * (H - m.t - m.b); }
       : function (v) { return H - m.b - (v - y0) / (y1 - y0 || 1) * (H - m.t - m.b); };
@@ -241,7 +257,7 @@
     if (!isLog && y0 < 0 && y1 > 0) el("line", { class: "zero", x1: m.l, x2: W - m.r, y1: Y(0), y2: Y(0) }, svg);
     var dt = spec.x.type === "date" ? dateTicks(x0, x1, narrow) : null;
     var xtf = spec.x.tfmt || spec.x.fmt;   // tick labels; the tooltip header keeps x.fmt
-    var xt = dt ? dt.t : (spec.x.ticks || linTicks(x0, x1, narrow ? 4 : 7, xtf));
+    var xt = dt ? dt.t : (spec.x.ticks || (xLog ? logTicks(x0, x1) : linTicks(x0, x1, narrow ? 4 : 7, xtf)));
     var xl = !dt && spec.x.ticks && spec.x.tickLabels;   // optional text for each of x.ticks
     el("line", { x1: m.l, x2: W - m.r, y1: H - m.b, y2: H - m.b }, ax);
     xt.forEach(function (v, i) {
@@ -250,6 +266,9 @@
       if (dt && dt.mode === "month") t.textContent = fmtDate(v, i === 0 || new Date(v).getUTCMonth() === 0 ? "monthyear" : "month");
       else if (dt) t.textContent = fmtDate(v, dt.mode === "year" ? "year" : null);
       else t.textContent = xl && xl[i] != null ? xl[i] : fmt(v, xtf);
+      // on a log axis (often ticked at its right end) the last label moves left until it ends at the svg's right edge
+      // (6.2 px a character); ending it at its tick instead would run it into the label before on a phone
+      if (xLog && i === xt.length - 1 && v <= x1 * 1.001) t.setAttribute("x", Math.min(X(v), W - t.textContent.length * 3.1));
     });
     if (spec.x.label) { var tx = el("text", { class: "ttl-y", x: m.l + (W - m.l - m.r) / 2, y: H - 6, "text-anchor": "middle" }, svg); setText(tx, spec.x.label); }
     if (spec.y.label) { var ty = el("text", { class: "ttl-y", x: m.l, y: m.t - 2 + 0, "text-anchor": "start" }, svg); ty.textContent = ""; host.setAttribute("data-ylabel", spec.y.label); }
@@ -265,18 +284,10 @@
       for (var i = 0; i < xa.length; i++) { vx.push(xa[i]); vy.push(ya[i]); if (i + 1 < xa.length) { vx.push(xa[i + 1]); vy.push(ya[i]); } }
       return { x: vx, y: vy };
     }
-    // one closed outline per run of points where lo and hi both exist: along hi, back along lo. On a log axis a value
-    // <= 0 is drawn at the floor of the axis (cy clamps it there), so a band from 0 keeps its shape
+    // on a log y axis a value <= 0 is drawn at the floor of the axis (cy clamps it there), so a band from 0 keeps its shape
     function bandPath(s) {
-      var l = verts(s.x, s.lo, s.step), h = verts(s.x, s.hi, s.step), d = "", run = [];
-      var pt = function (v) { return function (i) { return X(l.x[i]).toFixed(1) + "," + cy(v[i]); }; };
-      var fin = function (v) { return v != null && isFinite(v); };
-      for (var i = 0; i <= l.x.length; i++) {
-        if (i < l.x.length && fin(l.y[i]) && fin(h.y[i])) { run.push(i); continue; }
-        if (run.length > 1) d += "M" + run.map(pt(h.y)).join("L") + "L" + run.reverse().map(pt(l.y)).join("L") + "Z";
-        run = [];
-      }
-      return d;
+      var l = verts(s.x, s.lo, s.step), h = verts(s.x, s.hi, s.step);
+      return bandOutline(l.x, l.y, h.y, function (x, y) { return X(x).toFixed(1) + "," + cy(y); }, xok);
     }
     var order = series.filter(isBand)
       .concat(series.filter(function (s) { return s.quiet && !isBand(s); }), series.filter(function (s) { return !s.quiet && !isBand(s); }));
@@ -285,16 +296,16 @@
         el("path", { class: "bandfill", d: bandPath(s), style: "fill:" + color(s.color) + ";fill-opacity:" + (s.opacity != null ? s.opacity : 0.18) }, sg);
         return;
       }
-      var v = verts(s.x, s.y, s.step), d = "", pen = false;
+      var v = verts(s.x, s.y, s.step), d = "", pen = false, xa = null, xb = null;   // xa, xb: the first and last x drawn
       for (var i = 0; i < v.x.length; i++) {
         var yv = v.y[i];
-        if (!ok(yv) || (!s.step && (v.x[i] < x0 || v.x[i] > x1))) { pen = false; continue; }
+        if (!ok(yv) || !xok(v.x[i]) || (!s.step && (v.x[i] < x0 || v.x[i] > x1))) { pen = false; continue; }
         d += (pen ? "L" : "M") + X(v.x[i]).toFixed(1) + "," + cy(yv);
-        pen = true;
+        pen = true; if (xa == null) xa = v.x[i]; xb = v.x[i];
       }
-      if (s.area && !isLog) {
+      if (s.area && !isLog && xa != null) {
         var base = Y(Math.max(y0, Math.min(0, y1)));
-        el("path", { class: "area", d: d + "L" + X(s.x[s.x.length - 1]).toFixed(1) + "," + base + "L" + X(s.x[0]).toFixed(1) + "," + base + "Z", style: "fill:" + color(s.color) }, sg);
+        el("path", { class: "area", d: d + "L" + X(xb).toFixed(1) + "," + base + "L" + X(xa).toFixed(1) + "," + base + "Z", style: "fill:" + color(s.color) }, sg);
       }
       el("path", { class: s.quiet ? "line quiet" : "line", d: d, style: "stroke:" + color(s.quiet ? s.color || "var(--muted)" : s.color) +
         (s.dash ? ";stroke-dasharray:5 4" : "") + (s.width || s.quiet ? ";stroke-width:" + (s.width || 0.8) : "") +
@@ -343,7 +354,8 @@
     var cross = el("line", { class: "cross", y1: m.t, y2: H - m.b, x1: -10, x2: -10, visibility: "hidden" }, svg);
     var dots = series.map(function (s) { return s.quiet || isBand(s) ? null : el("circle", { class: "dot", r: 4, style: "fill:" + color(s.color), visibility: "hidden" }, svg); });
     var hit = el("rect", { x: m.l, y: m.t, width: W - m.l - m.r, height: H - m.t - m.b, fill: "transparent", style: "cursor:crosshair" }, svg);
-    function nearest(arr, v) { var lo = 0, hi = arr.length - 1; while (hi - lo > 1) { var mid = (lo + hi) >> 1; if (arr[mid] < v) lo = mid; else hi = mid; } return Math.abs(arr[lo] - v) <= Math.abs(arr[hi] - v) ? lo : hi; }
+    var xd = xLog ? Math.log : Number;   // nearest on the screen: on a log axis, by ratio
+    function nearest(arr, v) { var lo = 0, hi = arr.length - 1; while (hi - lo > 1) { var mid = (lo + hi) >> 1; if (arr[mid] < v) lo = mid; else hi = mid; } return Math.abs(xd(arr[lo]) - xd(v)) <= Math.abs(xd(arr[hi]) - xd(v)) ? lo : hi; }
     function stepAt(arr, v) {   // the step holding at v: the last i with arr[i] <= v; -1 outside arr[0] .. arr[n-1]
       if (!(v >= arr[0] && v <= arr[arr.length - 1])) return -1;
       var lo = 0, hi = arr.length - 1;
@@ -352,13 +364,13 @@
     }
     function move(ev) {
       var r = svg.getBoundingClientRect(), sx = (ev.clientX - r.left) * W / r.width;
-      var xv = x0 + (sx - m.l) / (W - m.l - m.r) * (x1 - x0);
+      var fr = (sx - m.l) / (W - m.l - m.r), xv = xLog ? x0 * Math.pow(x1 / x0, fr) : x0 + fr * (x1 - x0);
       var rows = [], px = null, at = [], snap = xv;
       // lines and bands report their point nearest the pointer; the last one with a value places the crosshair
       series.forEach(function (s, k) {
         if (s.quiet || s.step) return;
         var i = nearest(s.x, xv), lo = isBand(s) ? s.lo[i] : s.y[i], hi = isBand(s) ? s.hi[i] : lo;
-        if (lo == null || !isFinite(lo) || hi == null || !isFinite(hi)) return;
+        if (lo == null || !isFinite(lo) || hi == null || !isFinite(hi) || !xok(s.x[i])) return;
         at[k] = i; px = X(s.x[i]); snap = s.x[i];
       });
       // step series report the step under the crosshair (under the pointer when no other series has a value there)
@@ -426,8 +438,9 @@
     var lg = document.createElement("div"); lg.className = "legend";
     items.forEach(function (s) {
       var k = document.createElement("span"); k.className = "key";
-      var sw = document.createElement("i"); sw.className = "sw " + shape;
+      var sw = document.createElement("i"); sw.className = "sw " + (s.shape || shape);
       sw.style.background = color(s.color);
+      if (s.opacity != null) sw.style.opacity = s.opacity;
       var nm = document.createElement("span"); nm.innerHTML = rich(s.name == null ? "" : s.name);   // rich() escapes, and sets a_1 as a subscript
       k.appendChild(sw); k.appendChild(nm); lg.appendChild(k);
     });
@@ -471,7 +484,7 @@
   function svgPoint(c, ev) { var r = c.svg.getBoundingClientRect(); return { x: (ev.clientX - r.left) * c.W / r.width, y: (ev.clientY - r.top) * c.W / r.width, k: r.width / c.W }; }
   function maxLen(a) { return a.reduce(function (m, s) { return Math.max(m, String(s).replace(/[_^](\{[^}]*\}|\w)/g, "x").length); }, 0); }
   // cut a label to at most n visible characters, ending in an ellipsis; a_1 / x_{ij} / A^T count as one character each
-  // and are never cut in the middle. The full text stays in the tooltip header.
+  // and are never cut in the middle. The full text stays in the tooltip.
   function ellipsize(s, n) {
     s = String(s);
     if (maxLen([s]) <= n) return s;
@@ -668,8 +681,9 @@
   // the two axes (spec.equal, default true) and its `segments` are dashed; a scatter plot has free scales and its `lines`
   // are solid. Any of the keys below may appear in either.
   // spec: {type:'scatter'|'vector', alt, height, legend, equal,
-  //        x:{label,fmt,tfmt,min,max,ticks,name}, y:{...},
+  //        x:{label,fmt,tfmt,min,max,ticks,tickLabels,name}, y:{...},             tickLabels: text for each of ticks
   //        series:[{name,color,x:[],y:[],labels:[text],r}],                       points (up to four series)
+  //        bands:[{x:[],lo:[],hi:[],color,opacity,name}],                         filled between lo and hi, under everything
   //        lines:[{from:[x,y],to:[x,y],extend,dash,color,width,label}],          straight lines; extend runs the line to the edges
   //        segments:[...same keys...],                                            dashed by default (projections)
   //        ellipses:[{center:[x,y],cov:[[a,b],[b,c]],scale,color,fill,axes,label}],   the contour x'S^-1 x = scale^2
@@ -705,10 +719,14 @@
     var lines = (spec.lines || []).map(function (l) { return { l: l, dash: l.dash === true }; })
       .concat((spec.segments || []).map(function (l) { return { l: l, dash: l.dash !== false }; }));
     var ells = (spec.ellipses || []).map(function (e) { return { e: e, s: ellipseShape(e.center, e.cov, e.scale || 1) }; });
-    var c = begin(host, spec, series.map(function (s, i) { return { name: s.name, color: s.color || String(i + 1) }; }), "dot");
+    var bands = spec.bands || [], bop = function (b) { return b.opacity != null ? b.opacity : 0.18; };
+    var c = begin(host, spec, series.map(function (s, i) { return { name: s.name, color: s.color || String(i + 1) }; })
+      .concat(bands.filter(function (b) { return b.name != null; })
+        .map(function (b) { return { name: b.name, color: b.color || "var(--ink-2)", shape: "band", opacity: Math.min(1, 1.6 * bop(b)) }; })), "dot");
     var W = c.W, narrow = W < 460, bx = [], by = [];
     function add(x, y) { if (x != null && y != null && isFinite(x) && isFinite(y)) { bx.push(x); by.push(y); } }
     series.forEach(function (s) { s.x.forEach(function (v, i) { add(v, s.y[i]); }); });
+    bands.forEach(function (b) { b.x.forEach(function (v, i) { add(v, b.lo[i]); add(v, b.hi[i]); }); });
     vectors.forEach(function (v) { var f = v.from || [0, 0]; add(f[0], f[1]); add(v.to[0], v.to[1]); });
     pts.forEach(function (p) { add(p.at[0], p.at[1]); });
     lines.forEach(function (o) { add(o.l.from[0], o.l.from[1]); add(o.l.to[0], o.l.to[1]); });
@@ -721,6 +739,12 @@
     x0 = xs.min != null ? xs.min : x0 - px; x1 = xs.max != null ? xs.max : x1 + px;
     y0 = ys.min != null ? ys.min : y0 - py; y1 = ys.max != null ? ys.max : y1 + py;
     var m = { l: narrow ? 46 : 58, r: 16, t: 12, b: xs.label ? 44 : 30 }, pw = W - m.l - m.r, ph;
+    var xl = xs.ticks && xs.tickLabels, yl = ys.ticks && ys.tickLabels;   // text for each of the ticks
+    if (yl) {   // the left margin grows to fit the longest y label, up to 40% of the width; longer ones are cut with an ellipsis
+      var room = Math.max(m.l, W * 0.4);
+      yl = yl.map(function (s) { return s == null ? s : ellipsize(s, Math.floor((room - 14) / 6.2)); });
+      m.l = clamp(maxLen(yl.filter(function (s) { return s != null; })) * 6.2 + 14, m.l, room); pw = W - m.l - m.r;
+    }
     if (spec.height) ph = spec.height - m.t - m.b;
     else if (equal) ph = clamp(pw * (y1 - y0) / (x1 - x0), 190, 460);
     else ph = Math.round(Math.min(360, Math.max(220, W * 0.52))) - m.t - m.b;
@@ -740,18 +764,18 @@
       yt = ys.ticks || linTicks(y0, y1, narrow ? 4 : 6, ys.tfmt || ys.fmt);
     }
     var g = el("g", { class: "grid" }, svg), ax = el("g", { class: "axis" }, svg);
-    yt.forEach(function (v) {
+    yt.forEach(function (v, i) {
       if (v < y0 || v > y1) return;
       el("line", { x1: m.l, x2: W - m.r, y1: Y(v), y2: Y(v) }, g);
-      txt(svg, m.l - 8, Y(v) + 3.5, fmt(v, ys.tfmt || ys.fmt), null, "end");
+      txt(svg, m.l - 8, Y(v) + 3.5, yl && yl[i] != null ? yl[i] : fmt(v, ys.tfmt || ys.fmt), null, "end");
     });
     el("line", { x1: m.l, x2: m.l, y1: m.t, y2: H - m.b }, ax);
     el("line", { x1: m.l, x2: W - m.r, y1: H - m.b, y2: H - m.b }, ax);
-    xt.forEach(function (v) {
+    xt.forEach(function (v, i) {
       if (v < x0 || v > x1) return;
       el("line", { x1: X(v), x2: X(v), y1: m.t, y2: H - m.b }, g);
       el("line", { x1: X(v), x2: X(v), y1: H - m.b, y2: H - m.b + 4 }, ax);
-      txt(svg, X(v), H - m.b + 16, fmt(v, xs.tfmt || xs.fmt), null, "middle");
+      txt(svg, X(v), H - m.b + 16, xl && xl[i] != null ? xl[i] : fmt(v, xs.tfmt || xs.fmt), null, "middle");
     });
     if (y0 < 0 && y1 > 0) el("line", { class: "zero", x1: m.l, x2: W - m.r, y1: Y(0), y2: Y(0) }, svg);
     if (x0 < 0 && x1 > 0) el("line", { class: "zero", x1: X(0), x2: X(0), y1: m.t, y2: H - m.b }, svg);
@@ -787,6 +811,11 @@
         t.setAttribute("x", q.x); t.setAttribute("y", Math.max(10, q.y)); t.setAttribute("text-anchor", q.a);
       });
     }
+    // bands, under everything else in the plot
+    bands.forEach(function (b) {
+      el("path", { class: "bandfill", d: bandOutline(b.x, b.lo, b.hi, function (x, y) { return X(x).toFixed(1) + "," + Y(y).toFixed(1); }),
+                   style: "fill:" + color(b.color || "var(--ink-2)") + ";fill-opacity:" + bop(b) }, geo);
+    });
     // ellipses
     ells.forEach(function (o, i) {
       var e = o.e, col = color(e.color || "var(--ink-2)"), d = "";
@@ -855,7 +884,8 @@
       cand.forEach(function (q) { var d = Math.hypot(q.x - p.x, q.y - p.y); if (d < bd) { bd = d; best = q; } });
       if (!best) { leave(); return; }
       ring.setAttribute("cx", best.x); ring.setAttribute("cy", best.y); ring.setAttribute("visibility", "visible");
-      showTip(c, '<div class="hd">' + rich(best.head) + "</div>" + tipRow(best.col, xs.name || "x", fmt(best.xv, xs.fmt)) + tipRow(best.col, ys.name || "y", fmt(best.yv, ys.fmt)), best.x, best.y);
+      var yi = yl ? ys.ticks.indexOf(best.yv) : -1;   // a point on a labelled tick (a forest plot's row): the label in full
+      showTip(c, '<div class="hd">' + rich(best.head) + "</div>" + tipRow(best.col, xs.name || "x", fmt(best.xv, xs.fmt)) + tipRow(best.col, ys.name || "y", yi >= 0 && ys.tickLabels[yi] != null ? rich(ys.tickLabels[yi]) : fmt(best.yv, ys.fmt)), best.x, best.y);
     }
     hit.addEventListener("pointermove", move); hit.addEventListener("pointerdown", move); hit.addEventListener("pointerleave", leave);
     return { X: X, Y: Y, svg: svg };
@@ -1173,7 +1203,8 @@
         var spec = JSON.parse(src.textContent);
         if (spec.x && spec.x.type === "date") {   // dates may be ISO strings or epoch milliseconds, in series and annotations alike
           var toT = function (d) { return typeof d === "number" ? d : Date.parse(d + "T00:00:00Z"); };
-          spec.series.forEach(function (s) { s.x = s.x.map(toT); });
+          if (spec.x.values) spec.x.values = spec.x.values.map(toT);   // the shared x
+          spec.series.forEach(function (s) { if (s.x) s.x = s.x.map(toT); });
           (spec.ann || []).forEach(function (a) { ["x", "x0", "x1"].forEach(function (k) { if (a[k] != null) a[k] = toT(a[k]); }); });
         }
         Book.chart(h, spec);

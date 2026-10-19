@@ -23,7 +23,7 @@ revised (TODO, Stage 1). The briefs and `plans/vol-4-anchors.md` then replace th
   about 5,700 words in six or seven sections; each spine below is cut to fit that.
 - **Section pattern.** A small numeric case or a picture first, then the definition, estimator or test with all its
   conditions, a short derivation, a worked example on Taiwan data, at most one pitfall, the 中文導讀 and the
-  knowledge check. Each estimator is first computed by hand in NumPy from its formula; a package (if approved) is then
+  knowledge check. Each estimator is first computed by hand in NumPy from its formula; a package is then
   shown to give the same number.
 - **Rigor.** Every estimator, test and theorem states its conditions: iid or stationary data, finite moments,
   independence of errors, the null hypothesis, the large-sample approximation used. A result is derived in the text or
@@ -92,10 +92,14 @@ revised (TODO, Stage 1). The briefs and `plans/vol-4-anchors.md` then replace th
     so no expiry day enters (FinMind prints the expiring contract's settlement as 0 from 2008-12-17). LM25's basis.
   - **T5S** (new): TAIEX every 5 seconds (`TaiwanVariousIndicators5Seconds`, Free), 2005-01-03 → 2026-10-08. Rows per
     day show the sampling regime: 271 (1-minute snapshots) to 2011-01-14, then 1,081 (15 seconds), 1,621 (10 seconds)
-    and 3,241 (5 seconds) from 2014-12-29; `data/vol4_series.py` finds each switch from the data. LM26's realized
-    variance: a 5-minute daily series from 2005 and the sampling-interval study from 2015. The 13:30:00 value equals
-    the official close (8 sampled days, 2005–2025); the index freezes during the closing call auction (13:25:05 to
-    13:29:55 from 2014-12-29; each regime's window stated).
+    and 3,241 (5 seconds) from 2014-12-29 (the 10-second regime ends on Saturday 2014-12-27); `fetch_intraday.py
+    --check` prints each regime's first and last day. FinMind prints the previous close at 09:00:00, and the index
+    absorbs the opening gap within about a minute; the 13:30:00 value equals the official close; the index freezes
+    during the closing call auction (13:25:05 to 13:29:55 from 2014-12-29). `data/vol4_rv.py` builds per-day
+    realized variances on the common window 09:30:00–13:30:00 at nine intervals (5, 10, 15 and 30 seconds; 1, 5,
+    10, 15 and 30 minutes) with their counts, and `o2`, the squared log change from the previous close to 09:30:00
+    (the overnight gap and the first half hour), into the committed `data/derived/vol4_rv.csv`. LM26: a 5-minute
+    daily series from 2005 and the sampling-interval study from 2015.
   - Recorded uses of earlier samples: LM20 and LM23 may recompute LM2's and LM4's 0050 and 00631L numbers under their
     own module's name (LM2's slope 1.887, LM4's interval), and LM20 recomputes LM16's U28 correlation 0.5749 and LM15's
     $t$ fit; everything else from Volumes I–III is quoted as printed, with its module and sample (LM16's numbers that
@@ -174,16 +178,16 @@ revised (TODO, Stage 1). The briefs and `plans/vol-4-anchors.md` then replace th
 - **Leads and tags.** As Volume III: a module's `leads` are the modules that cite one of its tags or that its text
   points to with [[LMn]]; cite another module's exhibit or example in words with [[LMn]].
 
-## Capability check (2026-10-19, sent to the owner)
+## Capability check (2026-10-19)
 
 What the spines need and the repository lacks (survey and fresh check: `book.js`, `build/`, `data/`,
-`pyproject.toml`). Nothing is built before the owner approves; each approved piece is reviewed by a fresh agent (0
-differences on the published pages).
+`pyproject.toml`). **The owner approved A, B, B′, C and E on 2026-10-19 (ROADMAP, "Decided by the owner"); D is not
+approved.** Each approved piece is reviewed by a fresh agent (0 differences on the published pages).
 
 - **(A) Packages.** statsmodels 0.15.0 (BSD-3) and arch 8.0.0 (NCSA); arch requires statsmodels, so they are one
   decision. They bring pandas 3.0.6, patsy 1.0.3, formulaic 1.2.2, narwhals 2.27.1, wrapt 2.5.1, interface-meta 2.0.1
   and tzdata 2026.5: about 82 MB unpacked, cp313 Windows wheels for all, metadata-compatible with the locked NumPy
-  2.5.3 and SciPy 1.18.1. Runtime is unverified: arch 8.0.0 predates pandas 3. Needed for: MacKinnon p-values of the
+  2.5.3 and SciPy 1.18.1. The smoke test of 2026-10-19 ran the stack without error (SOURCES, "Python (Volume IV)"). Needed for: MacKinnon p-values of the
   ADF, KPSS and Engle–Granger tests (LM25; transcribing the response-surface tables by hand is error-prone); GARCH with
   Student-$t$ errors, robust standard errors and forecasts (LM26); the automatic block length of Politis and White
   (LM22); HAC and Ljung–Box cross-checks (LM23, LM25). The text derives every estimator in NumPy first. Proposed in
@@ -199,17 +203,20 @@ differences on the published pages).
      monthly contract of 2000, 2006, 2008, 2014 and 2020).
   2. T5S: FinMind serves it one day per request, so the present manifest (one request per entry, checked byte for
      byte) cannot hold it. A new `data/fetch_intraday.py` keeps its own manifest (`data/raw_intraday_manifest.json`, one
-     entry per day: date, rows, SHA-256), downloads about 5,350 days into `data/raw/vol4/taiex5s/<year>/` (about 310
+     entry per day: date, rows, SHA-256), downloads about 5,350 days into `data/raw/intraday/taiex5s/<year>/` (about 310
      MB of CSV, on the owner's disk only), logs rows per day, resumes after an interruption and stops at the hourly
-     quota (under one hour on the Sponsor plan). It checks every day: the row count of its regime, strictly increasing
+     quota (about 90 minutes on the Sponsor plan at the script's pace). It checks every day: the row count of its regime, strictly increasing
      times, no repeated day, the 13:30:00 value against the TAIEX close in `TaiwanStockPrice` (an independent series,
-     PITFALLS §3). `fetch_finmind.py --verify` and `./build.sh --data` leave T5S out unless its files are present.
+     PITFALLS §3). `fetch_finmind.py --verify` never reads T5S, and `./build.sh --data` rebuilds the derived file only from a
+     complete download that passes every check.
   3. Shared files: `make_lab_data.py` entries for LM19–LM26, `build.sh` `DATA_STEPS`, `data/README.md`, AUTHORING
      §8–§9, SOURCES.
 - **(B′) What is committed from T5S** (the owner's call on the licence). FinMind's Pricing page marks
   "再散布原始資料、建立鏡像 API" as not allowed, and its Disclaimer (§2, §3.2–3.3) forbids redistributing its data and
   asks for credit to the original agency. Proposed: commit one derived file, `data/derived/vol4_rv.csv`: per day, the
-  realized variance at eight sampling intervals and the number of returns in each (about 5,350 rows, under 1 MB),
+  realized variance at nine sampling intervals and the number of returns in each, and the squared opening change
+  `o2` (editor, after the review: the 09:00:00 value is the previous close, so the grids start at 09:30:00 and the
+  gap gets its own sign-free column; about 5,350 rows, under 1 MB),
   credited to FinMind and TWSE, never intraday prices or returns; LM26's lab reads it, so a reader needs no 5,350
   calls (about nine hours on a registered Free account at 600 calls an hour). ROADMAP's data rule then drops its
   example "5-minute returns", which is the price path up to scale. Without the file, the lab reads one year of raw T5S.
@@ -226,7 +233,8 @@ differences on the published pages).
      chart, LM19's rolling scale): about 40% less JSON for three series, 30% for two; about 8 lines.
   5. A size check in `build.py`: fail on a chart or widget JSON over 300 KB, warn on a page over 2 MB (published
      pages reach 1.50 MB, LM7; nothing checks it now).
-- **(D) `Book.dist` and `Book.rng` for inference.** `Book.dist.tInv` (LM20's $t_{T-1}$ interval, LM21's widget) and
+- **(D) `Book.dist` and `Book.rng` for inference (not approved).** Widgets use `PhiInv` and draw a Student $t$ with
+  an integer $\nu$ from normals in the module's own code. Proposed were `Book.dist.tInv` (LM20's $t_{T-1}$ interval, LM21's widget) and
   `rng.studentT(nu)` with a gamma sampler for non-integer $\nu$ (LM20's coverage widget under LM15's $\nu=3.065$),
   tested against SciPy in `build/qa/test_bookjs_dist.py`.
 - **(E) Optional data.** TX 1-minute bars for 2025 only (`TaiwanFuturesKBar`, Sponsor, about 300 calls): a futures
@@ -282,7 +290,8 @@ chi-square quantiles in `Book.dist` (LM24's beta–binomial posterior is a stati
   horizon does not change it under log utility. On TR23, $c=0.87$
   for a prior standard deviation of 10 points a year; LM4's "a quarter to a half" needs a sceptic's prior of about 2.3
   to 3.9 points. The module says so.
-- **Package facts corrected:** the normal p-values under HAC are statsmodels' (`use_t=False`), not arch's.
+- **Package facts corrected:** `use_t=False` under HAC is statsmodels' switch (normal p-values); arch's `pvalues` are normal
+  too (`stats.norm.sf`).
 - **Defects in published pages, fixed at Stage 4** with the Volume IV publication: the literal `[[LM20]]` in the
   LM11 lab (`build/make_lab11.py:571`, flagged in reviews/lm12.md:171); the front matter `leads` that miss Volume IV
   targets their text already links (lm02 23; lm03 19; lm04 19, 24; lm05 19, 20, 26; lm07 20; lm11 20, 22; lm18 23),
@@ -396,7 +405,7 @@ name if the brief uses them. Simulations under the seed rule.
 
 **Candidate exhibits.** The sampling distribution of $\bar R$ and of $s$ under an iid model fitted to TR23, by
 simulation; the 95% interval for $A\bar R$ against years of data; Merton's chart: the standard error of the annual
-mean and of the annual variance against the sampling interval (log $x$ if approved); the log-likelihood of the $t$
+mean and of the annual variance against the sampling interval (log $x$); the log-likelihood of the $t$
 fit against $\nu$ with its curvature. **Widget:** coverage of a 95% interval (normal or $t$ model, $T$ slider,
 seeded).
 
@@ -443,7 +452,7 @@ LM34 (named here, with White 2000 and Romano–Wolf as references). The Jarque�
 
 **Candidate exhibits.** The null distribution with the observed t-stat; power against years for annual Sharpe ratios
 0.25, 0.5, 1; the 17 calendar t-stats as a bar chart; sorted p-values against the Bonferroni and BH lines; the largest
-t-stat of $m$ null strategies against $m$ (log $x$ if approved). **Widget:** a multiple-testing simulator ($m$ null
+t-stat of $m$ null strategies against $m$ (log $x$). **Widget:** a multiple-testing simulator ($m$ null
 tests, seeded; the largest t-stat and the BH line), or power and sample size.
 
 **Hygiene.** *In-sample* tests, with the number of tests stated; regimes as a *Stability check*; simulated nulls
@@ -484,7 +493,7 @@ check and PBO → LM34; the Sharpe ratio's analytic standard error under non-iid
 **Data.** TR23; U28 for the crash correlation and PC1's share. Every resample under the seed rule.
 
 **Candidate exhibits.** Histograms of bootstrap Sharpe ratios, iid against block, with their intervals; interval
-width against block length (log $x$ if approved); the Kelly interval against LM20's delta-method interval (forest
+width against block length (log $x$); the Kelly interval against LM20's delta-method interval (forest
 plot); one resampled path that keeps clusters beside one that does not. **Widget:** a block-bootstrap explorer (block
 length, statistic, $B\le1{,}000$, seeded with `Book.rng`).
 
@@ -616,7 +625,8 @@ walk at $\phi_1=1$.
 
 **Hygiene.** *In-sample*; subperiods as a *Stability check*; simulations *Model*.
 
-**Brief settles.** Settlement or close for $F_t$ and the 15-minute gap to the TAIEX close (lm06.md:672; option E);
+**Brief settles.** How much of the basis noise the 15-minute gap between TX's settlement ($F_t$) and the TAIEX close
+explains (lm06.md:672; option E measures it on 2025);
 the deterministic part removed before testing the basis (a constant, the carry $(r_f-q)\tau$, the dividend season)
 and the notation for $q$ if used; the sample start (TR23's 2003).
 
@@ -640,15 +650,19 @@ its effective window and RiskMetrics' $\lambda=0.94$; GARCH(1,1): definition, po
 ($\omega>0$, $\alpha,\beta\ge0$, $\alpha+\beta<1$), the unconditional variance $\omega/(1-\alpha-\beta)$ in %², persistence
 and half-life; its MLE fit on TR23 (normal errors; Student-$t$ errors as one table row) and multi-step forecasts;
 realized variance from T5S: the sum of squared intraday log returns, the volatility signature over sampling
-intervals from 5 seconds to 30 minutes, why an index's stale prices bias it down at high frequency, the closing
-auction's frozen minutes, the overnight return; forecast evaluation out of sample with MSE and QLIKE, and the
+intervals from 5 seconds to 30 minutes and what moves it (stale prices of slow stocks push an index's realized
+variance down at high frequency; price bounce in the heaviest stocks, whose tick is a large share of the index,
+pushes it up, a hypothesis to test: on the 2025 test days 5-second returns from 09:30 had lag-1 autocorrelations of
+−0.36 to −0.46 (−0.16 to −0.46 over 14 five-second test days) and
+the finest-interval variance was up to 35 times the 5-minute one; the full download decides, by year), the
+closing auction's frozen minutes, the opening gap (`o2`); forecast evaluation out of sample with MSE and QLIKE, and the
 Mincer–Zarnowitz regression (one paragraph).
 
 **Leaves.** VaR from a volatility forecast → LM32; volatility targeting → LM31; stochastic volatility in continuous
 time → LM39; covariance forecasting → LM30 and LM31 (a sentence); HAR models and two-scale estimators → named, one
 sentence each.
 
-**Data.** TR23 (daily models); T5S (realized variance); option E only if approved.
+**Data.** TR23 (daily models); T5S (realized variance); TX 1-minute bars for 2025 (option E).
 
 **Candidate exhibits.** Daily $\lvert r\rvert$ with EWMA and GARCH volatility; the signature plot; out-of-sample
 forecasts against realized variance for one turbulent year (2020 or 2025); the losses of the three forecasts by year.
@@ -658,5 +672,6 @@ forecast's term structure.
 **Hygiene.** *In-sample* fits; *Out-of-sample* forecast comparison with rolling estimation; the signature plot
 *Descriptive*.
 
-**Brief settles.** The rolling window and refit frequency; how the overnight return enters the daily target (T5S
-starts at 09:00, TR23 is close to close); the loss functions' units; the year shown in detail.
+**Brief settles.** The rolling window and refit frequency; the daily target (the window 09:30:00–13:30:00 plus
+`o2` against TR23's close-to-close day); the sampling interval of the target, after the signature plot; the loss
+functions' units; the year shown in detail.

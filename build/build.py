@@ -363,45 +363,111 @@ def check_ellipses(cid, spec):
             raise SystemExit(f"chart {cid}: ellipse {i}: cov is not positive semi-definite (src/data/{cid}.json)")
 
 def check_bands(cid, spec):
-    """A line chart's band series has lo and hi instead of y, each one number or null per x; book.js pairs them with x
-    point by point, so arrays of another length would draw a wrong shape without any error."""
-    if spec.get("type", "line") != "line":
-        return
-    y = spec.get("y") or {}
-    if isinstance(y, dict) and y.get("type") == "log" and _finite(y.get("min")) and y["min"] <= 0:
-        raise SystemExit(f"chart {cid}: a log axis needs y.min > 0 (src/data/{cid}.json)")   # book.js would draw nothing
-    for i, s in enumerate(spec.get("series") or [], 1):
-        if not isinstance(s, dict) or ("lo" not in s and "hi" not in s):
-            continue
-        x, lo, hi = s.get("x"), s.get("lo"), s.get("hi")
+    """book.js pairs x, y, lo and hi point by point, so arrays of another length would draw a wrong shape without any
+    error. A band (a line chart's series with lo and hi instead of y, an entry of a scatter or vector chart's `bands`)
+    holds one number or null (a gap) per x in lo and hi, with lo <= hi. A line series without its own x uses x.values.
+    A step series may have one y fewer than x (bin edges and heights). A log axis ignores values <= 0: a log y axis
+    needs y.min > 0, a log x axis every x > 0."""
+    src = f"(src/data/{cid}.json)"
+    def band(where, x, lo, hi):
         if not (isinstance(x, list) and isinstance(lo, list) and isinstance(hi, list) and len(lo) == len(x) == len(hi)):
-            raise SystemExit(f"chart {cid}: band series {i}: lo and hi must be arrays as long as x (src/data/{cid}.json)")
-        if "y" in s:
-            raise SystemExit(f"chart {cid}: band series {i}: give lo and hi instead of y, not both (src/data/{cid}.json)")
+            raise SystemExit(f"chart {cid}: {where}: lo and hi must be arrays as long as x {src}")
         if not all(v is None or _finite(v) for v in lo + hi):
-            raise SystemExit(f"chart {cid}: band series {i}: lo and hi hold numbers or null (src/data/{cid}.json)")
+            raise SystemExit(f"chart {cid}: {where}: lo and hi hold numbers or null {src}")
+        bad = [v for v, a, b in zip(x, lo, hi) if a is not None and b is not None and a > b]
+        if bad:
+            raise SystemExit(f"chart {cid}: {where}: lo is above hi at {len(bad)} point(s), the first at x = {bad[0]} {src}")
+    typ = spec.get("type", "line")
+    if typ in ("scatter", "vector"):
+        for i, b in enumerate(spec.get("bands") or [], 1):
+            b = b if isinstance(b, dict) else {}
+            band(f"band {i}", b.get("x"), b.get("lo"), b.get("hi"))
+            if not all(_finite(v) for v in b["x"]):
+                raise SystemExit(f"chart {cid}: band {i}: x holds finite numbers only {src}")
+    if typ != "line":
+        return
+    x, y = spec.get("x") or {}, spec.get("y") or {}
+    if isinstance(y, dict) and y.get("type") == "log" and _finite(y.get("min")) and y["min"] <= 0:
+        raise SystemExit(f"chart {cid}: a log axis needs y.min > 0 {src}")   # book.js would draw nothing
+    xv = x.get("values") if isinstance(x, dict) else None
+    if isinstance(x, dict) and "values" in x and not isinstance(xv, list):
+        raise SystemExit(f"chart {cid}: x.values must be an array {src}")
+    for i, s in enumerate(spec.get("series") or [], 1):
+        if not isinstance(s, dict):
+            continue
+        sx = s.get("x", xv)
+        if "lo" in s or "hi" in s:
+            if "y" in s:
+                raise SystemExit(f"chart {cid}: band series {i}: give lo and hi instead of y, not both {src}")
+            band(f"band series {i}", sx, s.get("lo"), s.get("hi"))
+        elif not (isinstance(sx, list) and isinstance(s.get("y"), list)
+                  and (len(s["y"]) == len(sx) or (s.get("step") and len(s["y"]) == len(sx) - 1))):
+            raise SystemExit(f"chart {cid}: series {i}: y must be an array as long as x (the series' own x, else x.values; "
+                             f"a step series may have one y fewer, for bin edges) {src}")
+    if isinstance(x, dict) and x.get("type") == "log":
+        xs = [v for s in spec.get("series") or [] if isinstance(s, dict) for v in s.get("x") or []] + list(xv or [])
+        xs += [x[k] for k in ("min", "max") if x.get(k) is not None] + list(x.get("ticks") or [])
+        xs += [a[k] for a in spec.get("ann") or [] if isinstance(a, dict) for k in ("x", "x0", "x1") if a.get(k) is not None]
+        bad = [v for v in xs if not (_finite(v) and v > 0)]
+        if bad:
+            raise SystemExit(f"chart {cid}: a log x axis needs every x (series, x.values, x.min, x.max, x.ticks, "
+                             f"annotations) to be a number > 0; values that are not: {len(bad)}, the first {bad[0]!r} {src}")
+
+# Size limits in bytes of UTF-8: one inlined chart or widget JSON (the build fails) and one built page (it warns).
+# The largest published page was 1.5 MB in edition 0.4 (LM7).
+CHART_MAX_BYTES, PAGE_WARN_BYTES = 300_000, 2_000_000
+
+def chart_blob(cid, spec):
+    """Check a chart spec (a widget's data rides in one too) and return the compact JSON that the page inlines."""
+    if not isinstance(spec, dict):
+        raise SystemExit(f"chart {cid}: the spec must be a JSON object (src/data/{cid}.json)")
+    if not isinstance(spec.get("type", "line"), str) or spec.get("type", "line") not in CHART_TYPES:
+        raise SystemExit(f"chart {cid}: unknown type {spec.get('type')!r}; use one of {', '.join(sorted(CHART_TYPES))} "
+                         f"(src/data/{cid}.json)")
+    for key in ("series", "ann", "bands", "ellipses"):
+        if key in spec and not isinstance(spec[key], list):
+            raise SystemExit(f"chart {cid}: {key} must be an array (src/data/{cid}.json)")
+    for ax in ("x", "y"):
+        if isinstance(spec.get(ax), dict) and "ticks" in spec[ax] and not isinstance(spec[ax]["ticks"], list):
+            raise SystemExit(f"chart {cid}: {ax}.ticks must be an array (src/data/{cid}.json)")
+    check_ellipses(cid, spec)
+    check_bands(cid, spec)
+    for k in ("x", "y"):   # book.js pairs tickLabels with ticks by position: one missing label shifts every later one
+        a = spec.get(k)
+        if isinstance(a, dict) and "tickLabels" in a and not (
+                isinstance(a["tickLabels"], list) and isinstance(a.get("ticks"), list) and len(a["tickLabels"]) == len(a["ticks"])):
+            raise SystemExit(f"chart {cid}: {k}.tickLabels must be an array as long as {k}.ticks (src/data/{cid}.json)")
+    alt = spec.get("alt")   # the svg is role="img": it needs a text alternative that the renderers read as spec.alt
+    if not (isinstance(alt, str) and alt.strip()):
+        raise SystemExit(f"chart {cid}: the spec needs a non-empty 'alt' string (src/data/{cid}.json)")
+    try:   # NaN / Infinity are not JSON: JSON.parse would fail in the browser; write a missing point as null
+        blob = json.dumps(spec, separators=(",", ":"), allow_nan=False)
+    except ValueError as e:
+        raise SystemExit(f"chart {cid}: {e}; write a missing point as null (src/data/{cid}.json)") from e
+    n = len(blob.encode("utf-8"))
+    if n > CHART_MAX_BYTES:
+        raise SystemExit(f"chart {cid}: the inlined JSON is {n:,} bytes, over the limit of {CHART_MAX_BYTES:,}: fewer points, "
+                         f"fewer digits or a shared x.values (src/data/{cid}.json)")
+    return blob
 
 def inline_charts(html_s):
     used = re.findall(r'data-chart="([\w-]+)"', html_s)
     blobs = []
     for cid in dict.fromkeys(used):
-        spec = json.loads((SRC / "data" / f"{cid}.json").read_text(encoding="utf-8"))
-        if not isinstance(spec, dict):
-            raise SystemExit(f"chart {cid}: the spec must be a JSON object (src/data/{cid}.json)")
-        if spec.get("type", "line") not in CHART_TYPES:
-            raise SystemExit(f"chart {cid}: unknown type {spec.get('type')!r}; use one of {', '.join(sorted(CHART_TYPES))} "
-                             f"(src/data/{cid}.json)")
-        check_ellipses(cid, spec)
-        check_bands(cid, spec)
-        alt = spec.get("alt")   # the svg is role="img": it needs a text alternative that the renderers read as spec.alt
-        if not (isinstance(alt, str) and alt.strip()):
-            raise SystemExit(f"chart {cid}: the spec needs a non-empty 'alt' string (src/data/{cid}.json)")
-        try:   # NaN / Infinity are not JSON: JSON.parse would fail in the browser; write a missing point as null
-            blob = json.dumps(spec, separators=(",", ":"), allow_nan=False)
-        except ValueError as e:
-            raise SystemExit(f"chart {cid}: {e}; write a missing point as null (src/data/{cid}.json)") from e
+        blob = chart_blob(cid, json.loads((SRC / "data" / f"{cid}.json").read_text(encoding="utf-8")))
         blobs.append(f'<script type="application/json" id="chart-{cid}">{blob}</script>')
     return html_s + "\n".join(blobs)
+
+def check_page_size(out, page):
+    """Warn when a built page is over PAGE_WARN_BYTES (it loads slowly on a phone), giving its inline charts' total
+    and its largest charts (the rest is text and math)."""
+    n = len(page.encode("utf-8"))
+    if n > PAGE_WARN_BYTES:
+        charts = sorted(((len(m.group(2).encode("utf-8")), m.group(1)) for m in
+                         re.finditer(r'<script type="application/json" id="chart-([\w-]+)">(.*?)</script>', page)), reverse=True)
+        print(f"WARNING: {out.relative_to(ROOT)} is {n:,} bytes, over {PAGE_WARN_BYTES:,}; "
+              + (f"its {len(charts)} inline charts total {sum(b for b, _ in charts):,} bytes; the largest: "
+                 + ", ".join(f"{c} {b:,} bytes" for b, c in charts[:3]) if charts else "it has no inline charts"), file=sys.stderr)
 
 # ---------------------------------------------------------------- page parts
 def rail(current, depth):
@@ -585,10 +651,10 @@ def build_lm(path):
                  rail(n, "lm"), main, outline_html, js)
     out = OUT / "lm" / f"lm{n:02d}.html"
     out.parent.mkdir(parents=True, exist_ok=True); (OUT / "assets").mkdir(parents=True, exist_ok=True)
-    out.write_text(page, encoding="utf-8")
+    out.write_text(page, encoding="utf-8"); check_page_size(out, page)
     for j in fm.get("js", []):
         shutil.copy(SRC / j, OUT / "assets" / j)
-    print(f"built {out.relative_to(ROOT)}  math={len(ms.items)} examples={ctx.n['example']} exhibits={ctx.n['exhibit']} kc={ctx.n['kc']} bytes={len(page):,}")
+    print(f"built {out.relative_to(ROOT)}  math={len(ms.items)} examples={ctx.n['example']} exhibits={ctx.n['exhibit']} kc={ctx.n['kc']} bytes={len(page.encode('utf-8')):,}")
     return fm
 
 # ---------------------------------------------------------------- stale output
@@ -664,8 +730,8 @@ def build_page(slug):
     page = shell("", fm["title"], fm["description"], fm["title"], f' data-page="{slug}"', rail(slug, "root"), main, outline_html)
     out = OUT / f"{slug}.html"
     out.parent.mkdir(parents=True, exist_ok=True)
-    out.write_text(page, encoding="utf-8")
-    print(f"built {out.relative_to(ROOT)}  math={len(ms.items)} bytes={len(page):,}")
+    out.write_text(page, encoding="utf-8"); check_page_size(out, page)
+    print(f"built {out.relative_to(ROOT)}  math={len(ms.items)} bytes={len(page.encode('utf-8')):,}")
 
 if __name__ == "__main__":
     ap = argparse.ArgumentParser(description="Build the From Calculus to Kelly site.")

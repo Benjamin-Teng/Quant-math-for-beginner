@@ -19,8 +19,119 @@ right page. Pages consulted for edition 0.1 that no current text cites are left 
 | FinMind `TaiwanStockEvery5SecondsIndex` | the official 13:30:00 close of a TWSE sector index, one date per request; the 561 closes that repair FinMind's copied sector values (Volume II) |
 | FinMind `TaiwanStockInfo` | which index ids FinMind serves: none for the four sector indices TWSE launched on 30 June 2023 (`DigitalCloudServices` has no id and no `TaiwanStockPrice` rows; MCP query, 2026-10-12) |
 | TWSE `rwd/zh/TAIEX/MI_5MINS_HIST` (JSON) | TAIEX daily high/low around 27–30 June 2025 |
+| FinMind `TaiwanFuturesDaily`, TX, whole history | TX23 (LM25's basis): every TX row from 1998-07-21 in one call; sessions, expiry-day zeros and the `spread` rule below (2026-10-19) |
+| FinMind `TaiwanFuturesFinalSettlementPrice` | an optional cross-check of TX expiries (Backer); whole years missing, below |
+| FinMind `TaiwanVariousIndicators5Seconds` | T5S (LM26's realized variance): the TAIEX every 5 seconds (earlier every minute, 15 and 10 seconds), 2005-01-03 → 2026-10-08, one day per request; regimes and the closing-auction freeze below |
+| FinMind `TaiwanFuturesKBar` | option E: TX 1-minute bars for 2025 (Sponsor); night-session dating below |
+| FinMind `TaiwanStockTradingDate` | the calendar check of TX23: 1999-01-05 → 2026-12-31, including 52 future dates and the 1999–2000 Saturday sessions, so filter it to dates on or before the retrieval date |
+| FinMind `InterestRate`, `GovernmentBondsYield` | tried again 2026-10-19 for a Taiwan rate: `CBC` returns 0 rows (`FED` 222 rows, 1990-07-13 → 2026-06-17); `GovernmentBondsYield` with `data_id` "Taiwan 10-Year" returns 0 rows; `list_datasets` names no Taiwan policy, interbank or government bond rate. Volume IV's Sharpe ratios take a zero risk-free rate |
+| FinMind [Pricing](https://finmind.github.io/Pricing/) and [Disclaimer](https://finmind.github.io/Disclaimer/) pages | hourly quotas per plan; the terms on redistribution and attribution that govern what Volume IV commits (below) |
 
-Every registered FinMind file is fetched, and re-checked byte for byte, through the FinMind API with `data/fetch_finmind.py`.
+Every registered FinMind file is fetched, and re-checked byte for byte, through the FinMind API with `data/fetch_finmind.py`;
+intraday files, one request a day, with `data/fetch_intraday.py` and its own manifest (Volume IV).
+
+### TaiwanFuturesDaily, TX (TX23)
+
+- Tier Free with a `data_id` (per `list_datasets`, the FinMind plugin's knowledge base). One call returns the whole
+  history: 18.5 MB of JSON, 77,347 rows on 7,009 dates, 1998-07-21 → 2026-10-16 (survey); the fresh check's call,
+  ending 2026-10-08, returned 77,221 rows on 7,004 dates (its saved file, read again in Stage 1). One year (2024) is
+  1.57 MB.
+- Columns: `date, futures_id, contract_date, open, max, min, close, spread, spread_per, volume, settlement_price,
+  open_interest, trading_session`.
+- Sessions: `trading_session` is `position` (regular session) or `after_market` (night session). `after_market` rows
+  start 2017-05-16, and their settlement price and open interest are always 0. The `after_market` row dated D is the
+  night session that began at 15:00 on the previous trading day (checked against the 1-minute bars: the row dated
+  2025-06-30 opens at the 2025-06-27 15:00 bar and closes at the 2025-06-28 04:59 bar; after long holidays the gap is
+  wider, the row dated 2018-02-21 being the night of 2018-02-12). Night prices do not enter `position` rows: on
+  2025-06-27 the `position` open and close equal the 08:45 open and the 13:44 close. No `after_market` rows on
+  2017-06-05, 2017-10-02, 2018-04-02, 2018-07-11 and 2018-12-24; cause unverified.
+- Contracts: calendar spreads appear as `contract_date` "YYYYMM/YYYYMM" from 2007-10-08; monthly contracts per date
+  are 2–5 in 1998–2000 (back months missing on days they did not trade), 5 from 2001-01 to 2018-06-29, and 6 from
+  2018-07-02; no weekly contracts appear.
+- Calendar: the regular-session dates equal `TaiwanStockTradingDate` for 1999-01-05 → 2026-10-16 and the TAIEX
+  calendar for 2003-01-02 → 2026-10-08 (survey); the fresh check found the 5,850 regular-session dates equal to TR23's
+  5,850, with no difference either way.
+- Expiry-day zeros: from 2008-12-17 the expiring contract's settlement price prints 0 on its expiry day (214
+  contracts, 6 of them on holiday-shifted dates); before that the expiry row carries a settlement price. TX23 therefore
+  takes each monthly contract's last trading day from its last regular-session row and rolls at the close of the day
+  before (plans/vol-4.md, "Data").
+- Last close is not the final settlement: in the 189 months with both values, the expiring contract's last close equals
+  TAIFEX's final settlement price in only 105 (for example 200906: close 6204 against 6203), and differs by up to 4
+  points in the rest; `data/README.md` says so (corrected in Stage 1, 2026-10-19).
+- `spread` is close minus the previous day's settlement price, not minus the previous close: it holds for 34,571 of
+  34,773 same-contract pairs. The 202 exceptions: 197 in 1998–2000, where back-month rows are missing; 2001-03-07 (2
+  contracts); 2007-03-12 (5 contracts, spread 0.0), the five inside TR23's window.
+- Other oddities: 11 `position` rows (1998–2008, back months) with volume above 0 and open interest 0; 1,334
+  `position` rows with close 0 and volume 0. No duplicate rows, no identical consecutive near-month rows and no copied
+  whole days in the full history. Times are local Taipei time with no zone marker (inferred from the sessions).
+
+### TaiwanFuturesFinalSettlementPrice (gaps)
+
+- Tier Backer (per `list_datasets`; the Pricing page lists 期貨/選擇權最後結算價 under Backer). One call: 219 KB, 721
+  rows (survey; 720 TX rows in the fresh check's call): 277 monthly rows, 199809 → 202609, and 444 rows coded
+  "YYYYMMWn" from 2013-08-07 (443 in the fresh check). Which product the weekly codes belong to is unverified; they are
+  not in `TaiwanFuturesDaily` TX, so filter to 6-character months.
+- Columns: `date, contract_month, futures_type, futures_id, futures_name, settlement_price, underlying_code,
+  notional_value`; `underlying_code` is empty and `notional_value` is 0 on every row.
+- Gaps: every monthly contract of 2000, 2006, 2008, 2014 and 2020 is missing, 60 monthly prices in all (48 of them in
+  TR23's window); a request for 2020 alone, and one for 2008 alone, returned no rows.
+- Dates: for 200301–200712 the final-settlement date is one day after the contract's last regular-session row in
+  `TaiwanFuturesDaily` (the third Wednesday plus one day); from 200901 they match. Six later dates are holiday-shifted:
+  2010-02-22, 2010-06-17, 2013-08-22, 2015-02-24, 2023-01-30, 2026-02-23.
+
+### TaiwanVariousIndicators5Seconds (T5S)
+
+- Tier Free, no `data_id`. One day per request: a request with `end_date` returns HTTP 400, "the dataset
+  TaiwanVariousIndicators5Seconds size is too large, we only send one day data, so end_date parameter need be none."
+  (the survey's saved reply, read again in Stage 1).
+- Columns: `date` ("YYYY-MM-DD HH:MM:SS", local time) and `TAIEX`. Data start on 2005-01-03; 2004-12-31 returns no
+  rows.
+- Regimes, by rows a day (09:00:00 to 13:30:00 inclusive): 271 (one value a minute, about 12.7 KB) to 2011-01-14;
+  1,081 (15 seconds) from 2011-01-17; 1,621 (10 seconds) from 2014-02-24; 3,241 (5 seconds, about 152 KB) from
+  2014-12-29. The 15-second to 10-second switch lies between the adjacent sessions 2014-02-21 (1,081 rows) and
+  2014-02-24 (1,621); the 10-second regime ends on Saturday 2014-12-27 (1,621 rows, a re-review's fetch), the session
+  before 2014-12-29. `data/fetch_intraday.py --check` prints every regime's first and last day from the download.
+- On every one of the 8 days the fresh check sampled (2005–2025), timestamps increase strictly and the 13:30:00 value
+  equals the `TaiwanStockPrice` close (for example 6426.39, 8606.37, 22470.1).
+- The closing call auction freezes the index: on 2025-06-27, 59 equal values from 13:25:05 to 13:29:55. On 2014-12-29
+  the 13:25:00 value already equals the frozen value; before 2014-12-29 there is no 13:25:05 timestamp. TWSE's trading-system page,
+  already under "Taiwan exchanges, regulators and official pages", gives the closing call auction from 13:25; which
+  auction rules applied in the earlier regimes was not checked.
+- `TaiwanStockEvery5SecondsIndex` (Backer, 291 KB a day) gave the same 3,241 values on 2025-06-27, with 0 differences.
+
+### TaiwanFuturesKBar (night-session dating)
+
+- Tier Sponsor; `data_id` required (per `list_datasets`); one day per request (a range returns the HTTP 400 above).
+  Data start on 2011-01-03 (2010-12-31 is empty). Columns: `date, futures_id, contract_date, minute, open, high, low,
+  close, volume`. Every listed month and the spread combinations, with no (contract, minute) duplicates.
+- Night session from 2017-05-15 15:00. Rows are filed by calendar date: date D holds 00:00–04:59 of the night that began
+  on D − 1 and 15:00–23:59 of the night that begins on D. So one night is split across two minute-bar dates and filed
+  under a third date in `TaiwanFuturesDaily`, and a full download needs calls on Saturdays and post-holiday days
+  (Saturday 2025-06-28 has 336 rows).
+- The regular session's bars run 08:45–13:44 in 2020 and 2025; a 13:45 bar with a tiny volume (its close equals the
+  daily close) appears in 2011 and 2017.
+- Summed regular-session minute volume is not the daily volume: the ratio ran from 0.54 to 2.00 on 4 days, about 2 for
+  the near month and below 1 for the next month in roll weeks. Cause unverified (consistent with minute bars counting
+  both sides and leaving out spread legs).
+
+### FinMind's terms (Pricing and Disclaimer)
+
+- [方案與價格](https://finmind.github.io/Pricing/) (Pricing), retrieved 2026-10-19. Quoted by the fresh check: the
+  licence table marks "再散布原始資料、建立鏡像 API" as not allowed on any plan; quotas
+  "免費 | 300 次／小時（註冊會員 600 次／小時）", Backer 1,600, Sponsor 6,000 and Sponsor Pro 20,000 calls an hour.
+- [免責聲明與資料授權](https://finmind.github.io/Disclaimer/) (Disclaimer), retrieved 2026-10-19. Quoted by the fresh
+  check: §3.2 "本服務之授權不包含將本服務提供之資料對外再散布、轉售"; §3.3, whoever publishes the data must obtain the
+  "原資料來源機關" licences; §2, credit the original providing agency.
+- The fresh check's quotes came through a summarizer; they were re-read in the pages' HTML (next item). Its URL for
+  the Disclaimer is the Pricing page's link `../Disclaimer/`.
+- Read again in Stage 1 (raw HTML fetched with curl, tags stripped, 2026-10-19): each quoted phrase appears verbatim. The
+  Disclaimer is dated 版本日期：2026-07-12; its sections are numbered 一 to 五, and §3.2 and §3.3 are items 2 and 3 of
+  the numbered list under 三、使用者之授權範圍. Item 2 continues "，或建置實質等同於本服務之鏡像服務。"; item 3 asks users
+  who publish or redistribute the data to "自行確認並取得原資料來源機關所要求之相應授權". Section 二、來源標示 asks users
+  who put the data to external use to "以適當方式標示原資料提供機關". On the Pricing page the Free row's quota cell reads
+  "300 次／小時（註冊會員 600 次／小時）" (the "免費 |" of the quote is the price column); Free, Backer and Sponsor are
+  "非商業用途"; every plan "需標示資料來源「FinMind」"; and "將即時資料直接呈現於 web、App 等對外介面" is not allowed on
+  any plan.
 
 ## Taiwan exchanges, regulators and official pages
 
@@ -355,6 +466,393 @@ Every registered FinMind file is fetched, and re-checked byte for byte, through 
   The closed form of the shifted normal's second moment for a tail was not found in the snippets, so LM18 cites §4.6
   for the method only and derives the formula itself (same search, read 2026-10-18 for LM18's closing check).
 
+## Papers and books (Volume IV)
+
+Checked 2026-10-19 by the Stage 1 survey. Bibliographic data come from Crossref unless another source is named;
+Stage 1 read the Crossref record of every DOI below again (2026-10-19): volume, issue, pages and year agree with the
+survey everywhere Crossref holds them, and the titles of the LM23–LM26 entries, which the survey recorded without
+titles, are Crossref's. For several JSTOR DOIs Crossref holds only the first page; the end page's source is then
+named, or marked "end page not in Crossref". "Abstract" marks a claim read only in an abstract: for LM19–LM22, in
+OpenAlex's copy, not compared with the publisher's page; for LM23–LM26, in the copy named, or in one the survey did
+not name. "Bibliographic data only" means nothing in the text was read.
+
+### LM19 and LM20
+
+- Lo & MacKinlay, "Stock Market Prices Do Not Follow Random Walks: Evidence from a Simple Specification Test", *RFS*
+  1(1): 41–66, January 1988, DOI [10.1093/rfs/1.1.41](https://doi.org/10.1093/rfs/1.1.41). Abstract: tests the random
+  walk on weekly returns by comparing variance estimators at different sampling frequencies; strongly rejected for
+  1962–1985; largely due to small stocks, but not fully explained by infrequent trading or time-varying volatility. The
+  equation numbers for VR(q), z(q) and z\*(q) are unconfirmed (text not read).
+- Lo, "The Statistics of Sharpe Ratios", *FAJ* 58(4): 36–52, 2002, DOI
+  [10.2469/faj.v58.n4.2453](https://doi.org/10.2469/faj.v58.n4.2453). Abstract: monthly Sharpe ratios "cannot be
+  annualized by multiplying by √12 except under very special circumstances"; serial correlation can overstate the
+  annual ratio by "as much as 65 percent" (LM19's annualization rule; LM33).
+- Campbell, Lo & MacKinlay, *The Econometrics of Financial Markets*, Princeton University Press, ©1997 (published
+  29 December 1996), 632 pp., ISBN 978-0-691-04301-2 — Princeton UP's page; section numbers unconfirmed (its contents
+  are images only). Chapters from Project MUSE (titles as the survey shortened them): ch. 5 CAPM,
+  pp. 181–218; ch. 6 Multifactor, pp. 219–252; ch. 12 Nonlinearities, pp. 467–526.
+- Merton, "On estimating the expected return on the market: An exploratory investigation", *JFE* 8(4): 323–361,
+  December 1980, DOI [10.1016/0304-405X(80)90007-0](https://doi.org/10.1016/0304-405X(80)90007-0) (Crossref's title
+  omits the subtitle). Read in NBER Working Paper 444 (February 1980), Appendix A, "Estimating the Variance Rate From
+  Time Series of Realized Returns": with n = h/Δ observations, Var[μ̂] = σ²/h (A.3), and "nothing is gained in terms
+  of accuracy of the expected return estimate by choosing finer observation intervals"; the variance estimator's
+  accuracy depends on n, (A.4)–(A.5); annual data give a standard deviation of the variance estimate "approximately
+  nineteen times larger" than daily data (p. A4). The journal's pages and equation numbers were not compared.
+- Rao, "Information and the Accuracy Attainable in the Estimation of Statistical Parameters", reprinted in
+  *Breakthroughs in Statistics*, Springer Series in Statistics, Springer, 1992, pp. 235–247, DOI
+  [10.1007/978-1-4612-0919-5_16](https://doi.org/10.1007/978-1-4612-0919-5_16) — the reprint is verified; the original
+  (*Bull. Calcutta Math. Soc.*, 1945) is **unverified**.
+- Embrechts, Klüppelberg & Mikosch, *Modelling Extremal Events for Insurance and Finance*, Springer, Berlin Heidelberg,
+  1997, Applications of Mathematics 33 (now Stochastic Modelling and Applied Probability 33), softcover ISBN
+  978-3-642-08242-9, eBook ISBN 978-3-642-33483-2, DOI
+  [10.1007/978-3-642-33483-2](https://doi.org/10.1007/978-3-642-33483-2) — front-matter PDF (4th corrected and 9th
+  printing, 2012): §6.4.2 "Estimating the Shape Parameter ξ", p. 327. That the Hill estimator sits in §6.4.2 is
+  **unconfirmed**.
+- Drees, de Haan & Resnick, "How to make a Hill plot", *Ann. Statist.* 28(1): 254–274, February 2000, DOI
+  [10.1214/aos/1016120372](https://doi.org/10.1214/aos/1016120372). Crossref lists the authors as Drees, Resnick, de
+  Haan; check the order on the title page.
+- Bibliographic data only: Lo & MacKinlay, "The size and power of the variance ratio test in finite samples",
+  *J. Econometrics* 40(2): 203–238, 1989, DOI
+  [10.1016/0304-4076(89)90083-3](https://doi.org/10.1016/0304-4076(89)90083-3); Fisher, "Theory of Statistical
+  Estimation", *Proc. Camb. Phil. Soc.* 22(5): 700–725, 1925, DOI
+  [10.1017/S0305004100009580](https://doi.org/10.1017/S0305004100009580); Cramér, *Mathematical Methods of Statistics*
+  (PMS-9), Princeton University Press, 1946, DOI [10.1515/9781400883868](https://doi.org/10.1515/9781400883868).
+
+### LM21
+
+- Harvey, Liu & Zhu, "… and the Cross-Section of Expected Returns" (the title starts with the ellipsis), *RFS* 29(1):
+  5–68, January 2016 (online 9 October 2015), DOI [10.1093/rfs/hhv059](https://doi.org/10.1093/rfs/hhv059). Abstract:
+  "A new factor needs to clear a much higher hurdle, with a t-statistic greater than 3.0"; "most claimed research
+  findings in financial economics are likely false". Section numbers unconfirmed (the PDF returned 403).
+- White, "A Reality Check for Data Snooping", *Econometrica* 68(5): 1097–1126, September 2000, DOI
+  [10.1111/1468-0262.00152](https://doi.org/10.1111/1468-0262.00152). Abstract: tests the null that the best model
+  found in a specification search has no predictive superiority over a benchmark.
+- Sullivan, Timmermann & White, "Data-Snooping, Technical Trading Rule Performance, and the Bootstrap", *JF* 54(5):
+  1647–1691, 1999, DOI [10.1111/0022-1082.00163](https://doi.org/10.1111/0022-1082.00163). Abstract: applies the
+  Reality Check to technical rules on 100 years of daily DJIA data, expanding Brock et al.'s 26 rules.
+- Romano & Wolf, "Stepwise Multiple Testing as Formalized Data Snooping", *Econometrica* 73(4): 1237–1282, 2005, DOI
+  [10.1111/j.1468-0262.2005.00615.x](https://doi.org/10.1111/j.1468-0262.2005.00615.x). Abstract: a stepwise procedure
+  that asymptotically controls the FWER; more powerful than single-step methods; studentization advocated; set in
+  strategies against a benchmark.
+- Holm, "A Simple Sequentially Rejective Multiple Test Procedure", *Scand. J. Statist.* 6(2): 65–70, 1979, JSTOR
+  4615733; **no registered DOI** (doi.org returns 404 for 10.2307/4615733, which OpenAlex lists; Crossref also returned
+  404, read again in Stage 1). First page read in a JSTOR copy (ime.usp.br): "Scand J Statist 6: 65-70, 1979"; the
+  procedure gives a prescribed level of protection against errors of the first kind for any combination of true
+  hypotheses.
+- Benjamini & Hochberg, "Controlling the False Discovery Rate: A Practical and Powerful Approach to Multiple Testing",
+  *JRSS B* 57(1): 289–300, 1995, DOI
+  [10.1111/j.2517-6161.1995.tb02031.x](https://doi.org/10.1111/j.2517-6161.1995.tb02031.x). Abstract: the FDR equals
+  the FWER when all nulls are true and is smaller otherwise; the procedure is proved for **independent** test
+  statistics.
+- Benjamini & Yekutieli, "The control of the false discovery rate in multiple testing under dependency", *Ann.
+  Statist.* 29(4): 1165–1188, 2001, DOI [10.1214/aos/1013699998](https://doi.org/10.1214/aos/1013699998) — Crossref
+  record; SciPy's `false_discovery_control` cites its Theorem 1.3 for `'by'`.
+- Bibliographic data only: Harvey, "Presidential Address: The Scientific Outlook in Financial Economics", *JF* 72(4):
+  1399–1440, 2017, DOI [10.1111/jofi.12530](https://doi.org/10.1111/jofi.12530); Harvey & Liu, "Backtesting", *JPM*
+  42(1): 13–28, 2015, DOI [10.3905/jpm.2015.42.1.013](https://doi.org/10.3905/jpm.2015.42.1.013); Romano & Wolf,
+  "Exact and Approximate Stepdown Methods for Multiple Hypothesis Testing", *JASA* 100(469): 94–108, 2005, DOI
+  [10.1198/016214504000000539](https://doi.org/10.1198/016214504000000539); Hansen, P. R., "A Test for Superior
+  Predictive Ability", *JBES* 23(4): 365–380, 2005, DOI
+  [10.1198/073500105000000063](https://doi.org/10.1198/073500105000000063); Neyman & Pearson, "On the problem of the
+  most efficient tests of statistical hypotheses", *Phil. Trans. R. Soc. A* 231: 289–337, 1933, DOI
+  [10.1098/rsta.1933.0009](https://doi.org/10.1098/rsta.1933.0009); Wasserstein & Lazar, "The ASA Statement on
+  p-Values: Context, Process, and Purpose", *Am. Stat.* 70(2): 129–133, 2016, DOI
+  [10.1080/00031305.2016.1154108](https://doi.org/10.1080/00031305.2016.1154108).
+
+### LM22
+
+- Künsch, "The Jackknife and the Bootstrap for General Stationary Observations", *Ann. Statist.* 17(3): 1217–1241,
+  1989, DOI [10.1214/aos/1176347265](https://doi.org/10.1214/aos/1176347265) (Crossref spells the name "Kunsch").
+  Abstract: blocks of l consecutive observations; consistency if l → ∞ and l/n → 0; the bootstrap selects blocks
+  randomly with replacement.
+- Politis & Romano, "The Stationary Bootstrap", *JASA* 89(428): 1303–1313, 1994, DOI
+  [10.1080/01621459.1994.10476870](https://doi.org/10.1080/01621459.1994.10476870). Abstract: blocks of random length
+  with a geometric distribution; the pseudo-series is stationary conditional on the data.
+- Politis & White, "Automatic Block-Length Selection for the Dependent Bootstrap", *Econometric Reviews* 23(1): 53–70,
+  2004, DOI [10.1081/ETC-120028836](https://doi.org/10.1081/ETC-120028836). Abstract: optimal block-size estimators
+  built on flat-top lag-window spectral estimation. With the next entry, the reference of arch's
+  `optimal_block_length` ("Python (Volume IV)").
+- Patton, Politis & White, "Correction to 'Automatic Block-Length Selection for the Dependent Bootstrap' by D. Politis
+  and H. White", *Econometric Reviews* 28(4): 372–375, 2009, DOI
+  [10.1080/07474930802459016](https://doi.org/10.1080/07474930802459016). Abstract: corrects the block-size algorithms
+  after Nordman's correction of Lahiri (1999).
+- Efron, "Better Bootstrap Confidence Intervals", *JASA* 82(397): 171–185, 1987, DOI
+  [10.1080/01621459.1987.10478410](https://doi.org/10.1080/01621459.1987.10478410). Abstract: the new intervals are
+  second-order correct (the origin of BCa).
+- Ledoit & Wolf, "Robust performance hypothesis testing with the Sharpe ratio", *J. Empirical Finance* 15(5): 850–859,
+  December 2008, DOI [10.1016/j.jempfin.2008.03.002](https://doi.org/10.1016/j.jempfin.2008.03.002). Read in IEW
+  Working Paper 320 (January 2008): Jobson–Korkie, as corrected by Memmel (2003), is invalid under heavy tails or
+  time-series data; they propose a studentized time-series bootstrap interval for the difference of two Sharpe ratios.
+  §3.1 HAC inference; §3.2.2 the circular block bootstrap of Politis & Romano (1992); footnote 5 explains why circular
+  rather than Künsch's moving blocks (edge effects); Algorithm 3.1 chooses the block size. These numbers come from the
+  working paper and were not compared with the journal.
+- Jobson & Korkie, "Performance Hypothesis Testing with the Sharpe and Treynor Measures", *JF* 36(4): 889–908, 1981,
+  DOI [10.1111/j.1540-6261.1981.tb04891.x](https://doi.org/10.1111/j.1540-6261.1981.tb04891.x) — bibliographic data
+  only. Memmel (2003) is **unverified**.
+- Lahiri, *Resampling Methods for Dependent Data*, Springer Series in Statistics, Springer, New York, ©2003, DOI
+  [10.1007/978-1-4757-3803-2](https://doi.org/10.1007/978-1-4757-3803-2); the reprint's front matter gives softcover
+  ISBN 978-1-4419-1848-2, eBook ISBN 978-1-4757-3803-2, LCCN 2003045455; the original hardcover ISBN was not seen.
+  Contents (front-matter PDF): §2.5 the moving block bootstrap, p. 25; §2.7.1 circular, p. 33; §2.7.2 stationary,
+  p. 34; §3.3 the stationary bootstrap for the sample mean, p. 57; ch. 5 comparison of block methods, p. 115; ch. 7
+  "Empirical Choice of the Block Size", p. 175 (§7.3 subsampling, p. 182; §7.4 nonparametric plug-in, p. 186).
+- Bibliographic data only: Hall, Horowitz & Jing, "On blocking rules for the bootstrap with dependent data",
+  *Biometrika* 82(3): 561–574, 1995, DOI [10.1093/biomet/82.3.561](https://doi.org/10.1093/biomet/82.3.561); Efron,
+  "Bootstrap Methods: Another Look at the Jackknife", *Ann. Statist.* 7(1): 1–26, 1979, DOI
+  [10.1214/aos/1176344552](https://doi.org/10.1214/aos/1176344552); DiCiccio & Efron, "Bootstrap confidence
+  intervals", *Stat. Sci.* 11(3): 189–228, 1996, DOI [10.1214/ss/1032280214](https://doi.org/10.1214/ss/1032280214).
+
+### LM23
+
+- White, "A Heteroskedasticity-Consistent Covariance Matrix Estimator and a Direct Test for Heteroskedasticity",
+  *Econometrica* 48(4): 817–838, 1980, DOI [10.2307/1912934](https://doi.org/10.2307/1912934); pages also on the
+  Econometric Society's page (Crossref gives the first page only). Abstract: a covariance estimator that stays
+  consistent under heteroskedasticity, plus a direct test.
+- Newey & West, "A Simple, Positive Semi-Definite, Heteroskedasticity and Autocorrelation Consistent Covariance
+  Matrix", *Econometrica* 55(3): 703–708, 1987, DOI [10.2307/1913610](https://doi.org/10.2307/1913610); end page not in
+  Crossref. Abstract: positive semi-definite by construction and consistent. The Bartlett weights are not confirmed in
+  the paper itself. The Society's web page lists West first; Crossref has Newey, West.
+- Andrews, "Heteroskedasticity and Autocorrelation Consistent Covariance Matrix Estimation", *Econometrica* 59(3):
+  817–858, 1991, DOI [10.2307/2938229](https://doi.org/10.2307/2938229); end page not in Crossref. Abstract: optimal
+  kernel and bandwidth, and data-dependent automatic bandwidths. The plug-in constants (for example 1.1447) are
+  unconfirmed.
+- Lintner, "The Valuation of Risk Assets and the Selection of Risky Investments in Stock Portfolios and Capital
+  Budgets", *REStat* 47(1): 13–37, 1965, DOI [10.2307/1924119](https://doi.org/10.2307/1924119); the end page comes
+  from JSTOR's citation string as carried by OpenAlex. Bibliographic data only.
+- Hansen, B. E., "A Modern Gauss–Markov Theorem", *Econometrica* 90(3): 1283–1294, 2022, DOI
+  [10.3982/ECTA19255](https://doi.org/10.3982/ECTA19255); Pötscher & Preinerstorfer's comment, *Econometrica* 92(3):
+  913–924 (2024 in Crossref), DOI [10.3982/ECTA20819](https://doi.org/10.3982/ECTA20819), with Hansen's reply at
+  925–928 (its DOI not recorded). Bibliographic data only: read them before LM23 states Gauss–Markov for anything
+  beyond linear estimators.
+- Hayashi, *Econometrics*, Princeton University Press, 712 pp., ISBN 978-0-691-01018-2; the publisher's page says
+  published 19 November 2000, copyright 2001 (the copyright page was not seen). Contents from a bookseller (Eyrolles,
+  secondary): §1.3 "Finite-Sample Properties of OLS", p. 27 (Gauss–Markov is not named in the contents); ch. 6 "Serial
+  Correlation", p. 365, with "Using Kernels to Estimate S", p. 408; ch. 9 "Unit-Root Econometrics", p. 557 (Dickey–Fuller
+  tests §9.3, ADF §9.4); ch. 10 "Cointegration", p. 623. Theorem and equation numbers unconfirmed.
+- Greene, *Econometric Analysis*, 8th ed., Pearson, ©2018 (published 29 March 2017), ISBN 978-0-13-446136-6.
+  Pearson's contents: ch. 3 Least Squares; ch. 4 Estimating the Regression Model by Least Squares; ch. 9 Generalized
+  Regression and Heteroscedasticity; ch. 16 Bayesian (title as the survey shortened it); ch. 20 Serial Correlation;
+  ch. 21 Nonstationary Data. Theorem numbers unconfirmed.
+- Wooldridge, *Introductory Econometrics*, 8th ed., Cengage, c2025, xxi + 916 pp., ISBN 978-0-357-90016-1 (CiNii).
+  Chapters not checked.
+- Bibliographic data only: Newey & West, "Automatic Lag Selection in Covariance Matrix Estimation", *RES* 61(4):
+  631–653, 1994, DOI [10.2307/2297912](https://doi.org/10.2307/2297912); Sharpe, "Capital Asset Prices: A Theory of
+  Market Equilibrium under Conditions of Risk", *JF* 19(3): 425–442, 1964, DOI
+  [10.1111/j.1540-6261.1964.tb02865.x](https://doi.org/10.1111/j.1540-6261.1964.tb02865.x); Fama & French, "Common
+  risk factors in the returns on stocks and bonds", *JFE* 33(1): 3–56, 1993, DOI
+  [10.1016/0304-405X(93)90023-5](https://doi.org/10.1016/0304-405X(93)90023-5).
+
+### LM24
+
+- James & Stein, "Estimation with Quadratic Loss" (title from the reprint's Crossref record), Fourth Berkeley
+  Symposium, Vol. 1: 361–379. The end page is unresolved: two library records give 379, one set of course notes 380.
+  Project Euclid's page and PDF are blocked from here. The reprint in *Breakthroughs in Statistics* (1992), pp.
+  443–460, DOI [10.1007/978-1-4612-0919-5_30](https://doi.org/10.1007/978-1-4612-0919-5_30), is verified. BDA3 cites
+  the paper as "James and Stein (1960)". Breiman (1961), already in this list, is in the same volume.
+- Efron & Morris, "Data Analysis Using Stein's Estimator and its Generalizations", *JASA* 70(350): 311–319, 1975, DOI
+  [10.1080/01621459.1975.10479864](https://doi.org/10.1080/01621459.1975.10479864). Read in the Taylor & Francis PDF (a
+  course-site copy): Table 1 gives 18 players' averages after their first 45 at-bats of 1970; the Stein rule's mean
+  squared error is less than half that of the sample mean.
+- Efron & Morris, "Stein's Paradox in Statistics", *Scientific American* 236(5): 119–127, 1977, DOI
+  [10.1038/scientificamerican0577-119](https://doi.org/10.1038/scientificamerican0577-119). Content not seen.
+- Efron & Morris, "Stein's Estimation Rule and its Competitors—An Empirical Bayes Approach", *JASA* 68(341): 117–130,
+  1973, DOI [10.1080/01621459.1973.10481350](https://doi.org/10.1080/01621459.1973.10481350) (the empirical Bayes view).
+  Bibliographic data only.
+- Jorion, "Bayes-Stein Estimation for Portfolio Analysis", *JFQA* 21(3): 279–292, 1986, DOI
+  [10.2307/2331042](https://doi.org/10.2307/2331042); the end page comes from the RePEc handle (Crossref gives the
+  first page only). Abstract: an empirical Bayes estimator should outperform the sample mean in a portfolio setting.
+  The shrinkage target (the minimum-variance portfolio's mean) is confirmed only by secondary sources. **Warning:**
+  10.1017/S0022109000012138 is the issue's front matter (Crossref: "JFQ volume 21 issue 3 Cover and Front matter"),
+  not this article.
+- Gelman et al., *Bayesian Data Analysis*, 3rd ed., Chapman & Hall/CRC Texts in Statistical Science, ©2013, 675 pp.,
+  ISBN 978-1-4398-4095-5. The authors offer a free PDF for non-commercial use (errata fixed to 20 February 2025; its
+  pages may differ from print; its URL was not recorded). The survey confirmed in that PDF: §2.5 "Normal distribution
+  with known variance", p. 39; eq. (2.10), p. 40: "the posterior precision equals the prior precision plus the data
+  precision"; §3.3 normal data with a conjugate prior, p. 67; §5.5 the eight schools, p. 119; §5.8 the bibliographic
+  note on Stein. The fresh check lists (2.10) as unverified (it did not re-read it); re-read it in the document before
+  it is printed (plans/vol-4.md, "References").
+- MacLean, Thorp & Ziemba (2010), already in this list (with Kelly 1956) without a DOI: its DOI is
+  [10.1080/14697688.2010.506108](https://doi.org/10.1080/14697688.2010.506108), title "Long-term capital growth: the
+  good and bad properties of the Kelly and fractional Kelly capital growth criteria" (Crossref).
+
+### Fractional Kelly and parameter uncertainty (LM24)
+
+What each source claims; no source found derives fractional Kelly as *the* Bayesian answer, which fits ROADMAP's
+"only inside a stated model". LM24 cites Browne and Whitt (1996) for the posterior-mean rule under log utility.
+
+- Browne & Whitt, "Portfolio choice and the Bayesian Kelly criterion", *Adv. Appl. Prob.* 28(4): 1145–1176, 1996, DOI
+  [10.2307/1428168](https://doi.org/10.2307/1428168). Abstract: with log utility and unknown parameters the optimal
+  bet is "a linear function of the posterior mean increment", a generalisation of Kelly; it is not fractional Kelly.
+- MacLean, Ziemba & Blazenko, "Growth Versus Security in Dynamic Investment Analysis", *Mgmt Sci.* 38(11): 1562–1585,
+  1992, DOI [10.1287/mnsc.38.11.1562](https://doi.org/10.1287/mnsc.38.11.1562). Abstract: fractional Kelly trades
+  growth against security; the abstract does not mention parameter uncertainty.
+- Thorp (2006), already in this list: §7.3 "The case for 'fractional Kelly'", read in the PDF on gwern.net. Prudential,
+  not derived: overbetting costs more than underbetting; if mₑ is uncertain, choose f < fₑ; half Kelly keeps 3/4 of the
+  growth rate.
+- MacLean, Thorp & Ziemba (2010): wagers should be reduced because E log is so sensitive to errors in the mean.
+  Prudential; read in the January 2010 working version only.
+- Kan & Zhou, "Optimal Portfolio Choice with Parameter Uncertainty", *JFQA* 42(3): 621–656, 2007, DOI
+  [10.1017/S0022109000004129](https://doi.org/10.1017/S0022109000004129). Abstract: the plug-in portfolio does poorly;
+  under uncertainty, the riskless asset plus the sample tangency portfolio is never optimal; a three-fund rule.
+  Mean–variance, not log utility.
+- Rising & Wyner, "Partial Kelly portfolios and shrinkage estimators", 2012 IEEE International Symposium on
+  Information Theory Proceedings: 1618–1622, DOI [10.1109/ISIT.2012.6283549](https://doi.org/10.1109/ISIT.2012.6283549).
+  Abstract (OpenAlex): fractional Kelly works "not because of reduced risk, but because of reduced estimation error".
+- Baker & McHale, "Optimal Betting Under Parameter Uncertainty: Improving the Kelly Criterion", *Decision Analysis*
+  10(3): 189–199, 2013, DOI [10.1287/deca.2013.0271](https://doi.org/10.1287/deca.2013.0271). Abstract: shrink the
+  bet to improve out-of-sample performance.
+- Chu, Wu & Swartz, "Modified Kelly criteria", *JQAS* 14(1): 1–11, 2018, DOI
+  [10.1515/jqas-2017-0122](https://doi.org/10.1515/jqas-2017-0122). Abstract: decision-theoretic; the modified
+  fractions are smaller than Kelly in the cases studied and depend on the loss function.
+- Han, Yu & Mathew, "Shrinkage estimation of Kelly portfolios", *QF* 19(2): 277–287 (2019 in Crossref; the survey
+  gave no year), DOI [10.1080/14697688.2018.1483583](https://doi.org/10.1080/14697688.2018.1483583). Abstract: plug-in
+  Kelly weights are biased; proposes a shrinkage estimator.
+
+### LM25
+
+- Said & Dickey, "Testing for unit roots in autoregressive-moving average models of unknown order", *Biometrika*
+  71(3): 599–607, 1984, DOI [10.1093/biomet/71.3.599](https://doi.org/10.1093/biomet/71.3.599). Abstract: the test
+  approximates the ARMA by an autoregression.
+- Dickey & Fuller, "Distribution of the Estimators for Autoregressive Time Series with a Unit Root", *JASA* 74(366a):
+  427–431, 1979, DOI [10.1080/01621459.1979.10482531](https://doi.org/10.1080/01621459.1979.10482531). Abstract read
+  (its content not recorded by the survey).
+- Kwiatkowski, Phillips, Schmidt & Shin (KPSS), "Testing the null hypothesis of stationarity against the alternative of
+  a unit root", *J. Econometrics* 54(1–3): 159–178, 1992, DOI
+  [10.1016/0304-4076(92)90104-Y](https://doi.org/10.1016/0304-4076(92)90104-Y) (authors from Crossref). Abstract not
+  seen.
+- MacKinnon, "Numerical distribution functions for unit root and cointegration tests", *JAE* 11(6): 601–618, 1996, DOI
+  [`10.1002/(SICI)1099-1255(199611)11:6<601::AID-JAE417>3.0.CO;2-T`](https://doi.org/10.1002/(SICI)1099-1255(199611)11:6%3C601::AID-JAE417%3E3.0.CO;2-T).
+  Abstract: response surfaces giving finite-sample and asymptotic critical values and p-values.
+- MacKinnon, "Critical Values for Cointegration Tests", Queen's Economics Department Working Paper 1227, 2010 — the
+  IDEAS abstract says a new appendix is "more accurate" and covers more cases; Queen's own page failed its TLS
+  certificate check. statsmodels takes its critical values from it ("Python (Volume IV)").
+- Ljung & Box, "On a measure of lack of fit in time series models", *Biometrika* 65(2): 297–303, 1978, DOI
+  [10.1093/biomet/65.2.297](https://doi.org/10.1093/biomet/65.2.297); it modifies Box & Pierce, "Distribution of
+  Residual Autocorrelations in Autoregressive-Integrated Moving Average Time Series Models", *JASA* 65(332): 1509–1526,
+  1970, DOI [10.1080/01621459.1970.10481180](https://doi.org/10.1080/01621459.1970.10481180).
+- Hamilton, *Time Series Analysis*, Princeton University Press, 1994, ISBN 978-0-691-04289-3, 816 pp. Chapters from
+  Project MUSE (titles as the survey shortened them): 3 Stationary ARMA, pp. 43–71; 10 Covariance-Stationary Vector
+  Processes, pp. 257–290; 17 Unit Roots, pp. 475–543; 19 Cointegration, pp. 571–629; 20 FIML for cointegrated
+  systems, pp. 630–656; 21 Heteroskedasticity, pp. 657–676. Where Newey–West appears is unconfirmed; theorem and
+  equation numbers unconfirmed.
+- Box, Jenkins, Reinsel & Ljung, *Time Series Analysis: Forecasting and Control* (title from Open Library's ISBN
+  record, secondary, read again in Stage 1), 5th ed., Wiley, 720 pp., ISBN 978-1-118-67502-1. Wiley says June 2015;
+  library catalogues say 2016. Chapters not checked.
+- Tsay, *Analysis of Financial Time Series* (title from Open Library's ISBN record, secondary, read again in Stage 1),
+  3rd ed., Wiley, August 2010, 720 pp., ISBN 978-0-470-41435-4. Sections from Kinokuniya's contents (secondary):
+  §2.1–2.7 (pp. 30–71) stationarity, the ACF, white noise, AR, MA, ARMA and unit roots; §2.10 consistent covariance
+  matrix estimation, p. 97; ch. 3 conditional heteroscedastic models, p. 109 (IGARCH §3.6, p. 140); §7.2 RiskMetrics,
+  p. 328; §8.5–8.6 cointegration, pp. 428–432; §8.8 pairs trading, p. 446; §10.1 exponentially weighted estimate,
+  p. 506.
+- Futures–spot basis: Brenner & Kroner, "Arbitrage, Cointegration, and Testing the Unbiasedness Hypothesis in
+  Financial Markets", *JFQA* 30(1): 23–42, 1995, DOI [10.2307/2331251](https://doi.org/10.2307/2331251) (end page not
+  in Crossref) — RePEc abstract: whether spot and futures prices are cointegrated depends on the time-series properties
+  of the cost of carry. Dwyer, Locke & Yu, "Index Arbitrage and Nonlinear Dynamics Between the S&P 500 Futures and
+  Cash", *RFS* 9(1): 301–332, 1996, DOI [10.1093/rfs/9.1.301](https://doi.org/10.1093/rfs/9.1.301) — abstract:
+  threshold error correction, minute-by-minute S&P 500 data. Martens, Kofman & Vorst (1998), *JAE* 13(3): 245–263 —
+  abstract read; the title and DOI were not recorded by the survey. Lin, Chen & Hwang, "An Application of Threshold
+  Cointegration to Taiwan Stock Index Futures and Spot Markets", *Rev. Pacific Basin Fin. Mkts. Policies* 6(3):
+  291–304, 2003, DOI [10.1142/S0219091503001109](https://doi.org/10.1142/S0219091503001109) — abstract: Taiwan index
+  futures, 5-minute data, threshold cointegration. Roope & Zurbruegg, "The intra-day price discovery process between
+  the Singapore Exchange and Taiwan Futures Exchange", *JFM* 22(3): 219–240, 2002, DOI
+  [10.1002/fut.2215](https://doi.org/10.1002/fut.2215) — abstract: SGX and TAIFEX Taiwan index futures share a common
+  stochastic trend with the index.
+- Bibliographic data only: Engle & Granger, "Co-Integration and Error Correction: Representation, Estimation, and
+  Testing", *Econometrica* 55(2): 251–276, 1987, DOI [10.2307/1913236](https://doi.org/10.2307/1913236) (end page not
+  in Crossref); Johansen, "Statistical analysis of cointegration vectors", *JEDC* 12(2–3): 231–254, 1988, DOI
+  [10.1016/0165-1889(88)90041-3](https://doi.org/10.1016/0165-1889(88)90041-3); Johansen, "Estimation and Hypothesis
+  Testing of Cointegration Vectors in Gaussian Vector Autoregressive Models", *Econometrica* 59(6): 1551–1580, 1991,
+  DOI [10.2307/2938278](https://doi.org/10.2307/2938278) (end page not in Crossref); MacKinnon, "Approximate
+  Asymptotic Distribution Functions for Unit-Root and Cointegration Tests", *JBES* 12(2): 167–176, 1994, DOI
+  [10.1080/07350015.1994.10510005](https://doi.org/10.1080/07350015.1994.10510005) (statsmodels' p-values); Wahab &
+  Lashgari, "Price dynamics and error correction in stock index and stock index futures markets: A cointegration
+  approach", *JFM* 13(7): 711–742, 1993, DOI [10.1002/fut.3990130702](https://doi.org/10.1002/fut.3990130702).
+
+### LM26
+
+- *RiskMetrics — Technical Document*, 4th ed., J.P. Morgan/Reuters, New York, 17 December 1996 (PDF hosted by MSCI;
+  its URL was not recorded). The survey confirmed: §5.3.2 "Choosing the decay factor", p. 97: λ = 0.94 for the daily
+  data set and 0.97 for the monthly; the criterion is the root mean squared error of the variance forecast, Eq. [5.30]
+  in §5.3.2.1; the single λ is a weighted average across 480+ series, Eqs. [5.32]–[5.35]; Table 5.9, p. 100: 550 days
+  used in production, 75 effective at 0.94; Eq. [5.23]: σ²ₜ₊₁|ₜ = 0.94σ²ₜ|ₜ₋₁ + 0.06r²ₜ. The fresh check lists §5.3.2
+  as unverified (it did not re-read it); re-read it in the document before it is printed.
+- Engle, "Autoregressive Conditional Heteroscedasticity with Estimates of the Variance of United Kingdom Inflation",
+  *Econometrica* 50(4), 1982, DOI [10.2307/1912773](https://doi.org/10.2307/1912773): pp. 987–1008 per the Econometric
+  Society's issue listing (the next article starts at p. 1009), 987–1007 per RePEc; Crossref gives the first page
+  only. **Unresolved.**
+- Andersen & Bollerslev, "Answering the Skeptics: Yes, Standard Volatility Models do Provide Accurate Forecasts",
+  *IER* 39(4): 885–905, 1998, DOI [10.2307/2527343](https://doi.org/10.2307/2527343) (end page not in Crossref). Read
+  in a JSTOR copy: the out-of-sample R-squared of GARCH(1,1) against squared returns is 0.047 (DM–$) and 0.026 (¥–$);
+  against 5-minute realized volatility the models explain "about half"; there is a theoretical upper bound on
+  R-squared under conditional normality, but its value is garbled in the copy read.
+- Andersen, Bollerslev, Diebold & Labys, "Modeling and Forecasting Realized Volatility", *Econometrica* 71(2): 579–625,
+  2003, DOI [10.1111/1468-0262.00418](https://doi.org/10.1111/1468-0262.00418). Abstract read (its content not recorded
+  by the survey).
+- Andersen, Bollerslev, Diebold & Labys, "Great Realisations", *Risk*, 2000, issue (3): 105–108 (Kellogg listing).
+  Volume 13 is unverified. That this article introduced the signature plot is **unconfirmed**.
+- Zhang, Mykland & Aït-Sahalia, "A Tale of Two Time Scales", *JASA* 100(472): 1394–1411, 2005, DOI
+  [10.1198/016214505000000169](https://doi.org/10.1198/016214505000000169). Read in the published PDF: the five
+  estimators, §1.2; `TSRV = [Y,Y]^avg − (n̄/n)[Y,Y]^all`, §1.2.5; the small-sample adjustment, eq. (64), §4.2;
+  K = c·n^(2/3), with rate n^(−1/6).
+- Patton, "Volatility forecast comparison using imperfect volatility proxies", *J. Econometrics* 160(1): 246–256,
+  2011, DOI [10.1016/j.jeconom.2010.03.034](https://doi.org/10.1016/j.jeconom.2010.03.034). Abstract read on Duke's
+  page. MSE and QLIKE as members of a robust family are confirmed in the 2006 working version (Section 3); the
+  published text was not seen.
+- Hansen & Lunde, "A forecast comparison of volatility models: does anything beat a GARCH(1,1)?", *JAE* 20(7):
+  873–889, 2005, DOI [10.1002/jae.800](https://doi.org/10.1002/jae.800). Abstract: 330 ARCH-type models compared; for
+  DM–$ no evidence that GARCH(1,1) is beaten; for IBM, GARCH(1,1) is inferior to models with a leverage effect.
+- Hansen & Lunde, "Realized Variance and Market Microstructure Noise", *JBES* 24(2): 127–161, 2006, DOI
+  [10.1198/073500106000000071](https://doi.org/10.1198/073500106000000071). Abstract: microstructure noise is
+  time-dependent and correlated with increments in the efficient price.
+- Bibliographic data only: Bollerslev, "Generalized autoregressive conditional heteroskedasticity", *J. Econometrics*
+  31(3): 307–327, 1986, DOI [10.1016/0304-4076(86)90063-1](https://doi.org/10.1016/0304-4076(86)90063-1);
+  Barndorff-Nielsen & Shephard, "Econometric Analysis of Realized Volatility and its Use in Estimating Stochastic
+  Volatility Models", *JRSS B* 64(2): 253–280, 2002, DOI
+  [10.1111/1467-9868.00336](https://doi.org/10.1111/1467-9868.00336).
+
+### Entries already in this list: Volume IV locations
+
+- Wasserman (2004), from the contents in Springer's front-matter PDF (2026-10-19): §6.3.1 Point Estimation, p. 90;
+  §6.3.2 Confidence Sets, p. 92; §6.3.3 Hypothesis Testing, p. 94; ch. 7, the EDF, p. 97; §8.3 Bootstrap Confidence
+  Intervals, p. 110; §8.5.2 "Justification For The Percentile Interval", p. 116; §9.3 Maximum Likelihood, p. 122; §9.4
+  Properties of MLEs, p. 124; §9.5 Consistency of MLEs, p. 126; §9.7 Asymptotic Normality, p. 128; §9.8 Optimality,
+  p. 130; §9.9 Delta Method, p. 131; §9.11 Parametric Bootstrap, p. 134; ch. 10, Hypothesis Testing and p-values,
+  p. 149, with §10.1 Wald, p. 152, §10.2 p-values, p. 156, §10.6 the likelihood ratio test, p. 164, §10.7 Multiple
+  Testing, p. 165, and §10.10.1 Neyman–Pearson, p. 170; ch. 11 Bayesian Inference (§11.2, p. 176); §12.7 "Stein's
+  Paradox", p. 204; ch. 13 Linear and Logistic Regression (§13.2, §13.5; chapter 13's page numbers are garbled in the
+  PDF text). Unconfirmed: theorem numbers, and whether §10.7 covers Bonferroni and BH.
+- Efron & Tibshirani (1993): Routledge's ordered contents list gives ch. 8 "More Complicated Data Structures", ch. 12
+  "Confidence Intervals Based on Bootstrap 'Tables'", ch. 14 "Better Bootstrap Confidence Intervals" and ch. 16
+  "Hypothesis Testing with the Bootstrap" (ch. 13 as above); the numbers are inferred from the order. The BCa section
+  number and the moving-blocks section are **unconfirmed** (Google Books answered with a CAPTCHA).
+- Casella & Berger, *Statistical Inference*, 2nd ed. (new). Publication data (secondary): Duxbury/Thomson Learning,
+  Pacific Grove, CA, 2002, xxviii + 660 pp., ISBN 0-534-24312-6, LCCN 2001025794, from Open Library's copy of the LC
+  MARC record. Reprint: Chapman & Hall/CRC (Texts in Statistical Science), ©2024, 565 pp., DOI
+  [10.1201/9781003456285](https://doi.org/10.1201/9781003456285); Routledge's page says: "a reprint of the second
+  edition originally published by Cengage Learning, Inc. in 2001". Chapters 7 Point Estimation, 8 Hypothesis Testing,
+  9 Interval Estimation, 10 Asymptotic Evaluations. **Theorem 7.3.9 (Cramér–Rao), Corollary 7.3.10 (iid case), Lemma
+  7.3.11, Corollary 7.3.15 (attainment): unconfirmed** — they appear only in a UMich BIOS 602 handout (Kang, 2013)
+  that does not name the book; Google Books answered with a CAPTCHA and archive.org search was refused. The reprint's
+  page count differs from the original's: cite theorem numbers, not pages. Which year to cite (2001 or 2002) is open.
+- Hill (1975): the estimator's formula is still not checked (Project Euclid answered with a bot challenge again).
+- Already listed, named by the survey for Volume IV, no new checks: Cont (2001), Mandelbrot (1963) and
+  Gopikrishnan et al. (1999) (LM19, LM26); Kelly (1956), Breiman (1961), Thorp (2006), Markowitz (1952), Merton (1972),
+  Chopra & Ziemba (1993) (LM24); Hull (2022) (LM25); Strang (2016) §4.2 (LM23); Forbes & Rigobon (2002) (LM26); the
+  Volume III entries for Durrett, Glasserman, Grinstead & Snell and Blitzstein & Hwang (LM19, LM20, LM22).
+
+### Open points (Volume IV)
+
+Before any of these is printed: Engle's (1982) end page; James and Stein's (1961) end page; the origin of the
+volatility signature plot and the *Risk* volume of "Great Realisations"; Jorion's (1986) shrinkage target; Casella and
+Berger's theorem numbers and year; Lo and MacKinlay's (1988) equation numbers; Hill's (1975) formula as printed, and
+where Embrechts et al. treat the Hill estimator; the JFE pagination of Merton's Appendix A; Gelman et al.'s (2.10) and
+RiskMetrics §5.3.2, re-read in the documents; Harvey, Liu and Zhu's section numbers; Efron and Tibshirani's BCa and
+moving-blocks sections; the originals of Bonferroni (1936), Rao (1945), Memmel (2003) and Politis and Romano (1992,
+the circular block bootstrap, a book chapter); Andrews' (1991) plug-in constants; the Bartlett weights in Newey and
+West (1987); where Hamilton treats Newey–West; every theorem or equation number in Greene, Hayashi and Hamilton; the
+end pages that Crossref does not hold (Newey and West 1987, Andrews 1991, Engle and Granger 1987, Johansen 1991,
+Brenner and Kroner 1995); the author order of Drees et al.; the DOI of Hansen's (2024) reply; Lahiri's hardcover ISBN;
+the title and DOI of Martens, Kofman and Vorst (1998); the URLs of the RiskMetrics and BDA3 PDFs.
+
 ## Python (Volume III)
 
 Read 2026-10-18 in the NumPy v2.5 docs (`numpy.org/doc/stable`) and the SciPy v1.18.0 docs (`docs.scipy.org/doc/scipy`);
@@ -453,6 +951,138 @@ every numeric check ran in the project's venv (NumPy 2.5.3, SciPy 1.18.1).
   [`Expr.std`](https://docs.pola.rs/api/python/stable/reference/expressions/api/polars.Expr.std.html) defaults to
   `ddof=1` (divisor N − 1).
 
+## Python (Volume IV)
+
+Checked 2026-10-19 by the Stage 1 survey and the fresh check in the source of the statsmodels 0.15.0 and arch 8.0.0
+wheels (cp313, win_amd64; sha256 checked against PyPI); file:line references are inside the unpacked wheels. The
+documentation pages below returned HTTP 200 and carry these versions (page titles "statsmodels 0.15.0" and "arch
+8.0.0"; status and titles read again in Stage 1); their text was not compared line by line with the source. A
+line marked "read again in Stage 1" was read in the same wheel source in Stage 1, not by the survey. Prefixes:
+statsmodels pages are under `https://www.statsmodels.org/stable/generated/`, arch pages under
+`https://bashtage.github.io/arch/`; "stable" was 0.15.0 on that date.
+
+### The packages
+
+- statsmodels 0.15.0, released 2026-08-27
+  ([release notes](https://www.statsmodels.org/stable/release/version0.15.0.html)), BSD-3-Clause; arch 8.0.0,
+  released 2025-10-21, NCSA, the latest on PyPI ([changelog](https://bashtage.github.io/arch/changes.html)); dates and
+  licences from PyPI's JSON ([statsmodels](https://pypi.org/pypi/statsmodels/json),
+  [arch](https://pypi.org/pypi/arch/json)).
+- Requirements: arch requires `statsmodels>=0.13.0`, so the two are one decision. statsmodels requires
+  `numpy<3,>=1.23.5`, `scipy!=1.9.2,>=1.8`, `pandas!=2.1.0,>=1.4`, `patsy>=0.5.6`, `packaging>=21.3` and, new in 0.15,
+  `formulaic>=1.1.0`; arch requires `numpy<3,>=1.22.3`, `pandas>=1.4.0`, `scipy>=1.8` and `packaging` (numba only in
+  its `dev` extra). New packages: pandas 3.0.6, patsy 1.0.3, formulaic 1.2.2, narwhals 2.27.1, wrapt 2.5.1,
+  interface-meta 2.0.1 and tzdata 2026.5; about 81.5 MB unpacked in all (the wheels were read, not installed). The
+  working tree's `uv.lock` pins statsmodels 0.15.0, arch 8.0.0 and pandas 3.0.6 beside NumPy 2.5.3 and SciPy 1.18.1
+  (read again in Stage 1).
+- arch 8.0.0 predates pandas 3.0.0 (2026-01-21) and statsmodels 0.15.0; every statsmodels symbol arch imports exists
+  in 0.15.0 (static check). The smoke test of 2026-10-19 in an empty `UV_PROJECT_ENVIRONMENT` (plans/vol-4.md,
+  capability A) ran them together without error: `./build.sh --data --labs --preview` reproduced every tracked chart
+  file byte for byte and every lab's text output, and `arch_model` (normal and $t$), the three block bootstraps with a
+  NumPy `Generator` as `seed` (identical on a rerun), `optimal_block_length`, `adfuller`, `kpss`, `coint`,
+  `acorr_ljungbox`, OLS with HAC (equal to a NumPy Newey–West to 2e-15), `multipletests` and `ARIMA` ran on TR23.
+- Both packages import pandas when the modules the book uses load (statsmodels: `base/model.py:10`, `tsatools.py:9`,
+  `_stattools.py:13`, `diagnostic.py:35`, `multitest` through `stats/_knockoff.py:26`; arch: `univariate/mean.py:12`).
+  Importing OLS also loads patsy and formulaic. Book code passes NumPy arrays and ends with `.to_numpy()`. statsmodels
+  accepts a Polars frame but converts it with `.to_pandas()` (`tools/data.py:205-206`); whether that needs pyarrow is
+  unverified.
+- numba is not needed: arch's Windows wheel ships compiled `recursions.cp313-win_amd64.pyd` and
+  `_samplers.cp313-win_amd64.pyd`; its kernel covariance falls back to pure Python silently
+  (`covariance/kernel.py:148-151`).
+
+### statsmodels 0.15.0
+
+- [`OLS.fit`](https://www.statsmodels.org/stable/generated/statsmodels.regression.linear_model.OLS.fit.html) and
+  [`get_robustcov_results`](https://www.statsmodels.org/stable/generated/statsmodels.regression.linear_model.RegressionResults.get_robustcov_results.html):
+  `fit(method="pinv", cov_type="nonrobust", cov_kwds=None, use_t=None, **kwargs)`; with `cov_type="HAC"`,
+  `cov_kwds={"maxlags": L}` is required, the kernel defaults to Bartlett with weights 1 − j/(L + 1), j = 0, …, L
+  (`sandwich_covariance.py:543`), and `use_correction` defaults to False (`linear_model.py:2884`); with it the
+  covariance is multiplied by n/(n − k) (`sandwich_covariance.py:976-978`). `use_t=None` means t for `nonrobust` and
+  the normal distribution for every robust type, so HAC p-values are normal (docstring, `linear_model.py:2645-2647`;
+  code `linear_model.py:1868-1888` and `base/model.py:1546`, fresh check). This default is statsmodels', not arch's:
+  arch 8.0.0 has no `use_t`.
+- [`adfuller`](https://www.statsmodels.org/stable/generated/statsmodels.tsa.stattools.adfuller.html):
+  `adfuller(x, maxlag=None, regression="c", autolag="AIC", store=False, regresults=False, *, result_object=None)`
+  (`_stattools.py:233-242`). The default maximum lag is 12(nobs/100)^(1/4); the code rounds it up
+  (`int(np.ceil(...))`, `_stattools.py:373`, read again in Stage 1). The p-value is "MacKinnon's approximate p-value
+  based on MacKinnon (1994, 2010)" and the critical values follow MacKinnon (2010) (`_stattools.py:184-192`;
+  `adfvalues.py:256-258, 447-452`). `result_object=None` returns the old tuple with a FutureWarning; pass
+  `result_object=True`. The docstring says the default changes "In release 0.16.0 or after July 2027, whichever is
+  later" (`_stattools.py:279-289`, read again in Stage 1).
+- [`kpss`](https://www.statsmodels.org/stable/generated/statsmodels.tsa.stattools.kpss.html):
+  `kpss(x, regression="c", nlags="auto", store=False, *, result_object=None)`, `regression` "c" or "ct", `nlags`
+  "auto", "legacy" or an integer (`_stattools.py:3051-3062`); `nlags=None` now raises an error; `result_object` as
+  for `adfuller`. The page cites Hobijn et al. as vol. 52; Crossref gives 58(4): 483–502.
+- [`coint`](https://www.statsmodels.org/stable/generated/statsmodels.tsa.stattools.coint.html):
+  `coint(y0, y1, trend="c", method="aeg", maxlag=None, autolag="aic", return_results=None)`
+  (`_stattools.py:2571-2579`): it takes `return_results`, not `result_object`; MacKinnon's approximate p-value
+  (1994, 2010).
+- [`acf`](https://www.statsmodels.org/stable/generated/statsmodels.tsa.stattools.acf.html):
+  `acf(x, adjusted=False, nlags=None, qstat=False, fft=True, alpha=None, bartlett_confint=True, missing="none", *,
+  result_object=None)` (`_stattools.py:847-858`); it warns (FutureWarning) when only one of `qstat` and `alpha` is
+  requested (`:909-919`). Its convention, read again in Stage 1: `acf` calls `acovf` with `demean=True`
+  (`_stattools.py:1012`), which subtracts the full-sample mean (`:564`) and divides every lag by n when
+  `adjusted=False` ("If True, then denominators is n-k, otherwise n", `:488-498`).
+  [`pacf`](https://www.statsmodels.org/stable/generated/statsmodels.tsa.stattools.pacf.html):
+  `pacf(x, nlags=None, method=…)` (`:1315`).
+- [`acorr_ljungbox`](https://www.statsmodels.org/stable/generated/statsmodels.stats.diagnostic.acorr_ljungbox.html):
+  `acorr_ljungbox(x, lags=None, boxpierce=False, model_df=0, period=None, return_df=True, auto_lag=False)`
+  (`diagnostic.py:596-604`); it always returns a DataFrame, `return_df` being "retained for backward compatibility"
+  (`:635-645`).
+- [`multipletests`](https://www.statsmodels.org/stable/generated/statsmodels.stats.multitest.multipletests.html):
+  `multipletests(pvals, alpha=0.05, method="hs", maxiter=1, is_sorted=False, returnsorted=False)`
+  (`multitest.py:99-101`): the default is Holm–Šidák, **not** Holm; `"bonferroni"`, `"holm"`, `"fdr_bh"` and
+  `"fdr_by"` are available (`:203, 233, 269`).
+- [`ARIMA`](https://www.statsmodels.org/stable/generated/statsmodels.tsa.arima.model.ARIMA.html):
+  `ARIMA(endog, exog=None, order=(p, d, q), …)` (`tsa/arima/model.py:26, 145`).
+- [`coint_johansen`](https://www.statsmodels.org/stable/generated/statsmodels.tsa.vector_ar.vecm.coint_johansen.html):
+  `coint_johansen(endog, det_order, k_ar_diff)`, giving `lr1`, `lr2`, `cvt`, `cvm`, `eig` and `evec`
+  (`vecm.py:594, 763-803`).
+
+### arch 8.0.0
+
+- [`arch_model`](https://bashtage.github.io/arch/univariate/introduction.html#arch.univariate.arch_model):
+  `arch_model(y, x=None, mean="Constant", lags=0, vol="GARCH", p=1, o=0, q=1, power=2.0, dist="normal",
+  hold_back=None, rescale=None)`; `mean` includes "Zero", `dist` includes "t" (`univariate/mean.py:1887-1911`). The
+  survey's link (`univariate/mean.html#arch.univariate.arch_model`) opens a page without that anchor; the function is
+  documented on the introduction page above (read again in Stage 1).
+- [`ARCHModel.fit`](https://bashtage.github.io/arch/univariate/generated/generated/arch.univariate.base.ARCHModel.fit.html):
+  `fit(update_freq=1, disp="final", starting_values=None, cov_type="robust", show_warning=True, first_obs=None,
+  last_obs=None, tol=None, options=None, backcast=None)`; SciPy's SLSQP with bounds and constraints
+  (`univariate/base.py:617-629, 807-815`). Results: `params`, `pvalues` and `std_err` are pandas Series
+  (`base.py:1320, 2027, 2035`); `resid` and `conditional_volatility` stay ndarrays for NumPy input
+  (`base.py:1335-1338, 1352-1355`).
+- [`ARCHModelResult.forecast`](https://bashtage.github.io/arch/univariate/generated/generated/arch.univariate.base.ARCHModelResult.forecast.html):
+  `forecast(params=None, horizon=1, start=None, align="origin", method="analytic", simulations=1000, rng=None,
+  random_state=None, *, reindex=False, x=None)`; `.variance` is a DataFrame (`base.py:1444-1456, 2224`).
+- Scale warning: when the residual variance lies outside [0.1, 10000), arch warns and suggests rescaling
+  (`base.py:309-322`); daily decimal returns trigger it, so Volume IV fits returns in percent (or passes `rescale`).
+- [`StationaryBootstrap`](https://bashtage.github.io/arch/bootstrap/generated/arch.bootstrap.StationaryBootstrap.html),
+  [`CircularBlockBootstrap`](https://bashtage.github.io/arch/bootstrap/generated/arch.bootstrap.CircularBlockBootstrap.html),
+  [`MovingBlockBootstrap`](https://bashtage.github.io/arch/bootstrap/generated/arch.bootstrap.MovingBlockBootstrap.html):
+  `(block_size, *args, seed=None, **kwargs)` (`bootstrap/base.py:1511/1586, 1367/1442, 1609/1686`); `seed` accepts
+  `int | Generator | RandomState` (`base.py:391`), so the experiment's NumPy generator can be passed.
+- [`optimal_block_length`](https://bashtage.github.io/arch/bootstrap/generated/arch.bootstrap.optimal_block_length.html):
+  `optimal_block_length(x) -> pd.DataFrame` (`bootstrap/base.py:126`), columns `b_sb` (stationary) and `b_cb`
+  (circular); it implements Politis & White (2004) with Patton, Politis & White's (2009) correction, both cited in its
+  docstring (`base.py:185-190`).
+- [`ADF`](https://bashtage.github.io/arch/unitroot/generated/arch.unitroot.ADF.html) (also
+  [`KPSS`](https://bashtage.github.io/arch/unitroot/generated/arch.unitroot.KPSS.html),
+  [`PhillipsPerron`](https://bashtage.github.io/arch/unitroot/generated/arch.unitroot.PhillipsPerron.html)):
+  `ADF(y, lags, trend, max_lags, method, low_memory)` (`unitroot/unitroot.py:664, 754-762, 1004, 1207`).
+  [`engle_granger`](https://bashtage.github.io/arch/unitroot/generated/arch.unitroot.cointegration.engle_granger.html):
+  `engle_granger(y, x, trend="c", *, lags, max_lags, method="bic")` (`unitroot/_engle_granger.py:25-33`); its critical
+  values come from arch's own tables (`critical_values/engle_granger.py`), whose source is unverified.
+
+### SciPy 1.18 (locked 1.18.1)
+
+- [`scipy.stats.bootstrap`](https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.bootstrap.html) (v1.18.0
+  docs): defaults `method='BCa'`, `n_resamples=9999`, `confidence_level=0.95`; iid resampling only, no block scheme;
+  cites Efron & Tibshirani (1993).
+- [`scipy.stats.false_discovery_control`](https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.false_discovery_control.html):
+  `false_discovery_control(ps, *, axis=0, method='bh')`, methods `'bh'` and `'by'`; `'by'` controls the FDR under
+  dependence, citing Benjamini & Yekutieli (2001), Theorem 1.3 (checked in the locked 1.18.1).
+
 ## Taiwan facts (Volume III)
 
 - TAIEX total-return index (發行量加權股價報酬指數), read 2026-10-18. Dividend rule verified: TWSE
@@ -508,6 +1138,108 @@ every numeric check ran in the project's venv (NumPy 2.5.3, SciPy 1.18.1).
   雙對數圖尺；雙對數尺度 (數學名詞) for "log-log scale". LM15 prints 雙對數圖. Not in 樂詞網, composed from listed parts:
   檢察官謬誤, 標準化動差, 全變異數法則, 條件相關係數, 超越相關係數, 放回重抽樣; the law of the unconscious statistician has
   no entry and keeps its English name; the printed 尾部指數 and 超額峰態 are not in 樂詞網 either.
+
+## Chinese terms (Volume IV)
+
+- 樂詞網, [terms.naer.edu.tw](https://terms.naer.edu.tw/) (國家教育研究院), searched 2026-10-19 for Volume IV's list
+  (`plans/vol-4.md`, "Chinese terms") with the URL pattern of the Volume III entry: 75 query strings for LM19–LM22 and
+  67 for LM23–LM26, each run in all listings, in 統計學名詞 and in 數學名詞 (426 result pages). Python's ssl rejected
+  the site's certificate ("Missing Subject Key Identifier"), so the pages were fetched with curl. Entry pages are not
+  cited. "—" means the listing has no entry for that English form; "not recorded" means the survey did not report that
+  listing.
+- Decided (plans/vol-4.md): **波動率** for volatility (統計學名詞 gives 波動；波動率 and lists "volatility index (VIX)"
+  as 波動率指數; the plan also cites TAIFEX's 臺指選擇權波動率指數, whose page is not yet in this file); the five printed
+  波動度 (lm05.md:191, lm07.md:354, lm07.md:512, lm10.md:228, lm10.md:449) become 波動率 at Stage 4. **時間序列** for
+  time series (數學名詞; 統計學名詞 writes 時間數列).
+- Already printed and consistent: 標準誤 (lm18.md:566) and 自助重抽法 (lm18.md:573), both 統計學名詞 forms.
+
+| English | 統計學名詞 | 數學名詞 | Book |
+|:--|:--|:--|:--|
+| descriptive statistics | 敘述統計量；描述統計量；敘述統計（學）；描述統計（學） | 敘述統計[學] | 敘述統計 |
+| sample variance | 樣本變異數 | 樣本變異數 | 樣本變異數 |
+| estimator | 估計量；估計式 | 估計量；估計式 | 估計量 |
+| unbiased estimator | 不偏估計量 | — | 不偏估計量 |
+| bias | 偏誤；偏差 | — (compounds only, e.g. 不偏性) | 偏誤 |
+| mean squared error | 均方誤差 ("mean squared error (MSE)" and "mean square error (MSE)") | 均方誤差 ("mean square error (MSE)") | 均方誤差 |
+| consistent estimator | 一致估計量 (consistency 一致性) | — (consistency 相容性；一致性；無矛盾性) | 一致估計量 |
+| standard error | 標準誤 | 標準誤[差] | 標準誤 |
+| sampling distribution | 抽樣分布 | — | 抽樣分布 |
+| confidence interval | 信賴區間 | 信賴區間 | 信賴區間 |
+| likelihood function | 概度函數 | 概度函數 | 概度函數 |
+| maximum likelihood estimation | 最大概度估計 (estimator 最大概度估計量) | estimate 最大概度估計; method 最大概度法 | 最大概度估計 |
+| Fisher information | 費雪訊息 (matrix 費雪訊息矩陣) | — | 費雪訊息 |
+| Cramér–Rao lower bound | 克萊姆-饒歐下界 (inequality 克萊姆-饒歐不等式; information inequality 訊息不等式) | — | 克萊姆-饒歐下界 |
+| Hill estimator | 希爾估計量 | — | 希爾估計量 |
+| tail index | — | — | none (Volume III printed 尾部指數, not in 樂詞網) |
+| hypothesis testing | 假設檢定 | 假設檢定 | 假設檢定 |
+| null hypothesis | 虛無假設 | 虛無假設 | 虛無假設 |
+| alternative hypothesis | 對立假設 | 備擇假設；對立假設 | 對立假設 |
+| significance level | 顯著水準 (also "level of significance") | 顯著水準; "level of significance" 顯著性水準 | 顯著水準 |
+| p-value | p值(顯著機率值) | — | p值 |
+| power | 檢定力；檢力；乘冪; "power of a test" 檢定力；檢力 | "power of test" 檢定力 | 檢定力 |
+| type I error | 第一型誤差；第一型錯誤 | "error of the first kind" 第一類誤差 | 第一型錯誤 |
+| type II error | 第二型誤差；第二型錯誤 | 第二類誤差 | 第二型錯誤 |
+| multiple testing | no entry for "multiple testing" or "multiple test"; multiple comparisons 多重比較; multiple hypothesis test 多重假設檢定 | — | 多重假設檢定 (multiple testing) |
+| family-wise error rate | familywise error rate 族系誤差率 (experimentwise error rate 實驗誤差率) | — | 族系誤差率 |
+| false discovery rate | 偽發現率 | — | 偽發現率 |
+| Bonferroni correction, inequality | Bonferroni校正, Bonferroni不等式 | — | Bonferroni 校正 |
+| data snooping | 資料偵伺 | — | 資料偵伺 |
+| resampling | 重抽樣 | 再抽樣 | 重抽樣 |
+| bootstrap | 自助重抽法；靴拔重抽法 | not recorded | 自助重抽法 |
+| block bootstrap | not listed in any listing (block: 集區；區塊) | — | 區塊自助重抽法 (book's own) |
+| stationary bootstrap | not listed (stationary time series 平穩時間數列; stationary process 平穩過程) | stationary 平穩；定常 | 平穩自助重抽法 (book's own) |
+| percentile interval | "percentile interval" and "percentile method" not listed; percentile confidence interval 百分位數信賴區間; BCa 偏誤加速校正之自助重抽信賴區間 | — | 百分位數信賴區間 |
+| variance ratio | 變異數比 (test 變異數比檢定) | variance-ratio transformation 變異數比變換 | 變異數比 |
+| autocorrelation | 自我相關; serial correlation 序列相關 | compounds only, with 自相關; serial correlation 序列相關 | 自我相關 |
+| ACF, PACF | 自我相關函數, 偏自我相關函數 | 自相關函數, — | 自我相關函數, 偏自我相關函數 |
+| regression | 迴歸 | 迴歸 | 迴歸 |
+| least squares | method of least squares 最小平方法 (bare term not listed) | 最小平方法; 最小平方估計 | — |
+| ordinary least squares | ordinary least squares (OLS) method 普通最小平方法 | — | 普通最小平方法 |
+| residual | 殘差 | 剩餘；殘差 | 殘差 |
+| coefficient of determination | 判定係數；決定係數 | 決定係數 | 判定係數 |
+| Gauss–Markov theorem | 高斯-馬可夫定理 | not recorded | 高斯-馬可夫定理 |
+| best linear unbiased estimator | 最佳線性不偏估計量 | not recorded | 最佳線性不偏估計量 |
+| heteroscedasticity | 變異數非齊一性 (same entry for the -sk- spelling) | 異方差性；不等變異性 | 變異數非齊一性 |
+| robust standard error | 穩健標準誤 | not recorded | 穩健標準誤 |
+| HAC estimator | 變異數非齊一與自我相關一致估計量 | — | 變異數非齊一與自我相關一致估計量 (HAC) |
+| Bayesian inference | 貝氏推論 | — | 貝氏推論 |
+| prior distribution | 事前分布 | 事前分布；事前分配 | 事前分布 |
+| posterior distribution | "posterior distributions" 事後分布 | none (兩岸數學名詞 has 事後分布；事後分配) | 事後分布 |
+| conjugate prior | 共軛事前分布 | — | 共軛事前分布 |
+| shrinkage estimator | 收縮估計量; James-Stein估計量 | — | 收縮估計量 |
+| empirical Bayes estimator | 經驗貝氏估計量 | empirical Bayes method 經驗Bayes法 | 經驗貝氏估計量 |
+| precision | 精確度 | 精確；精[密]度 | — |
+| stationary | bare term none; stationarity 平穩性；定態性; 平穩過程; 平穩時間數列; 共變異數平穩過程；共變異數定態過程 | 平穩；定常; 平穩過程; 平穩時間序列 | 平穩 |
+| white noise | 白雜訊；白噪音 | 白噪音 | 白噪音 |
+| random walk | 隨機漫步 | 隨機漫步 | 隨機漫步 |
+| autoregressive model | autoregressive (AR) model 自我迴歸模型; 自我迴歸過程 | 自迴歸 compounds | 自我迴歸模型 |
+| moving average model | moving average (MA) 移動平均; MA model 移動平均模型; MA process 移動平均數過程 | 移動平均數 | 移動平均模型 |
+| ARMA | 自我迴歸移動平均模型; 自我迴歸移動平均過程 | — | 自我迴歸移動平均模型 |
+| unit root | bare term none (經濟學名詞 has 單根); unit root test 單根檢定 | — | 單根, 單根檢定 |
+| Dickey–Fuller test, augmented | Dickey-Fuller檢定; 增廣Dickey-Fuller檢定 | not recorded | 增廣 Dickey-Fuller 檢定 |
+| Box–Pierce test | 柏克斯-皮爾斯檢定 | not recorded | — |
+| portmanteau test | 便利的檢定 | not recorded | — |
+| Ljung–Box test | no entry | not recorded | — |
+| cointegration | 共整合；共積 | — | 共整合 |
+| threshold cointegration | 門檻共積；門檻共整合 | not recorded | — |
+| error correction model | 誤差修正模型 | not recorded | 誤差修正模型 |
+| volatility | 波動；波動率 | — | 波動率 |
+| volatility clustering | 波動群聚現象 | — | 波動群聚現象 |
+| conditional variance | 條件變異數 (conditional heteroscedasticity: bare term none) | 條件變異數 | 條件變異數 |
+| ARCH model | 自我迴歸條件變異數非齊一模型 | — | — |
+| GARCH | 廣義自我迴歸條件變異數非齊一模型; IGARCH 整合廣義自我迴歸條件變異數非齊一模型 | — | 廣義自我迴歸條件變異數非齊一模型 (GARCH) |
+| EWMA | EWMA model 指數加權移動平均模型; exponential smoothing 指數平滑 | — | 指數加權移動平均模型 |
+| realized volatility, realized variance | no entry in any listing (integrated variance: none) | — | 已實現波動率, 已實現變異數 (book's own) |
+| microstructure noise | no entry; noise 雜訊；噪音; high-frequency data 高頻資料 | 雜訊 | 市場微結構雜訊 (book's own); 高頻資料 |
+
+- The rows from Gauss–Markov to error correction that the survey reported without a listing are all 統計學名詞 entries
+  in its saved results (read again in Stage 1).
+- The book's own forms have no 樂詞網 entry and are printed with their English in every box that uses them:
+  區塊自助重抽法 (block bootstrap), 平穩自助重抽法 (stationary bootstrap), 已實現變異數 (realized variance),
+  已實現波動率 (realized volatility), 市場微結構雜訊 (market microstructure noise).
+- Forms that differ from the listing only by spacing: the listing writes Bonferroni校正 and 增廣Dickey-Fuller檢定 with no
+  space between Latin letters and Chinese; plans/vol-4.md writes "Bonferroni 校正" and "增廣 Dickey-Fuller 檢定". The
+  book should choose one style.
 
 ## Writing style (AUTHORING §1, checked 2026-10-11)
 

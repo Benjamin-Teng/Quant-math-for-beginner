@@ -84,8 +84,9 @@ Who owns what where modules touch; a brief may refine a line but not move a topi
 - Intraday data are large (one day of 5-second TAIEX is about 3,240 rows), and some datasets answer one day per
   request (`TaiwanStockEvery5SecondsIndex`, `TaiwanVariousIndicators5Seconds`). Download them with a FinMind API token
   from a session that can reach FinMind (for example Claude Code on the owner's computer), with a script in `data/`
-  that logs rows per day and stays within the plan's hourly call quota. Commit the derived series the text uses (for example 5-minute
-  returns); keep the raw download reproducible rather than committing very large raw files.
+  that logs rows per day and stays within the plan's hourly call quota. Commit only per-day statistics derived from
+  them (for example realized variances), never intraday prices or returns; keep the raw download reproducible rather
+  than committing very large raw files.
 - `TaiwanStockPriceAdj` (adjusted prices) is a useful cross-check of the hand-built total-return series.
 
 **FinMind access: the owner has a Sponsor plan** (2026-10-10). It allows 6,000 API calls an hour and every dataset
@@ -143,6 +144,14 @@ Volume VII results it uses.
 - **Volume IV intraday data** (2026-10-11): approved. Minute bars and other intraday history come through the
   FinMind API with a logged script in `data/`; Volume IV's Stage 1 capability check fixes the details (request
   range per dataset, file layout, what is committed) and reports them.
+- **Volume IV capabilities** (2026-10-19): approved, items A, B, B′, C and E of the editor's Stage 1 capability check
+  (`plans/vol-4.md`): the packages statsmodels and arch (with pandas and the rest of their dependencies, in the main
+  dependencies; book code never imports pandas); the TX23 and T5S data pipeline (`data/vol4_series.py`,
+  `data/fetch_intraday.py` with its own manifest, kept out of the default verify); committing per-day realized
+  variances (`data/derived/vol4_rv.csv`, credited to FinMind and TWSE, no intraday prices or returns); the chart kit's
+  log $x$ axis, scatter tick labels, scatter bands, shared $x$ and a size check; TX 1-minute bars for 2025. Not
+  approved: item D (`Book.dist.tInv`, `rng.studentT`); widgets use normal quantiles and draw a Student $t$ with an
+  integer $\nu$ from normals in the module's own code.
 - **Volume III capabilities** (2026-10-18): approved, the editor's list of the Stage 1 capability check
   (`plans/vol-3.md`): line-chart steps, bands, quiet series and dashed lines; format codes for scientific notation,
   significant figures and `n6`; shared JavaScript helpers (a seeded random-number generator, distribution functions,

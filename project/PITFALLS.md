@@ -77,14 +77,23 @@ unless stated.
   00631L's halt, so its 0050 return on 2026-03-31 covers five sessions (−2.76% against −2.10% for the day), and
   `lm07_returns.parquet` has none for 0050's halt, so its 00679B return on 2025-06-18 is −0.79% against +0.93% for the
   day. Use a joined frame only for statistics of the series it joins, and name the frame next to every number.
-- **TX futures (`TaiwanFuturesDaily`):** on its last trading day the expiring contract's `settlement_price` prints 0.0
-  (use `close` or TAIFEX's published final settlement price); on days a contract does not trade, `close` and `volume`
-  print 0 while `settlement_price` is set by the exchange. For expiry, use the official final settlement price from
-  `TaiwanFuturesFinalSettlementPrice` (the owner's Sponsor plan includes it). Back months often trade a few lots a day, so their
+- **TX futures (`TaiwanFuturesDaily`):** from 2008-12-17, on its last trading day the expiring contract's
+  `settlement_price` prints 0.0; on days a contract does not trade, `close` and `volume` print 0 while
+  `settlement_price` is set by the exchange. The last day's `close` is not the final settlement price (they agree in
+  105 of the 189 months 200901–202609 and differ by up to 4 points in the rest): for expiry use `TaiwanFuturesFinalSettlementPrice`, which lacks every monthly
+  contract of 2000, 2006, 2008, 2014 and 2020. A futures `spread` is the close minus the contract's previous
+  *settlement*, not its previous close (`check_chunk.py` does not apply; `data/vol4_series.py` checks it per contract,
+  with the five rows of 2007-03-12 as the only exception in TR23's window). Back months often trade a few lots a day, so their
   settlements are partly exchange-determined: report volume when a result leans on them.
 - **Futures vs index timing:** TAIEX closes on a 13:25–13:30 call auction; the TX daily settlement comes from the last
   minute before 13:45. Daily changes in the near-month basis therefore had a standard deviation of about 83 points in 2025, mostly timing noise. Example: on 2025-06-30
   TAIEX fell 1.44% (about 40 points of it ex-dividend) while the July TX settled +0.10%.
+- **An intraday index opens at the previous close** (2026-10-19, Volume IV). `TaiwanVariousIndicators5Seconds` prints
+  the previous day's TAIEX close at 09:00:00, and the index takes about a minute to absorb the opening gap (stocks open
+  one by one). A realized variance whose grid starts at 09:00:00 puts the whole overnight gap into its first return
+  (100% of one day's 5-minute variance on 2025-04-07). `data/vol4_rv.py` starts every grid at 09:30:00 and keeps the
+  squared change from the previous close to 09:30:00 as its own column; `fetch_intraday.py --check` requires the
+  09:00:00 value to equal the previous close, which also catches a misdated or copied day.
 - **Final settlement:** TAIFEX averages the published index values from 13:00 (exclusive) to 13:25 (inclusive) plus the
   closing value; at expiry the future converges to that average, not to the 13:30 close.
 - **Not in FinMind:** Taiwan's central-bank policy rate (`InterestRate` has the Fed, the ECB and others, not the CBC).

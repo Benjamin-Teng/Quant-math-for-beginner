@@ -18,6 +18,44 @@ uv run python data/fetch_finmind.py --verify   # later: confirm local files stil
 If FinMind has revised a series, the fetched file is written as `<name>.new` and the script stops, so the book's
 numbers never change silently. New raw files are registered with `fetch_finmind.py --add` (see its `--help`).
 
+Volume IV's intraday series are served one request per day, so they have their own script and manifest,
+[`raw_intraday_manifest.json`](raw_intraday_manifest.json) (one entry per day: dataset, `data_id`, date, rows, SHA-256,
+retrieval date), and live in `raw/intraday/`; `fetch_finmind.py --verify` does not look at them. The realized
+variances derived from them are committed (`derived/`, below), so a reader needs the download only to rebuild that
+file.
+
+```bash
+uv run python data/fetch_intraday.py --dry-run           # the days still to request, the API calls and the time
+uv run python data/fetch_intraday.py --series taiex5s    # T5S: 5,351 one-day requests; resumable; then --check
+uv run python data/fetch_intraday.py --verify            # listed files, pending .new files, unlisted files; no network
+uv run python data/fetch_intraday.py --check             # the per-day checks; no network
+```
+
+T5S is a Free dataset. On a registered Free account (600 calls an hour) its 5,351 requests take about nine hours: the
+script stops with exit status 2 whenever the hourly limit is reached, and you re-run the same command after the hour
+(listed days are skipped). Without `--series` the command also fetches `tx1m` (297 requests), which needs the Sponsor
+plan. With the download present, `./build.sh --data` runs `vol4_rv.py`: an incomplete download leaves the committed
+`derived/vol4_rv.csv` as it is, while a complete one is checked day by day and rebuilds the file, so a day that fails
+a check stops the build.
+
+An empty answer on a TAIEX trading day is logged as FAILED, is not listed, and is asked again on the next run. A day
+that stays empty, or whose data fail a check for a reason you have confirmed, goes into `EXCEPTIONS` in
+`fetch_intraday.py` with its reason: kind `drop` (`vol4_rv.py` leaves the day out), kind `grid` (the values are
+sound but the rows miss the regime's grid; the day is kept) or kind `steps` (a step above the bound was inspected
+and is a real market move; the day is kept). Edit the manifest or `EXCEPTIONS` only while no fetch is running.
+
+**Accepting a revised day.** A listed day is requested again only when its file is missing or no longer matches the
+manifest. When FinMind's answer then differs from the manifest, the fetch writes it as `<date>.csv.new` beside the
+file, leaves the manifest unchanged and exits 1; `--verify` reports it as PENDING until you decide. To ask whether
+FinMind has revised a listed day, move its file out of `data/raw/intraday/` (never delete it; a file left there
+unlisted makes `--verify` fail) and fetch the day with `--series taiex5s --dates <date>`: an
+unchanged answer is written back under the same entry, a changed one becomes `.new`. Compare the two files. To keep
+the listed version, put your copy back and delete the `.new` file. To accept the revision, delete the `.new` file and
+the day's line in `raw_intraday_manifest.json` (keep the JSON valid: the last entry has no trailing comma), then fetch
+the day again with `uv run python data/fetch_intraday.py --series taiex5s --dates <date>` (one request); the day is
+listed again with its new row count, SHA-256 and retrieval date. Then run `--check`, and `vol4_rv.py` if the day is
+in `derived/vol4_rv.csv`. A reader who rebuilds from the committed manifest takes a revised day the same way.
+
 ## Scripts
 
 `./build.sh --data` runs every step below in this order.
@@ -46,8 +84,11 @@ numbers never change silently. New raw files are registered with `fetch_finmind.
 | LM16 | `lm16_numbers.py`, `lm16_charts.py` | every LM16 number (U28 sample), asserted against `../src/lm16.md`; `../src/data/lm16-*.json` |
 | LM17 | `lm17_numbers.py`, `lm17_charts.py` | every LM17 number, asserted against `../src/lm17.md` and compared with the A17 anchors; `../src/data/lm17-*.json` |
 | LM18 | `lm18_common.py` (imported), `lm18_numbers.py`, `lm18_charts.py` | every LM18 number, asserted against `../src/lm18.md`; `../src/data/lm18-*.json` |
+| LM25 | `vol4_series.py` | `processed/vol4_tx23.parquet` (TX23: the TX near-month regular-session settlement and the TAIEX close on TR23's 5,850 dates, rolled at the close of the day before each contract's last trading day, with days to that day, the log basis and the roll-free daily changes), `processed/vol4_series.txt` (the report); stops unless the calendars agree and every row passes the checks of `raw/vol4/` below |
+| LM26 | `vol4_rv.py` | `derived/vol4_rv.csv` (committed, below) from the T5S download, `processed/vol4_rv.txt` (the report); without `raw/intraday/taiex5s/` the build skips the step, with an incomplete download the script keeps the committed file, and with a complete one it checks every day and stops on a failing one |
+| Volume IV | `fetch_intraday.py` | not run by the build: downloads and checks the intraday series `raw/intraday/taiex5s/` and `raw/intraday/tx1m/` (below) and keeps `raw_intraday_manifest.json` |
 
-`processed/` is not committed; `./build.sh --data` recreates it.
+`processed/` is not committed; `./build.sh --data` recreates it. `derived/` is committed (below).
 
 ## Raw files (`raw/`)
 
@@ -58,7 +99,7 @@ All files are exactly as returned by FinMind (retrieved 2026-10-10), in the wind
 - `00679B__<start>__<end>.csv`: `date,close,spread`, 2017-01-17 → 2026-10-08. `00679B_dividends.csv`: 37 quarterly ex-dates with before/after prices and cash dividends from `TaiwanStockDividendResult`; on 2019-03-05 and 2025-08-21 the close was unchanged, so the spread check cannot flag them and the dividend file is the authority.
 - `0050_dividends.csv`: ex-dividend dates, before/after prices and cash dividends from `TaiwanStockDividendResult`.
 - `TAIEX__2025-04-01__2025-10-31.csv`: TAIEX daily closes (146 rows).
-- `TX__2025-04-01__2025-10-31.csv`: `TaiwanFuturesDaily` for TX, regular session only, every listed contract month (876 rows). On its last trading day the expiring contract's `settlement_price` prints 0.0 (the final settlement price is not in this field; use `close` or TAIFEX's published final settlement price). On days a contract does not trade, `close` and `volume` print 0 while `settlement_price` is set by the exchange.
+- `TX__2025-04-01__2025-10-31.csv`: `TaiwanFuturesDaily` for TX, regular session only, every listed contract month (876 rows). On its last trading day the expiring contract's `settlement_price` prints 0.0. The final settlement price is not in this field, and the day's `close` is not it either: for the TX contracts of 200901 → 202609 in TAIFEX's file the two agree on 105 of 189 and differ by up to 4 points (`vol4_settlement/` holds TAIFEX's published final settlement prices). On days a contract does not trade, `close` and `volume` print 0 while `settlement_price` is set by the exchange.
 - `lm06/`: for LM6, TAIEX closes (`TaiwanStockPrice`) for 2024-12-31 → 2025-03-31 and 2025-11-03 → 2025-12-31, which with the main TAIEX file cover calendar 2025; the TWSE total-return index (`TaiwanStockTotalReturnIndex`, columns `date,stock_id,price`) for the same three windows; TAIEX open, high (`max`), low (`min`), close and spread for 2025-06-26 → 2025-07-01. `lm06_basis.py` checks that every close satisfies the spread rule across the chunks, that both indices share their dates, and that the total-return index never falls behind the price index except by rounding (it gains only on ex-dividend days).
 - `QQQ__us_2022.csv`, `TQQQ__us_2022.csv`: `date,adj_close,close` from `USStockPrice`. Adjusted closes depend on the retrieval date; returns within the window do not.
 - `sectors/` (Volume II, retrieved 2026-10-11): `date,close,spread` from `TaiwanStockPrice` for TAIEX and the 30 TWSE
@@ -104,6 +145,72 @@ the editor's exploration for the Volume II briefs (`processed/vol2_anchors.txt`)
   `processed/vol3_taiex.parquet` and `processed/vol3_series.txt`. `vol3_anchors_lm13.py` … `vol3_anchors_lm18.py`
   print every number of the Volume III briefs, one line per anchor of `../plans/vol-3-anchors.md` (LM16's reads
   `vol2_closes.parquet`); they write nothing.
+- `vol4/` (Volume IV, retrieved 2026-10-19): `TX__1998-07-21__2026-10-16.csv`, `TaiwanFuturesDaily` for TX, the whole
+  history in one query, regular session only (`trading_session` position) and monthly contracts only (`contract_date`
+  of six digits; the calendar-spread rows are left out), columns
+  `date,contract_date,close,spread,settlement_price,volume,open_interest` (36,437 rows, 7,009 dates, 343 contracts).
+  `spread` is the close minus the contract's previous *settlement*, not its previous close; on a day a contract does
+  not trade, `close`, `spread` and `volume` print 0 (646 rows in TR23's window; 639 of them after a first listing day). Within 2003-01-02 → 2026-10-08 the
+  only rows that break this rule are the five months listed on 2007-03-12, whose spreads are the close minus the
+  *same* day's settlement (the next session's spreads, which follow the rule, confirm those settlements);
+  `vol4_series.py` asserts that pattern. A contract's last trading day is its last
+  row: the third Wednesday of its month, or later after a holiday (eight contracts in the window). From 2008-12-17 the
+  expiring contract's `settlement_price` prints 0 on that day (214 contracts). The regular-session dates equal TR23's
+  5,850 dates, with five monthly contracts a date to 2018-06-29 and six from 2018-07-02. The file runs a week past
+  TR23's last date so that the contract held on 2026-10-08 is known not to expire the next session. `check_chunk.py`
+  does not apply (several contracts a date, and the spread is against the settlement); `vol4_series.py` checks all of
+  the above and builds TX23. On 2008-10-27 TX fell by its 7% limit and TAIEX by 4.6%, so the near-month log basis
+  reached −7.9%, the sample's widest. `vol4/` holds only this file; the intraday files are in `intraday/`.
+- `vol4_settlement/` (Volume IV, retrieved 2026-10-19; Backer, optional):
+  `TaiwanFuturesFinalSettlementPrice` for TX, monthly contracts only (`contract_month` of six digits; the weekly
+  `YYYYMMWn` rows are left out), columns `date,contract_month,settlement_price`: 277 official final settlement prices,
+  199809 → 202609, with no rows for 2000, 2006, 2008, 2014 and 2020. `vol4_series.py` uses it only as a cross-check:
+  the final-settlement date is the contract's last trading day from 200901 and the next session up to 200712, and the
+  script skips the cross-check when the file is absent. `fetch_finmind.py --verify`, and so `./build.sh --data`,
+  accepts the file missing (`OPTIONAL` in that script) but not changed. On a plan without this dataset, fetch with
+  `--exclude vol4_settlement/`.
+- `intraday/taiex5s/<year>/<date>.csv` and `intraday/tx1m/2025/<date>.csv` (Volume IV intraday, `fetch_intraday.py`,
+  listed in `raw_intraday_manifest.json`, not in `raw_manifest.json`; the request log is
+  `intraday/fetch_intraday.log`). Each file is one day exactly as returned: FinMind's columns in its order, every
+  value as printed in its JSON.
+  - `taiex5s`: `TaiwanVariousIndicators5Seconds` (Free, no `data_id`), columns `date,TAIEX` (`date` carries the time),
+    every TAIEX trading day 2005-01-03 → 2026-10-08 (5,351 days, about 310 MB). The rows a day give the sampling: 271
+    (every minute) to 2011-01-14, 1,081 (every 15 seconds) 2011-01-17 → 2014-02-21, 1,621 (every 10 seconds)
+    2014-02-24 → 2014-12-27 (a Saturday session) and 3,241 (every 5 seconds) from 2014-12-29;
+    `fetch_intraday.py --check` prints every regime's first and last day. FinMind prints the
+    previous trading day's close at 09:00:00; the values after it move with the day's trading, and the first seconds
+    carry the opening gap. `--check` requires the 09:00:00 value to equal the previous trading day's TAIEX close and
+    the 13:30:00 value the day's (`TaiwanStockPrice`, within 0.005), and checks every value and the steps between
+    consecutive values (`fetch_intraday.py --help`).
+  - `tx1m`: `TaiwanFuturesKBar` (Sponsor) for TX, calendar 2025, columns
+    `date,futures_id,contract_date,minute,open,high,low,close,volume`, every listed month and calendar spread. A date
+    holds 00:00–04:59 of the night session that began the session before, then 08:45–13:45 (a 13:45:00 bar on one
+    of the ten test days) and 15:00–23:59 of its own sessions. Saturdays and the first day of a holiday hold only that
+    00:00–04:59 tail; later holiday days and Sundays answer no rows. The calendar is the 243 trading days of 2025 plus the 54 calendar days after one (297
+    requests); a day off the trading calendar that answers no rows is listed with `rows` 0 and no file, while an
+    empty trading day is retried like a T5S day.
+
+## Derived files (`derived/`)
+
+Per-day statistics of raw data that a reader could otherwise rebuild only with a long download. They are committed
+by the owner's decision of 2026-10-19 (`../plans/ROADMAP.md`, "Data rule"): per-day statistics only, never intraday
+prices or returns. They are not covered by the repository's MIT licence: they derive from FinMind data, which remain
+subject to FinMind's terms (non-commercial use; credit FinMind and the original source).
+
+- `vol4_rv.csv` (LM26, `vol4_rv.py`), derived from FinMind's `TaiwanVariousIndicators5Seconds`, the TAIEX that the
+  Taiwan Stock Exchange (TWSE) computes. Its first line is a comment with that credit; read it with
+  `pl.read_csv("data/derived/vol4_rv.csv", comment_prefix="#")`. One row per TAIEX trading day 2005-01-03 →
+  2026-10-08, less any day that `fetch_intraday.py` lists as a `drop` exception (`processed/vol4_rv.txt` gives the
+  reason): `date`; `regime_s`, the seconds between the day's values; for each of the nine sampling intervals h (`5s`,
+  `10s`, `15s`, `30s`, `1m`, `5m`, `10m`, `15m` and `30m`), `rv_<h>`, the sum of squared log returns on the grid
+  09:30:00, 09:30:00 + h, …, 13:30:00, and `n_<h>`, the number of returns (14,400 s / h), both NaN when h is not a
+  multiple of `regime_s` (Polars then reads that `n_<h>` column as floats); and `o2`, the squared log change from the
+  previous trading day's TAIEX close (`TaiwanStockPrice`; for 2005-01-03, 2004-12-31's close from `raw/vol3/`) to the
+  09:30:00 value. Values carry seven significant digits. The file holds no signed return and no price level. The grids
+  start at 09:30:00 because FinMind's 09:00:00 value is the previous close (`raw/` above): a grid from 09:00:00 would
+  put the overnight gap into its first return. The 240 minutes to 13:30:00 hold a whole number of every interval, so
+  every grid covers the same window, and `o2` keeps the gap as its own column. `vol4_rv.py` rebuilds the file only
+  from a complete download that passes `fetch_intraday.py`'s checks.
 
 ## Verification
 

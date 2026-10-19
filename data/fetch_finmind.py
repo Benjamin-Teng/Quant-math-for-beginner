@@ -21,8 +21,12 @@ reports that the request quota ("upper limit") is used up. Re-run to retry; entr
     uv run python data/fetch_finmind.py --only 00679B  # restrict to manifest paths containing a substring
     uv run python data/fetch_finmind.py --exclude sectors_close/   # skip paths containing a substring (repeatable),
                                                        # e.g. on FinMind's free plan, which lacks that dataset
+                                                       # (and vol4_settlement/, an optional Backer cross-check)
     uv run python data/make_lab_data.py                # then rebuild every lab's data/ folder (needs data/raw/*.csv,
                                                        # lm06/ and sectors/; uses sectors_close/ when present)
+
+--verify accepts a missing file in an OPTIONAL folder (vol4_settlement/: a cross-check that vol4_series.py skips when
+the file is absent), so a checkout without it still passes --verify; a present file must match like any other.
 
 Register a new raw file (after verifying it with data/check_chunk.py). --add re-fetches the query (it needs
 FINMIND_TOKEN) and refuses to register it unless the result matches the file byte for byte: FinMind's labels differ
@@ -31,6 +35,10 @@ session without API access; run the full fetch in a clean checkout before relyin
 
     uv run python data/fetch_finmind.py --add TX__2025-04-01__2025-10-31.csv --dataset TaiwanFuturesDaily --data-id TX \
         --start 2025-04-01 --end 2025-10-31 --filter trading_session=^position$ --filter 'contract_date=^\\d{6}$'
+
+Volume IV's intraday series (one request per day, 5,648 days) are not in this manifest: data/fetch_intraday.py
+downloads them into data/raw/intraday/ with its own manifest, data/raw_intraday_manifest.json (saved under this
+script's lock), and --verify here does not look at them.
 
 Columns are kept under the FinMind names unless mapped with --map out=source (for example
 --map cash_dividend=stock_and_cache_dividend). A new daily series can be one file: the API returns the whole
@@ -46,6 +54,7 @@ every series of the day (about 200,000 rows). --filter then keeps the one row yo
         --filter time=^13:30:00$ --filter kind=^twse$
 """
 import argparse
+import contextlib
 import csv
 import hashlib
 import io
@@ -66,7 +75,8 @@ LOCK = ROOT / "data" / "raw_manifest.lock"
 API ="https://api.finmindtrade.com/api/v4/data"
 PAUSE = 0.7                                                # seconds between requests, far below the hourly API limit
 MAX_CONSECUTIVE_FAILURES = 25
-LAB_INPUTS = ("lm06/", "sectors/", "vol3/")                # folders make_lab_data.py needs, besides the top level
+LAB_INPUTS = ("lm06/", "sectors/", "vol3/", "vol4/")      # folders make_lab_data.py needs, besides the top level
+OPTIONAL = ("vol4_settlement/",)   # cross-checks their script skips when absent: --verify accepts them missing
 
 def sha256(b: bytes) -> str:
     return hashlib.sha256(b).hexdigest()
@@ -80,23 +90,31 @@ def save_manifest(m):
     tmp.write_text(json.dumps(m, indent=1, ensure_ascii=False) + "\n", encoding="utf-8")
     os.replace(tmp, MANIFEST)                              # a reader never sees a half-written manifest
 
-def register(entry):
-    """Add or replace one manifest entry under a lock, so parallel --add runs cannot drop each other's entries."""
-    for _ in range(300):                                   # wait up to 30 s for another --add to finish writing
+@contextlib.contextmanager
+def manifest_lock():
+    """Hold data/raw_manifest.lock while a manifest is read, changed and written back. --add here and every manifest
+    save of fetch_intraday.py take it, so runs in parallel cannot drop each other's entries."""
+    for _ in range(300):                                   # wait up to 30 s for another run to finish writing
         try:
             fd = os.open(LOCK, os.O_CREAT | os.O_EXCL | os.O_WRONLY)
             break
         except FileExistsError:
             time.sleep(0.1)
     else:
-        raise SystemExit(f"not registered: data/{LOCK.name} exists (another --add is writing, or delete a stale lock)")
+        raise SystemExit(f"nothing written: data/{LOCK.name} exists (fetch_finmind.py --add or fetch_intraday.py is "
+                         "writing a manifest, or delete a stale lock)")
     try:
-        m = load_manifest()
-        m["files"] = [e for e in m["files"] if e["path"] != entry["path"]] + [entry]
-        save_manifest(m)
+        yield
     finally:
         os.close(fd)
         LOCK.unlink()
+
+def register(entry):
+    """Add or replace one manifest entry under the lock."""
+    with manifest_lock():
+        m = load_manifest()
+        m["files"] = [e for e in m["files"] if e["path"] != entry["path"]] + [entry]
+        save_manifest(m)
 
 def fmt(value, kind):
     if kind == "float":
@@ -196,9 +214,11 @@ def main():
     entries = [e for e in load_manifest()["files"]
                if args.only in e["path"] and not any(x in e["path"] for x in args.exclude)]
     if args.verify:
-        bad = [e["path"] for e in entries if not verify_local(e)]
+        absent = {e["path"] for e in entries if e["path"].startswith(OPTIONAL) and not (RAW / e["path"]).exists()}
+        bad = [e["path"] for e in entries if e["path"] not in absent and not verify_local(e)]
         for e in entries:
-            print(("ok      " if e["path"] not in bad else "MISSING/CHANGED ") + e["path"])
+            p = e["path"]
+            print(("absent  (optional) " if p in absent else "MISSING/CHANGED " if p in bad else "ok      ") + p)
         sys.exit(1 if bad else 0)
     token = os.environ.get("FINMIND_TOKEN")
     if not token:
@@ -259,13 +279,14 @@ def main():
               + (" Fetched now:" if fetched else ""))
         for p in fetched:
             print(f"  {p}")
-        # make_lab_data.py reads the top level of data/raw, lm06/, sectors/ and vol3/; sectors_close/ only when present
+        # make_lab_data.py reads the top level of data/raw, lm06/, sectors/, vol3/ and vol4/ (Volume IV's labs);
+        # sectors_close/ only when present; vol4_settlement/ is a cross-check for vol4_series.py only
         need = [e["path"] for e in load_manifest()["files"]
                 if ("/" not in e["path"] or e["path"].startswith(LAB_INPUTS)) and not verify_local(e)]
         if need:
-            print(f"make_lab_data.py needs {len(need)} more files (data/raw/*.csv, lm06/, sectors/, vol3/): run "
-                  "fetch_finmind.py with no --only and no --exclude (on the free plan: --exclude sectors_close/ only) "
-                  "before it.")
+            print(f"make_lab_data.py needs {len(need)} more files (data/raw/*.csv, lm06/, sectors/, vol3/, vol4/): "
+                  "run fetch_finmind.py with no --only and no --exclude (on the free plan: --exclude sectors_close/ "
+                  "--exclude vol4_settlement/ only) before it.")
         else:
             print("make_lab_data.py has every file it needs; next: uv run python data/make_lab_data.py")
     else:

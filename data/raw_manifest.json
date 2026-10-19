@@ -28144,6 +28144,67 @@
    ],
    "rows": 1113,
    "sha256": "4ad5b357a5016933d7acdad0b7baf14e4204619dca67fb2bfac255aeb9cb05ab"
+  },
+  {
+   "path": "vol4/TX__1998-07-21__2026-10-16.csv",
+   "dataset": "TaiwanFuturesDaily",
+   "data_id": "TX",
+   "start_date": "1998-07-21",
+   "end_date": "2026-10-16",
+   "columns": {
+    "date": "date",
+    "contract_date": "contract_date",
+    "close": "close",
+    "spread": "spread",
+    "settlement_price": "settlement_price",
+    "volume": "volume",
+    "open_interest": "open_interest"
+   },
+   "kinds": {
+    "date": "date",
+    "contract_date": "int",
+    "close": "float",
+    "spread": "float",
+    "settlement_price": "float",
+    "volume": "int",
+    "open_interest": "int"
+   },
+   "filter": {
+    "trading_session": "^position$",
+    "contract_date": "^\\d{6}$"
+   },
+   "sort": [
+    "date",
+    "contract_date"
+   ],
+   "rows": 36437,
+   "sha256": "35cdc1e20a4bde7a4af124b1b9621fcff654aecc6a8121c8e41028cd3852f391"
+  },
+  {
+   "path": "vol4_settlement/TX__1998-07-21__2026-10-16.csv",
+   "dataset": "TaiwanFuturesFinalSettlementPrice",
+   "data_id": "TX",
+   "start_date": "1998-07-21",
+   "end_date": "2026-10-16",
+   "columns": {
+    "date": "date",
+    "contract_month": "contract_month",
+    "settlement_price": "settlement_price"
+   },
+   "kinds": {
+    "date": "date",
+    "contract_month": "int",
+    "settlement_price": "float"
+   },
+   "filter": {
+    "contract_month": "^\\d{6}$"
+   },
+   "sort": [
+    "date",
+    "contract_month"
+   ],
+   "rows": 277,
+   "sha256": "0d30d0d0ea8dc82197bc6f9bbfb09c635cafc4e5ba822b05b3263d22d4a1fce0"
   }
  ]
 }

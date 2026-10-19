@@ -6,6 +6,8 @@
 #   ./build.sh --data     first rebuild data/processed and src/data/*.json from data/raw
 #   ./build.sh --labs     also regenerate and execute every lab notebook
 #   ./build.sh --fetch    first rebuild data/raw/ from FinMind (needs FINMIND_TOKEN) and every lab's data/ folder
+# Volume IV's intraday data (one request a day: 5,351 for TAIEX every 5 seconds) are fetched separately with
+# data/fetch_intraday.py (data/README.md); --data then also rebuilds data/derived/vol4_rv.csv when the download is complete
 # A module is published when its entry in src/syllabus.yaml has `status: published` (see AUTHORING.md §11).
 set -euo pipefail
 cd "$(dirname "$0")"
@@ -46,6 +48,8 @@ DATA_STEPS=(
   data/lm16_numbers.py data/lm16_charts.py   # U28, from vol2_series.py
   data/lm17_numbers.py data/lm17_charts.py
   data/lm18_numbers.py data/lm18_charts.py
+  data/vol4_series.py           # Volume IV TX23: the TX near-month settlement on TR23's dates, checked
+  data/vol4_rv.py               # LM26 realized variance (data/derived/vol4_rv.csv) from a complete T5S download
 )
 # Raw FinMind data are not committed (licence): fetch them with your token and verify against data/raw_manifest.json.
 if [ "$FETCH" = 1 ]; then
@@ -57,7 +61,12 @@ if [ "$DATA" = 1 ] || [ "$LABS" = 1 ]; then
   py data/fetch_finmind.py --verify > /dev/null || { echo "data/raw is missing or differs from the manifest: run ./build.sh --fetch"; exit 1; }
 fi
 if [ "$DATA" = 1 ]; then
-  for s in "${DATA_STEPS[@]}"; do echo "data: $s"; py "$s" > /dev/null; done
+  for s in "${DATA_STEPS[@]}"; do
+    if [ "$s" = data/vol4_rv.py ] && [ ! -d data/raw/intraday/taiex5s ]; then
+      echo "data: $s skipped (no data/raw/intraday/taiex5s/: the committed data/derived/vol4_rv.csv stays)"; continue
+    fi
+    echo "data: $s"; py "$s" > /dev/null
+  done
 fi
 
 py build/build.py --target web

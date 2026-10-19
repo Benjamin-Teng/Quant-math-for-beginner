@@ -74,12 +74,16 @@ end of the roadmap before the batch that needs them; content is the editor's cal
 approved (ROADMAP, "Decided by the owner"); its packages (statsmodels, arch, per ROADMAP's Volume IV row) are not yet,
 so they go into the Stage 1 capability check.
 
-**Status (2026-10-19).** Steps 1 and 2 are drafted in [`plans/vol-4.md`](plans/vol-4.md): the shared decisions, the
-spines and the capability check, after a survey of the published book, the data, the packages and the sources, and a
-fresh adversarial check of the draft. The capability check (A packages, B data pipeline, B′ what is committed from
-T5S, C chart kit, D `Book.dist`/`Book.rng`, E optional TX minute bars) waits for the owner's decision; the next steps
-are the approved builds, AUTHORING §6's Volume IV notation, SOURCES, the data download (T5S on the owner's computer,
-about one hour of quota) and the briefs.
+**Status (2026-10-19).** Steps 1–2 are done and step 3 is under way ([`plans/vol-4.md`](plans/vol-4.md)): the shared
+decisions, the spines and the capability check, after a survey and a fresh adversarial check. The owner approved A
+(statsmodels 0.15.0 and arch 8.0.0, smoke-tested in an empty environment), B (TX23 by `data/vol4_series.py`; T5S by
+`data/fetch_intraday.py` with its own manifest; `data/vol4_rv.py`), B′ (per-day realized variances committed in
+`data/derived/vol4_rv.csv`), C (log $x$, `x.values`, scatter `tickLabels` and bands, size checks) and E (TX 1-minute
+bars for 2025); not D. Each piece was built, reviewed by a fresh agent, fixed and re-reviewed (published pages pixel-
+and byte-identical). AUTHORING §6–§9, PITFALLS §3, SOURCES (Volume IV) and the ROADMAP decision are updated. Next:
+the T5S download (about 90 minutes) and `vol4_rv.py`; the LM19–LM25 briefs and anchors are being drafted, LM26's after
+the download; then the cross-check, the independent anchor recomputation, the editor's decisions, the revised briefs
+and a fresh check of the whole of Stage 1.
 
 **Stage 1, before any writer starts**, as Volume III did (`plans/vol-3.md` is the model):
 

@@ -327,8 +327,8 @@ uv run --with jupyterlab jupyter lab labs/</code></pre></div>
         body = head + body.replace("<a class=\"skip\"", "</head>\n<body>\n<a class=\"skip\"", 1) + "</body>\n</html>\n"
     out = B.OUT / "index.html"
     out.parent.mkdir(parents=True, exist_ok=True)
-    out.write_text(body, encoding="utf-8")
-    print(f"built {out.relative_to(ROOT)}", f"{len(body):,} bytes")
+    out.write_text(body, encoding="utf-8"); B.check_page_size(out, body)
+    print(f"built {out.relative_to(ROOT)}", f"{len(body.encode('utf-8')):,} bytes")
 
 if __name__ == "__main__":
     build()

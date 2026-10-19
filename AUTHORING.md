@@ -150,22 +150,22 @@ note says why.
 | Symbol | Book-wide meaning |
 |:--|:--|
 | $R$, $r$ | simple return per period; $r:=\ln(1+R)$ the log return. A continuously compounded rate is also an $r$: $r_f$, $r(t)$ |
-| $\mu$, $\sigma$ | mean and standard deviation of $R$ in a model; $\bar R$ (or $\hat\mu$) and $s$ are the sample mean and standard deviation (say whether $s$ divides by $T$ or $T-1$) |
+| $\mu$, $\sigma$ | mean and standard deviation of $R$ in a model; $\bar R$ (or $\hat\mu$) and $s$ are the sample mean and standard deviation, $s$ with divisor $T$ (from Volume IV, $s_{\mathrm u}$ divides by $T-1$) |
 | $g$, $G$ | log growth rate per unit time ($g(f)$: growth as a function of exposure); growth factor, end value ÷ start value |
 | $\mathrm{RV}$ | $\sum_t R_t^2$, realized variance |
 | $A$ | periods per year used to annualize, e.g. $A=243.1$ trading sessions; always say which sample it comes from |
 | $T$, $t$, $\tau$, $n$ | either a sample size (number of returns) or a horizon or maturity in years: a module uses one of the two and says which; time index; time to maturity or expiry, or any span in years when $T$ is a count; number of compounding or payment periods |
 | $P$, $W$, $D$, $\mathrm{DD}$ | price; wealth; cash dividend ($D_1$ the next dividend); drawdown |
-| $f$, $f^*$, $c$ | exposure ÷ equity of a position ($f>1$ is leverage); its growth-maximizing (Kelly) value; $c:=f/f^*$, the fraction of full Kelly |
+| $f$, $f^*$, $c$ | exposure ÷ equity of a position ($f>1$ is leverage); its growth-maximizing (Kelly) value; $c:=f/f^*$, the fraction of full Kelly (LM25, without Kelly, writes $c$ for an AR intercept) |
 | $L$ | a leveraged fund's fixed daily multiple (00631L: $L=2$); for a portfolio, total exposure $\sum_i f_i$; in a module without leverage, a Cholesky factor, declared (table below) |
-| $p$, $q$, $b$, $a$ | binary bet: win probability, $q=1-p$, gain $b$ and loss $a$ per unit staked, so $f^*=p/a-q/b$. In futures pricing $q$ is instead the continuous dividend yield; a module uses one of the two |
+| $p$, $q$, $b$, $a$ | binary bet: win probability, $q=1-p$, gain $b$ and loss $a$ per unit staked, so $f^*=p/a-q/b$. In futures pricing $q$ is instead the continuous dividend yield; a module uses one of the two. LM21, without bets, writes $p_i$ for p-values and $q$ for a false-discovery level; LM26's auxiliary regressions write their coefficients $a$, $b$ |
 | $r_f$ | risk-free or financing rate (state the compounding) |
 | $\mathrm{SR}$ | Sharpe ratio $(\mu-r_f)/\sigma$ of a return; say the period (per day, or annualized) |
 | $w$, $\mathbf w$, $\mathbf f$, $\Sigma$, $\rho$ | portfolio weights summing to 1; vector of exposures; covariance matrix; correlation |
 | $\varphi$, $\Phi$ | standard normal density and distribution function |
 | $B_t$ | standard Brownian motion ($W$ stays wealth, so $dW_t=W_t(\mu\,dt+\sigma\,dB_t)$ reads unambiguously); a module without Brownian motion may use $B$ for a balance, or (LM18) the number of bootstrap resamples, declared in its notation note |
 | $y$, $i$, $v$, $k$, $\gamma$ | yield to maturity or IRR; periodic interest rate; discount factor $1/(1+i)$; required return; growth rate of dividends or cash flows (simple, per period) |
-| $\lambda$, $\nu$, $\mathcal L$ | multiplier of an equality constraint (with a subscript, $\lambda_k$ is an eigenvalue: table below); multipliers of inequality constraints (KKT), or in a module about distributions a Student $t$'s degrees of freedom (a module uses one of the two); Lagrangian. In a module about distributions without constraints, $\lambda$ is a Poisson mean or an exponential rate |
+| $\lambda$, $\nu$, $\mathcal L$ | multiplier of an equality constraint (with a subscript, $\lambda_k$ is an eigenvalue: table below); multipliers of inequality constraints (KKT), or in a module about distributions a Student $t$'s degrees of freedom (a module uses one of the two); Lagrangian. In a module about distributions without constraints, $\lambda$ is a Poisson mean or an exponential rate. Volume IV has no constraints: there $\mathcal L(\theta)$ is a likelihood, and LM26's $\lambda$ is the EWMA decay |
 | $h$, $u$; $\psi$ | generic functions in modules where $f$ or $g$ already have their book-wide meaning ($f$, $g$, $h$ are fine in purely mathematical modules; from Volume III $u$ is instead a probability level or a uniform draw, table below); constraint functions, $\psi(x)=b$ or $\psi_i(x)\le b_i$ (there $b$ is a constraint level, not a bet's gain: a module uses one of the two) |
 
 **Vectors and matrices** (from Volume II; LM7 already writes vectors, transposes and $\Sigma$ this way):
@@ -176,7 +176,7 @@ note says why.
 | $M$, $K$; $m_{ij}$ | a matrix is a plain capital; a generic matrix is $M$ (a second one $K$), never $A$, which annualizes; $m_{ij}$ is the entry in row $i$ and column $j$ |
 | $^{\top}$, $M^{-1}$, $\det M$, $\operatorname{rank}M$, $\operatorname{tr}M$ | transpose (never $^T$, since $T$ is a count, and never a prime, which is a derivative); inverse; determinant; rank; trace |
 | $I$, $\mathbf 0$, $\mathbf 1$, $\mathbf e_i$ | identity ($I_N$ when the size matters); zero vector; vector of ones; $i$th standard basis vector, in a module that does not use LM7's excess-return vector $\mathbf e$ |
-| $\lVert\mathbf x\rVert$, $\lVert M\rVert_2$, $\mathbf x^{\top}\mathbf y$, $\theta$ | Euclidean norm; spectral norm, $\max_{\lVert\mathbf u\rVert=1}\lVert M\mathbf u\rVert$ (the largest absolute eigenvalue of a symmetric $M$); dot product (LM8 also writes $\mathbf x\cdot\mathbf y$); angle between two vectors ($\varphi$ stays the normal density) |
+| $\lVert\mathbf x\rVert$, $\lVert M\rVert_2$, $\mathbf x^{\top}\mathbf y$, $\theta$ | Euclidean norm; spectral norm, $\max_{\lVert\mathbf u\rVert=1}\lVert M\mathbf u\rVert$ (the largest absolute eigenvalue of a symmetric $M$); dot product (LM8 also writes $\mathbf x\cdot\mathbf y$); angle between two vectors ($\varphi$ stays the normal density); from Volume IV, in a module without angles, $\theta$ is a parameter (statistics table below) |
 | $N$, $i$, $j$; $T$, $t$ | number of assets and asset indices; number of returns and the date index |
 | $\mathbf R_t$, $X$, $\tilde X$, $\bar{\mathbf R}$ | vector of the $N$ simple returns on date $t$; the $T\times N$ matrix whose row $t$ is $\mathbf R_t^{\top}$ (date first, asset second), so its entry $x_{tj}$ is $R_{j,t}$, the return of asset $j$ on date $t$ (asset first); its centred version $X-\mathbf 1\bar{\mathbf R}^{\top}$; vector of sample means |
 | $\hat\Sigma$, $\mathbf s$, $C$ | sample covariance matrix $\tilde X^{\top}\tilde X/T$ (divisor $T$; in NumPy `ddof=0`, `rowvar=False`); vector of sample standard deviations; correlation matrix $\operatorname{diag}(\mathbf s)^{-1}\hat\Sigma\operatorname{diag}(\mathbf s)^{-1}$ |
@@ -191,7 +191,7 @@ note says why.
 
 | Symbol | Book-wide meaning |
 |:--|:--|
-| $\Omega$, $\omega$ | sample space; an outcome (sequences of trades or days as $+$/$-$ strings) |
+| $\Omega$, $\omega$ | sample space; an outcome (sequences of trades or days as $+$/$-$ strings); LM26, without a sample space, writes $\omega$ for a GARCH constant |
 | $\Pr(\cdot)$, $\Pr(B\mid A)$ | probability and conditional probability (`\mid`), never $P$, the price. Events are sets, $\{R\le-3\%\}$; capital letters $A$, $B$ for events only in a module that does not annualize (LM13), with $A^c$ the complement |
 | $\mathcal A$, $\mathcal B$ | an event in a general statement, in a module that annualizes, where $A$ is the annualization factor; LM13, which does not annualize, writes $A$, $B$ |
 | $\mathbf 1_{\mathcal A}$, $\mathbf 1\{\cdot\}$ | indicator of an event, always with a subscript or braces (bold $\mathbf 1$ alone is the vector of ones); $\E[\mathbf 1_{\mathcal A}]=\Pr(\mathcal A)$ is (14.1) |
@@ -201,12 +201,40 @@ note says why.
 | $u$, $U$ | a probability level in $F^{-1}(u)$; a value of a uniform random variable $U\sim\operatorname{Unif}(0,1)$ |
 | $\E$, $\Var$, $\Cov$, $\operatorname{Corr}$; $\operatorname{Skew}$, $\operatorname{Kurt}$ | expectation, variance, covariance, correlation (macros `\E`, `\Var`, `\Cov`); standardized third and fourth moments, excess kurtosis $\operatorname{Kurt}-3$ |
 | $\mu_X$, $\sigma_X$, $\sigma_{XY}$, $\rho_{XY}$ | moments of random variables; unsubscripted $\mu$, $\sigma$, $\rho$ stay the return's. A population correlation is $\rho$, a sample one $\hat\rho$ in a module with both |
-| $\bar R$, $s$; $\bar r$, $s_r$; $g$, $\sigma_r$ | sample mean and standard deviation of $R$ and of $r$ (divisor $T$); model mean log return per day $g=\E[\ln(1+R)]$ and its standard deviation |
+| $\bar R$, $s$; $\bar r$, $s_r$; $g$, $\sigma_r$ | sample mean and standard deviation of $R$ and of $r$ (divisor $T$; $s_{\mathrm u}$ divides by $T-1$); model mean log return per day $g=\E[\ln(1+R)]$ and its standard deviation |
 | $\mathcal N$, $\mathcal N_N$, $t_\nu$, $\chi^2_N$, $\operatorname{Bin}(n,p)$, $\operatorname{Poisson}(\lambda)$, $\operatorname{Exp}(\lambda)$ | distributions; "iid" independent and identically distributed |
 | $n$, $\bar X_n$, $S_n$; $m$ | number of independent draws or trials, their mean and sum ($T$ stays the number of returns in a data sample); number of days summed or compounded in a model, whole sessions ($m=\operatorname{round}(A\tau)$) |
-| $j$, $R_{(j)}$; $k$ | the value of a count in a pmf, the $j$th smallest return; a number of standard deviations, $k\ge0$, in a module without a required return |
+| $j$, $R_{(j)}$; $k$ | the value of a count in a pmf, the $j$th smallest return; a number of standard deviations, $k\ge0$, in a module without a required return; in Volume IV a lag (statistics table), and in LM20 the Hill estimator's tail count, declared |
 | $\eta$, $\zeta$ | constants in $\Var(\eta X+\zeta)$ (LM5's letters; $a$, $b$ are a bet's) |
 | $d^2$ | squared Mahalanobis distance $(\mathbf x-\boldsymbol\mu)^{\top}\Sigma^{-1}(\mathbf x-\boldsymbol\mu)$ |
+
+**Statistics and time series** (from Volume IV, `plans/vol-4.md`; one meaning per module, declared in its notation
+note):
+
+| Symbol | Book-wide meaning |
+|:--|:--|
+| $\theta$, $\hat\theta$, $\boldsymbol\theta$ | a parameter, its estimator, a parameter vector, in a module without angles; in LM21 also a binomial probability under test |
+| $\operatorname{Bias}$, $\operatorname{MSE}$, $\operatorname{SE}$ | bias, mean squared error and standard error of an estimator, upright: $\operatorname{SE}(\bar R)$ |
+| $s_{\mathrm u}$, $s_\varepsilon$ | standard deviation with divisor $T-1$, $s_{\mathrm u}^2=\frac{T}{T-1}s^2$; a regression's residual standard deviation, $s_\varepsilon^2=\text{RSS}/(T-d)$. A script passes `ddof` explicitly (NumPy defaults to 0, Polars to 1) |
+| $\mathcal L(\theta)$, $\ell(\theta)$, $\mathcal I(\theta)$ | likelihood, log-likelihood $\ln\mathcal L$, Fisher information ($I$ stays the identity) |
+| $H_0$, $H_1$; $\text{t-stat}$ | null and alternative hypotheses; a t-statistic, upright, with its estimate when needed, $\text{t-stat}(\hat\beta)$ ($t$ stays the date index and $t_\nu$ the distribution); the Dickey–Fuller statistic is "the DF t-stat" |
+| $p_i$, $p_{(i)}$; $m$; $q$ | in LM21: the p-values of $m$ tests and their ordered values; the number of tests; the false-discovery level. Elsewhere "p-value" is written in words |
+| $\alpha$ | one meaning per module: a significance level (LM21, LM22); a regression intercept and Jensen's alpha (LM23); a GARCH coefficient (LM26); a tail index (LM15, LM20). A module whose $\alpha$ is not the level writes the level as a percentage ("the 5% level") |
+| $\beta$, $\hat{\boldsymbol\beta}$; $\alpha_0$, $\beta_0$ | regression or cointegrating coefficients (LM23, LM25), a GARCH coefficient (LM26); the parameters of a $\operatorname{Beta}(\alpha_0,\beta_0)$ prior (LM24) |
+| $\mu_0$, $\sigma_0$ | prior mean and standard deviation of a mean parameter (LM24); a parameter's density is an $f$ with a subscript |
+| $\varepsilon_t$, $\hat\varepsilon_t$; $\eta_t$; $\xi_t$ | a regression's error and residual (LM23), LM26's innovation $\varepsilon_t=\sigma_t\xi_t$; white noise of an AR or MA model (LM25); an iid standardized innovation, mean 0, variance 1, normal or scaled Student $t$ (LM26; $Z$ stays a standard normal) |
+| $X$, $d$ | LM23's $T\times d$ design matrix, first column $\mathbf 1$, and its number of coefficients (LM23 writes no random variable $X$) |
+| $\rho_k$, $\hat\rho_k$, $\gamma_k$, $\hat\gamma_k$ | autocorrelation and autocovariance at lag $k$, model and sample; $\hat\rho_k$ uses the full-sample mean and divisor $T$ in numerator and denominator (LM19). $\gamma$ without a lag keeps its meaning above |
+| $\operatorname{VR}(m)$ | variance ratio of $m$-day log-return sums (LM19, LM22, LM25) |
+| $\phi_j$, $\theta_j$; $\delta$ | AR and MA coefficients, always subscripted ($\phi_1$ even in an AR(1); $\varphi$ stays the normal density); the Dickey–Fuller coefficient $\delta=\phi_1-1$ (LM25) |
+| $F_t$, $S_t$ | TX settlement price and TAIEX close (LM25; LM6 writes $F$, $S$; $F_X$ keeps its subscript) |
+| $\sigma_t^2$, $\sigma^2_{t+1\mid t}$ | conditional variance of day $t$; its forecast made on day $t$ (LM26) |
+| $\mathrm{RV}_t$ | realized variance of day $t$, the sum of squared intraday log returns at a stated interval (LM26; the table's $\mathrm{RV}$ is the same idea on simple returns) |
+| $B$, $\ell$ | number of bootstrap resamples; block length or mean block length (LM22, which has no likelihood) |
+
+Words with one meaning each: "unconditional variance" is GARCH's $\omega/(1-\alpha-\beta)$ (LM26) and "long-run
+variance" the HAC target (LM23). Not used: $R^2$ for R-squared, a star for a bootstrap draw ($\bar R_{\text{boot}}$),
+$L$ for a lag operator (write $x_{t-1}$), $\tau$ for a Dickey–Fuller statistic, $Z_t$ for a non-normal innovation.
 
 - Subscripted standard symbols are distinct symbols and may sit beside the table: $D_{\text{mod}}$, $D_{\text{Mac}}$,
   $D_{\mathrm{KL}}$, $a_{n,i}$, $s_{n,i}$, $T_1(x)$.
@@ -239,10 +267,10 @@ note says why.
   sub-samples are excluded.
 - A chart must show every value the text cites from it (do not thin a series past the extremes you quote).
 - Chart spec (`src/data/*.json`, produced by `data/lmNN_charts.py`):
-  `{"alt", "height", "x": {"type": "date"|"num", "fmt", "label", "tipLabel", "min", "max", "ticks", "tickLabels"},
-  "y": {"type": "lin"|"log", "fmt", "tfmt", "label", "min", "max", "ticks"}, "series": [{"name", "endLabel", "color":
-  "1".."4" or a CSS colour, "dash", "area", "x": [...], "y": [...]}], "ann": [{"type": "vline"|"hline"|"point"|"band",
-  ...}], "endLabels", "endValue", "endMargin"}`.
+  `{"alt", "height", "x": {"type": "date"|"num"|"log", "fmt", "label", "tipLabel", "min", "max", "ticks",
+  "tickLabels", "values"}, "y": {"type": "lin"|"log", "fmt", "tfmt", "label", "min", "max", "ticks"}, "series":
+  [{"name", "endLabel", "color": "1".."4" or a CSS colour, "dash", "area", "x": [...], "y": [...]}], "ann":
+  [{"type": "vline"|"hline"|"point"|"band", ...}], "endLabels", "endValue", "endMargin"}`.
   On a date axis, series and annotation dates may be ISO strings or epoch milliseconds; ticks fall on year starts when
   at least three are in range, otherwise on month starts (every 1, 2, 3 or 6 months, labelled "Jan 2026", "Apr", …).
   On a numeric axis, `ticks` fixes the tick values and `tickLabels` (one string per tick) replaces their text;
@@ -257,8 +285,15 @@ note says why.
   filled region between them (with a legend entry; `build.py` refuses lengths that differ from `x`); `quiet: true` is
   a thin translucent line with no legend entry, tooltip row, hover dot or end label, for dozens of simulated paths
   (`opacity`, `width` override). Bands are drawn first, then quiet lines, then the rest. `hline` and `vline`
-  annotations take `dash: true`. A log axis ignores values at or below zero. There is no log $x$ axis: plot
-  $\log_{10}$ values on a numeric axis with `tickLabels`.
+  annotations take `dash: true`. A log axis ignores values at or below zero. From Volume IV: `x.type: "log"` is a
+  log $x$ axis, ticked like a log $y$ axis (1, 2 and 5 times powers of ten, only the powers of ten when that gives
+  more than eight ticks); `ticks` and `tickLabels` work as on a numeric axis, and the tooltip header prints the
+  value itself in `x.fmt`. `build.py` refuses a log $x$ axis where any $x$ (in a series, `x.values`, `x.min`,
+  `x.max`, `x.ticks` or an annotation) is not a number above zero. `x.values` is one $x$ array for every series
+  without its own `x` (dates as ISO strings or epoch milliseconds, as in a series), so several series on the same
+  days carry their dates once. `build.py` refuses a series whose `y`, or a band whose `lo` and `hi`, is not as long
+  as its $x$ (its own `x`, else `x.values`), and a band with `lo` above `hi`; a `step` series may instead have one
+  `y` fewer than its $x$ (bin edges and the heights between them).
 - Other chart types: add `"type"` to the spec (`"line"` is the default, and the spec above is a line chart). All types
   need `alt`, share the legend, tooltip, colour tokens and format codes, and are drawn by `Book.chart(host, spec)`.
   - `"bar"`: `categories` (one text each), `valueLabels`, `x: {label}`, `y: {fmt, tfmt, label, min, max, ticks}`,
@@ -274,16 +309,31 @@ note says why.
   - `"scatter"` and `"vector"` share one drawing routine; a vector diagram has equal scales on both axes (`equal`,
     default true; `equal: true` widens an author's own `x`/`y` `min`/`max` until the scales match) and dashed
     `segments`, a scatter plot has free scales and solid `lines`. Keys: `x`, `y` (`label`, `fmt`, `tfmt`, `min`, `max`,
-    `ticks`, `name` for the tooltip), `series: [{name, color, x, y, labels, r}]` (points), `points: [{at, label, color,
-    r, dx, dy}]`, `lines` and `segments: [{from, to, extend, dash, color, width, label}]`, `vectors: [{from, to, label,
-    color, width, dash, dx, dy}]` (arrows; `from` defaults to the origin), `ellipses: [{center, cov, scale, color,
-    fill, axes, label}]` (the contour x'S^-1 x = scale^2 of a positive semi-definite 2x2 `cov`; anything else fails).
+    `ticks`, `tickLabels`, `name` for the tooltip), `series: [{name, color, x, y, labels, r}]` (points), `points:
+    [{at, label, color, r, dx, dy}]`, `lines` and `segments: [{from, to, extend, dash, color, width, label}]`,
+    `vectors: [{from, to, label, color, width, dash, dx, dy}]` (arrows; `from` defaults to the origin), `ellipses:
+    [{center, cov, scale, color, fill, axes, label}]` (the contour x'S^-1 x = scale^2 of a positive semi-definite
+    2x2 `cov`; anything else fails).
+    From Volume IV: `bands: [{x, lo, hi, color, opacity, name}]` fills the region between `lo` and `hi` (`opacity`
+    0.18 unless given, `color` the ink grey unless given) under everything else, and counts in the axis range; a
+    `null` in `lo` or `hi` leaves a gap. A band's `name` is a legend entry, and as with series the legend shows only
+    with two or more entries (series and named bands) or `legend: true`; name the points' series
+    too, or the legend shows an entry without text. `build.py` refuses arrays of unequal
+    length, an $x$ that is not a finite number and `lo` above `hi`. `tickLabels` (one string per tick, with
+    `ticks`; `null` keeps the number) replaces the tick text on either axis. Long $y$ labels widen the left margin
+    up to 40% of the chart's width and are cut with an ellipsis beyond that (about 20 characters on a phone); the
+    tooltip of a point on a labelled $y$ tick prints the whole label.
 - Series names, categories and labels may mark `a_1` and `x_{ij}` as subscripts and `A^T` and `x^{2}` as superscripts:
   in legends and tooltips of every chart type, in the text drawn on bar, heatmap, scatter and vector charts, and in
   line-chart end labels (not in a line chart's axis titles or annotations). A `^` or `_` followed by anything but a
   letter, digit or `{...}` (as in `e^(-2t)`) stays as typed.
 - `build.py` refuses a chart spec without a non-empty `alt` string, or one that is not strict JSON: write a missing
-  point as `null`, never `NaN`. A spec the browser cannot draw leaves a one-line note and the other charts alone.
+  point as `null`, never `NaN`. On any axis of any chart type it refuses `tickLabels` that is not an array as long
+  as that axis's `ticks` (a missing label would shift every later one to the wrong tick). It refuses a chart or
+  widget JSON over 300,000 bytes as inlined (compact JSON in UTF-8), and warns when a built page is over 2,000,000
+  bytes (the largest, LM7, was 1,500,849 in edition 0.4); the warning gives the page's size, the total of its
+  inline charts and its three largest charts. A spec the browser cannot draw leaves a one-line note and the other
+  charts alone.
 - Chart text (legends, labels, end labels) uses no combining marks: the chart font has no Greek, so a hat drifts off
   its letter (write "sample mean", or keep μ̂ for the exhibit note, which renders in the body font).
 - Code blocks keep lines to 80 characters: longer lines are cut off at A4 print width.
@@ -301,14 +351,32 @@ note says why.
 - Real Taiwan and US data, and for historical data FinMind only (`TaiwanStockPrice`, `TaiwanStockDividendResult`,
   `TaiwanFuturesDaily`, `TaiwanStockTotalReturnIndex`, `USStockPrice`, …), fetched through the FinMind API with
   `data/fetch_finmind.py` and a token, a whole series per query where the dataset allows it. Intraday history
-  (`TaiwanVariousIndicators5Seconds`, minute bars, ticks) is large, and some datasets answer one day per request:
-  download it with a logged script (see `plans/ROADMAP.md`).
+  (`TaiwanVariousIndicators5Seconds`, minute bars, ticks) is large and answers one day per request: download it with
+  `data/fetch_intraday.py` into `data/raw/intraday/<series>/<year>/`. That script keeps its own manifest
+  (`data/raw_intraday_manifest.json`, one entry per day), logs every request, stops cleanly at the hourly quota,
+  retries an empty answer on a trading day instead of listing it, and checks every day (`--check`);
+  `fetch_finmind.py --verify` does not need it. A day that fails a check for a reason you have confirmed goes into the
+  script's `EXCEPTIONS` with that reason, as `drop` (left out downstream), `grid` (kept) or `steps` (a real move
+  above the step bound, kept).
 - Store raw files in `data/raw/` exactly as returned (`date,close,spread` for prices) and register each one in
   `data/raw_manifest.json` with `uv run python data/fetch_finmind.py --add …`. `data/raw/` is git-ignored: FinMind's licence
   forbids redistributing raw data, so the repository keeps only the manifest and the scripts. Verify every close against
   FinMind's `spread` column with `data/check_chunk.py`; accept mismatches only on ex-dividend days (spread printed as
   0.0) and split days, and handle those explicitly in the script that builds returns. Around a split, restate the
-  previous price per new share.
+  previous price per new share. Futures files (`TaiwanFuturesDaily`) differ: the spread is against the contract's
+  previous *settlement*, an untraded contract prints a close of 0, and from 2008-12-17 the expiring contract's
+  settlement prints 0 on its last day, so `check_chunk.py` does not apply and the series script checks them per
+  contract (`data/vol4_series.py`). The last day's close is not the final settlement price, which TAIFEX publishes
+  (`TaiwanFuturesFinalSettlementPrice`).
+- Per-day statistics of raw data that a reader could rebuild only with a long intraday download are committed in
+  `data/derived/` (owner, 2026-10-19: per-day statistics only, never intraday prices or returns). Each file starts
+  with a `#` line crediting FinMind and the original source, and `data/README.md` gives its licence (FinMind's terms,
+  not the MIT licence). Its builder rebuilds it only from a complete download that passes every check, and otherwise
+  keeps the committed file. `data/derived/vol4_rv.csv` holds realized variances on the window 09:30:00–13:30:00 (the
+  5-second TAIEX prints the previous close at 09:00:00) and, as its own column, the squared log change from the
+  previous close to 09:30:00 (the overnight gap and the first half hour); it holds no
+  signed return and no price level. The `Source:` line of an exhibit built on such a file names FinMind, the dataset
+  and TWSE.
 - Every number in the text, tables, examples, knowledge checks, problems and solutions must be produced by a script
   in `data/` or by the lab, and re-checked after the last edit.
 - Conventions: a horizon in years is calendar days ÷ 365.25 unless an instrument has its own day count, which is the
@@ -333,17 +401,22 @@ Polars-first notebooks (NumPy/SciPy at the numerical edge, Matplotlib for plots)
 pass literals to expressions with `pl.lit(...)` (strings are column names), avoid `map_elements` when a native
 expression exists, and never rely on row order after a join (pass `maintain_order` or sort). A lab rebuilds the
 module's exhibits and computational examples, solves the computational practice problems, and ends with one
-extension exercise. It reads only files in its own `data/` folder, which is git-ignored and built from `data/raw/` by
-`data/make_lab_data.py` (add the lab's files there). Commit it executed (`./build.sh --labs` or
+extension exercise. It reads only files in its own `data/` folder, which is git-ignored and built from `data/raw/`
+(and, for committed per-day statistics, `data/derived/`) by `data/make_lab_data.py` (add the lab's files there).
+Commit it executed (`./build.sh --labs` or
 `uv run jupyter nbconvert --to notebook --execute --inplace LMNN_lab.ipynb` inside the lab folder). Use only packages in `pyproject.toml` (the standard library's `urllib` for an
 optional live refresh, not `requests`); add a new one with `uv add` after asking the owner.
 
-Standard wording, the same in every module (FinMind's licence forbids redistributing its data, so nothing is bundled):
+Standard wording, the same in every module (FinMind's licence forbids redistributing its data, so no FinMind data are
+bundled):
 
 - The module's companion-lab box keeps the sentence that says what the notebook rebuilds, minus any claim about bundled
   data or a snapshot, and then, in a paragraph of its own (four sentences), says: "The notebook reads FinMind files that you download once with your own token. From the repository root, run
   `uv run python data/fetch_finmind.py`, then `uv run python data/make_lab_data.py`. FinMind's licence does not allow
-  the book to redistribute the data. After that, the notebook runs offline."
+  the book to redistribute the data. After that, the notebook runs offline." LM26's box adds a fifth sentence: "The
+  realized variances come with the repository (`data/derived/vol4_rv.csv`); rebuilding them needs the 5-second TAIEX
+  download, `uv run python data/fetch_intraday.py --series taiex5s` (5,351 requests, about nine hours on a free
+  FinMind account, re-run after each hourly stop)."
 - The notebook's first cell: "**Environment.** From the repository root, `uv sync` installs the locked Python
   environment (`uv.lock`). Open this notebook with the `.venv` kernel, or run `uv run --with jupyterlab jupyter lab`."
 - The lab's README runs `uv sync` and `uv run --with jupyterlab jupyter lab labs/LMNN_lab/LMNN_lab.ipynb` from the

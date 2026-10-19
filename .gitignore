@@ -5,7 +5,7 @@ __pycache__/
 *.pyc
 .ipynb_checkpoints/
 qa_shots/
-# derived data (rebuild with ./build.sh --data)
+# intermediate outputs of the data scripts (rebuild with ./build.sh --data); data/derived/ is committed
 data/processed/
 # OS / editor
 .DS_Store
@@ -22,3 +22,4 @@ data/raw/
 labs/*/data/
 data/raw_manifest.lock
 data/raw_manifest.json.tmp
+data/raw_intraday_manifest.json.tmp
