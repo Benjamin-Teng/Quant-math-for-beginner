@@ -809,6 +809,57 @@ What each source claims; no source found derives fractional Kelly as *the* Bayes
   Volatility Models", *JRSS B* 64(2): 253–280, 2002, DOI
   [10.1111/1467-9868.00336](https://doi.org/10.1111/1467-9868.00336).
 
+### Stage 1 additions to the papers (2026-10-19, after the briefs)
+
+Bibliographic data come from Crossref (`api.crossref.org/works/<doi>`, read 2026-10-19) unless another source is named.
+
+#### The t and χ² laws of normal samples (X32)
+
+- Blitzstein & Hwang (2019). Read 2026-10-19 in the authors' free edition, the Google Drive file recorded above. Its page images were fetched headless through the viewer. Page numbers are as printed on the images; the print edition was not compared.
+  - §7.5, Theorem 7.5.7 (pp. 339–341): "Within an MVN random vector, uncorrelated implies independent."
+  - Example 7.5.9, "Independence of sample mean and sample variance" (p. 342). For X₁,…,Xₙ iid 𝒩(μ,σ²), n ≥ 2, with S²ₙ = Σ(Xⱼ − X̄ₙ)²/(n − 1): "Show that X̄ₙ and S²ₙ are independent by applying MVN ideas to (X̄ₙ, X₁ − X̄ₙ, …, Xₙ − X̄ₙ)". The text solves it.
+  - §10.4, "Chi-Square and Student-t" (p. 477). Definition 10.4.1 defines χ²ₙ as a sum of n squared iid 𝒩(0,1). Theorem 10.4.2: "The χ²ₙ distribution is the Gamma(n/2, 1/2) distribution."
+  - Example 10.4.3, "Distribution of sample variance" (pp. 478–479): "Show that (n − 1)S²ₙ/σ² ∼ χ²ₙ₋₁". It is solved with Example 7.5.9 and MGFs, and the text adds that E(S²ₙ) = σ² (its Theorem 6.3.4).
+  - Definition 10.4.4, Student-t (p. 479): T = Z/√(V/n), with Z ∼ 𝒩(0,1), V ∼ χ²ₙ and Z independent of V. The tₙ density is printed "though we will not prove this". Theorem 10.4.5 (pp. 479–480) gives symmetry, t₁ = Cauchy, and convergence to the normal.
+  - **Not stated in the book:** the tₙ₋₁ law of √n(X̄ₙ − μ)/Sₙ. On p. 479 the text says "we do not introduce the details of t-tests here since they are better left for a course on statistical inference". The exercises seen (19–37, pp. 491–494) do not state it either. It follows in one line from Ex. 7.5.9, Ex. 10.4.3 and Def. 10.4.4, taking Z = √n(X̄−μ)/σ and V = (n−1)S²/σ². A module can cite those three items and show that line.
+  - LM24's χ² density: only Theorem 10.4.2 (Gamma(n/2, 1/2)) was read. The Gamma density itself (§8.4) was not read.
+- Casella & Berger and Wasserman were not reached. No legitimate free copy was found, and the Google Books API answered 429 (daily quota). Their theorem numbers stay open.
+
+#### LM19 (added)
+
+- Kim & White, "On more robust estimation of skewness and kurtosis", *Finance Research Letters* 1(1): 56–73, March 2004, DOI [10.1016/S1544-6123(03)00003-5](https://doi.org/10.1016/S1544-6123(03)00003-5).
+  - Text not read: no free copy was found, and IDEAS lists access as restricted.
+  - Secondary source: statsmodels 0.15.0's `robust_skewness` and `robust_kurtosis` pages cite it. They print SK₂ = [(q.75 − q.5) − (q.5 − q.25)]/(q.75 − q.25) and KR₂ = [(q.875 − q.625) + (q.375 − q.125)]/(q.75 − q.25).
+- Moors, "A Quantile Alternative for Kurtosis", *The Statistician* 37(1): 25–?, 1988, DOI [10.2307/2348376](https://doi.org/10.2307/2348376).
+  - **End page unresolved.** Crossref and OpenAlex give only the first page, and JSTOR answered with a bot challenge.
+  - Read instead in the 1987 discussion paper, Tilburg *Ter discussie FEW* 87.08 ([Tilburg repository PDF](https://repository.tilburguniversity.edu/bitstreams/56d6c0a6-9d7b-4d6a-b194-0a19231563ca/download), an OCR of a scan):
+    - octiles Eᵢ, (2.1);
+    - T = [(E₇ − E₅) + (E₃ − E₁)]/(E₆ − E₂), (2.3);
+    - its table gives the normal's T = 1.233 (E₅ = 0.3186, E₆ = 0.6745, E₇ = 1.1503).
+  - The journal text was not compared.
+- Joanes & Gill, "Comparing measures of sample skewness and kurtosis", *JRSS D (The Statistician)* 47(1): 183–189, March 1998, DOI [10.1111/1467-9884.00122](https://doi.org/10.1111/1467-9884.00122). Bibliographic data only. A BibTeX index gives 10.2307/2988433, which doi.org and Crossref answer with 404: do not use it.
+
+#### LM21 (added)
+
+- Jarque & Bera, "Efficient tests for normality, homoscedasticity and serial independence of regression residuals", *Economics Letters* 6(3): 255–259, 1980, DOI [10.1016/0165-1765(80)90024-5](https://doi.org/10.1016/0165-1765(80)90024-5). This is the reference on SciPy's `jarque_bera` page, which prints it as "6 Econometric Letters 255-259". Bibliographic data only: the paper's own formula was not read. The formula SciPy computes is recorded under "Python" below.
+- Jarque & Bera, "A Test for Normality of Observations and Regression Residuals", *International Statistical Review* 55(2): 163–172, August 1987, DOI [10.2307/1403192](https://doi.org/10.2307/1403192). Crossref gives only the first page; the end page 172 comes from Semantic Scholar (secondary). Bibliographic data only.
+
+#### LM23 (added)
+
+- Jensen, "The Performance of Mutual Funds in the Period 1945–1964" (Crossref prints the title in capitals), *JF* 23(2): 389–416, May 1968, DOI [10.1111/j.1540-6261.1968.tb00815.x](https://doi.org/10.1111/j.1540-6261.1968.tb00815.x). Bibliographic data only.
+- Fama & MacBeth, "Risk, Return, and Equilibrium: Empirical Tests", *JPE* 81(3): 607–636, May 1973, DOI [10.1086/260061](https://doi.org/10.1086/260061). Bibliographic data only.
+- Newey & West (1994), already listed. Read in [NBER Technical Working Paper 144](https://www.nber.org/papers/t0144), "Automatic Lag Selection in Covariance Matrix Estimation", September 1993. The cover lists Kenneth D. West first, then Whitney K. Newey. The PDF is a scan; its pages were extracted locally.
+  - p. 7, (2-2), "For clarity, assume that the Bartlett kernel is used". The **lag selection parameter** n = [4(T/100)^{2/9}] truncates the sums ŝ⁽¹⁾ = 2Σⱼ₌₁ⁿ jσ̂ⱼ and ŝ⁽⁰⁾ = σ̂₀ + 2Σⱼ₌₁ⁿ σ̂ⱼ.
+  - Then γ̂ = 1.1447{(ŝ⁽¹⁾/ŝ⁽⁰⁾)²}^{1/3}, and the HAC truncation lag is "m = [γ̂T^{1/3}]" ("We recommend initially setting"). The recommended procedure first prewhitens with a VAR(1) (p. 6).
+  - So **⌊4(T/100)^{2/9}⌋ is Newey and West's pilot lag, not the HAC lag they recommend.** As a HAC lag it is statsmodels' default (see "Python" below), which answers open point (f).
+  - The definition of the brackets was not seen. The journal version (*RES* 61(4): 631–653) was not read.
+  - The 1.1447 here is Newey and West's Bartlett constant, which arch also uses. It does not settle the open point on Andrews' (1991) constants.
+
+#### LM25 (added)
+
+- Granger & Newbold, "Spurious regressions in econometrics", *J. Econometrics* 2(2): 111–120, July 1974, DOI [10.1016/0304-4076(74)90034-7](https://doi.org/10.1016/0304-4076(74)90034-7). Bibliographic data only.
+- Dimson (1979) is not added, because no brief uses it.
+
 ### Entries already in this list: Volume IV locations
 
 - Wasserman (2004), from the contents in Springer's front-matter PDF (2026-10-19): §6.3.1 Point Estimation, p. 90;
@@ -852,6 +903,14 @@ West (1987); where Hamilton treats Newey–West; every theorem or equation numbe
 end pages that Crossref does not hold (Newey and West 1987, Andrews 1991, Engle and Granger 1987, Johansen 1991,
 Brenner and Kroner 1995); the author order of Drees et al.; the DOI of Hansen's (2024) reply; Lahiri's hardcover ISBN;
 the title and DOI of Martens, Kofman and Vorst (1998); the URLs of the RiskMetrics and BDA3 PDFs.
+
+Closed in Stage 1 (2026-10-19): the $t$ and $\chi^2$ laws of normal samples (Blitzstein and Hwang Ex. 7.5.9,
+Ex. 10.4.3 and Def. 10.4.4; the $t_{n-1}$ law of the studentized mean follows from them in one line, which a module
+shows); the source of the lag rule $\lfloor4(T/100)^{2/9}\rfloor$ (statsmodels' default HAC lag, and Newey and
+West's (1994) pilot lag, not their recommended HAC lag); the Saturday sessions (TWSE's history page). New: Moors'
+(1988) end page; the Kim & White and Joanes & Gill texts; the journal version of Newey and West (1994); Jarque and
+Bera's (1987) end page from a primary source; a TAIFEX page on Saturday sessions; Casella and Berger and Wasserman's
+section contents are still unread.
 
 ## Python (Volume III)
 
@@ -1062,10 +1121,12 @@ statsmodels pages are under `https://www.statsmodels.org/stable/generated/`, arc
   [`MovingBlockBootstrap`](https://bashtage.github.io/arch/bootstrap/generated/arch.bootstrap.MovingBlockBootstrap.html):
   `(block_size, *args, seed=None, **kwargs)` (`bootstrap/base.py:1511/1586, 1367/1442, 1609/1686`); `seed` accepts
   `int | Generator | RandomState` (`base.py:391`), so the experiment's NumPy generator can be passed.
-- [`optimal_block_length`](https://bashtage.github.io/arch/bootstrap/generated/arch.bootstrap.optimal_block_length.html):
-  `optimal_block_length(x) -> pd.DataFrame` (`bootstrap/base.py:126`), columns `b_sb` (stationary) and `b_cb`
-  (circular); it implements Politis & White (2004) with Patton, Politis & White's (2009) correction, both cited in its
-  docstring (`base.py:185-190`).
+- [`optimal_block_length`](https://bashtage.github.io/arch/bootstrap/generated/arch.bootstrap.optimal_block_length.html) (corrected in Stage 1, 2026-10-19):
+  - `optimal_block_length(x) -> pd.DataFrame` (`bootstrap/base.py:126`) returns columns **`stationary`** and **`circular`**.
+    - Code: `base.py:202`. Running it on 500 normals gave `['stationary', 'circular']`.
+    - The docstring (`base.py:139–141`) and the doc page both say `b_sb` and `b_cb`. Those are the internal variable names (`base.py:119–123`).
+  - Each estimate is capped at ⌈min(3√n, n/3)⌉ (`base.py:91`, applied at `:121–122`); the page does not mention the cap.
+  - It implements Politis & White (2004) with Patton, Politis & White's (2009) correction (docstring, `base.py:185–190`).
 - [`ADF`](https://bashtage.github.io/arch/unitroot/generated/arch.unitroot.ADF.html) (also
   [`KPSS`](https://bashtage.github.io/arch/unitroot/generated/arch.unitroot.KPSS.html),
   [`PhillipsPerron`](https://bashtage.github.io/arch/unitroot/generated/arch.unitroot.PhillipsPerron.html)):
@@ -1082,6 +1143,89 @@ statsmodels pages are under `https://www.statsmodels.org/stable/generated/`, arc
 - [`scipy.stats.false_discovery_control`](https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.false_discovery_control.html):
   `false_discovery_control(ps, *, axis=0, method='bh')`, methods `'bh'` and `'by'`; `'by'` controls the FDR under
   dependence, citing Benjamini & Yekutieli (2001), Theorem 1.3 (checked in the locked 1.18.1).
+
+### Stage 1 additions to the Python facts (2026-10-19, after the briefs)
+
+- **Documentation pages:**
+  - SciPy's `stable` pages are titled "SciPy v1.18.0 Manual"; `docs.scipy.org/doc/scipy-1.18.1/` returns 404.
+  - NumPy pages are under `numpy.org/doc/2.5/`.
+  - statsmodels pages are under `https://www.statsmodels.org/v0.15.0/generated/`, titled "statsmodels 0.15.0".
+  - arch pages are titled "arch 8.0.0".
+- **Source lines** are in the project venv's `.venv/Lib/site-packages`: SciPy 1.18.1, NumPy 2.5.3, statsmodels 0.15.0, arch 8.0.0.
+
+#### arch 8.0.0 (Stage 1 check)
+
+- `seed` of the block bootstraps. The page says: "If an int, passes the value to value to np.random.default_rng" (sic).
+  - Code (`base.py:399–404`): a Generator or RandomState is used as given; an int becomes `np.random.default_rng(int(seed))`; `None` becomes `default_rng()`.
+- [`kernel.Bartlett`](https://bashtage.github.io/arch/covariance/generated/arch.covariance.kernel.Bartlett.html): `kernel_const` 1.1447 and `rate` 2/9 (`covariance/kernel.py:440–451`).
+  - The pilot lag in `_alpha_q` is n = ⌈4(nobs/100)^{2/9}⌉ (`kernel.py:337`). arch rounds up, Newey and West print [·], and statsmodels takes the floor.
+  - The bandwidth is 1.1447(α̂T)^{1/3}, capped at nobs − 1 (`:362–374`).
+  - So arch's default Bartlett lag is **not** the book's rule.
+
+#### SciPy 1.18 (Stage 1 check)
+
+- [`ttest_1samp`](https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.ttest_1samp.html): `(a, popmean, axis=0, nan_policy='propagate', alternative='two-sided', *, keepdims=False)`.
+- [`ttest_ind`](https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.ttest_ind.html): `(a, b, *, axis=0, equal_var=True, nan_policy='propagate', alternative='two-sided', trim=0, method=None, keepdims=False)`. `equal_var`: "If True (default), perform a standard independent 2 sample test that assumes equal population variances"; `False` is Welch's test.
+- [`chi2_contingency`](https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.chi2_contingency.html): `(observed, correction=True, lambda_=None, *, method=None)`. `correction`: "If True, and the degrees of freedom is 1, apply Yates' correction for continuity". It is therefore on by default for a 2×2 table.
+- [`binomtest`](https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.binomtest.html): `(k, n, p=0.5, alternative='two-sided')`.
+- [`jarque_bera`](https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.jarque_bera.html): `(x, *, axis=None, nan_policy='propagate', keepdims=False)`.
+  - The page says the test "only works for a large enough number of data samples (>2000)", with an asymptotic χ²₂ law, and prints no formula.
+  - Code (`stats/_stats_py.py:1931–1939`): statistic = n/6·(s² + k²/4), where s and k are `skew` and Fisher `kurtosis` at their defaults (divisor n, `bias=True`); the p-value is the χ²₂ upper tail.
+- [`bootstrap`](https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.bootstrap.html): `(data, statistic, *, n_resamples=9999, batch=None, vectorized=None, paired=False, axis=0, confidence_level=0.95, alternative='two-sided', method='BCa', bootstrap_result=None, rng=None)`. The page also shows `random_state=None`.
+  - `rng` passed by keyword: a Generator is used as given; other values go to `default_rng`. Passed positionally or as `random_state`, it takes the legacy RandomState behaviour.
+  - `batch`: "Default is None, in which case batch = n_resamples (or batch = max(n_resamples, n) for method='BCa')".
+  - `method`: 'percentile', 'basic' ("AKA 'reverse'") or 'BCa'.
+  - `standard_error`: "the sample standard deviation of the bootstrap distribution". The page's example checks it against `np.std(…, ddof=1)`, i.e. divisor B − 1 (code `_resampling.py:684`).
+  - Code:
+    - resamples are `rng_integers(rng, 0, n, (n_resamples, n))` (`:80`);
+    - the interval ends are `stats.quantile(theta_hat_b, …)` (`:663`), whose default is `method='linear'` (`_quantile.py:161`);
+    - the basic interval is 2θ̂ minus the ends (`:675–677`).
+  - **The ends are not the book's `inverted_cdf`, and the page does not name the method.**
+- [`t`](https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.t.html), [`chi2`](https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.chi2.html), [`norm`](https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.norm.html), [`beta`](https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.beta.html):
+  - Methods: `ppf(q, df, loc=0, scale=1)` ("Percent point function (inverse of cdf — percentiles)") and `logpdf(x, df, loc=0, scale=1)`. `norm` takes no `df`; `beta` takes `a, b`.
+  - beta's density: f(x, a, b) = Γ(a+b)x^{a−1}(1−x)^{b−1}/(Γ(a)Γ(b)) for 0 ≤ x ≤ 1, a, b > 0.
+- [`minimize(method='Nelder-Mead')`](https://docs.scipy.org/doc/scipy/reference/optimize.minimize-neldermead.html):
+  - The page says `maxiter` and `maxfev` "Will default to N*200 … if neither maxiter or maxfev is set".
+  - `xatol` and `fatol` are documented, but the page prints no defaults.
+  - Code `optimize/_optimize.py:701–704`: `xatol=1e-4`, `fatol=1e-4`, `adaptive=False`.
+- [`kurtosis`](https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.kurtosis.html) with `bias=False`.
+  - The page says it is "calculated using k statistics to eliminate bias coming from biased moment estimators".
+  - Code `_stats_py.py:1431–1435`, for n > 3: [(n²−1)m₄/m₂² − 3(n−1)²]/((n−2)(n−3)). By algebra this equals `(n−1)[(n+1)g₂ + 6]/((n−2)(n−3))`.
+- [`brentq`](https://docs.scipy.org/doc/scipy/reference/generated/scipy.optimize.brentq.html): `(f, a, b, args=(), xtol=2e-12, rtol=8.881784197001252e-16, maxiter=100, full_output=False, disp=True)`. "f(a) and f(b) must have opposite signs".
+- NumPy [`Generator.standard_t`](https://numpy.org/doc/2.5/reference/random/generated/numpy.random.Generator.standard_t.html): `(df, size=None)`, with df "must be > 0".
+
+#### statsmodels 0.15.0 (Stage 1 check)
+
+- `robust_skewness(y, axis=0)` and `robust_kurtosis(y, axis=0, ab=(5.0, 50.0), dg=(2.5, 25.0), excess=True)`. The pages give SK₂ and KR₂ as above and cite Kim & White.
+  - Quantiles come from `np.percentile` at NumPy's default, linear (`stats/stattools.py:198, 376`). **They are not `inverted_cdf`.**
+  - `kr1 = stats.kurtosis(y, axis, False)`, which is `fisher=False` (`:382`); `kr2` is at `:383`.
+  - `excess=True` subtracts `expected_robust_kurtosis()`, whose KR₂ entry for the normal is 1.23309512 (computed).
+- `HC0_se` page: "White's (1980) heteroskedasticity robust standard errors". `HC1_se` page: "MacKinnon and White's (1985) … Defined as sqrt(diag(n/(n-p)*HC_0)". Code: `regression/linear_model.py:2222–2236`.
+  - `get_robustcov_results(cov_type='HC1', use_t=None, **kwargs)` (page; `:2634`) defaults to HC1. The book's HC0 must be requested explicitly.
+- [`cov_hac`](https://www.statsmodels.org/v0.15.0/generated/statsmodels.stats.sandwich_covariance.cov_hac.html) is the alias of `cov_hac_simple`, whose v0.15.0 page returns 404. Signature: `(results, nlags=None, weights_func=weights_bartlett, use_correction=True)`.
+  - `nlags`: "If None, then nlags = floor[4(T/100)^(2/9)] is used".
+  - `use_correction`: "If true (default), then a small sample correction factor is used". The Notes add: "just guessing on correction factor, need reference".
+  - Code:
+    - the lag rule is `int(np.floor(4 * (n_periods / 100.0) ** (2.0 / 9.0)))` (`stats/sandwich_covariance.py:606–607`);
+    - the correction multiplies by nobs/(nobs − k) (`:976–978`);
+    - a module comment reads "Reference: xtscc paper, Newey-West" (`:72–73`).
+  - `OLS.fit(cov_type="HAC")` still requires `maxlags` (already recorded), so this default lag applies only through `cov_hac`, `cov_hac_simple` and `S_hac_simple`.
+- `acorr_ljungbox`. The page says: "If lags is None, then the default maxlag is min(10, nobs // 5)"; "The data is demeaned before the test statistic is computed".
+  - Code: the lags are at `stats/diagnostic.py:736–738`; Q = nobs(nobs+2)Σρ̂ₖ²/(nobs − k) is computed with `acf(fft=False)` (`:746–749`).
+- `kpss`. The page says: "a boundary point is returned if the test statistic is outside the table of critical values, that is, if the p-value is outside the interval (0.01, 0.1)".
+  - Code: the critical values are 0.347, 0.463, 0.574 and 0.739 for "c" and 0.119, 0.146, 0.176 and 0.216 for "ct" (`tsa/stattools/_stattools.py:3182–3187`).
+  - p = `np.interp(stat, crit, [0.10, 0.05, 0.025, 0.01])` (`:3211–3217`), so p is clipped to [0.01, 0.10], with an `InterpolationWarning` (`:3219–3235`).
+- `pacf(x, nlags=None, method='ywadjusted', alpha=None, *, result_object=None)` (page; `:1315–1337`). The page describes the default as "Yule-Walker with sample-size adjustment in denominator for acovf"; `"ols"` is "regression of time series on lags of it and on constant".
+- `ARIMA`, trend: "Default is 'c' for models without integration, and no trend for models with integration" (page; `tsa/arima/model.py:152–159`).
+  - Trends enter as "regression with ARIMA errors": Yₜ − δ₀ − … = εₜ, with εₜ ARMA (page, Notes).
+  - Reading that equation: with d = 0, `const` is the process mean.
+- `ARIMA.fit(…, method=None, …, cov_type=None, …)`.
+  - Methods: 'statespace', 'innovations_mle', 'hannan_rissanen', 'burg', 'innovations', 'yule_walker'. `None` means "statespace" (`model.py:326–335`).
+  - With `"innovations_mle"` the estimates come from `innovations_mle` (`:454–455`), and the results are rebuilt by `smooth(…, cov_type=cov_type)` (`:501`).
+- `MLEModel.fit(…, cov_type=None, cov_kwds=None, method='lbfgs', maxiter=50, …)`.
+  - The `cov_type` options are 'opg'; 'oim' ("observed information matrix estimator, calculated using the method of Harvey (1989)"); 'approx' ("… numerical approximation of the Hessian matrix"); 'robust', 'robust_approx' and 'none'.
+  - "Default is 'opg' unless memory conservation is used …, in which case the default is 'approx'". The code agrees (`tsa/statespace/mlemodel.py:2800–2801`).
+  - The ARIMA.fit page says 'oim' for the memory-conservation case. It disagrees with the code.
 
 ## Taiwan facts (Volume III)
 
@@ -1240,6 +1384,55 @@ statsmodels pages are under `https://www.statsmodels.org/stable/generated/`, arc
 - Forms that differ from the listing only by spacing: the listing writes Bonferroni校正 and 增廣Dickey-Fuller檢定 with no
   space between Latin letters and Chinese; plans/vol-4.md writes "Bonferroni 校正" and "增廣 Dickey-Fuller 檢定". The
   book should choose one style.
+
+### Stage 1 additions to the terms (2026-10-19, after the briefs)
+
+- 樂詞網, searched 2026-10-19 with curl, using the Volume III URL pattern: 67 query strings, each in all listings, in 統計學名詞 and in 數學名詞 (201 pages).
+- "—" means no entry. The Book column holds proposals for the editor.
+
+| English | 統計學名詞 | 數學名詞 | Book (proposed) |
+|:--|:--|:--|:--|
+| delta method | delta法；δ法 | — | delta法 |
+| observed information | only "observed information matrix" 觀察訊息矩陣 | — | 觀察訊息(矩陣) |
+| asymptotic normality | 漸近常態性 | 漸近正規性；漸近常態性 | 漸近常態性 |
+| efficiency | 效率；有效性; efficient estimator 有效估計量; relative efficiency 相對效率；相對有效性 | 效率; 有效估計量; 相對效率 | 效率 |
+| Pareto distribution | 帕累托分布 | — | 帕累托分布 |
+| profile likelihood | 剖面概度 | — | 剖面概度 |
+| basic interval | — ("basic bootstrap", "reverse percentile": —) | — | book's own |
+| moving block; circular block (bootstrap) | — (other listings: engineering senses only) | — | book's own |
+| block length, block size | — | block length 分組長度 (coding sense) | book's own |
+| half-life | — (半衰期 in physics, astronomy and other listings) | — | 半衰期 |
+| spurious regression | 虛擬迴歸；虛假迴歸 (偽迴歸: —) | — | 虛假迴歸 |
+| spurious correlation | 虛擬相關；虛假相關 | 偽相關；虛假相關 | — |
+| mean reversion | — (管理學名詞 平均數復歸; 均值回歸, 均值復歸, 回歸均值: —) | — | editor |
+| rollover (轉倉) | — (no futures sense; 管理學名詞 rollover credit 展期信用) | — | 轉倉 (market usage) |
+| collinearity; multicollinearity | 共線性; 多元共線性 | —; 多重共線性 | 共線性 |
+| market model | 市場模型 | — | 市場模型 |
+| credible interval | "credible intervals" 可靠區間; credible region 可靠區域 | — | 可靠區間 |
+| beta distribution | 貝他(β)分布; beta-binomial 貝他(β)-二項分布 | β分布；β分配 | 貝他(β)分布 |
+| grand mean | 總平均數 | — | 總平均數 |
+| hyperparameter | 超參數 | — | 超參數 |
+| sufficient statistic | 充分統計量 | 充分統計量 | 充分統計量 |
+| shrinkage; Stein's paradox | 收縮 (收縮估計); Stein詭論 | — | 收縮 |
+| trimmed mean | 截尾平均數 | — | 截尾平均數 |
+| interquartile range | 四分位距；四分位數間距 (IQR) | 四分位[數間]距 | 四分位距 |
+| median absolute deviation | 中位數絕對離差 (MAD) | — | 中位數絕對離差 |
+| mean absolute deviation | — | 平均絕對偏差 | 平均絕對偏差 |
+| robust statistics; robustness; robust estimation | 穩健統計; 穩健性; 穩健估計 | —; 穩健; — | 穩健統計 |
+| quartile; octile | 四分位數; 八分位數 | 四分位數; — | 四分位數, 八分位數 |
+| measure of location, dispersion | 位置量數, 離勢量數 | — | — |
+| sensitivity curve | 敏感度曲線 | — | 敏感度曲線 |
+
+## Taiwan facts (Volume IV)
+
+- TWSE [company history (zh)](https://www.twse.com.tw/zh/about/company/history.html), read 2026-10-19: "108年 01.01 施行週末補行上班日，證券市場不交易亦不交割". The [English page](https://www.twse.com.tw/en/about/company/history.html) says: "2019 Jan 1 The TWSE forgoes Saturday trading and settlement, even with the presence of work."
+- TWSE [市場開休市日期](https://www.twse.com.tw/zh/trading/holiday.html), read through its JSON (`rwd/zh/holidaySchedule`):
+  - 2024: "於2月17日（星期六）補行上班，但不交易亦不交割";
+  - 2025: the same wording for 2月8日;
+  - 2018–2020 return no rows.
+- Inference, not stated on either page: before 2019 the market traded on Saturday make-up workdays, which would explain TR23's 23 Saturday sessions (2006–2018).
+- Not checked: whether those 23 dates match the government's make-up workdays.
+- TAIFEX: no official page was found; only news covers it.
 
 ## Writing style (AUTHORING §1, checked 2026-10-11)
 

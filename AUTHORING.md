@@ -156,7 +156,7 @@ note says why.
 | $A$ | periods per year used to annualize, e.g. $A=243.1$ trading sessions; always say which sample it comes from |
 | $T$, $t$, $\tau$, $n$ | either a sample size (number of returns) or a horizon or maturity in years: a module uses one of the two and says which; time index; time to maturity or expiry, or any span in years when $T$ is a count; number of compounding or payment periods |
 | $P$, $W$, $D$, $\mathrm{DD}$ | price; wealth; cash dividend ($D_1$ the next dividend); drawdown |
-| $f$, $f^*$, $c$ | exposure ÷ equity of a position ($f>1$ is leverage); its growth-maximizing (Kelly) value; $c:=f/f^*$, the fraction of full Kelly (LM25, without Kelly, writes $c$ for an AR intercept) |
+| $f$, $f^*$, $c$ | exposure ÷ equity of a position ($f>1$ is leverage); its growth-maximizing (Kelly) value; $c:=f/f^*$, the fraction of full Kelly (LM25, without Kelly, writes $c$ for an AR intercept; in LM24, $c$ is the data's weight in a posterior, which is the Kelly fraction its Bayes bet takes) |
 | $L$ | a leveraged fund's fixed daily multiple (00631L: $L=2$); for a portfolio, total exposure $\sum_i f_i$; in a module without leverage, a Cholesky factor, declared (table below) |
 | $p$, $q$, $b$, $a$ | binary bet: win probability, $q=1-p$, gain $b$ and loss $a$ per unit staked, so $f^*=p/a-q/b$. In futures pricing $q$ is instead the continuous dividend yield; a module uses one of the two. LM21, without bets, writes $p_i$ for p-values and $q$ for a false-discovery level; LM26's auxiliary regressions write their coefficients $a$, $b$ |
 | $r_f$ | risk-free or financing rate (state the compounding) |
@@ -225,12 +225,14 @@ note):
 | $\varepsilon_t$, $\hat\varepsilon_t$; $\eta_t$; $\xi_t$ | a regression's error and residual (LM23), LM26's innovation $\varepsilon_t=\sigma_t\xi_t$; white noise of an AR or MA model (LM25); an iid standardized innovation, mean 0, variance 1, normal or scaled Student $t$ (LM26; $Z$ stays a standard normal) |
 | $X$, $d$ | LM23's $T\times d$ design matrix, first column $\mathbf 1$, and its number of coefficients (LM23 writes no random variable $X$) |
 | $\rho_k$, $\hat\rho_k$, $\gamma_k$, $\hat\gamma_k$ | autocorrelation and autocovariance at lag $k$, model and sample; $\hat\rho_k$ uses the full-sample mean and divisor $T$ in numerator and denominator (LM19). $\gamma$ without a lag keeps its meaning above |
-| $\operatorname{VR}(m)$ | variance ratio of $m$-day log-return sums (LM19, LM22, LM25) |
+| $\operatorname{VR}(m)$ | variance ratio: the variance of overlapping $m$-day log-return sums, centred at $m\bar r$, over $m$ times the daily variance (LM19's (19.8); LM22, LM25) |
 | $\phi_j$, $\theta_j$; $\delta$ | AR and MA coefficients, always subscripted ($\phi_1$ even in an AR(1); $\varphi$ stays the normal density); the Dickey–Fuller coefficient $\delta=\phi_1-1$ (LM25) |
 | $F_t$, $S_t$ | TX settlement price and TAIEX close (LM25; LM6 writes $F$, $S$; $F_X$ keeps its subscript) |
 | $\sigma_t^2$, $\sigma^2_{t+1\mid t}$ | conditional variance of day $t$; its forecast made on day $t$ (LM26) |
 | $\mathrm{RV}_t$ | realized variance of day $t$, the sum of squared intraday log returns at a stated interval (LM26; the table's $\mathrm{RV}$ is the same idea on simple returns) |
-| $B$, $\ell$ | number of bootstrap resamples; block length or mean block length (LM22, which has no likelihood) |
+| $B$, $\ell$ | number of bootstrap resamples; block length or mean block length (LM22), Newey–West lag (LM23); neither module writes a likelihood |
+| $\hat f$, $\hat f^*$, $f_{\mathrm B}$ | $\bar R/s^2$, the plug-in Kelly fraction (from LM20); the exact in-sample root of (4.5) (LM22, LM24); LM24's Bayes fraction, $f_{\mathrm B}=c\hat f$ |
+| $\operatorname{med}$ | a sample median, $\hat F^{-1}(\tfrac12)$, upright (LM19); a tilde means centred ($\tilde X$, $\tilde r_t$) |
 
 Words with one meaning each: "unconditional variance" is GARCH's $\omega/(1-\alpha-\beta)$ (LM26) and "long-run
 variance" the HAC target (LM23). Not used: $R^2$ for R-squared, a star for a bootstrap draw ($\bar R_{\text{boot}}$),
