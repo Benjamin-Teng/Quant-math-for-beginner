@@ -50,6 +50,14 @@ DATA_STEPS=(
   data/lm18_numbers.py data/lm18_charts.py
   data/vol4_series.py           # Volume IV TX23: the TX near-month settlement on TR23's dates, checked
   data/vol4_rv.py               # LM26 realized variance (data/derived/vol4_rv.csv) from a complete T5S download
+  data/lm19_charts.py data/lm19_numbers.py   # the numbers scripts of LM19-LM23, LM25 and LM26 check the chart files,
+  data/lm20_charts.py data/lm20_numbers.py   # so charts run first
+  data/lm21_charts.py data/lm21_numbers.py   # U28 from vol2_series.py
+  data/lm22_charts.py data/lm22_numbers.py
+  data/lm23_charts.py data/lm23_numbers.py   # U28, TR23, LM2's pairs, TX23's F_t
+  data/lm24_numbers.py data/lm24_charts.py   # TR23 and U28's halves
+  data/lm25_charts.py data/lm25_numbers.py   # TX23 and TR23
+  data/lm26_charts.py data/lm26_numbers.py   # raw intraday statistics only when data/raw/intraday/ is present
 )
 # Raw FinMind data are not committed (licence): fetch them with your token and verify against data/raw_manifest.json.
 if [ "$FETCH" = 1 ]; then
