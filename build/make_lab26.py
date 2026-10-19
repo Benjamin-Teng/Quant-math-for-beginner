@@ -57,7 +57,7 @@ def code(s: str) -> None:
 md(r"""
 # LM26 Lab — Time Series II: Volatility Models
 
-Companion notebook to **From Calculus to Kelly, LM26**. It rebuilds the module's exhibits and computational examples from the closes of the TAIEX total-return index and the per-day realized variances of the 5-second TAIEX. It also computes the widget's starting values, solves the computational practice problems, and ends with an extension exercise.
+Companion notebook to **From Calculus to Kelly, LM26**. It rebuilds the module's exhibits and computational examples from the closes of the TAIEX total-return index and the per-day realized variances of the intraday TAIEX. It also computes the widget's starting values, solves the computational practice problems, and ends with an extension exercise.
 
 | Part | Rebuilds |
 |:--|:--|
@@ -631,7 +631,7 @@ show("after the other days (%)", 100 * float(pred[~big].mean()), ".2f", "0.79")
 """)
 
 md(r"""
-Experiments 1 and 2: 1,000 paths of 5,849 days from each fit, with normal $\xi_t$ in experiment 1 and Student $t$ in experiment 2, $\sigma_t^2$ started at the unconditional variance. Each day draws one vector of 1,000 innovations (element $k$ for path $k$); a $t$ draw is scaled by $\sqrt{(\nu-2)/\nu}$ to variance 1. Medians carry LM18's batch standard error (20 batches of 50 paths, divisor 20). Each experiment takes about a second.
+Experiments 1 and 2: 1,000 paths of 5,849 days from each fit, with normal $\xi_t$ in experiment 1 and Student $t$ in experiment 2, $\sigma_t^2$ started at the unconditional variance. Each day draws one vector of 1,000 innovations (element $k$ for path $k$); a $t$ draw is scaled by $\sqrt{(\nu-2)/\nu}$ to variance 1. Medians carry LM18's batch standard error (20 batches of 50 paths, divisor 20), and a share of paths its binomial standard error, $\sqrt{p(1-p)/1{,}000}$. Each result keeps only the digits its error supports. Each experiment takes about a second.
 """)
 
 code(r"""
@@ -683,11 +683,16 @@ show("its batch standard error", batch_se_median(disp1), ".3f", "0.035")
 show("5% of paths", qinv(disp1, 0.05), ".2f", "2.04")
 show("95% of paths", qinv(disp1, 0.95), ".2f", "5.14")
 show("median excess kurtosis", qinv(kurt1, 0.5), ".2f", "1.63")
-show("share of paths reaching 5.428 (%)", 100 * float(np.mean(kurt1 >= 5.428)), ".1f", "5.3")
+show("its batch standard error", batch_se_median(kurt1), ".3f", "0.045")
+share = float(np.mean(kurt1 >= 5.428))
+print(f"share of paths reaching 5.428: {100 * share:.1f}%")
+show("share of paths reaching 5.428, to its standard error (%)", 100 * share, ".0f", "5")
+show("its binomial standard error (points)", 100 * math.sqrt(share * (1 - share) / 1000), ".1f", "0.7")
 t0 = time.perf_counter()
 disp2, kurt2 = experiment(2, pt, "t")
 print(f"experiment 2 ran in {time.perf_counter() - t0:.1f} s")
 show("experiment 2: median excess kurtosis", qinv(kurt2, 0.5), ".1f", "7.0")
+show("its batch standard error", batch_se_median(kurt2), ".2f", "0.11")
 """)
 
 md(r"""
@@ -763,8 +768,11 @@ Deep Dive 3: under (26.7) the mean RV would rise by the same amount for every ex
 code(r"""
 m5s, m15 = reg == 5, reg == 15
 show("5-second days: RV(10 s)/RV(5 s) - 1", float(np.mean(RV["10s"][m5s]) / np.mean(RV["5s"][m5s]) - 1), ".3f", "-0.381")
-show("15-second days: RV(30 s)/RV(15 s)", float(np.mean(RV["30s"][m15]) / np.mean(RV["15s"][m15])), ".4f", "0.7189")
-show("15-second days: RV(30 s)/RV(15 s) - 1", float(np.mean(RV["30s"][m15]) / np.mean(RV["15s"][m15]) - 1), ".3f", "-0.281")
+m1112 = periods["2011-2012 (15-second data)"]
+show("2011-2012: RV(30 s)/RV(15 s)", float(np.mean(RV["30s"][m1112]) / np.mean(RV["15s"][m1112])), ".4f", "0.9013")
+show("2011-2012: RV(30 s)/RV(15 s) - 1", float(np.mean(RV["30s"][m1112]) / np.mean(RV["15s"][m1112]) - 1), ".3f", "-0.099")
+print(f"the whole 15-second regime ({int(m15.sum())} days, to February 2014): "
+      f"{float(np.mean(RV['30s'][m15]) / np.mean(RV['15s'][m15])):.4f}")
 show("all days: RV(10 min)/RV(5 min) - 1", float(np.mean(RV["10m"]) / np.mean(RV["5m"]) - 1), ".3f", "0.056")
 
 ns = [14400 // h for _, h in IV[:6]]

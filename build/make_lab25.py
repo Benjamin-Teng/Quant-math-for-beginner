@@ -609,7 +609,7 @@ jump = (db - db_free)[roll[1:]]
 rmon = mon[1:][roll[1:]]
 show("roll jumps: mean", BP * jump.mean(), ".1f", "-37.5")
 show("June roll", BP * jump[rmon == 6].mean(), ".1f", "-144.7")
-show("July roll", BP * jump[rmon == 7].mean(), ".2f", "-104.95")
+show("July roll", BP * jump[rmon == 7].mean(), ".1f", "-104.9")
 # the share of a calendar year's dividends (TR - price log gap from the previous year's last close) that went ex in the
 # life of the contract entered at the June and the July roll, 2003-2025
 for mm, printed in ((6, "45"), (7, "39")):

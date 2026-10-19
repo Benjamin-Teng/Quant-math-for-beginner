@@ -621,6 +621,7 @@ ct("T", T, "5,849")
 nm("years", years, 4, "23.7645")
 nm("A", A, 2, "246.12")
 has("subtitle range", "anything from 11.89% to 25.04%")
+has("subtitle names its sample", "On 2003–2025, TAIEX's days scale to an annual volatility of 18.56%")
 
 # ====================================================================== section 2
 assert rank == 1 and len(all_wk) == 1224
@@ -673,6 +674,10 @@ assert abs(k_mean - (w_mean - 0.02)) < 1e-15 and k_med == w_med and k_trim == w_
 
 # ====================================================================== section 3
 nm("LM10's factor at 4,382 days", sqrt(4382 / 4381), 6, "1.000114")
+assert float(np.std([1.0, 2.0])) == 0.5, "NumPy's std no longer divides by T by default"
+has("software and NumPy's default", "which is why software often uses it. NumPy's `std` divides by $T$ by default"
+    " (Section 8)")
+assert "software defaults to it" not in MD_RAW
 nm("Phi^-1(0.75)", Z75, 4, "0.6745")
 nm("1/Phi^-1(0.75)", 1 / Z75, 4, "1.4826")
 nm("2 Phi^-1(0.75)", 2 * Z75, 3, "1.349")
@@ -919,6 +924,9 @@ nm("overlap: (m-1)/m", 245 / 246, 3, "0.996")
 nm("overlap: T/246", T / 246, 1, "23.8")
 ct("overlap: windows of 1,231", T - 1231 + 1, "4,619")
 nm("overlap: T/1231", T / 1231, 2, "4.75")
+has("overlap: few disjoint periods", "rests on few disjoint periods: 23.8 for TR23's one-year windows, 4.75 for its"
+    " five-year ones. Under iid days the overlapping estimator is also biased down by about $m/T$.")
+assert "handful" not in MD_RAW
 nm("X5: max", float(vr_tr2.max()), 3, "1.267")
 ct("X5: argmax", int(mm[vr_tr2.argmax()]), "127")
 ct("X5: first m below 1", int(mm[np.argmax(vr_tr2 < 1)]), "340")
@@ -1098,6 +1106,7 @@ nm("P4: IQR", 0.681 + 0.490, 3, "1.171")
 nm("P5: C", 1 + 0.0393, 4, "1.0393")
 nm("P5: A", 1 + 2 * 0.0393, 4, "1.0786")
 nm("P5: B", p5, 4, "1.0195")
+has("P5: B named", "B, 1.0195, is the square root of the correct 1.0393: a ratio of volatilities, not of variances.")
 nm("P6: B", iid_factor(5849, 1231), 2, "0.79")
 nm("P6: C", 1231 / 5849, 2, "0.21")
 nm("P7: ratio", vr7, 4, "1.0797")
@@ -1121,6 +1130,7 @@ nm("P9: by (19.9), from printed", 0.627 / sqrt(1.0536), 3, "0.611")
 pc("P9: calendar mean (LM15's)", float(ann.mean()), 3, "11.646")
 nm("P9: calendar ratio", cal_sr, 3, "0.524")
 nm("P9: calendar ratio from printed", 11.646 / 22.207, 3, "0.524")
+has("P9(b): rounding", "compute their ratio, to three decimals.")
 pc("P9: 246 rbar (LM17's)", m246, 3, "11.634")
 tq5, rt5 = t_vals[5.0]
 tq3, rt3 = t_vals[3.065]

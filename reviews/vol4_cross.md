@@ -258,7 +258,7 @@ tags, labels, cross-module numbers, conventions and notation agree. Its items an
 
 | # | Finding | Decision |
 |:--|:--|:--|
-| 1 | Pointer-only citations follow two rules (lm07 → 22 kept; LM24's pointers dropped). | One rule: a pointer or an illustrative value creates no prereq or lead. The Stage 4 list drops lm07 → 22; LM23's prereq drops 22. |
+| 1 | Pointer-only citations follow two rules (lm07 → 22 kept; LM24's pointers dropped). | One rule: a pointer or an illustrative value creates no prereq or lead (stated exactly in X5 below). The Stage 4 list drops lm07 → 22; LM23's prereq drops 22. |
 | 2 | LM25 names no divisor and compares 81.4 with LM6's 83.4 across divisors. | Fixed (LM25's record). |
 | 3 | LM23's test count leaves out tests it reads at 1.96. | Fixed (LM23's record). |
 | 4 | LM26 prints R-squared and sample moments with neither a standard error nor a reason. | Fixed (LM26's record). |
@@ -267,3 +267,16 @@ tags, labels, cross-module numbers, conventions and notation agree. Its items an
 | 7 | LM22 says Volume IV sets $r_f=0$; LM23 and LM25 use 2%. | Fixed (LM22's record). |
 | 8 | "out of sample" and "out-of-sample". | Fixed (LM23's record). |
 | 9 | LM18 prints 波動的群聚 against Volume IV's 波動群聚現象. | Stage 4 list (plans/vol-4.md). |
+
+## Final check (X5), 2026-10-20
+
+A fresh agent checked the volume after the closing fixes (`scratch/fix/X5.md`) beside the eight module final checks
+(`scratch/fix/F19.md` … `F26.md`). Its items and the editor's decisions:
+
+| # | Finding | Decision |
+|:--|:--|:--|
+| 1 | `src/syllabus.yaml` still describes LM26 as using 5-second data. | "intraday TAIEX data" (done). |
+| 2 | X4's rule applied only to the cases it was decided on: LM21's prereq 4, LM23's 6 and LM25's 3 rest on a backward pointer or an illustrative value; the rule's wording does not say that forward pointers make leads. | Rule: a backward pointer or an illustrative value creates no prereq or lead; a forward [[LMn]] makes n a lead (plans/vol-4.md, shared decisions). LM21 drops 4, LM23 6, LM25 3; the Stage 4 list drops lm03 → 25, lm04 → 21 and lm06 → 23. LM20's [[LM13]] (a count LM20 cites from LM13) and LM19's [[LM10]] (LM10's factor) cite results and stay. |
+| 3 | The Stage 4 list's lab wordings for `make_lab11.py:571` and `make_lab15.py:443` say more than LM20 gives, and the committed notebooks hold the same lines. | Reworded; labs 04, 11, 15 and 17 are regenerated at Stage 4 (plans/vol-4.md). |
+| 4 | LM23's new median uses `np.median`, against the quantile rule. | `inverted_cdf` (LM23's record); the printed 87% holds. |
+| 5 | SOURCES lacks four box forms (對數基差, 八分位數峰態, 對數報酬絕對值, 三次方、四次方). | Added after a 樂詞網 lookup. |

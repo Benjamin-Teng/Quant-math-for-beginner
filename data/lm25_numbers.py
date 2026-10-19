@@ -643,6 +643,11 @@ chk("TX23 dates", N, ",", "5,850")
 chk("s rolled changes", BP * db.std(), ".1f", "38.9")
 chk("rho1 b", rho1_b, ".3f", "0.776")
 chk("AR(1) half-life (case)", half_life(1 + d_b), ".1f", "2.7")
+# the case attributes 2.7 sessions to an AR(1), not to the data: the sample autocorrelations stay above 0.5 to lag 6
+assert min(rho_hat(b, k_) for k_ in range(1, 7)) > 0.5 > rho_hat(b, 7)
+has("case half-life is the AR(1)'s", "Next-day values correlate 0.776, so an AR(1) would halve a gap in about 2.7 "
+    "sessions.")
+has("divisor of s", "Standard deviations divide by the number of values.")
 chk("X1 dates", len(keep), ",", "1,227")
 chk("D dates", int(D.sum()), ",", "5,834")
 # D: every date whose held contract's last trading day is a TX23 date; the last, 14 September 2026, holds 202609,
@@ -858,7 +863,7 @@ chk("roll jumps", int(roll[1:].sum()), "d", "285")
 chk("roll jump mean", BP * float(jump.mean()), ".1f", "-37.5")
 chk("roll jump s", BP * float(jump.std()), ".1f", "58.7")
 chk("June roll", -BP * float(jump[rm == 6].mean()), ".1f", "144.7")
-chk("July roll", -BP * float(jump[rm == 7].mean()), ".2f", "104.95")
+chk("July roll", -BP * float(jump[rm == 7].mean()), ".1f", "104.9")
 chk("other rolls", -BP * float(jump[(rm != 6) & (rm != 7)].mean()), ".1f", "19.8")
 chk("June roll (overview)", BP * float(jump[rm == 6].mean()), ".1f", "-144.7")
 # KC of Section 7: the share of a calendar year's dividends (the TR - price log gap from the previous year's last close,
@@ -985,7 +990,7 @@ assert max(df_like) < cv["1%"] - 3 and min(t_s, a_ct[0]) > -1 and min(p_s, a_ct[
 has("hygiene DF verdicts", "Every DF and ADF verdict lies far from its critical value.\n>\n> Bonferroni's correction")
 has("hygiene KPSS", norm_text(
     "needs a KPSS statistic above 1.03, the 0.05/24 upper point of its limit law (Kwiatkowski et al. 1992). That law "
-    "is the law of $\\int_0^1V_t^2\\,dt$ for a Brownian bridge $V_t$, the Cramér–von Mises limit law (Csörgő and "
+    "is the law of $\\int_0^1V_t^2\\,dt$ for a Brownian bridge $V_t$ ([[LM36]]), the Cramér–von Mises limit law (Csörgő and "
     "Faraway 1996, p. 222), which SciPy evaluates.\n>\n> The five KPSS statistics for the basis, 0.62 to 0.96, fall "
     "short, and so does $\\hat\\alpha_F$'s t-stat, −2.9, against the two-sided normal point 3.08."))
 has("hygiene references", "Csörgő, S., and J. J. Faraway (1996).")
@@ -1055,8 +1060,13 @@ assert np.allclose(np.log(F_held[i25c] / F[i25c - 1]), rF[i25c])   # F_held is t
 assert int(roll[i25c].sum()) == 12
 chk("2025 rolled s(change) points", float(pts_rolled.std()), ".1f", "81.4")
 chk("2025 roll-free s(change) points", float(pts_free.std()), ".1f", "76.7")
-has("2025 measured", "Measured in points, the 242 rolled daily changes within 2025 had a standard deviation of 81.4")
-has("LM6's 83.4", "[[LM6]]'s 83.4 used same-contract pairs from April to October only")
+assert len(pts_rolled) == len(pts_free) == 242                       # numpy's std divides by the number of values
+has("2025 measured", "Measured in points, the 242 rolled daily changes within 2025 had a standard deviation of 81.4 "
+    "(divisor 242), and the roll-free ones 76.7.")
+# LM6 prints its divisor next to 83.4 (138 same-contract pairs, divisor 137)
+assert "sample standard deviation of 83.4 points (divisor 137)" in (ROOT / "src" / "lm06.md").read_text(encoding="utf-8")
+has("LM6's 83.4", "[[LM6]]'s 83.4 (divisor 137) used same-contract pairs from April to October only")
+has("timing gap", "before 13:45 ([[LM6]]). This book does not measure that gap.")
 # widget
 chk("widget sigma_zeta", math.sqrt(sz2), ".1f", "22.8")
 chk("widget mean", p_b[0], ".1f", "-25.5")
@@ -1122,6 +1132,10 @@ eg_labels = re.findall(r"\[!example\][^\n]*\{#([\w-]+)\}", md_raw)
 assert len(ex_labels) == 8 and len(eg_labels) == 10, (ex_labels, eg_labels)
 for lab in ex_labels:
     assert f"[[ex:{lab}]]" in md_raw, f"exhibit {lab} is never cited"
+ex_blocks = re.findall(r"^> \[!exhibit\][^\n]*\n(?:>[^\n]*\n?)*", md_raw, flags=re.MULTILINE)
+assert len(ex_blocks) == len(ex_labels)
+for blk in ex_blocks:                    # every data exhibit cites its dataset (AUTHORING section 8); models say so
+    assert ("Source:" in blk) != ("*Model.*" in blk), blk.splitlines()[0]
 for kind, lab in re.findall(r"\[\[(ex|eg):([\w-]+)\]\]", md_raw):
     assert lab in (ex_labels if kind == "ex" else eg_labels), (kind, lab)
 tags = re.findall(r"\\tag\{(25\.\d+)\}", md_raw)

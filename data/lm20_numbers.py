@@ -658,6 +658,11 @@ chk("location SE / R-bar's SE, same model", ratio, ".2f", "0.72")
 chk("ratio from printed", 0.0124 / 0.0172, ".2f", "0.72")
 has("M1 sentence", "Inside the Student-t model, $\\bar R$'s standard error is the fit's $1.317%/\\sqrt T=0.0172%$, and the "
     "location's is 0.0124%, a ratio of 0.72.")
+# closing item 1: the caveat is about the data, not the model. TR23 is skewed (-0.34), and its fitted location sits
+# about three location SEs above R-bar, so the two estimate different centres (Section 5's pitfall).
+assert skew < 0 and (LOC - 100 * RB) / SE_T[1] > 2.5
+has("closing 1: the location's centre", "That efficiency holds only if the days are Student-t; on TR23's skewed days "
+    "the location estimates a different centre from the mean (Section 5).")
 # the expected information of a t location, (nu + 1) / ((nu + 3) c^2), gives the same ratio to two decimals
 assert f"{SCALE * sqrt((NU + 3) / (NU + 1)) / sqrt(T) / se_rb_t:.2f}" == "0.72"
 # plans/vol-4-anchors.md's A20-25 holds the superseded ratio to the iid s/sqrt(T) (0.782069); kept for traceability
@@ -783,6 +788,9 @@ for row in ("| Annual volatility, %, TR23 | 18.96 | — | 0.175 | 0.334 | 18.3 t
 has("23.7645 in KC 7", "0.205 for TR23's 23.7645 years")
 
 # ====================================================================== Section 8: Hill
+# closing item 3: the loss level x0 is named the threshold in the English text and in the notation note
+has("closing 3: threshold", "$x_0>0$ a loss level, the **threshold**.")
+has("closing 3: threshold (notation)", "$x_0$ a loss level (the threshold)")
 counts = {x0: c.count_le(x0) for x0 in ("0.02", "0.03", "0.04", "0.05", "0.06")}
 cnt = list(counts.values())
 chords = [log(cnt[i] / cnt[j]) / log((j + 2) / (i + 2)) for i in range(5) for j in range(i + 1, 5)]
@@ -996,6 +1004,8 @@ for gap_t in ((0.95 - c3t) / sqrt(c3t * (1 - c3t) / 20_000), (0.95 - c3t) / sqrt
               (95 - 94.77) / 0.16):                    # "about one and a half standard errors", unrounded and printed
     assert 1.4 < gap_t < 1.6, gap_t
 has("P11 stem", "Is the gap between the first interval's simulated and exact coverage chance?")
+# closing item 4: the stem states the rounding the solution prints (84.3%, 0.26; 94.8%, 0.16; 84.6%)
+has("P11 stem: rounding", "Give coverages in percent to one decimal, and standard errors in points to two.")
 has("P11 solution", "The $t_4$ interval's 94.77% lies about one and a half standard errors from 95%, also chance.")
 chk("exact T=5 (coverage table)", 100 * exact[5], ".1f", "84.6")
 anchor("A20-47", "z", 100 * c3z, "84.320")
@@ -1029,6 +1039,8 @@ in_chart("hill: point labels", "lm20-hill", "3% (k = 108): 3.63")
 in_chart("hill: alt text (m5)", "lm20-hill", "to 4.93 at 4% (2.49 at 2%, 3.63 at 3%), then wanders (4.76 at 5%)")
 in_chart("sampling-vol: alt text (A2)", "lm20-sampling-vol", "between 16% and 22%, 95% of them between 17.3% and 20.6%")
 in_chart("merton: iid line value", "lm20-merton", "3.90")
+in_chart("merton: alt text (closing item 2)", "lm20-merton",
+         "The mean's stays between 3.87 and 4.53 points, around the iid line of 3.90")
 widget = json.loads(chart_text("lm20-coverage"))["widget"]
 for n, shown in ((5, "2.7764"), (10, "2.2622"), (20, "2.0930"), (30, "2.0452"), (100, "1.9842"), (250, "1.9695")):
     assert f"{widget['tq'][n - 2]:.4f}" == shown, (n, widget["tq"][n - 2])

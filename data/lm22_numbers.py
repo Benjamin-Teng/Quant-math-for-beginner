@@ -800,10 +800,18 @@ chk("E9 shortfall about their own mean %", 100 * (1 - evar / (M5 * D.sr**2)), ".
 has("E9 m/T", "understate the variance even for independent days, by about $m/T$ ([[LM19]]'s "
     "$\\operatorname{VR}(m)$), 24% about their own mean")
 # blocks keep LM19's variance ratios above 1 below 340 days (LM19: "first falls below 1 at m = 340")
-vr_m = {m_: float(C.vr(r[None, :], m_)[0]) for m_ in range(2, 341)}
+vr_m = {m_: float(C.vr(r[None, :], m_)[0]) for m_ in range(2, M5 + 1)}
 assert all(vr_m[m_] > 1 for m_ in range(2, 340)) and vr_m[340] < 1
 chk("first m with VR(m) below 1", 340.0, ".0f", "340")
 has("E9 340", "variance ratios above 1 below 340 days")
+# closing check item 3: the pitfall's "below 1 beyond 340 days" holds up to the windows' m = 1,231
+assert all(vr_m[m_] < 1 for m_ in range(340, M5 + 1))
+has("C3 pitfall 340", "variance ratios below 1 beyond 340 days")
+# closing fixes: X4 item 7 (Sharpe ratios), C22 item 1 (the docstring contradicts the columns), X4 item 5 (Sources)
+has("X4.7 r_f", "while Volume IV's Sharpe ratios set $r_f=0$")
+has("C1 docstring", "`stationary` and `circular`, but its docstring calls them `b_sb` and `b_cb`")
+has("X4.5 forest", "1.8 to 6.6 (blocks). In-sample. Source: as [[ex:case]].")
+has("X4.5 ell", "about 1% at 145. In-sample. Source: as [[ex:case]].")
 has("N2", "that lift the resampled mean to 0.386")
 assert abs(wd14.mean - sqrt(M5) * D.sr) < abs(wd14.mean - sd0)                   # the blocks' mean is nearer 0.425
 assert 0.2 < nz14 / B < 0.4                                                      # "a third of the resamples"

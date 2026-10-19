@@ -103,9 +103,14 @@ ms = list(c.MERTON_M)
 rows = [c.merton(m) for m in ms]
 iid_mean = math.sqrt(A) * c.S_R / math.sqrt(c.TAU)
 assert f"{100 * iid_mean:.2f}" == "3.90"
+# the alt text's numbers (closing item 2): the mean's SE runs 3.87 to 4.53, the volatility's 0.34 to 4.43
+mean_ses = [100 * r[1] for r in rows]
+assert (f"{min(mean_ses):.2f}", f"{max(mean_ses):.2f}") == ("3.87", "4.53")
+assert (ms[0], ms[-1]) == (1, 246) and (f"{100 * rows[0][2]:.2f}", f"{100 * rows[-1][2]:.2f}") == ("0.34", "4.43")
 write("lm20-merton", {
-    "alt": "Standard errors of TAIEX's annual mean and annual volatility estimated from sums over 1 to 246 sessions: "
-           "the mean's stays near 3.9 points at every interval, the volatility's grows from 0.34 to 4.43 points",
+    "alt": "Standard errors of TAIEX's annual mean and annual volatility estimated from sums over 1 to 246 sessions. "
+           "The mean's stays between 3.87 and 4.53 points, around the iid line of 3.90; the volatility's grows from "
+           "0.34 to 4.43 points.",
     "height": 300,
     "x": {"type": "log", "fmt": "n0", "label": "Sessions in each sum (log scale)", "tipLabel": "sessions per sum: ",
           "values": ms, "ticks": [1, 5, 21, 62, 246],

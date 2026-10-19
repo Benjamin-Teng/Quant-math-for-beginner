@@ -198,6 +198,10 @@ has("U28 first return", "2 December 2008")
 has("halves' dates", "2 December 2008 → 6 October 2017 and 11 October 2017 → 8 October 2026")
 has("retrieval TR23", "retrieved 18 October 2026")
 has("retrieval U28", "retrieved 11 October 2026")
+# C24 item 5: the lab's thirds (a second split of the same days) are a stability check too
+has("C24 item 5: hygiene note", "The reverse direction, the lab's thirds and Problem 11 are **stability checks**.")
+# C24 item 4: the cell's likelihood is taken at its point x_k, so the displayed posterior probability is approximate
+has("C24 item 4", "with prior probability about $f_\\theta(x_k)\\Delta$, gets the posterior probability about\n\n$$")
 anchor("A24-01", f"{len(C.DATES_ALL)} closes {C.DATES_ALL[0]} -> {C.DATES_ALL[-1]}")
 anchor("A24-02", f"{T} returns {C.DATES_ALL[1]} -> {C.DATES_ALL[-1]}")
 anchor("A24-03", f"days {C.DAYS}; years {v(years, 2, 1)}; A {v(A, 2)}")
@@ -298,6 +302,10 @@ anchor("A24-26", f"Beta(90,86): mean {Fraction(90, 176)} = {v(90 / 176, 4)} (shi
 pr_flat_half, pr_flat_55 = C.beta_sf(9, 5, Fraction(1, 2)), C.beta_sf(9, 5, C.P55)
 assert pr_flat_half == Fraction(7099, 8192)
 has("E2 fractions", "$9/14=0.643$ and $c=12/14=6/7$")
+# C24 item 2: the flat prior's pitfall quotes E2's and E1's weights instead of "nearly settle the question"
+has("C24 item 2", "Under it, the twelve months dominate the posterior ($c=6/7$); under the sceptic's prior they hardly "
+    "move it ($c=0.068$).")
+assert "nearly settle" not in RAW_MD
 chk("E2 mean", 9 / 14, ".3f", "0.643")
 has("E2 Pr > 0.5 exact", "7,099/8,192=86.7%")
 chk("E2 Pr > 0.5", 100 * float(pr_flat_half), ".1f", "86.7")
@@ -453,6 +461,10 @@ chk("years, four decimals (priors note)", years, ".4f", "23.7645")
 chk("quarter-Kelly worth from printed 3 x 23.7645", 3 * 23.7645, ".2f", "71.29")
 chk("half-Kelly worth from printed 23.7645", 23.7645, ".2f", "23.76")
 has("priors note (m2)", "their priors are worth three times and once the sample's 23.7645 years")
+# X4 item 5: the priors table (TR23) ends with a Source line; [[ex:normal]] carries TR23's source ([[ex:case]] is U28's)
+has("X4 item 5: priors source", "printed 1.96 as in [[LM15]]. Source: as [[ex:normal]].")
+_normal_note = RAW_MD.split("{#normal}", 1)[1].split("\n\n", 1)[0]
+assert "Source: FinMind `TaiwanStockTotalReturnIndex` (TAIEX), retrieved 18 October 2026." in _normal_note
 chk("A sigma0 for c = 1/4", 100 * sig_q, ".2f", "2.25")
 chk("A sigma0 for c = 1/4 from printed 3.89/sqrt(3)", 3.89 / sqrt(3), ".2f", "2.25")
 anchor("A24-14", f"A sigma0 = SE/sqrt(3) for c = 1/4: {v(sig_q, 2, pct=True)} (from printed 3.89: {v(3.89 / sqrt(3), 2, extra=3)}; "
@@ -507,6 +519,9 @@ for lab_, (_, e_) , p in (("raw", raw1, "0.08"), ("JS", js1, "0.04"), ("pp", pp1
     if near(e_, ".2f"):
         NEAR.append(f"E6 SE {lab_}: {e_!r} printed {p}")
 chk("E6 mean c_hat", float(e1["c_pp"].mean()), ".2f", "0.50")
+_, se_c = C.mc_mean_se(e1["c_pp"])          # C24 item 3: every Monte Carlo result states its standard error
+assert format(se_c, ".3f") == "0.001" and not tie(se_c, ".3f"), se_c
+has("E6 mean c_hat with its standard error (C24 item 3)", "the mean of $\\hat c$ is 0.50 (standard error 0.001).")
 has("E6 theory", "$N-(N-3)/(1+\\sigma_0^2)=28-25/2=15.5$")
 has("E6 Bayes theory", "$Nc\\sigma^2/T=14$")
 assert 28 - 25 / 2 - 28 / 2 == 1.5
@@ -546,6 +561,21 @@ chk("E7 1 - c_hat, common removed", b_d, ".2f", "1.01")
 chk("E7 1 - c_hat, common removed, from printed", 25 * 4.79**2 / (28 * 4.50**2), ".2f", "1.01")
 _, sp2, _, _ = C.js(C.X[C.H:])
 chk("E7 second half spread", 100 * sp2, ".2f", "8.49")
+# C24 item 1 (S24's fix at L245): by (24.4), 1 - c_hat = (N-3)/N (noise/spread)^2 with the spread's divisor N, so
+# c_hat = 0 exactly when the spread is at most sqrt((N-3)/N) times the noise
+thr = sqrt((C.N - 3) / C.N)
+chk("C24 item 1: sqrt((N-3)/N) at N = 28", thr, ".3f", "0.945")
+for b_, nz_, sp_ in ((b_r, nz_r, sp1), (b_d, nz_d, sp_d)):
+    assert abs(b_ - (C.N - 3) / C.N * (nz_ / sp_) ** 2) < 1e-12
+print(f"C24 item 1: spread/noise {sp1 / nz_r:.4f} (total noise) and {sp_d / nz_d:.4f} (common removed) "
+      f"against {thr:.5f}")
+assert sp1 / nz_r < thr and sp_d / nz_d < thr          # both below 0.945 (the overview's sentence)
+assert 1 - (C.N - 3) / (C.N * 3**2) > 0.9              # at three times the noise, c_hat = 0.90: "near 1"
+has("C24 item 1 rule", "When the means spread several times their noise, $\\hat c$ is near 1. When their spread "
+    "(divisor $N$) is at most $\\sqrt{(N-3)/N}$ times the noise, 0.945 for 28 means, $\\hat c=0$, and every estimate is "
+    "the grand mean.")
+has("C24 item 1 overview", "The means spread less than 0.945 times their noise, so James–Stein shrinks all the way")
+assert "when they spread less" not in RAW_MD and "spread more than their noise" not in RAW_MD
 # M3: one common noise variance stands in for 28 unequal ones (total noise, first half)
 noise_i = C.A28 * np.sqrt(C.X[:C.H].var(axis=0, ddof=0) / C.H)
 assert abs(float(np.sqrt((noise_i**2).mean())) - nz_r) < 1e-15          # E7's noise is the root of their average

@@ -363,7 +363,9 @@ show("[[eg:exp1]] raw", err["raw"].mean(), ".1f", "28.1")
 show("   James-Stein", err["JS"].mean(), ".1f", "15.5")
 show("   positive part", err["positive part"].mean(), ".1f", "15.5")
 show("   Bayes rule", err["Bayes 0.5x"].mean(), ".1f", "14.0")
-show("   mean c_hat", np.maximum(ch, 0).mean(), ".2f", "0.50")
+c_pp = np.maximum(ch, 0)
+show("   mean c_hat", c_pp.mean(), ".2f", "0.50")
+show("   its standard error", c_pp.std(ddof=0) / sqrt(c_pp.size), ".3f", "0.001")
 """)
 
 md(r"""

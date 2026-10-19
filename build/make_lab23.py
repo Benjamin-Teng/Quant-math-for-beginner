@@ -76,9 +76,11 @@ Companion notebook to **From Calculus to Kelly, LM23**. It repairs the sector cl
 
 **Data.** The notebook reads FinMind files that you download once with your own token. From the repository root, run `uv run python data/fetch_finmind.py`, then `uv run python data/make_lab_data.py`. FinMind's licence does not allow the book to redistribute the data. After that, the notebook runs offline.
 
-`data/` then holds `sectors_close_raw.csv` (the closes FinMind's `TaiwanStockPrice` serves for TAIEX and the 30 TWSE sector indices, one column per series), `sectors_close_repairs.csv` (the 561 closes that FinMind copied from another date or series, each with its official 13:30:00 value from `TaiwanStockEvery5SecondsIndex`), `taiex_tr.csv` (the TAIEX total-return index, `TaiwanStockTotalReturnIndex`), and `0050_daily_raw.csv`, `0050_dividends.csv` and `00631L_daily_raw.csv` (LM2's funds). The notebook reads nothing outside `data/`.
+`data/` then holds six files. `sectors_close_raw.csv` has the closes FinMind's `TaiwanStockPrice` serves for TAIEX and the 30 TWSE sector indices, one column per series. `sectors_close_repairs.csv` has the 561 closes that FinMind copied from another date or series, each with its official 13:30:00 value from `TaiwanStockEvery5SecondsIndex`. `taiex_tr.csv` has the TAIEX total-return index (`TaiwanStockTotalReturnIndex`). `0050_daily_raw.csv`, `0050_dividends.csv` and `00631L_daily_raw.csv` hold LM2's funds. The notebook reads nothing outside `data/`.
 
-**Conventions (as in the module).** U28: daily simple price returns (no dividends) of the 28 leaf TWSE sector indices and the TAIEX price index between consecutive TAIEX-calendar dates, closes 2008-12-01 to 2026-10-08, $T=4{,}382$ returns. OLS with an intercept; $s_\varepsilon^2=\text{RSS}/(T-d)$; classical standard errors $s_\varepsilon^2(X^{\top}X)^{-1}$; White's HC0 with no degrees-of-freedom factor; Newey–West with Bartlett weights $1-k/(\ell+1)$, no small-sample correction and the lag $\ell=\lfloor4(T/100)^{2/9}\rfloor$ unless stated. Descriptive means, standard deviations and correlations divide by $T$ (`ddof=0`). t-stats and p-values use the normal reference, two-sided, except LM12's four points ($t_2$). Daily returns may lack a finite fourth moment (LM19), so these normal references are approximations. Quantiles are $\hat F^{-1}(u)$ (`method="inverted_cdf"`). Every count against a threshold uses the guard `1e-12`. Fits and tests are in-sample; halves, years and rolling windows are stability checks; the hedges of [[eg:hedge]] and of the extension are judged out of sample.
+**Conventions (as in the module).** U28: daily simple price returns (no dividends) of the 28 leaf TWSE sector indices and the TAIEX price index between consecutive TAIEX-calendar dates, closes 2008-12-01 to 2026-10-08, $T=4{,}382$ returns. OLS with an intercept; $s_\varepsilon^2=\text{RSS}/(T-d)$. Classical standard errors $s_\varepsilon^2(X^{\top}X)^{-1}$; White's HC0 with no degrees-of-freedom factor. Newey–West with Bartlett weights $1-k/(\ell+1)$, no small-sample correction and the lag $\ell=\lfloor4(T/100)^{2/9}\rfloor$ unless stated.
+
+Descriptive means, standard deviations and correlations divide by $T$ (`ddof=0`). t-stats and p-values use the normal reference, two-sided, except LM12's four points ($t_2$). Daily returns may lack a finite fourth moment (LM19), so these normal references are approximations. Quantiles are $\hat F^{-1}(u)$ (`method="inverted_cdf"`). Every count against a threshold uses the guard `1e-12`. Fits and tests are in-sample. Halves, years and rolling windows are stability checks. The hedges of [[eg:hedge]] and of the extension are judged out of sample.
 """)
 
 code(r"""
@@ -145,7 +147,9 @@ def two_sided(t):
 md(r"""
 ## Part 1 — Data
 
-FinMind's `TaiwanStockPrice` serves the sector indices with some rows copied from another date, or from another series on the same date (PITFALLS §3 of the repository). The book replaces each of these closes with the official 13:30:00 value. On FinMind's free plan the 13:30:00 values are not available (`TaiwanStockEvery5SecondsIndex` is a paid dataset), so `close_1330` is empty and the cell **drops** those closes instead: the returns into and out of each dropped date leave the common sample, which then holds 4,307 returns instead of 4,382. Nothing is ever estimated.
+FinMind's `TaiwanStockPrice` serves the sector indices with some rows copied from another date, or from another series on the same date (PITFALLS §3 of the repository). The book replaces each of these closes with the official 13:30:00 value.
+
+On FinMind's free plan the 13:30:00 values are not available (`TaiwanStockEvery5SecondsIndex` is a paid dataset), so `close_1330` is empty. The cell **drops** those closes instead. The returns into and out of each dropped date leave the common sample, which then holds 4,307 returns instead of 4,382. Nothing is ever estimated.
 """)
 
 code(r"""
@@ -209,7 +213,7 @@ print("lag rule: 4,382 ->", nw_lag(4382), "; 2,902 ->", nw_lag(2902), "; 2,191 -
 """)
 
 md(r"""
-**TR23 on U28's dates** gives the TAIEX's dividend yield over the window: the total-return index's daily return minus the price index's, averaged and multiplied by $A$. **LM2's pairs** are rebuilt as the LM2 lab builds them: total returns $R_t=(P_t+D_t)/(P_{t-1}/s_t)-1$ on the common dates of 0050 and 00631L, with the dividends of 0050 and the two splits (0050 4-for-1 on 2025-06-18, 00631L 22-for-1 on 2026-03-31).
+**TR23 on U28's dates** gives the TAIEX's dividend yield over the window. It is the total-return index's daily return minus the price index's, averaged and multiplied by $A$. **LM2's pairs** are rebuilt as the LM2 lab builds them: total returns $R_t=(P_t+D_t)/(P_{t-1}/s_t)-1$ on the common dates of 0050 and 00631L. They use the dividends of 0050 and the two splits (0050 4-for-1 on 2025-06-18, 00631L 22-for-1 on 2026-03-31).
 """)
 
 code(r"""
@@ -322,7 +326,7 @@ show("t_183 over the normal, less 1 (%)", 100 * (q[183] / stats.norm.ppf(0.975) 
 """)
 
 md(r"""
-**statsmodels, every option passed.** `OLS.fit()` gives the classical errors; `cov_type="HC0"` White's (not HC1, the default of `get_robustcov_results`); `cov_type="HAC"` needs `maxlags` and leaves `use_correction` False, and its p-values are normal (`use_t` False). FinancialInsurance's market model is Problem 11.
+**statsmodels, every option passed.** `OLS.fit()` gives the classical errors, and `cov_type="HC0"` White's (not HC1, the default of `get_robustcov_results`). `cov_type="HAC"` needs `maxlags` and leaves `use_correction` False, and its p-values are normal (`use_t` False). FinancialInsurance's market model is Problem 11.
 """)
 
 code(r"""
@@ -347,7 +351,9 @@ show("sqrt(T/(T-2))", sqrt(T / (T - 2)), ".6f", "1.000228")
 md(r"""
 ## Part 3 — Intervals and hat values
 
-**[[ex:fin2025]] and [[eg:band]].** FinancialInsurance on the TAIEX over the 243 returns of 2025, with 95% confidence and prediction bands from (23.5), and the hat values of the year. The book's own `Fraction` recount confirms that 7 April 2025 is the sample's smallest TAIEX return and that 2 days of 2025 fell 5% or more. The bands assume (23.2)'s conditions, and the prediction band also normal errors: White's standard error of the fitted value at −5% shows how far the classical one falls short, and the two days at or below −5% fall outside the prediction band.
+**[[ex:fin2025]] and [[eg:band]].** FinancialInsurance on the TAIEX over the 243 returns of 2025, with 95% confidence and prediction bands from (23.5), and the hat values of the year. The book's own `Fraction` recount confirms that 7 April 2025 is the sample's smallest TAIEX return and that 2 days of 2025 fell 5% or more.
+
+The bands assume (23.2)'s conditions, and the prediction band also normal errors. White's standard error of the fitted value at −5% shows how far the classical one falls short. The two days at or below −5% fall outside the prediction band.
 """)
 
 code(r"""
@@ -420,7 +426,7 @@ ax.set_xlabel("TAIEX daily return, 2025 (%)"); ax.set_ylabel("FinancialInsurance
 md(r"""
 ## Part 4 — White's standard errors
 
-**[[eg:lm18slope]].** LM18's experiment 3 recomputed with LM18's own seed: 10,000 five-year paths of iid normal log returns with TR23's $\bar r$ and $s_r$ (divisor $T$), `default_rng([3, 20261011])`, 20 chunks of `standard_normal((500, m))`. The model's value of the sandwich (23.6) is a normal integral, computed by 200-node Gauss–Hermite quadrature. These numbers use TR23 alone, so they do not change on the free plan.
+**[[eg:lm18slope]].** LM18's experiment 3 recomputed with LM18's own seed, `default_rng([3, 20261011])`. It draws 10,000 five-year paths of iid normal log returns with TR23's $\bar r$ and $s_r$ (divisor $T$), in 20 chunks of `standard_normal((500, m))`. The model's value of the sandwich (23.6) is a normal integral, computed by 200-node Gauss–Hermite quadrature. These numbers use TR23 alone, so they do not change on the free plan.
 """)
 
 code(r"""
@@ -535,7 +541,7 @@ for k, pr in ((1, "0.953"), (10, "0.538"), (20, "0.038")):
 """)
 
 md(r"""
-**The iid factors of the Deep Dive.** Under iid days, the products of the error and regressor sums have autocovariance $(m-k)^2\sigma_\varepsilon^2\sigma_x^2$ for $k<m$, so the true variance of the overlapping slope is $(2m^2+1)/(3m)$ times the classical one; Bartlett weights at lag $\ell$ keep $1-k/(\ell+1)$ of each term.
+**The iid factors of the Deep Dive.** Under iid days, the products of the error and regressor sums have autocovariance $(m-k)^2\sigma_\varepsilon^2\sigma_x^2$ for $k<m$, so the overlapping slope's true variance is $(2m^2+1)/(3m)$ times the classical one. Bartlett weights at lag $\ell$ keep $1-k/(\ell+1)$ of each term.
 """)
 
 code(r"""
@@ -551,7 +557,7 @@ show("Bartlett, lag 38", iid_factor(20, 38), ".2f", "3.41", kept=True)
 """)
 
 md(r"""
-**[[ex:haclag]].** The Newey–West standard error of Semiconductor's daily beta against the lag, always with the full-sample bread: the full-sample residuals, then the residuals of one fit per calendar year (2008's 22 returns form their own).
+**[[ex:haclag]].** The Newey–West standard error of Semiconductor's daily beta against the lag, always with the full-sample bread. Two sets of residuals enter: the full sample's, then those of one fit per calendar year (2008's 22 returns form their own).
 """)
 
 code(r"""
@@ -610,7 +616,7 @@ show("Jensen-type alpha (bp, one decimal)", 1e4 * (ci["b"][0] - (1 - ci["b"][1])
 """)
 
 md(r"""
-**[[ex:betas]].** The 28 betas of the full sample and of the halves, with the change between the halves in standard errors, $z=(\hat\beta_{\text{second}}-\hat\beta_{\text{first}})/\sqrt{\operatorname{SE}_{\text{first}}^2+\operatorname{SE}_{\text{second}}^2}$, from Newey–West errors ($\ell=7$ in each half).
+**[[ex:betas]].** The 28 betas of the full sample and of the halves, with the change between the halves in standard errors, $z=(\hat\beta_{\text{second}}-\hat\beta_{\text{first}})/\sqrt{\operatorname{SE}_{\text{first}}^2+\operatorname{SE}_{\text{second}}^2}$. The errors are Newey–West ($\ell=7$ in each half).
 """)
 
 code(r"""
@@ -671,7 +677,7 @@ show("Semiconductor last", bs[-1], ".3f", "1.168")
 """)
 
 md(r"""
-**[[eg:hedge]].** The variance-minimizing hedge ratio is the beta, and the contracts follow from LM8's contract value $200F_t$ NT\$. TX's settlement on 8 October 2026, $F_t=49{,}357$ (the 202610 contract), is the module's printed input (from `data/vol4_series.py`), so the lab needs no futures file. The first half's ratio is judged on the second half: out of sample.
+**[[eg:hedge]].** The variance-minimizing hedge ratio is the beta, and the contracts follow from LM8's contract value $200F_t$ NT\$. TX's settlement on 8 October 2026, $F_t=49{,}357$ (the 202610 contract), is the module's printed input (from `data/vol4_series.py`), so the lab needs no futures file. The first half's ratio is judged on the second half: out of sample. The same rule across the 28 sectors shows whether FinancialInsurance's failure is typical.
 """)
 
 code(r"""
@@ -697,6 +703,15 @@ y2, m2 = y_fi[H:], M[H:]
 for name, h, pr in (("first-half beta", hb["first"][0], "0.19"), ("ratio 1", 1.0, "23.09"),
                     ("second half's own beta", hb["second"][0], "49.29")):
     show(f"second-half variance cut by the {name} (%)", 100 * (1 - np.var(y2 - h * m2, ddof=0) / np.var(y2, ddof=0)), ".2f", pr)
+cut = {}                                              # every sector: (first-half ratio's cut, second half's own cut)
+for nm in U28:
+    ys = X[H:, J[nm]]
+    b_1 = slope_r2(X[:H, J[nm]], M[:H])[0]
+    cut[nm] = (1 - np.var(ys - b_1 * m2, ddof=0) / np.var(ys, ddof=0), slope_r2(ys, m2)[1])
+show("median share of the in-sample cut kept (%)", 100 * np.median([o / i for o, i in cut.values()]), ".0f", "87")
+low = {nm: float(round(100 * o, 2)) for nm, (o, i) in cut.items() if o < 0.01 - EPS}
+print("first-half ratio's cut (%) where under 1% or negative:", low)
+show("sectors cut under 1% or raised", len(low), "d", "5")
 """)
 
 md(r"""
@@ -770,7 +785,9 @@ show("BH's smallest adjusted p", multipletests(p_c, method="fdr_bh")[1].min(), "
 """)
 
 md(r"""
-**[[eg:alpha28]], experiment 1.** The residuals of the 28 market models are correlated, and with one shared regressor so are the intercepts' errors. Draw 100,000 vectors of 28 null t-stats from $\mathcal N_{28}(\mathbf 0,C)$, $C$ the residual correlation matrix, as `rng.standard_normal((100_000, 28)) @ L.T` with `L = np.linalg.cholesky(C)` and the sectors in U28's column order, Python's `sorted` of their FinMind names (ElectricMachinery before ElectricalCable), and `default_rng([1, 20261011])` created once. Count the entries beyond ±1.96 with the guard. Monte Carlo standard errors: binomial for a probability, the standard deviation over $\sqrt B$ for the mean count, and the delta method for the count's standard deviation.
+**[[eg:alpha28]], experiment 1.** The residuals of the 28 market models are correlated, and with one shared regressor so are the intercepts' errors. Draw 100,000 vectors of 28 null t-stats from $\mathcal N_{28}(\mathbf 0,C)$, $C$ the residual correlation matrix, as `rng.standard_normal((100_000, 28)) @ L.T` with `L = np.linalg.cholesky(C)`, from `default_rng([1, 20261011])` created once. The sectors are in U28's column order, Python's `sorted` of their FinMind names (ElectricMachinery before ElectricalCable).
+
+Count the entries beyond ±1.96 with the guard. Monte Carlo standard errors: binomial for a probability, the standard deviation over $\sqrt B$ for the mean count, and the delta method for the count's standard deviation.
 """)
 
 code(r"""
@@ -878,7 +895,9 @@ show("P12 Pr(at least one)", p_any, ".3f", "0.696")
 md(r"""
 ### Extension: a walk-forward hedge
 
-Fix one rule in advance and judge it out of sample. At the end of each calendar month from December 2009, estimate FinancialInsurance's beta on the trailing 250 returns, hedge the next month's returns with it, and compare the hedged variance over all those next months with the notional hedge's (ratio 1) and with no hedge. Which rule wins, and in which years does the trailing beta fail? Trying many such rules and keeping the best is the data snooping that LM34 treats; one rule fixed in advance avoids it.
+Fix one rule in advance and judge it out of sample. Hedge each month's FinancialInsurance returns from December 2009 with the beta of the 250 returns before that month. Compare the hedged variance over all those months with the notional hedge's (ratio 1) and with no hedge.
+
+Which rule wins, and in which years does the trailing beta fail? Trying many such rules and keeping the best is the data snooping that LM34 treats; one rule fixed in advance avoids it.
 """)
 
 code(r"""
@@ -907,7 +926,7 @@ nbf.write(nb, LAB / "LM23_lab.ipynb")
 
 (LAB / "README.md").write_text("""# LM23 Lab — Linear Regression
 
-Companion to *From Calculus to Kelly*, Learning Module 23. The notebook repairs the sector closes and rebuilds the module's exhibits and computational examples (OLS by hand and in statsmodels, confidence and prediction bands, hat values, White and Newey–West standard errors on LM18's paths and on overlapping sums, the market model, rolling betas, a regression hedge, LM2's slope, the 28 alphas and their corrections, and a factor named in advance), and works the computational practice problems.
+Companion to *From Calculus to Kelly*, Learning Module 23. The notebook repairs the sector closes, rebuilds the module's exhibits and computational examples, and works the computational practice problems. It covers OLS by hand and in statsmodels, confidence and prediction bands, hat values, and White and Newey–West standard errors on LM18's paths and on overlapping sums. It also covers the market model, rolling betas, a regression hedge, LM2's slope, the 28 alphas and their corrections, and a factor named in advance.
 
 ## Run
 

@@ -64,7 +64,7 @@ volumes:
       - {n: 23, title: "Linear Regression", desc: "From simple to multiple OLS in matrix form; HAC errors; CAPM beta and factor models."}
       - {n: 24, title: "Bayesian Inference and Shrinkage", desc: "Priors, posteriors, James–Stein; when fractional Kelly is a Bayesian answer."}
       - {n: 25, title: "Time Series I: ARMA, Unit Roots and Cointegration", desc: "Stationarity, mean reversion, the futures–spot basis."}
-      - {n: 26, title: "Time Series II: Volatility Models", desc: "EWMA, GARCH, and realized volatility from 5-second TAIEX data."}
+      - {n: 26, title: "Time Series II: Volatility Models", desc: "EWMA, GARCH, and realized volatility from intraday TAIEX data."}
   - id: V
     title: Portfolio Optimization
     blurb: Mean–variance theory, the convex machinery to solve it, and the estimation error that breaks it.

@@ -343,6 +343,9 @@ anchor("A21-60", "from the four-decimal means and s_u: " + "; ".join(
 for v, sh in zip(t60, ("3.955", "2.047", "3.675")):
     chk("A21-60", "X1 note, t-stat from the printed inputs", v, sh)
 has("X1 note", "give 3.955, 2.047 and 3.675")
+# C21 item 2: rows 1 to 3 use s_u / sqrt(days); row 4's 0.0375 is (21.3)'s denominator (two_sample, A21-14)
+has("X1 note (C21 2)", "and standard errors $s_{\\mathrm u}/\\sqrt{\\text{days}}$ ([[LM20]]'s (20.2)); row 4 uses the "
+    "two-sample statistic (21.3) and its denominator")
 # X1 (reviews/vol4_cross.md): LM19 owns TR23's autocorrelations; (19.5) on log returns, full-sample mean, divisor T
 rlog = np.log1p(R)
 rlc = rlog - rlog.mean()
@@ -577,6 +580,11 @@ has("E8 stability", "2.06 before June 2015 (p-value 0.040) and 1.25 after (0.21)
 anchor("A21-42", f"expected {100 * 0.05:.0f}; Pr(at least one) {1 - 0.95**100:.5f}")
 chk("A21-42", "KC 6 expected", Fraction(100, 20), "5")
 chk("A21-42", "KC 6 Pr", 1 - Fraction(19, 20) ** 100, "0.994")
+# (21.6)'s box, KC 6 and Problem 2 state each test's size, not its level (C21 item 1, S21's fix)
+has("(21.6) box (C21 1)", "each of size $\\alpha$ (as under a continuous null law), $\\text{FWER}=1-(1-\\alpha)^m$")
+has("(21.6) box (C21 1)", "the expected number of false rejections is the sum of the true nulls' sizes, at most $m_0$")
+has("KC 6 stem (C21 1)", "100 independent tests, each of size 5%, and every null is true")
+has("P2 stem (C21 1)", "Twenty independent tests each have size 5%, and every null is true")
 
 # ---------------------------------------------------------------- Holm, Benjamini-Hochberg (E9, X6, KC 7)
 ps_sorted = sorted(pv)
@@ -604,7 +612,12 @@ assert np.allclose(bh_adj, np.sort(multipletests(pv, method="fdr_bh")[1]), rtol=
 hs1 = 1 - 0.95 ** (1 / M)
 chk("new", "Holm-Sidak first level (Solution 10)", hs1, "0.00301")
 assert ps_sorted[0] > hs1 and abs(float(multipletests(pv, method="hs")[1].min()) - (1 - (1 - ps_sorted[0]) ** M)) < 1e-12
-has("S10", "$p_{(1)}=0.018$ exceeds their first levels, 0.00294 and 0.00301")
+has("S10", "$p_{(1)}=0.018$ exceeds their first levels, 0.00294 and $1-0.95^{1/17}=0.00301$")
+# Section 8: Holm-Sidak runs Holm's steps at Sidak's levels 1 - (1 - alpha)^(1/(m-i+1)); its adjusted p-values,
+# the running maximum of 1 - (1 - p_(i))^(m-i+1), reproduce statsmodels' method="hs" on the calendar family
+hs_adj = np.maximum.accumulate([1 - (1 - ps_sorted[i]) ** (M - i) for i in range(M)])
+assert np.allclose(np.minimum(hs_adj, 1), np.sort(multipletests(pv, method="hs")[1]), rtol=0, atol=1e-12)
+has("Holm-Sidak defined (C21 3)", "runs Holm's steps at Šidák's levels $1-(1-\\alpha)^{1/(m-i+1)}$ in place of $\\alpha/(m-i+1)$")
 has("S10", "rejects nothing either, because every $p_{(i)}$ exceeds $iq/m$")
 has("P10 stem", "Give the rejections at 5% and Benjamini–Hochberg's two smallest adjusted p-values")
 chk("A21-32", "Holm's second level (exact: printed in full)", Fraction(1, 20 * (M - 1)), "0.003125")

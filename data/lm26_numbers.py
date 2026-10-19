@@ -746,6 +746,15 @@ chk("A", A, ".2f", "246.12")
 chk("T5S sessions", len(rv_dates), ",", "5,351")
 has("first return", "3 January 2003")
 has("last date", "8 October 2026")
+# closing item 5: V_t comes from a 15-minute grid on data sampled every 5 to 60 seconds, so neither the subtitle nor the
+# introduction says "5-second"; V_t itself is observed, the true variance is not
+has("subtitle", "measure it from intraday TAIEX data, and judge the forecasts against that noisy measurement.")
+has("introduction", "measures a day's variance from intraday index data, and judges the forecasts against that noisy "
+                    "measurement.")
+assert "never observed exactly" not in TEXT
+# closing item 3: in Deep Dive 1 the number of substitutions is k (a lag), since n is the intraday count of (26.6)
+has("DD1: k substitutions", "Substitute (26.3) into itself $k$ times:")
+assert "\\beta^k\\sigma_{t-k}^2" in TEXT and "\\beta^n" not in TEXT and "n\\to\\infty" not in TEXT
 has("T5S start", "3 January 2005")
 has("TR23 retrieval", "`TaiwanStockTotalReturnIndex` (TAIEX), retrieved 18 October 2026")
 has("T5S retrieval", "`TaiwanVariousIndicators5Seconds` (TWSE's TAIEX), retrieved 19 October 2026")
@@ -819,7 +828,11 @@ has("hygiene: 24 tests", "Tests on these data number 24 ([[LM21]]'s count).")
 has("hygiene: five ARCH", "They are five ARCH (two by permutation), two Ljung–Box")
 has("hygiene: the ARCH tests' label", "The ARCH tests and the full-sample fits are **in-sample**.")
 # the shuffles are a simulated null, labelled a model as LM21 and LM22 label theirs (revision 3, F1 with X3 item 3)
-has("hygiene: the shuffles' label", "simulations, the shuffles, the widget and the noise model are **models**")
+has("hygiene: the shuffles' label", "Simulations, the shuffles, the widget and the noise model are **models**")
+# X4 item 4: R-squared values and sample moments carry no standard error, as LM19 and LM25 say; Deep Dive 3's nominal
+# Newey-West errors are the one exception among the intraday statistics
+has("hygiene: descriptive", "Outside Deep Dive 3, intraday statistics, R-squared values and sample moments are "
+                            "**descriptive**, without standard errors ([[LM20]]).")
 has("roadmap", "Section 2 tests for clustering, Sections 3 to 5 build the forecasts, Section 6 measures a day's variance, "
                "and Section 7 judges them.")
 has("E1: what is rejected", "A constant variance is rejected beyond doubt.")
@@ -1068,8 +1081,21 @@ chk("exp 1: its batch SE", SIM[1]["disp_se"], ".3f", "0.035")
 chk("exp 1: 5%", SIM[1]["disp_q05"], ".2f", "2.04")
 chk("exp 1: 95%", SIM[1]["disp_q95"], ".2f", "5.14")
 chk("exp 1: median excess kurtosis", SIM[1]["kurt_med"], ".2f", "1.63")
-chk("exp 1: share at or above 5.428", 100 * SIM[1]["kurt_share"], ".1f", "5.3")
+# closing item 2 (AUTHORING section 8): each Monte Carlo result with its standard error, and only the digits that error
+# supports; the share's is binomial, sqrt(p(1 - p)/1,000)
+kurt_share_se = math.sqrt(SIM[1]["kurt_share"] * (1 - SIM[1]["kurt_share"]) / 1000)
+print(f"CHECK exp 1: share at or above 5.428 {100 * SIM[1]['kurt_share']:.1f}% (binomial SE {100 * kurt_share_se:.2f} "
+      f"points; printed to a whole percent)")
+chk("exp 1: its batch SE", SIM[1]["kurt_se"], ".3f", "0.045")
+chk("exp 1: share at or above 5.428", 100 * SIM[1]["kurt_share"], ".0f", "5")
+chk("exp 1: its binomial SE (points)", 100 * kurt_share_se, ".1f", "0.7")
 chk("exp 2: median excess kurtosis", SIM[2]["kurt_med"], ".1f", "7.0")
+chk("exp 2: its batch SE", SIM[2]["kurt_se"], ".2f", "0.11")
+flag("exp 1: kurtosis batch SE", SIM[1]["kurt_se"], 3)
+flag("exp 2: kurtosis batch SE", SIM[2]["kurt_se"], 2)
+has("exp 1-2: standard errors", "Experiment 1's paths have a median excess kurtosis of only 1.63, and 5% reach TR23's "
+                                "5.428 (standard errors 0.045 and 0.7 points). Experiment 2 (`default_rng([2, 20261011])`) "
+                                "repeats it with $t$ innovations: median 7.0 (standard error 0.11).")
 flag("exp 1: batch SE", SIM[1]["disp_se"], 3)
 flag("exp 1: 95%", SIM[1]["disp_q95"], 2)
 has("exp seeds", "`default_rng([1, 20261011])`")
@@ -1101,10 +1127,20 @@ has("P12: a ratio of means", "by the ratio of the period's mean $\\mathrm{RV}(10
                              "minus 1, to three decimals")
 # the mean of daily ratios would give another answer (the solver's -0.358)
 assert f"{float(np.mean(RV['10s'][m5s] / RV['5s'][m5s])) - 1:.3f}" != "-0.381"
-chk("E8: file, 15-second days", vr15, ".3f", "-0.281")
+# closing item 1: E8 and KC 6 use X4's 15-second sample, 17 January 2011 to 2012 (487 days). The whole 15-second
+# regime (764 days, to 21 February 2014; anchors A26-34 and A26-61) mixes it with 2013-2014's much stronger reversal.
+m1112 = periods["2011-01-17..2012"]
+assert np.all(reg[m1112] == 15) and int(m1112.sum()) == 487 and int(m15.sum()) == 764
+vr1112 = float(np.mean(RV["30s"][m1112]) / np.mean(RV["15s"][m1112]) - 1)
+print(f"CHECK whole 15-second regime (764 days, not printed): RV(30s)/RV(15s) {vr15 + 1:.4f}")
+assert math.isclose(vr1112 + 1, SIG["2011-01-17..2012"]["30s"] / SIG["2011-01-17..2012"]["15s"], rel_tol=1e-12)
+chk("E8: file, 2011-2012's 15-second days", vr1112, ".3f", "-0.099")
+flag("E8: file, 2011-2012", vr1112, 3)
 chk("E8: file, 5 minutes", vr5m, ".3f", "0.056")
-chk("KC 6: RV(30s)/RV(15s)", vr15 + 1, ".4f", "0.7189")
-chk("KC 6: implied rho_1 (printed ratio)", 0.7189 - 1, ".3f", "-0.281")
+chk("KC 6: RV(30s)/RV(15s), 2011-2012", vr1112 + 1, ".4f", "0.9013")
+chk("KC 6: implied rho_1 (printed ratio)", 0.9013 - 1, ".3f", "-0.099")
+has("E8: the 15-second sample", "On 2011–2012's 15-second days the two are −0.099 and −0.0992".replace("−", "-"))
+has("KC 6: the 15-second sample", "In 2011–2012, $\\mathrm{RV}(30 s)/\\mathrm{RV}(15 s)=0.9013$.")
 chk("X6 top: 2008", R1_5["2008"], ".3f", "0.397")
 chk("X6 top: 2025", R1_5["2025"], ".3f", "2.968")
 assert min(R1_5, key=lambda k: R1_5[k]) == "2008" and max(R1_5, key=lambda k: R1_5[k]) == "2025"
@@ -1172,8 +1208,11 @@ if PA is not None and TX is not None:
     rd_ = PA["rho1_day"][m25]
     rat_day = RV["5s"][m25] / RV["5m"][m25]
     chk("E8: raw, 5-second days", r5_, ".3f", "-0.380")
-    chk("E8: raw, 15-second days", r15_, ".4f", "-0.2815")
-    chk("KC 6: raw", r15_, ".4f", "-0.2815")
+    r1112_ = C.pooled(PA, m1112, "f")
+    print(f"CHECK whole 15-second regime (764 days, not printed): pooled rho_1 {r15_:.4f}")
+    chk("E8: raw, 2011-2012's 15-second days", r1112_, ".4f", "-0.0992")
+    chk("KC 6: raw", r1112_, ".4f", "-0.0992")
+    flag("E8: raw, 2011-2012", r1112_, 4)
     chk("E8: raw, 5 minutes", r5m_, ".3f", "0.056")
     chk("E8: 2025 pooled", p25_, ".3f", "-0.386")
     chk("E8: noise share 2025", 100 * 2 * abs(p25_), ".0f", "77")
@@ -1236,7 +1275,7 @@ ie_, iv_ = sw.index("ewma"), sw.index("ewma_v")
 sw[ie_], sw[iv_] = sw[iv_], sw[ie_]
 assert ORDERS["r2"] == sw and ORDERS["r2"][-1] == "v_prev"
 has("X7 note: orders", "with $r_t^2$ only the two EWMAs swap places")
-has("orders against r^2", "There the two GARCH forecasts again rank first and second, and yesterday's $V$ last.")
+has("orders against r^2", "unbiased up to the tiny squared mean; there only the two EWMAs swap places.")
 has("P4: the two GARCH forecasts", "while the two GARCH forecasts keep the two lowest QLIKE scores")
 print("QLIKE orders:", {tg: [NAMES[k] for k in ORDERS[tg]] for tg in ORDERS})
 chk("E10: GARCH QLIKE", X7["garch_n"]["qlike"], ".4f", "0.5032")
@@ -1366,6 +1405,11 @@ chk("widget: half-life", half_life(psw), ".1f", "44.2")
 chk("widget: alpha+beta", psw, ".5f", "0.98443")
 chk("widget: unconditional", math.sqrt(WJ["A"] * uw), ".2f", "19.83")
 chk("widget: unconditional variance", uw, ".4f", "1.5971")
+# closing item 4: (26.4) needs alpha + beta < 1; above that, src/lm26.js draws start x (alpha + beta)^(m - 1) instead
+has("widget sentence", "Starting from [[eg:term]], the widget draws (26.4) for any $\\alpha+\\beta<1$ at the fit's "
+                       "unconditional variance.")
+JS = (ROOT / "src" / "lm26.js").read_text(encoding="utf-8")
+assert "stat = p < 1" in JS and "stat ? U + Math.pow(p, m - 1) * (s - U) : s * Math.pow(p, m - 1)" in JS
 
 # ====================================================================== structure: labels and citations
 md_raw = MD.read_text(encoding="utf-8")

@@ -179,8 +179,9 @@ plan; from Stage 3 the module sources and their numbers scripts are authoritativ
 - **Problems.** Each stem states its sample, divisor, $A$, rounding, the test's null and level, the standard-error
   method and, for a simulation or bootstrap, the seed, the draws and the block length. Every distractor is computed
   and fails for a reason worth explaining.
-- **Leads and tags.** As Volume III: a module's `leads` are the modules that cite one of its tags or that its text
-  points to with [[LMn]]; cite another module's exhibit or example in words with [[LMn]].
+- **Leads and tags.** As Volume III: a module's `leads` are the modules that cite one of its tags or results, and
+  the modules its text points to forward with [[LMn]]; a backward pointer or an illustrative value creates no prereq
+  or lead (closing check X4, final check X5). Cite another module's exhibit or example in words with [[LMn]].
 
 ## Capability check (2026-10-19)
 
@@ -423,13 +424,18 @@ Collected here as the briefs add them; applied at publication with the edition n
 - `build/make_lab17.py:486`: the autocorrelation convention is LM19's.
 - `build/make_lab11.py:571`: the literal `[[LM20]]` goes (wording below).
 - Leads of Volumes I–III gain the Volume IV modules that cite them (cross-check X25–X29, checked against the
-  current front matter): lm01 20; lm02 20, 23; lm03 19, 25, 26; lm04 19, 21, 22, 24;
-  lm05 19, 20, 21, 26; lm06 23; lm07 20; lm10 23, 24; lm11 20, 22, 24; lm12 20, 25; lm13 20, 22; lm14 21, 22,
+  current front matter): lm01 20; lm02 20, 23; lm03 19, 26; lm04 19, 22, 24;
+  lm05 19, 20, 21, 26; lm07 20; lm10 23, 24; lm11 20, 22, 24; lm12 20, 25; lm13 20, 22; lm14 21, 22,
   26; lm15 22, 24 (round 1: lm14 → 24 and lm15 → 23 go with the uncited prerequisites,
-  X2; revision 1: lm15 gains 22, which LM22 now cites for $\nu=3.065$; closing check: lm07 → 22 goes, since a
-  pointer or an illustrative value creates no lead, X4); lm16 25; lm17 23, 24, 25; lm18 21, 23, 25.
-- `build/make_lab11.py:571`: "LM20 and LM22 give the tools; LM22 answers it for 2017 and 2020"; `make_lab15.py:443`
-  and `make_lab17.py:486`: LM19's wording; `make_lab04.py:642`: LM22's wording (the briefs give each).
+  X2; revision 1: lm15 gains 22, which LM22 now cites for $\nu=3.065$; closing check: lm07 → 22 goes, and in the final
+  check lm03 → 25, lm04 → 21 and lm06 → 23, since a backward pointer or an illustrative value creates no lead,
+  X4 and X5); lm16 25; lm17 23, 24, 25; lm18 21, 23, 25.
+- `build/make_lab11.py:571`: "LM22's block bootstrap answers it for 2017 and 2020; LM20 explains why the delta
+  method cannot" (final check X5, replacing the briefs' wording, which lm20.md's own sentence on LM11 contradicts);
+  `make_lab15.py:443`: "LM19 shows how such statistics vary with the sample, and LM20 gives a fitted $\nu$ its
+  standard error" (X5: LM20 gives a quantile no standard error); `make_lab17.py:486`: LM19's wording;
+  `make_lab04.py:642`: LM22's wording (the briefs give each). Then regenerate and execute labs 04, 11, 15 and 17 and
+  check the four lines in the committed notebooks.
 - lm15.md:263: LM20's rewording ("understate" claims a direction the data do not establish: the gap is 1.1 standard
   errors).
 

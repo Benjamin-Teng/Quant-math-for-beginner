@@ -746,7 +746,7 @@ nbf.write(nb, LAB / "LM20_lab.ipynb")
 
 Companion to *From Calculus to Kelly*, Learning Module 20. The notebook rebuilds the module's exhibits and computational examples and works the computational practice problems.
 
-It covers the sampling distributions of a mean and a volatility, standard errors by sampling interval and the coverage of confidence intervals. It fits the normal and Student-t models by maximum likelihood, with their observed information and profile likelihood. Then come the delta method for the volatility, the Kelly fraction and the Sharpe ratio, and the Hill estimator.
+The notebook covers the sampling distributions of a mean and a volatility, standard errors by sampling interval and the coverage of confidence intervals. It fits the normal and Student-t models by maximum likelihood, with their observed information and profile likelihood. Then come the delta method for the volatility, the Kelly fraction and the Sharpe ratio, and the Hill estimator.
 
 ## Run
 

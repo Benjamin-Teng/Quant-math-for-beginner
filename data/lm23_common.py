@@ -393,6 +393,13 @@ for _lab, _hh in (("none", 0.0), ("notional", 1.0), ("first", HB["first"][0]), (
                   ("full", HB["full"][0])):
     _vv = float(np.var(_y2 - _hh * _m2, ddof=0))
     HEDGE_OOS[_lab] = (sqrt(_vv), 1 - _vv / float(_y2.var(ddof=0)))
+HEDGE28 = {}                    # every sector: (the first-half ratio's cut of the second half's variance, that half's own)
+for _nm in NAMES:
+    _ys = X[H:, J[_nm]]
+    _b1 = slope_r2(X[:H, J[_nm]], MKT[:H])[0]
+    HEDGE28[_nm] = (1 - float(np.var(_ys - _b1 * _m2, ddof=0)) / float(_ys.var(ddof=0)), slope_r2(_ys, _m2)[1])
+HEDGE28_KEPT = float(np.median([o / i for o, i in HEDGE28.values()]))   # median share of the in-sample cut kept
+HEDGE28_FAIL = sorted(nm for nm, (o, _) in HEDGE28.items() if o < 0.01 - EPS)  # cut under 1% or raise the variance
 F2 = ols(R631, design(R50))
 _yr2 = np.array([d[:4] for d in ETF_DATES])
 BY_YEAR_ETF = {yy: ols(R631[_yr2 == yy], design(R50[_yr2 == yy])) for yy in sorted(set(_yr2))}

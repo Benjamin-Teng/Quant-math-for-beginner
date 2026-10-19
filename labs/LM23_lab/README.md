@@ -1,6 +1,6 @@
 # LM23 Lab — Linear Regression
 
-Companion to *From Calculus to Kelly*, Learning Module 23. The notebook repairs the sector closes and rebuilds the module's exhibits and computational examples (OLS by hand and in statsmodels, confidence and prediction bands, hat values, White and Newey–West standard errors on LM18's paths and on overlapping sums, the market model, rolling betas, a regression hedge, LM2's slope, the 28 alphas and their corrections, and a factor named in advance), and works the computational practice problems.
+Companion to *From Calculus to Kelly*, Learning Module 23. The notebook repairs the sector closes, rebuilds the module's exhibits and computational examples, and works the computational practice problems. It covers OLS by hand and in statsmodels, confidence and prediction bands, hat values, and White and Newey–West standard errors on LM18's paths and on overlapping sums. It also covers the market model, rolling betas, a regression hedge, LM2's slope, the 28 alphas and their corrections, and a factor named in advance.
 
 ## Run
 
