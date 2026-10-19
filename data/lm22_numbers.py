@@ -528,10 +528,25 @@ has("M3 moments", "its moments exist only below order 3.065")
 # review N1 and decision XB7 (revision 2): Theorem 3.1 covers the mean of R_t (moments above order 2 exist), not the
 # statistics that average squares or products of returns, which need moments above order 4 (nu < 4); nor does the
 # iid percentile interval's smooth-function result for R-bar/s, whose mean of R_t^2 needs a finite fourth moment
-has("N1 mean of R_t", "That meets Theorem 3.1's moment condition for the mean of $R_t$ but not Theorem 3.3's.")
-# (the variance ratio and the windows' spread use log returns, so the text says "returns", not R_t)
-has("N1 squares", "average squares or products of returns, for which Theorem 3.1 needs moments of returns above order 4")
-has("N1 practice", "Neither theorem covers them, so their intervals rest on the method's practice")
+# revision 3 (F1, X3 item 1): the stationary bootstrap of the mean needs Theorem 3.3's moments, so it rests on practice
+has("N1 mean of R_t", "That meets Theorem 3.1's moment condition for the mean of $R_t$ but not Theorem 3.3's, so the "
+    "stationary bootstrap of the mean ([[eg:btest]]) rests on practice too.")
+# (the variance ratio and the windows' spread use log returns, so the text says "returns", not R_t); revision 3 (F2,
+# X3 item 1) adds rho_1(|r|) and Section 7's correlations and component shares, which average products of returns.
+# The share of windows under water averages indicators, so the list names the component shares only.
+has("N1 squares", "The volatility, Sharpe ratio and Kelly fraction, $\\operatorname{VR}(20)$, $\\hat\\rho_1(\\lvert "
+    "r\\rvert)$, the windows' spread and Section 7's correlations and component shares average squares or products "
+    "of returns.")
+has("N1 practice", "For these, Theorem 3.1 needs moments above order 4, so their intervals rest on the method's "
+    "practice")
+has("F5 BCa", "BCa's adjustments are stated here without proof (Efron 1987).")
+# revision 3: F3, F4, X3 item 6 and XB11 (視窗 for window) in the boxes
+has("F4 zh VR", "$\\operatorname{VR}(20)$ 以區塊自助重抽法（block bootstrap）算出的信賴區間是 0.92 到 1.16")
+has("F3 zh", "使平均報酬（mean return）為零")
+has("X3 item 6 zh", "重抽樣（resampling）的分布（distribution）若有")
+has("X3 item 6 zh null", "成立時的分布（distribution）")
+has("XB11 window zh", "五年視窗（window）虧損比例")
+assert "區塊信賴區間" not in NORM and "五年期間" not in NORM
 has("XB7 fourth moment", "For $\\bar R/s$ one mean is of $R_t^2$, whose variance needs a finite fourth moment; "
     "[[LM15]]'s $t_{3.065}$ fit lacks it, so TR23's intervals rest on practice.")
 # decision XB8 (revision 2): sqrt(A) annualization is a convention on simple returns ([[LM19]])

@@ -953,16 +953,21 @@ print(f"labels: {len(ex_labels)} exhibits, {len(eg_labels)} examples, tags {tags
 # decision XB10: the English at a term's first use in each box (the editor's named terms and revision 2's own scan)
 ZH = re.findall(r"^> \[!zh\][^\n]*\n> ([^\n]+)", RAW, flags=re.MULTILINE)
 GLOSS = [["迴歸（regression）", "係數（coefficient）", "誤差（error）", "估計量（estimator）", "殘差（residual）",
-          "變異數（variance）"],
-         ["係數（coefficient）", "標準誤（standard error）", "誤差（error）"],
-         ["誤差（error）", "變異數（variance）", "殘差（residual）"],
-         ["迴歸（regression）", "標準誤（standard error）", "變異數（variance）", "殘差（residual）"],
-         ["殘差（residual）"]]
+          "變異數（variance）", "維度（dimension）", "互不相關（uncorrelated）"],
+         ["係數（coefficient）", "標準誤（standard error）", "誤差（error）", "抽樣誤差（sampling error）", "檢定（test）"],
+         ["誤差（error）", "變異數（variance）", "殘差（residual）", "互不相關（uncorrelated）",
+          "參數漂移（parameter drift）"],
+         ["迴歸（regression）", "標準誤（standard error）", "變異數（variance）", "殘差（residual）",
+          "股利殖利率（dividend yield）"],
+         ["殘差（residual）", "檢定（test）", "門檻（threshold）", "機率（probability）"]]
 same("Chinese boxes", len(ZH), len(GLOSS))
 for box, terms in zip(ZH, GLOSS, strict=True):
     for g in terms:
         assert g in box and box.index(g) <= box.index(g.split("（")[0]), ("XB10: no English at first use", g)
-print("XB10: the named terms carry their English at first use in each box")
+# decision XB11: one Chinese form per concept (參數漂移, 股利殖利率, 互不相關)
+for old in ("彼此不相關", "在漂移", "與殖利率"):
+    assert old not in RAW, ("XB11: superseded form", old)
+print("XB10/XB11: the named terms carry their English at first use in each box, in the book's one form")
 
 # ====================================================================== report
 body = TEXT.split("\n## Glossary", 1)[0].split("\n---\n", 1)[1]

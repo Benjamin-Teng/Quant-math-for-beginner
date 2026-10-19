@@ -57,14 +57,14 @@ def code(s: str) -> None:
 md(r"""
 # LM26 Lab — Time Series II: Volatility Models
 
-Companion notebook to **From Calculus to Kelly, LM26**. It rebuilds the module's exhibits and computational examples from the closes of the TAIEX total-return index and the per-day realized variances of the 5-second TAIEX, computes the widget's starting values, solves the computational practice problems, and ends with an extension exercise.
+Companion notebook to **From Calculus to Kelly, LM26**. It rebuilds the module's exhibits and computational examples from the closes of the TAIEX total-return index and the per-day realized variances of the 5-second TAIEX. It also computes the widget's starting values, solves the computational practice problems, and ends with an extension exercise.
 
 | Part | Rebuilds |
 |:--|:--|
 | 1 | Data: TR23's log returns in percent, $T$, $A$; `vol4_rv.csv`, its sampling regimes and the daily target $V_t$ |
 | 2 | The ARCH test by hand and with `het_arch` ([[eg:archtest]]), its permutation reference (experiment 3) and the knowledge check's ARCH(1) forecasts |
 | 3 | EWMA by hand ([[eg:ewmahand]]), its weights, and $\lambda$ in hindsight ([[eg:lambda]]) |
-| 4 | GARCH: the likelihood by hand, arch's normal and $t$ fits with classic and robust errors ([[eg:fit]], [[ex:garchfit]]), standardized residuals ([[eg:resid]]), Deep Dive 2, the term structure ([[eg:term]], the widget) and [[ex:vol]] |
+| 4 | GARCH: the likelihood by hand, arch's normal and $t$ fits with classical and robust errors ([[eg:fit]], [[ex:garchfit]]), standardized residuals ([[eg:resid]]), Deep Dive 2, the term structure ([[eg:term]], the widget) and [[ex:vol]] |
 | 5 | What GARCH explains ([[eg:explains]]) with experiments 1 and 2 |
 | 6 | Realized variance: [[ex:signature]], [[ex:byyear]], [[eg:vrback]]'s file values, Deep Dive 3, the opening return's share, $V_t$ against $r_t^2$ |
 | 7 | Out of sample: the six forecasts, [[ex:case]], [[ex:losses]], [[eg:oos]], [[ex:qlikeyear]], [[ex:y2025]], the window check |
@@ -76,9 +76,20 @@ Companion notebook to **From Calculus to Kelly, LM26**. It rebuilds the module's
 
 **Data.** The notebook reads FinMind files that you download once with your own token. From the repository root, run `uv run python data/fetch_finmind.py`, then `uv run python data/make_lab_data.py`. FinMind's licence does not allow the book to redistribute the data. After that, the notebook runs offline. The realized variances come with the repository (`data/derived/vol4_rv.csv`). Rebuilding them needs the 5-second TAIEX download, `uv run python data/fetch_intraday.py --series taiex5s` (5,351 requests, about nine hours on a free registered FinMind account at 600 calls an hour, re-run after each hourly stop).
 
-`data/` then holds `taiex_tr.csv` (`date`, `price`: the daily closes of the TAIEX total-return index, FinMind `TaiwanStockTotalReturnIndex`, data_id TAIEX, 2 January 2003 to 8 October 2026) and `vol4_rv.csv` (one row per session from 3 January 2005: the sampling interval `regime_s`, the realized variances `rv_<h>` of the window 09:30:00–13:30:00 at nine intervals with their return counts `n_<h>`, and `o2`, the squared log change from the previous close to 09:30:00; derived from FinMind `TaiwanVariousIndicators5Seconds` and `TaiwanStockPrice`, TWSE the original source). The notebook reads nothing outside `data/`.
+`data/` then holds two files, and the notebook reads nothing outside `data/`:
 
-**Conventions (as in the module).** TR23: $T=5{,}849$ log returns $r_t=\ln(1+R_t)$ from 3 January 2003, used in percent ($y_t=100r_t$) by every model, so variances are in %² a day; years are calendar days / 365.25 and $A=T/\text{years}=246.12$; an annualized volatility is $\sqrt{A\times\text{variance}}$. Moments divide by $T$. The target is $V_t=10^4(\texttt{o2}+\texttt{rv\_15m})$ in %². GARCH(1,1) is arch's `arch_model(y, mean="Constant", vol="GARCH", p=1, q=1)`, started from arch's backcast. EWMA has $\lambda=0.94$, mean zero, and starts at the mean of $y_t^2$ over the first 246 returns. Out of sample: a window of $\operatorname{round}(5A)=1{,}231$ returns, both GARCH models refitted at each month's first session, forecasts from 2 January 2008. Newey–West: Bartlett weights, $\lfloor4(n/100)^{2/9}\rfloor$ lags, no small-sample correction; Mincer–Zarnowitz: HC0. Quantiles and medians use `method="inverted_cdf"`; counts against a threshold use the guard `1e-12`. Simulations create `np.random.default_rng([e, 20261011])` once per experiment $e$.
+- `taiex_tr.csv`: `date` and `price`, the daily closes of the TAIEX total-return index (FinMind `TaiwanStockTotalReturnIndex`, data_id TAIEX), 2 January 2003 to 8 October 2026.
+- `vol4_rv.csv`: one row per session from 3 January 2005. It holds the sampling interval `regime_s` and the realized variances `rv_<h>` of the window 09:30:00–13:30:00 at nine intervals, with their return counts `n_<h>`. Its column `o2` is the squared log change from the previous close to 09:30:00. The file is derived from FinMind `TaiwanVariousIndicators5Seconds` and `TaiwanStockPrice`, with TWSE the original source.
+
+**Conventions (as in the module).**
+
+- TR23: $T=5{,}849$ log returns $r_t=\ln(1+R_t)$ from 3 January 2003, used in percent ($y_t=100r_t$) by every model, so variances are in %² a day.
+- Years are calendar days / 365.25 and $A=T/\text{years}=246.12$; an annualized volatility is $\sqrt{A\times\text{variance}}$. Moments divide by $T$.
+- The target is $V_t=10^4(\texttt{o2}+\texttt{rv\_15m})$ in %².
+- GARCH(1,1) is arch's `arch_model(y, mean="Constant", vol="GARCH", p=1, q=1)`, started from arch's backcast. EWMA has $\lambda=0.94$, mean zero, and starts at the mean of $y_t^2$ over the first 246 returns.
+- Out of sample: a window of $\operatorname{round}(5A)=1{,}231$ returns, both GARCH models refitted at each month's first session, forecasts from 2 January 2008.
+- Newey–West: Bartlett weights, $\lfloor4(n/100)^{2/9}\rfloor$ lags, no small-sample correction; Mincer–Zarnowitz: HC0.
+- Quantiles and medians use `method="inverted_cdf"`; counts against a threshold use the guard `1e-12`. Simulations create `np.random.default_rng([e, 20261011])` once per experiment $e$.
 """)
 
 code(r"""
@@ -164,7 +175,7 @@ def ann(v):
 """)
 
 md(r"""
-The per-day realized variances. The file's first line is a comment (the credit to FinMind and TWSE), hence `comment_prefix="#"`; a missing grid prints `NaN` (the 10-second regime has no 15-second grid, and the 1-minute regime nothing finer).
+The per-day realized variances. The file's first line is a comment (the credit to FinMind and TWSE), hence `comment_prefix="#"`. A missing grid prints `NaN`: the 10-second regime has no 15-second grid, and the 1-minute regime nothing finer.
 """)
 
 code(r"""
@@ -200,7 +211,7 @@ show("8 April 2025: sqrt(V_t) (%)", math.sqrt(V15[i8]), ".4f", "3.3873")
 md(r"""
 ## Part 2 — The ARCH test ([[eg:archtest]])
 
-First the evidence of Section 2, by LM19's (19.5) (full-sample mean, divisor $T$): next-day log returns barely correlate, their sizes do. Then the test: regress $\hat\varepsilon_t^2$ on a constant and $K$ lags by OLS; the statistic is $(T-K)\times$R-squared, compared with the upper tail of $\chi^2_K$. statsmodels' `het_arch` squares the residuals it is given, so pass $y_t-\bar y$.
+First the evidence of Section 2, by LM19's (19.5) (full-sample mean, divisor $T$): next-day log returns barely correlate, their sizes do. Then the test: regress $\hat\varepsilon_t^2$ on a constant and $K$ lags by OLS; the statistic is $T-K$ times R-squared, compared with the upper tail of $\chi^2_K$. statsmodels' `het_arch` squares the residuals it is given, so pass $y_t-\bar y$.
 """)
 
 code(r"""
@@ -246,7 +257,9 @@ for x, v_, s_ in ((3.0, "2.94", "1.72"), (0.5, "1.23", "1.11")):
 md(r"""
 These $\chi^2$ p-values are nominal: (26.1) needs a finite fourth moment, which LM15's fit ($\nu=3.065$) lacks (LM19).
 
-Experiment 3 needs no moment. As in LM21, it shuffles TR23's days 20,000 times with one generator, `np.random.default_rng([3, 20261011])`, and computes both statistics on each shuffle. A shuffle keeps every return but breaks any dependence between days, so the shuffles show how large the statistics get without clustering. The cell takes about ten seconds.
+Experiment 3 needs no moment. It shuffles TR23's days 20,000 times with one generator, `np.random.default_rng([3, 20261011])`, as LM21's experiment 8 shuffled dates, and computes both statistics on each shuffle. A shuffle keeps every return but breaks any dependence between days, so the shuffles show how large the statistics get without clustering.
+
+The largest statistics depend on the seed, so the module prints only that no shuffle reaches 224.8 or 696.3; the cell prints this run's largest. It takes about ten seconds.
 """)
 
 code(r"""
@@ -267,9 +280,10 @@ for i in range(NPERM):
     xs = yc[rng3.permutation(T)]          # the mean is unchanged, so xs is the shuffled series' own residual
     perm1[i], perm5[i] = arch_lm(xs, 1), arch_lm(xs, 5)
 print(f"{NPERM:,} shuffles in {time.time() - t0:.0f} s")
-show("largest shuffled statistic, K=1", perm1.max(), ".1f", "84.1")
-show("largest shuffled statistic, K=5", perm5.max(), ".1f", "88.0")
-print(f"shuffles at or above the observed 224.8 and 696.3: {int((perm1 >= lm1).sum())} and {int((perm5 >= lm5).sum())}")
+print(f"largest shuffled statistics in this run: {perm1.max():.1f} (K=1) and {perm5.max():.1f} (K=5)")
+n1, n5 = int((perm1 >= lm1).sum()), int((perm5 >= lm5).sum())
+print(f"shuffles at or above the observed 224.8 and 696.3: {n1} and {n5}   [book: no shuffle reaches them]")
+assert n1 == 0 and n5 == 0
 q1, q5 = (float(np.quantile(p, 0.99, method="inverted_cdf")) for p in (perm1, perm5))
 print(f"99% points of the shuffles: {q1:.2f} (K=1) and {q5:.2f} (K=5); of chi2_1 and chi2_5: "
       f"{stats.chi2.ppf(0.99, 1):.2f} and {stats.chi2.ppf(0.99, 5):.2f}")
@@ -278,7 +292,7 @@ print(f"99% points of the shuffles: {q1:.2f} (K=1) and {q5:.2f} (K=5); of chi2_1
 md(r"""
 ## Part 3 — EWMA ([[eg:ewmahand]], [[eg:lambda]])
 
-$\sigma^2_{t+1\mid t}=\lambda\sigma^2_{t\mid t-1}+(1-\lambda)y_t^2$, started at the mean of $y_t^2$ over the first 246 returns. `ewma(lam)[t]` is the forecast for day $t$ made at the close of day $t-1$; its last entry is the forecast after 8 October 2026.
+The recursion is $\sigma^2_{t+1\mid t}=\lambda\sigma^2_{t\mid t-1}+(1-\lambda)y_t^2$, started at the mean of $y_t^2$ over the first 246 returns. `ewma(lam)[t]` is the forecast for day $t$ made at the close of day $t-1$; its last entry is the forecast after 8 October 2026.
 """)
 
 code(r"""
@@ -313,7 +327,7 @@ show("knowledge check: weights' half-life at 0.97", math.log(0.5) / math.log(0.9
 """)
 
 md(r"""
-The out-of-sample design of Section 7 fixes the test days: the window is $\operatorname{round}(5A)=1{,}231$ returns, and the first forecast day is the first month's first session with a full window behind it. [[eg:lambda]] scores EWMA on those days for every $\lambda$ on a grid; choosing the best uses the test days, so it is in-sample.
+The out-of-sample design of Section 7 fixes the test days. The window is $\operatorname{round}(5A)=1{,}231$ returns, and the first forecast day is the first month's first session with a full window behind it. [[eg:lambda]] scores EWMA on those days for every $\lambda$ on a grid; choosing the best uses the test days, so it is in-sample.
 """)
 
 code(r"""
@@ -405,16 +419,16 @@ names = ["g (% a day)", "omega (%^2)", "alpha", "beta", "nu"]
 x3 = pl.DataFrame({
     "parameter": names,
     "normal": [*(f"{v:.4f}" for v in pn), "-"],
-    "classic SE": [*(f"{v:.4f}" for v in gn_c.std_err.to_numpy()), ""],
+    "classical SE": [*(f"{v:.4f}" for v in gn_c.std_err.to_numpy()), ""],
     "robust SE": [*(f"{v:.4f}" for v in gn.std_err.to_numpy()), ""],
     "t": [*(f"{v:.4f}" for v in pt[:4]), f"{pt[4]:.2f}"],
-    "classic SE (t)": [*(f"{v:.4f}" for v in gt_c.std_err.to_numpy()[:4]), f"{gt_c.std_err.to_numpy()[4]:.2f}"],
+    "classical SE (t)": [*(f"{v:.4f}" for v in gt_c.std_err.to_numpy()[:4]), f"{gt_c.std_err.to_numpy()[4]:.2f}"],
     "robust SE (t)": [*(f"{v:.4f}" for v in gt.std_err.to_numpy()[:4]), f"{gt.std_err.to_numpy()[4]:.2f}"],
 })
 print(x3)
-book = {"normal": ["0.0809", "0.0249", "0.0913", "0.8932", "-"], "classic SE": ["0.0123", "0.0040", "0.0076", "0.0086", ""],
+book = {"normal": ["0.0809", "0.0249", "0.0913", "0.8932", "-"], "classical SE": ["0.0123", "0.0040", "0.0076", "0.0086", ""],
         "robust SE": ["0.0126", "0.0068", "0.0137", "0.0151", ""], "t": ["0.0965", "0.0149", "0.0663", "0.9247", "5.54"],
-        "classic SE (t)": ["0.0114", "0.0036", "0.0081", "0.0090", "0.41"],
+        "classical SE (t)": ["0.0114", "0.0036", "0.0081", "0.0090", "0.41"],
         "robust SE (t)": ["0.0114", "0.0043", "0.0104", "0.0117", "0.41"]}
 for col, vals in book.items():
     assert x3[col].to_list() == vals, (col, x3[col].to_list())
@@ -430,7 +444,7 @@ show("annualized, t", ann(uvar_t), ".2f", "20.16")
 show("half-life, t", half_life(pers_t), ".1f", "76.5")
 show("l, t", gt.loglikelihood, ",.2f", "-8,463.90")
 show("l gain of the t fit", gt.loglikelihood - gn.loglikelihood, ".2f", "183.35")
-show("knowledge check: robust / classic SE of alpha", gn.std_err.to_numpy()[2] / gn_c.std_err.to_numpy()[2], ".2f", "1.80")
+show("knowledge check: robust / classical SE of alpha", gn.std_err.to_numpy()[2] / gn_c.std_err.to_numpy()[2], ".2f", "1.80")
 """)
 
 md(r"""
@@ -741,7 +755,9 @@ plt.show()
 """)
 
 md(r"""
-[[eg:vrback]] from the file: by (26.6) with $J=2$, $\mathrm{RV}(2h)/\mathrm{RV}(h)-1$ estimates $\rho_1$ of the returns over $h$, a ratio of the period's means. Deep Dive 3: under (26.7) the mean RV would rise by the same amount for every extra return a day. Each rise is the mean of a per-day series, so it gets a Newey–West standard error across the 5-second days. These errors need a finite fourth moment of returns (LM19), so they are nominal; the share of days on which the largest rise exceeds the smallest needs no moment.
+[[eg:vrback]] from the file: by (26.6) with $J=2$, $\mathrm{RV}(2h)/\mathrm{RV}(h)-1$ estimates $\rho_1$ of the returns over $h$, a ratio of the period's means.
+
+Deep Dive 3: under (26.7) the mean RV would rise by the same amount for every extra return a day. Each rise is the mean of a per-day series, so it gets a Newey–West standard error across the 5-second days. These errors need a finite fourth moment of returns (LM19), so they are nominal; the share of days on which the largest rise exceeds the smallest needs no moment.
 """)
 
 code(r"""
@@ -792,7 +808,7 @@ for yy, v_ in (("2025", "0.918"), ("2008", "1.011")):
 md(r"""
 ## Part 7 — Judging forecasts out of sample ([[ex:losses]], [[eg:oos]])
 
-Both GARCH models are refitted at each month's first session on the previous 1,231 returns; the recursion restarts at the window's first day from that window's backcast and runs with the new parameters through the month. The forecast of day $t$ is made at the close of day $t-1$. This cell runs 452 fits (several seconds).
+Both GARCH models are refitted at each month's first session on the previous 1,231 returns. The recursion restarts at the window's first day from that window's backcast and runs with the new parameters through the month. The forecast of day $t$ is made at the close of day $t-1$. This cell runs 452 fits (several seconds).
 """)
 
 code(r"""
@@ -859,7 +875,7 @@ show("EWMA's mean forecast over them", ann(float(FC["ewma"][post].mean())), ".1f
 """)
 
 md(r"""
-[[ex:losses]]: mean forecast, MSE (%⁴), QLIKE, the Mincer–Zarnowitz slope with HC0 errors (checked against statsmodels), R-squared, and the Newey–West t-stat of the daily QLIKE difference from GARCH normal (9 lags; checked against statsmodels' HAC with `use_correction` off, its default).
+[[ex:losses]]: mean forecast, MSE (%⁴), QLIKE, the Mincer–Zarnowitz slope with HC0 errors, R-squared, and the Newey–West t-stat of the daily QLIKE difference from GARCH normal (9 lags). Both kinds of error are checked against statsmodels, the second against its HAC with `use_correction` off, its default.
 """)
 
 code(r"""
@@ -1022,7 +1038,7 @@ show("P11: t-stat", float(d.mean() / nw_se(d, 9)), ".2f", "1.83")
 """)
 
 md(r"""
-**Problem 12.** The 2015–2026 line of [[ex:signature]] from `vol4_rv.csv`, and $\hat\rho_1$ of 5-second returns on the 5-second days by the ratio of the period's mean $\mathrm{RV}(10\text{ s})$ to its mean $\mathrm{RV}(5\text{ s})$, minus 1 (a mean of daily ratios gives another number).
+**Problem 12.** The 2015–2026 line of [[ex:signature]] from `vol4_rv.csv`. Then $\hat\rho_1$ of 5-second returns on the 5-second days, by the ratio of the period's mean $\mathrm{RV}(10\text{ s})$ to its mean $\mathrm{RV}(5\text{ s})$, minus 1. A mean of daily ratios gives another number.
 """)
 
 code(r"""
@@ -1084,7 +1100,11 @@ else:
 md(r"""
 ## Part 10 — Extension: an asymmetric GARCH
 
-[[eg:explains]] found that the data raise the risk of a fall more after falls than after rises, which GARCH(1,1) cannot express. arch's `o=1` adds a term $\gamma\,\varepsilon_{t-1}^2\mathbf 1\{\varepsilon_{t-1}<0\}$ to (26.3) (the asymmetry Hansen and Lunde call a "leverage effect"). Fit it to TR23, recompute the expected number of falls after the 108 falls and after the 67 rises with the new residuals' own distribution, and compare with 13 and 3 observed and with GARCH(1,1)'s 7.8 and 5.4. Does the model now expect more falls after falls than after rises? Then compare the log-likelihoods, and decide whether the gain is worth one parameter. The fit is in-sample; LM34 tests such choices on later data.
+[[eg:explains]] found that the data raise the risk of a fall more after falls than after rises, which GARCH(1,1) cannot express. arch's `o=1` adds a term $\gamma\,\varepsilon_{t-1}^2\mathbf 1\{\varepsilon_{t-1}<0\}$ to (26.3) (the asymmetry Hansen and Lunde call a "leverage effect").
+
+Fit it to TR23. With the new residuals' own distribution, recompute the expected number of falls after the 108 falls and after the 67 rises. Compare them with 13 and 3 observed and with GARCH(1,1)'s 7.8 and 5.4. Does the model now expect more falls after falls than after rises?
+
+Then compare the log-likelihoods, and decide whether the gain is worth one parameter. The fit is in-sample; LM34 tests such choices on later data.
 """)
 
 code(r"""
@@ -1109,7 +1129,16 @@ nbf.write(nb, LAB / "LM26_lab.ipynb")
 
 (LAB / "README.md").write_text("""# LM26 Lab — Time Series II: Volatility Models
 
-Companion to *From Calculus to Kelly*, Learning Module 26. The notebook rebuilds the module's exhibits and computational examples (the ARCH test with its permutation reference, EWMA by hand and in hindsight, GARCH(1,1) fitted by hand and with arch under normal and Student-t innovations, standardized residuals, the term structure of a forecast, what GARCH explains with two simulated experiments, the volatility signature and the ratios of realized variances by year, and the out-of-sample comparison of six variance forecasts), computes the widget's starting values, works the computational practice problems and ends with an asymmetric GARCH.
+Companion to *From Calculus to Kelly*, Learning Module 26. The notebook rebuilds the module's exhibits and computational examples:
+
+- the ARCH test with its permutation reference;
+- EWMA by hand and in hindsight;
+- GARCH(1,1) fitted by hand and with arch under normal and Student-t innovations, its standardized residuals and the term structure of a forecast;
+- what GARCH explains, with two simulated experiments;
+- the volatility signature and the ratios of realized variances by year;
+- the out-of-sample comparison of six variance forecasts.
+
+It also computes the widget's starting values, works the computational practice problems and ends with an asymmetric GARCH.
 
 ## Run
 

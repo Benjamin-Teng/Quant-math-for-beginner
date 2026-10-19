@@ -74,9 +74,11 @@ Companion notebook to **From Calculus to Kelly, LM20**. It rebuilds the module's
 
 **Data.** The notebook reads FinMind files that you download once with your own token. From the repository root, run `uv run python data/fetch_finmind.py`, then `uv run python data/make_lab_data.py`. FinMind's licence does not allow the book to redistribute the data. After that, the notebook runs offline.
 
-`data/` then holds `taiex_tr.csv` (the closes of the TAIEX total-return index, FinMind `TaiwanStockTotalReturnIndex`), LM4's `0050_daily_raw.csv`, `0050_dividends.csv` and `00631L_daily_raw.csv` (`TaiwanStockPrice`, `TaiwanStockDividendResult`), and LM16's `sectors_close_raw.csv` and `sectors_close_repairs.csv` (`TaiwanStockPrice` sector indices, with repairs from `TaiwanStockEvery5SecondsIndex`). The notebook reads nothing outside `data/`. On FinMind's free plan the repair values are missing; Problem 6 then drops the listed closes, and its numbers differ from the module's (the cell says so).
+`data/` then holds `taiex_tr.csv`, the closes of the TAIEX total-return index (FinMind `TaiwanStockTotalReturnIndex`). It also holds LM4's `0050_daily_raw.csv`, `0050_dividends.csv` and `00631L_daily_raw.csv` (`TaiwanStockPrice`, `TaiwanStockDividendResult`), and LM16's `sectors_close_raw.csv` and `sectors_close_repairs.csv` (`TaiwanStockPrice` sector indices, with repairs from `TaiwanStockEvery5SecondsIndex`). The notebook reads nothing outside `data/`. On FinMind's free plan the repair values are missing; Problem 6 then drops the listed closes, and its numbers differ from the module's (the cell says so).
 
-**Conventions (as in the module).** TR23: $T=5{,}849$ simple daily returns from 3 January 2003 to 8 October 2026; log returns $r_t=\ln(1+R_t)$ enter every sum. $s$ and the moments divide by $T$ (`ddof=0`), $s_{\mathrm u}$ by $T-1$ (`ddof=1`); pass `ddof` every time. $A=T/\tau$ with $\tau$ the calendar days from the first to the last close over 365.25. Intervals are estimate ± 1.96 standard errors. Counts use the guard `1e-12` and are checked exactly with `Fraction` on the two-decimal closes. Each simulated experiment $e$ creates `np.random.default_rng([e, 20261011])` once. Quantiles of simulated values use `method="inverted_cdf"`. Everything is in-sample and assumes independent, identically distributed days; simulations are models.
+**Conventions (as in the module).** TR23: $T=5{,}849$ simple daily returns from 3 January 2003 to 8 October 2026; log returns $r_t=\ln(1+R_t)$ enter every sum. The standard deviation $s$ and the moments divide by $T$ (`ddof=0`), and $s_{\mathrm u}$ by $T-1$ (`ddof=1`); pass `ddof` every time. The sessions a year are $A=T/\tau$, with $\tau$ the calendar days from the first to the last close over 365.25. Intervals are estimate ± 1.96 standard errors.
+
+Counts use the guard `1e-12` and are checked exactly with `Fraction` on the two-decimal closes. Each simulated experiment $e$ creates `np.random.default_rng([e, 20261011])` once. Quantiles of simulated values use `method="inverted_cdf"`. Everything is in-sample and assumes independent, identically distributed days; simulations are models.
 """)
 
 code(r"""
@@ -172,7 +174,7 @@ show("2009, simple, %", 100 * (ends["2009"] / ends["2008"] - 1), ".2f", "83.34")
 md(r"""
 ## Part 2 — Sampling distributions and a shrunk mean
 
-[[ex:sampling]] draws 10,000 one-year samples of 246 days from a normal model and from a Student-t with the degrees of freedom of the maximum-likelihood fit (Part 5 explains the fit; it is computed here first), both with TR23's mean and $s$ by (15.11). Experiment 1 creates its generator once and draws the normal block first. Quantile standard errors are LM18's batch standard errors: 20 batches in draw order, standard deviation with divisor 20, over $\sqrt{20}$.
+[[ex:sampling]] draws 10,000 one-year samples of 246 days from two models with TR23's mean and $s$ by (15.11). One is normal, and the other is a Student-t with the degrees of freedom of the maximum-likelihood fit. Part 5 explains that fit, but it is computed here first. Experiment 1 creates its generator once and draws the normal block first. Quantile standard errors are LM18's batch standard errors: 20 batches in draw order, standard deviation with divisor 20, over $\sqrt{20}$.
 """)
 
 code(r"""
@@ -388,7 +390,7 @@ show("Monte Carlo SE at 95%, points", 100 * sqrt(0.95 * 0.05 / 100_000), ".2f", 
 md(r"""
 ## Part 5 — Maximum likelihood
 
-[[eg:normalmle]]: the normal MLE is $\bar R$ and $s$ with divisor $T$. The 0050 sample is LM4's: total returns on the 2,902 dates common to 0050 and 00631L, each from the previous common date (two span a fund's split halt), with the cash dividend added on ex-dates and the previous close restated per new share on split days (0050 4-for-1 on 2025-06-18; 00631L 22-for-1 on 2026-03-31). Every close is first checked against FinMind's `spread` column.
+[[eg:normalmle]]: the normal MLE is $\bar R$ and $s$ with divisor $T$. The 0050 sample is LM4's: total returns on the 2,902 dates common to 0050 and 00631L, each from the previous common date (two span a fund's split halt). The cash dividend is added on ex-dates, and the previous close is restated per new share on split days (0050 4-for-1 on 2025-06-18; 00631L 22-for-1 on 2026-03-31). Every close is first checked against FinMind's `spread` column.
 """)
 
 code(r"""
@@ -431,7 +433,7 @@ show("TR23 s_u, %", 100 * su, ".4f", "1.2085")
 """)
 
 md(r"""
-[[eg:tmle]] and [[ex:fits]]: the Student-t fit of Part 2, its standard errors from the observed information (a central-difference Hessian of $-\ell$, checked at two step sizes), the fit's standard deviation by (20.8), and the fits by price-limit regime.
+[[eg:tmle]] and [[ex:fits]]: the Student-t fit of Part 2 and its standard errors from the observed information. That information is a central-difference Hessian of $-\ell$, checked at two step sizes. The cells then give the fit's standard deviation by (20.8) and the fits by price-limit regime.
 """)
 
 code(r"""
@@ -507,7 +509,9 @@ plt.title("[[ex:profile]]"); plt.legend(); plt.show()
 md(r"""
 ## Part 6 — Information and the delta method
 
-[[eg:info]], [[eg:vol]] (with the $\chi^2_{22}$ interval of a normal model for the 23 annual values) and [[eg:kelly]], collected in [[ex:delta]]. The plug-in standard errors use the sample's skewness and kurtosis; "normal" uses 0 and 3; "mean only" keeps the first term of (20.9). The volatility's, the Kelly fraction's and the Sharpe ratio's standard errors need a finite fourth moment, which the Student-t fit ($\nu=3.065$) lacks, so they are nominal; [[ex:merton]]'s volatility errors and the regimes' 0.026 and 0.035 rest on the sample kurtosis too.
+[[eg:info]], [[eg:vol]] (with the $\chi^2_{22}$ interval of a normal model for the 23 annual values) and [[eg:kelly]], collected in [[ex:delta]]. The plug-in standard errors use the sample's skewness and kurtosis; "normal" uses 0 and 3; "mean only" keeps the first term of (20.9).
+
+The volatility's, the Kelly fraction's and the Sharpe ratio's standard errors need a finite fourth moment, which the Student-t fit ($\nu=3.065$) lacks, so they are nominal. [[ex:merton]]'s volatility errors and the regimes' 0.026 and 0.035 rest on the sample kurtosis too.
 """)
 
 code(r"""
@@ -719,7 +723,9 @@ print(f"its distance from 95% in Monte Carlo standard errors: {(0.95 - ct) / sqr
 md(r"""
 ### Extension: the Kelly fraction in each limit regime
 
-The daily price limit was 7% until 29 May 2015 and 10% from 1 June 2015. Compute the plug-in Kelly fraction $\hat f=\bar R/s^2$ of each regime with its delta-method standard error (20.9) and 95% interval, using the regime's own mean, $s$, skewness and kurtosis. Do the two intervals overlap? Then ask what the comparison assumes: each regime's days iid, a finite fourth moment, and nothing learned from the comparison itself. A regime split is a stability check, not a test (tests are LM21's subject).
+The daily price limit was 7% until 29 May 2015 and 10% from 1 June 2015. Compute the plug-in Kelly fraction $\hat f=\bar R/s^2$ of each regime with its delta-method standard error (20.9) and 95% interval, using the regime's own mean, $s$, skewness and kurtosis. Do the two intervals overlap?
+
+Then ask what the comparison assumes: each regime's days iid, a finite fourth moment, and nothing learned from the comparison itself. A regime split is a stability check, not a test (tests are LM21's subject).
 """)
 
 code(r"""
@@ -738,7 +744,9 @@ nbf.write(nb, LAB / "LM20_lab.ipynb")
 
 (LAB / "README.md").write_text("""# LM20 Lab — Estimation Theory and Maximum Likelihood
 
-Companion to *From Calculus to Kelly*, Learning Module 20. The notebook rebuilds the module's exhibits and computational examples (the sampling distributions of a mean and a volatility, standard errors by sampling interval, the coverage of confidence intervals, the normal and Student-t maximum-likelihood fits with their observed information and profile likelihood, the delta method for the volatility, the Kelly fraction and the Sharpe ratio, and the Hill estimator) and works the computational practice problems.
+Companion to *From Calculus to Kelly*, Learning Module 20. The notebook rebuilds the module's exhibits and computational examples and works the computational practice problems.
+
+It covers the sampling distributions of a mean and a volatility, standard errors by sampling interval and the coverage of confidence intervals. It fits the normal and Student-t models by maximum likelihood, with their observed information and profile likelihood. Then come the delta method for the volatility, the Kelly fraction and the Sharpe ratio, and the Hill estimator.
 
 ## Run
 

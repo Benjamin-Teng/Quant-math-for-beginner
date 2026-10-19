@@ -741,7 +741,9 @@ chk("XB7 t from printed", 0.0393 / 0.01954, ".2f", "2.01")
 cross1 = c_r[1:] * c_r[:-1]                           # the editor's note: dropping it from rho_hat_1 too
 assert f"{float(cross1.sum() - cross1[j_apr]) / float(c_r @ c_r):.4f}" == "0.0455"
 assert f"{float(cross1.sum() - cross1[j_apr]) / float(c_r @ c_r) / se_drop:.2f}" == "2.33"
-has("XB7 flag", "Formula (25.4) needs a finite fourth moment, which TR23 may lack ([[LM19]]).")
+has("XB7 flag", "Formula (25.4) needs a finite fourth moment, which TR23 may lack ([[LM19]]), so its t-stats are "
+    "approximate.")
+has("XB7 Glossary row", "valid under clustering with finite fourth moments, for no autocorrelation.")
 has("XB7 sentence", "Leaving the product of 9 and 10 April 2025 out of (25.4)'s sum lowers the standard error")
 assert len(out_iid) == 9 and len(out_rob) == 2
 has("E2 exits", "9 values leave the iid band and 2 leave the robust one")
@@ -942,9 +944,11 @@ assert 100 * (1 - 5.05 / 7.01) < 29.5 and max(half_life(vv["arma_phi"]) for vv i
 has("E9 shortening", "shortens the half-lives by up to 29%, but every version still reverts within days")
 # hygiene note (N2): Bonferroni's correction for the 24 tests on TX23 compares statistics, not p-values from two
 # sources (statsmodels' KPSS p-values stop at the table's bound 0.01, above 0.05 / 24). The KPSS level statistic's
-# limit law is int_0^1 V(r)^2 dr for a Brownian bridge V, the Cramer-von Mises limit; its CDF is the series that
-# SciPy's scipy.stats._hypotests._cdf_cvm_inf evaluates (Csorgo and Faraway 1996, as SciPy's source cites it),
-# written here with public functions. Its 10%, 5%, 2.5% and 1% points reproduce KPSS's table to 0.007.
+# limit law is int_0^1 V(r)^2 dr for a Brownian bridge V (the working paper, Cowles Foundation Discussion Paper 979,
+# section 3.a, equations 10-12; the module writes V_t and dt, since r is a return there), the Cramer-von Mises limit
+# law (Csorgo and Faraway 1996, p. 222). Its CDF is the series that SciPy's private
+# scipy.stats._hypotests._cdf_cvm_inf evaluates, written here with public functions. Its 10%, 5%, 2.5% and 1% points
+# reproduce KPSS's table to 0.007.
 def cvm_limit_cdf(x: float) -> float:
     tot = 0.0
     for k_ in range(60):
@@ -979,8 +983,15 @@ assert 1.96 < abs(t_aF) < z_point and abs(-2.9) < 3.08
 df_like = [t_b, a_b[0], t_f] + [vv["df"] for vv in VERS] + [vv["adf"] for vv in VERS] + [REG[k]["df"] for k in REG]
 assert max(df_like) < cv["1%"] - 3 and min(t_s, a_ct[0]) > -1 and min(p_s, a_ct[1]) > 0.9
 has("hygiene DF verdicts", "Every DF and ADF verdict lies far from its critical value.\n>\n> Bonferroni's correction")
-has("hygiene KPSS", "needs a KPSS statistic above 1.03, the limit law's point at 0.05/24. The five for the basis, "
-    "0.62 to 0.96, fall short, and so does $\\hat\\alpha_F$'s t-stat, -2.9, against the two-sided normal point 3.08.")
+has("hygiene KPSS", norm_text(
+    "needs a KPSS statistic above 1.03, the 0.05/24 upper point of its limit law (Kwiatkowski et al. 1992). That law "
+    "is the law of $\\int_0^1V_t^2\\,dt$ for a Brownian bridge $V_t$, the Cramér–von Mises limit law (Csörgő and "
+    "Faraway 1996, p. 222), which SciPy evaluates.\n>\n> The five KPSS statistics for the basis, 0.62 to 0.96, fall "
+    "short, and so does $\\hat\\alpha_F$'s t-stat, −2.9, against the two-sided normal point 3.08."))
+has("hygiene references", "Csörgő, S., and J. J. Faraway (1996).")
+has("KPSS working paper", "the limit read in the working paper by Kwiatkowski, Phillips and Schmidt, [Cowles "
+    "Foundation Discussion Paper 979](https://cowles.yale.edu/sites/default/files/2022-08/d0979.pdf) (1991), §3.a, "
+    "equations 10–12, and Table 1.")
 chk("X6 neighbouring days on D", rho_hat(b[D], 1), ".3f", "0.775")
 chk("KPSS 5% point", 0.463, ".3f", "0.463")
 # E10

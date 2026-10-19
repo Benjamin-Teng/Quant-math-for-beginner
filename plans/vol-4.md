@@ -419,13 +419,15 @@ Collected here as the briefs add them; applied at publication with the edition n
 
 - 波動度 → 波動率 in lm05.md:191, lm07.md:354, lm07.md:512, lm10.md:228, lm10.md:449.
 - 只做多 → 只作多 in lm08.md:356 (樂詞網's 作多, decision XB11).
+- 波動的群聚 → 波動群聚現象 in lm18.md:392 (Volume IV's form and SOURCES', closing check X4).
 - `build/make_lab17.py:486`: the autocorrelation convention is LM19's.
 - `build/make_lab11.py:571`: the literal `[[LM20]]` goes (wording below).
 - Leads of Volumes I–III gain the Volume IV modules that cite them (cross-check X25–X29, checked against the
   current front matter): lm01 20; lm02 20, 23; lm03 19, 25, 26; lm04 19, 21, 22, 24;
-  lm05 19, 20, 21, 26; lm06 23; lm07 20, 22; lm10 23, 24; lm11 20, 22, 24; lm12 20, 25; lm13 20, 22; lm14 21, 22,
-  26; lm15 22, 24 (round 1: lm07 gains 22, LM22 m9; lm14 → 24 and lm15 → 23 go with the uncited prerequisites,
-  X2; revision 1: lm15 gains 22, which LM22 now cites for $\nu=3.065$); lm16 25; lm17 23, 24, 25; lm18 21, 23, 25.
+  lm05 19, 20, 21, 26; lm06 23; lm07 20; lm10 23, 24; lm11 20, 22, 24; lm12 20, 25; lm13 20, 22; lm14 21, 22,
+  26; lm15 22, 24 (round 1: lm14 → 24 and lm15 → 23 go with the uncited prerequisites,
+  X2; revision 1: lm15 gains 22, which LM22 now cites for $\nu=3.065$; closing check: lm07 → 22 goes, since a
+  pointer or an illustrative value creates no lead, X4); lm16 25; lm17 23, 24, 25; lm18 21, 23, 25.
 - `build/make_lab11.py:571`: "LM20 and LM22 give the tools; LM22 answers it for 2017 and 2020"; `make_lab15.py:443`
   and `make_lab17.py:486`: LM19's wording; `make_lab04.py:642`: LM22's wording (the briefs give each).
 - lm15.md:263: LM20's rewording ("understate" claims a direction the data do not establish: the gap is 1.1 standard

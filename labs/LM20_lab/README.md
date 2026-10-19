@@ -1,6 +1,8 @@
 # LM20 Lab — Estimation Theory and Maximum Likelihood
 
-Companion to *From Calculus to Kelly*, Learning Module 20. The notebook rebuilds the module's exhibits and computational examples (the sampling distributions of a mean and a volatility, standard errors by sampling interval, the coverage of confidence intervals, the normal and Student-t maximum-likelihood fits with their observed information and profile likelihood, the delta method for the volatility, the Kelly fraction and the Sharpe ratio, and the Hill estimator) and works the computational practice problems.
+Companion to *From Calculus to Kelly*, Learning Module 20. The notebook rebuilds the module's exhibits and computational examples and works the computational practice problems.
+
+It covers the sampling distributions of a mean and a volatility, standard errors by sampling interval and the coverage of confidence intervals. It fits the normal and Student-t models by maximum likelihood, with their observed information and profile likelihood. Then come the delta method for the volatility, the Kelly fraction and the Sharpe ratio, and the Hill estimator.
 
 ## Run
 

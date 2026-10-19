@@ -249,3 +249,21 @@ Decided by the editor:
   percentile interval and percentile confidence interval, out-of-sample forecast and forecasting) are Glossary
   headword variants and stay, except where a box glosses a noun with an adjective (LM25 L262: 平穩性（stationarity）).
   LM8's 只做多 becomes 作多, 樂詞網's form, at Stage 4 (plans/vol-4.md).
+
+## Volume closing check (X4), 2026-10-20
+
+A fresh, read-only agent checked the eight modules after revision 3 as one volume (`scratch/rev3/X4.md`), beside
+the closing checks C19–C26 and their second checks S19–S26: no critical or major item. Every X and XB decision holds;
+tags, labels, cross-module numbers, conventions and notation agree. Its items and the editor's decisions:
+
+| # | Finding | Decision |
+|:--|:--|:--|
+| 1 | Pointer-only citations follow two rules (lm07 → 22 kept; LM24's pointers dropped). | One rule: a pointer or an illustrative value creates no prereq or lead. The Stage 4 list drops lm07 → 22; LM23's prereq drops 22. |
+| 2 | LM25 names no divisor and compares 81.4 with LM6's 83.4 across divisors. | Fixed (LM25's record). |
+| 3 | LM23's test count leaves out tests it reads at 1.96. | Fixed (LM23's record). |
+| 4 | LM26 prints R-squared and sample moments with neither a standard error nor a reason. | Fixed (LM26's record). |
+| 5 | Five data exhibits lack a Source line (LM21, LM22, LM24). | Fixed (the records). |
+| 6 | LM25 points to LM26 for a gap LM26 does not measure. | Fixed (LM25's record). |
+| 7 | LM22 says Volume IV sets $r_f=0$; LM23 and LM25 use 2%. | Fixed (LM22's record). |
+| 8 | "out of sample" and "out-of-sample". | Fixed (LM23's record). |
+| 9 | LM18 prints 波動的群聚 against Volume IV's 波動群聚現象. | Stage 4 list (plans/vol-4.md). |

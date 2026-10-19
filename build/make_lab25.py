@@ -57,7 +57,7 @@ def code(s: str) -> None:
 md(r"""
 # LM25 Lab — Time Series I: ARMA, Unit Roots and Cointegration
 
-Companion notebook to **From Calculus to Kelly, LM25**. It builds TX23, the TX near-month future against the TAIEX, from the daily futures file with the module's roll rule, rebuilds the module's exhibits and computational examples, runs the four simulation experiments, solves the computational practice problems, and ends with an extension exercise.
+Companion notebook to **From Calculus to Kelly, LM25**. It builds TX23, the TX near-month future against the TAIEX, from the daily futures file with the module's roll rule. It then rebuilds the module's exhibits and computational examples, runs the four simulation experiments, solves the computational practice problems, and ends with an extension exercise.
 
 | Part | Rebuilds |
 |:--|:--|
@@ -75,9 +75,11 @@ Companion notebook to **From Calculus to Kelly, LM25**. It builds TX23, the TX n
 
 **Data.** The notebook reads FinMind files that you download once with your own token. From the repository root, run `uv run python data/fetch_finmind.py`, then `uv run python data/make_lab_data.py`. FinMind's licence does not allow the book to redistribute the data. After that, the notebook runs offline.
 
-`data/` then holds three files: `taiex_tr.csv` (`date`, `price`: the TAIEX total-return closes, FinMind `TaiwanStockTotalReturnIndex`), `taiex_price.csv` (`date`, `close`, `spread`: the TAIEX price closes, FinMind `TaiwanStockPrice`, on the same 5,850 dates) and `tx_daily.csv` (the regular-session rows of the monthly TX contracts, FinMind `TaiwanFuturesDaily`, 1998-07-21 to 2026-10-16). The TX file is free on FinMind; nothing here needs a paid plan. The notebook reads nothing outside `data/`.
+`data/` then holds three files. The first, `taiex_tr.csv` (`date`, `price`), holds the TAIEX total-return closes, FinMind `TaiwanStockTotalReturnIndex`. The second, `taiex_price.csv` (`date`, `close`, `spread`), holds the TAIEX price closes, FinMind `TaiwanStockPrice`, on the same 5,850 dates. The third, `tx_daily.csv`, holds the regular-session rows of the monthly TX contracts, FinMind `TaiwanFuturesDaily`, 1998-07-21 to 2026-10-16. The TX file is free on FinMind; nothing here needs a paid plan. The notebook reads nothing outside `data/`.
 
-**Conventions (as in the module).** The log basis $b_t=\ln F_t-\ln S_t$ is in basis points (bp, $10^{-4}$). A rolled change differences the stored series; a roll-free change uses one contract on both days. $s$ divides by the number of terms (`ddof=0`), a regression's $s_\varepsilon$ by $T-2$. Sample autocorrelations use the full-sample mean and divisor $T$ (LM19's (19.5)); partial autocorrelations come from OLS. Quantiles and medians use `method="inverted_cdf"`; a simulated quantile's standard error is LM18's batch standard error (20 batches, divisor 20). Each simulated experiment $e$ creates `np.random.default_rng([e, 20261011])` once. ARMA fits run at the likelihood maximum with standard errors from $-\ell''$. Every test and fit is in-sample; the limit regimes are a stability check; the simulations are a model; the figures of the case, the regimes' means and the expiry, season and roll figures are descriptive.
+**Conventions (as in the module).** The log basis $b_t=\ln F_t-\ln S_t$ is in basis points (bp, $10^{-4}$). A rolled change differences the stored series; a roll-free change uses one contract on both days. A standard deviation $s$ divides by the number of terms (`ddof=0`), a regression's $s_\varepsilon$ by $T-2$. Sample autocorrelations use the full-sample mean and divisor $T$ (LM19's (19.5)); partial autocorrelations come from OLS.
+
+Quantiles and medians use `method="inverted_cdf"`; a simulated quantile's standard error is LM18's batch standard error (20 batches, divisor 20). Each simulated experiment $e$ creates `np.random.default_rng([e, 20261011])` once. ARMA fits run at the likelihood maximum with standard errors from $-\ell''$. Every test and fit is in-sample, and the limit regimes are a stability check. The simulations are a model; the figures of the case, the regimes' means and the expiry, season and roll figures are descriptive.
 """)
 
 code(r"""
@@ -115,7 +117,9 @@ def show(label, value, fmt, printed):
 md(r"""
 ## Part 1 — Data: TX23 with the roll rule
 
-A monthly contract's last trading day is its last row in the file; for a contract still trading at the file's end, it is the TAIFEX rule's third Wednesday of the month. On each date the position holds the first contract whose last trading day comes after the next session, so the roll happens at the close of the day before a contract's last trading day and no expiry day enters (FinMind prints the expiring contract's settlement as 0 on that day from December 2008). $F_t$ is the held contract's settlement price, $S_t$ the TAIEX price close.
+A monthly contract's last trading day is its last row in the file. For a contract still trading at the file's end, it is the TAIFEX rule's third Wednesday of the month. On each date the position holds the first contract whose last trading day comes after the next session. So the roll happens at the close of the day before a contract's last trading day.
+
+No expiry day enters the series, and that matters: FinMind prints the expiring contract's settlement as 0 on that day from December 2008. Here $F_t$ is the held contract's settlement price and $S_t$ the TAIEX price close.
 """)
 
 code(r"""
@@ -245,7 +249,7 @@ plt.show()
 md(r"""
 ## Part 3 — Stationarity
 
-[[eg:regimes]] splits TX23 at 1 June 2015, when TWSE's daily price limit widened from 7% to 10%. A window's statistics use its own dates only. Then a simulated random walk and a stationary AR(1) with the same innovations show why a level has no fixed variance (seed `[101, 20261011]`, an illustration that the module does not print).
+[[eg:regimes]] splits TX23 at 1 June 2015, when TWSE's daily price limit widened from 7% to 10%. A window's statistics use its own dates only. Then a simulated random walk and a stationary AR(1) with the same innovations show why a level has no fixed variance. The module does not print this illustration (seed `[101, 20261011]`).
 """)
 
 code(r"""
@@ -336,8 +340,8 @@ show("robust SE lag 1", rob[0], ".4f", "0.0205")
 show("iid t-stat", rho[0] / se_iid, ".2f", "3.01")
 show("robust t-stat", rho[0] / rob[0], ".2f", "1.92")
 
-# (25.4) needs a finite fourth moment, which TR23 may lack (LM19): leave the largest product of its lag-1 sum,
-# 9 and 10 April 2025, out of the numerator (rho_1 keeps every product)
+# (25.4) needs a finite fourth moment, which TR23 may lack (LM19), so its t-stats are approximate. Leave the largest
+# product of its lag-1 sum, 9 and 10 April 2025, out of the numerator (rho_1 keeps every product)
 cr = r - r.mean()
 prod1 = cr[1:] ** 2 * cr[:-1] ** 2          # element j pairs the returns of dates[j + 1] and dates[j + 2]
 j_apr = dates.index("2025-04-10") - 2
@@ -408,7 +412,9 @@ show("P12 t robust", (v5 - 1) / se_r5, ".2f", "1.02")
 md(r"""
 ## Part 6 — Unit roots
 
-Experiment 1 simulates the Dickey–Fuller null ([[eg:dfsim]], [[ex:dfnull]]): random walks $x_t=z_1+\dots+z_t$ of 5,850 levels, drawn in chunks of 500, each with the DF t-stat of (25.7) (constant, no lags, classical standard error). [[eg:adf]] then runs `adfuller` and `kpss` on $\ln S_t$ and $b_t$. MacKinnon's constant-only points and p-values assume no drift: for the drifting $\ln S_t$ the no-lag p-value does not apply, and the module tests the index with a trend. Problem 10 repeats experiment 1's idea on one year of 246 levels.
+Experiment 1 simulates the Dickey–Fuller null ([[eg:dfsim]], [[ex:dfnull]]) with random walks $x_t=z_1+\dots+z_t$ of 5,850 levels, drawn in chunks of 500. Each walk gives the DF t-stat of (25.7), with a constant, no lags and the classical standard error.
+
+[[eg:adf]] then runs `adfuller` and `kpss` on $\ln S_t$ and $b_t$. MacKinnon's constant-only points and p-values assume no drift: for the drifting $\ln S_t$ the no-lag p-value does not apply, and the module tests the index with a trend. Problem 10 repeats experiment 1's idea on one year of 246 levels.
 """)
 
 code(r"""
@@ -665,10 +671,14 @@ for name, x in versions.items():
     kpss_basis.append(kv.statistic)
 """)
 
+md(r"""
+Bonferroni's correction compares the KPSS statistics with the 0.05/24 upper point of their limit law, since statsmodels' p-values stop at the table's bound, 0.01. That law is the law of $\int_0^1V_t^2\,dt$ for a Brownian bridge $V_t$ (Kwiatkowski et al. 1992), the Cramér–von Mises limit law (Csörgő and Faraway 1996, p. 222).
+
+SciPy evaluates its distribution function in `scipy.stats._hypotests._cdf_cvm_inf`, a private function that may change without notice. So the next cell writes the same series with public functions and checks it against KPSS's table. Then 20,000 simulated bridges corroborate the 0.05/24 point (seed `[102, 20261011]`, a model). Each bridge is a random walk of 2,000 standard normal steps, scaled by $\sqrt{2000}$ and tied down at its end.
+""")
+
 code(r"""
-# Bonferroni over the 24 tests on TX23 compares KPSS statistics with the limit law's point at 0.05/24 (statsmodels'
-# p-values stop at the table's bound, 0.01). The limit law is that of the integral of a squared Brownian bridge, the
-# Cramer-von Mises limit; its CDF is the series that SciPy's Cramer-von Mises test evaluates.
+# the limit law's distribution function, the series of SciPy's private _cdf_cvm_inf, with public functions
 def cvm_limit_cdf(x):
     tot = 0.0
     for k in range(60):
@@ -693,6 +703,21 @@ show("KPSS point at 0.05/24", kp_point, ".2f", "1.03")
 show("lowest KPSS for the basis (TX23's b and D's four versions)", min(kpss_basis), ".2f", "0.62")
 show("highest", max(kpss_basis), ".2f", "0.96")
 assert len(kpss_basis) == 5 and max(kpss_basis) < kp_point
+
+# corroboration: 20,000 Brownian bridges V_t = W_t - t W_1 on a grid of 2,000 steps; int_0^1 V_t^2 dt as a Riemann sum
+rng = np.random.default_rng([102, SEED])
+n_br, n_step = 20_000, 2_000
+cvm = np.empty(n_br)
+grid = np.arange(1, n_step + 1) / n_step
+for c0 in range(0, n_br, 500):
+    w = np.cumsum(rng.standard_normal((500, n_step)), axis=1) / math.sqrt(n_step)
+    v = w - grid * w[:, -1:]
+    cvm[c0:c0 + 500] = (v**2).mean(axis=1)
+share = (cvm > kp_point).mean()
+se_share = math.sqrt(0.05 / 24 * (1 - 0.05 / 24) / n_br)
+print(f"share of the bridges above {kp_point:.4f}: {share:.5f} (target 0.05/24 = {0.05 / 24:.5f}, "
+      f"binomial SE {se_share:.5f})")
+assert abs(share - 0.05 / 24) < 3 * se_share
 """)
 
 code(r"""

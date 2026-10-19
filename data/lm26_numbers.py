@@ -817,7 +817,11 @@ has("hygiene: two Ljung-Box", "two Ljung–Box (one is [[LM25]]'s, recomputed)")
 assert (3 + 2) + 2 + 5 * 2 + 6 + 1 == 24
 has("hygiene: 24 tests", "Tests on these data number 24 ([[LM21]]'s count).")
 has("hygiene: five ARCH", "They are five ARCH (two by permutation), two Ljung–Box")
-has("hygiene: the permutation's label", "The ARCH tests (also by permutation) and the full-sample fits are **in-sample**.")
+has("hygiene: the ARCH tests' label", "The ARCH tests and the full-sample fits are **in-sample**.")
+# the shuffles are a simulated null, labelled a model as LM21 and LM22 label theirs (revision 3, F1 with X3 item 3)
+has("hygiene: the shuffles' label", "simulations, the shuffles, the widget and the noise model are **models**")
+has("roadmap", "Section 2 tests for clustering, Sections 3 to 5 build the forecasts, Section 6 measures a day's variance, "
+               "and Section 7 judges them.")
 has("E1: what is rejected", "A constant variance is rejected beyond doubt.")
 # XB7: the chi^2 law of (26.1) needs a finite fourth moment, which LM15's maximum-likelihood t fit (nu = 3.065) lacks
 has("E1: nominal p-values", "These $\\chi^2$ p-values are nominal: (26.1) needs a finite fourth moment, which [[LM15]]'s fit "
@@ -847,15 +851,14 @@ print(f"CHECK exp 3: {NPERM} shuffles; largest K=1 {perm1.max():.4f}, K=5 {perm5
       f"224.8 / 696.3: {int((perm1 >= lm1).sum())} / {int((perm5 >= lm5).sum())}; 99% points {qinv(perm1, 0.99):.2f}, "
       f"{qinv(perm5, 0.99):.2f}")
 assert perm1.max() < lm1 and perm5.max() < lm5       # no shuffle reaches the observed statistics
+# the maxima depend on the seed (AUTHORING section 8), so the module prints only that no shuffle reaches the observed
+# statistics; the lab prints its run's maxima
 chk("exp 3: shuffles", NPERM, ",", "20,000")
-chk("exp 3: largest K=1", float(perm1.max()), ".1f", "84.1")
-chk("exp 3: largest K=5", float(perm5.max()), ".1f", "88.0")
-flag("exp 3: largest K=1", float(perm1.max()), 1)
-flag("exp 3: largest K=5", float(perm5.max()), 1)
-has("exp 3: seed", "(experiment 3, `default_rng([3, 20261011])`)")
-has("exp 3: sentence", "Shuffling TR23's days 20,000 times, as [[LM21]] did (experiment 3, `default_rng([3, 20261011])`), "
-                       "gives largest statistics of 84.1 for $K=1$ and 88.0 for $K=5$, so the rejection stands.")
-has("overview: shuffles", "the ARCH test with five lags gives 696.3; the largest of 20,000 shuffles of the days gives 88.0.")
+chk("exp 3: observed K=1", lm1, ".1f", "224.8")
+chk("exp 3: observed K=5", lm5, ".1f", "696.3")
+has("exp 3: sentence", "Experiment 3 shuffles TR23's days 20,000 times (`default_rng([3, 20261011])`), as [[LM21]]'s "
+                       "experiment 8 shuffled dates; no shuffle reaches 224.8 or 696.3.")
+has("overview: shuffles", "the ARCH test with five lags gives 696.3, which none of 20,000 shuffles of the days reaches.")
 
 # ---------------------------------------------------------------- section 3
 chk("E2: forecast for 7 April, %^2", ew[i7], ".4f", "2.4351")
@@ -1012,7 +1015,11 @@ assert {f"{ser[i_] / sen[i_]:.1f}" for i_ in (1, 2, 3)} == {"1.7", "1.8"}   # om
 # the other ratios are near 1.0 (g) or 1.2-1.3 (the t fit), so the summary names the three parameters
 assert f"{ser[0] / sen[0]:.1f}" == "1.0" and all(1.0 <= strr[i_] / stc[i_] < 1.31 for i_ in range(5))
 has("summary: 1.7 to 1.8", "for $\\omega$, $\\alpha$ and $\\beta$ of the normal fit, robust errors are 1.7 to 1.8 times the "
-                           "classic ones")
+                           "classical ones")
+# XB11: "classical standard error" in the English (LM23, LM25), 古典標準誤 in the box; "classic" only as arch's option
+has("XB11: classical, prose", "Classical standard errors invert $-\\ell''$")
+has("XB11: classical, the box", "古典標準誤（classical standard error）")
+assert re.findall(r"[Cc]lassic\b", MD.read_text(encoding="utf-8")) == ["classic", "classic"], "only arch's option name"
 chk("E6: excess kurtosis of xi", MOM["xi normal"][1], ".2f", "2.57")
 chk("E6: skewness of xi", MOM["xi normal"][0], ".2f", "-0.59")
 chk("E6: skewness of r", MOM["r"][0], ".2f", "-0.47")
@@ -1376,6 +1383,12 @@ for kind, lab in re.findall(r"\[\[(ex|eg):([\w-]+)\]\]", md_raw):
 assert "Engle 的自我迴歸條件變異數非齊一檢定（ARCH test）" in md_raw
 assert "| ARCH test | 自我迴歸條件變異數非齊一檢定 |" in md_raw and "ARCH 檢定" not in md_raw
 assert "本書採用一般用法" not in md_raw
+# XB11 (one form per concept) and the revision-3 glosses: 互不相關, 抽樣 and 抽樣區間, 有效視窗, 遞迴 (LM18's form)
+for form in ("所以互不相關（uncorrelated）", "抽樣越細", "抽樣區間（sampling interval）", "有效視窗（effective window）",
+             "| Effective window | 有效視窗 |", "GARCH 的遞迴（recursion）"):
+    assert form in md_raw, form
+for old in ("彼此不相關", "取樣", "有效窗口", "遞迴式"):
+    assert old not in md_raw, old
 tags = re.findall(r"\\tag\{(26\.\d+)\}", md_raw)
 assert tags == [f"26.{k}" for k in range(1, 10)], tags
 for name in re.findall(r'data-chart="(lm26-[\w-]+)"', md_raw):

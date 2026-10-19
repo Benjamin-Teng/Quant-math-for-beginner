@@ -1,6 +1,15 @@
 # LM26 Lab — Time Series II: Volatility Models
 
-Companion to *From Calculus to Kelly*, Learning Module 26. The notebook rebuilds the module's exhibits and computational examples (the ARCH test with its permutation reference, EWMA by hand and in hindsight, GARCH(1,1) fitted by hand and with arch under normal and Student-t innovations, standardized residuals, the term structure of a forecast, what GARCH explains with two simulated experiments, the volatility signature and the ratios of realized variances by year, and the out-of-sample comparison of six variance forecasts), computes the widget's starting values, works the computational practice problems and ends with an asymmetric GARCH.
+Companion to *From Calculus to Kelly*, Learning Module 26. The notebook rebuilds the module's exhibits and computational examples:
+
+- the ARCH test with its permutation reference;
+- EWMA by hand and in hindsight;
+- GARCH(1,1) fitted by hand and with arch under normal and Student-t innovations, its standardized residuals and the term structure of a forecast;
+- what GARCH explains, with two simulated experiments;
+- the volatility signature and the ratios of realized variances by year;
+- the out-of-sample comparison of six variance forecasts.
+
+It also computes the widget's starting values, works the computational practice problems and ends with an asymmetric GARCH.
 
 ## Run
 

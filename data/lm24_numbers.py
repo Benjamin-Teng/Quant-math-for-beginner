@@ -872,18 +872,23 @@ print(f"labels: {len(ex_labels)} exhibits, {len(eg_labels)} examples, every exhi
 # XB10: the English at the first use of each Chinese term in each box (the boxes in order)
 zh_boxes = re.findall(r"> \[!zh\][^\n]*\n((?:>[^\n]*\n?)+)", RAW_MD)
 assert len(zh_boxes) == 5, len(zh_boxes)
-GLOSSES = [["二項資料（binomial data）", "事後平均數（posterior mean）", "資料權重（data's weight）"],
+GLOSSES = [["參數（parameter）", "分布（distribution）", "二項資料（binomial data）", "事後平均數（posterior mean）",
+            "加權平均（weighted average）", "資料權重（data's weight）", "懷疑性事前分布（sceptical prior）"],
            ["變異數（variance）", "平均數（mean）", "常態分布（normal distribution）", "標準差（standard deviation）",
-            "資料權重（data's weight）"],
-           ["可靠區間（credible interval）", "信賴區間（confidence interval）"],
-           ["估計值（estimate）", "離差（deviation）", "橫斷面平均（cross-sectional mean）"],
+            "事後平均數（posterior mean）", "加權平均（weighted average）", "資料權重（data's weight）"],
+           ["機率（probability）", "可靠區間（credible interval）", "信賴區間（confidence interval）",
+            "重複抽樣（repeated sampling）", "平均報酬（mean return）"],
+           ["估計值（estimate）", "平均報酬（mean return）", "誤差（error）", "彼此相關（correlated）",
+            "共同成分（common component）", "離差（deviation）", "橫斷面平均（cross-sectional mean）"],
            ["波動率（volatility）", "期望對數成長（expected log growth）", "貝氏下注（Bayes bet）",
             "事前標準差（prior standard deviation）", "估計值（estimate）", "資料權重（data's weight）"]]
 for k, (box, glosses) in enumerate(zip(zh_boxes, GLOSSES)):
     for g in glosses:
         term = g.split("（")[0]
         assert term in box and box.index(term) == box.index(g), (k + 1, g)   # the first use carries the English
-print(f"XB10: {sum(map(len, GLOSSES))} first-use glosses checked in the {len(zh_boxes)} boxes")
+# XB11: 樂詞網's 懷疑性事前分布 at the box's one use of the prior; 懷疑者的事前標準差 and the title stay
+assert "懷疑者的事前分布" not in RAW_MD and RAW_MD.count("懷疑性事前分布") == 1
+print(f"XB10, XB11: {sum(map(len, GLOSSES))} first-use glosses checked in the {len(zh_boxes)} boxes")
 
 # ====================================================================== report
 body = TEXT.split("\n## Glossary", 1)[0]

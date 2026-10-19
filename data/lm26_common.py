@@ -22,7 +22,7 @@ Conventions (plans/vol-4.md, the LM26 brief, and plans/vol-4-anchors.md, "LM26")
 - GARCH(1,1): arch 8.0.0, arch_model(y, mean="Constant", vol="GARCH", p=1, q=1, dist="normal" or "t"),
   fit(disp="off"), convergence asserted; the recursion starts from arch's backcast (the weighted mean of the first 75
   squared residuals about the sample mean, weights 0.94^j normalized; arch/univariate/volatility.py, backcast):
-  sigma_1^2 = omega + (alpha + beta) backcast. Classic standard errors invert -l'' (cov_type="classic"), robust ones
+  sigma_1^2 = omega + (alpha + beta) backcast. Classical standard errors invert -l'' (cov_type="classic"), robust ones
   are the sandwich (cov_type="robust", arch's default).
 - EWMA: sigma^2_{t+1|t} = 0.94 sigma^2_{t|t-1} + 0.06 y_t^2, zero mean, started at the mean of y^2 over TR23's first
   246 returns.
