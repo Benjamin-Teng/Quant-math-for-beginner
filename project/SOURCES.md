@@ -764,7 +764,7 @@ What each source claims; no source found derives fractional Kelly as *the* Bayes
 - Kwiatkowski, Phillips, Schmidt & Shin (KPSS), "Testing the null hypothesis of stationarity against the alternative of
   a unit root", *J. Econometrics* 54(1–3): 159–178, 1992, DOI
   [10.1016/0304-4076(92)90104-Y](https://doi.org/10.1016/0304-4076(92)90104-Y) (authors from Crossref). Abstract not
-  seen.
+  seen; the limit law is read in the working paper (revision 2, below).
 - MacKinnon, "Numerical distribution functions for unit root and cointegration tests", *JAE* 11(6): 601–618, 1996, DOI
   [`10.1002/(SICI)1099-1255(199611)11:6<601::AID-JAE417>3.0.CO;2-T`](https://doi.org/10.1002/(SICI)1099-1255(199611)11:6%3C601::AID-JAE417%3E3.0.CO;2-T).
   Abstract: response surfaces giving finite-sample and asymptotic critical values and p-values.
@@ -1030,6 +1030,24 @@ Batch B (LM23–LM26), read 2026-10-19:
   817–838; Engle & Granger (1987) 251–276; Johansen (1991) 1551–1580; Brenner & Kroner (1995) 23–42; Andersen &
   Bollerslev (1998) 885–905; Andrews (1991) 817–858. Newey & West (1987) 703–708 from RePEc, NBER and the Society's
   page (Crossref does not bound it: the next issue starts at p. 749); Engle (1982) 987–1007 (its row).
+
+Revision 2 (LM25), read 2026-10-19:
+
+- KPSS, working-paper version: Kwiatkowski, Phillips & Schmidt, "Testing the Null Hypothesis of Stationarity Against
+  the Alternative of a Unit Root: How Sure Are We That Economic Time Series Have a Unit Root?", Cowles Foundation
+  Discussion Paper No. 979, May 1991, <https://cowles.yale.edu/sites/default/files/2022-08/d0979.pdf> (a scan; pp. 1,
+  3, 7–12 and Table 1 read as page images). §3.a, p. 11, (10)–(12): the level statistic's limit is
+  $\int_0^1V(r)^2\,dr$, with $V(r)=W(r)-rW(1)$ a standard Brownian bridge; p. 12: Table 1 by direct simulation (sample
+  size 2,000, 50,000 replications); Table 1: .347, .463, .574, .739. The journal text was not reached, so no journal
+  equation number is cited.
+- Csörgő & Faraway, "The Exact and Asymptotic Distributions of Cramér–von Mises Statistics", *JRSS B* 58(1): 221–234,
+  1996, DOI [10.1111/j.2517-6161.1996.tb02077.x](https://doi.org/10.1111/j.2517-6161.1996.tb02077.x) (Crossref). Read in
+  the Deep Blue copy (<https://hdl.handle.net/2027.42/146839>), p. 222: the limit distribution function's second
+  formula in (1.3) is Anderson and Darling's (1952), who identified it as the law of $\omega^2=\int_0^1B^2(s)\,ds$ for a
+  Brownian bridge. SciPy 1.18.1's private `_cdf_cvm_inf` (`stats/_hypotests.py`, l. 479–515) implements that formula
+  and cites the paper. Its points 0.347, 0.461, 0.581 and 0.743 match KPSS's table to 0.007; the 0.05/24 point is
+  1.0309 (a simulation of 20,000 bridges gives 0.00215 above it). Anderson & Darling (1952), *Ann. Math. Statist.*
+  23(2): 193–212, DOI [10.1214/aoms/1177729437](https://doi.org/10.1214/aoms/1177729437): bibliographic data only.
 
 ### Open points (Volume IV)
 
@@ -1575,7 +1593,7 @@ statsmodels pages are under `https://www.statsmodels.org/stable/generated/`, arc
 | conjugate prior | 共軛事前分布 | — | 共軛事前分布 |
 | shrinkage estimator | 收縮估計量; James-Stein估計量 | — | 收縮估計量 |
 | empirical Bayes estimator | 經驗貝氏估計量 | empirical Bayes method 經驗Bayes法 | 經驗貝氏估計量 |
-| precision | 精確度 | 精確；精[密]度 | — |
+| precision | 精確度 | 精確；精[密]度 | 精確度 (LM24) |
 | stationary | bare term none; stationarity 平穩性；定態性; 平穩過程; 平穩時間數列; 共變異數平穩過程；共變異數定態過程 | 平穩；定常; 平穩過程; 平穩時間序列 | 平穩 |
 | white noise | 白雜訊；白噪音 | 白噪音 | 白噪音 |
 | random walk | 隨機漫步 | 隨機漫步 | 隨機漫步 |
@@ -1586,14 +1604,14 @@ statsmodels pages are under `https://www.statsmodels.org/stable/generated/`, arc
 | Dickey–Fuller test, augmented | Dickey-Fuller檢定; 增廣Dickey-Fuller檢定 | not recorded | 增廣 Dickey-Fuller 檢定 |
 | Box–Pierce test | 柏克斯-皮爾斯檢定 | not recorded | — |
 | portmanteau test | 便利的檢定 | not recorded | — |
-| Ljung–Box test | no entry | not recorded | — |
+| Ljung–Box test | no entry | not recorded | Ljung–Box 檢定 (LM25) |
 | cointegration | 共整合；共積 | — | 共整合 |
 | threshold cointegration | 門檻共積；門檻共整合 | not recorded | — |
 | error correction model | 誤差修正模型 | not recorded | 誤差修正模型 |
 | volatility | 波動；波動率 | — | 波動率 |
 | volatility clustering | 波動群聚現象 | — | 波動群聚現象 |
 | conditional variance | 條件變異數 (conditional heteroscedasticity: bare term none) | 條件變異數 | 條件變異數 |
-| ARCH model | 自我迴歸條件變異數非齊一模型 | — | — |
+| ARCH model | 自我迴歸條件變異數非齊一模型 | — | the listed form (LM26) |
 | GARCH | 廣義自我迴歸條件變異數非齊一模型; IGARCH 整合廣義自我迴歸條件變異數非齊一模型 | — | 廣義自我迴歸條件變異數非齊一模型 (GARCH) |
 | EWMA | EWMA model 指數加權移動平均模型; exponential smoothing 指數平滑 | — | 指數加權移動平均模型 |
 | realized volatility, realized variance | no entry in any listing (integrated variance: none) | — | 實現波動率, 實現變異數 (book's own; 實現變異數 as LM3 printed it, lm03.md:710) |
@@ -1662,7 +1680,7 @@ statsmodels pages are under `https://www.statsmodels.org/stable/generated/`, arc
 | out-of-sample | compounds only: out-of-sample forecasting 樣本外預測 (統計學名詞) | 樣本外 |
 | cost of carry | none in 統計 or 數學; holding cost 持有成本 (管理學名詞) | 持有成本 |
 | innovation (time series) | 新息 (數學名詞); 創新項 has no entry | 新息 |
-| effective window, unconditional variance, realized variance | no entry | the book's own forms 有效窗口, 無條件變異數, 實現變異數 (LM3's) |
+| effective window, unconditional variance, realized variance | no entry | the book's own forms 有效視窗 (XB11, from 視窗), 無條件變異數, 實現變異數 (LM3's) |
 | normal-equivalent scale, iid band, iid factor, data weight | no entry | the book's own forms 常態等效尺度, 獨立同分布區間, 獨立同分布因子, 資料權重 |
 
 Batch B (LM23–LM26), 樂詞網 searched 2026-10-19 with curl (21 query strings, 統計學名詞 and 數學名詞):
@@ -1690,6 +1708,47 @@ The book's own forms are recorded here and printed in the modules without a tag 
 | moving block, circular block (bootstrap) | no entry in 統計 or 數學 | 移動區塊, 循環區塊, the book's own forms |
 | block length | no entry in 統計; 數學名詞 分組長度 is the coding sense | 區塊長度, the book's own form |
 | effective sample size | 有效樣本數 (統計學名詞); effective observations or days: no entry | not printed |
+
+Revision 2 (LM19–LM26): the glosses revision 2 added to the boxes, from the verifiers' and a fresh checker's curl
+lookups (2026-10-19, the Volume III URL pattern); forms already recorded above are not repeated. Decision XB11
+(`reviews/vol4_cross.md`) settles the forms marked "XB11".
+
+| English | 樂詞網 | Book |
+|:--|:--|:--|
+| statistic | 統計量 (統計學名詞, 數學名詞) | 統計量 |
+| numerator, denominator | 分子, 分母 (數學名詞) | 分子, 分母 |
+| annualized | compounds only (季節調整年化率, 統計學名詞) | 年化; 年化平均報酬, 年化夏普比率 composed |
+| uncorrelated; correlated | compounds only (不相關隨機變數); 統計學名詞 compounds only | 互不相關 (LM16's Glossary form; XB11); 彼此相關 |
+| mean; variance; covariance | 平均數; 變異數; 共變異數；共變異 (統計學名詞) | as listed |
+| standard deviation, estimate, dependence | 標準差, 估計值, 相依性 (統計學名詞) | as listed |
+| dispersion; deviation | 離勢；離散 (統計學名詞); 離差；偏差 (數學名詞) | 離散程度; 離差 |
+| sampling; sampling error; error | 抽樣；取樣; 抽樣誤差; 誤差；錯誤 (統計學名詞) | 抽樣 (XB11); 抽樣誤差; 誤差 |
+| sampling interval | 抽樣區間 (統計學名詞) | 抽樣區間 (XB11) |
+| sampling frequency | 抽樣次數 (統計學名詞); sampling rate 抽樣率 (統計學名詞) | 抽樣頻率, another field's form (電子計算機名詞): LM20 means observations per unit of time, and 抽樣次數 reads as a count of draws, 抽樣率 as a fraction |
+| numerical method | 數值法 (數學名詞) | 數值方法, LM5's form (XB11) |
+| normal model | 正規模型 (數學名詞 only) | 常態模型, as the book writes 常態 |
+| parameter, unbiased, significant figure, parabola, smooth function, diagonal entries, threshold, inverse matrix, linear combination | listed (統計學名詞 or 數學名詞) | as listed (門檻 of 閾值；門檻) |
+| probability, test, factor, independent | 機率, 檢定, 因子 (統計學名詞); 獨立 (數學名詞-兩岸數學名詞 and 高中以下數學名詞; 統計學名詞 independence 獨立性) | as listed |
+| significant | compounds only (顯著差異, 顯著域; significance 顯著性, 統計學名詞) | 顯著 |
+| dimension | 維度；維數；維 (統計學名詞) | 維度 |
+| forecast; target; weight | 預測 (統計學名詞); no entry; 權數 (統計學名詞) | 預測值 for a forecast value (樣本外預測 for forecasting); 目標值; 權重 (LM18's and LM24's form) |
+| vector, weighted average, repeated sampling, fit, interval | 向量 (數學名詞); 加權平均(數), 重複抽樣, 配適 (in 最佳配適), 區間 (統計學名詞) | as listed |
+| coefficient, intercept, slope, projection, fitted value, prediction interval, influence | listed (統計學名詞, 數學名詞) | as listed (配適值, 預測區間, 影響力) |
+| window | 視域；視窗 (統計學名詞) | 視窗; 有效視窗 for the effective window (XB11) |
+| parameter drift; drift | 參數漂移; 漂移項 (統計學名詞) | 參數漂移 (LM23), 漂移項 (LM25) (XB11) |
+| dividend yield | dividend yield ratio 股利收益率 (管理學名詞) | 股利殖利率, LM6's form (XB11) |
+| shock, one-sided test, critical value | 衝擊項, 單邊檢定, 臨界值 (統計學名詞) | as listed |
+| heavy tail, conditional expectation | 重尾；厚尾, 條件期望值 (統計學名詞) | 厚尾, 條件期望值 |
+| recursion, normal density, conditionally unbiased | 遞迴[式] (數學名詞); 常態密度函數; 條件不偏估計量 | 遞迴 (LM18's form), 常態密度, 條件不偏 |
+| price index, risk-free rate, total excess return | 物價指數；價格指數; 無風險利率 (管理學名詞); 超額報酬 | 價格指數, 無風險利率, 超額報酬 |
+| sceptical prior | 懷疑性事前分布 (統計學名詞) | 懷疑性事前分布 (XB11) |
+| backtest; long; short | 回溯測試 (管理學名詞); 作多 (經濟學名詞); 放空: no entry (賣空；融券) | 回測 (the common form); 作多 (LM8's 做多 changes at Stage 4); 放空 (LM1–LM14's form) |
+| false rejection | 錯誤拒絕 (engineering listings only) | 錯誤拒絕 |
+| tails, adjusted, first principal component | compounds only | 尾部, 調整後, 第一主成分 |
+| no entry in 統計 or 數學: log return, simple return, sample autocorrelation, shoulders, quartile skewness, joint density, second derivative, first-order expansion, fourth moment, Kelly fraction, fractional Kelly, mean return, Monte Carlo error, price limit, hedge ratio, binomial data, posterior mean, prior SD, cross-sectional mean, expected log growth, Bayes bet, common component, classical standard error, efficient price, bid and ask, basis (基差 in 經濟學名詞, 管理學名詞) | no entry | the book's forms 對數報酬, 簡單報酬, 樣本自我相關, 肩部, 四分位數偏態, 聯合密度, 二階導數, 一階展開, 四階動差, 凱利比例, 分數凱利, 平均報酬, 模擬誤差, 漲跌幅限制, 避險比例, 二項資料, 事後平均數, 事前標準差, 橫斷面平均, 期望對數成長, 貝氏下注, 共同成分, 古典標準誤, 有效價格, 買賣價, 基差 |
+
+The Book cells above that read "—" are now filled where a module prints the term: precision 精確度 (LM24), ARCH model
+自我迴歸條件變異數非齊一模型 (LM26) and Ljung–Box test Ljung–Box 檢定 (LM25).
 
 ## Writing style (AUTHORING §1, checked 2026-10-11)
 

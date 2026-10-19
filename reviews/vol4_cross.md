@@ -215,3 +215,37 @@ Decided by the editor:
 - **XB10 (glosses):** every Chinese technical term gets its English at its first use in each box, basic terms
   included (變異數, 平均數, 標準差, 殘差, 迴歸, 估計量, 標準誤, 對數報酬, 波動率, 條件變異數 and the like), as AUTHORING §1 asks and LM20
   and LM23 already do. Places as X2 lists them, in the module records.
+
+## Revision 2 re-check (X3), 2026-10-19
+
+A fresh, read-only agent checked the eight modules after revision 2 (`scratch/rev2/X3.md`): no critical or major
+item. XB7–XB10 are applied; X1–X11 and XB1–XB6 still hold; tags, labels, prereq and leads, and the numbers one
+module cites from another all agree; the revision added no contradiction. Its minor items and the editor's decisions:
+
+| # | Finding | Decision |
+|:--|:--|:--|
+| 1 | XB7 gaps in LM22 (the stationary test of the mean; $\hat\rho_1(\lvert r\rvert)$; Section 7's correlations and shares). | Fixed as proposed (LM22's record). |
+| 2 | XB7 gap in LM20 (Problem 6(c)'s plug-in error). | Fixed as proposed (LM20's record). |
+| 3 | LM26's permutation maxima depend on the seed and carry no standard error. | "No shuffle reaches" instead (LM26's record). |
+| 4 | LM26 alone has no roadmap. | Restored (LM26's record). |
+| 5 | One concept, two forms: drift, sampling, classical standard error, window, dividend yield, uncorrelated, heavy tail, 數值方法. | XB11 below. |
+| 6 | XB10: first uses still unglossed. | Applied with the module lists (records); XB10's scope below. |
+| 7 | SOURCES lacks rows for revision 2's glosses, and three Book cells are stale. | The editor adds a revision-2 table and fills the cells. |
+| 8 | LM25's XB7 wording and Glossary row. | Fixed as proposed (LM25's record). |
+
+Decided by the editor:
+
+- **XB11 (one form per concept):** 參數漂移（parameter drift） for a moving coefficient (LM23), 漂移項（drift） for a
+  drift term (LM25); 抽樣 for sampling and 抽樣區間（sampling interval） (LM21, LM26); "classical standard error" in
+  English and 古典標準誤 in Chinese (LM26 joins LM23 and LM25); 視窗 for window and 有效視窗 for the effective window
+  (LM26, SOURCES); 股利殖利率（dividend yield） (LM23, as LM6); 互不相關（uncorrelated） (LM16's Glossary form; LM23,
+  LM25, LM26); 懷疑性事前分布（sceptical prior） (LM24, 樂詞網). Two are declined: "fat tails" and "heavy tails" stay
+  English synonyms, as in LM4, LM5, LM14, LM15 and LM17; 數值方法 stays, LM5's form.
+- **XB10's scope, from here:** the module lists above close it. A later check reports an unglossed first use in a box
+  only for a term in the module's own Glossary or a term the module defines; ordinary words of the book's prose are
+  not reopened.
+- **XB11, after a fresh check (2026-10-20):** the English headword variants a checker listed (stationary and
+  stationarity for 平穩 and 平穩性, likelihood and likelihood function, hypothesis test and hypothesis testing,
+  percentile interval and percentile confidence interval, out-of-sample forecast and forecasting) are Glossary
+  headword variants and stay, except where a box glosses a noun with an adjective (LM25 L262: 平穩性（stationarity）).
+  LM8's 只做多 becomes 作多, 樂詞網's form, at Stage 4 (plans/vol-4.md).

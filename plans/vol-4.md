@@ -418,6 +418,7 @@ editor's decisions follow; each brief is revised to them, and LM26's brief start
 Collected here as the briefs add them; applied at publication with the edition note.
 
 - 波動度 → 波動率 in lm05.md:191, lm07.md:354, lm07.md:512, lm10.md:228, lm10.md:449.
+- 只做多 → 只作多 in lm08.md:356 (樂詞網's 作多, decision XB11).
 - `build/make_lab17.py:486`: the autocorrelation convention is LM19's.
 - `build/make_lab11.py:571`: the literal `[[LM20]]` goes (wording below).
 - Leads of Volumes I–III gain the Volume IV modules that cite them (cross-check X25–X29, checked against the
