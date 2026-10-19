@@ -1,6 +1,6 @@
 """Every number that LM26 (Time Series II: Volatility Models) prints, computed and checked against src/lm26.md.
 
-Run:  PYTHONUTF8=1 uv run python data/lm26_numbers.py
+Run:  uv run python data/lm26_numbers.py
       (after data/vol3_series.py, data/vol4_series.py and data/vol4_rv.py; and after data/lm26_charts.py, whose
       widget data this script checks)
 
@@ -666,6 +666,7 @@ anchor(52, f"2025 weekly points: {len(wk)} weeks (the {len(ids25)} sessions date
            f"sqrt(A mean V) {v(W7['real'], 2, 2)}%, GARCH normal {v(W7['garch_n'], 2, 2)}%, EWMA {v(W7['ewma'], 2, 2)}%, "
            f"yesterday's V {v(W7['v_prev'], 2, 2)}%; 2025 means: realized {v(real25, 2, 2)}%")
 SENS: dict[int, tuple[float, float, float]] = {}
+SENS_FIRST: dict[int, str] = {}
 sens = []
 for wv in (1000, 2461):
     rg2 = C.rolling_garch(wv)
@@ -675,6 +676,7 @@ for wv in (1000, 2461):
     qt = float(qlike(V15[o2_], rg2["t"][o2_]).mean())
     qe = float(qlike(V15[o2_], ew[o2_]).mean())
     SENS[wv] = (qn, qt, qe)
+    SENS_FIRST[wv] = dates[f0]
     sens.append(f"W={wv}: first OOS {dates[f0]}, {len(o2_)} days, QLIKE normal {qn:.4f}, t {qt:.4f}, EWMA {qe:.4f}")
 anchor(53, "; ".join(sens))
 wkall: dict[tuple[int, int], list[int]] = {}
@@ -747,6 +749,11 @@ has("last date", "8 October 2026")
 has("T5S start", "3 January 2005")
 has("TR23 retrieval", "`TaiwanStockTotalReturnIndex` (TAIEX), retrieved 18 October 2026")
 has("T5S retrieval", "`TaiwanVariousIndicators5Seconds` (TWSE's TAIEX), retrieved 19 October 2026")
+# o2 uses the TAIEX closes of data/raw/vol3/ (retrieved 18 October 2026) and data/raw/sectors/ (11 October 2026);
+# TX's held contract comes from data/raw/vol4/TX__*.csv (19 October 2026): git log of data/raw_manifest.json
+has("TAIEX closes retrieval", "`TaiwanStockPrice` (the TAIEX closes before each opening return), retrieved 11 and 18 "
+                              "October 2026")
+has("TX daily retrieval", "`TaiwanFuturesDaily` (TX, the contract held), retrieved 19 October 2026")
 chk("LM19's rho_1 of r^2 (A19-40, cited)", 0.194403, ".3f", "0.194")
 f_g7, f_e7, f_r7, f_v7 = (math.sqrt(FC[k][i7]) for k in ("garch_n", "ewma", "roll60", "v_prev"))
 f_g8, f_e8, f_r8, f_v8 = (math.sqrt(FC[k][i8]) for k in ("garch_n", "ewma", "roll60", "v_prev"))
@@ -792,8 +799,22 @@ for xx, pv_, sd_ in ((3.0, "2.94", "1.72"), (0.5, "1.23", "1.11")):
     chk(f"KC 2: sd after {xx}%", math.sqrt(b1[0] + b1[1] * xx**2), ".2f", sd_)
     chk(f"KC 2: sd after {xx}% (printed inputs)", math.sqrt(1.1779 + 0.1960 * xx**2), ".2f", sd_)
 has("cited LM13", "12.04% of the time, against 1.85% overall")
-has("cited LM17", "correlate only 0.039, but their sizes correlate 0.161")
+has("cited LM19", "correlate only 0.0393, but their sizes correlate 0.161 ([[LM19]])")
+
+
+def rho_19(x: np.ndarray, k: int) -> float:
+    """LM19's (19.5): full-sample mean, divisor T in numerator and denominator."""
+    xc = x - x.mean()
+    return float(xc[k:] @ xc[:-k]) / float(xc @ xc)
+
+
+chk("LM19's rho_1 of r (recomputed)", rho_19(C.r, 1), ".4f", "0.0393")
+chk("LM19's rho_1 of |r| (recomputed)", rho_19(np.abs(C.r), 1), ".3f", "0.161")
 chk("cited LM25 Ljung-Box (recomputed)", lbr[0, 0], ",.0f", "1,820")
+has("hygiene: two Ljung-Box", "two Ljung–Box (one is [[LM25]]'s, recomputed)")
+assert 3 + 2 + 5 * 2 + 6 + 1 == 22     # ARCH: K=1, K=5, K=5 on xi; LB: |xi|, |r|; 5 x 2 loss differences; 6 MZ; V vs r^2
+has("hygiene: 22 tests", "22 in all")
+has("E1: what is rejected", "A constant variance is rejected beyond doubt.")
 
 # ---------------------------------------------------------------- section 3
 chk("E2: forecast for 7 April, %^2", ew[i7], ".4f", "2.4351")
@@ -827,11 +848,15 @@ chk("E3: GARCH", q_garch, ".4f", "0.5032")
 has("E3: grid", "from 0.800 to 0.995 in steps of 0.005")
 chk("KC 3: effective window at 0.97", 1 / 0.03, ".1f", "33.3")
 chk("KC 3: half-life at 0.97", math.log(0.5) / math.log(0.97), ".2f", "22.76")
-has("RiskMetrics: 75 effective days", "Table 5.9 lists 75 effective days at 0.94")
 # RiskMetrics' effective days K solve lam^K = tolerance (its section 5.3.1.2, Eq. [5.26]); at a 1% tolerance K = 74.4,
-# and its Table 5.9 prints 75: the last 75 days carry at least 99% of the weight, the last 74 less.
+# which its Table 5.7 lists as 74 days. E2's "the last 75 days carry 99.0%" stands: 75 whole days reach 99%, 74 do not.
+chk("RiskMetrics: effective days at a 1% tolerance", math.log(0.01) / math.log(LAM), ".1f", "74.4")
 assert 1 - LAM**75 >= 0.99 > 1 - LAM**74
-has("RiskMetrics: 99% of the weight", "the most recent days, which carry 99% of the weight")
+has("RiskMetrics: the decay factor's section", "RiskMetrics (1996, §5.3.2.2) fixed")
+has("RiskMetrics: 480 series", "over 480 series, of the $\\lambda$ that minimizes")
+has("RiskMetrics: Table 5.7", "which its Table 5.7 lists as 74 days")
+has("RiskMetrics: zero mean", "RiskMetrics sets the mean return to zero (its Table 5.9)")
+has("RiskMetrics: References", "§5.3.1.2 and Table 5.7 (effective days), §5.3.2.2 (the decay factor) and Table 5.9")
 
 # ---------------------------------------------------------------- section 4
 chk("E4: alpha+beta", pers, ".5f", "0.98443")
@@ -859,6 +884,15 @@ chk("pitfall 4: 250-day average, a year", ann(float(p7.mean())), ".2f", "32.57")
 chk("KC 4: half-life at 0.98", half_life(0.98), ".1f", "34.3")
 chk("KC 4: half-life at 0.99098", half_life(0.99098), ".1f", "76.5")
 chk("KC 4: t fit's alpha+beta", pers_t, ".5f", "0.99098")
+# Deep Dive 1: with alpha + beta = 1 the forecast step sigma^2_{t+j+1|t} = omega + (alpha + beta) sigma^2_{t+j|t} is flat
+# only when omega = 0 (EWMA, which breaks conditions 2 and 4); with omega > 0 it rises by omega a step (IGARCH)
+for om_ in (0.0, 0.02):
+    path_ = [3.0]
+    for _ in range(9):
+        path_.append(om_ + (0.06 + 0.94) * path_[-1])
+    assert np.allclose(np.array(path_), 3.0 + om_ * np.arange(10), atol=1e-12)
+has("DD1: EWMA breaks two conditions", "which breaks conditions 2 and 4")
+has("DD1: IGARCH", "with $\\omega>0$ it rises by $\\omega$ a step")
 
 # ---------------------------------------------------------------- section 5
 X3n = [("g", pn[0], sen[0], ser[0]), ("omega", pn[1], sen[1], ser[1]), ("alpha", pn[2], sen[2], ser[2]),
@@ -903,13 +937,47 @@ chk("E5: mapped, high (printed)", half_life(0.99544), ".0f", "152")
 chk("E5: nu", pt[4], ".2f", "5.54")
 chk("E5: l gain", gt.loglikelihood - gn.loglikelihood, ".2f", "183.35")
 chk("E5: t half-life", hl_t, ".1f", "76.5")
+
+
+def uvol_se(p: np.ndarray, cov: np.ndarray) -> float:
+    """Delta-method SE of sqrt(A omega / (1 - alpha - beta)), in percentage points a year, from the robust covariance."""
+    om_, ps_ = float(p[1]), float(p[2] + p[3])
+    grad_u = np.zeros(len(p))
+    grad_u[1] = 1 / (1 - ps_)
+    grad_u[2] = grad_u[3] = om_ / (1 - ps_) ** 2
+    se_u = math.sqrt(float(grad_u @ cov @ grad_u))
+    return math.sqrt(A) / (2 * math.sqrt(om_ / (1 - ps_))) * se_u
+
+
+se_uvol_n = uvol_se(pn, gn.param_cov.to_numpy())
+se_uvol_t = uvol_se(pt, gt.param_cov.to_numpy())
+chk("E5: SE of the normal fit's 19.83%", se_uvol_n, ".1f", "2.3")
+has("E5: the volatility's SE", "19.83% a year (robust delta-method standard error 2.3 points)")
+chk("X3 note: SE of the t fit's 20.16%", se_uvol_t, ".1f", "2.9")
+has("X3 note: intervals", "Intervals for the derived rows: [[eg:fit]]; the $t$ fit's 20.16% has a standard error of 2.9 points.")
+covt = gt.param_cov.to_numpy()
+se_pers_t = math.sqrt(covt[2, 2] + covt[3, 3] + 2 * covt[2, 3])
+lo_t, hi_t = pers_t - z975 * se_pers_t, pers_t + z975 * se_pers_t
+chk("E5: t interval for alpha+beta, low", lo_t, ".5f", "0.98343")
+chk("E5: t interval for alpha+beta, high", hi_t, ".5f", "0.99853")
+chk("E5: t mapped, low", half_life(lo_t), ".0f", "41")
+chk("E5: t mapped, high", half_life(hi_t), ".0f", "471")
+chk("E5: t mapped, low (printed)", half_life(0.98343), ".0f", "41")
+chk("E5: t mapped, high (printed)", half_life(0.99853), ".0f", "471")
+has("E5: t interval", "mapped from $\\alpha+\\beta$ (0.98343 to 0.99853), its interval runs from 41 to 471 sessions")
 chk("KC 5: robust over classic, alpha", ser[2] / sen[2], ".2f", "1.80")
 chk("KC 5: from the printed X3", 0.0137 / 0.0076, ".2f", "1.80")
 assert {f"{ser[i_] / sen[i_]:.1f}" for i_ in (1, 2, 3)} == {"1.7", "1.8"}   # omega, alpha, beta
-has("summary: 1.7 to 1.8", "1.7 to 1.8 times the classic ones")
+# the other ratios are near 1.0 (g) or 1.2-1.3 (the t fit), so the summary names the three parameters
+assert f"{ser[0] / sen[0]:.1f}" == "1.0" and all(1.0 <= strr[i_] / stc[i_] < 1.31 for i_ in range(5))
+has("summary: 1.7 to 1.8", "for $\\omega$, $\\alpha$ and $\\beta$ of the normal fit, robust errors are 1.7 to 1.8 times the "
+                           "classic ones")
 chk("E6: excess kurtosis of xi", MOM["xi normal"][1], ".2f", "2.57")
 chk("E6: skewness of xi", MOM["xi normal"][0], ".2f", "-0.59")
 chk("E6: skewness of r", MOM["r"][0], ".2f", "-0.47")
+has("E6: -0.47 is this module's", "against $r_t$'s −0.47 (computed here)".replace("−", "-"))
+has("E6: approximate p-values", "Both p-values are approximate, since the tests take residuals of an estimated model")
+has("E6: LM5's question was on 0050", "[[LM5]]'s lab asked, for 0050, whether")
 chk("E6: excess kurtosis of r (LM17's 5.428)", MOM["r"][1], ".3f", "5.428")
 chk("E6: Ljung-Box of |xi|", lbn[0, 0], ".1f", "27.6")
 chk("E6: its p-value", lbn[0, 1], ".3f", "0.002")
@@ -957,7 +1025,10 @@ flag("exp 1: batch SE", SIM[1]["disp_se"], 3)
 flag("exp 1: 95%", SIM[1]["disp_q95"], 2)
 has("exp seeds", "`default_rng([1, 20261011])`")
 has("exp seeds", "`default_rng([2, 20261011])`")
-has("LM18 resample numbers", "0.598 over 0.612")
+# simulate(): normal draws for e = 1, sigma^2 started at om / (1 - al - be), 1,000 paths of T days
+has("exp 1 design", "Experiment 1 draws 1,000 paths of 5,849 days from the normal fit, with normal $\\xi_t$ and "
+                    "$\\sigma_t^2$ started at the unconditional variance")
+has("LM18 resample numbers", "[[LM18]]'s 0.598 over [[LM15]]'s mean, 0.612")
 assert abs(0.598 / 0.612 - 1) < 0.05
 
 # ---------------------------------------------------------------- section 6
@@ -976,6 +1047,11 @@ chk("X4 note: 2015-2026 days", int(periods["2015-2026"].sum()), ",", "2,867")
 chk("S12: 5 s, two decimals", SIG["2015-2026"]["5s"], ".2f", "11.71")
 chk("S12: 30 min", SIG["2015-2026"]["30m"], ".3f", "0.930")
 chk("E8: file, 5-second days", vr5, ".3f", "-0.381")
+has("E8: a ratio of means", "from the per-day file (a ratio of the period's means)")
+has("P12: a ratio of means", "by the ratio of the period's mean $\\mathrm{RV}(10 s)$ to its mean $\\mathrm{RV}(5 s)$, "
+                             "minus 1, to three decimals")
+# the mean of daily ratios would give another answer (the solver's -0.358)
+assert f"{float(np.mean(RV['10s'][m5s] / RV['5s'][m5s])) - 1:.3f}" != "-0.381"
 chk("E8: file, 15-second days", vr15, ".3f", "-0.281")
 chk("E8: file, 5 minutes", vr5m, ".3f", "0.056")
 chk("KC 6: RV(30s)/RV(15s)", vr15 + 1, ".4f", "0.7189")
@@ -993,9 +1069,41 @@ has("X6 threshold", "below −0.1 only in 2024".replace("−", "-"))
 chk("DD3: smallest rise per return", min(slopes) * 1e3, ".1f", "3.1")
 chk("DD3: largest rise per return", max(slopes) * 1e3, ".1f", "4.9")
 has("DD3: the range", r"from $3.1\times10^{-3}$ to $4.9\times10^{-3}$")
+# M4: each rise as a per-day series (the day's RV(h_j) - RV(h_j+1) over n_j - n_j+1, over the period's mean RV(5 min)),
+# whose mean is the printed slope; Newey-West across the 5-second days by the book's lag rule
+m5_mean = float(np.mean(RV["5m"][m5s]))
+per_day = [(RV[IV[j][0]][m5s] - RV[IV[j + 1][0]][m5s]) / (ns[j] - ns[j + 1]) / m5_mean for j in range(5)]
+nl5 = nw_lags(int(m5s.sum()))
+assert int(m5s.sum()) == 2870 and nl5 == 8
+for j, d_ in enumerate(per_day):
+    assert math.isclose(float(d_.mean()), slopes[j], rel_tol=1e-10)
+    se_j = nw_se(d_, nl5)
+    print(f"CHECK DD3: {IV[j][0]}-{IV[j + 1][0]} rise {d_.mean():.3e}, Newey-West SE {se_j:.1e}, ratio "
+          f"{se_j / d_.mean():.3f}")
+    assert 0.05 <= se_j / float(d_.mean()) < 0.15        # "about a tenth of itself"
+jx, jn = int(np.argmax(slopes)), int(np.argmin(slopes))
+d_x = per_day[jx] - per_day[jn]
+t_dd3 = float(d_x.mean() / nw_se(d_x, nl5))
+print(f"CHECK DD3: largest minus smallest {d_x.mean():.3e}, t-stat {t_dd3:.2f}")
+assert 9.5 <= t_dd3 < 11.5                                  # "about ten standard errors" (10.6)
+has("DD3: standard errors", "Each has a Newey–West standard error across days of about a tenth of itself, and the "
+                            "largest and smallest differ by about ten standard errors.")
+has("DD3: what is rejected", "So (26.7), with iid efficient returns and iid noise, does not fit.")
+has("DD3: Hansen and Lunde", "Hansen and Lunde (2006) find noise that is serially dependent and correlated with the "
+                             "efficient returns")
+# after 09:00:00 (excluded: the previous close), 09:30:00 is the first start whose window to 13:30:00 every interval
+# up to 30 minutes divides
+first_ok = next(s for s in range(9 * 3600 + 1, 13 * 3600) if all((13 * 3600 + 30 * 60 - s) % h == 0 for _, h in IV))
+assert first_ok == 9 * 3600 + 30 * 60 and 13 * 3600 + 30 * 60 - first_ok == 14400
+has("grid start", "the 240 minutes from there to 13:30:00 divide evenly into every interval up to 30 minutes")
+has("X5 note: inference", "labelled by their first minute (an inference from the labels)")
+has("m2: what the book does not cover", "Zhang, Mykland and Aït-Sahalia (2005, §1.2.5)")
 chk("auction: 1/48", 100 / 48, ".1f", "2.1")
 chk("opening share, all days", 100 * float(np.mean(1e4 * O2) / np.mean(Vt["15m"])), ".0f", "66")
 chk("E10: opening share, OOS days", 100 * float(np.mean(1e4 * O2[mo]) / np.mean(Vt["15m"][mo])), ".0f", "68")
+assert len(O2) == 5351 and int(mo.sum()) == 4609
+has("opening share: its sample", "66% of the mean $V_t$ over the 5,351 days")
+has("E10: its sample", "because over the 4,609 days 68% of it is, on average, one squared opening return")
 if PA is not None and TX is not None:
     r5_, r15_, r5m_ = C.pooled(PA, m5s, "f"), C.pooled(PA, m15, "f"), C.pooled(PA, np.ones(len(rv_dates), bool), "m5")
     p25_ = C.pooled(PA, m25, "f")
@@ -1104,6 +1212,17 @@ chk("windows: 2,461 GARCH", SENS[2461][0], ".4f", "0.5332")
 chk("windows: 1,000 EWMA", SENS[1000][2], ".4f", "0.5126")
 chk("windows: 2,461 EWMA", SENS[2461][2], ".4f", "0.5421")
 assert all(SENS[w_][0] < min(SENS[w_][1], SENS[w_][2]) for w_ in SENS)
+assert SENS_FIRST == {1000: "2007-02-01", 2461: "2012-12-03"}, SENS_FIRST
+has("windows: first days", "Those forecasts run from 1 February 2007 and from 3 December 2012.")
+has("(26.8): the daily loss", " squared error=\\big(V_t-\\sigma^2_{t\\mid t-1}\\big)^2")   # norm_text drops \text{}
+has("(26.8): MSE is a mean", "A forecast's MSE is the mean of its squared errors over the test days")
+has("(26.9): conditionally unbiased", "A conditionally unbiased forecast has $a=0$ and $b=1$.")
+has("pitfall 7: the condition", "Given the past, $r_t^2$ is unbiased up to the tiny squared mean, so a robust loss still "
+                                "ranks forecasts as the true variance would.")
+has("summary: the condition", "rank forecasts as the true variance would if the target is conditionally unbiased")
+has("KC 7: same ratio", "For errors of the same ratio, QLIKE punishes the forecast that is too low more")
+# for errors of the same ratio (forecast V/2 and 2V), QLIKE is larger below and the squared error above
+assert (2 - math.log(2) - 1) > (0.5 + math.log(2) - 1) and (1 - 0.5) ** 2 < (1 - 2) ** 2
 chk("windows: 2,461", 2461, ",", "2,461")
 chk("X9: 2025 realized", real25, ".2f", "23.33")
 chk("X9: week of 7 April, realized", W7["real"], ".2f", "100.16")
@@ -1155,6 +1274,11 @@ chk("S6: annualized", math.sqrt(246.12 * 10.9157), ".1f", "51.8")
 chk("S6: annualized (unrounded)", ann(float(p7[:20].mean())), ".1f", "51.8")
 chk("S9: denominator", 1 - 0.984432**2 - 2 * 0.091254**2, ".6f", "0.014239")
 chk("S10: l", gn.loglikelihood, ",.2f", "-8,647.25")
+has("P10: the backcast", "from arch's backcast (about the sample mean, 2.78 %²)")
+assert abs(C.backcast(y - y.mean()) - bc_full) < 1e-15 and f"{C.backcast(y - pn[0]):.4f}" != f"{bc_full:.4f}"
+has("P2 constructed", "$\\beta=0.89$ (constructed)")
+has("P5 constructed", "$\\hat\\rho_1=-0.40$ (constructed)")
+has("S3: B", "B is $1/(1-0.98)$, the decay's effective window (Section 3), not its half-life.")
 chk("S10: sigma_t on 7 April", float(cvn[i7]), ".3f", "1.737")
 chk("S11: EWMA QLIKE", X7["ewma"]["qlike"], ".4f", "0.5153")
 

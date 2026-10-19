@@ -40,6 +40,7 @@ from lm25_common import (
     LIMIT_SWITCH,
     RF,
     ROOT,
+    TRI,
     A,
     ArmaFit,
     D,
@@ -63,7 +64,9 @@ from lm25_common import (
     hc0,
     hl_se,
     iD,
+    idx,
     kpss_c,
+    last,
     lnF,
     lnS,
     med,
@@ -85,6 +88,7 @@ from lm25_common import (
     spurious,
     tau,
     tr,
+    tx,
     vol,
     vr_over,
     years,
@@ -641,13 +645,21 @@ chk("rho1 b", rho1_b, ".3f", "0.776")
 chk("AR(1) half-life (case)", half_life(1 + d_b), ".1f", "2.7")
 chk("X1 dates", len(keep), ",", "1,227")
 chk("D dates", int(D.sum()), ",", "5,834")
-assert dates[iD[-1]] == "2026-09-14"
-has("D end", "14 September 2026")
+# D: every date whose held contract's last trading day is a TX23 date; the last, 14 September 2026, holds 202609,
+# which expires on 16 September (only 5,814 dates hold a contract that expires by 14 September)
+assert dates[iD[-1]] == "2026-09-14" and contracts[iD[-1]] == 202609 and last[iD[-1]] == "2026-09-16"
+assert sum(1 for x in last if x <= "2026-09-14") == 5814
+has("D end", "to 14 September 2026, whose contract expires within the sample (the last, 202609, on 16 September)")
 chk("TR23 T", T, ",", "5,849")
-chk("tests on TR23", n_tests, "d", "35")
-chk("expected false rejections", 0.05 * n_tests, ".2f", "1.75")
-has("tests on |r|", "two on $\\lvert r_t\\rvert$")
+n_tests36 = n_tests + 1                  # Problem 6's Q_LB(5) is a 36th test on TR23's log returns
+chk("tests on TR23", n_tests36, "d", "36")
+chk("expected false rejections", 0.05 * n_tests36, ".1f", "1.8")
+has("Problem 6's test counted", "one of them Problem 6's $Q_{ LB}(5)$")
+has("X2 note's count", "36 tests on these returns, one in Problem 6")
+has("tests on |r|", "Two are on $\\lvert r_t\\rvert$")
 chk("tests on TX23", 3 + 3 + 1 + 1 + 2 + 12 + 2, "d", "24")
+chk("neighbouring days (hygiene, TX23)", rho1_b, ".2f", "0.78")
+chk("neighbouring days (hygiene, D)", rho_hat(b[D], 1), ".2f", "0.78")
 
 # ---------------------------------------------------------------- section 2
 chk("|r| lag 1 (LM19's)", rho_abs1, ".3f", "0.161")
@@ -692,6 +704,16 @@ for k_, fm, pr_ in ((1, ".4f", "0.7745"), (2, ".3f", "0.702"), (5, ".3f", "0.522
     chk(f"ARMA model lag {k_}", arma_acf(p_b[1], p_b[2], k_), fm, pr_)
 chk("ARMA acf lag 1 from printed (0.90620, -0.3553)", arma_acf(0.90620, -0.3553, 1), ".4f", "0.7745")
 chk("half-life (pitfall)", half_life(p_b[1]), ".1f", "7.0")
+# partial autocorrelation at lag 2 from the normal equations of the two-lag regression (population autocorrelations):
+# AR(1) gives (phi1, 0); MA(1), with rho_2 = 0, gives a lag-2 coefficient of -rho_1^2 / (1 - rho_1^2)
+for ph_ in (0.8, 0.5, -0.4, 0.7758):
+    a_ar = np.linalg.solve(np.array([[1, ph_], [ph_, 1]]), np.array([ph_, ph_**2]))
+    assert np.allclose(a_ar, [ph_, 0.0], atol=1e-14)
+for th_ in (0.5, -0.36, -0.3553, 0.9):
+    r1_ = th_ / (1 + th_**2)
+    a_ma = np.linalg.solve(np.array([[1, r1_], [r1_, 1]]), np.array([r1_, 0.0]))
+    assert abs(a_ma[1] - (-(r1_**2) / (1 - r1_**2))) < 1e-14 and a_ma[1] != 0
+has("MA(1) PACF at lag 2", "a lag-2 coefficient of $-\\rho_1^2/(1-\\rho_1^2)\\ne0$")
 chk("KC3 1 + 0.36^2", 1 + 0.36**2, ".4f", "1.1296")
 chk("KC3 rho1", -0.36 / 1.1296, ".3f", "-0.319")
 
@@ -820,6 +842,39 @@ chk("June roll", -BP * float(jump[rm == 6].mean()), ".1f", "144.7")
 chk("July roll", -BP * float(jump[rm == 7].mean()), ".2f", "104.95")
 chk("other rolls", -BP * float(jump[(rm != 6) & (rm != 7)].mean()), ".1f", "19.8")
 chk("June roll (overview)", BP * float(jump[rm == 6].mean()), ".1f", "-144.7")
+# KC of Section 7: the share of a calendar year's dividends (the TR - price log gap from the previous year's last close,
+# 2003 from its first date) that went ex in the life of the contract entered at the June and the July roll, 2003-2025
+share: dict[int, list[float]] = {6: [], 7: []}
+for y_ in range(2003, 2026):
+    yi = np.flatnonzero(yr == y_)
+    j0 = max(int(yi[0]) - 1, 0)
+    gap = math.log(TRI[yi[-1]] / TRI[j0]) - math.log(S[yi[-1]] / S[j0])
+    for mm_ in (6, 7):
+        (i_r,) = [int(i) for i in yi if roll[i] and mon[i] == mm_]
+        j_ = idx[last[i_r]]
+        share[mm_].append((math.log(TRI[j_] / TRI[i_r]) - math.log(S[j_] / S[i_r])) / gap)
+chk("June roll's share of the year's dividends (%)", 100 * float(np.mean(share[6])), ".0f", "45")
+chk("July roll's share of the year's dividends (%)", 100 * float(np.mean(share[7])), ".0f", "39")
+# the roll jump split into the change of the fair log basis (carry and dividends: new contract minus the expiring one,
+# whose last trading day is the next session) and the residual; rolls whose two contracts expire in the sample
+dec = []
+for i_r in np.flatnonzero(roll):
+    j_new, j_old = idx.get(last[int(i_r)]), int(i_r) + 1
+    if j_new is None:
+        continue
+    tau_old = (dt.date.fromisoformat(dates[j_old]) - dt.date.fromisoformat(dates[i_r])).days / 365.0
+    q_old = math.log(TRI[j_old] / TRI[i_r]) - math.log(S[j_old] / S[i_r])
+    q_new = math.log(TRI[j_new] / TRI[i_r]) - math.log(S[j_new] / S[i_r])
+    jmp = BP * float((db - db_free)[i_r - 1])
+    fair_old = BP * (RF * tau_old - q_old)
+    dec.append((mon[i_r], jmp, BP * RF * (tau[i_r] - tau_old), -BP * (q_new - q_old), fair_old))
+dec_ = np.array(dec)
+d_jun, d_oth = dec_[dec_[:, 0] == 6], dec_[(dec_[:, 0] != 6) & (dec_[:, 0] != 7)]
+assert abs(d_jun[:, 4].mean()) < 3 and d_jun[:, 4].mean() + d_jun[:, 2:4].sum(axis=1).mean() < -100  # -2.5, -143
+resid_oth = d_oth[:, 1] - d_oth[:, 2] - d_oth[:, 3]
+assert len(d_oth) == 236 and 15 < d_oth[:, 2].mean() < 18 and resid_oth.mean() < -d_oth[:, 2].mean()
+assert abs(d_oth[:, 3].mean()) < d_oth[:, 2].mean()       # dividends matter less than the carry outside June and July
+has("KC answer", "on average 45% of a year's dividends went ex in its life, and 39% in the July roll's contract")
 for mm, (pb, pf, prs) in ((6, ("-74.80", "-67.43", "-7.37")), (7, ("-70.17", "-65.88", "-4.29"))):
     chk(f"season {mm} b", SEAS[mm][0], ".2f", pb)
     chk(f"season {mm} fair", SEAS[mm][1], ".2f", pf)
@@ -860,6 +915,29 @@ chk("E9 AR half-life min", min(half_life(vv["ar"]) for vv in VERS), ".2f", "1.92
 chk("E9 AR half-life max", max(half_life(vv["ar"]) for vv in VERS), ".2f", "2.72")
 chk("E9 ARMA half-life min", min(half_life(vv["arma_phi"]) for vv in VERS), ".2f", "5.05")
 chk("E9 ARMA half-life max", max(half_life(vv["arma_phi"]) for vv in VERS), ".2f", "7.01")
+# E9: removing slow parts shortens the half-lives by up to 29% (AR(1) 2.72 -> 1.92, the residual; ARMA 7.01 -> 5.05)
+short_ar = [1 - half_life(vv["ar"]) / half_life(VERS[0]["ar"]) for vv in VERS[1:]]
+short_arma = [1 - half_life(vv["arma_phi"]) / half_life(VERS[0]["arma_phi"]) for vv in VERS[1:]]
+assert min(short_ar + short_arma) > 0          # every version reverts faster than b_t itself
+chk("E9 largest shortening (%)", 100 * max(short_ar + short_arma), ".0f", "29")
+chk("E9 largest shortening from printed (%)", 100 * (1 - 1.92 / 2.72), ".0f", "29")
+assert 100 * (1 - 5.05 / 7.01) < 29.5 and max(half_life(vv["arma_phi"]) for vv in VERS) < 7.5
+has("E9 shortening", "shortens the half-lives by up to 29%, but every version still reverts within days")
+# hygiene note: KPSS's rejections for b_t (TX23 0.017; D 0.021 for b_t and b_t - r_f tau) and alpha_F's t-stat fail
+# Bonferroni's correction for the 24 tests on TX23; every DF and ADF verdict lies far from its critical value
+bonf = 0.05 / 24
+kp_b = [k_b[1], VERS[0]["kpss_p"], VERS[1]["kpss_p"]]
+chk("KPSS p-values for b_t, lowest", min(kp_b), ".3f", "0.017")
+chk("KPSS p-values for b_t, highest", max(kp_b), ".3f", "0.021")
+assert all(0.01 < p_ < 0.05 and p_ > bonf for p_ in kp_b)
+t_aF = float(bFe[1]) / wF
+chk("alpha_F t-stat (HC0)", t_aF, ".1f", "-2.9")
+assert bonf < 2 * stats.norm.sf(abs(t_aF)) < 0.05
+df_like = [t_b, a_b[0], t_f] + [vv["df"] for vv in VERS] + [vv["adf"] for vv in VERS] + [REG[k]["df"] for k in REG]
+assert max(df_like) < cv["1%"] - 3 and min(t_s, a_ct[0]) > -1 and min(p_s, a_ct[1]) > 0.9
+has("hygiene DF verdicts", "Every DF and ADF verdict lies far from its critical value")
+has("hygiene KPSS", "KPSS's rejections for $b_t$ (p-values 0.017 to 0.021) and $\\hat\\alpha_F$'s t-stat, -2.9")
+chk("X6 neighbouring days on D", rho_hat(b[D], 1), ".3f", "0.775")
 chk("KPSS 5% point", 0.463, ".3f", "0.463")
 # E10
 chk("llf default gap", fit_b.llf - fit_b.llf_default, ".3f", "0.006")
@@ -910,8 +988,20 @@ chk("2025 mean S", s25, ",.0f", "23,919")
 chk("2025 sigma_u points", math.sqrt(u25) / BP * s25, ".0f", "56")
 chk("2025 sigma_u points from printed", 23.4 / BP * 23919, ".0f", "56")
 chk("2025 changes", int(m25.sum()) - 1, "d", "242")
-chk("2025 s(change) points", sch25 / BP * s25, ".1f", "84.5")
-has("LM6's 83.4", "[[LM6]]'s 83.4")
+# measured in index points (not a conversion at the mean close): the changes of F - S within 2025, rolled (the stored
+# series) and roll-free (the contract held over the day, F_held), divisor 242
+F_held = tx["F_held"].to_numpy()
+i25 = np.flatnonzero(m25)
+assert np.all(np.diff(i25) == 1) and len(i25) == 243
+i25c = i25[1:]
+pts_rolled = (F[i25c] - S[i25c]) - (F[i25c - 1] - S[i25c - 1])
+pts_free = (F_held[i25c] - F[i25c - 1]) - (S[i25c] - S[i25c - 1])
+assert np.allclose(np.log(F_held[i25c] / F[i25c - 1]), rF[i25c])   # F_held is the contract held over the day
+assert int(roll[i25c].sum()) == 12
+chk("2025 rolled s(change) points", float(pts_rolled.std()), ".1f", "81.4")
+chk("2025 roll-free s(change) points", float(pts_free.std()), ".1f", "76.7")
+has("2025 measured", "Measured in points, the 242 rolled daily changes within 2025 had a standard deviation of 81.4")
+has("LM6's 83.4", "[[LM6]]'s 83.4 used same-contract pairs from April to October only")
 # widget
 chk("widget sigma_zeta", math.sqrt(sz2), ".1f", "22.8")
 chk("widget mean", p_b[0], ".1f", "-25.5")
@@ -943,7 +1033,7 @@ chk("P6 SE range low", min(rob4), ".4f", "0.0178")
 chk("P6 SE range high", max(rob4), ".4f", "0.0227")
 chk("P6 expected false rejections", 0.05 * 5, ".2f", "0.25")
 p8b, p8f = P8["before"], P8["from"]
-has("P8 inputs before", "$\\phi_1=0.9035$, $\\theta_1=-0.3606$, $\\sigma_\\eta^2=1,659.9$")
+has("P8 inputs before", "$\\hat\\phi_1=0.9035$, $\\hat\\theta_1=-0.3606$, $\\hat\\sigma_\\eta^2=1,659.9$")
 has("P8 inputs from", "0.9101, −0.3427, 808.6".replace("\u2212", "-"))
 chk("P8 sigma_u before", p8b[0], ".2f", "25.74")
 chk("P8 sd before", p8b[1], ".2f", "60.50")

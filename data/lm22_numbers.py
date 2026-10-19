@@ -16,7 +16,9 @@ Checks, each of which stops the script on a mismatch:
                                    by hand are also recomputed from the inputs printed next to them.
   has(label, text)                 a literal string (a seed, a date, a code line) appears in the text.
   mc(label, value, mcse, nd)       a bootstrap number printed with nd decimals has a Monte Carlo standard error (LM18's
-                                   batches) no larger than one unit of its last printed digit.
+                                   batches) below 2.5 units of its last printed digit (Volume III's precedent,
+                                   plans/vol-3.md:2308: 0.0530 +- 0.0022 printed as 5.3%, 2.2 units).
+  atmost(label, value, printed)    a bound the text prints ("at most 0.04") is at or above the value it bounds.
   anchor(id, got, expected)        compares with plans/vol-4-anchors.md (LM22 rows, the anchor script's unrounded
                                    values); a difference is reported at the end, not forced.
 The printed code blocks of Section 9 and of Problem 10's solution are run as printed, and their outputs are checked.
@@ -33,6 +35,7 @@ import textwrap
 from fractions import Fraction
 from itertools import product
 from math import ceil, sqrt
+from types import SimpleNamespace
 from typing import Any, cast
 
 import lm22_common as C
@@ -97,11 +100,21 @@ def has(label: str, text: str) -> None:
 
 
 def mc(label: str, value: float, mcse: float, nd: int) -> None:
-    """LM18's rule: the Monte Carlo standard error, rounded to one significant digit, is no finer than the last
-    printed digit (0.0530 +- 0.0022 prints as 5.3% +- 0.2 points), so mcse < 10 units of that digit."""
+    """A printed bootstrap number keeps only the digits its Monte Carlo standard error supports: the error is below
+    2.5 units of the last printed digit (Volume III printed 0.0530 +- 0.0022 as 5.3%, 2.2 units; review M4)."""
     global N_CHECKS
     print(f"MC {label}: {value:.6g}, Monte Carlo SE {mcse:.2g}, last digit {10.0 ** -nd:g}")
-    assert mcse < 10.0 ** (1 - nd), (label, value, mcse, nd)
+    assert mcse < 2.5 * 10.0 ** (-nd), (label, value, mcse, nd)
+    N_CHECKS += 1
+
+
+def atmost(label: str, value: float, printed: str) -> None:
+    """The text's bound "at most <printed>" holds: value <= printed, and the bound appears in the text."""
+    global N_CHECKS
+    print(f"BOUND {label}: {value:.6g} <= {printed}")
+    assert value <= float(printed), (label, value, printed)
+    assert in_text(printed), f"{label}: {printed!r} not found in src/lm22.md"
+    COVERED.add(printed)
     N_CHECKS += 1
 
 
@@ -132,9 +145,9 @@ def chk_iv(label: str, s: C.Summary, nd: int, scale: float = 1.0, basic: bool = 
     chk(f"{label} high", hi * scale, f".{nd}f", b)
     assert any(in_text(f"{a}{p} {w} {b}") for p in ("", "%") for w in ("to", "and")) or in_text(f"{a}–{b}") \
         or in_text(f"{a}%–{b}"), (label, a, b)
-    if not basic:
-        mc(f"{label} low end", lo * scale, s.lo_b * scale, nd)
-        mc(f"{label} high end", hi * scale, s.hi_b * scale, nd)
+    lo_b, hi_b = (s.hi_b, s.lo_b) if basic else (s.lo_b, s.hi_b)    # a basic end mirrors a percentile end
+    mc(f"{label} low end", lo * scale, lo_b * scale, nd)
+    mc(f"{label} high end", hi * scale, hi_b * scale, nd)
 
 
 # ====================================================================== data (notation note, case)
@@ -245,10 +258,10 @@ chk("width ratio SR", wr["SR"], ".1f", "1.1")
 chk("width ratio Kelly", wr["Kelly"], ".1f", "1.2")
 chk("width ratio vol", wr["vol"], ".1f", "3.9")
 assert 3.5 < wr["vol"] < 4                                                     # "almost four times as wide"
-chk("ends' MC SE, Sharpe", mx_end["SR"], ".3f", "0.008")
-chk("ends' MC SE, Kelly", mx_end["Kelly"], ".2f", "0.04")
-chk("ends' MC SE, volatility points", 100 * mx_end["vol"], ".2f", "0.03")
-has("X1 MC sentence", "at most 0.008, 0.04 and 0.03 points")
+atmost("ends' MC SE, Sharpe", mx_end["SR"], "0.009")                         # review m1: 0.0082, not 0.008
+atmost("ends' MC SE, Kelly", mx_end["Kelly"], "0.04")
+atmost("ends' MC SE, volatility points", 100 * mx_end["vol"], "0.03")
+has("X1 MC sentence", "at most 0.009, 0.04 and 0.03 points")
 has("X1 width ratios unrounded", "Width ratios from unrounded ends")
 for lit in ("`[2, 20261011]`", "`[3, 20261011]`", "`default_rng([1, 20261011])`", "`default_rng([2, 20261011])`",
             "`default_rng([3, 20261011])`", "`integers(0, T, size=(500, T))`", "`default_rng([e, 20261011])`"):
@@ -368,6 +381,22 @@ chk("SciPy Kelly BCa low", ci("BCa", "Kelly")[0], ".1f", "2.2")
 chk("SciPy Kelly BCa high", ci("BCa", "Kelly")[1], ".1f", "6.5")
 has("Kelly BCa", "BCa interval 2.2 to 6.5")
 
+
+def bca_ends(vals: np.ndarray) -> tuple[float, float]:
+    """SciPy's BCa interval of f_hat from a given bootstrap distribution (n_resamples=0 reuses it as it is)."""
+    res = stats.bootstrap((R,), kel_vec, n_resamples=0, vectorized=True, method="BCa",
+                          bootstrap_result=cast(Any, SimpleNamespace(bootstrap_distribution=vals)))
+    return float(res.confidence_interval.low), float(res.confidence_interval.high)
+
+
+assert np.allclose(bca_ends(IID["Kelly"]), ci("BCa", "Kelly"), rtol=0, atol=1e-12)
+bca_b = np.array([bca_ends(c) for c in np.split(IID["Kelly"], 20)]).std(axis=0) / sqrt(20)   # LM18's batches
+e3_ends = {"f_hat iid": max(k_i.lo_b, k_i.hi_b), "f_hat BCa": float(bca_b.max()), "f_hat* iid": max(fx_i.lo_b, fx_i.hi_b),
+           "f_hat blocks": max(k_b.lo_b, k_b.hi_b), "f_hat* blocks": max(fx_b.lo_b, fx_b.hi_b)}
+print("E3 ends' batch SEs:", {k: round(v, 4) for k, v in e3_ends.items()})
+atmost("E3 every end's MC SE (BCa's 0.041 and 0.042 included)", max(e3_ends.values()), "0.05")
+has("E3 MC sentence", "(Monte Carlo errors of every end at most 0.05)")
+
 # relative error, LM4's band, the knowledge check of section 3
 rel = 1 / (SR * sqrt(T))
 anchor("A22-38", f"{rel:.6f}", "0.252780")
@@ -379,14 +408,15 @@ sr4 = 0.0871 / 1.2385                                     # LM4's printed mean a
 chk("LM4 SR sqrt T", sr4 * sqrt(2902), ".2f", "3.79")
 chk("LM4 relative error %", 100 / (sr4 * sqrt(2902)), ".0f", "26")
 chk("LM4 printed ratio %", 100 * 0.0230 / 0.0871, ".0f", "26")
-hw4 = (7.6 - 2.7) / 2 / 5.42
 hwt = (k_i.hi - k_i.lo) / 2 / KEL
-anchor("A22-16", f"LM4 {hw4:.6f}; TR23 {hwt:.6f}", "LM4 0.452030; TR23 0.501790")
-chk("LM4 half-width %", 100 * hw4, ".0f", "45")
-chk("TR23 half-width %", 100 * hwt, ".0f", "50")
+anchor("A22-16", f"TR23 {hwt:.6f}", "TR23 0.501790")   # the anchor's LM4 part (2.7 to 7.6, the exact optimum) is
+chk("TR23 half-width %", 100 * hwt, ".0f", "50")       # superseded: review U6 compares LM4's band for mu/s^2
 chk("TR23 half-width % from printed", 100 * (6.5 - 2.2) / 2 / 4.28, ".0f", "50")
-has("LM4's band", "2.7 to 7.6")
-has("LM4's optimum", "45% of 5.42")
+# LM4's band for 0050's mu-hat / s^2: 2.7 to 8.6 around 5.68 (lm04.md:547, :39), from a shifted mean
+chk("LM4 half-width % (1.96 x 0.0230 / 0.0871)", 100 * 1.96 * 0.0230 / 0.0871, ".0f", "52")
+chk("LM4 half-width % from its band", 100 * (8.6 - 2.7) / 2 / 5.68, ".0f", "52")
+has("LM4's band", "2.7 to 8.6 for 0050's $\\hat\\mu/s^2$")
+has("LM4's quadratic rule", "52% of 5.68")
 has("LM7's rate", "$r_f=1.5%$")
 
 # ====================================================================== E4: what resampling days cannot see
@@ -410,6 +440,10 @@ has("none of 10,000", "none of 10,000 reaches 0.161")
 chk("acf block mean", acf_b.mean, ".3f", "0.156")
 mc("acf block mean", acf_b.mean, acf_b.se / 100, 3)
 chk_iv("acf block percentile", acf_b, 2)
+chk("acf iid SE (the null law's)", acf_i.se, ".3f", "0.013")                     # section 8, independence
+chk("0.161 in iid standard errors", OBS["acf"] / acf_i.se, ".0f", "12")
+chk("0.161 in iid standard errors, from printed", 0.161 / 0.013, ".0f", "12")
+has("independence rejected", "None reaches 0.161, which lies 12 standard errors (0.013) above 0")
 chk("P4 basic low", acf_i.blo, ".3f", "0.295")
 chk("P4 basic high", acf_i.bhi, ".3f", "0.346")
 has("P4 basic", "0.295 to 0.346")
@@ -429,6 +463,12 @@ chk("VR iid SE", vr_i.se, ".3f", "0.065")
 chk("VR block SE", vr_b.se, ".3f", "0.061")
 chk("iid factor of (19.8)", (1 - 20 / T) / (1 - 1 / T), ".3f", "0.997")
 chk("VR m", 20.0, ".0f", "20")
+has("E4 95% of them", "with 95% of them between 0.88 and 1.13")
+has("E4 blocks 95%", "with 95% between 0.92 and 1.16")
+atmost("E4 ends' MC SE, rho_1", max(acf_i.lo_b, acf_i.hi_b, acf_b.lo_b, acf_b.hi_b), "0.0007")
+atmost("E4 ends' MC SE, VR(20)", max(vr_i.lo_b, vr_i.hi_b, vr_b.lo_b, vr_b.hi_b), "0.002")
+has("E4 MC sentence", "at most 0.0007 ($\\hat\\rho_1$) and 0.002 ($\\operatorname{VR}(20)$)")
+mc("VR block mean", vr_b.mean, vr_b.se / sqrt(B), 3)
 
 # ====================================================================== E5 and X7: the volatility, four schemes
 se_s = D.s * sqrt((kurt - 1) / (4 * T))
@@ -468,6 +508,9 @@ for nm, pr_ in x7_printed.items():
     mc(f"X7 {nm} Kelly ends", fk.lo, max(fk.lo_b, fk.hi_b), 1)
     row = (f"| {names[nm]} | {pr_[0]} | {pr_[1]}% to {pr_[2]}% | {pr_[3]} | {pr_[4]} to {pr_[5]} | {pr_[6]} |")
     has(f"X7 row {nm}", row)
+atmost("X7 vol ends' MC SE, points", max(100 * max(x7[nm][0].lo_b, x7[nm][0].hi_b) for nm in x7), "0.04")
+atmost("X7 Kelly ends' MC SE", max(max(x7[nm][1].lo_b, x7[nm][1].hi_b) for nm in x7), "0.05")
+has("X7 MC sentence", "Monte Carlo standard errors (batch) of the ends: at most 0.04 points (volatility) and 0.05 (Kelly)")
 chk("moving and circular SE", 100 * x7["circular"][0].se, ".2f", "1.12")
 assert max(abs(x7[a][0].se - x7[b][0].se) for a in ("moving", "circular", "stationary")
            for b in ("moving", "circular", "stationary")) < min(x7[a][0].se for a in ("moving", "circular")) - x7["iid"][0].se
@@ -477,6 +520,17 @@ chk("moving blocks needed", float(nb), ".0f", "41")
 chk("days held", float(nb * C.ELL), ",.0f", "5,945")
 chk("days cut", float(nb * C.ELL - T), ".0f", "96")
 chk("moving blocks in the sample", float(T - C.ELL + 1), ",.0f", "5,705")
+# section 5: the conditions of Lahiri's Theorems 3.1 and 3.3 against TR23's tails (LM15's maximum-likelihood t fit)
+nu_t = float(stats.t.fit(R)[0])
+chk("LM15's nu", nu_t, ".3f", "3.065")
+assert 2 < nu_t < 4                       # moments of order just above 2 exist (Theorem 3.1), of order above 4 do not
+has("M3 moments", "its moments exist only below order 3.065")
+# the pitfall of section 5: a block of at least m = 1,231 days, by (22.3)
+p_long = (1 - 1 / C.ELL) ** (C.M5 - 1)
+print(f"Pr(a block lasts at least {C.M5} days) = {p_long:.6e}, 1 in {1 / p_long:,.0f}")
+assert 4900 < 1 / p_long < 5100
+chk("1 in N blocks hold a five-year window", round(1 / p_long, -3), ",.0f", "5,000")
+has("pitfall m3", "almost no block (about 1 in 5,000) holds a five-year window")
 
 # ====================================================================== X5: two paths (experiment 7)
 pi_, ps_ = C.exp7()
@@ -515,14 +569,16 @@ assert ratio[400]["vol"] > ratio[200]["vol"] > ratio[145]["vol"]                
 chk("X6 SR at 3", ratio[3]["SR"], ".2f", "1.05")
 chk("X6 SR at 145", ratio[145]["SR"], ".2f", "1.13")
 chk("X6 VR at 145", ratio[145]["VR20"], ".2f", "0.93")
-chk("X6 SR at most", max(ratio[e]["SR"] for e in ratio), ".2f", "1.15")
-chk("X6 Kelly at most", max(ratio[e]["Kelly"] for e in ratio), ".2f", "1.24")
+chk("X6 SR peak", max(ratio[e]["SR"] for e in ratio), ".2f", "1.15")
+chk("X6 Kelly peak", max(ratio[e]["Kelly"] for e in ratio), ".2f", "1.24")
+assert max(ratio, key=lambda e: ratio[e]["SR"]) == 50 and max(ratio, key=lambda e: ratio[e]["Kelly"]) == 50
+has("X6 peaks", "peak at 1.15 and 1.24, both at $\\ell=50$")
 chk("SR growth 3 -> 145 %", 100 * (ratio[145]["SR"] / ratio[3]["SR"] - 1), ".0f", "8")
 chk("Kelly growth 3 -> 145 %", 100 * (ratio[145]["Kelly"] / ratio[3]["Kelly"] - 1), ".0f", "14")
 chk("SR growth from printed ratios %", 100 * (1.13 / 1.05 - 1), ".0f", "8")
-chk("MC SE of a ratio, B 2,000 %", 100 * mc2, ".0f", "2")
+atmost("MC SE of a ratio, B 2,000 %", 100 * mc2, "2.2")                          # review m1: 2.16%, not 2%
 chk("MC SE of a ratio at 145 %", 100 * mc145, ".0f", "1")
-has("X6 MC", "at most 2%, about 1% at 145")
+has("X6 MC", "at most 2.2%, about 1% at 145")
 chk("B grid", float(C.B_GRID), ",.0f", "2,000")
 
 # ====================================================================== E7: the crash correlation (experiments 8, 9)
@@ -568,7 +624,7 @@ chk_iv("crash corr block", dc9, 2)
 chk("gap block SE", dg9.se, ".3f", "0.016")
 chk_iv("gap block", dg9, 3)
 chk_iv("gap iid", dg8, 3)
-has("event days in resamples", "(182 to 255)")
+has("event days in resamples", "(182 to 255 in the block resamples below)")
 assert (int(cr[9]["days"].min()), int(cr[9]["days"].max())) == (182, 255)
 has("none of the gaps", "none of the 10,000 gaps reaches 0")
 
@@ -580,10 +636,11 @@ for y, e_iid, e_blk in (("2017", 10, 11), ("2020", 12, 13)):
     pws = [C.pw((Xy[:, j] - Xy[:, j].mean()) ** 2)[0] for j in range(Xy.shape[1])]
     ell_y = round(max(pws))
     si = C.summ(C.exp_pc1(e_iid, y, 1), est)
-    sb = C.summ(C.exp_pc1(e_blk, y, ell_y), est)
-    pc[y] = (Xy.shape[0], est, max(pws), ell_y, si, sb)
-n17, e17, p17, l17, si17, sb17 = pc["2017"]
-n20, e20, p20, l20, si20, sb20 = pc["2020"]
+    vb = C.exp_pc1(e_blk, y, ell_y)
+    sb = C.summ(vb, est)
+    pc[y] = (Xy.shape[0], est, max(pws), ell_y, si, sb, C.bse(vb, lambda c: float(c.mean())))
+n17, e17, p17, l17, si17, sb17, _ = pc["2017"]
+n20, e20, p20, l20, si20, sb20, mb20 = pc["2020"]
 anchor("A22-31", f"{n17}; {e17:.6f}; PW {p17:.6f}; ell {l17}; iid {g6(si17.lo)} to {g6(si17.hi)}; block SE "
        f"{g6(sb17.se)}, {g6(sb17.lo)} to {g6(sb17.hi)}",
        "246; 0.345248; PW 6.787814; ell 7; iid 0.306612 to 0.389299; block SE 0.0236247, 0.301267 to 0.394041")
@@ -610,9 +667,12 @@ chk_iv("2020 block %", sb20, 1, 100)
 chk("2020 block low, two decimals", 100 * sb20.lo, ".2f", "49.55")
 chk("2020 block high, two decimals", 100 * sb20.hi, ".2f", "75.92")
 chk_iv("2020 block basic %", sb20, 1, 100, basic=True)
-chk("2020 resample mean %", 100 * sb20.mean, ".2f", "64.96")
-chk("2020 bias points", 100 * sb20.bias, ".2f", "-1.66")
-chk("2020 bias from printed", 64.96 - 66.62, ".2f", "-1.66")
+# review M4: the mean (64.96%) and the bias (-1.66) had a Monte Carlo error of 0.08 points; the text prints the bias
+# to one decimal and no separate mean (65.0 - 66.62 would give -1.6)
+chk("2020 bias points, below the share", -100 * sb20.bias, ".1f", "1.7")
+mc("2020 bias points", -100 * sb20.bias, 100 * mb20, 1)
+has("E8 bias", "average about 1.7 points below the 2020 share (a bias)")
+has("E8 two decimals", "from the ends to two decimals, 49.55% and 75.92%")
 assert e20 - sb20.lo > sb20.hi - e20                                         # "a long left tail"
 assert si17.hi < si20.lo and sb17.hi < sb20.lo                               # the intervals do not overlap
 yrs = sorted({y for y in C.YEARS_U if y >= "2009"})
@@ -645,6 +705,7 @@ chk("under water", float(under), ".0f", "191")
 chk("share under water %", 100 * sh0, ".2f", "4.14")
 chk("sd ln G", sd0, ".3f", "0.283")
 chk("sqrt(m) s_r", sqrt(M5) * D.sr, ".3f", "0.425")
+has("E9 stem", "against $\\sqrt m\\,s_r=0.425$ for independent five-year paths ([[LM18]])")
 W14, W15 = C.exp_windows(14, C.ELL), C.exp_windows(15, 1)
 ws14, wd14 = C.summ(W14["share"], sh0), C.summ(W14["sd"], sd0)
 ws15, wd15 = C.summ(W15["share"], sh0), C.summ(W15["sd"], sd0)
@@ -656,17 +717,53 @@ anchor("A22-34", f"share SE {g6(ws14.se)}; {g6(ws14.lo)} to {g6(ws14.hi)}; basic
 anchor("A22-35", f"share SE {g6(ws15.se)}; sd {g6(wd15.lo)} to {g6(wd15.hi)}",
        "share SE 0.0841454; sd 0.192662 to 0.583806")
 chk("windows share SE points", 100 * ws14.se, ".1f", "9.9")
-chk_iv("windows share %", ws14, 1, 100)
-chk_iv("windows share basic %", ws14, 1, 100, basic=True)
-chk("windows basic low from printed", 2 * 4.14 - 33.0, ".1f", "-24.7")
+mc("windows share SE points", 100 * ws14.se, 100 * ws14.se_b, 1)
+assert ws14.lo == 0 and nz14 > B * 0.025                    # the lower end is exactly 0: more than 250 resamples have none
+chk_iv("windows share %", ws14, 0, 100)                     # review M4: 33.0% had a Monte Carlo error of 0.57 points
+chk_iv("windows share basic %", ws14, 0, 100, basic=True)
+chk("windows basic low from printed", 2 * 4.14 - 33, ".0f", "-25")
+has("P8 basic end", "$2\\times4.14%-33%\\approx-25%$")
+has("E9 basic", "The basic interval, -25% to 8%, leaves the range of a share")
+has("zh basic end", "下界約是 -25%")
+has("zh E8 bias", "比估計值低約 1.7 個百分點")
 chk("resamples with none", float(nz14), ",.0f", "3,248")
 chk("iid share SE points", 100 * ws15.se, ".1f", "8.4")
+mc("iid share SE points", 100 * ws15.se, 100 * ws15.se_b, 1)
 chk("sd ln G block SE", wd14.se, ".3f", "0.124")
+mc("sd ln G block SE", wd14.se, wd14.se_b, 3)
 chk_iv("sd ln G block", wd14, 2)
 chk("sd ln G resampled mean", wd14.mean, ".3f", "0.386")
+mc("sd ln G resampled mean", wd14.mean, wd14.se / sqrt(B), 3)
 chk_iv("sd ln G iid", wd15, 2)
-assert abs(wd14.mean - sqrt(M5) * D.sr) < abs(wd14.mean - sd0)                   # "nearer 0.425 than 0.283"
+chk("sd ln G iid mean", wd15.mean, ".3f", "0.357")                               # review M2 (A22-35)
+mc("sd ln G iid mean", wd15.mean, C.bse(W15["sd"], lambda c: float(c.mean())), 3)
+has("E9 iid mean", "(iid days: 0.19 to 0.58, mean 0.357)")
+assert sd0 < wd15.mean < wd14.mean < sqrt(M5) * D.sr                             # 0.283 < 0.357 < 0.386 < 0.425
+# why iid days give 0.357, not 0.425: overlapping windows centred on their own mean understate the variance by about
+# m/T (LM19's iid factor of VR(m), 0.790 at m = 1,231), and a mean of standard deviations lies below the square root
+# of the mean variance. Exact expected variance about the windows' own mean under iid draws from F-hat:
+nw = T - M5 + 1
+lag = np.arange(-(M5 - 1), M5)
+evar = M5 * D.sr**2 - D.sr**2 * float(((nw - np.abs(lag)) * (M5 - np.abs(lag))).sum()) / nw**2
+print(f"windows, iid: E var / (m s_r^2) = {evar / (M5 * D.sr**2):.4f} against 1 - m/T = {1 - M5 / T:.4f}; "
+      f"sqrt(E var) = {sqrt(evar):.4f}; mean sd {wd15.mean:.4f}; mean var {float((W15['sd'] ** 2).mean()):.4f}")
+assert abs(evar / (M5 * D.sr**2) - (1 - M5 / T)) < 0.05                          # "by about m/T"
+assert abs(float((W15["sd"] ** 2).mean()) - evar) < 3 * float((W15["sd"] ** 2).std()) / sqrt(B)
+assert wd15.mean < sqrt(float((W15["sd"] ** 2).mean()))                          # the mean of SDs lies lower still
+has("E9 m/T", "understate the variance even for independent days, by about $m/T$")
+# blocks keep LM19's variance ratios above 1 below 340 days (LM19: "first falls below 1 at m = 340")
+vr_m = {m_: float(C.vr(r[None, :], m_)[0]) for m_ in range(2, 341)}
+assert all(vr_m[m_] > 1 for m_ in range(2, 340)) and vr_m[340] < 1
+chk("first m with VR(m) below 1", 340.0, ".0f", "340")
+has("E9 340", "variance ratios above 1 below 340 days")
+assert abs(wd14.mean - sqrt(M5) * D.sr) < abs(wd14.mean - sd0)                   # the blocks' mean is nearer 0.425
 assert 0.2 < nz14 / B < 0.4                                                      # "a third of the resamples"
+# the note of the exhibit of earlier estimates: bounds on the ends' batch standard errors
+atmost("X8 windows' share ends, points", 100 * max(ws14.lo_b, ws14.hi_b), "0.6")
+atmost("X8 component shares' ends, points", 100 * max(sb17.lo_b, sb17.hi_b, sb20.lo_b, sb20.hi_b), "0.16")
+atmost("X8 other ends", max(dc9.lo_b, dc9.hi_b, dg9.lo_b, dg9.hi_b, wd14.lo_b, wd14.hi_b, vr_b.lo_b, vr_b.hi_b), "0.005")
+has("X8 MC sentence", "at most 0.6 points for the windows' share, 0.16 points for the component shares and 0.005 "
+    "elsewhere")
 
 # ====================================================================== E10: bootstrap tests (experiments 16-18)
 tests = {}
@@ -703,7 +800,14 @@ chk("full t-stat", t18[0], ".2f", "3.96")
 chk("full normal p x1e5", t18[1] * 1e5, ".1f", "7.6")
 has("full normal p", "$7.6\\times10^{-5}$")
 assert t18[3] == 0 and t18[2] == 145
-chk("1/B", 1 / B, ".4f", "0.0001")
+# review C1: zero hits make (22.4) zero but only bound the ideal p-value; the one-sided 95% bound after 0 of B is
+# 1 - 0.05^(1/B) = 2.996/B
+bound0 = 1 - 0.05 ** (1 / B)
+chk("95% bound after zero hits", bound0, ".4f", "0.0003")
+chk("3/B", 3 / B, ".4f", "0.0003")
+assert abs(bound0 * B - 3) < 0.01
+has("C1 bound", "zero hits only bound the p-value: below about $3/B=0.0003$ at the 95% level")
+assert bound0 < 0.05                                                              # "the decision at the 5% level stands"
 # knowledge check of section 8 (experiment 19)
 tb_u = C.exp19()
 anchor("A22-41", f"mean {tb_u.mean():.6f}; share {float((tb_u >= t18[0]).mean()):.4f}", "mean 3.960818; share 0.5023")
@@ -802,6 +906,43 @@ chk("P6 prediction at 2 from printed", 0.5 * 0.161, ".2f", "0.08")
 chk("P6 e21 mean", m21, ".3f", "0.078")
 chk("P6 e21 batch SE", bs21, ".4f", "0.0005")
 chk("P6 e3 mean", acf_b.mean, ".3f", "0.156")
+# review K1: the expectation at ell = 2 (experiment 26, B = 200,000) and experiment 21's distance from it
+b26 = C.exp_tr(26, "sb", 2, b=C.B_26, fx=False)["acf"]
+m26, bs26 = float(b26.mean()), C.bse(b26, lambda c: float(c.mean()))
+chk("P6 e26 mean", m26, ".4f", "0.0797")
+chk("P6 e26 batch SE", bs26, ".5f", "0.00005")
+mc("P6 e26 mean", m26, bs26, 4)
+chk("P6 e26 mean, three decimals", m26, ".3f", "0.080")
+chk("P6 e21 below the expectation, in its batch SEs", (m26 - m21) / bs21, ".0f", "3")
+chk("B of experiment 26", float(C.B_26), ",.0f", "200,000")
+has("K1 text", "At $\\ell=2$ the expectation is about 0.080 (experiment 26, $B=200,000$: $0.0797\\pm0.00005$)")
+
+
+def boot_acf1_expectation(ell: float) -> tuple[float, float]:
+    """First-order expectation of a stationary resample's lag-1 autocorrelation of |r| (19.5), E[numerator] /
+    E[denominator], with and without the centring on each resample's own mean. Day indices wrap (day T, then day 1);
+    positions k apart share a block with probability (1 - 1/ell)^k, else they are independent uniform days."""
+    a = np.abs(r)
+    mu, ac = float(a.mean()), a - a.mean()
+    q = 1 - 1 / ell
+    spec = np.fft.rfft(ac)
+    cov = np.fft.irfft(spec * np.conj(spec), n=T) / T                      # circular autocovariances c_0 .. c_(T-1)
+    k_ = np.arange(T)
+    qk = q**k_
+    var_mean = (T * cov[0] + 2 * float(((T - k_[1:]) * qk[1:] * cov[1:]).sum())) / T**2
+    num = (T - 1) * q * cov[1] - (T + 1) * var_mean + 2 / T * float((qk * cov).sum())
+    den = T * cov[0] - T * var_mean
+    assert mu > 0
+    return num / den, (T - 1) * q * cov[1] / (T * cov[0])
+
+
+x145, x145_raw = boot_acf1_expectation(C.ELL)
+x2, x2_raw = boot_acf1_expectation(2)
+print(f"first-order expectations: ell 145 {x145:.5f} (no own-mean centring {x145_raw:.5f}); ell 2 {x2:.5f} "
+      f"({x2_raw:.5f}); experiment 3 {acf_b.mean:.5f}, experiment 26 {m26:.5f}")
+assert f"{x145:.3f}" == "0.156" and f"{x145_raw:.2f}" == "0.16" and x145 < x145_raw - 0.003   # the centring lowers it
+assert abs(x2 - m26) < 1e-3     # agrees at ell = 2 (0.0801 against 0.0797; the ratio's own bias, order 1/T, is the rest)
+has("K1 mechanism", "Each resample is centred on its own mean, which varies more under long blocks")
 cnt = np.array([min(t, C.ELL, T - C.ELL + 1, T - t + 1) for t in range(1, T + 1)])
 emb = float((cnt * R).sum() / cnt.sum())
 anchor("A22-49", f"{cnt[0]}, {cnt[C.ELL - 1]}; {emb:.8%}; {1e4 * (emb - D.Rb):.6f} bp; {emb / D.Rb - 1:+.6%}",
@@ -815,6 +956,15 @@ chk("P9 bp", 1e4 * (emb - D.Rb), ".2f", "-0.23")
 chk("P9 percent", 100 * (emb / D.Rb - 1), ".1f", "-3.7")
 chk("P9 percent from printed", 100 * (0.060185 / 0.062505 - 1), ".1f", "-3.7")
 chk("P9 last days", 144.0, ".0f", "144")
+# review K2: why the sign is negative
+chk("P9 first 144 days' mean %", 100 * float(R[:144].mean()), ".2f", "0.13")
+chk("P9 last 144 days' mean %", 100 * float(R[-144:].mean()), ".2f", "0.28")
+assert R[:144].mean() > D.Rb and R[-144:].mean() > D.Rb                           # both count less and lie above R-bar
+se_rb = D.s / sqrt(T)
+chk("P9 difference in standard errors of R-bar", abs(emb - D.Rb) / se_rb, ".2f", "0.15")
+chk("P9 the same with s_u", abs(emb - D.Rb) / (float(R.std(ddof=1)) / sqrt(T)), ".2f", "0.15")
+has("P9 K2", "Both stretches averaged more than $\\bar R$ (0.13% and 0.28% a day), so the block mean is lower")
+has("P9 SEs", "or 0.15 standard errors of $\\bar R$")
 R10 = R[~D.pre]
 k10 = float(R10.mean() / R10.var())
 ell10 = round(C.pw((R10 - R10.mean()) ** 2)[0])
@@ -827,13 +977,17 @@ chk("P11 ell", float(ell10), ".0f", "36")
 chk_iv("P11 iid", v22, 1)
 chk_iv("P11 block", v23, 1)
 assert k_i.lo < v22.lo < k_i.hi < v22.hi                                          # overlap "from 2.8 to 6.5"
-has("P11 overlap", "from 2.8 to 6.5")
+assert k_b.lo < v23.lo < k_b.hi < v23.hi                                          # overlap "from 2.6 to 7.1"
+assert (f"{v22.lo:.1f}", f"{k_i.hi:.1f}", f"{v23.lo:.1f}", f"{k_b.hi:.1f}") == ("2.8", "6.5", "2.6", "7.1")
+has("P11 overlap", "from 2.8 to 6.5 and from 2.6 to 7.1")
+has("P11 stem", "Compare them with the full sample's 2.2 to 6.5 (iid) and 1.8 to 7.1 (blocks)")
+has("P11 regime days", "The full sample includes the regime's 2,772 days")
 
 # ====================================================================== words that carry numbers
 has("widget", "the 1,000 resampled values")
 has("five returns", "+1.2%, −0.8%, +0.3%, −2.5% and +0.6%".replace("−", "-"))
 has("three returns", "+1%, −2% and +4%".replace("−", "-"))
-for e in range(1, 24):                                                           # experiments 1-23 are named
+for e in (*range(1, 24), 26):                                                    # experiments 1-23 and 26 are named
     assert re.search(rf"[Ee]xperiments?[^.]{{0,70}}?\b{e}\b", NORM), e
 
 # ====================================================================== chart files (data/lm22_charts.py)

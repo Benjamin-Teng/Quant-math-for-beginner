@@ -13,7 +13,7 @@ returns R, sums, autocorrelations and variance ratios on log returns r = ln(1 + 
 terms (s_u by T - 1); every quantile and median is F^-1(u) = x_(ceil(un)); rho_k uses the full-sample mean and divisor
 T; VR(m) is the overlapping estimator (19.8). A = T / years = 246.12 for TR23, and a year of 2003-2025 is 246 sessions.
 Counts on returns use Fraction on the closes; counts on computed statistics use the guard (>= x - 1e-12,
-<= x + 1e-12). One simulated experiment, e = 1: np.random.default_rng([1, 20261011]), created once.
+<= x + 1e-12). One simulated experiment, experiment 1: np.random.default_rng([1, 20261011]), created once.
 
 Checks (each stops the script on a failure):
   chk(label, value, fmt, printed)  format(value, fmt) equals the printed string, the value does not sit on a rounding
@@ -323,7 +323,7 @@ put(f"m = 246, TR23: identity column {vp246:.7f}; overlapping {vo246:.7f}; non-o
 put(f"iid factor (1 - m/T)/(1 - 1/T): m = 246, T = {T}: {iid_factor(T, 246):.7f}; m = 1231: {iid_factor(T, 1231):.7f};"
     f" m = 246, T = {T25}: {iid_factor(T25, 246):.7f}",
     (iid_factor(T, 246), 3), (iid_factor(T, 1231), 3), (iid_factor(T25, 246), 3))                    # 47
-# experiment e = 1: the iid expectation of the overlapping estimator (the generator is created once, here)
+# experiment 1: the iid expectation of the overlapping estimator (the generator is created once, here)
 rng = np.random.default_rng([1, SEED])
 n_sim = 10_000
 sim = np.empty((n_sim, 2))
@@ -432,6 +432,7 @@ p4 = (0.681 - 0.490 - 2 * 0.088) / (0.681 + 0.490)
 p4c = (0.681 - 0.490) / (0.681 + 0.490)
 put(f"Problem 4 (printed quartiles -0.490, 0.088, 0.681): {p4:.6f}; sign reversed {-p4:.6f}; without the median "
     f"{p4c:.6f}", (p4, 3), (p4c, 3))                                                                  # 63
+p4 = (0.681 - 0.490 - 2 * 0.0879) / (0.681 + 0.490)   # round 1 (m10): LM14 prints the median as 0.0879%
 p5 = sqrt(1.0393)
 put(f"Problem 5: 1 + 0.0393 = 1.0393; 1 + 2(0.0393) = {1 + 2 * 0.0393:.4f}; sqrt(1.0393) = {p5:.6f}", (p5, 4))  # 64
 put(f"Problem 6: iid factor {iid_factor(5849, 1231):.6f}; m/T {1231 / 5849:.6f}",
@@ -609,7 +610,10 @@ nm("weeks a year", wpy, 2, "51.52")
 has("weeks a year, in the note", "1,185/23 = 51.52 weeks or 12 months")
 assert (len(sat), sat[0].isoformat(), sat[-1].isoformat(), len(six)) == (23, "2006-10-14", "2018-12-22", 17)
 assert all(any(x.weekday() == 5 for x in v) for v in six) and sum(d.year <= 2025 for d in sat) == 23
-has("Saturday sessions", "23 Saturday sessions (14 October 2006 to 22 December 2018), one in each of the 17 six-session weeks")
+# each ISO week holds at most one Saturday, so the 23 Saturdays lie in 23 weeks: 17 of six sessions, the rest of 4 or 5
+assert len(sat_wk) == 23 and sorted(len(v) for v in sat_wk if len(v) != 6) == [4, 4, 4, 4, 4, 5]
+has("Saturday sessions", "23 Saturday sessions, from 14 October 2006 to 22 December 2018. Each of the 17 six-session"
+    " weeks holds one, and the other six fall in weeks of four or five sessions")
 has("retrieval", "retrieved 18 October 2026")
 has("first return", "3 January 2003")
 has("last close", "8 October 2026")
@@ -653,6 +657,16 @@ nm("E2: drag from printed inputs", 100 * (0.062505 - 0.055185), 4, "0.7320")
 nm("E2: s^2/2 in bp", 1e4 * full["s"] ** 2 / 2, 4, "0.7301")
 nm("E2: s^2/2 from printed s", 1.2084**2 / 2, 4, "0.7301")
 pc("E2: s", full["s"], 4, "1.2084")
+# large falls outnumber large rises (LM15's guarded counts, here exact on the closes; no return is exactly +-3%)
+three = Fraction(3, 100)
+assert not any(abs(x) == three for x in RF)
+ct("E2: falls of 3% or more (LM15's)", sum(x <= -three for x in RF), "108")
+ct("E2: rises of 3% or more (LM15's)", sum(x >= three for x in RF), "67")
+has("E2: why the median sits above the mean", "because large falls outnumber large rises, 108 against 67 beyond ±3%")
+has("overview: why", "because large falls outnumber large rises.")
+order = np.argsort(-np.abs(R - R.mean()))
+assert sum(R[order[:10]] < 0) == 6 and R[order[1]] > 0   # the largest moves are not all falls (m3)
+has("KC 4: largest moves", "decided by the largest moves, more of which are falls")
 has("KC 2: changed return", "from −9.6997% to −19.6997%".replace("−", "-"))
 pc("KC 2: mean", k_mean, 3, "-3.493")
 assert abs(k_mean - (w_mean - 0.02)) < 1e-15 and k_med == w_med and k_trim == w_trim
@@ -696,8 +710,8 @@ pc("E4: upper quartile", q3, 4, "0.6812")
 pc("E4: IQR", q3 - q1, 4, "1.1716")
 nm("E4: IQR from the printed quartiles", 0.6812 + 0.4904, 4, "1.1716")
 pc("E4: MAD", mad_full, 4, "0.5889")
-assert n_in == 2925 == ceil(T / 2) and len(devF) == len(set(devF))
-has("E4: half the days", "exactly half the days, 2,925, lie within 0.5889% of the median")
+assert n_in == 2925 == ceil(T / 2) and len(devF) == len(set(devF)) and n_distinct == T
+has("E4: ceil(T/2) days", "as no two returns tie, exactly $\\lceil T/2\\rceil=2,925$ days lie within 0.5889% of the median")
 pc("E4: 1.4826 MAD", full["1.4826MAD"], 3, "0.873")
 nm("E4: 1.4826 x printed 0.5889", 1.4826 * 0.5889, 3, "0.873")
 pc("E4: IQR/1.349", full["IQR/1.349"], 3, "0.868")
@@ -727,6 +741,8 @@ pc("X3: last s", float(roll["s"][-1]), 1, "26.7")
 pc("X3: last MAD", float(roll["MAD"][-1]), 1, "21.9")
 pc("X3: last IQR", float(roll["IQR"][-1]), 1, "22.2")
 has("X3: last window", "26.7%, 21.9% and 22.2%")
+has("X3: thinning", "every fifth window is plotted, plus the last and those where a scale or the ratio reaches its"
+    " maximum or minimum")
 for k, lab, fn, d in (("s", "35.2% (15 Jun 2009)", np.argmax, "2009-06-15"), ("MAD", "31.0% (15 Dec 2008)", np.argmax,
                       "2008-12-15"), ("s", "8.2% (10 Nov 2017)", np.argmin, "2017-11-10"),
                       ("MAD", "7.6% (29 Nov 2017)", np.argmin, "2017-11-29")):
@@ -750,9 +766,18 @@ nm("E5: TR23 skewness", full["skew"], 4, "-0.3384")
 nm("E5: TR23 adjusted skewness", full["skew_adj"], 4, "-0.3385")
 nm("E5: TR23 excess kurtosis", full["exkurt"], 3, "5.268")
 nm("E5: TR23 adjusted excess kurtosis", full["exkurt_adj"], 3, "5.274")
+adj_rel = max(abs(full["skew_adj"] / full["skew"] - 1), abs(full["exkurt_adj"] / full["exkurt"] - 1))
+pc("E5: the larger relative change, adjusted against plain", adj_rel, 1, "0.1")
+assert abs(full["skew_adj"] / full["skew"] - 1) < 0.0005 and 0.001 < adj_rel < 0.0011
+has("E5: about 0.1% at most", "TR23's daily values move by about 0.1% at most")
+has("E5 box: about 0.1%", "在 5,849 天裡只差約 0.1%")
 nm("E5: LM4's 8.12 adjusted", k50, 2, "8.14")
 ct("E5: 0050's days", n50, "2,902")
 nm("octile kurtosis of a normal law", okn, 3, "1.233")
+has("(19.4) in words", "it rises when the outer octiles move away from the median or the inner ones toward it")
+has("hygiene: model properties", "The normal-law constants of (19.2), the iid band and expectation, and experiment 1"
+    " are **model** properties")
+has("(19.2): rounded constants", "are rounded to five and four figures")
 # X2, row by row (the minus sign is normalized to '-')
 COLS = (full, reg7, reg10, None, plus)
 NORMAL = {"mean": full["mean"], "median": full["mean"], "trim5": full["mean"], "s": full["s"], "s_u": None,
@@ -813,6 +838,7 @@ nm("E6: skewness change from printed", 100 * (-0.425 + 0.338) / 0.338, 0, "-26")
 nm("E6: kurtosis change from printed", 100 * (5.88 - 5.27) / 5.27, 0, "12")
 pc("E6: quartile skewness, relative", rel["qskew"], 1, "1.2")
 pc("E6: octile kurtosis, relative", -rel["okurt"], 2, "0.05")
+has("E6: 26% and 12%", "moves the moment measures by 26% and 12%")
 x4 = (R - R.mean()) ** 4
 pc("LM15's top-ten share of fourth powers", float(np.sort(x4)[-10:].sum() / x4.sum()), 1, "35.0")
 nm("KC 4: quartile skewness", full["qskew"], 3, "0.013")
@@ -848,11 +874,19 @@ nm("X4: r^2 lag 1", float(rho_q[0]), 3, "0.194")
 nm("X4: r^2 lag 2", float(rho_q[1]), 3, "0.213")
 nm("X4: r^2 lag 3", float(rho_q[2]), 3, "0.271")
 nm("X4: r^2 min", float(rho_q.min()), 3, "0.046")
+has("X4: the band's condition for r^2", "For $r_t^2$ the band would also need a finite fourth moment of $r_t$, which"
+    " [[LM15]]'s maximum-likelihood fit ($\\nu=3.065$) lacks, so these values are description only.")
+has("(19.6): its source", "stated without proof (Brockwell and Davis 1991, Theorem 7.2.2 and Example 7.2.1)")
+has("(19.6): its condition", "be iid with a finite variance")
+has("References: Brockwell and Davis", "Brockwell, P. J., and R. A. Davis (1991). *Time Series: Theory and Methods*, 2nd"
+    " ed. New York: Springer-Verlag, §7.2, Theorem 7.2.2 and Example 7.2.1")
 for lab in ("7%", "10%"):
     nm(f"regime {lab}: rho_1(r)", reg_rho[lab][0], 3, {"7%": "0.055", "10%": "0.018"}[lab])
     nm(f"regime {lab}: rho_1(|r|)", reg_rho[lab][1], 3, {"7%": "0.113", "10%": "0.217"}[lab])
 pc("lag-3 share, r^2", sh_q, 1, "31.5")
 pc("lag-3 share, |r|", sh_a, 1, "7.7")
+assert dates[i10 - 3] == "2025-04-07"   # the single product of 7 and 10 April 2025 (three sessions apart)
+has("lag-3 share: one product", "the product of 7 and 10 April 2025 alone supplies 31.5% of the lag-3 sum of products")
 nm("pitfall 5: thirty looks", 30 * 0.05, 1, "1.5")
 same("KC 5: alternating six", str(Fraction(a1).limit_denominator(100)), "-5/6", in_md=False)
 has("KC 5: -5/6", "-5/6=-0.833")
@@ -875,6 +909,8 @@ nm("e = 1: its standard error", float(mcse[1]), 3, "0.005")
 nm("iid factor, m = 246, T = 5,849", iid_factor(T, 246), 3, "0.958")
 nm("iid factor, m = 1,231, T = 5,849", iid_factor(T, 1231), 3, "0.790")
 has("e = 1: seed", "`default_rng([1, 20261011])`")
+has("experiment 1, named in words", "Experiment 1 checks it with 10,000 samples")
+assert "$e=1$" not in MD_RAW
 nm("overlap: (m-1)/m", 245 / 246, 3, "0.996")
 nm("overlap: T/246", T / 246, 1, "23.8")
 ct("overlap: windows of 1,231", T - 1231 + 1, "4,619")
@@ -898,6 +934,9 @@ for m in X6_M:
     has(f"X6 row m = {m}", row)
     for v in vals6:
         near(f"X6 m={m}", v, 3)
+    # the note: VR(m) stays close to the identity column up to m = 60 and departs from it beyond
+    assert (abs(vals6[0] - vals6[1]) < 0.006) if m <= 60 else (abs(vals6[0] - vals6[1]) > 0.07), m
+has("X6 note: identity", "$\\operatorname{VR}(m)$ stays close to it up to $m=60$ and departs from it beyond")
 nm("E9: sd of ln G (LM18's)", sd_own, 3, "0.283")
 nm("E9: mean ln G (LM18's)", float(s1231.mean()), 3, "0.502")
 nm("E9: sqrt(m) s_r (LM18's)", sqm, 3, "0.425")
@@ -927,6 +966,32 @@ nm("X8: SR(R) a year", sqrt(A) * sr_R, 2, "0.81")
 nm("X8: SR(r) per day", sr_r, 4, "0.0456")
 nm("X8: SR(r) a year", sqrt(A) * sr_r, 3, "0.715")
 nm("X8: SR(r) by (19.9)", sqrt(A) * sr_r / sqrt(vo246), 3, "0.650")
+# C1: on simple returns the rules are conventions. A year of A iid draws from F-hat compounds:
+# E(1+R) = 1 + Rbar and E(1+R)^2 = s^2 + (1+Rbar)^2, so the year's simple return has mean (1+Rbar)^A - 1 and
+# variance (s^2 + (1+Rbar)^2)^A - (1+Rbar)^(2A). The same digits come out with A = 246.
+for a_ in (A, 246.0):
+    g1 = (1 + full["mean"]) ** a_
+    yr_sd = sqrt((full["s"] ** 2 + (1 + full["mean"]) ** 2) ** a_ - g1**2)
+    yr = (g1 - 1, yr_sd, (g1 - 1) / yr_sd)
+    assert (f"{100 * yr[0]:.2f}", f"{100 * yr[1]:.2f}", f"{yr[2]:.3f}") == ("16.62", "22.29", "0.746"), (a_, yr)
+    if a_ == A:
+        pc("C1: compounded iid year, mean", yr[0], 2, "16.62")
+        pc("C1: compounded iid year, standard deviation", yr[1], 2, "22.29")
+        nm("C1: compounded iid year, Sharpe ratio", yr[2], 3, "0.746")
+g1p = 1.000625 ** 246.12   # the same from the printed 0.0625%, 1.2084% and A = 246.12
+sdp = sqrt((0.012084**2 + 1.000625**2) ** 246.12 - g1p**2)
+pc("C1: mean from printed inputs", g1p - 1, 2, "16.62")
+pc("C1: standard deviation from printed inputs", sdp, 2, "22.29")
+nm("C1: Sharpe ratio from printed inputs", (g1p - 1) / sdp, 3, "0.746")
+has("C1: the rules on simple returns", "On simple returns these rules are conventions. Even for iid draws from $\\hat F$,"
+    " a year of $A$ days has a simple return with mean 16.62%, standard deviation 22.29% and Sharpe ratio 0.746.")
+for row_ in ("| Mean simple return | 0.0625% | $\\times A$ | 15.38% | never (a convention), and not a growth rate |",
+             "| 18.96% (18.99%) | log returns on uncorrelated days, (19.7); never on simple returns |",
+             "| 0.81 (0.715) | log returns on uncorrelated days with a constant mean, (19.9); never on simple returns |"):
+    has("X8: the 'Exact when' column", row_)
+has("overview 6", "On simple returns these rules are conventions: TR23 averages 15.38% a year")
+has("Summary", "on simple returns the rules are conventions")
+has("box 7", "簡單報酬（simple return）套用這些規則只是慣例")
 ann_simple = float(np.expm1(ann).mean())
 pc("LM14's 14.97%", ann_simple, 2, "14.97")
 pc("E10: sqrt(246) s_r", v_day, 3, "18.563")
@@ -945,6 +1010,9 @@ pc("E10: median grid", g_med, 2, "19.13")
 assert g_med == float(np.sort(gv)[122])
 ct("E10: grids at or above 22.207%", n_hi, "46")
 ct("E10: grids at or below 18.563%", n_lo, "113")
+ct("E10: fewest sessions in a calendar year", min(per_year), "239")
+ct("E10: most sessions in a calendar year", max(per_year), "251")
+has("E10: calendar years are another cut", "The calendar years, of 239 to 251 sessions, are one more such cut")
 pc("X7: share above", n_hi / 246, 1, "18.7")
 pc("X7: share below", n_lo / 246, 1, "45.9")
 has("X7: median rule", "Median 19.13%, the 123rd of the 246 sorted values")
@@ -956,6 +1024,9 @@ pc("LM17's 73.0% rise in 2026", float(tr[-1] / tr[i_end25] - 1), 1, "73.0")
 ct("widget: windows", T25 - 246 + 1, "5,419")
 nm("widget: T/m", T25 / 246, 1, "23.0")
 pc("widget: independent days", v_day, 2, "18.56")
+# the widget's 19.05% and 18.56% use A = 246 on 2003-2025; A = 246.12 would give 19.06% and 18.57%
+assert f"{100 * sqrt(246.122955 * v25) * sr25:.2f}" == "19.06" and f"{100 * sqrt(246.122955) * sr25:.2f}" == "18.57"
+has("widget: its A", "with $A=246$ on 2003–2025 ([[LM17]]'s year) and 246.12 on TR23")
 nm("KC 7: SR(r) per day", sr_r, 6, "0.045567")
 nm("KC 7: VR(246)", vo246, 4, "1.2080")
 nm("KC 7: annual", 0.045567 * sqrt(246.12), 4, "0.7149")
@@ -1011,7 +1082,11 @@ nm("P3: C", p3v[2], 2, "6.23")
 nm("P4: A", p4, 3, "0.013")
 nm("P4: B", -p4, 3, "-0.013")
 nm("P4: C", p4c, 3, "0.163")
-nm("P4: numerator", 0.681 - 0.490 - 2 * 0.088, 3, "0.015")
+nm("P4: numerator", 0.681 - 0.490 - 2 * 0.0879, 4, "0.0152")
+nm("P4: from the printed numerator", 0.0152 / 1.171, 3, "0.013")
+nm("P4: A, unrounded quartiles", full["qskew"], 3, "0.013")
+for q_, pr_ in ((q1, "-0.490"), (full["median"], "0.0879"), (q3, "0.681")):
+    pc(f"P4: printed quartile {pr_}", q_, 3 if pr_ != "0.0879" else 4, pr_)
 nm("P4: IQR", 0.681 + 0.490, 3, "1.171")
 nm("P5: C", 1 + 0.0393, 4, "1.0393")
 nm("P5: A", 1 + 2 * 0.0393, 4, "1.0786")
@@ -1022,6 +1097,11 @@ nm("P7: ratio", vr7, 4, "1.0797")
 nm("P7: without", p7a, 2, "18.99")
 nm("P7: with", p7a * sqrt(vr7), 2, "19.73")
 nm("P7: with, from printed", 18.99 * sqrt(1.0797), 2, "19.73")
+nm("P7: what the other 244 lags add", vp246 - f1, 2, "0.20")
+nm("P7: the same from printed 1.280 and 1.0784", 1.280 - 1.0784, 2, "0.20")
+nm("P7: what lag 1 adds", f1 - 1, 3, "0.078")
+nm("P7: lag 1 from printed 1.0784", 1.0784 - 1, 3, "0.078")
+has("P7: solution", "so the other 244 lags add about 0.20, more than the first's 0.078")
 nm("P8: factor at T = 5,664", iid_factor(T25, 246), 3, "0.957")
 nm("P8: corrected ratio", 1.0536 / iid_factor(T25, 246), 3, "1.101")
 nm("P8: corrected ratio from printed", 1.0536 / 0.957, 3, "1.101")
@@ -1044,7 +1124,9 @@ nm("P10: t quantile at 3.065", tq3, 4, "0.7628")
 nm("P10: ratio at 3.065", rt3, 3, "0.667")
 nm("P10: ratio at 3.065 from printed", 0.7628 * sqrt(1.065 / 3.065) / 0.6745, 3, "0.667")
 nm("P10: TR23", tr_ratio, 3, "0.723")
-nm("P11: lag 29 margin", band - abs(float(rho_r[28])), 5, "0.00002")
+nm("P11: lag 29 margin (x 1e5, three significant figures)", 1e5 * (band - abs(float(rho_r[28]))), 2, "2.15")
+has("P11: margin", "by $2.15\\times10^{-5}$")
+has("S11: the band's condition", "whose note gives the band's condition for $r_t^2$")
 
 # ====================================================================== structure: labels and citations
 ex_labels = re.findall(r"\[!exhibit\][^\n]*\{#([\w-]+)\}", MD_RAW)

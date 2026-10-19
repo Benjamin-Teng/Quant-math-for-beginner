@@ -130,11 +130,21 @@ write("lm23-betas", {
 })
 
 # ---------------------------------------------------------------- haclag: Newey-West SE against the lag (log x)
+_iy = int(np.argmax(c.CURVE_YEAR))               # the yearly-fit series rises to its maximum, then falls
+assert all(b >= a for a, b in zip(c.CURVE_POOL, c.CURVE_POOL[1:]))
+assert all(b >= a for a, b in zip(c.CURVE_YEAR[:_iy], c.CURVE_YEAR[1:_iy + 1]))
+assert all(b <= a for a, b in zip(c.CURVE_YEAR[_iy:], c.CURVE_YEAR[_iy + 1:]))
+assert (c.LAG_GRID[0], c.LAG_GRID[_iy], c.LAG_GRID[-1]) == (1, 39, 400)
+assert (f"{c.CURVE_POOL[0]:.4f}", f"{c.CURVE_YEAR[0]:.4f}", f"{c.CURVE_YEAR[_iy]:.4f}", f"{c.CURVE_YEAR[-1]:.4f}") == \
+    ("0.0138", "0.0127", "0.0161", "0.0083")
+assert (f"{c.SEMI.se_w[1]:.4f}", f"{c.CURVE_AT[9][0]:.4f}", f"{c.CURVE_AT[50][0]:.4f}", f"{c.CURVE_AT[200][0]:.4f}") == \
+    ("0.0129", "0.0185", "0.0275", "0.0390")
 write("lm23-haclag", {
     "type": "line", "height": 320,
     "alt": "Newey-West standard error of Semiconductor's daily beta against the lag from 1 to 400 on a log axis: with "
-           "the full-sample residuals it rises from 0.0129 (White) through 0.0185 at lag 9, 0.0275 at 50 and 0.0390 "
-           "at 200; with the residuals of yearly fits it stays between 0.0122 and 0.0160",
+           "the full-sample residuals it rises from 0.0138 at lag 1 (White's 0.0129 is dashed) through 0.0185 at 9, "
+           "0.0275 at 50 and 0.0390 at 200; with the residuals of yearly fits it rises from 0.0127 to 0.0161 at lag 39 "
+           "and falls to 0.0083 at 400",
     "x": {"type": "log", "fmt": "n0", "label": "Newey–West lag (log scale)", "tipLabel": "lag ",
           "min": 1, "max": 400, "ticks": [1, 2, 5, 10, 20, 50, 100, 200, 400], "values": c.LAG_GRID},
     "y": {"fmt": "n4", "tfmt": "n3", "label": "Standard error of beta", "min": 0.006, "max": 0.05,

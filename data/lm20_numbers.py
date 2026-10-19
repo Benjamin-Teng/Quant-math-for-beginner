@@ -31,6 +31,7 @@ import re
 import sys
 import tempfile
 from fractions import Fraction
+from itertools import pairwise
 from math import log, sqrt
 from pathlib import Path
 
@@ -285,8 +286,10 @@ for row in ("| Mean, % a year, $A\\bar R$ | 15.38 | 3.89 | 7.8 to 23.0 | (20.2) 
             "| Student-t degrees of freedom | 3.065 | 0.144 | 2.78 to 3.35 |",
             "| Tail index, Hill, 108 losses of 3% or more | 3.63 | 0.35 | 2.9 to 4.3 |"):
     has("case table row", norm_text(row))
-has("case: within a third of a point", "within a third of a point")
-assert se_vol_k < 1 / 3 + 0.01 and abs(se_vol_k * 100 - 1 / 3) < 0.01
+# M2: the volatility's and the mean's 95% intervals, like for like (subtitle and case)
+has("subtitle: both 95% intervals", "pin the volatility to 18.3%–19.6% but leave the mean anywhere from 7.8% to 23.0% a year "
+    "(95% intervals)")
+has("case: both 95% intervals", "pin the volatility to 18.3% to 19.6% a year, but the mean only to 7.8% to 23.0%, both at 95%")
 
 # ====================================================================== Section 2: sampling distributions, E1, consistency
 sims = c.experiment1()
@@ -322,6 +325,16 @@ chk("t 97.5% batch SE", 100 * tx["b975"], ".1f", "0.3")
 chk("t values above 40%", tx["off40"], "d", "35")
 assert nx["off40"] == 0
 print(f"     annual means outside the top axis: normal {nx['am_out']}, t {tx['am_out']} (the axis is clipped)")
+chk("t annual means off the top axis", tx["am_out"], "d", "4")
+assert nx["am_out"] == 0
+has("sampling note: means off the axis", "4 Student-t annual means outside -60% to 90% lie off the top axis")
+chk("experiment 1: unrounded nu", NU, ".6f", "3.065257")
+has("sampling note: Student-t draws", "NumPy's `standard_t` with $\\nu=3.065257$, [[ex:fits]]'s unrounded estimate, "
+    "scaled by (15.11)")
+has("experiment 4 seed", "Experiment 4, `default_rng([4, 20261011])`, draws these runs in turn")
+assert c.N_SIM // c.N_BATCH == 500
+has("batch layout", "(20 batches of 500)")
+has("MC SE of a standard deviation", "[[LM18]]'s $s_Y/\\sqrt{2n}$): 0.13")
 anchor("A20-35", "normal sd of A x mean", 100 * nx["sd_am"], "18.91985")
 anchor("A20-35", "normal sd of volatility", 100 * nx["sd_av"], "0.855165")
 anchor("A20-35", "normal 2.5%", 100 * nx["q025"], "17.25880")
@@ -428,7 +441,7 @@ chk("KC 3: three years", 18.96 / sqrt(3), ".1f", "10.9")
 chk("KC 3: ten years", 18.96 / sqrt(10), ".1f", "6.0")
 anchor("A20-50", "three years", 100 * ann_vol / sqrt(3), "10.94494")
 anchor("A20-50", "ten years", 100 * ann_vol / sqrt(10), "5.99479")
-has("zh 3: 2.2%", "標準差則差 2.2%")
+has("zh 3: 2.2%", "標準差（standard deviation）則差 2.2%")
 
 # ====================================================================== Section 4: intervals, coverage, years
 q_t = float(stats.t.ppf(0.975, T - 1))
@@ -442,6 +455,14 @@ t_half = q_t * A * SU / sqrt(T)
 z_half = Z * A * S / sqrt(T)
 chk("t interval moves the ends by", 100 * (t_half - z_half), ".3f", "0.002")
 assert f"{100 * (ann_mean - t_half):.1f}" == "7.8" and f"{100 * (ann_mean + t_half):.1f}" == "23.0"
+# K2: the knowledge check prints both intervals to four decimals, and both round to 7.76% to 23.01%
+for lab_, half, lo_p, hi_p in (("1.96 with s", z_half, "7.7620", "23.0059"), ("t with s_u", t_half, "7.7599", "23.0080")):
+    chk(f"KC 4: {lab_} low", 100 * (ann_mean - half), ".4f", lo_p)
+    chk(f"KC 4: {lab_} high", 100 * (ann_mean + half), ".4f", hi_p)
+    chk(f"KC 4: {lab_} low, two decimals", 100 * (ann_mean - half), ".2f", "7.76")
+    chk(f"KC 4: {lab_} high, two decimals", 100 * (ann_mean + half), ".2f", "23.01")
+has("KC 4 answer", "The interval is 7.76% to 23.01% either way (7.7620 to 23.0059 against 7.7599 to 23.0080)")
+has("coverage note: layout", "drawn row by row with the normal days first, in chunks of 10,000 (the lab's layout)")
 one_year_se = sqrt(A) * S * sqrt(A / 246)
 chk("one year: SE", 100 * one_year_se, ".2f", "18.96")
 chk("one year: half-width", 100 * Z * one_year_se, ".1f", "37.2")
@@ -486,6 +507,9 @@ for Tc in (5, 10, 30, 100, 246):
         anchor("A20-17", f"T={Tc} {model} z", 100 * cov[(Tc, model)][0], seg.group(1))
         anchor("A20-17", f"T={Tc} {model} t", 100 * cov[(Tc, model)][1], seg.group(2))
 chk("coverage at T=5, normal, 1.96 with s", 100 * cov[(5, "normal")][0], ".1f", "84.5")
+# m2: at T = 5 the t_4 law alone would give 87.84%; the divisor T (factor sqrt(4/5)) brings it down to the exact 84.55%
+assert 2 * float(stats.t.cdf(Z, 4)) - 1 > 0.878 and abs(exact[5] - (2 * float(stats.t.cdf(Z * sqrt(4 / 5), 4)) - 1)) < 1e-15
+has("m2: two causes", "because the normal quantile ignores the error in $s$, and divisor $T$ shrinks $s$")
 lo246 = min(min(cov[(246, m)]) for m in ("normal", "t3"))
 hi246 = max(max(cov[(246, m)]) for m in ("normal", "t3"))
 chk("T=246: lowest coverage", 100 * min(lo246, exact[246]), ".1f", "94.8")
@@ -624,10 +648,20 @@ assert c.profile(2.6) < -(2.6 - NU) ** 2 / (2 * SE_T[0] ** 2)   # the curve fall
 cor = c.COV_T / np.outer(SE_T, SE_T)
 chk("corr nu-scale", float(cor[0, 2]), ".2f", "0.68")
 anchor("A20-22", "nu-scale", float(cor[0, 2]), "0.677422")
-ratio = SE_T[1] / (100 * S / sqrt(T))
-chk("location SE / mean SE", ratio, ".2f", "0.78")
-chk("ratio from printed", 0.0124 / 0.0158, ".2f", "0.78")
-anchor("A20-25", "ratio", ratio, "0.782069")
+# M1: efficiency inside one model. In the fitted Student-t, Var R-bar = sd_t^2 / T with the fit's standard deviation
+# sd_t (1.317%), so R-bar's SE there is 0.0172%; the location's 0.0124% over it is 0.72 (variance ratio 0.52).
+se_rb_t = sd_t / sqrt(T)
+ratio = SE_T[1] / se_rb_t
+chk("R-bar's SE inside the Student-t model", se_rb_t, ".4f", "0.0172")
+chk("R-bar's SE inside the model, from printed 1.317%", 1.317 / sqrt(5849), ".4f", "0.0172")
+chk("location SE / R-bar's SE, same model", ratio, ".2f", "0.72")
+chk("ratio from printed", 0.0124 / 0.0172, ".2f", "0.72")
+has("M1 sentence", "Inside the Student-t model, $\\bar R$'s standard error is the fit's $1.317%/\\sqrt T=0.0172%$, and the "
+    "location's is 0.0124%, a ratio of 0.72.")
+# the expected information of a t location, (nu + 1) / ((nu + 3) c^2), gives the same ratio to two decimals
+assert f"{SCALE * sqrt((NU + 3) / (NU + 1)) / sqrt(T) / se_rb_t:.2f}" == "0.72"
+# plans/vol-4-anchors.md's A20-25 holds the superseded ratio to the iid s/sqrt(T) (0.782069); kept for traceability
+anchor("A20-25", "ratio (superseded: location SE over s/sqrt(T))", SE_T[1] / (100 * S / sqrt(T)), "0.782069")
 chk("KC 6: one-year bound", 100 * A * S / sqrt(246), ".2f", "18.96")
 
 # ====================================================================== Section 7: delta method
@@ -647,6 +681,10 @@ daily_based = sqrt(246) * c.S_RW
 se_daily = daily_based * sqrt((c.KURT_RW - 1) / (4 * len(c.R_W)))
 chk("LM17's 18.563%", 100 * daily_based, ".3f", "18.563")
 chk("its SE", 100 * se_daily, ".2f", "0.34")
+chk("its kurtosis (U4)", c.KURT_RW, ".2f", "8.55")
+chk("its log returns (U4)", len(c.R_W), ",", "5,664")
+chk("its SE from printed 18.563, 8.55 and 5,664", 18.563 * sqrt((8.55 - 1) / (4 * 5664)), ".2f", "0.34")
+has("E8: the SE's inputs", "(standard error 0.34, from the kurtosis 8.55 of its 5,664 log returns)")
 gap = c.S_ANN - daily_based
 chk("gap", 100 * gap, ".1f", "3.6")
 chk("gap in SEs", gap / se_a, ".1f", "1.1")
@@ -711,6 +749,12 @@ lm4 = (c.MU50 - Z * c.S50 / sqrt(c.T50)) / c.S50**2, (c.MU50 + Z * c.S50 / sqrt(
 assert abs(lm4[0] - (k5 - Z * se5m)) < 1e-12 and abs(lm4[1] - (k5 + Z * se5m)) < 1e-12
 has("LM4's bands", "[[LM4]]'s quadratic 2.7 to 8.6")
 has("LM4's exact band", "[[LM4]]'s exact band, 2.7 to 7.6")
+has("delta note: no SE for the moments", "0.04 and 11.12 for 0050. These four moments are printed without standard errors, "
+    "which would need the sixth and eighth moments.")
+has("delta note: 0050's sample (A3)", "on the days both 0050 and 00631L traded (two span a fund's split halt)")
+has("delta note: datasets (XB1)", "`TaiwanStockPrice` (0050, 00631L) and `TaiwanStockDividendResult` (0050), retrieved "
+    "10 October 2026")
+assert norm_text(RAW).count("`TaiwanStockDividendResult` (0050)") == 2       # the delta note and the References
 chk("0050 skewness", c.M3_50 / c.S50**3, ".2f", "0.04")
 chk("0050 kurtosis", c.M4_50 / c.S50**4, ".2f", "11.12")
 anchor("A20-30", "f", k5, "5.679608")
@@ -724,6 +768,12 @@ anchor("A20-30", "skewness", c.M3_50 / c.S50**3, "0.036675")
 anchor("A20-30", "kurtosis", c.M4_50 / c.S50**4, "11.120502")
 has("0050 dates", "3 November 2014 to 8 October 2026")
 assert c.DATES50 == ("2014-11-03", "2026-10-08")
+# A3: in LM4's common-date sample, exactly two returns span more than one TWSE session (TR23's calendar):
+# 0050's split halt (return dated 2025-06-18) and 00631L's (2026-03-31)
+_sess = {d: i for i, d in enumerate(c.DATES_ALL)}
+_prev50 = max(d for d in c.DATES_ALL if d < c.DATES50_ALL[0])
+_spans = [(d, _sess[d] - _sess[p]) for p, d in zip([_prev50, *c.DATES50_ALL[:-1]], c.DATES50_ALL, strict=True)]
+assert [d for d, n in _spans if n > 1] == ["2025-06-18", "2026-03-31"], [x for x in _spans if x[1] > 1]
 for row in ("| Annual volatility, %, TR23 | 18.96 | — | 0.175 | 0.334 | 18.3 to 19.6 |",
             "| Kelly fraction $\\hat f$, TR23 | 4.28 | 1.082 | 1.085 | 1.111 | 2.10 to 6.46 |",
             "| Kelly fraction $\\hat f$, 0050 | 5.68 | 1.499 | 1.506 | 1.532 | 2.68 to 8.68 |",
@@ -748,6 +798,14 @@ for x0, a_p, e_p, k_p in (("0.02", "2.49", "0.16", "252"), ("0.04", "4.93", "0.7
     chk(f"Hill SE at {x0}", ee, ".2f", e_p)
     chk(f"Hill SE at {x0}, from printed", float(a_p) / sqrt(kk), ".2f", e_p)
 has("E10 k list", "from $k$ = 252, 44 and 15")
+# m5: the estimate rises from 2% to 4% (2.49, 3.63, 4.93), then wanders once k < 45 (4.76 at 5% is below 4.93)
+assert hl["0.02"][1] < a3 < hl["0.04"][1] and hl["0.05"][1] < hl["0.04"][1]
+_grid = [c.hill_fast(round(0.01 + 0.0005 * i, 4)) for i in range(101)]
+_few = [a_ for k_, a_, _ in _grid if k_ < 45]
+assert [k_ < 45 for k_, _, _ in _grid] == [False] * 58 + [True] * 43               # k < 45 from 3.90% to 6.00%
+assert any(b_ < a_ for a_, b_ in pairwise(_few)) and f"{min(_few):.2f}" == "4.13" and f"{max(_few):.2f}" == "6.88"
+has("E10: rise then wander", "The estimate rises from 2% to 4%, as [[LM15]]'s chords did, then wanders once $k$ falls "
+    "below 45.")
 has("hill note k list", "with $k$ = 252, 108, 44 and 15")
 for x0, lo_p, hi_p in (("0.02", "2.2", "2.8"), ("0.04", "3.5", "6.4")):
     kk, aa, ee = hl[x0]
@@ -926,8 +984,19 @@ chk("P11: t coverage", 100 * c3t, ".1f", "94.8")
 chk("P11: z MC SE", 100 * sqrt(c3z * (1 - c3z) / 20_000), ".2f", "0.26")
 chk("P11: t MC SE", 100 * sqrt(c3t * (1 - c3t) / 20_000), ".2f", "0.16")
 chk("P11: exact", 100 * ez5, ".1f", "84.6")
-chk("P11: gap", 100 * (ez5 - c3z), ".1f", "0.2")
+# M4 = K1: the stem asks about the first interval's simulated against exact coverage; the gap is printed before rounding
+chk("P11: exact, two decimals", 100 * ez5, ".2f", "84.55")
+chk("P11: z coverage, two decimals", 100 * c3z, ".2f", "84.32")
+chk("P11: gap", 100 * (ez5 - c3z), ".2f", "0.23")
+chk("P11: gap from printed 84.55 and 84.32", 84.55 - 84.32, ".2f", "0.23")
 assert 0.7 < (ez5 - c3z) / sqrt(c3z * (1 - c3z) / 20_000) < 1.3          # "about one Monte Carlo standard error"
+assert 0.7 < 0.23 / 0.26 < 1.3
+chk("P11: t coverage, two decimals", 100 * c3t, ".2f", "94.77")
+for gap_t in ((0.95 - c3t) / sqrt(c3t * (1 - c3t) / 20_000), (0.95 - c3t) / sqrt(0.95 * 0.05 / 20_000),
+              (95 - 94.77) / 0.16):                    # "about one and a half standard errors", unrounded and printed
+    assert 1.4 < gap_t < 1.6, gap_t
+has("P11 stem", "Is the gap between the first interval's simulated and exact coverage chance?")
+has("P11 solution", "The $t_4$ interval's 94.77% lies about one and a half standard errors from 95%, also chance.")
 chk("exact T=5 (coverage table)", 100 * exact[5], ".1f", "84.6")
 anchor("A20-47", "z", 100 * c3z, "84.320")
 anchor("A20-47", "t", 100 * c3t, "94.770")
@@ -957,6 +1026,8 @@ in_chart("profile: points", "lm20-profile", "2.78")
 in_chart("profile: points", "lm20-profile", "3.35")
 in_chart("hill: t line", "lm20-hill", "Student-t fit, 3.065")
 in_chart("hill: point labels", "lm20-hill", "3% (k = 108): 3.63")
+in_chart("hill: alt text (m5)", "lm20-hill", "to 4.93 at 4% (2.49 at 2%, 3.63 at 3%), then wanders (4.76 at 5%)")
+in_chart("sampling-vol: alt text (A2)", "lm20-sampling-vol", "between 16% and 22%, 95% of them between 17.3% and 20.6%")
 in_chart("merton: iid line value", "lm20-merton", "3.90")
 widget = json.loads(chart_text("lm20-coverage"))["widget"]
 for n, shown in ((5, "2.7764"), (10, "2.2622"), (20, "2.0930"), (30, "2.0452"), (100, "1.9842"), (250, "1.9695")):

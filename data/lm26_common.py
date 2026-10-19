@@ -1,6 +1,6 @@
 """Shared data and computations for LM26's scripts (data/lm26_numbers.py and data/lm26_charts.py import it).
 
-Not a pipeline step of its own. Inputs:
+Not a script: `uv run python data/lm26_numbers.py` and `uv run python data/lm26_charts.py` run it. Inputs:
 - data/processed/vol3_taiex.parquet: TR23, the TAIEX total-return index (columns date, tr, price, R, Rp; R the
   total-return index's simple daily return, Rp the price index's, null on the first row), built and checked by
   data/vol3_series.py;
@@ -36,9 +36,9 @@ Conventions (plans/vol-4.md, the LM26 brief, and plans/vol-4-anchors.md, "LM26")
   l = floor(4 (n/100)^(2/9)), divisor n, no small-sample correction. Mincer-Zarnowitz: OLS, HC0.
 - Intraday autocorrelations pool within-day pairs only, uncentred: sum over days of sum r_i r_{i-1} over sum over
   days of sum r_i^2.
-- TX bars: a bar's label is its first minute; the near-month contract held during day t is TX23's contract on the
-  previous TX23 date; the price at 09:30:00 is the close of the 09:29 bar; a minute without a bar keeps the previous
-  close.
+- TX bars: a bar's label is its first minute (an inference from the labels; SOURCES, TaiwanFuturesKBar); the
+  near-month contract held during day t is TX23's contract on the previous TX23 date (TaiwanFuturesDaily); the price
+  at 09:30:00 is the close of the 09:29 bar; a minute without a bar keeps the previous close.
 - Quantiles and medians: np.quantile(..., method="inverted_cdf"); batch standard error of a median: 20 consecutive
   batches, standard deviation of the batch medians (divisor 20) over sqrt(20) (LM18).
 """

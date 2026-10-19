@@ -118,7 +118,8 @@ _etf = pl.read_parquet(PROC / "etf_daily_returns.parquet").sort("date")
 R50: Vec = np.asarray(_etf["R_0050"].to_numpy(), dtype=np.float64)
 assert int(_etf["R_0050"].null_count()) == 0
 T50 = len(R50)
-DATES50 = (str(_etf["date"][0]), str(_etf["date"][-1]))
+DATES50_ALL: list[str] = [str(d) for d in _etf["date"].to_list()]
+DATES50 = (DATES50_ALL[0], DATES50_ALL[-1])
 MU50, S50, M3_50, M4_50 = moments(R50)
 
 

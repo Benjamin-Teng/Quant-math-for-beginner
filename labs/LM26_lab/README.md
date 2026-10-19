@@ -23,7 +23,7 @@ It ran in about 25 seconds when the book was built, although the out-of-sample c
 
 ## Data (FinMind; not in the repository)
 
-The notebook reads FinMind files that you download once with your own token. From the repository root, run `uv run python data/fetch_finmind.py`, then `uv run python data/make_lab_data.py`. FinMind's licence does not allow the book to redistribute the data. After that, the notebook runs offline. The realized variances come with the repository (`data/derived/vol4_rv.csv`); rebuilding them needs the 5-second TAIEX download, `uv run python data/fetch_intraday.py --series taiex5s` (5,351 requests, about nine hours on a free FinMind account, re-run after each hourly stop).
+The notebook reads FinMind files that you download once with your own token. From the repository root, run `uv run python data/fetch_finmind.py`, then `uv run python data/make_lab_data.py`. FinMind's licence does not allow the book to redistribute the data. After that, the notebook runs offline. The realized variances come with the repository (`data/derived/vol4_rv.csv`); rebuilding them needs the 5-second TAIEX download, `uv run python data/fetch_intraday.py --series taiex5s` (5,351 requests, about nine hours on a free registered FinMind account at 600 calls an hour, re-run after each hourly stop).
 
 The same steps in a shell (`data/raw/` and this folder's `data/` are git-ignored):
 

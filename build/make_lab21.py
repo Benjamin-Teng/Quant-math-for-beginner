@@ -81,7 +81,7 @@ Companion notebook to **From Calculus to Kelly, LM21**. It rebuilds the module's
 code(r"""
 import datetime as dt
 from fractions import Fraction
-from math import log, sqrt
+from math import comb, log, sqrt
 from pathlib import Path
 
 import matplotlib.pyplot as plt
@@ -288,23 +288,50 @@ ax.legend();
 md(r"""
 ## Part 4 — Counts and independence
 
-[[eg:manager]] and Problem 6: LM13's hypothetical manager with `stats.binom`, then the months needed for 80% power and an exact check.
+[[eg:manager]] (8 good months in 12, at 5%) and Problem 6 (9 in 12, at 10%) with `stats.binom`; then the months that give 80% power by the normal approximation, using $\hat\theta$'s standard deviation under each hypothesis, and an exact check.
 """)
 
 code(r"""
+# Example: 8 of 12 at 5%
 show("Pr(X >= 8)", stats.binom.sf(7, 12, 0.5), ".3f", "0.194")
 show("Pr(X >= 9)", stats.binom.sf(8, 12, 0.5), ".3f", "0.073")
 show("size of X >= 10", stats.binom.sf(9, 12, 0.5), ".4f", "0.0193")
 show("power at 0.55", stats.binom.sf(9, 12, 0.55), ".3f", "0.042")
+# Problem 6 (a)-(c): 9 of 12 at 10%; the record lies on the region's edge, so its p-value is the size
+assert Fraction(sum(comb(12, j) for j in range(9, 13)), 4096) == Fraction(299, 4096)
+show("Problem 6 (a): Pr(X >= 9)", stats.binom.sf(8, 12, 0.5), ".4f", "0.0730")
+assert stats.binom.sf(7, 12, 0.5) > 0.10 >= stats.binom.sf(8, 12, 0.5)     # the 10% region is X >= 9
+show("Problem 6 (c): power of X >= 9 at 0.55", stats.binom.sf(8, 12, 0.55), ".3f", "0.134")
+""")
+
+code(r"""
+# Problem 6 (d): the one-sided 5% test of theta = 1/2 for n months, and its power at 0.55
+def exact_test(n):
+    cut = int(stats.binom.isf(0.05, n, 0.5)) + 1      # the smallest count whose upper tail is at most 5%
+    while stats.binom.sf(cut - 1, n, 0.5) > 0.05:
+        cut += 1
+    return cut, stats.binom.sf(cut - 1, n, 0.5), stats.binom.sf(cut - 1, n, 0.55)
+
+
 n_months = ((stats.norm.isf(0.05) * 0.5 + c80 * sqrt(0.55 * 0.45)) / 0.05) ** 2
 show("months, normal approximation", n_months, ".2f", "616.16")
 n = int(np.ceil(n_months))
-cut = int(stats.binom.isf(0.05, n, 0.5)) + 1          # the smallest count whose upper tail is at most 5%
-while stats.binom.sf(cut - 1, n, 0.5) > 0.05:
-    cut += 1
+cut, size_n, power_n = exact_test(n)
 print(f"n = {n} months ({n / 12:.1f} years): reject at X >= {cut}")
-show("exact size", stats.binom.sf(cut - 1, n, 0.5), ".4f", "0.0454")
-show("exact power at 0.55", stats.binom.sf(cut - 1, n, 0.55), ".4f", "0.7874")
+show("exact size", size_n, ".4f", "0.0454")
+show("exact power at 0.55", power_n, ".4f", "0.7874")
+ns = np.arange(560, 680)
+pw = np.array([exact_test(int(k))[2] for k in ns])
+n80 = int(ns[np.argmax(pw >= 0.8)])
+cut80, size80, power80 = exact_test(n80)
+show("first n with exact power >= 80%", n80, "d", "620")
+show("its cutoff", cut80, "d", "331")
+show("its size", size80, ".4f", "0.0498")
+show("its power", power80, ".4f", "0.8018")
+fig, ax = plt.subplots()
+ax.plot(ns, pw, ".-")
+ax.axhline(0.8, color="k", ls="--", lw=0.8)
+ax.set(xlabel="months n", ylabel="exact power at 0.55", title="Exact power is not monotone in n");
 """)
 
 md(r"""
@@ -352,7 +379,7 @@ show("exact Pr(X >= 13)", float(stats.binom.sf(f12 - 1, f1, sum(fall[1:]) / npai
 md(r"""
 ## Part 5 — The calendar family
 
-[[ex:calendar]]: each month and weekday against all other returns with (21.3). Then experiment 8 ([[eg:wednesday]]): the returns shuffled over TR23's fixed dates, `R[perm]`, 10,000 times, recomputing the 17 statistics each time. Model.
+[[ex:calendar]]: each month and weekday against all other returns with (21.3). Then experiment 8 ([[eg:wednesday]]): the returns shuffled over TR23's fixed dates, `R[perm]` with `perm = rng.permutation(T)` drawn 10,000 times from one `rng = np.random.default_rng([8, 20261011])`, recomputing the 17 statistics each time. Model.
 """)
 
 code(r"""
@@ -412,6 +439,8 @@ md(r"""
 ## Part 6 — Holm and Benjamini–Hochberg
 
 The three rules by hand on [[eg:holmbh]]'s constructed p-values, compared exactly as fractions; then the packages on the calendar family. `multipletests` defaults to Holm–Šidák (`method="hs"`), not Holm: always pass `method`.
+
+On the calendar, Bonferroni and Holm stop at the first rank. Benjamini–Hochberg steps up, so every rank must be checked against its level $iq/m$. Its adjusted p-values are $\min_{j\ge i}mp_{(j)}/j$, capped at 1.
 """)
 
 code(r"""
@@ -445,6 +474,13 @@ print("calendar:", {meth: int(multipletests(pv, alpha=0.05, method=meth)[0].sum(
                     for meth in ("bonferroni", "holm", "fdr_bh", "hs")})
 adj = np.sort(stats.false_discovery_control(pv, method="bh"))
 show("smallest BH-adjusted p", adj[0], ".3f", "0.308")
+ps = np.sort(pv)
+ranks = np.arange(1, m + 1)
+by_hand = np.minimum(1, np.minimum.accumulate((m * ps / ranks)[::-1])[::-1])   # min over j >= i of m p_(j) / j
+assert np.allclose(by_hand, adj, rtol=0, atol=1e-15)
+ratio10 = (ps / (ranks * 0.10 / m)).min()
+print(f"smallest p_(i) / (i q / m) at q = 10%: {ratio10:.2f} (at least threefold)")
+assert ratio10 >= 3
 """)
 
 md(r"""
@@ -467,7 +503,7 @@ ax.legend();
 md(r"""
 ## Part 7 — A search over random rules
 
-Experiment 10 ([[eg:search]]): 10,000 rules, each long or short one unit by a fair coin each day, every position drawn in one call; the t-stat (21.1) of each rule's daily returns, in 20 chunks of 500 rules. The standard deviation of the 10,000 t-stats gets LM18's batch standard error over the 20 chunks. Then (21.9) for the best of $m$ independent null statistics ([[ex:maxt]]).
+Experiment 10 ([[eg:search]]): 10,000 rules, each long or short one unit by a fair coin each day, every position drawn in one call, `integers(0, 2, size=(10000, T), dtype=np.int8)`, with 1 for long and 0 for short; the t-stat (21.1) of each rule's daily returns, in 20 chunks of 500 rules. The standard deviation of the 10,000 t-stats gets LM18's batch standard error over the 20 chunks. Then (21.9) for the best of $m$ independent null statistics ([[ex:maxt]]).
 """)
 
 code(r"""
@@ -503,6 +539,8 @@ for m_, book in ((17, "1.75"), (100, "2.46"), (1000, "3.20"), (10000, "3.81")):
     show(f"median of the best of {m_}", max_quantile(0.5, m_), ".2f", book)
 show("Pr(best of 1,000 > 3)", 1 - stats.norm.cdf(3) ** 1000, ".2f", "0.74")
 show("Bonferroni tests for t = 3", 0.05 / (2 * stats.norm.sf(3)), ".1f", "18.5")
+show("Bonferroni's level for the module's 29 tests", stats.norm.isf(0.025 / 29), ".3f", "3.134")
+assert t_all > stats.norm.isf(0.025 / 29) > 3      # TR23's mean clears both bars
 mm = np.unique(np.round(np.logspace(0, 4, 200)).astype(int))
 fig, ax = plt.subplots()
 ax.fill_between(mm, max_quantile(0.05, mm), max_quantile(0.95, mm), alpha=0.25, label="model, 90% range")
@@ -516,7 +554,7 @@ ax.legend();
 md(r"""
 ## Part 8 — Practice problems
 
-**Problem 7.** LM15's 292 blocks of 20 sessions: the variance of their up-day counts against the binomial and the dependence-adjusted model, with LM20's standard error of a variance, $\sigma_X^2\sqrt{2/n}$; then the blocks needed to see the gap.
+**Problem 7.** LM15's 292 blocks of 20 sessions: the variance of their up-day counts against the binomial and the dependence-adjusted model. Use the standard error of a variance of $n$ nearly normal draws, $\sigma_X^2\sqrt{2/n}$, with $\sigma_X^2$ the model's value. It is the square root of LM20's $\operatorname{Var}(s^2)\approx(\operatorname{Kurt}-1)\sigma^4/T$ at $\operatorname{Kurt}=3$, with $n$ draws in place of $T$. Then find the blocks needed to see the gap.
 """)
 
 code(r"""
@@ -557,6 +595,9 @@ for method in ("holm", "fdr_bh"):
     print(f"{method}: {int(rej.sum())} rejected; smallest adjusted p {adj_p.min():.3f}")
 rej, adj_p, _, _ = multipletests(pv, alpha=0.05)
 print(f"default (Holm-Sidak): {int(rej.sum())} rejected")
+show("Holm's first level", 0.05 / m, ".5f", "0.00294")
+show("Holm-Sidak's first level", 1 - 0.95 ** (1 / m), ".5f", "0.00301")
+print("BH rejects:", int((stats.false_discovery_control(pv) <= 0.05).sum()))
 adj = np.sort(stats.false_discovery_control(pv))
 show("BH-adjusted, smallest", adj[0], ".3f", "0.308")
 show("BH-adjusted, second", adj[1], ".3f", "0.669")
@@ -583,7 +624,7 @@ show("exact", 1 - (1 - 0.05 / 17) ** 17, ".5f", "0.04884")
 md(r"""
 ### Extension: the calendar family in each limit regime
 
-Split TR23 at 1 June 2015 and run the 17 calendar tests within each regime: 34 tests, each group against the other days of its own regime. Apply Holm and Benjamini–Hochberg at 5% to all 34 together. Does Wednesday survive in either regime? Does any month? Remember that this adds 34 tests to the module's 29 on the same data: a stability check, not a new discovery.
+Split TR23 at 1 June 2015 and run the 17 calendar tests within each regime: 34 tests, each group against the other days of its own regime. Apply Holm and Benjamini–Hochberg at 5% to all 34 together. Does Wednesday survive in either regime? Does any month? 32 of these 34 tests are new, since Wednesday in each regime is among the module's 29: the data now carry 61 tests. This is a stability check, not a new discovery.
 """)
 
 code(r"""

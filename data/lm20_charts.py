@@ -79,9 +79,13 @@ e_v, h_vn = hist(av["normal"], 0.10, 0.40, 0.0025)
 _, h_vt = hist(av["t"], 0.10, 0.40, 0.0025)
 assert int((av["t"] >= 0.40).sum()) == 35 and int((av["normal"] >= 0.40).sum()) == 0
 assert int((av["t"] < 0.10).sum()) == 0 and int((av["normal"] < 0.10).sum()) == 0
+# the alt text's numbers: the normal model's range rounds to 16% and 22%, its 95% range is 17.3% to 20.6%,
+# and the Student-t model's lowest value rounds to 12%
+assert [f"{100 * v:.0f}" for v in (av["normal"].min(), av["normal"].max(), av["t"].min())] == ["16", "22", "12"]
+assert [f"{100 * c.qinv(av['normal'], u):.1f}" for u in (0.025, 0.975)] == ["17.3", "20.6"]
 write("lm20-sampling-vol", {
-    "alt": "Histograms of the annualized volatility from the same 10,000 samples: the normal model's are packed "
-           "within about one point of 18.9%, the Student-t model's spread from about 12% to beyond 40%",
+    "alt": "Histograms of the annualized volatility from the same 10,000 samples: the normal model's lie between 16% "
+           "and 22%, 95% of them between 17.3% and 20.6%, the Student-t model's spread from about 12% to beyond 40%",
     "height": 240,
     "x": {"type": "num", "fmt": "pct2", "tfmt": "pct0", "label": "Annual volatility, √A × sample s (bins of 0.25 points)",
           "tipLabel": "bin from ", "min": 0.10, "max": 0.40, "ticks": [0.10, 0.15, 0.20, 0.25, 0.30, 0.35, 0.40]},
@@ -191,9 +195,12 @@ for x0s_, dx, dy, anc in (("0.02", 8, 18, "start"), ("0.03", -8, -10, "end"), ("
     k, a, _ = c.hill(x0s_)
     marks.append({"type": "point", "x": float(x0s_), "y": rd(a, 4), "label": f"{float(x0s_):.0%} (k = {k}): {a:.2f}",
                   "color": "1", "dx": dx, "dy": dy, "anchor": anc})
+assert f"{hl[0][1]:.1f}" == "1.7"                                   # the estimate at 1%
+assert [f"{c.hill(x)[1]:.2f}" for x in ("0.02", "0.03", "0.04", "0.05")] == ["2.49", "3.63", "4.93", "4.76"]
 write("lm20-hill", {
     "alt": "Hill estimates of TAIEX's tail index for loss thresholds from 1% to 6%, with a 95% band: the estimate "
-           "rises from about 1.7 at 1% to 2.49 at 2%, 3.63 at 3%, 4.93 at 4% and 4.76 at 5%, while the band widens",
+           "rises from about 1.7 at 1% to 4.93 at 4% (2.49 at 2%, 3.63 at 3%), then wanders (4.76 at 5%) while the "
+           "band widens",
     "height": 320,
     "x": {"type": "num", "fmt": "pct2", "tfmt": "pct0", "label": "Loss threshold", "tipLabel": "threshold: ",
           "min": 0.01, "max": 0.06, "ticks": [0.01, 0.02, 0.03, 0.04, 0.05, 0.06]},

@@ -27,8 +27,10 @@ points a day, A times that for a year. One-day regressions on simple returns, 20
 autocorrelation is LM19's rho_hat_k (full-sample mean, divisor T in numerator and denominator); a sample quantile is
 F_hat^-1(u) (np.quantile method="inverted_cdf"). Counts against a threshold use the guard (|t| > c + 1e-12,
 x <= c + 1e-12) and, on two-decimal closes, Fraction. Seeds: LM23's experiment 1 (the correlated null of 28 alpha
-t-stats), rng = np.random.default_rng([1, 20261011]) created once, 100,000 draws; LM18's paths keep LM18's
-default_rng([3, 20261011]).
+t-stats), rng = np.random.default_rng([1, 20261011]) created once, 100,000 draws of standard_normal((B, 28)) @ L.T
+with L the Cholesky factor of the residual correlation matrix, sectors in U28's alphabetical order (Monte Carlo SEs:
+binomial for a probability, SD/sqrt(B) for the mean count, the delta method for the count's SD); LM18's paths keep
+LM18's default_rng([3, 20261011]).
 """
 import sys
 from dataclasses import dataclass
@@ -200,6 +202,11 @@ D25 = design(X25)
 HAT25 = np.einsum("ij,jk,ik->i", D25, F25.zi, D25)
 H7 = float(HAT25[J7])
 assert abs(H7 - (1 / len(X25) + (X25[J7] - X25.mean()) ** 2 / (len(X25) * X25.var(ddof=0)))) < 1e-12
+_u25 = D25 * F25.e[:, None]
+SE_FIT_WHITE = sqrt(float(Z0 @ (F25.zi @ (_u25.T @ _u25) @ F25.zi) @ Z0))   # White's SE of the fitted value at -5%
+J5 = [int(j) for j in np.flatnonzero(X25 <= -0.05 + EPS)]                      # the 2025 days with TAIEX <= -5%
+RES5 = [float(F25.e[j] / sqrt(F25.s2)) for j in J5]                            # their residuals in units of s_eps
+OUT5 = [bool(abs(F25.e[j]) > 1.96 * sqrt(F25.s2 * (1 + HAT25[j]))) for j in J5]  # outside the 95% prediction band
 _keep = np.ones(len(X25), dtype=bool)
 _keep[J7] = False
 F25B = ols(Y25[_keep], design(X25[_keep]))
@@ -392,6 +399,8 @@ FULL2 = {k: v for k, v in BY_YEAR_ETF.items() if "2015" <= k <= "2025"}
 YLO = min(FULL2, key=lambda k: FULL2[k].b[1])
 YHI = max(FULL2, key=lambda k: FULL2[k].b[1])
 ZDIFF = float((FULL2[YHI].b[1] - FULL2[YLO].b[1]) / sqrt(FULL2[YHI].se_n[1] ** 2 + FULL2[YLO].se_n[1] ** 2))
+Z_YEARS = {k: float((v.b[1] - F2.b[1]) / v.se_n[1]) for k, v in FULL2.items()}   # each year against the full slope
+YEARS_BEYOND = [k for k, z in Z_YEARS.items() if abs(z) > 1.96 + EPS]
 
 # ---------------------------------------------------------------- section 7: 28 alphas
 ORDER_T = sorted(NAMES, key=lambda k: T_C[k])
@@ -413,6 +422,9 @@ P_ANY, P_GE3 = N_ANY / B1, N_GE3 / B1
 SE_ANY = sqrt(P_ANY * (1 - P_ANY) / B1)
 CNT_MEAN, CNT_SD = float(CNT.mean()), float(CNT.std(ddof=0))
 CNT_MEAN_SE = CNT_SD / sqrt(B1)
+_m4 = float(((CNT - CNT_MEAN) ** 4).mean())
+CNT_SD_SE = sqrt((_m4 - CNT_SD**4) / (4 * CNT_SD**2 * B1))     # delta method: SE of a standard deviation
+SE_GE3 = sqrt(P_GE3 * (1 - P_GE3) / B1)
 
 # ---------------------------------------------------------------- section 8: the named factor
 RHO_ME, RHO_MF = corr(MKT, EL), corr(MKT, FX)

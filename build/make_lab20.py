@@ -196,7 +196,7 @@ def fit_t(x):
 
 p_t, ll_t, p0_t = fit_t(X100)
 nu = p_t[0]
-print(f"nu = {nu:.6f}")
+show("nu, unrounded (experiment 1 draws with it)", nu, ".6f", "3.065257")
 
 rng = np.random.default_rng([1, SEED])                       # experiment 1
 sims = {"normal": Rb + s * rng.standard_normal((10_000, 246))}
@@ -219,7 +219,7 @@ for lab, xs in sims.items():
     rows.append({"model": lab, "sd of annual mean": 100 * am.std(), "sd of volatility": 100 * av.std(),
                  "vol 2.5%": 100 * qinv(av, 0.025), "vol median": 100 * qinv(av, 0.5),
                  "vol 97.5%": 100 * qinv(av, 0.975), "batch SE 97.5%": 100 * batch_se(av, 0.975),
-                 "vol above 40%": int((av > 0.40).sum())})
+                 "vol above 40%": int((av > 0.40).sum()), "means off the axis": int(((am < -0.6) | (am >= 0.9)).sum())})
 tab = pl.DataFrame(rows)
 print(tab)
 nrm, tt = rows
@@ -238,6 +238,7 @@ show("t 97.5%", tt["vol 97.5%"], ".1f", "26.8")
 show("t median", tt["vol median"], ".1f", "17.7")
 show("t 97.5% batch SE", tt["batch SE 97.5%"], ".1f", "0.3")
 show("t values above 40%", tt["vol above 40%"], "d", "35")
+show("t annual means outside -60% to 90%", tt["means off the axis"], "d", "4")
 
 fig, ax = plt.subplots(1, 2, figsize=(11, 4))
 for lab, xs in sims.items():
@@ -250,7 +251,7 @@ ax[0].legend(); plt.tight_layout(); plt.show()
 """)
 
 md(r"""
-Experiment 4 repeats the Student-t block 20 more times from its own generator. The Student-t with $\nu<4$ has no finite fourth moment, so its two standard deviations get the range over runs instead of a Monte Carlo standard error.
+Experiment 4 repeats the Student-t block 20 more times from its own generator, `default_rng([4, 20261011])`, the runs drawn in turn. The Student-t with $\nu<4$ has no finite fourth moment, so its two standard deviations get the range over runs instead of a Monte Carlo standard error.
 """)
 
 code(r"""
@@ -349,6 +350,10 @@ show("normal quantile", stats.norm.ppf(0.975), ".5f", "1.95996")
 show("interval low, %", 100 * (A * Rb - Z * se_ann), ".1f", "7.8")
 show("interval high, %", 100 * (A * Rb + Z * se_ann), ".1f", "23.0")
 show("the t form moves the ends by, points", 100 * (q * A * su - Z * A * s) / sqrt(T), ".3f", "0.002")
+for kind, half, book_iv in (("1.96 with s", Z * A * s / sqrt(T), "7.7620 to 23.0059"),
+                            ("t quantile with s_u", q * A * su / sqrt(T), "7.7599 to 23.0080")):
+    show(f"interval, {kind}, %", f"{100 * (A * Rb - half):.4f} to {100 * (A * Rb + half):.4f}", "", book_iv)
+    show("  to two decimals", f"{100 * (A * Rb - half):.2f} to {100 * (A * Rb + half):.2f}", "", "7.76 to 23.01")
 show("one year: half-width, points", 100 * Z * sqrt(A) * s * sqrt(A / 246), ".1f", "37.2")
 
 rng2 = np.random.default_rng([2, SEED])                      # experiment 2
@@ -508,7 +513,10 @@ md(r"""
 code(r"""
 show("SE(mu-hat), %", 100 * s / sqrt(T), ".4f", "0.0158")
 show("SE(sigma-hat), %", 100 * s / sqrt(2 * T), ".4f", "0.0112")
-show("location SE / mean SE", se_t[1] / (100 * s / sqrt(T)), ".2f", "0.78")
+# efficiency inside one model: in the fitted Student-t, R-bar's SE is the fit's standard deviation over sqrt(T)
+se_rb_t = scale * sqrt(nu / (nu - 2)) / sqrt(T)
+show("R-bar's SE inside the Student-t model, %", se_rb_t, ".4f", "0.0172")
+show("location SE / R-bar's SE, same model", se_t[1] / se_rb_t, ".2f", "0.72")
 
 vol = sqrt(A) * s
 show("SE of the annual volatility, plug-in", 100 * vol * sqrt((kurt - 1) / (4 * T)), ".3f", "0.334")
@@ -520,6 +528,8 @@ show("interval low", 100 * (sa - Z * se_a), ".1f", "15.8"); show("high", 100 * (
 r_w = r[np.array([d <= "2025-12-31" for d in dates])]
 _, s_rw, _, m4_rw = moments(r_w)
 show("LM17's daily-based 18.563%", 100 * sqrt(246) * s_rw, ".3f", "18.563")
+show("its log returns, 2003-2025", len(r_w), ",", "5,664")
+show("their kurtosis", m4_rw / s_rw**4, ".2f", "8.55")
 show("its plug-in SE", 100 * sqrt(246) * s_rw * sqrt((m4_rw / s_rw**4 - 1) / (4 * len(r_w))), ".2f", "0.34")
 show("gap in standard errors", (sa - sqrt(246) * s_rw) / se_a, ".1f", "1.1")
 c_lo, c_hi = stats.chi2.ppf([0.025, 0.975], 22)
@@ -576,7 +586,7 @@ show("1/sqrt(tau)", 1 / sqrt(tau), ".3f", "0.205")
 md(r"""
 ## Part 7 — The Hill estimator
 
-[[eg:tailindex]] and [[ex:hill]]: losses $-R$ at or beyond a threshold $x_0$, counted with the guard, $\hat\alpha=k/\sum\ln(x_i/x_0)$ and its standard error $\hat\alpha/\sqrt k$, (20.10).
+[[eg:tailindex]] and [[ex:hill]]: losses $-R$ at or beyond a threshold $x_0$, counted with the guard, $\hat\alpha=k/\sum\ln(x_i/x_0)$ and its standard error $\hat\alpha/\sqrt k$, (20.10). The estimate rises from 2% to 4%, then wanders once fewer than 45 losses remain.
 """)
 
 code(r"""
@@ -602,6 +612,9 @@ for x0 in x0s:
     a = len(xs) / np.log(xs / x0).sum()
     est.append((a, a / sqrt(len(xs))))
 est = np.array(est)
+ks = np.array([int((R <= -x0 + EPS).sum()) for x0 in x0s])
+few = est[ks < 45, 0]
+print(f"k < 45 from x0 = {x0s[ks < 45][0]:.2%}: the estimate wanders between {few.min():.2f} and {few.max():.2f}")
 plt.fill_between(x0s, est[:, 0] - Z * est[:, 1], est[:, 0] + Z * est[:, 1], alpha=0.3, label="95% interval")
 plt.plot(x0s, est[:, 0], label="Hill estimate")
 plt.axhline(nu, ls="--", color="grey", label="Student-t fit")
@@ -679,7 +692,7 @@ show("P9: interval", f"{th - Z * se_th:.3f} to {th + Z * se_th:.3f}", "", "0.535
 """)
 
 md(r"""
-**Problem 10.** Hill at 2% and 4% with their intervals. **Problem 11.** Experiment 3: 20,000 normal samples of $T=5$, coverage of $\bar X\pm1.96\,s/\sqrt5$ (divisor 5) and of the $t_4$ interval with $s_{\mathrm u}$, with Monte Carlo standard errors and the exact value.
+**Problem 10.** Hill at 2% and 4% with their intervals. **Problem 11.** Experiment 3: 20,000 normal samples of $T=5$, coverage of $\bar X\pm1.96\,s/\sqrt5$ (divisor 5) and of the $t_4$ interval with $s_{\mathrm u}$, with Monte Carlo standard errors and the exact value. The question is whether the first interval's simulated coverage differs from its exact coverage by more than chance.
 """)
 
 code(r"""
@@ -695,7 +708,12 @@ exact5 = 2 * stats.t.cdf(Z * sqrt(4 / 5), 4) - 1
 show("P11: coverage, 1.96 with s, %", 100 * cz, ".1f", "84.3"); show("MC SE", 100 * sqrt(cz * (1 - cz) / 20000), ".2f", "0.26")
 show("P11: coverage, t_4 with s_u, %", 100 * ct, ".1f", "94.8"); show("MC SE", 100 * sqrt(ct * (1 - ct) / 20000), ".2f", "0.16")
 show("P11: exact, %", 100 * exact5, ".1f", "84.6")
-print(f"gap in Monte Carlo standard errors: {(exact5 - cz) / sqrt(cz * (1 - cz) / 20000):.2f}")
+show("P11: before rounding, exact against simulated, %", f"{100 * exact5:.2f} against {100 * cz:.2f}", "",
+     "84.55 against 84.32")
+show("P11: the gap, points", 100 * (exact5 - cz), ".2f", "0.23")
+print(f"the gap in Monte Carlo standard errors: {(exact5 - cz) / sqrt(cz * (1 - cz) / 20000):.2f}")
+show("P11: t_4 coverage before rounding, %", 100 * ct, ".2f", "94.77")
+print(f"its distance from 95% in Monte Carlo standard errors: {(0.95 - ct) / sqrt(ct * (1 - ct) / 20000):.2f}")
 """)
 
 md(r"""

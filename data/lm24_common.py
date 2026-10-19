@@ -1,7 +1,7 @@
 """Shared inputs and formulas of LM24's scripts (Bayesian Inference and Shrinkage).
 
 Imported by data/lm24_numbers.py and data/lm24_charts.py. Run on its own, it prints a summary of the two samples:
-    PYTHONUTF8=1 uv run python data/lm24_common.py
+    uv run python data/lm24_common.py
 
 Samples (never mixed in one statistic; plans/vol-4.md, "Data"):
   * TR23: data/processed/vol3_taiex.parquet (built and checked by data/vol3_series.py from FinMind's
@@ -23,7 +23,8 @@ Conventions (AUTHORING section 6 and plans/vol-4.md, the LM24 brief):
     posterior expectation of mean_t ln(1 + f (R_t - Rbar + mu)), mu ~ N(c Rbar, c s^2 / T), the expectation by 60-node
     Gauss-Hermite quadrature (numpy.polynomial.hermite_e.hermegauss, weights normalized to sum 1).
   * James-Stein (24.4), positive part toward the grand mean: 1 - c_hat = (N - 3) v / sum_i (m_i - mbar)^2, with v the
-    average over the 28 sectors of s_i^2 / T (one common noise variance, an approximation). "Common removed" replaces
+    average over the 28 sectors of s_i^2 / T (one common noise variance, treated as known: an approximation, since the
+    sectors' noise variances differ by a factor of about 4 on the first half). "Common removed" replaces
     each day's 28 returns by their deviations from that day's cross-sectional mean; Problem 11 subtracts the TAIEX price
     index's return instead.
   * Out-of-sample miss: root mean square over the 28 sectors of (estimate from one half - mean of the other half),

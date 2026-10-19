@@ -458,6 +458,8 @@ show("   LM17's pair correlation", np.corrcoef(np.abs(r[:-1]), np.abs(r[1:]))[0,
 show("   iid mean", acf_i.mean, ".4f", "-0.0001")
 show("   iid percentile", acf_i.lo, ".3f", "-0.025"); show("   ...", acf_i.hi, ".3f", "0.026")
 print("   iid resamples at or above 0.161 in absolute value:", int((np.abs(IID["acf"]) >= OBS["acf"]).sum()))
+show("   iid SE, the null law's (Section 8)", acf_i.se, ".3f", "0.013")
+show("   0.161 in these standard errors", OBS["acf"] / acf_i.se, ".0f", "12")
 show("   blocks mean", acf_b.mean, ".3f", "0.156")
 show("   blocks percentile", acf_b.lo, ".2f", "0.10"); show("   ...", acf_b.hi, ".2f", "0.21")
 show("   Problem 4: iid basic interval", acf_i.blo, ".3f", "0.295"); show("   ...", acf_i.bhi, ".3f", "0.346")
@@ -583,8 +585,10 @@ show("volatility at 2", ratio[2]["vol"], ".2f", "1.18")
 show("   at 145", ratio[145]["vol"], ".2f", "3.91")
 show("   at 400", ratio[400]["vol"], ".2f", "4.63")
 show("Sharpe ratio at 3", ratio[3]["SR"], ".2f", "1.05"); show("   at 145", ratio[145]["SR"], ".2f", "1.13")
-show("   largest", max(v["SR"] for v in ratio.values()), ".2f", "1.15")
-show("Kelly fraction, largest", max(v["Kelly"] for v in ratio.values()), ".2f", "1.24")
+show("   peak", max(v["SR"] for v in ratio.values()), ".2f", "1.15")
+show("   at the length", max(ratio, key=lambda e: ratio[e]["SR"]), "d", "50")
+show("Kelly fraction, peak", max(v["Kelly"] for v in ratio.values()), ".2f", "1.24")
+show("   at the length", max(ratio, key=lambda e: ratio[e]["Kelly"]), "d", "50")
 show("VR(20) at 145", ratio[145]["VR20"], ".2f", "0.93")
 show("Sharpe SE from 3 to 145, % change", 100 * (ratio[145]["SR"] / ratio[3]["SR"] - 1), ".0f", "8")
 show("Kelly SE from 3 to 145, % change", 100 * (ratio[145]["Kelly"] / ratio[3]["Kelly"] - 1), ".0f", "14")
@@ -656,7 +660,7 @@ def pc1_share(Xy):
     return float(np.linalg.eigvalsh(np.corrcoef(Xy, rowvar=False))[-1] / Xy.shape[1])
 
 
-pc = {}
+pc, shares = {}, {}
 for y, e_iid, e_blk, n_p, sh_p, ell_p in (("2017", 10, 11, "246", "34.5", "7"), ("2020", 12, 13, "245", "66.6", "18")):
     Xy = X[uyear == y]
     est = pc1_share(Xy)
@@ -664,7 +668,8 @@ for y, e_iid, e_blk, n_p, sh_p, ell_p in (("2017", 10, 11, "246", "34.5", "7"), 
     out = []
     for e, ell in ((e_iid, 1), (e_blk, ell_y)):
         g = rng(e)
-        out.append(summ(np.array([pc1_share(Xy[one(g, Xy.shape[0], ell)]) for _ in range(B)]), est))
+        shares[e] = np.array([pc1_share(Xy[one(g, Xy.shape[0], ell)]) for _ in range(B)])
+        out.append(summ(shares[e], est))
     pc[y] = (est, ell_y, *out)
     show(f"[[eg:pc1]] {y}: returns", Xy.shape[0], "d", n_p, u28=True)
     show("   share, %", 100 * est, ".1f", sh_p, u28=True)
@@ -677,8 +682,8 @@ show("   iid interval, %", 100 * i17.lo, ".1f", "30.7", u28=True); show("   ..."
 show("2020 blocks: SE, points", 100 * b20.se, ".1f", "7.1", u28=True)
 show("   percentile, %", 100 * b20.lo, ".1f", "49.6", u28=True); show("   ...", 100 * b20.hi, ".1f", "75.9", u28=True)
 show("   basic, %", 100 * b20.blo, ".1f", "57.3", u28=True); show("   ...", 100 * b20.bhi, ".1f", "83.7", u28=True)
-show("   resampled mean, %", 100 * b20.mean, ".2f", "64.96", u28=True)
-show("   bias, points", 100 * (b20.mean - e20), ".2f", "-1.66", u28=True)
+show("   resampled mean below the share, points", 100 * (e20 - b20.mean), ".1f", "1.7", u28=True)
+print(f"   its batch SE: {100 * bse(shares[13], np.mean):.2f} points (so the module prints one decimal)")
 show("   iid interval, %", 100 * i20.lo, ".1f", "58.6", u28=True); show("   ...", 100 * i20.hi, ".1f", "72.8", u28=True)
 """)
 
@@ -712,14 +717,17 @@ for e, ell in ((14, 145), (15, 1)):                                  # experimen
 ws14, wd14 = summ(W[14][:, 0], sh0), summ(W[14][:, 1], sd0)
 ws15, wd15 = summ(W[15][:, 0], sh0), summ(W[15][:, 1], sd0)
 show("blocks: share SE, points", 100 * ws14.se, ".1f", "9.9")
-show("   percentile, %", 100 * ws14.lo, ".1f", "0.0"); show("   ...", 100 * ws14.hi, ".1f", "33.0")
-show("   basic, %", 100 * ws14.blo, ".1f", "-24.7"); show("   ...", 100 * ws14.bhi, ".1f", "8.3")
+show("   percentile, %", 100 * ws14.lo, ".0f", "0"); show("   ...", 100 * ws14.hi, ".0f", "33")
+show("   basic, %", 100 * ws14.blo, ".0f", "-25"); show("   ...", 100 * ws14.bhi, ".0f", "8")
+print(f"   batch SEs of the ends: {100 * ws14.lo_b:.2f} and {100 * ws14.hi_b:.2f} points (so whole percents)")
 show("   resamples with no window under water", int((W[14][:, 0] == 0).sum()), ",", "3,248")
 show("   SD of ln G: SE", wd14.se, ".3f", "0.124")
 show("   percentile", wd14.lo, ".2f", "0.20"); show("   ...", wd14.hi, ".2f", "0.68")
 show("   resampled mean", wd14.mean, ".3f", "0.386")
 show("iid: share SE, points", 100 * ws15.se, ".1f", "8.4")
 show("   SD of ln G percentile", wd15.lo, ".2f", "0.19"); show("   ...", wd15.hi, ".2f", "0.58")
+show("   SD of ln G resampled mean", wd15.mean, ".3f", "0.357")
+print(f"   1 - m/T = {1 - M5 / T:.3f}: overlapping windows understate the variance even for independent days")
 """)
 
 code(r"""
@@ -769,6 +777,7 @@ show("   blocks: count", t17[2], "d", "477"); show("   p", t17[3], ".3f", "0.048
 show("   SDs of the resampled t-stats: iid", t16[4], ".2f", "1.01"); show("   blocks", t17[4], ".2f", "1.03")
 show("full sample t-stat", t18[0], ".2f", "3.96")
 show("   resampled |t-stat| at or beyond it (blocks of 145)", t18[2], "d", "0")
+show("   so (22.4) is 0; the one-sided 95% bound 1 - 0.05^(1/B)", 1 - 0.05 ** (1 / B), ".4f", "0.0003")
 tu = np.concatenate([tstat(R[idx]) for idx in chunks(rng(19), T, "iid", 1)])   # experiment 19, not centred
 show("knowledge check: mean t-stat of uncentred resamples", tu.mean(), ".2f", "3.96")
 print(f"   share at or above the observed t-stat: {(tu >= t18[0]).mean():.4f} (about half)")
@@ -777,7 +786,7 @@ print(f"   share at or above the observed t-stat: {(tu >= t18[0]).mean():.4f} (a
 md(r"""
 ## Part 9 — Problems 6, 10 and 11
 
-**Problem 6.** The stationary bootstrap at $\ell=145$ and $T=5{,}849$: the expected number of blocks, the chance that a block lasts 60 days or more by (22.3), and the predicted mean of $\hat\rho_1(\lvert r\rvert)$ at $\ell=145$ and $\ell=2$, against experiment 3 and experiment 21 ($\ell=2$, $B=2{,}000$).
+**Problem 6.** The stationary bootstrap at $\ell=145$ and $T=5{,}849$: the expected number of blocks, the chance that a block lasts 60 days or more by (22.3), and the predicted mean of $\hat\rho_1(\lvert r\rvert)$ at $\ell=145$ and $\ell=2$, against experiment 3 and experiment 21 ($\ell=2$, $B=2{,}000$). Experiment 26 ($\ell=2$, $B=200{,}000$, about a minute) estimates the expectation at $\ell=2$ itself.
 """)
 
 code(r"""
@@ -789,6 +798,10 @@ e21 = boot(R, chunks(rng(21), T, stationary_idx, 2, 2000), exact=False)["acf"]  
 show("    experiment 21: mean", e21.mean(), ".3f", "0.078")
 show("    its batch SE", bse(e21, np.mean), ".4f", "0.0005")
 show("    experiment 3: mean", acf_b.mean, ".3f", "0.156")
+e26 = boot(R, chunks(rng(26), T, stationary_idx, 2, 200_000), exact=False)["acf"]   # experiment 26
+show("    experiment 26: mean (the expectation at 2)", e26.mean(), ".4f", "0.0797")
+show("    its batch SE", bse(e26, np.mean), ".5f", "0.00005")
+show("    experiment 21 below it, in its batch SEs", (e26.mean() - e21.mean()) / bse(e21, np.mean), ".0f", "3")
 """)
 
 md(r"""
@@ -831,7 +844,10 @@ show("f_hat, 10% regime", k10, ".2f", "6.06")
 show("   the book's block length", ell10, "d", "36")
 show("   iid", p22.lo, ".1f", "2.8"); show("   ...", p22.hi, ".1f", "9.6")
 show("   blocks", p23.lo, ".1f", "2.6"); show("   ...", p23.hi, ".1f", "10.1")
-print(f"   overlap with the full sample's iid interval: {max(p22.lo, k_i.lo):.1f} to {min(p22.hi, k_i.hi):.1f}")
+show("   overlap with the full sample's iid interval", max(p22.lo, k_i.lo), ".1f", "2.8")
+show("   ...", min(p22.hi, k_i.hi), ".1f", "6.5")
+show("   overlap with the full sample's block interval", max(p23.lo, k_b.lo), ".1f", "2.6")
+show("   ...", min(p23.hi, k_b.hi), ".1f", "7.1")
 """)
 
 md(r"""

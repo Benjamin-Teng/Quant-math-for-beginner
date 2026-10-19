@@ -259,6 +259,8 @@ show("[[eg:taiexpost]] c at 10 points", c10, ".3f", "0.869")
 show("   posterior mean (%)", 100 * m10, ".1f", "13.4")
 show("   posterior SD (points)", 100 * sd10, ".1f", "3.6")
 show("   prior worth (years)", (sqrt(A) * s / 0.10) ** 2, ".2f", "3.59")
+show("knowledge check: the unrounded worth (years)", (sqrt(A) * s / 0.10) ** 2, ".3f", "3.594")
+show("   years of data for c = 0.9, nine times that", 9 * (sqrt(A) * s / 0.10) ** 2, ".1f", "32.3")
 show("[[eg:split]] variance of the posterior mean (points^2)", c10 * 100, ".1f", "86.9")
 show("   expected posterior variance (points^2)", 1e4 * sd10**2, ".1f", "13.1")
 mh, sdh = posterior(0.5)
@@ -292,6 +294,8 @@ priors   # [[ex:priors]]
 code(r"""
 show("[[ex:priors]] quarter-Kelly A sigma0", priors["A sigma0 (points)"][0], ".2f", "2.25")
 show("   its worth (years)", priors["worth (years)"][0], ".2f", "71.29")
+show("   the sample's span (years), four decimals", years, ".4f", "23.7645")
+show("   three times the span", 3 * years, ".2f", "71.29")
 show("   its interval", f"{priors['lower (%)'][0]:.1f} to {priors['upper (%)'][0]:.1f}", "", "0.0 to 7.7")
 show("   its Pr(mu<=0)", priors["Pr(mu<=0)"][0], ".2g", "0.024")
 show("   half-Kelly interval", f"{priors['lower (%)'][1]:.1f} to {priors['upper (%)'][1]:.1f}", "", "2.3 to 13.1")
@@ -315,13 +319,16 @@ print(f"LM21's t-stat {t_u:.6f} (with s: {Rbar / se:.6f}); one-sided p-value {st
 assert f"{stats.norm.cdf(-Rbar / se):.1e}" == f"{stats.norm.cdf(-t_u):.1e}" == "3.8e-05"
 print(f"at 10 points: Pr(mu <= 0 | data) = {stats.norm.cdf(-m10 / sd10):.1e}   [book: 1.1e-04]")
 q_m, q_sd = posterior(0.25)
-show("quarter-Kelly prior: Pr(mu > 0) (%)", 100 * stats.norm.sf(-q_m / q_sd), ".1f", "97.6")
+h_m, h_sd = posterior(0.5)
+# each sceptic's prior is centred at zero and puts 50% on mu > 0; the posterior puts much more there
+show("Pr(mu > 0 | data) under the quarter-Kelly prior (%)", 100 * stats.norm.sf(-q_m / q_sd), ".1f", "97.6")
+show("Pr(mu > 0 | data) under the half-Kelly prior (%)", 100 * stats.norm.sf(-h_m / h_sd), ".1f", "99.7")
 """)
 
 md(r"""
 ## Part 5 — James–Stein, and Experiment 1
 
-(24.4) toward the grand mean with one common noise variance, the average of the $s_i^2/T$. The divisor is passed explicitly.
+(24.4) toward the grand mean with one common noise variance, the average of the $s_i^2/T$, treated as known. The divisor is passed explicitly.
 """)
 
 code(r"""
@@ -384,6 +391,10 @@ c_r, b_r, _, v_r = james_stein(X1)
 show28("[[eg:halves]] noise (points)", 100 * A28 * sqrt(v_r), ".2f", "7.18")
 show28("   spread (divisor 28, points)", 100 * a1.std(ddof=0), ".2f", "4.50")
 show28("   1 - c_hat", b_r, ".2f", "2.27")
+noise_i = 100 * A28 * np.sqrt(X1.var(axis=0, ddof=0) / len(X1))   # each sector's own noise (points)
+show28("   smallest and largest sector noise (points)", f"{noise_i.min():.1f} to {noise_i.max():.1f}", "", "4.8 to 9.7")
+show28("   ratio of the noise variances", (noise_i.max() / noise_i.min()) ** 2, ".0f", "4")
+print("   spread below every sector's noise:", bool((noise_i > 100 * a1.std(ddof=0)).all()))
 d1, d2 = m1 - m1.mean(), m2 - m2.mean()
 show28("   best weight in hindsight", d1 @ d2 / (d1 @ d1), ".2f", "-0.09")
 XD1 = X1 - X1.mean(axis=1, keepdims=True)                 # each day's cross-sectional mean removed
@@ -427,7 +438,7 @@ print(f"half-widths {100 * hw.min():.0f} to {100 * hw.max():.0f} points; interva
 md(r"""
 ## Part 7 — The Bayes Kelly fraction
 
-(24.5): $f_{\mathrm B}=c\hat f$ for a prior centred at zero. The exact fraction solves (4.5) on TR23's returns shifted by one constant to the posterior mean, LM4's band method.
+(24.5): $f_{\mathrm B}=c\hat f$ for a prior centred at zero. The exact fraction solves (4.5) on TR23's returns shifted by one constant to the posterior mean, LM4's band method. To see what the quadratic rule's overshoot at $c=1$ is made of, the cell keeps (4.2)'s $\mu^2$ term, then mirrors the days about their mean: the mirrored days keep the fat tails and lose the skewness.
 """)
 
 code(r"""
@@ -455,6 +466,16 @@ def dgrowth(f):
 show("   posterior-integrated", optimize.brentq(dgrowth, 1e-6, 8), ".2f", "3.62")
 show("   posterior SD of mu / sigma^2", psd_d / s**2, ".2f", "1.01")
 show("   quadratic minus exact at c = 1/2", 0.5 * fhat - kelly_exact(0.5 * Rbar), ".2f", "0.03")
+
+# what the gap at c = 1 is made of: (4.2) keeps a mu^2 term that (24.5) drops; the rest comes from non-normal days
+quad_mu2 = Rbar / (s**2 + Rbar**2)
+show("   (4.2) with its mu^2 term, c = 1", quad_mu2, ".2f", "4.27")
+show("   mu^2 part of the gap", fhat - quad_mu2, ".2f", "0.01")
+show("   the rest (non-normal days)", quad_mu2 - f_star, ".2f", "0.13")
+sym = np.concatenate([R, 2 * Rbar - R])         # the days mirrored about their mean: same tails, no skewness
+f_sym = optimize.brentq(lambda f: (sym / (1 + f * sym)).mean(), 1e-6, 1 / abs(sym.min()) - 1e-6)
+print(f"   mirrored days' root {f_sym:.4f}: fat tails {quad_mu2 - f_sym:.4f}, skewness {f_sym - f_star:.4f}")
+print(f"   skewness of TR23's daily returns (LM19's): {(((R - Rbar) / s) ** 3).mean():.4f}")
 
 
 def growth(f, m):
@@ -495,6 +516,9 @@ m5, sd5 = posterior(c5)
 show("P9 c", c5, ".3f", "0.623")
 show("   posterior mean (%)", 100 * m5, ".1f", "9.6")
 show("   posterior SD (points)", 100 * sd5, ".1f", "3.1")
+show("   from the printed 0.623: mean, two decimals", 0.623 * 15.38, ".2f", "9.58")
+show("   SD, two decimals", sqrt(0.623) * 3.89, ".2f", "3.07")
+show("   interval from 9.58 and 3.07", f"{9.58 - 1.96 * 3.07:.1f} to {9.58 + 1.96 * 3.07:.1f}", "", "3.6 to 15.6")
 show("   interval (%)", f"{100 * (m5 - Z975 * sd5):.1f} to {100 * (m5 + Z975 * sd5):.1f}", "", "3.6 to 15.6")
 show("   Pr(mu <= 0 | data)", stats.norm.cdf(-m5 / sd5), ".4f", "0.0009")
 show("   Bayes fraction", c5 * fhat, ".2f", "2.67")
@@ -531,6 +555,8 @@ me1, me2 = XE1.mean(axis=0), XE2.mean(axis=0)
 show28("P11 noise (points)", 100 * A28 * sqrt(v_e), ".1f", "5.0")
 show28("   1 - c_hat", b_e, ".2f", "1.10")
 show28("   miss of the grand mean (points)", 100 * miss(me1, me2, 0), ".1f", "12.1")
+dev_miss = miss(me1 - me1.mean(), me2 - me2.mean(), 0)  # the grand mean's miss of the deviations
+show28("   miss of the deviations from each half's grand mean (points)", 100 * dev_miss, ".2f", "8.49")
 show28("   average excess, first half (points)", 100 * A28 * me1.mean(), ".1f", "-0.3")
 show28("   average excess, second half (points)", 100 * A28 * me2.mean(), ".1f", "-9.0")
 show28("   TAIEX price index, halves (%)", f"{100 * A28 * TX1.mean():.1f} -> {100 * A28 * TX2.mean():.1f}", "",

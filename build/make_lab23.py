@@ -305,6 +305,8 @@ show("F statistic", (semi["b"][1] / semi["se_c"][1]) ** 2, ",.0f", "18,824")
 h1, h2 = ols(X[:H, J["Semiconductor"]], ZM[:H]), ols(X[H:, J["Semiconductor"]], ZM[H:])
 show("first-half beta", h1["b"][1], ".3f", "1.089")
 show("second-half beta", h2["b"][1], ".3f", "1.294")
+show("first-half Newey-West SE (lag 7)", h1["se_n"][1], ".3f", "0.023")
+show("second-half Newey-West SE (lag 7)", h2["se_n"][1], ".3f", "0.029")
 betas = {nm: FITS[nm]["b"][1] for nm in U28}
 print("smallest and largest beta:", min(betas, key=betas.get), f"{min(betas.values()):.3f};",
       max(betas, key=betas.get), f"{max(betas.values()):.3f}")
@@ -345,7 +347,7 @@ show("sqrt(T/(T-2))", sqrt(T / (T - 2)), ".6f", "1.000228")
 md(r"""
 ## Part 3 — Intervals and hat values
 
-**[[ex:fin2025]] and [[eg:band]].** FinancialInsurance on the TAIEX over the 243 returns of 2025, with 95% confidence and prediction bands from (23.5), and the hat values of the year. The book's own `Fraction` recount confirms that 7 April 2025 is the sample's smallest TAIEX return and that 2 days of 2025 fell 5% or more.
+**[[ex:fin2025]] and [[eg:band]].** FinancialInsurance on the TAIEX over the 243 returns of 2025, with 95% confidence and prediction bands from (23.5), and the hat values of the year. The book's own `Fraction` recount confirms that 7 April 2025 is the sample's smallest TAIEX return and that 2 days of 2025 fell 5% or more. The bands assume (23.2)'s conditions, and the prediction band also normal errors: White's standard error of the fitted value at −5% shows how far the classical one falls short, and the two days at or below −5% fall outside the prediction band.
 """)
 
 code(r"""
@@ -388,6 +390,16 @@ assert min(rf, key=rf.get) == "2025-04-07"
 show("2025 days with TAIEX <= -5% (Fraction)", sum(1 for d, v in rf.items() if d[:4] == "2025" and v <= Fraction(-5, 100)),
      "d", "2")
 show("2025 days with TAIEX <= -5% (guard)", int((x25 <= -0.05 + EPS).sum()), "d", "2")
+u25 = D25 * f25["e"][:, None]
+show("White SE of the fitted value at -5% (points)", 100 * sqrt(x0 @ f25["zi"] @ (u25.T @ u25) @ f25["zi"] @ x0), ".3f",
+     "0.557")
+for j, pr2, pr1 in zip(np.flatnonzero(x25 <= -0.05 + EPS), ("-5.67", "-3.03"), ("-5.7", "-3.0")):
+    res_s = f25["e"][j] / sqrt(f25["s2"])
+    half = 1.96 * sqrt(f25["s2"] * (1 + hat[j]))
+    print(f"{d25[j]}: TAIEX {100 * x25[j]:.2f}%, residual {100 * f25['e'][j]:.2f} points, outside the prediction band: "
+          f"{abs(f25['e'][j]) > half}")
+    show(f"{d25[j]} residual in s_eps", res_s, ".2f", pr2)
+    show(f"{d25[j]} residual in s_eps (as printed)", res_s, ".1f", pr1)
 
 order = np.argsort(x25)
 grid = np.linspace(x25.min(), x25.max(), 60)
@@ -516,7 +528,8 @@ for nm in book:
 fo, nwin, nov = semi_ov
 show("overlapping windows", nov, ",", "4,363")
 show("non-overlapping sums", nwin, "d", "219")
-show("Newey-West (19) / classical", fo["se_n"][1] / fo["se_c"][1], ".2f", "4.35")
+print(f"Newey-West (19) / classical, unrounded: {fo['se_n'][1] / fo['se_c'][1]:.4f}")
+show("the same ratio from the printed 0.0389 and 0.0089 ('about 4.4')", 0.0389 / 0.0089, ".1f", "4.4", kept=True)
 for k, pr in ((1, "0.953"), (10, "0.538"), (20, "0.038")):
     show(f"overlap residual rho_hat_{k}", rho_hat(fo["e"], k), ".3f", pr)
 """)
@@ -563,6 +576,10 @@ def nw_curve(name, lag):
 for lag, p0, p1 in ((0, "0.0129", "0.0122"), (9, "0.0185", "0.0152"), (50, "0.0275", "0.0160"), (200, "0.0390", "0.0123")):
     show(f"lag {lag}, full-sample residuals", nw_curve("pooled", lag), ".4f", p0)
     show(f"lag {lag}, yearly-fit residuals", nw_curve("yearly", lag), ".4f", p1)
+# the values the chart's description quotes: the first plotted lag, the yearly series' peak on the chart's grid, lag 400
+for name, lag, pr in (("full-sample", 1, "0.0138"), ("yearly-fit", 1, "0.0127"), ("yearly-fit", 39, "0.0161"),
+                      ("yearly-fit", 400, "0.0083")):
+    show(f"lag {lag}, {name} residuals", nw_curve("pooled" if name == "full-sample" else "yearly", lag), ".4f", pr)
 lags = np.unique(np.round(np.geomspace(1, 400, 60)).astype(int))
 fig, ax = plt.subplots()
 ax.plot(lags, [nw_curve("pooled", int(g)) for g in lags], label="full-sample residuals")
@@ -705,6 +722,14 @@ show("2024 Newey-West (4)", by["2024"]["se_n"][1], ".4f", "0.0759", kept=True)
 show("2021 Newey-West (4)", by["2021"]["se_n"][1], ".4f", "0.0776", kept=True)
 show("z of the difference", (by["2021"]["b"][1] - by["2024"]["b"][1]) /
      sqrt(by["2021"]["se_n"][1] ** 2 + by["2024"]["se_n"][1] ** 2), ".1f", "2.5", kept=True)
+# the extremes were picked from 11 years; a count over all 11 uses every year
+zy = {y: (f["b"][1] - f2["b"][1]) / f["se_n"][1] for y, f in by.items()}
+print(pl.DataFrame({"year": list(zy), "slope": [round(by[y]["b"][1], 3) for y in zy],
+                    "Newey-West SE": [round(by[y]["se_n"][1], 4) for y in zy], "z": [round(v, 2) for v in zy.values()]}))
+beyond = [str(y) for y, v in zy.items() if abs(v) > 1.96 + EPS]
+print("years more than 1.96 own SEs from the full-sample slope:", beyond)
+show("their count", len(beyond), "d", "4", kept=True)
+show("expected if the slope were constant, 11 x 0.05", 11 * 0.05, ".2f", "0.55", kept=True)
 """)
 
 md(r"""
@@ -744,7 +769,7 @@ show("BH's smallest adjusted p", multipletests(p_c, method="fdr_bh")[1].min(), "
 """)
 
 md(r"""
-**[[eg:alpha28]], experiment 1.** The residuals of the 28 market models are correlated, and with one shared regressor so are the intercepts' errors. Draw 100,000 vectors $\mathbf Z\sim\mathcal N_{28}(\mathbf 0,C)$, $C$ the residual correlation matrix, with `default_rng([1, 20261011])` created once, and count $\lvert Z_i\rvert>1.96$ with the guard.
+**[[eg:alpha28]], experiment 1.** The residuals of the 28 market models are correlated, and with one shared regressor so are the intercepts' errors. Draw 100,000 vectors of 28 null t-stats from $\mathcal N_{28}(\mathbf 0,C)$, $C$ the residual correlation matrix with the sectors in U28's alphabetical order, as `rng.standard_normal((100_000, 28)) @ L.T` with $L$ the Cholesky factor of $C$ and `default_rng([1, 20261011])` created once. Count the entries beyond ±1.96 with the guard. Monte Carlo standard errors: binomial for a probability, the standard deviation over $\sqrt B$ for the mean count, and the delta method for the count's standard deviation.
 """)
 
 code(r"""
@@ -754,19 +779,25 @@ iu = np.triu_indices(28, 1)
 show("residual correlation, min", C[iu].min(), ".3f", "-0.430")
 show("residual correlation, max", C[iu].max(), ".3f", "0.462")
 show("residual correlation, mean", C[iu].mean(), ".3f", "0.112")
+assert U28 == sorted(U28)                                       # the columns of C, in U28's alphabetical order
 rng1 = np.random.default_rng([1, 20261011])                    # experiment 1, created once
 B = 100_000
-Z = rng1.standard_normal((B, 28)) @ np.linalg.cholesky(C).T
-cnt = (np.abs(Z) > 1.96 + EPS).sum(axis=1)
+L = np.linalg.cholesky(C)
+draws = rng1.standard_normal((B, 28)) @ L.T
+cnt = (np.abs(draws) > 1.96 + EPS).sum(axis=1)
 p_any = (cnt >= 1).mean()
-show("count mean", cnt.mean(), ".3f", "1.406")
-show("its Monte Carlo SE", cnt.std(ddof=0) / sqrt(B), ".3f", "0.005")
-show("count SD", cnt.std(ddof=0), ".3f", "1.458")
+sd = cnt.std(ddof=0)
+show("count mean", cnt.mean(), ".2f", "1.41")
+show("its Monte Carlo SE", sd / sqrt(B), ".3f", "0.005")
+show("count SD", sd, ".2f", "1.46")
+show("its Monte Carlo SE (delta method)", sqrt((((cnt - cnt.mean()) ** 4).mean() - sd**4) / (4 * sd**2 * B)), ".3f", "0.006")
 show("independent SD", sqrt(28 * 0.05 * 0.95), ".3f", "1.153", kept=True)
 show("Pr(at least one)", p_any, ".3f", "0.696")
 show("its binomial SE", sqrt(p_any * (1 - p_any) / B), ".4f", "0.0015")
 show("independent Pr(at least one)", 1 - 0.95**28, ".4f", "0.7622", kept=True)
-show("Pr(three or more)", (cnt >= 3).mean(), ".3f", "0.178")
+p_ge3 = (cnt >= 3).mean()
+show("Pr(three or more)", p_ge3, ".3f", "0.178")
+show("its binomial SE", sqrt(p_ge3 * (1 - p_ge3) / B), ".4f", "0.0012")
 show("independent Pr(three or more)", stats.binom.sf(2, 28, 0.05), ".3f", "0.163", kept=True)
 """)
 

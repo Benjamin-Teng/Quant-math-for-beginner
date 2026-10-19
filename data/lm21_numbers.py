@@ -29,6 +29,7 @@ Checks (each failure is collected; the script exits 1 after printing them all):
 At the end the script lists the module's numbers that no check covered, the NEAR flags and the anchor differences,
 and prints "all N checks passed".
 """
+import inspect
 import json
 import re
 import sys
@@ -342,7 +343,13 @@ anchor("A21-60", "from the four-decimal means and s_u: " + "; ".join(
 for v, sh in zip(t60, ("3.955", "2.047", "3.675")):
     chk("A21-60", "X1 note, t-stat from the printed inputs", v, sh)
 has("X1 note", "give 3.955, 2.047 and 3.675")
-has("LM17's lag-1 correlation", "next-day log returns correlate 0.039")
+# X1 (reviews/vol4_cross.md): LM19 owns TR23's autocorrelations; (19.5) on log returns, full-sample mean, divisor T
+rlog = np.log1p(R)
+rlc = rlog - rlog.mean()
+rho1_log = float((rlc[1:] * rlc[:-1]).sum() / (rlc * rlc).sum())
+print(f"LM19's rho_1 of TR23's log returns: {rho1_log:.6f}")
+chk("new", "LM19's lag-1 autocorrelation of log returns", rho1_log, "0.0393")
+has("LM19's lag-1 autocorrelation", "TR23's log returns have a lag-1 autocorrelation of 0.0393 ([[LM19]])")
 # KC section 3
 chk("A21-39", "KC 3 t-stat", 0.04 / (1 / sqrt(900)), "1.20")
 chk("A21-39", "KC 3 days", Fraction(2 * 100, 4) ** 2, "2,500")
@@ -543,8 +550,10 @@ chk("A21-31", "shuffles at least as extreme as Wednesday", Fraction(n8b, B8), "0
 chk("A21-31", "its SE", sqrt(pw8 * (1 - pw8) / B8), "0.004")
 has("E8", "$0.580\\pm0.005$")
 has("E8", "$0.266\\pm0.004$")
-has("E8 seed", "`default_rng([8, 20261011])`")
-has("E8 shuffles", "Over 10,000 shuffles")
+has("E8 seed", "`rng = default_rng([8, 20261011])`")
+has("E8 shuffles (U2)", "Each shuffle is `R[perm]`, with `perm = rng.permutation(T)` drawn 10,000 times from one")
+has("E8 shares", "Across the shuffles, $0.580\\pm0.005$ of the families")
+assert B8 == 10_000 and "x = R[g8.permutation(T)]" in inspect.getsource(experiment8), "E8's printed call"
 has("pitfall 7", "(0.580 against 0.582)")
 stab = []
 for lab, sel, shown in (("before", d.pre, ("2.06", "0.040")), ("from", ~d.pre, ("1.25", "0.21"))):
@@ -570,7 +579,25 @@ anchor("A21-32", f"p_(1) {ps_sorted[0]:.5f} against Holm/Bonferroni/BH(0.05) {0.
        f"{0.10 / M:.6f}; p_(2) {ps_sorted[1]:.5f} against Holm {0.05 / (M - 1):.6f}, BH(0.05) {2 * 0.05 / M:.6f}, "
        f"BH(0.10) {2 * 0.10 / M:.6f}; rejections: Bonferroni {rej['bonferroni']}, Holm {rej['holm']}, BH q=0.05 "
        f"{rej['fdr_bh']}, BH q=0.10 {rej_bh10}, multipletests default (Holm-Sidak) {rej['hs']}")
-chk("A21-32", "BH(0.10) first level", Fraction(1, 10 * M), "0.00588")
+chk("A21-32", "BH(0.10) first level (no longer printed, C1)", Fraction(1, 10 * M), "0.00588", in_md=False)
+# C1: each p_(i) exceeds its BH level i q / m at least threefold even at q = 10% (so also at 5%)
+bh_ratio = {q_: min(p_ / ((i + 1) * q_ / M) for i, p_ in enumerate(ps_sorted)) for q_ in (0.05, 0.10)}
+print(f"C1: smallest p_(i) / (i q / m): q = 5% {bh_ratio[0.05]:.4f}, q = 10% {bh_ratio[0.10]:.4f}")
+assert 3 <= bh_ratio[0.10] < bh_ratio[0.05], bh_ratio
+has("E9 calendar (C1)", "the first level of Bonferroni and Holm at 5%, so neither rejects anything")
+has("E9 calendar (C1)", "each $p_{(i)}$ exceeds its level $iq/m$, at least threefold even at $q=10\\%$")
+has("E9 calendar (C1)", "Its adjusted p-values, $\\min_{j\\ge i}mp_{(j)}/j$ (at most 1), start at 0.308")
+# the printed definition of BH's adjusted p-values reproduces SciPy's and statsmodels'
+bh_adj = [min(1.0, min(M * ps_sorted[j] / (j + 1) for j in range(i, M))) for i in range(M)]
+assert np.allclose(bh_adj, np.sort(stats.false_discovery_control(pv, method="bh")), rtol=0, atol=1e-15)
+assert np.allclose(bh_adj, np.sort(multipletests(pv, method="fdr_bh")[1]), rtol=0, atol=1e-15)
+# Solution 10: Holm-Sidak's first level 1 - (1 - alpha)^(1/m)
+hs1 = 1 - 0.95 ** (1 / M)
+chk("new", "Holm-Sidak first level (Solution 10)", hs1, "0.00301")
+assert ps_sorted[0] > hs1 and abs(float(multipletests(pv, method="hs")[1].min()) - (1 - (1 - ps_sorted[0]) ** M)) < 1e-12
+has("S10", "$p_{(1)}=0.018$ exceeds their first levels, 0.00294 and 0.00301")
+has("S10", "rejects nothing either, because every $p_{(i)}$ exceeds $iq/m$")
+has("P10 stem", "Give the rejections at 5% and Benjamini–Hochberg's two smallest adjusted p-values")
 chk("A21-32", "Holm's second level (exact: printed in full)", Fraction(1, 20 * (M - 1)), "0.003125")
 assert Fraction(1, 20 * (M - 1)) == Fraction(3125, 10**6)
 assert all(v == 0 for v in (rej["bonferroni"], rej["holm"], rej["fdr_bh"], rej_bh10, rej["hs"]))
@@ -647,6 +674,9 @@ for v, sh in ((int(np.argmax(tt[:100])) + 1, "90"), (int(np.argmax(tt[:1100])) +
 has("E10", "The best after 100 rules is 2.95 (rule 90), and it is still 2.95 after 1,000")
 has("E10", "Rule 1,022 reaches 3.28, and the best of all 10,000 is 3.97 (rule 7,840)")
 has("E10 seed", "`default_rng([10, 20261011])`")
+has("E10 call (U1)", "`integers(0, 2, size=(10000, T), dtype=np.int8)`, with 1 for long and 0 for short")
+assert len(tt) == 10_000 and "integers(0, 2, size=(M, d.T), dtype=np.int8)" in inspect.getsource(experiment10)
+assert "2.0 * pos[c:c + 500].astype(np.float64) - 1.0" in inspect.getsource(experiment10), "1 long, 0 short"
 mx = json.loads((CHARTS / "lm21-maxt.json").read_text(encoding="utf-8"))
 step = next(sr for sr in mx["series"] if sr.get("step"))
 assert step["x"][:-1] == [i for i, _ in records] and step["x"][-1] == 10000
@@ -722,6 +752,44 @@ for v, sh in ((C95, "1.644854"), (n_months, "616.16"),
               (((1.644854 * 0.5 + 0.841621 * sqrt(0.55 * 0.45)) / 0.05) ** 2, "616.16"), (n_up, "617"),
               (Fraction(n_up, 12), "51.4"), (cmin, "330"), (size_x, "0.0454"), (pow_x, "0.7874")):
     chk("A21-52", "P6", v, sh)
+# m8: Problem 6 (a)-(c) on 9 of 12 months at 10%, so that they no longer repeat E1
+pow55_9 = sum(comb(12, j) * th1**j * (1 - th1) ** (12 - j) for j in range(9, 13))
+print(f"P6: Pr(X >= 9) {pge9} = {float(pge9):.6f}; Pr(X >= 8) {float(pge8):.5f}; power of X >= 9 at 0.55 "
+      f"{float(pow55_9):.5f}")
+assert pge9 == Fraction(299, 4096) and pge8 > Fraction(1, 10) >= pge9   # the 10% region is X >= 9
+chk("new", "P6 p-value Pr(X >= 9)", pge9, "0.0730")
+chk("new", "P6 power of X >= 9 at 0.55", pow55_9, "0.134")
+has("P6 stem", "A hypothetical manager beat the index in 9 of 12 months. Test $\\theta=\\tfrac12$ against "
+    "$\\theta>\\tfrac12$ at 10%.")
+has("S6 (a)", "$\\Pr(X\\ge9)=299/4,096=0.0730$, significant at 10%")
+has("S6 (b)", "$\\Pr(X\\ge8)=0.194$ exceeds 0.10, so the region is $X\\ge9$, with size 0.0730")
+has("S6 (c)", "$\\Pr(X\\ge9)=0.134$")
+has("P6 (d) stem (K2)", "using $\\hat\\theta$'s standard deviation under each hypothesis")
+
+
+# K2: the exact one-sided 5% test of theta = 1/2 for n months; power at 0.55 is not monotone in n
+def exact_test(n: int) -> tuple[int, Fraction, Fraction]:
+    """(smallest c with Pr(X >= c | 1/2) <= 5%, its size, its power at 0.55), exactly."""
+    tail, c = Fraction(0), n + 1
+    while tail + comb(n, c - 1) * half**n <= Fraction(1, 20):
+        c -= 1
+        tail += comb(n, c) * half**n
+    pw_ = sum((comb(n, j) * th55**j * (1 - th55) ** (n - j) for j in range(c, n + 1)), Fraction(0))
+    return c, tail, pw_
+
+
+pw_float = [float(stats.binom.sf(int(stats.binom.isf(0.05, n, 0.5)), n, 0.55)) for n in range(1, 700)]
+n80 = next(n for n in range(1, 700) if pw_float[n - 1] >= 0.8)
+c80, size80, pow80 = exact_test(n80)
+assert c80 == int(stats.binom.isf(0.05, n80, 0.5)) + 1 and pow80 >= Fraction(4, 5)
+assert max(pw_float[:499]) < 0.75 and all(exact_test(n)[2] < Fraction(4, 5) for n in range(500, n80))
+assert exact_test(n_up)[0] == cmin and exact_test(n_up - 1)[2] > pow_x   # 616 beats 617: not monotone
+print(f"P6 (d): exact power first reaches 80% at n = {n80}: reject X >= {c80}, size {float(size80):.5f}, "
+      f"power {float(pow80):.5f}; at {n_up - 1}: power {float(exact_test(n_up - 1)[2]):.5f}")
+for v, sh in ((n80, "620"), (c80, "331"), (size80, "0.0498"), (pow80, "0.8018")):
+    chk("new", "P6 (d) exact months for 80% power", v, sh)
+has("S6 (d)", "Exact power is not monotone in $n$: it first reaches 80% at 620 months (reject at $X\\ge331$, "
+    "size 0.0498, power 0.8018)")
 nb = T // 20
 blk = (R[: nb * 20] > EPS).reshape(nb, 20).sum(axis=1)
 assert list(blk) == [sum(1 for x in RF[20 * j: 20 * j + 20] if x > 0) for j in range(nb)]
@@ -755,6 +823,11 @@ for v, sh in ((c12, "512"), (c21, "191"), (c22, "3,332"), (rho16, "0.423"), (cn 
               (cn * rho16**2 / chi95, "204")):
     chk("A21-54", "P8", v, sh)
 assert abs(cn * rho16**2 - float(stats.chi2_contingency(np.array([[c11, c12], [c21, c22]]), correction=False).statistic)) < 1e-6
+# m13: the widening of sqrt(n) rho_hat's spread that would bring 784 down to the 5% point
+print(f"P8: chi2 {cn * rho16**2:.4f}; variance factor {cn * rho16**2 / chi95:.4f}; spread factor "
+      f"{sqrt(cn * rho16**2 / chi95):.4f}")
+chk("new", "P8 spread factor", sqrt(cn * rho16**2 / chi95), "14.3")
+has("S8 (m13)", "widen the spread of $\\sqrt n\\,\\hat\\rho$ 14.3-fold, its variance 204-fold, to bring 784 down to the 5% point 3.84")
 xc = R - Rb
 m2_, m3_, m4_ = float((xc**2).mean()), float((xc**3).mean()), float((xc**4).mean())
 sk, ku = m3_ / m2_**1.5, m4_ / m2_**2 - 3
@@ -801,6 +874,20 @@ has("29 tests", "seven in Sections 2 to 5, the 17 of the calendar, Wednesday in 
 # X1's four rows are four of the 29: the mean, the two regimes' means and Wednesday's calendar test
 assert {"mean (E3)", "mean before 2015-06-01", "mean from 2015-06-01", "calendar: Wed"} <= set(tests)
 has("X1 note", "In-sample, 4 of 29 tests on TR23")
+has("X1 note (U6)", "Row 4's other days include the 23 Saturday sessions (Section 6)")
+assert (d.wd[d.wd != 2] == 5).sum() == 23   # the Saturdays are among Wednesday's "other days"
+# m14 (ii): the mean's t-stat against the hurdle of 3 and against Bonferroni for the module's 29 tests
+c29 = float(stats.norm.isf(0.025 / len(tests)))
+print(f"Bonferroni's two-sided 5% level for {len(tests)} tests: {c29:.5f}; TR23's t-stat {tstat:.4f}")
+chk("new", "Bonferroni level for 29 tests", c29, "3.134")
+assert tstat > c29 > 3
+has("m14", "TR23's mean clears both bars: its t-stat, 3.96, exceeds 3 and Bonferroni's 3.134 for this module's 29 tests")
+# m5: the hygiene note names U28 and counts its two tests (Section 5's z = 18.5 and Problem 8's chi2)
+has("hygiene (m5)", "[[LM16]]'s counts are U28's (28 TWSE sector price indices, 2008–2026), as printed; Section 5 and "
+    "Problem 8 run two tests on them")
+has("notation (m6)", "So $A=246.12$ sessions a year")
+has("notation (m9, X10)", "$V$ a $\\chi^2$ variable")
+has("t law (m9, X10)", "$V:=(T-1)s_{\\mathrm u}^2/\\sigma^2\\sim\\chi^2_{T-1}$")
 
 # ====================================================================== A21-61: LM16's printed counts recounted on U28
 u = u28()
@@ -832,6 +919,7 @@ for v, sh in ((nU, "4,382"), (int(fs.sum()), "859"), (int(ff.sum()), "538"), (in
               (Fraction(nU, 100), "43.8")):
     chk("A21-61", "LM16's counts on U28", v, sh)
 assert (str(u.dates[0]), str(u.dates[-1])) == ("2008-12-02", "2026-10-08")
+assert len(u.names) == u.X.shape[1] == 28   # "28 TWSE sector price indices, 2008–2026" (the hygiene note)
 
 # ====================================================================== the charts carry the cited values
 pw = json.loads((CHARTS / "lm21-power.json").read_text(encoding="utf-8"))

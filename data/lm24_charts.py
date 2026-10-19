@@ -1,6 +1,6 @@
 """Chart specs for LM24 (src/data/lm24-*.json), computed from TR23 and U28.
 
-Run:  PYTHONUTF8=1 uv run python data/lm24_charts.py      (data/lm24_numbers.py checks the text)
+Run:  uv run python data/lm24_charts.py      (data/lm24_numbers.py checks the text)
 
 Inputs and conventions: data/lm24_common.py. Writes
   lm24-case       scatter: the 28 sectors' annual means, first half against second half (price indices, U28's halves)

@@ -65,7 +65,7 @@ Companion notebook to **From Calculus to Kelly, LM19**. It rebuilds the module's
 | 3 | Dispersion: [[eg:weekscale]], [[eg:robustscale]], [[ex:rollscale]] with `sliding_window_view` |
 | 4 | Shape: [[eg:divisor]], [[ex:summary]] with its regime, normal and hypothetical columns, [[eg:oneday]], the closed forms against `bias=False` |
 | 5 | Autocorrelation: (19.5) in NumPy and statsmodels, [[eg:twoways]], [[ex:acf]], the knowledge check of Section 5 |
-| 6 | Variance ratios: [[eg:sumvar]], [[ex:vr]], [[ex:vrtable]], [[eg:windows]], experiment $e=1$ |
+| 6 | Variance ratios: [[eg:sumvar]], [[ex:vr]], [[ex:vrtable]], [[eg:windows]], experiment 1 |
 | 7 | Annualization: [[ex:case]] by Polars periods, [[ex:rules]], [[eg:annualvol]], [[ex:grids]], the widget's data |
 | 8 | Practice problems 7 to 12, and an extension: the variance ratios within each limit regime |
 
@@ -197,6 +197,10 @@ show("[[eg:centres]] mean log return (%)", 100 * r.mean(), ".6f", "0.055170")
 show("[[eg:centres]] compound daily rate (%)", 100 * RG, ".6f", "0.055185")
 show("drag (bp)", 1e4 * (R.mean() - RG), ".4f", "0.7320")
 show("s^2 / 2 (bp)", 1e4 * R.var(ddof=0) / 2, ".4f", "0.7301")
+# why the median sits above the mean: large falls outnumber large rises (exact counts on the closes)
+three = Fraction(3, 100)
+show("falls of 3% or more", sum(x <= -three for x in RF), "d", "108")
+show("rises of 3% or more", sum(x >= three for x in RF), "d", "67")
 """)
 
 md(r"""
@@ -224,7 +228,7 @@ show("[[eg:robustscale]] s_u (%)", 100 * R.std(ddof=1), ".4f", "1.2085")
 show("mean absolute deviation (%)", 100 * np.abs(R - R.mean()).mean(), ".3f", "0.836")
 show("IQR (%)", 100 * iqr, ".4f", "1.1716")
 show("MAD (%)", 100 * mad(R), ".4f", "0.5889")
-print("days within MAD of the median:", int((np.abs(R - qf(R, 0.5)) <= mad(R) + EPS).sum()))
+show("days within MAD of the median, ceil(T/2)", int((np.abs(R - qf(R, 0.5)) <= mad(R) + EPS).sum()), ",", "2,925")
 show("1.4826 MAD (%)", 100 * mad(R) / Z75, ".3f", "0.873")
 show("IQR / 1.349 (%)", 100 * iqr / (2 * Z75), ".3f", "0.868")
 show("annual, 1.4826 MAD (%)", 100 * sqrt(A) * mad(R) / Z75, ".1f", "13.7")
@@ -291,6 +295,8 @@ show("[[eg:divisor]] 23 years, excess kurtosis", stats.kurtosis(ann), ".2f", "2.
 show("[[eg:divisor]] 23 years, adjusted", exk_adj(ann), ".2f", "3.22")
 n50 = 2902
 show("LM4's 8.12 adjusted at 2,902 days", (n50 - 1) / ((n50 - 2) * (n50 - 3)) * ((n50 + 1) * 8.12 + 6), ".2f", "8.14")
+adj = max(abs(skew_adj(R) / stats.skew(R) - 1), abs(exk_adj(R) / stats.kurtosis(R) - 1))
+show("TR23: the larger relative change, adjusted against plain (%)", 100 * adj, ".1f", "0.1")
 
 
 def summary(x):
@@ -380,7 +386,7 @@ ax.legend(fontsize=8); plt.show()
 md(r"""
 ## Part 6 — How daily variances add up
 
-The overlapping variance ratio (19.8) from cumulative sums, the identity column (19.7) with the sample $\hat\rho_k$, and the non-overlapping blocks after $o$ skipped returns. Then [[eg:sumvar]], [[ex:vr]], [[ex:vrtable]], [[eg:windows]] and experiment $e=1$: the iid expectation of $\operatorname{VR}(m)$, with the generator `np.random.default_rng([1, 20261011])` created once.
+The overlapping variance ratio (19.8) from cumulative sums, the identity column (19.7) with the sample $\hat\rho_k$, and the non-overlapping blocks after $o$ skipped returns. Then [[eg:sumvar]], [[ex:vr]], [[ex:vrtable]], [[eg:windows]] and experiment 1: the iid expectation of $\operatorname{VR}(m)$, with the generator `np.random.default_rng([1, 20261011])` created once.
 """)
 
 code(r"""
@@ -457,24 +463,24 @@ show("KC: m = 3, rho_1 = 0.04", 1 + 2 * (2 / 3) * 0.04, ".4f", "1.0533")
 """)
 
 code(r"""
-# experiment e = 1: 10,000 samples of T = 5,849 iid standard normal log returns (about ten seconds)
+# experiment 1: 10,000 samples of T = 5,849 iid standard normal log returns (about ten seconds)
 rng = np.random.default_rng([1, 20261011])
 sim = np.empty((10_000, 2))
 for j in range(10_000):
     zz = rng.standard_normal(T)
     sim[j] = vr(zz, 246), vr(zz, 1231)
 mean_, se_ = sim.mean(axis=0), sim.std(axis=0, ddof=0) / sqrt(10_000)
-show("e = 1: mean VR(246)", mean_[0], ".3f", "0.960")
-show("e = 1: its standard error", se_[0], ".3f", "0.002")
-show("e = 1: mean VR(1,231)", mean_[1], ".3f", "0.791")
-show("e = 1: its standard error", se_[1], ".3f", "0.005")
+show("experiment 1: mean VR(246)", mean_[0], ".3f", "0.960")
+show("experiment 1: its standard error", se_[0], ".3f", "0.002")
+show("experiment 1: mean VR(1,231)", mean_[1], ".3f", "0.791")
+show("experiment 1: its standard error", se_[1], ".3f", "0.005")
 show("iid factor, m = 246", iid_factor(T, 246), ".3f", "0.958")
 """)
 
 md(r"""
 ## Part 7 — Annualizing, and the annual volatility
 
-[[ex:case]] from weekly (ISO), monthly and calendar-year log-return sums built with Polars (sorted after `group_by`, since Polars does not keep the groups' order), [[ex:rules]], [[eg:annualvol]] with [[ex:grids]], and the data of the widget.
+[[ex:case]] from weekly (ISO), monthly and calendar-year log-return sums built with Polars (sorted after `group_by`, since Polars does not keep the groups' order), [[ex:rules]] with what a compounded year of iid simple returns would give, [[eg:annualvol]] with [[ex:grids]], and the data of the widget.
 """)
 
 code(r"""
@@ -512,6 +518,13 @@ show("[[ex:rules]] SR(R) a year", sqrt(A) * R.mean() / s, ".2f", "0.81")
 show("[[ex:rules]] SR(r) a day", r.mean() / s_r, ".4f", "0.0456")
 show("[[ex:rules]] SR(r) a year", sqrt(A) * r.mean() / s_r, ".3f", "0.715")
 show("[[ex:rules]] SR(r) by (19.9)", sqrt(A) * r.mean() / s_r / sqrt(vr(r, 246)), ".3f", "0.650")
+# on simple returns the rules are conventions: a year of A iid draws from F-hat compounds,
+# with E(1+R) = 1 + Rbar and E(1+R)^2 = s^2 + (1+Rbar)^2
+g1 = (1 + R.mean()) ** A
+yr_sd = sqrt((s**2 + (1 + R.mean()) ** 2) ** A - g1**2)
+show("compounded iid year: mean simple return (%)", 100 * (g1 - 1), ".2f", "16.62")
+show("compounded iid year: standard deviation (%)", 100 * yr_sd, ".2f", "22.29")
+show("compounded iid year: Sharpe ratio", (g1 - 1) / yr_sd, ".3f", "0.746")
 
 v25 = vr(r25, 246)
 show("[[eg:annualvol]] VR(246), 2003-2025", v25, ".4f", "1.0536")
@@ -554,6 +567,8 @@ ratio7 = 1 + 2 * 0.04 * 245 / 246
 show("P7 model ratio", ratio7, ".4f", "1.0797")
 show("P7 without (%)", sqrt(246) * 1.2107, ".2f", "18.99")
 show("P7 with (%)", sqrt(246) * 1.2107 * sqrt(ratio7), ".2f", "19.73")
+show("P7 what the other 244 lags add", identity(246) - (1 + 2 * rho_r[0] * 245 / 246), ".2f", "0.20")
+show("P7 what lag 1 adds", 2 * rho_r[0] * 245 / 246, ".3f", "0.078")
 
 show("P8 factor, m = 246, T = 5,664", iid_factor(5664, 246), ".3f", "0.957")
 show("P8 factor, m = 1,231, T = 5,849", iid_factor(5849, 1231), ".3f", "0.790")
@@ -575,7 +590,7 @@ counts = [int((np.abs(x) >= band - EPS).sum()) for x in (rho_r, rho_a, rho_q)]
 print("P11 lags outside the band (r, |r|, r^2):", counts)
 assert counts == [9, 30, 30]
 show("P11 lag 29", rho_r[28], ".5f", "-0.02561")
-show("P11 margin", band - abs(rho_r[28]), ".5f", "0.00002")
+show("P11 margin, in units of 1e-5 (three significant figures)", 1e5 * (band - abs(rho_r[28])), ".2f", "2.15")
 
 show("P12 days (%)", 100 * v_day, ".2f", "18.56")
 show("P12 weeks (%)", 100 * v_wk, ".2f", "18.09")
@@ -591,7 +606,7 @@ show("P12 np.median, for comparison (%)", 100 * np.median(grids), ".2f", "19.15"
 md(r"""
 ### Extension: variance ratios within each limit regime
 
-The daily price limit was 7% until 29 May 2015 and 10% from 1 June 2015. Compute $\operatorname{VR}(m)$ of (19.8) for $m$ = 5, 20 and 60 within each regime, each about its own mean. Before June 2015 they read 1.070, 1.057 and 1.215; from June 2015, 1.013, 1.000 and 0.975. Then extend the grid to $m=246$: how many disjoint years does each regime hold, and what would the iid factor be? A regime split is a stability check, not a test (LM25 tests variance ratios, and LM22 puts intervals around them).
+The daily price limit was 7% until 29 May 2015 and 10% from 1 June 2015. Compute $\operatorname{VR}(m)$ of (19.8) for $m$ = 5, 20 and 60 within each regime, each about its own mean. Before June 2015 they read 1.070, 1.057 and 1.215; from June 2015, 1.013, 1.000 and 0.975. Then extend the grid to $m=246$: how many disjoint years does each regime hold, and what would the iid factor be? A regime split is a stability check, not a test (LM25 tests variance ratios, and LM22 puts a block-bootstrap interval around $\operatorname{VR}(20)$).
 """)
 
 code(r"""

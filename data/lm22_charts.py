@@ -168,7 +168,7 @@ pw_r, pw_r2 = C.pw(D.R)[0], C.pw((D.R - D.Rb) ** 2)[0]
 ell = {
     "alt": "Bootstrap standard error over the iid one against the mean block length, 1 to 400 days on a log scale: "
     "the volatility's ratio rises from 1.18 at 2 days to 3.91 at 145 and 4.63 at 400, while the Sharpe ratio's and "
-    "the Kelly fraction's stay at or below 1.15 and 1.24, and VR(20)'s ends at 0.93 at 145",
+    "the Kelly fraction's peak at 1.15 and 1.24, both at 50 days, and VR(20)'s is 0.93 at 145",
     "height": 320,
     "x": {"type": "log", "fmt": "n0", "tipLabel": "mean block length ", "label": "Mean block length (days, log scale)",
           "min": 1, "max": 400, "ticks": [1, 3, 10, 30, 145, 400], "values": ells},

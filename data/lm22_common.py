@@ -34,7 +34,8 @@ Conventions (plans/vol-4.md, the LM22 brief; plans/vol-4-anchors.md, "LM22", Com
 - Seeds: each experiment creates np.random.default_rng([e, 20261011]) once, at its start (AUTHORING section 8). The
   numbers e are the brief's: 1 E1; 2 iid TR23; 3 stationary TR23 (ell 145); 4 X6's grid; 5 moving, 6 circular; 7 X5's
   paths; 8, 9 the crash correlation; 10-13 the PC1 shares; 14, 15 the windows; 16-18 the tests; 19 the uncentred
-  resamples of section 8's knowledge check; 20 the arch check; 21 Problem 6; 22, 23 Problem 11; 24 the widget.
+  resamples of section 8's knowledge check; 20 the arch check; 21 Problem 6; 22, 23 Problem 11; 24 the widget; 26
+  Problem 6's expectation at ell 2 (B = 200,000; the lab's extension uses 25).
 """
 import math
 import os
@@ -61,6 +62,7 @@ CHUNK = 500
 B = 10_000
 B_GRID = 2_000               # X6's other lengths (experiment 4) and Problem 6 (experiment 21)
 B_WIDGET = 1_000             # the widget's resamples per replicate (experiment 24)
+B_26 = 200_000               # Problem 6's expectation at ell 2 (experiment 26)
 GRID = (2, 3, 5, 10, 20, 50, 100, 200, 400)          # experiment 4, in this order
 WIDGET_ELLS = (1, 2, 3, 5, 10, 20, 50, 100, 145, 200, 400)
 WIDGET_REPS = 3

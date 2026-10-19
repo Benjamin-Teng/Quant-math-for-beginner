@@ -1,6 +1,6 @@
 """Every number that LM24 (Bayesian Inference and Shrinkage) prints, computed and checked against src/lm24.md.
 
-Run:  PYTHONUTF8=1 uv run python data/lm24_numbers.py
+Run:  uv run python data/lm24_numbers.py
       (after data/vol3_series.py, which builds TR23, and data/vol2_series.py, which builds U28's closes)
 
 Inputs and conventions: data/lm24_common.py (TR23 from data/processed/vol3_taiex.parquet; U28 from data/lm10_series.py's
@@ -386,7 +386,10 @@ chk("pitfall: daily sigma0 by A (%)", 100 * s0_right, ".4f", "0.0406")
 chk("pitfall: c with sqrt(A)", c_wrong, ".4f", "0.9994")
 # KC section 3
 chk("KC3 nine times 3.59", 9 * n0_10 / A, ".1f", "32.3")
+chk("KC3 unrounded worth, three decimals (K1)", n0_10 / A, ".3f", "3.594")
+chk("KC3 from printed 3.594", 9 * 3.594, ".1f", "32.3")
 chk("KC3 from printed 3.59", 9 * 3.59, ".1f", "32.3")
+has("KC3 answer (K1)", "nine times the unrounded 3.594: 32.3 years")
 anchor("A24-19", f"A sigma0 = 10 worth {v(n0_10 / A, 2)} years; c = 0.9 needs 9 x that = {v(9 * n0_10 / A, 1)} years "
        f"(from printed 3.59: {9 * 3.59:.2f})")
 anchor("A24-31", f"{v(C.Z975, 2, extra=4)} (lm15.md:194 prints 1.9600)")
@@ -441,6 +444,11 @@ anchor("A24-30", "A sigma0 = 10: " + row_anchor(c10, 0.10, 2))
 p_flat = float(stats.norm.cdf(-Rb / se))
 anchor("A24-20", "flat: " + row_anchor(1.0, math.inf, 0) + f"; LM21's one-sided p-value Phi(-{t_u:.6f}) "
        f"{sig(float(stats.norm.cdf(-t_u)), 2)}")
+# the note: the first two rows are defined by c, so their worth is 3 and 1 times the sample's span (m2)
+chk("years, four decimals (priors note)", years, ".4f", "23.7645")
+chk("quarter-Kelly worth from printed 3 x 23.7645", 3 * 23.7645, ".2f", "71.29")
+chk("half-Kelly worth from printed 23.7645", 23.7645, ".2f", "23.76")
+has("priors note (m2)", "their priors are worth three times and once the sample's 23.7645 years")
 chk("A sigma0 for c = 1/4", 100 * sig_q, ".2f", "2.25")
 chk("A sigma0 for c = 1/4 from printed 3.89/sqrt(3)", 3.89 / sqrt(3), ".2f", "2.25")
 anchor("A24-14", f"A sigma0 = SE/sqrt(3) for c = 1/4: {v(sig_q, 2, pct=True)} (from printed 3.89: {v(3.89 / sqrt(3), 2, extra=3)}; "
@@ -459,8 +467,11 @@ chk("E5 at 10 points: upper", 100 * hi10, ".1f", "20.5")
 sci("E5 at 10 points: Pr(mu<=0)", p10, 1, "1.1 -4")
 pr_pos_q = 1 - float(stats.norm.cdf(-0.25 * Rb / (0.5 * se)))
 pr_pos_h = 1 - float(stats.norm.cdf(-0.5 * Rb / (sqrt(0.5) * se)))
-chk("Pr(mu>0), quarter-Kelly prior", 100 * pr_pos_q, ".1f", "97.6")
-chk("Pr(mu>0), half-Kelly prior", 100 * pr_pos_h, ".1f", "99.7")
+chk("Pr(mu>0 | data), quarter-Kelly prior", 100 * pr_pos_q, ".1f", "97.6")
+chk("Pr(mu>0 | data), half-Kelly prior", 100 * pr_pos_h, ".1f", "99.7")
+assert float(stats.norm.sf(0.0)) == 0.5          # each prior itself, centred at zero, puts 50% on mu > 0 (U1)
+has("U1: the posterior under the first row's prior", "Even under the prior of the first row, the posterior puts 97.6% on")
+has("U1: the sceptics after the data", "After the data, both sceptics put high probability on a positive mean, 97.6% and 99.7%")
 _, _, lo_h, hi_h, _, _, _ = row_values(0.5, sig_h)
 has("pitfall 4 interval", "the same data give 2.3% to 13.1%")
 assert (f"{100 * lo_h:.1f}", f"{100 * hi_h:.1f}") == ("2.3", "13.1")
@@ -496,6 +507,14 @@ has("E6 theory", "$N-(N-3)/(1+\\sigma_0^2)=28-25/2=15.5$")
 has("E6 Bayes theory", "$Nc\\sigma^2/T=14$")
 assert 28 - 25 / 2 - 28 / 2 == 1.5
 has("E6 cost", "costs 1.5 of the 14 that knowing them saves")
+# the theorem's and the risk formula's source (SOURCES, Efron and Hastie 2016: (7.12)-(7.16) and §7.5)
+has("theorem source", "Stated without proof (Efron and Hastie 2016, §7.1 and §7.5).")
+has("risk formula source", "is stated without proof (Efron and Hastie 2016, equation 7.14)")
+has("Efron and Hastie reference", "§7.1 (the James–Stein estimator toward the grand mean, its risk and the James–Stein theorem, "
+    "equations 7.12–7.16) and §7.5 (the positive part)")
+has("Wasserman citation (M2 c)", "(Wasserman 2004, ch. 11)")
+has("Wasserman reference (M2 c)", "New York: Springer, ch. 11 (Bayesian inference)")
+assert "Chopra" not in RAW_MD and "\\Gamma(a+1)" not in RAW_MD and "\\chi^2_k" not in RAW_MD   # m1; m3 (a, nu)
 anchor("A24-42", f"Experiment 1, 10,000 cross-sections: raw {mcs(e1['raw'])}; JS {mcs(e1['js'])}; positive part "
        f"{mcs(e1['pp'])}; Bayes 0.5x {mcs(e1['bayes'])}; mean c_hat (positive part) "
        f"{v(float(e1['c_pp'].mean()), 2, extra=2)}; mean unclipped 1 - 25/S {v(float(e1['c_js'].mean()), 2, extra=2)}")
@@ -519,6 +538,18 @@ chk("E7 1 - c_hat, common removed", b_d, ".2f", "1.01")
 chk("E7 1 - c_hat, common removed, from printed", 25 * 4.79**2 / (28 * 4.50**2), ".2f", "1.01")
 _, sp2, _, _ = C.js(C.X[C.H:])
 chk("E7 second half spread", 100 * sp2, ".2f", "8.49")
+# M3: one common noise variance stands in for 28 unequal ones (total noise, first half)
+noise_i = C.A28 * np.sqrt(C.X[:C.H].var(axis=0, ddof=0) / C.H)
+assert abs(float(np.sqrt((noise_i**2).mean())) - nz_r) < 1e-15          # E7's noise is the root of their average
+chk("M3 smallest sector noise", 100 * float(noise_i.min()), ".1f", "4.8")
+chk("M3 largest sector noise", 100 * float(noise_i.max()), ".1f", "9.7")
+chk("M3 ratio of the noise variances (about 4)", float(noise_i.max() / noise_i.min()) ** 2, ".0f", "4")
+assert bool((noise_i > sp1).all())                                     # the spread lies below every sector's noise
+assert 25 * float(noise_i.min()) ** 2 / (28 * sp1**2) > 1                # so c_hat = 0 under any average of the noises
+has("M3 paragraph", "the sectors' noise variances differ by a factor of about 4 (half-widths 9 to 19 points in [[ex:forest]])")
+has("M3 known", "Their average, estimated from 2,191 returns, is treated as known.")
+has("M3 spread", "the spread, 4.50, lies below every sector's noise (4.8 to 9.7 points)")
+has("M3 l.289", "sum to zero each day, still co-move and have unequal noise")
 anchor("A24-44", f"first half: noise {v(nz_r, 1, pct=True)}; spread SD (divisor 28) {v(sp1, 1, pct=True)}; 1 - c_hat "
        f"{v(b_r, 2)}; c_hat {c_r:g}")
 anchor("A24-17", f"common removed, first half: noise {v(nz_d, 1, pct=True)}; 1 - c_hat {v(b_d, 2)}; c_hat {c_d:g}")
@@ -587,6 +618,31 @@ chk("E9 exact at c = 1/2", kxh, ".2f", "2.11")
 chk("E9 gap at c = 1/2", 0.5 * fhat - kxh, ".2f", "0.03")
 chk("E9 gap at c = 1/2 from printed", 2.14 - 2.11, ".2f", "0.03")
 chk("E9 1 - c at 10 points (%)", 100 * (1 - c10), ".0f", "13")
+# M1: what the gap at c = 1 is made of. (4.2) with its mu^2 term gives Rbar / (s^2 + Rbar^2); the rest is non-normal.
+quad_mu2 = Rb / (s**2 + Rb**2)
+chk("E9 (4.2) with the mu^2 term", quad_mu2, ".2f", "4.27")
+chk("E9 mu^2 part of the gap", fhat - quad_mu2, ".2f", "0.01")
+chk("E9 the rest of the gap", quad_mu2 - f_star, ".2f", "0.13")
+chk("E9 mu^2 part from printed 4.28 - 4.27", 4.28 - 4.27, ".2f", "0.01")
+chk("E9 the rest from printed 4.27 - 4.14", 4.27 - 4.14, ".2f", "0.13")
+assert 0.02 < (quad_mu2 - f_star) / quad_mu2 < 0.05                    # "a few per cent off a fraction"
+# the cause test of PITFALLS section 7: the days mirrored about their mean keep the tails and drop the skewness
+_sym = np.concatenate([C.R, 2 * Rb - C.R])
+f_sym = float(optimize.brentq(lambda f: float((_sym / (1 + f * _sym)).mean()), 1e-6, 1 / abs(float(_sym.min())) - 1e-6,
+                              xtol=1e-14))
+tails_part, skew_part = quad_mu2 - f_sym, f_sym - f_star
+print(f"M1 split at c = 1: mu^2 {fhat - quad_mu2:.4f}; tails {tails_part:.4f} (mirrored root {f_sym:.5f}); "
+      f"skewness {skew_part:.4f}")
+assert tails_part > 0.04 and skew_part > 0.04                           # both fat tails and skewness matter
+skew = float((((C.R - Rb) / s) ** 3).mean())
+assert f"{skew:.4f}" == "-0.3384" and "| Skewness | −0.3384 |" in (ROOT / "src" / "lm19.md").read_text(encoding="utf-8")
+has("E9 mu^2 sentence", "Keeping the $\\mu^2$ term of (4.2), which (24.5) drops, gives $\\bar R/(s^2+\\bar R^2)=4.27$ at "
+    "$c=1$: it explains only 0.01 of the gap")
+has("E9 rest sentence", "The other 0.13 comes from the days' fat tails and negative skewness ([[LM19]])")
+has("kelly note (M1)", "comes mostly from the days' fat tails and negative skewness; (4.2)'s $\\mu^2$ term adds 0.01 at "
+    "full Kelly")
+has("departures (M1)", "**Non-normal days.** Fat tails and a negative skewness make the quadratic rule overstate")
+assert "fat tails' effect" not in RAW_MD and "The fat tails shave" not in RAW_MD
 gb, gp = C.growth(c10 * fhat, pm10), C.growth(fhat, pm10)
 chk("E9 Bayes growth (%)", 100 * gb, ".0f", "25")
 chk("E9 plug-in share (%)", 100 * gp / gb, ".1f", "97.7")
@@ -630,7 +686,10 @@ chk("KC7 ratio to fhat", fb8 / fhat, ".2f", "0.76")
 chk("KC7 c fhat", 0.5 * fhat, ".2f", "2.14")
 anchor("A24-23", f"prior centred at 8% a year, A sigma0 = SE (c = 1/2): posterior mean {v(A * pm8, 2, pct=True)}; "
        f"Bayes fraction {v(fb8, 2)}; ratio to fhat {v(fb8 / fhat, 2)}; c fhat {v(0.5 * fhat, 2)}")
-has("what breaks: T", "matters little at $T=5,849$")
+has("what breaks: T", "At $T=5,849$ this matters little")
+has("what breaks: the prior of BDA3's section 3.3 (M2 a)",
+    "Under the conjugate prior of Gelman et al. (2013, §3.3), whose prior SD of $\\mu$ is proportional to $\\sigma$")
+has("M4: growth over tau years", "is therefore $(f\\mu-\\tfrac12f^2\\sigma^2)A\\tau$")
 
 # ====================================================================== section 8: the code's comments and the KC
 post_ = stats.beta(82 + 8, 82 + 4)
@@ -692,6 +751,15 @@ chk("P9 lower", 100 * A * (pm5 - C.Z975 * psd5), ".1f", "3.6")
 chk("P9 upper", 100 * A * (pm5 + C.Z975 * psd5), ".1f", "15.6")
 chk("P9 lower from printed", 0.623 * 15.38 - 1.96 * sqrt(0.623) * 3.89, ".1f", "3.6")
 chk("P9 upper from printed", 0.623 * 15.38 + 1.96 * sqrt(0.623) * 3.89, ".1f", "15.6")
+# m2: the two-decimal values the solution prints, and the interval a reader computes from them
+chk("P9 posterior mean, two decimals from printed 0.623 x 15.38", 0.623 * 15.38, ".2f", "9.58")
+chk("P9 posterior SD, two decimals from printed", sqrt(0.623) * 3.89, ".2f", "3.07")
+chk("P9 posterior SD, two decimals", 100 * A * psd5, ".2f", "3.07")
+chk("P9 lower from printed 9.58, 3.07", 9.58 - 1.96 * 3.07, ".1f", "3.6")
+chk("P9 upper from printed 9.58, 3.07", 9.58 + 1.96 * 3.07, ".1f", "15.6")
+assert format(9.6 - 1.96 * 3.1, ".1f") == "3.5"   # why the solution prints the two-decimal values (m2)
+has("P9 two-decimal values", "=9.58%$, or 9.6% to one decimal, and the SD is $\\sqrt{0.623}\\times3.89=3.07$ points, or "
+    "3.1. From these two-decimal values, the 95% credible interval runs from 3.6% to 15.6%")
 p5_ = float(stats.norm.cdf(-pm5 / psd5))
 chk("P9 Pr(mu<=0)", p5_, ".4f", "0.0009")
 chk("P9 Pr(mu<=0) from printed", float(stats.norm.cdf(-0.623 * 15.38 / (sqrt(0.623) * 3.89))), ".4f", "0.0009")
@@ -729,6 +797,10 @@ chk("P11 noise", 100 * nz_e, ".1f", "5.0")
 chk("P11 1 - c_hat", b_e, ".2f", "1.10")
 chk("P11 miss of the grand mean", 100 * miss_e, ".1f", "12.1")
 chk("P11 deviations' miss", 100 * miss_e_dev, ".1f", "8.5")
+chk("P11 deviations' miss, two decimals (K2)", 100 * miss_e_dev, ".2f", "8.49")
+assert abs(miss_e_dev - C.oos(C.M1, C.M2, 0, True)) < 1e-12           # the same deviations as in E7
+has("P11 stem (K2)", "while the miss of the deviations from each half's grand mean stays 8.5?")
+has("P11 solution (K2)", "the deviations from each half's grand mean, and their miss of 8.49, do not change")
 chk("P11 average excess, first half", 100 * C.A28 * float(me1.mean()), ".1f", "-0.3")
 chk("P11 average excess, second half", 100 * C.A28 * float(me2.mean()), ".1f", "-9.0")
 chk("P11 TAIEX, first half", 100 * C.A28 * float(C.TX[:C.H].mean()), ".1f", "10.8")

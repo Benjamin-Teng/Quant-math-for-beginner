@@ -1,6 +1,6 @@
 """Chart specs for LM26 (src/data/lm26-*.json), computed from TR23, the per-day realized variances and the 2025 TX bars.
 
-Run:  PYTHONUTF8=1 uv run python data/lm26_charts.py
+Run:  uv run python data/lm26_charts.py
       (after data/vol3_series.py, data/vol4_series.py and data/vol4_rv.py; data/lm26_numbers.py then checks the text
       and the widget block)
 

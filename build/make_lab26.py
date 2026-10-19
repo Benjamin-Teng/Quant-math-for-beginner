@@ -74,7 +74,7 @@ Companion notebook to **From Calculus to Kelly, LM26**. It rebuilds the module's
 
 **Environment.** From the repository root, `uv sync` installs the locked Python environment (`uv.lock`). Open this notebook with the `.venv` kernel, or run `uv run --with jupyterlab jupyter lab`.
 
-**Data.** The notebook reads FinMind files that you download once with your own token. From the repository root, run `uv run python data/fetch_finmind.py`, then `uv run python data/make_lab_data.py`. FinMind's licence does not allow the book to redistribute the data. After that, the notebook runs offline. The realized variances come with the repository (`data/derived/vol4_rv.csv`); rebuilding them needs the 5-second TAIEX download, `uv run python data/fetch_intraday.py --series taiex5s` (5,351 requests, about nine hours on a free FinMind account, re-run after each hourly stop).
+**Data.** The notebook reads FinMind files that you download once with your own token. From the repository root, run `uv run python data/fetch_finmind.py`, then `uv run python data/make_lab_data.py`. FinMind's licence does not allow the book to redistribute the data. After that, the notebook runs offline. The realized variances come with the repository (`data/derived/vol4_rv.csv`); rebuilding them needs the 5-second TAIEX download, `uv run python data/fetch_intraday.py --series taiex5s` (5,351 requests, about nine hours on a free registered FinMind account at 600 calls an hour, re-run after each hourly stop).
 
 `data/` then holds `taiex_tr.csv` (`date`, `price`: the daily closes of the TAIEX total-return index, FinMind `TaiwanStockTotalReturnIndex`, data_id TAIEX, 2 January 2003 to 8 October 2026) and `vol4_rv.csv` (one row per session from 3 January 2005: the sampling interval `regime_s`, the realized variances `rv_<h>` of the window 09:30:00–13:30:00 at nine intervals with their return counts `n_<h>`, and `o2`, the squared log change from the previous close to 09:30:00; derived from FinMind `TaiwanVariousIndicators5Seconds` and `TaiwanStockPrice`, TWSE the original source). The notebook reads nothing outside `data/`.
 
@@ -111,6 +111,21 @@ def show(label, value, fmt, printed):
     got = format(value, fmt)
     print(f"{label}: {got}   [book: {printed}]")
     assert got == printed, (label, got, printed)
+
+
+def nw_lags(n):
+    # the book's lag rule (LM23)
+    return math.floor(4 * (n / 100) ** (2 / 9))
+
+
+def nw_se(d, lags):
+    # Newey-West standard error of a mean: Bartlett weights, divisor n, no small-sample correction
+    c = d - d.mean()
+    n = len(c)
+    s = float(c @ c) / n
+    for k in range(1, lags + 1):
+        s += 2 * (1 - k / (lags + 1)) * float(c[k:] @ c[:-k]) / n
+    return math.sqrt(s / n)
 """)
 
 md(r"""
@@ -185,10 +200,20 @@ show("8 April 2025: sqrt(V_t) (%)", math.sqrt(V15[i8]), ".4f", "3.3873")
 md(r"""
 ## Part 2 — The ARCH test ([[eg:archtest]])
 
-Regress $\hat\varepsilon_t^2$ on a constant and $K$ lags by OLS; the statistic is $(T-K)\times$R-squared, compared with the upper tail of $\chi^2_K$. statsmodels' `het_arch` squares the residuals it is given, so pass $y_t-\bar y$.
+First the evidence of Section 2, by LM19's (19.5) (full-sample mean, divisor $T$): next-day log returns barely correlate, their sizes do. Then the test: regress $\hat\varepsilon_t^2$ on a constant and $K$ lags by OLS; the statistic is $(T-K)\times$R-squared, compared with the upper tail of $\chi^2_K$. statsmodels' `het_arch` squares the residuals it is given, so pass $y_t-\bar y$.
 """)
 
 code(r"""
+def rho(x, k):
+    # LM19's (19.5): full-sample mean, divisor T in numerator and denominator
+    xc = x - x.mean()
+    return float(xc[k:] @ xc[:-k]) / float(xc @ xc)
+
+
+show("rho_1 of r (LM19)", rho(r, 1), ".4f", "0.0393")
+show("rho_1 of |r| (LM19)", rho(np.abs(r), 1), ".3f", "0.161")
+
+
 def arch_test(x, K):
     z = x[K:] ** 2
     X = np.column_stack([np.ones(len(x) - K)] + [x[K - j - 1 : len(x) - j - 1] ** 2 for j in range(K)])
@@ -248,7 +273,9 @@ print(f"weights sum to {w.sum():.10f}")
 show("effective window 1/(1 - lam) (days)", 1 / (1 - LAM), ".1f", "16.7")
 show("weights' half-life ln(1/2)/ln(lam) (days)", math.log(0.5) / math.log(LAM), ".1f", "11.2")
 show("weight on the last 75 days (%)", 100 * (1 - LAM**75), ".1f", "99.0")
-print(f"RiskMetrics' 1% tolerance: ln(0.01)/ln(0.94) = {math.log(0.01) / math.log(LAM):.1f} days")
+show("RiskMetrics' effective days at a 1% tolerance, ln(0.01)/ln(0.94)", math.log(0.01) / math.log(LAM), ".1f", "74.4")
+print(f"weight on the last 74 days {100 * (1 - LAM**74):.2f}%, on the last 75 {100 * (1 - LAM**75):.2f}%")
+assert 1 - LAM**75 >= 0.99 > 1 - LAM**74          # its Table 5.7 lists 74 days; 75 whole days reach 99%
 show("knowledge check: effective window at 0.97", 1 / 0.03, ".1f", "33.3")
 show("knowledge check: weights' half-life at 0.97", math.log(0.5) / math.log(0.97), ".2f", "22.76")
 """)
@@ -375,7 +402,7 @@ show("knowledge check: robust / classic SE of alpha", gn.std_err.to_numpy()[2] /
 """)
 
 md(r"""
-The half-life's uncertainty: the delta method (20.8) on $\ln\frac12/\ln(\alpha+\beta)$ with the robust covariance, against the robust interval for $\alpha+\beta$ mapped through the half-life. Near 1 the mapped interval is lopsided.
+The half-life's uncertainty: the delta method (20.8) on $\ln\frac12/\ln(\alpha+\beta)$ with the robust covariance, against the robust interval for $\alpha+\beta$ mapped through the half-life. Near 1 the mapped interval is lopsided. The same delta method gives the unconditional volatility $\sqrt{A\,\omega/(1-\alpha-\beta)}$ its standard error.
 """)
 
 code(r"""
@@ -394,6 +421,27 @@ show("interval for alpha + beta, low", lo, ".5f", "0.97342")
 show("interval for alpha + beta, high", hi, ".5f", "0.99544")
 show("mapped half-life, low", half_life(lo), ".0f", "26")
 show("mapped half-life, high", half_life(hi), ".0f", "152")
+
+cov_t = gt.param_cov.to_numpy()
+se_pt = math.sqrt(cov_t[2, 2] + cov_t[3, 3] + 2 * cov_t[2, 3])
+lo_t, hi_t = pers_t - z * se_pt, pers_t + z * se_pt
+show("t fit: interval for alpha + beta, low", lo_t, ".5f", "0.98343")
+show("t fit: interval for alpha + beta, high", hi_t, ".5f", "0.99853")
+show("t fit: mapped half-life, low", half_life(lo_t), ".0f", "41")
+show("t fit: mapped half-life, high", half_life(hi_t), ".0f", "471")
+
+
+def uvol_se(p, cov):
+    # delta method for sqrt(A omega / (1 - alpha - beta)), in percentage points a year
+    om, ps = p[1], p[2] + p[3]
+    g_ = np.zeros(len(p))
+    g_[1] = 1 / (1 - ps)
+    g_[2] = g_[3] = om / (1 - ps) ** 2
+    return math.sqrt(A) / (2 * math.sqrt(om / (1 - ps))) * math.sqrt(float(g_ @ cov @ g_))
+
+
+show("SE of the normal fit's unconditional volatility (points)", uvol_se(pn, cov_r), ".1f", "2.3")
+show("SE of the t fit's unconditional volatility (points)", uvol_se(pt, cov_t), ".1f", "2.9")
 """)
 
 md(r"""
@@ -537,7 +585,7 @@ show("after the other days (%)", 100 * float(pred[~big].mean()), ".2f", "0.79")
 """)
 
 md(r"""
-Experiments 1 and 2: 1,000 paths of 5,849 days from each fit, $\sigma_t^2$ started at the unconditional variance. Each day draws one vector of 1,000 innovations (element $k$ for path $k$); a $t$ draw is scaled by $\sqrt{(\nu-2)/\nu}$ to variance 1. Medians carry LM18's batch standard error (20 batches of 50 paths, divisor 20). Each experiment takes about a second.
+Experiments 1 and 2: 1,000 paths of 5,849 days from each fit, with normal $\xi_t$ in experiment 1 and Student $t$ in experiment 2, $\sigma_t^2$ started at the unconditional variance. Each day draws one vector of 1,000 innovations (element $k$ for path $k$); a $t$ draw is scaled by $\sqrt{(\nu-2)/\nu}$ to variance 1. Medians carry LM18's batch standard error (20 batches of 50 paths, divisor 20). Each experiment takes about a second.
 """)
 
 code(r"""
@@ -661,7 +709,7 @@ plt.show()
 """)
 
 md(r"""
-[[eg:vrback]] from the file: by (26.6) with $J=2$, $\mathrm{RV}(2h)/\mathrm{RV}(h)-1$ estimates $\rho_1$ of the returns over $h$. Deep Dive 3: under iid noise the mean RV would rise by the same amount for every extra return a day.
+[[eg:vrback]] from the file: by (26.6) with $J=2$, $\mathrm{RV}(2h)/\mathrm{RV}(h)-1$ estimates $\rho_1$ of the returns over $h$, a ratio of the period's means. Deep Dive 3: under (26.7) the mean RV would rise by the same amount for every extra return a day. Each rise is the mean of a per-day series, so it gets a Newey–West standard error across the 5-second days.
 """)
 
 code(r"""
@@ -677,6 +725,17 @@ rise_per = [(mv[j] - mv[j + 1]) / (ns[j] - ns[j + 1]) for j in range(5)]
 print("rise of mean RV(h)/RV(5 min) per extra return a day:", ", ".join(f"{v:.2e}" for v in rise_per))
 show("smallest (x 1e-3)", 1e3 * min(rise_per), ".1f", "3.1")
 show("largest (x 1e-3)", 1e3 * max(rise_per), ".1f", "4.9")
+
+m5_mean = float(np.mean(RV["5m"][m5s]))
+per_day = [(RV[IV[j][0]][m5s] - RV[IV[j + 1][0]][m5s]) / (ns[j] - ns[j + 1]) / m5_mean for j in range(5)]
+nl5 = nw_lags(int(m5s.sum()))
+print(f"{int(m5s.sum()):,} five-second days, {nl5} Newey-West lags")
+for j, d_ in enumerate(per_day):
+    se_j = nw_se(d_, nl5)
+    print(f"{IV[j][0]}-{IV[j + 1][0]}: rise {d_.mean():.3e}, SE {se_j:.1e}, SE / rise {se_j / d_.mean():.3f}")
+jx, jn = int(np.argmax(rise_per)), int(np.argmin(rise_per))
+d_x = per_day[jx] - per_day[jn]
+print(f"largest minus smallest: {d_x.mean():.3e}, t-stat {d_x.mean() / nw_se(d_x, nl5):.2f}")
 """)
 
 code(r"""
@@ -684,21 +743,7 @@ o2_share = float(np.mean(1e4 * O2) / np.mean(Vt["15m"]))
 show("opening return's share of mean V_t, all days (%)", 100 * o2_share, ".0f", "66")
 mo = np.isin(d_arr, [dates[i] for i in oos])
 show("on the out-of-sample days (%)", 100 * float(np.mean(1e4 * O2[mo]) / np.mean(Vt["15m"][mo])), ".0f", "68")
-
-
-def nw_lags(n):
-    return math.floor(4 * (n / 100) ** (2 / 9))
-
-
-def nw_se(d, lags):
-    # Newey-West standard error of a mean: Bartlett weights, divisor n, no small-sample correction
-    c = d - d.mean()
-    n = len(c)
-    s = float(c @ c) / n
-    for k in range(1, lags + 1):
-        s += 2 * (1 - k / (lags + 1)) * float(c[k:] @ c[:-k]) / n
-    return math.sqrt(s / n)
-
+print(f"(all days: {len(O2):,}; out-of-sample days: {int(mo.sum()):,})")
 
 y2 = y[i05:] ** 2
 dV = Vt["15m"] - y2
@@ -899,9 +944,10 @@ The window check (a stability check): the same design with windows of 1,000 and 
 
 code(r"""
 t0 = time.perf_counter()
-for wv, vals in ((1000, ("0.5029", "0.5126")), (2461, ("0.5332", "0.5421"))):
+for wv, vals, day0 in ((1000, ("0.5029", "0.5126"), "2007-02-01"), (2461, ("0.5332", "0.5421"), "2012-12-03")):
     rg2, _ = rolling_garch(wv)
     f0 = next(i for i in starts if i >= wv)
+    assert dates[f0] == day0                       # the module: forecasts from 1 February 2007 and 3 December 2012
     o2_ = np.arange(f0, T)
     qn = float(qlike(V15[o2_], rg2["normal"][o2_]).mean())
     qt = float(qlike(V15[o2_], rg2["t"][o2_]).mean())
@@ -917,12 +963,15 @@ print(f"{time.perf_counter() - t0:.0f} s")
 md(r"""
 ## Part 8 — Practice problems 10, 11 and 12
 
-**Problem 10.** The normal GARCH log-likelihood (26.5) by hand, from arch's backcast, at arch's estimates (Part 4 did it): $\ell$ and $\hat\sigma_t$ on 7 April 2025.
+**Problem 10.** The normal GARCH log-likelihood (26.5) by hand, from arch's backcast (about the sample mean, 2.78 %²), at arch's estimates (Part 4 did it): $\ell$ and $\hat\sigma_t$ on 7 April 2025. A backcast about $\hat g$ instead gives a slightly different $\ell$.
 """)
 
 code(r"""
 show("P10: l by hand", ll, ",.2f", "-8,647.25")
 show("P10: sigma_t on 7 April 2025 (%)", math.sqrt(s2[i7]), ".3f", "1.737")
+s2_g = garch_filter(pn[1], pn[2], pn[3], y - pn[0], backcast(y - pn[0]))
+ll_g = -0.5 * float(np.sum(np.log(2 * np.pi) + np.log(s2_g[:T]) + (y - pn[0]) ** 2 / s2_g[:T]))
+print(f"backcast about g: {backcast(y - pn[0]):.4f} %^2, l {ll_g:.4f}; about the sample mean: {bc:.4f} %^2, l {ll:.4f}")
 """)
 
 md(r"""
@@ -938,7 +987,7 @@ show("P11: t-stat", float(d.mean() / nw_se(d, 9)), ".2f", "1.83")
 """)
 
 md(r"""
-**Problem 12.** The 2015–2026 line of [[ex:signature]] from `vol4_rv.csv`, and $\hat\rho_1$ of 5-second returns on the 5-second days by $\mathrm{RV}(10\text{ s})/\mathrm{RV}(5\text{ s})-1$.
+**Problem 12.** The 2015–2026 line of [[ex:signature]] from `vol4_rv.csv`, and $\hat\rho_1$ of 5-second returns on the 5-second days by the ratio of the period's mean $\mathrm{RV}(10\text{ s})$ to its mean $\mathrm{RV}(5\text{ s})$, minus 1 (a mean of daily ratios gives another number).
 """)
 
 code(r"""
@@ -948,6 +997,7 @@ print(", ".join(f"{k} {v:.3f}" for (k, _), v in zip(IV, line)))
 show("P12: 5 s", line[0], ".2f", "11.71")
 show("P12: 30 min", line[-1], ".3f", "0.930")
 show("P12: rho_1 estimate", float(np.mean(RV["10s"][m5s]) / np.mean(RV["5s"][m5s]) - 1), ".3f", "-0.381")
+print(f"the mean of daily ratios, for contrast: {float(np.mean(RV['10s'][m5s] / RV['5s'][m5s])) - 1:.3f}")
 """)
 
 md(r"""
@@ -1047,7 +1097,7 @@ It ran in about 25 seconds when the book was built, although the out-of-sample c
 
 ## Data (FinMind; not in the repository)
 
-The notebook reads FinMind files that you download once with your own token. From the repository root, run `uv run python data/fetch_finmind.py`, then `uv run python data/make_lab_data.py`. FinMind's licence does not allow the book to redistribute the data. After that, the notebook runs offline. The realized variances come with the repository (`data/derived/vol4_rv.csv`); rebuilding them needs the 5-second TAIEX download, `uv run python data/fetch_intraday.py --series taiex5s` (5,351 requests, about nine hours on a free FinMind account, re-run after each hourly stop).
+The notebook reads FinMind files that you download once with your own token. From the repository root, run `uv run python data/fetch_finmind.py`, then `uv run python data/make_lab_data.py`. FinMind's licence does not allow the book to redistribute the data. After that, the notebook runs offline. The realized variances come with the repository (`data/derived/vol4_rv.csv`); rebuilding them needs the 5-second TAIEX download, `uv run python data/fetch_intraday.py --series taiex5s` (5,351 requests, about nine hours on a free registered FinMind account at 600 calls an hour, re-run after each hourly stop).
 
 The same steps in a shell (`data/raw/` and this folder's `data/` are git-ignored):
 

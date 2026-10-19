@@ -77,7 +77,7 @@ Companion notebook to **From Calculus to Kelly, LM25**. It builds TX23, the TX n
 
 `data/` then holds three files: `taiex_tr.csv` (`date`, `price`: the TAIEX total-return closes, FinMind `TaiwanStockTotalReturnIndex`), `taiex_price.csv` (`date`, `close`, `spread`: the TAIEX price closes, FinMind `TaiwanStockPrice`, on the same 5,850 dates) and `tx_daily.csv` (the regular-session rows of the monthly TX contracts, FinMind `TaiwanFuturesDaily`, 1998-07-21 to 2026-10-16). The TX file is free on FinMind; nothing here needs a paid plan. The notebook reads nothing outside `data/`.
 
-**Conventions (as in the module).** The log basis $b_t=\ln F_t-\ln S_t$ is in basis points (bp, $10^{-4}$). A rolled change differences the stored series; a roll-free change uses one contract on both days. $s$ divides by the number of terms (`ddof=0`), a regression's $s_\varepsilon$ by $T-2$. Sample autocorrelations use the full-sample mean and divisor $T$ (LM19's (19.5)); partial autocorrelations come from OLS. Quantiles and medians use `method="inverted_cdf"`; a simulated quantile's standard error is LM18's batch standard error (20 batches, divisor 20). Each simulated experiment $e$ creates `np.random.default_rng([e, 20261011])` once. ARMA fits run at the likelihood maximum with standard errors from $-\ell''$. Every test and fit is in-sample; the regimes are a stability check; the simulations are a model.
+**Conventions (as in the module).** The log basis $b_t=\ln F_t-\ln S_t$ is in basis points (bp, $10^{-4}$). A rolled change differences the stored series; a roll-free change uses one contract on both days. $s$ divides by the number of terms (`ddof=0`), a regression's $s_\varepsilon$ by $T-2$. Sample autocorrelations use the full-sample mean and divisor $T$ (LM19's (19.5)); partial autocorrelations come from OLS. Quantiles and medians use `method="inverted_cdf"`; a simulated quantile's standard error is LM18's batch standard error (20 batches, divisor 20). Each simulated experiment $e$ creates `np.random.default_rng([e, 20261011])` once. ARMA fits run at the likelihood maximum with standard errors from $-\ell''$. Every test and fit is in-sample; the limit regimes are a stability check; the simulations are a model; the figures of the case, the regimes' means and the expiry, season and roll figures are descriptive.
 """)
 
 code(r"""
@@ -194,7 +194,8 @@ mon = np.array([int(d[5:7]) for d in dates])
 yr = np.array([int(d[:4]) for d in dates])
 pre = np.array([d < "2015-06-01" for d in dates])
 show("D dates", int(D.sum()), ",", "5,834")
-print("D ends on", dates[np.flatnonzero(D)[-1]])
+iD_last = int(np.flatnonzero(D)[-1])
+print("D ends on", dates[iD_last], "holding", tx23["contract"][iD_last], "which expires on", ld[iD_last])
 
 # TR23: log returns of the total-return index
 r = np.diff(np.log(TRI))
@@ -395,7 +396,7 @@ show("P12 t robust", (v5 - 1) / se_r5, ".2f", "1.02")
 md(r"""
 ## Part 6 — Unit roots
 
-Experiment 1 simulates the Dickey–Fuller null ([[eg:dfsim]], [[ex:dfnull]]): random walks $x_t=z_1+\dots+z_t$ of 5,850 levels, drawn in chunks of 500, each with the DF t-stat of (25.7) (constant, no lags, classical standard error). [[eg:adf]] then runs `adfuller` and `kpss` on $\ln S_t$ and $b_t$. Problem 10 repeats experiment 1's idea on one year of 246 levels.
+Experiment 1 simulates the Dickey–Fuller null ([[eg:dfsim]], [[ex:dfnull]]): random walks $x_t=z_1+\dots+z_t$ of 5,850 levels, drawn in chunks of 500, each with the DF t-stat of (25.7) (constant, no lags, classical standard error). [[eg:adf]] then runs `adfuller` and `kpss` on $\ln S_t$ and $b_t$. MacKinnon's constant-only points and p-values assume no drift: for the drifting $\ln S_t$ the no-lag p-value does not apply, and the module tests the index with a trend. Problem 10 repeats experiment 1's idea on one year of 246 levels.
 """)
 
 code(r"""
@@ -453,7 +454,8 @@ with warnings.catch_warnings():
     a_b = adfuller(b, regression="c", autolag="AIC", result_object=True)
     k_b = kpss(b, regression="c", nlags="auto", result_object=True)
 show("ln S: ADF 'ct'", a_s.statistic, ".2f", "-0.77")
-print("ln S: ADF p-value", round(a_s.pvalue, 2), "with", a_s.lags, "lags; KPSS", round(k_s.statistic, 3), "p", k_s.pvalue)
+print("ln S: ADF p-value", round(a_s.pvalue, 2), "with", a_s.lags, "lags; KPSS", round(k_s.statistic, 3),
+      "p", "below 0.01 (the table's bound)" if k_s.pvalue <= 0.01 else round(k_s.pvalue, 3))
 show("b: ADF 'c'", a_b.statistic, ".2f", "-9.00")
 print("b: ADF lags", a_b.lags, "p-value", f"{a_b.pvalue:.1e}")
 show("b: KPSS", k_b.statistic, ".3f", "0.664")
@@ -552,6 +554,9 @@ bF, _, eF = ols(Xb, rF)
 bS, _, eS = ols(Xb, rS)
 show("alpha_F", bF[1], ".4f", "-0.1597")
 show("alpha_F White SE", hc0(Xb, eF)[1], ".3f", "0.055")
+show("alpha_F t-stat (HC0)", bF[1] / hc0(Xb, eF)[1], ".1f", "-2.9")
+print(f"its two-sided p-value {2 * stats.norm.sf(abs(bF[1] / hc0(Xb, eF)[1])):.4f}; Bonferroni's level for 24 tests "
+      f"{0.05 / 24:.5f}")
 show("alpha_S", bS[1], "+.4f", "+0.0655")
 show("alpha_S White SE", hc0(Xb, eS)[1], ".3f", "0.040")
 show("alpha_F - alpha_S = roll-free delta", bF[1] - bS[1], ".4f", "-0.2252")
@@ -583,6 +588,17 @@ rmon = mon[1:][roll[1:]]
 show("roll jumps: mean", BP * jump.mean(), ".1f", "-37.5")
 show("June roll", BP * jump[rmon == 6].mean(), ".1f", "-144.7")
 show("July roll", BP * jump[rmon == 7].mean(), ".2f", "-104.95")
+# the share of a calendar year's dividends (TR - price log gap from the previous year's last close) that went ex in the
+# life of the contract entered at the June and the July roll, 2003-2025
+for mm, printed in ((6, "45"), (7, "39")):
+    sh = []
+    for y in range(2003, 2026):
+        yi = np.flatnonzero(yr == y)
+        j0 = max(int(yi[0]) - 1, 0)
+        gap = math.log(TRI[yi[-1]] / TRI[j0]) - math.log(S[yi[-1]] / S[j0])
+        i_roll = next(int(i) for i in yi if roll[i] and mon[i] == mm)
+        sh.append(qt[i_roll] / gap)
+    show(f"roll in month {mm}: mean share of the year's dividends (%)", 100 * np.mean(sh), ".0f", printed)
 
 season = pl.DataFrame({"month": mon[D], "b": BP * b[D], "fair": BP * fair[D], "resid": BP * resid[D]})
 by_month = season.group_by("month").agg(pl.col("b", "fair", "resid").mean(), pl.len()).sort("month")
@@ -624,8 +640,10 @@ for name, x in versions.items():
         av = adfuller(x, regression="c", autolag="AIC", result_object=True)
         kv = kpss(x, regression="c", nlags="auto", result_object=True)
     _, fv, _ = arma_fit(xb)
-    print(f"{name:15s} mean {xb.mean():6.1f}  s {xb.std():6.2f}  DF {bv[1] / sv[1]:6.1f}  ADF {av.statistic:6.2f} "
-          f"({av.lags})  KPSS {kv.statistic:.2f} (p {kv.pvalue:.3f})  AR {1 + bv[1]:.4f} "
+    mean_txt = f"{xb.mean():6.1f}".replace("-0.0", " 0.0")          # the month-mean version averages 0 exactly
+    kp_txt = f"p {kv.pvalue:.3f}" if kv.pvalue > 0.01 else "p <0.01, the table's bound"
+    print(f"{name:15s} mean {mean_txt}  s {xb.std():6.2f}  DF {bv[1] / sv[1]:6.1f}  ADF {av.statistic:6.2f} "
+          f"({av.lags})  KPSS {kv.statistic:.2f} ({kp_txt})  AR {1 + bv[1]:.4f} "
           f"({half_life(1 + bv[1]):.2f})  ARMA {fv.params[1]:.5f}, {fv.params[2]:.3f} ({half_life(fv.params[1]):.2f})")
 """)
 
@@ -661,7 +679,7 @@ var_change = 2 * sx2 * (1 - phi) + 2 * su2
 show("sigma_u (bp)", math.sqrt(su2), ".1f", "22.2")
 show("sigma_zeta (bp)", math.sqrt(sz2), ".1f", "22.8")
 show("persistent sd (bp)", math.sqrt(sx2), ".1f", "53.8")
-show("noise share of a day's change (%)", 100 * 2 * su2 / var_change, ".0f", "64")
+show("noise share of the variance of a day's change (%)", 100 * 2 * su2 / var_change, ".0f", "64")
 show("model sd of a change (bp)", math.sqrt(var_change), ".2f", "39.11")
 
 hl = half_life(phi)
@@ -696,15 +714,22 @@ m25 = yr == 2025
 _, f25, _ = arma_fit(BP * b[m25])
 su25 = math.sqrt(-f25.params[2] * f25.params[3] / f25.params[1])
 show("2025 sigma_u (bp)", su25, ".1f", "23.4")
-show("2025 sigma_u in index points", su25 / BP * S[m25].mean(), ".0f", "56")
-show("2025 sd of daily changes (points)", np.diff(b[m25]).std() * S[m25].mean(), ".1f", "84.5")
+show("2025 sigma_u in index points (a conversion at the mean close)", su25 / BP * S[m25].mean(), ".0f", "56")
+# measured in points: the changes of F - S within 2025, rolled and roll-free (the contract held over the day)
+F_held = tx23["F_held"].to_numpy()
+i25 = np.flatnonzero(m25)[1:]                  # both days in 2025
+pts_rolled = (F[i25] - S[i25]) - (F[i25 - 1] - S[i25 - 1])
+pts_free = (F_held[i25] - F[i25 - 1]) - (S[i25] - S[i25 - 1])
+print("changes within 2025:", len(i25), "| rolls among them:", int(roll[i25].sum()))
+show("2025 sd of rolled changes of F - S (points)", pts_rolled.std(), ".1f", "81.4")
+show("2025 sd of roll-free changes of F - S (points)", pts_free.std(), ".1f", "76.7")
 
 # Problem 8: (25.9) from the regimes' estimates printed to four decimals
 for ph, th, s2_ in ((0.9035, -0.3606, 1659.9), (0.9101, -0.3427, 808.6)):
     su2_ = -th * s2_ / ph
     sx2_ = ((1 + th ** 2) * s2_ - (1 + ph ** 2) * su2_) / (1 - ph ** 2)
-    print(f"phi {ph}: sigma_u {math.sqrt(su2_):.2f} bp, persistent sd {math.sqrt(sx2_):.2f} bp, noise share "
-          f"{100 * 2 * su2_ / (2 * sx2_ * (1 - ph) + 2 * su2_):.1f}%")
+    print(f"phi {ph}: sigma_u {math.sqrt(su2_):.2f} bp, persistent sd {math.sqrt(sx2_):.2f} bp, noise share of the "
+          f"variance of a day's change {100 * 2 * su2_ / (2 * sx2_ * (1 - ph) + 2 * su2_):.1f}%")
 """)
 
 md(r"""
