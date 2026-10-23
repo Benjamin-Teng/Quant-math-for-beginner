@@ -1,10 +1,45 @@
-# Quant-math-for-beginner · From Calculus to Kelly
+# From Calculus to Kelly
 
-從大一的微積分、統計學與線性代數開始，一路推進到**自建統計模型、投資組合統計最佳化、計算真正的風險報酬，以及在估計誤差下求最適凱利槓桿**。全書 9 卷 50 個 Learning Modules，每章依「Learning Outcomes → 編號章節 → Example／Exhibit → Practice Problems → Solutions」編排。內文以英文為主，難懂之處附「中文導讀」；每章附 Jupyter Lab，用台股與美股真實資料重現書中每個數字。這是個人學習用的專案。
+**English** | [繁體中文](README.zh-TW.md)
 
-*A nine-volume quantitative curriculum that starts from first-year calculus, statistics and linear algebra and ends with statistical models, optimized portfolios and growth-optimal (Kelly) leverage. English text with Traditional Chinese reading guides; every module ships with a lab notebook on real Taiwan and US market data. A personal study project.*
+A personal self-study project that builds from first-year calculus, statistics and linear algebra toward statistical modeling, portfolio optimization and Kelly position sizing under uncertainty. The planned curriculum spans **9 volumes and 50 Learning Modules**; **Volumes I–IV (LM1–LM26) are published**.
 
-## Status — Edition 0.5 (2026-10-20)
+The textbook is written in English with Traditional Chinese reading guides. Published modules include a web chapter, an A4 PDF and a Jupyter lab with saved outputs. Examples combine Taiwan and US market data with explicitly labeled models, simulations and constructed cases.
+
+**[Read online](https://quantmath.fintools.tw)** · [Getting Started](https://quantmath.fintools.tw/getting-started.html) · [Research hygiene](https://quantmath.fintools.tw/research-hygiene.html)
+
+## Current progress
+
+README updated: **2026-10-23**. Latest textbook edition: **0.5 (2026-10-20)**, as recorded in [the syllabus](src/syllabus.yaml).
+
+| Volume | Topic | Modules | Status |
+|:--|:--|:--|:--|
+| I | Calculus for Finance | LM1–LM7 | Published |
+| II | Linear Algebra for Portfolios | LM8–LM12 | Published |
+| III | Probability | LM13–LM18 | Published |
+| IV | Statistical Inference and Econometrics | LM19–LM26 | Published |
+| V | Portfolio Optimization | LM27–LM31 | Planned |
+| VI | Measuring True Risk and Return | LM32–LM35 | Planned |
+| VII | Stochastic Calculus | LM36–LM40 | Planned |
+| VIII | The Kelly Criterion and Optimal Leverage | LM41–LM46 | Planned |
+| IX | Capstone | LM47–LM50 | Planned |
+
+Edition 0.5 adds statistical inference, regression, Bayesian shrinkage and time-series models, including volatility modeling. The remaining portfolio, risk, stochastic-calculus, advanced Kelly and capstone modules are roadmap items, not published chapters.
+
+See [TODO.md](TODO.md) for the current queue and [the roadmap](plans/ROADMAP.md) for future volumes.
+
+## Start learning
+
+1. Read **Getting Started** for prerequisites, notation and the lab workflow.
+2. Follow the module order, or use each chapter's prerequisite links.
+3. Work through the learning outcomes, examples and practice problems before checking the solutions.
+4. Reproduce the lab results and compare their assumptions with the **Research hygiene** guidance.
+
+The language switch above changes the README only. The textbook keeps its English text and 中文導讀 boxes.
+
+## Published modules
+
+The following links point to the repository's built chapters, PDFs and lab folders. Use the online site above to read rendered HTML.
 
 | Module | State | HTML | PDF | Lab |
 |:--|:--|:--|:--|:--|
@@ -36,86 +71,71 @@
 | LM25 Time Series I: ARMA, Unit Roots and Cointegration | published | [`docs/lm/lm25.html`](docs/lm/lm25.html) | [`docs/pdf/LM25_…pdf`](docs/pdf/LM25_Time_Series_I_ARMA_Unit_Roots_and_Cointegration.pdf) | [`labs/LM25_lab`](labs/LM25_lab) |
 | LM26 Time Series II: Volatility Models | published | [`docs/lm/lm26.html`](docs/lm/lm26.html) | [`docs/pdf/LM26_…pdf`](docs/pdf/LM26_Time_Series_II_Volatility_Models.pdf) | [`labs/LM26_lab`](labs/LM26_lab) |
 
-A module goes on the site only after an independent review has recomputed its numbers and checked its mathematics; drafts are kept in `src/` and `labs/` but are not linked from the site. The full syllabus lives in [`src/syllabus.yaml`](src/syllabus.yaml).
+A module is published only after independent review and verified fixes under [AUTHORING.md](AUTHORING.md). The syllabus controls which modules appear in the published build; unpublished entries appear only in the preview.
+
+## Build locally
+
+Prerequisites: Python 3.13 managed by `uv`, Node.js/npm, and Bash for `build.sh` (for example, Git Bash or WSL on Windows). Python dependencies are defined in [pyproject.toml](pyproject.toml) and pinned in [uv.lock](uv.lock).
+
+```bash
+uv sync                           # create the Python environment
+(cd build && npm ci)              # install KaTeX and self-hosted fonts
+./build.sh                        # build docs/ and dist/artifact/
+./build.sh --preview              # also build drafts into dist/preview/
+uv run playwright install chromium  # required before PDF rendering
+./build.sh --pdf                  # also render A4 PDFs into docs/pdf/
+```
+
+Optional data and lab rebuilds require local source data:
+
+```bash
+./build.sh --fetch                # fetch raw data and rebuild lab data; needs FINMIND_TOKEN
+./build.sh --data                 # recompute derived data and chart specifications
+./build.sh --labs                 # regenerate and execute lab notebooks
+```
+
+Volume IV intraday downloads use `data/fetch_intraday.py` separately; `--fetch` does not fetch that entire history. Follow [data/README.md](data/README.md) for access requirements, reconstruction steps and verification. These commands may make substantial data requests or take time to execute.
+
+For an HTML-only build, run `uv run python build/build.py` after installing dependencies. Formulas are rendered with KaTeX at build time; interactive charts use JavaScript.
 
 ## Repository layout
 
-```text
-docs/            built static site, published modules only — upload as-is to any host (GitHub Pages: main /docs)
-  index.html       roadmap and contents
-  lm/              one page per learning module
-  pdf/             A4 print editions
-  assets/          CSS, JS, self-hosted fonts and KaTeX
-src/             sources (Obsidian-compatible Markdown)
-  syllabus.yaml    volumes, modules, publish status, edition notes
-  lmNN.md          module text: $math$, > [!callouts], exhibits, problems
-  lmNN.js          the module's interactive figures
-  data/            chart specs (generated by data/lmNN_charts.py)
-  assets/          book.css, book.js, favicon
-build/           build.py (Markdown → HTML, KaTeX at build time), build_index.py, render_pdf.py,
-                 make_labNN.py, katex_render.js, package.json, qa/ (screenshots, overflow check)
-data/            scripts that compute every number, table and chart; raw_manifest.json + fetch_finmind.py rebuild raw/
-labs/            LMNN_lab/ notebooks (saved with outputs); their data/ is built by data/make_lab_data.py
-plans/           module briefs
-reviews/         independent review records: findings, decisions, fix status, prompt templates
-project/         SPEC.md (agreed decisions), PITFALLS.md (mistakes not to repeat), SOURCES.md (sites consulted)
-AUTHORING.md     how a module is written, checked, reviewed and published
-TODO.md          the current work queue (handoff)
-CLAUDE.md        orientation for Claude Code sessions
-build.sh         one-shot build
-pyproject.toml   the Python environment, managed by uv (uv.lock pins every version)
-```
+| Path | Purpose |
+|:--|:--|
+| `src/` | Module sources, standalone pages, figures, assets and publication syllabus |
+| `docs/` | Built website, published chapters and A4 PDFs |
+| `labs/` | Jupyter notebooks with saved outputs; input data are rebuilt locally |
+| `data/` | Data-fetching, validation, calculation and chart-generation scripts |
+| `build/` | HTML/PDF builders, notebook generators and QA tools |
+| `plans/` | Roadmap and module briefs |
+| `reviews/` | Independent review findings and verification records |
+| `project/` | Specification, pitfalls and source records |
+| `AUTHORING.md` | Writing, notation, review and publication rules |
+| `TODO.md` | Current work queue and handoff |
 
-## Build
+## Authoring and checks
 
-Python is managed with [uv](https://docs.astral.sh/uv/): `uv sync` creates `.venv` from `uv.lock` (Python 3.13), and every
-script runs as `uv run python <script>`.
+See [AUTHORING.md](AUTHORING.md) for the chapter format, notation and publication gates, [project/SPEC.md](project/SPEC.md) for agreed requirements, and [reviews/README.md](reviews/README.md) for review status. Sources use Markdown with YAML front matter, math, callouts and cross-references; they also serve as an Obsidian vault.
+
+For changes to these README files:
 
 ```bash
-uv sync                           # locked Python environment in .venv
-(cd build && npm ci)              # KaTeX + self-hosted fonts
-./build.sh                        # docs/ (web) and dist/artifact/ (claude.ai artifact bundle)
-./build.sh --preview              # also dist/preview/: the whole site with drafts, for local review
-./build.sh --pdf                  # also render docs/pdf/ (first: uv run playwright install chromium)
-./build.sh --fetch                # rebuild data/raw/ and the labs' data/ from FinMind (needs FINMIND_TOKEN)
-./build.sh --data                 # rebuild data/processed and src/data/*.json from data/raw
-./build.sh --labs                 # regenerate and execute the lab notebooks
+markdownlint-cli2 README.md README.zh-TW.md
+uv run python build/qa/check_terms.py
 ```
 
-Math is rendered to HTML at build time, so the pages need no JavaScript to show formulas; charts and the interactive figures use a small dependency-free script (`src/assets/book.js`).
+Module publication additionally requires the content, numerical, lab, layout and PDF checks defined in the authoring guide.
 
-## Hosting on your own domain
+## Hosting
 
-Every link in `docs/` is relative, so the site works at a domain root or under a sub-path.
+The published site is configured for **[quantmath.fintools.tw](https://quantmath.fintools.tw)** using GitHub Pages from `main` → `/docs`. The build produces static files and `docs/CNAME`; another static host can serve the `docs/` directory. Adjust the domain configuration for your own deployment. See [CLAUDE.md](CLAUDE.md) for repository maintenance instructions.
 
-- **GitHub Pages:** Settings → Pages → *Deploy from a branch* → `main` / `/docs`; the site is live at <https://quantmath.fintools.tw>. `build/build.py` writes `docs/CNAME` with that domain, and a DNS `CNAME` record points `quantmath.fintools.tw` at `benjamin-teng.github.io`.
-- **Any static host** (Cloudflare Pages, Netlify, your own server): publish the `docs/` folder; no build step is needed on the host.
+## Data and license
 
-## Writing a module
+Historical market data come from **FinMind**. The project uses Taiwan stock, index, dividend and futures data, plus US stock data. Validation and adjustments are documented in [data/README.md](data/README.md), the source manifest and the calculation scripts; [project/SOURCES.md](project/SOURCES.md) records references.
 
-See [`AUTHORING.md`](AUTHORING.md). In short, `src/lmNN.md` starts with YAML front matter (`lm`, `title`, `subtitle`, `prereq`, `leads`, `time`, `js`, `outcomes`, `overview`) followed by Markdown:
-
-| Syntax | Renders as |
-|:--|:--|
-| `$x$`, `$$…\tag{3.1}$$` | KaTeX inline / numbered display math |
-| `## Title {lo=2,3}` · `## Summary {-}` | numbered section mapped to outcomes 2 and 3 · unnumbered section |
-| `> [!definition] Term` · `theorem` · `pitfall` · `zh` · `kc` · `case` · `note` | callout boxes (`zh` = 中文導讀) |
-| `> [!example] Title {#label}` with a nested `> > [!solution]` | numbered example with its solution |
-| `> [!exhibit] Title {#label}` | numbered table or chart; a final `Note:` / `Source:` line becomes the caption |
-| `> [!deepdive]- Title`, `> > [!answer]-` | collapsed proof / answer |
-| `[[LM14]]`, `[[ex:label]]`, `[[eg:label]]` | links to modules, exhibits, examples (numbered automatically) |
-| `<div data-chart="id"></div>` | chart from `src/data/id.json` (hover tooltips, light/dark aware) |
-
-The same files open cleanly in Obsidian, so the sources double as a notes vault.
-
-## Data
-
-Taiwan prices, dividends, index and futures data come from FinMind (`TaiwanStockPrice`, `TaiwanStockDividendResult`, `TaiwanStockTotalReturnIndex`, `TaiwanFuturesDaily`, and for Volume II the 13:30:00 index values of `TaiwanStockEvery5SecondsIndex` and `TaiwanVariousIndicators5Seconds`); US prices come from FinMind `USStockPrice`. The files were retrieved on 2026-10-10, except Volume II's `sectors/`, `sectors_close/` and `taiex_close/` files (2026-10-11). Every daily close in `data/raw/` was checked against FinMind's own `spread` column (close − previous close). In Volume I's files the only mismatches are ex-dividend days and the two share splits (0050 4-for-1 on 2025-06-18, 00631L 22-for-1 on 2026-03-31), which the pipeline handles explicitly. In Volume II's sector-index series FinMind copies some closes from other dates or series: `data/vol2_series.py` replaces the 561 wrong closes with their 13:30:00 values and accepts 1,528 stale spreads whose closes agree with their neighbours. TAIEX's spread prints 0.0 on 52 dates, and each of those closes equals its 13:30:00 value. Volume III's main sample is the TAIEX total-return index (`TaiwanStockTotalReturnIndex`, retrieved 2026-10-18), 2003-01-02 to 2026-10-08, which FinMind serves from 2003-01-02; it has no spread column, so `data/vol3_series.py` checks every row against the TAIEX price index (the same 5,850 dates, each price close against its spread, and the daily dividend gap within rounding and 1%). Volume IV adds TX's daily history (`TaiwanFuturesDaily`, retrieved 2026-10-19) and, through `data/fetch_intraday.py`, the intraday TAIEX (`TaiwanVariousIndicators5Seconds`, every trading day from 2005-01-03 to 2026-10-08, sampled every minute to 2011 and every 5 seconds from 2014-12-29) and 2025's TX one-minute bars (`TaiwanFuturesKBar`); of these only per-day realized variances (`data/derived/vol4_rv.csv`) are committed. See [`data/README.md`](data/README.md).
-
-## License
-
-Text, code and notebooks are released under the [MIT License](LICENSE). Market data come from FinMind and are not redistributed here: `data/raw/` and the labs' `data/` folders are rebuilt with your own FinMind token (`./build.sh --fetch`), and only derived results are committed.
+Text, code and notebooks use the [MIT License](LICENSE). This license does **not** grant rights to FinMind data. Raw market data and lab input-data folders are not redistributed; rebuild them using your own token and appropriate data access. Only derived results are committed. Derived statistics in `data/derived/` also remain subject to FinMind's non-commercial-use and attribution terms; they are not covered by the MIT License. The project's FinMind access is for non-commercial use.
 
 ## Disclaimer
 
-A personal study project. Educational material only; nothing here is investment advice.
+A personal study project for education. Nothing here is investment advice.
