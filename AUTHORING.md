@@ -228,12 +228,12 @@ note):
 | $X$, $d$ | LM23's $T\times d$ design matrix, first column $\mathbf 1$, and its number of coefficients (LM23 writes no random variable $X$) |
 | $\rho_k$, $\hat\rho_k$, $\gamma_k$, $\hat\gamma_k$ | autocorrelation and autocovariance at lag $k$, model and sample; $\hat\rho_k$ uses the full-sample mean and divisor $T$ in numerator and denominator (LM19). $\gamma$ without a lag keeps its meaning above |
 | $\operatorname{VR}(m)$ | variance ratio: the variance of overlapping $m$-day log-return sums, centred at $m\bar r$, over $m$ times the daily variance (LM19's (19.8); LM22, LM25; LM26 writes (19.7)'s ratio without the symbol) |
-| $\phi_j$, $\theta_j$; $\delta$ | AR and MA coefficients, always subscripted ($\phi_1$ even in an AR(1); $\varphi$ stays the normal density); the Dickey–Fuller coefficient $\delta=\phi_1-1$ (LM25); from Volume V, $\delta$ is risk aversion (LM28, LM30) |
+| $\phi_j$, $\theta_j$; $\delta$ | AR and MA coefficients, always subscripted ($\phi_1$ even in an AR(1); $\varphi$ stays the normal density); the Dickey–Fuller coefficient $\delta=\phi_1-1$ (LM25); from Volume V, $\delta$ is risk aversion (LM28, LM29, LM30) |
 | $F_t$, $S_t$ | TX settlement price and TAIEX close (LM23 in E6's contract count, $200F_t$ a contract; LM25; LM6 writes $F$, $S$; $F_X$ keeps its subscript) |
 | $b_t$, $a_j$, $u_t$, $\zeta_t$, $K$; $h_t$; $u_i$, $h$ | LM25's log basis, ADF lag coefficients, one-day white noise, the persistent part's innovation and the Ljung–Box lag count; LM23's hat values; LM26's intraday noise and sampling interval (and its lag count $K$) — local, declared; each displaces a book-wide meaning its module does not use ($b$, $a$ a bet's; $u$ a probability level; $\zeta$ LM5's constant; $K$ a second matrix; $h$ a generic function) |
 | $\sigma_t^2$, $\sigma^2_{t+1\mid t}$ | conditional variance of day $t$; its forecast made on day $t$ (LM26) |
 | $\mathrm{RV}_t$ | realized variance of day $t$, the sum of squared intraday log returns at a stated interval (LM26; the table's $\mathrm{RV}$ is the same idea on simple returns) |
-| $B$, $\ell$ | number of bootstrap resamples; block length or mean block length (LM22, LM32), Newey–West lag (LM23); none of these modules writes a likelihood (LM33, with both a lag and a block length, declares two letters) |
+| $B$, $\ell$ | number of bootstrap resamples; block length or mean block length (LM22, LM32, LM34), Newey–West lag (LM23); none of these modules writes a likelihood (LM33, with both a lag and a block length, declares two letters; LM35's $\ell$ is a reverse stress test's loss level) |
 | $\hat f$, $\hat f^*$, $f_{\mathrm B}$ | $\bar R/s^2$, the plug-in Kelly fraction (from LM20); the exact in-sample root of (4.5) (LM22, LM24); LM24's Bayes fraction, $f_{\mathrm B}=c\hat f$ |
 | $\operatorname{med}$ | a sample median, $\hat F^{-1}(\tfrac12)$, upright (LM19); a tilde means centred ($\tilde X$, $\tilde r_t$) |
 
@@ -249,6 +249,8 @@ notation note):
 |:--|:--|
 | $\mathbf e$ | excess returns $\boldsymbol\mu-r_f\mathbf 1$ (LM7); LM27–LM31 write no basis vector $\mathbf e_i$ |
 | $\mu_p$; $\mathbf w_{t-1}$, $\mathbf w^{\mathrm{drift}}_t$ | portfolio mean; weights set at the previous close; weights after a period's returns, before trading |
+| $W^{\mathrm{pre}}_t$, $A_{\mathrm w}$ | wealth before the day's trade (the post-trade wealth is $W_t$); sessions per year of a wealth frame, which counts every session (a joint estimation frame's $A$ can be smaller) |
+| $\mathbf y$ | in LM29 the homogenized variable of the maximum-Sharpe QP, in LM31 the ERC variable before normalizing (modules without least squares) |
 | $\lVert\mathbf x\rVert_1$ | the 1-norm $\sum_i\lvert x_i\rvert$; gross exposure $\lVert\mathbf f\rVert_1$ (LM8) |
 | $\mathbf w^{\mathrm{mv}}$, $\sigma^2_{\min}$, $\mathbf w^{\mathrm{tan}}$, $\mathrm{SR}^*$ | minimum-variance weights and variance; tangency weights; the best Sharpe ratio |
 | $K$, $\mathbf b$ | constraint matrix and right-hand side, $K\mathbf w=\mathbf b$ (LM28, LM29); in LM31 $\mathbf b$ is the risk budgets, and LM31 writes its constraints out |
@@ -258,7 +260,7 @@ notation note):
 | $\hat\Sigma_{\mathrm{tgt}}$, $\hat\Sigma_c$ | a shrinkage target; the shrunk matrix $c\hat\Sigma+(1-c)\hat\Sigma_{\mathrm{tgt}}$ (LM30) |
 | $n_0$, $\mathbf w_{\mathrm{ref}}$, $\mathbf e_{\mathrm{eq}}$, $\Xi$ | Black–Litterman (LM30): the prior's worth in observations (LM24's $n_0$; the literature's $\tau=1/n_0$), reference weights, implied excess returns $\delta\Sigma\mathbf w_{\mathrm{ref}}$, view-error covariance; views $K\mathbf e=\mathbf b+\boldsymbol\varepsilon$ |
 | $d_{ij}$ | HRP's correlation distance $\sqrt{(1-\rho_{ij})/2}$ (LM31), half of LM8's per-date distance $\sqrt{2(1-\rho)}$ |
-| $\sigma_{\mathrm{tgt}}$, $\bar\sigma_t$, $\hat\sigma_{t+1\mid t}$ | a volatility target; a window's volatility; an EWMA forecast (LM26) |
+| $\sigma_{\mathrm{tgt}}$, $\bar\sigma_t$, $\sigma_{t+1\mid t}$, $\Sigma_{t+1\mid t}$ | a volatility target; a window's volatility; an EWMA forecast of a variance or a covariance matrix, without a hat as LM26 prints it, $\Sigma_{t+1\mid t}=\lambda\Sigma_{t\mid t-1}+(1-\lambda)\mathbf R_t\mathbf R_t^{\top}$ |
 | $\operatorname{VaR}_u$, $\operatorname{ES}_u$ | value at risk $-F_{R_p}^{-1}(u)$ and expected shortfall over $m$ days, positive for a loss; "99% VaR" is $u=0.01$ |
 | $\mathrm{MDD}$, $\mathrm{DD}^0_t$ | maximum drawdown $\max_t\mathrm{DD}_t$; the loss from initial wealth $\max(0,1-W_t/W_0)$. An underwater chart plots $-\mathrm{DD}_t$ and says so |
 | $\widehat{\mathrm{SR}}$, $\mathrm{SR}_0$; PSR, DSR, MinTRL, PBO | an estimated Sharpe ratio; a benchmark ratio (no star); upright abbreviations (LM33, LM34) |
