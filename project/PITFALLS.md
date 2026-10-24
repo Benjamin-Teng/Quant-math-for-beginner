@@ -16,7 +16,9 @@ unless stated.
   editions committed 63 raw files (`data/raw/`, lab snapshots). On 2026-10-10 they were removed, git history was
   rewritten and force-pushed at the owner's request, and `.gitignore` now excludes `data/raw/` and `labs/*/data/`.
   Commit only the manifest, scripts and derived results (statistics, chart specs, executed notebooks); rebuild raw
-  files with `data/fetch_finmind.py`. The old commits stay reachable on GitHub by SHA (and through PR #1) until GitHub Support removes them; see TODO.md.
+  files with `data/fetch_finmind.py`. The old commits stay reachable on GitHub by SHA (and through PR #1): PR #1 head
+  `e3ed88b`, and the old `main` commits `cfc45f0`, `a9de9cf`, `44d199c`, `8ec5034`, `f959c26`, `49b0748`, `5b56679`.
+  The owner checked GitHub's rules and decided (2026-10-24) that no removal request is needed.
 - **Pull requests.** The owner wants commits pushed straight to `main`. Before pushing, `git fetch` and rebase: the
   owner may change `main` on GitHub (he merged PR #1 there while work continued locally).
 - **Asking too late.** The owner interrupted a large batch of agent launches twice to change course. Say what a big
@@ -124,8 +126,10 @@ unless stated.
   merged formulas with text (and caused overflow that `overflow.py` did not flag). The pattern now accepts escaped
   characters, but write NT\$ outside math by default.
 - **Chart annotations on date axes** needed epoch milliseconds; `book.js` now converts ISO strings too.
-- **Missing chart features:** date axes print only year ticks (sub-year charts need labelled vertical lines), and
-  `lineChart` has no custom tick labels (widgets relabel ticks themselves). Both are open in TODO.md.
+- **Missing chart features, since added:** date axes printed only year ticks, and `lineChart` had no custom tick
+  labels (widgets relabelled ticks themselves). A date axis now falls back to month ticks when fewer than three year
+  starts fall inside it (`dateTicks` in `book.js`), and `x.tickLabels` gives text for each of `x.ticks`. Check the
+  chart kit in `book.js` before a capability check lists a feature as missing.
 - **Thinned chart series hid the extremes the text quoted** (LM4 Exhibit 8). Keep cited extremes in the plotted data.
 - **Mobile overflow:** negative margins on the module band, `white-space: nowrap` on inline math, bare URLs in
   References, and multiple-choice options laid out as grid cells all overflowed at 400 px. Check every page with
@@ -204,6 +208,11 @@ unless stated.
 - **Agent calls block the main session until the whole batch finishes.** Do the editor's quick work first, then launch
   one batch of parallel agents in a single message.
 - **Interrupted agents keep their context**; resume them with a message instead of starting fresh.
+- **A review record that points to an agent's report loses it.** Volume IV's records cite working reports under
+  `scratch/`, which were never committed. For the closing check's minor items and the fixes its second check changed,
+  the records give only counts and verdicts, so the items themselves are gone. Write every finding, decision and fix
+  into `reviews/lmNN.md` (or the volume file) itself; an agent's report is a working file that does not survive the
+  session.
 - **Give writers the cross-module notation decisions up front.** Six drafts written in parallel clashed on f, L, G, φ,
   g, D, T and q until AUTHORING §6 fixed a book-wide table.
 - **Hard sentence caps produced mechanical edits that broke the text** (Volume I, 2026-10-11). "Sentences under 25

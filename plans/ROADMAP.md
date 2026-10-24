@@ -10,9 +10,9 @@ file (`plans/vol-N.md`, in the format below).
 | Batch | Volumes | Modules | Needs published | Edition |
 |:--|:--|--:|:--|:--|
 | 0 | I Calculus for Finance (published 2026-10-11) | 7 | — | 0.2, 0.2.1 |
-| 1 | II Linear Algebra for Portfolios | 5 | I | 0.3 |
-| 2 | III Probability | 6 | I | 0.4 |
-| 3 | IV Statistical Inference and Econometrics | 8 | II, III | 0.5 |
+| 1 | II Linear Algebra for Portfolios (published 2026-10-17) | 5 | I | 0.3 |
+| 2 | III Probability (published 2026-10-18) | 6 | I | 0.4 |
+| 3 | IV Statistical Inference and Econometrics (published 2026-10-20) | 8 | II, III | 0.5 |
 | 4 | V Portfolio Optimization · VI Measuring True Risk and Return | 5 + 4 | II, IV | 0.6 |
 | 5 | VII Stochastic Calculus | 5 | III, IV | 0.7 |
 | 6 | VIII The Kelly Criterion and Optimal Leverage | 6 | V, VI, VII | 0.8 |
@@ -53,7 +53,10 @@ takes it); **Uses before taught** (each with a one-sentence introduction and a p
 illustrate, the sample, any cleaning); **Hygiene declaration** (whether results are descriptive, in-sample, a
 stability check or out-of-sample); **Notation** (local symbols, checked against AUTHORING §6); the motivating case with
 **verified anchor numbers** and the scripts that print them; sections; exhibits with their chart types; the widget;
-a problems plan; lab parts; and cross-module tags (equations other modules cite).
+a problems plan; lab parts; and cross-module tags (equations other modules cite). From Volume V each outcome is
+marked with its level: derive without the solution; compute and diagnose; or know its use and limits. The shared
+decisions say which recommendations of [`curriculum-guidance.md`](curriculum-guidance.md) the volume adopts, adjusts
+or leaves, and why.
 
 ## Module boundaries
 
