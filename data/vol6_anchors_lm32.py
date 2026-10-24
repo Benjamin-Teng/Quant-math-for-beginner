@@ -1,4 +1,5 @@
-"""LM32 anchors (VaR, Expected Shortfall and Drawdown): every number the Stage 1 brief quotes (drafted 2026-10-24).
+"""LM32 anchors (VaR, Expected Shortfall and Drawdown): every number the Stage 1 brief quotes (drafted 2026-10-24;
+revised the same day to the editor's decisions on the briefs, plans/vol-5.md).
 
 Reads only checked, git-ignored outputs and the raw files the plan names (run their builders first):
   * TR23 (Volume III) and LM26's out-of-sample forecasts: data/lm26_common.py, which reads
@@ -41,12 +42,21 @@ Conventions (the brief's "Data role").
     spell under water runs from a peak to the first session with W at or above that peak; durations in sessions.
     Resampled MDDs: medians and 5-95% points by inverted_cdf; a block bootstrap reproduces a short episode that fits
     in one block exactly, so its MDDs have atoms: the largest is printed with its count and the realized
-    peak -> trough it equals, and a median that sits on an atom (over 1% of the resamples) gets no batch SE.
+    peak -> trough it equals, and a median that sits on an atom (over 1% of the resamples) gets no batch SE; the
+    resamples equal to the realized MDD are counted too.
+  * Stationary bootstrap (shared decision "Counting, simulation"): each resample is drawn as LM22's stationary_idx
+    (lm22.md:365-383): integers then random, a new block where the uniform is <= 1/ell; it equals arch's
+    StationaryBootstrap on twin generators (asserted). Resamples are drawn one after another; batches are
+    consecutive.
   * Seeds (one generator per experiment, created once): 1 Monte Carlo 10-day GARCH-t VaR (100,000 paths); 2
     importance sampling (Problem 10, 10,000 draws); 3 permutations of each rule's returns (10,000 per rule, rules in
     order); 4 stationary bootstrap of each rule's returns (10,000 per rule, the book's block rule, LM22); 5 and 6 iid
     and stationary bootstrap of TR23's 1% quantile (10,000 each); 7 ten-session compound returns of iid draws from
-    TR23's returns (100,000). Batch standard errors use 20 batches (divisor 20).
+    TR23's returns (100,000). Batch standard errors use 20 consecutive batches (divisor 20).
+  * T5S: every change is a log change from the 09:00:00 value (the previous close), as the shared decisions write
+    them; the intraday fall is the largest log fall from the running peak, the previous close included.
+  * Owners (shared decision): the rules' losses on 2025-04-07 are LM35's (A35-13) and the first purchase's cost is
+    LM27's (A27-23, echoed); neither is computed here as LM32's number.
   * Counts against a threshold use the guard (<= x + 1e-12); the TR23 minimum is checked with Fraction on the
     two-decimal index values.
 Numbers printed by earlier modules are echoed with file:line.
@@ -71,7 +81,7 @@ import cvxpy as cp
 import lm26_common as C
 import numpy as np
 import polars as pl
-from arch.bootstrap import optimal_block_length
+from arch.bootstrap import StationaryBootstrap, optimal_block_length
 from numpy.typing import NDArray
 from scipy import integrate, stats
 from vol5_rules import RULES, WINDOW, cov0, minvar, schedule, signals, wealth_path
@@ -174,15 +184,21 @@ def mdd_rows(G: NDArray[np.float64], w0: float) -> Vec:
     return (1 - Wp / np.maximum.accumulate(Wp, axis=1)).max(axis=1)
 
 
-def stat_idx(rng: np.random.Generator, n: int, ell: float, B: int) -> NDArray[np.int64]:
-    """Stationary-bootstrap positions (22.3): a new block with probability 1/ell at a uniform day, else the next day."""
-    new = rng.random((B, n)) < 1 / ell
-    new[:, 0] = True
-    start = rng.integers(0, n, size=(B, n))
-    ar = np.arange(n)
-    last = np.maximum.accumulate(np.where(new, ar, 0), axis=1)
-    s = np.take_along_axis(start, last, axis=1)
-    return (s + ar - last) % n
+def stationary_idx(rng: np.random.Generator, n: int, ell: int) -> NDArray[np.int64]:
+    """Day indices of one stationary resample (22.3), drawn as LM22's stationary_idx (lm22.md:365-383) and
+    data/lm22_common.py's sb_row do, in arch's order: n candidate start days, then n uniforms; a block starts where the
+    uniform is <= 1/ell (and at the first position); day n is followed by day 1."""
+    start = rng.integers(n, size=n, dtype=np.int64)
+    new = rng.random(n) <= 1.0 / ell
+    new[0] = True
+    first_ = np.flatnonzero(new)
+    blk = np.cumsum(new) - 1
+    return (start[first_][blk] + np.arange(n) - first_[blk]) % n
+
+
+def stat_idx(rng: np.random.Generator, n: int, ell: int, B: int) -> NDArray[np.int64]:
+    """B consecutive stationary resamples, one row each, in LM22's draw order (one resample after another)."""
+    return np.stack([stationary_idx(rng, n, ell) for _ in range(B)])
 
 
 def book_ell(x: Vec) -> int:
@@ -308,18 +324,21 @@ Ro = R[oos]
 k7 = list(oos).index(i7)
 
 # ================================================================ case
-put("2 April 2025 -> 7 April 99% VaR forecasts (%): " + "; ".join(f"{m} {f(100 * VAR[m][k7], 2)}" for m in MODELS)
-    + f"; loss {f(-100 * R[i7], 2)}%; loss / VaR " + "; ".join(f"{m} {f(-R[i7] / VAR[m][k7], 1)}" for m in MODELS)
-    + f"; range {f(100 * min(VAR[m][k7] for m in MODELS), 2)} to {f(100 * max(VAR[m][k7] for m in MODELS), 2)}")  # 05
-r7 = {k: float(ret[k][rdates.index("2025-04-07")]) for k in RULES}
+s7 = max(s for s in mstarts if s <= i7)            # the t model's refit for 7 April: the month's first session
+assert dates[s7] == "2025-04-01" and dates[i7 - W_] > dates[s7 - W_]
+put("2 April 2025 -> 7 April 99% VaR forecasts (%): " + "; ".join(f"{m} {f(100 * VAR[m][k7], 2, 3)}" for m in MODELS)
+    + f"; loss {f(-100 * R[i7], 2)}%; loss / VaR " + "; ".join(f"{m} {f(-R[i7] / VAR[m][k7], 1, 2)}" for m in MODELS)
+    + f"; range {f(100 * min(VAR[m][k7] for m in MODELS), 2)} to {f(100 * max(VAR[m][k7] for m in MODELS), 2)}"
+    + f" (HS and N: the {W_} returns {dates[i7 - W_]} -> {dates[i7 - 1]}; t: the fit of {dates[s7]} on the {W_} "
+      f"returns {dates[s7 - W_]} -> {dates[s7 - 1]})")                                                     # 05
 worst = {k: rdates[int(np.argmin(ret[k]))] for k in RULES}
-put("rules' returns on 2025-04-07 (%): " + "; ".join(f"{k} {f(100 * r7[k], 2)}" for k in RULES)
-    + "; each rule's worst day: " + "; ".join(f"{k} {worst[k]}" for k in RULES))                         # 06
+put("each rule's worst day over its " + str(nR) + " returns: " + "; ".join(f"{k} {worst[k]}" for k in RULES)
+    + " (the rules' losses on 2025-04-07 are LM35's, A35-13)")                                          # 06
 U2 = 0.025
 put("rules' historical VaR / ES at 1% and ES at 2.5% (%; j = "
     f"{jrank(U, nR)}, {jrank(U2, nR)} of {nR}): "
-    + "; ".join(f"{k} {f(100 * var_h(ret[k], U), 2)} / {f(100 * es_h(ret[k], U), 2)} / {f(100 * es_h(ret[k], U2), 2)}"
-                for k in RULES))                                                                         # 07
+    + "; ".join(f"{k} {f(100 * var_h(ret[k], U), 2, 3)} / {f(100 * es_h(ret[k], U), 2)} / "
+                f"{f(100 * es_h(ret[k], U2), 2)}" for k in RULES))                                       # 07
 
 
 @dataclass
@@ -404,8 +423,10 @@ put(f"Student t on TR23 (ML refit: nu {f(nu0, 3)}, loc {f(loc0, 4)}%, scale {f(s
     f"3.065, 0.0997, 0.7761; sd {f(sc0 * sqrt(nu0 / (nu0 - 2)), 3)}): " + "; ".join(rows)
     + " (1% VaR echoes lm15.md:461's -3.365%)")                                                         # 14
 num = integrate.quad(lambda v: v * stats.t.pdf(v, nu0), -np.inf, float(stats.t.ppf(U, nu0)))[0] / U
-put(f"check of (32.4): -loc - scale x (numerical tail mean of Y at 1%) {f(-loc0 - sc0 * num, 6)} against the closed "
-    f"form {f(es_t(nu0, loc0, sc0, U), 6)}; difference {abs(-loc0 - sc0 * num - es_t(nu0, loc0, sc0, U)):.1e}")  # 15
+d15 = abs(-loc0 - sc0 * num - es_t(nu0, loc0, sc0, U))
+assert d15 < 1e-12                       # quad's default tolerances; the digits of d15 itself are rounding noise
+put(f"check of (32.4): -loc - scale x (numerical tail mean of Y at 1%, quad's default tolerances) "
+    f"{f(-loc0 - sc0 * num, 6)} against the closed form {f(es_t(nu0, loc0, sc0, U), 6)}; difference below 1e-12")  # 15
 cs = np.concatenate([[0.0], np.cumsum(np.log1p(R))])
 R10 = np.expm1(cs[10:] - cs[:-10])
 rbar, sr = float(np.log1p(R).mean()), float(np.log1p(R).std(ddof=0))
@@ -445,6 +466,9 @@ for u in (0.01, 0.5):
                 f"sqrt(u(1-u)/T)/f {f(sqrt(u * (1 - u) / T) / fhat, 3, 4)} points")
 put("asymptotic SE (delta method on (32.5); Glasserman's (9.7) stated) with the density read off the interval's "
     "ranks: " + "; ".join(rows) + " (LM20's Student-t location SE 0.0124, lm20.md:269)")                  # 19
+tw1, tw2 = np.random.default_rng([99, SEED]), np.random.default_rng([99, SEED])   # twins, as LM22's experiment 20
+sbt = StationaryBootstrap(145, R, seed=tw1)
+assert all(np.array_equal(np.asarray(sbt.index), stationary_idx(tw2, T, 145)) for _ in sbt.bootstrap(3))
 rng5 = np.random.default_rng([5, SEED])
 rng6 = np.random.default_rng([6, SEED])
 qi, qb = [], []
@@ -452,9 +476,10 @@ for _ in range(20):
     qi.append(np.quantile(R[rng5.integers(0, T, size=(500, T))], U, axis=1, method="inverted_cdf"))
     qb.append(np.quantile(R[stat_idx(rng6, T, 145, 500)], U, axis=1, method="inverted_cdf"))
 qi_a, qb_a = np.concatenate(qi), np.concatenate(qb)
-put(f"bootstrap SE of TR23's 1% quantile (B 10,000 each; experiments 5 iid and 6 stationary, l = 145, LM22's rule "
-    f"lm22.md:254): iid {f(100 * float(qi_a.std()), 3)} points (batch SE {f(100 * batch_se_sd(qi_a), 3)}), blocks "
-    f"{f(100 * float(qb_a.std()), 3)} points (batch SE {f(100 * batch_se_sd(qb_a), 3)}); ratio "
+put(f"bootstrap SE of TR23's 1% quantile (B 10,000 each, 20 consecutive batches of 500; experiments 5 iid and 6 "
+    f"stationary, l = 145, LM22's rule lm22.md:254, LM22's draw order, equal to arch's StationaryBootstrap): iid "
+    f"{f(100 * float(qi_a.std()), 3)} points (batch SE {f(100 * batch_se_sd(qi_a), 3, 4)}), blocks "
+    f"{f(100 * float(qb_a.std()), 3)} points (batch SE {f(100 * batch_se_sd(qb_a), 3, 4)}); ratio "
     f"{f(float(qb_a.std() / qi_a.std()), 1, 2)}")                                                          # 20
 last250 = R[-250:]
 j1, j2, cov = binom_interval(250, U)
@@ -462,7 +487,8 @@ p0 = 0.99**250
 put(f"250 returns: Pr(no return below the 1% quantile) = 0.99^250 = {f(p0, 4)} (BCBS 1996 Table 2: 8.11%); "
     f"ranks j1 {j1} (no lower end), j2 {j2}, coverage {f(cov, 4)}; TR23's last 250 returns ({dates[-250]} -> "
     f"{dates[-1]}): VaR -R_(3) {f(-100 * float(np.sort(last250)[2]), 2)}%, interval upper end R_({j2}) "
-    f"{f(100 * float(np.sort(last250)[j2 - 1]), 2)}%, worst {f(100 * float(last250.min()), 2)}%")           # 21
+    f"{f(100 * float(np.sort(last250)[j2 - 1]), 2)}%, worst {f(100 * float(last250.min()), 2)}% on "
+    f"{dates[len(R) - 250 + int(np.argmin(last250))]}")                                                    # 21
 
 # ================================================================ section 5: coherence
 pd_, lgd, gain = Fraction(8, 1000), Fraction(-60, 100), Fraction(2, 100)
@@ -479,8 +505,8 @@ put(f"constructed bonds (default 0.8%, loss 60%, else +2%; independent): one bon
 k_n = float(stats.norm.pdf(stats.norm.ppf(U2))) / U2
 put(f"normal: ES_0.025 / sigma {f(k_n, 4)} against VaR_0.01 / sigma {f(-z01, 4)} (ratio {f(k_n / -z01, 4)}); TR23 "
     f"ES 2.5% / VaR 1%: historical {f(100 * es_h(R, U2), 3)} / {f(100 * var_h(R, U), 3)} = "
-    f"{f(es_h(R, U2) / var_h(R, U), 3)}; normal {f(es_n(mu, s, U2) / var_n(mu, s, U), 3)}; t "
-    f"{f(es_t(nu0, loc0, sc0, U2) / var_t(nu0, loc0, sc0, U), 3)}")                                     # 23
+    f"{f(es_h(R, U2) / var_h(R, U), 2, 3)}; normal {f(es_n(mu, s, U2) / var_n(mu, s, U), 3)}; t "
+    f"{f(es_t(nu0, loc0, sc0, U2) / var_t(nu0, loc0, sc0, U), 2, 3)}")                                  # 23
 sig0, trade0, rows0 = schedule(fr)[0]
 xw = fr.X[rows0 - WINDOW:rows0]
 nw_ = xw.shape[0]
@@ -542,7 +568,9 @@ for _ in range(m10):
 R10mc = np.expm1(tot / 100)
 v1t = VAR["GARCH-t"][k7]
 real10 = float(np.prod(1 + R[i7:i7 + 10]) - 1)
-put(f"Monte Carlo 10-session VaR, GARCH-t from 2 April (experiment 1, default_rng([1, {SEED}]), {B1:,} paths): "
+put(f"Monte Carlo 10-session VaR, GARCH-t from 2 April (experiment 1, default_rng([1, {SEED}]), {B1:,} paths; "
+    f"each of the {m10} steps draws standard_t(nu, size={B1:,}) for all paths at once; batch SE over 20 consecutive "
+    f"batches of 5,000 paths): "
     f"{f(-100 * float(np.quantile(R10mc, U, method='inverted_cdf')), 2)}% (batch SE "
     f"{f(100 * batch_se_q(R10mc, U), 2)} points); sqrt(10) x one-day {f(100 * sqrt(10) * v1t, 2)}%; realized "
     f"{dates[i7]} -> {dates[i7 + 9]} {f(100 * real10, 2)}%")                                            # 28
@@ -570,7 +598,7 @@ lines = []
 for m in MODELS:
     v = VAR[m]
     hit = Ro < -v - EPS
-    margin = float(np.min(np.abs(Ro + v)))
+    margin = 100 * float(np.min(np.abs(Ro + v)))      # in percentage points
     x = int(hit.sum())
     p_cov = float(stats.binom.sf(x - 1, n_bt, U))
     trials = int(hit[:-1].sum())
@@ -585,7 +613,8 @@ for m in MODELS:
                  f"{n11} of {trials} (expected {f(trials * x / n_bt, 2)}), p {g(p_ind, 2)}; 250-day windows "
                  f"{len(r250)}: yellow {f(100 * float(np.mean((r250 >= 5) & (r250 <= 9))), 1)}%, red "
                  f"{f(100 * float(np.mean(r250 >= 10)), 1)}%, max {int(r250.max())} (window ending "
-                 f"{dates[int(oos[imax + 249])]}); mean VaR {f(100 * float(v.mean()), 2)}%; smallest margin {margin:.1e}")
+                 f"{dates[int(oos[imax + 249])]}); mean VaR {f(100 * float(v.mean()), 2)}%; smallest margin "
+                 f"|R + VaR| {f(margin, 3)} points")
 put("six models, u 1%, n " + str(n_bt) + ": " + " | ".join(lines))                                       # 31
 put(f"tests on TR23's forecasts: {2 * len(MODELS)} (coverage and independence for six models); Bonferroni level "
     f"0.05/{2 * len(MODELS)} = {f(0.05 / (2 * len(MODELS)), 4)}; coverage rejected at it: "
@@ -642,10 +671,12 @@ def dist_row(k: str, v: Vec, with_atom: bool = False) -> str:
     med = float(np.quantile(v, 0.5, method="inverted_cdf"))
     on_atom = float(np.mean(np.abs(v - med) < 1e-10)) > 0.01
     se = "on the atom, no batch SE" if on_atom else f"batch SE {f(100 * batch_se_q(v, 0.5), 2)}"
+    n_eq = int(np.sum(np.abs(v - real) < 1e-10))       # resamples that rebuild the realized MDD episode exactly
+    ties = f", {n_eq} of them equal to it" if with_atom else ""
     row = (f"{k} median {f(100 * med, 1)} ({se}), 5-95% "
            f"{f(100 * float(np.quantile(v, 0.05, method='inverted_cdf')), 1)}-"
            f"{f(100 * float(np.quantile(v, 0.95, method='inverted_cdf')), 1)}, at or above the realized {n_ge} of "
-           f"{len(v):,} (SE {f(100 * sqrt(sh * (1 - sh) / B3), 2)} points)")
+           f"{len(v):,}{ties} (SE {f(100 * sqrt(sh * (1 - sh) / B3), 2)} points)")
     if with_atom:
         a, s_a, where = atom(k, v)
         row += (f", largest atom {f(100 * a, 2)} in {round(s_a * len(v))} of {len(v):,} resamples (the realized fall "
@@ -655,19 +686,20 @@ def dist_row(k: str, v: Vec, with_atom: bool = False) -> str:
 
 put(f"permutations of each rule's {nR} returns (experiment 3, default_rng([3, {SEED}]), {B3:,} each, rules in order; "
     f"MDD in %): " + " | ".join(dist_row(k, MP[k]) for k in RULES))                                     # 36
-put(f"stationary bootstrap (experiment 4, default_rng([4, {SEED}]), {B3:,} each, the book's block rule on each "
-    f"rule's squared demeaned returns, block lengths " + ", ".join(f"{k} {ELL[k]}" for k in RULES)
+put(f"stationary bootstrap (experiment 4, default_rng([4, {SEED}]), {B3:,} each in LM22's draw order, one resample "
+    f"after another, rules in order; the book's block rule on each rule's squared demeaned returns, block lengths "
+    + ", ".join(f"{k} {ELL[k]}" for k in RULES)
     + "; MDD in %): " + " | ".join(dist_row(k, MB[k], with_atom=True) for k in RULES))                   # 37
 gam = sqrt(pi / 8)
 lg = sqrt(pi / 2) * 0.20 * sqrt(10)
-put(f"Brownian motion, zero drift (Magdon-Ismail et al. 2004, eq. (16) of the author's 2003 version): E[max log "
+put(f"Brownian motion, zero drift (Magdon-Ismail et al. 2004, eq. (16) of the authors' preprint of 2003-09-01): E[max log "
     f"drawdown] = 2 gamma sigma sqrt(T), gamma = sqrt(pi/8) = {f(gam, 4)}; hypothetical sigma 20% a year, 10 years: "
     f"{f(lg, 3)}, a loss of {f(100 * (1 - exp(-lg)), 1)}%")                                             # 38
-put(f"R6 against R8: 7 April {f(100 * r7['R6'], 2)} / {f(100 * r7['R8'], 2)}% (ratio {f(r7['R8'] / r7['R6'], 2)}); "
-    f"ES 1% {f(100 * es_h(ret['R6'], U), 2)} / {f(100 * es_h(ret['R8'], U), 2)}%; MDD "
-    f"{f(100 * SP['R6'].mdd, 2)} / {f(100 * SP['R8'].mdd, 2)}%")                       # 39
+put(f"R6 against R8: ES 1% {f(100 * es_h(ret['R6'], U), 2)} / {f(100 * es_h(ret['R8'], U), 2)}%; MDD "
+    f"{f(100 * SP['R6'].mdd, 2)} / {f(100 * SP['R8'].mdd, 2)}% (their losses on 2025-04-07 are LM35's, A35-13)")  # 39
 sp2 = SP["R2"]
-put(f"KC section 8: R2 MDD {f(100 * sp2.mdd, 2)}% but max DD0 {f(100 * sp2.dd0, 2)}% ({sp2.dd0_date}; the first purchase cost {f(100 * (1 - float(paths['R2'].wealth[0])), 3)}%); recovery "
+put(f"KC section 8: R2 MDD {f(100 * sp2.mdd, 2)}% but max DD0 {f(100 * sp2.dd0, 2)}% ({sp2.dd0_date}; the first "
+    f"purchase cost {f(100 * (1 - float(paths['R2'].wealth[0])), 3)}%, echo of LM27's A27-23); recovery "
     f"gain (1.17) {f(100 * sp2.mdd / (1 - sp2.mdd), 1)}%; R1's {f(100 * sp1.mdd / (1 - sp1.mdd), 2)}%")  # 40
 mu1, s1 = float(ret["R1"].mean()), float(ret["R1"].std(ddof=0))
 put("rules' normal 1% VaR (In-sample, own mean and s; %): " + "; ".join(
@@ -702,11 +734,13 @@ for d in ("2025-04-07", "2024-08-05", "2020-03-19"):
     P = xx["TAIEX"].to_numpy().astype(np.float64)
     tt = xx["date"].str.slice(11, 8).to_list()
     assert tt[0] == "09:00:00" and tt[-1] == "13:30:00"
-    ddi = 1 - P / np.maximum.accumulate(P)
+    lfall = np.log(np.maximum.accumulate(P) / P)          # log fall from the running peak (previous close included)
     jl = int(np.argmin(P))
-    rows.append(f"{d}: close {f(100 * (P[-1] / P[0] - 1), 2)}%, low {f(100 * (P[jl] / P[0] - 1), 2)}% at {tt[jl]}, "
-                f"intraday MDD (peak includes the previous close) {f(100 * float(ddi.max()), 2)}%")
-put("T5S per day (TAIEX price index; 09:00:00 = previous close): " + "; ".join(rows))                    # 44
+    jm = int(np.argmax(lfall))
+    rows.append(f"{d}: close {f(100 * float(np.log(P[-1] / P[0])), 2)}%, low {f(100 * float(np.log(P[jl] / P[0])), 2)}% "
+                f"at {tt[jl]}, largest log fall from the running peak {f(100 * float(lfall[jm]), 2)}% (peak "
+                f"{tt[int(np.argmax(P[: jm + 1]))]}, trough {tt[jm]})")
+put("T5S per day (TAIEX price index; log changes from 09:00:00, the previous close): " + "; ".join(rows))  # 44
 
 # ================================================================ problems
 put(f"P1: T 250, u 1%: j = ceil(2.5) = {jrank(U, 250)} (floor gives 2)")                              # 45
@@ -744,9 +778,9 @@ wis = (Z <= 0) * np.exp(kk * Z - kk * kk / 2)
 p_is = float(wis.mean())
 se_is = float(wis.std() / sqrt(len(wis)))
 var_one = exp(kk * kk) * float(stats.norm.cdf(-2 * kk)) - p_n**2
-put(f"P10 importance sampling (18.7), k = {f(kk, 4)} (7 April under GARCH-n), experiment 2, default_rng([2, {SEED}]), "
-    f"10,000 draws: {g(p_is, 4)} +- {g(se_is, 2)} (relative SE {f(100 * se_is / p_is, 1)}%); exact Phi(-k) {g(p_n, 4)}; "
-    f"plain draws in the tail expected {f(10_000 * p_n, 6)}; variance ratio p(1-p) / (e^k^2 Phi(-2k) - p^2) "
+put(f"P10 importance sampling (18.7), shift a = {f(kk, 4)} (7 April under GARCH-n), experiment 2, default_rng([2, "
+    f"{SEED}]), 10,000 draws: {g(p_is, 4)} +- {g(se_is, 2)} (relative SE {f(100 * se_is / p_is, 1)}%); exact Phi(-a) "
+    f"{g(p_n, 4)}; plain draws in the tail expected {f(10_000 * p_n, 6)}; variance ratio p(1-p) / (e^a^2 Phi(-2a) - p^2) "
     f"{g(p_n * (1 - p_n) / var_one, 3)}; shifted draws in the tail {int((Z <= 0).sum())}")              # 53
 
 
@@ -786,7 +820,7 @@ rng7 = np.random.default_rng([7, SEED])
 B7 = 100_000
 R10iid = np.concatenate([np.prod(1 + R[rng7.integers(0, T, size=(5_000, 10))], axis=1) - 1 for _ in range(20)])
 put(f"10 sessions drawn iid from TR23's 5,849 returns (experiment 7, default_rng([7, {SEED}]), {B7:,} sums in 20 "
-    f"batches of 5,000): 99% VaR {f(-100 * float(np.quantile(R10iid, U, method='inverted_cdf')), 2)}% (batch SE "
+    f"consecutive batches, each one integers(0, T, size=(5000, 10)), a row per sum): 99% VaR {f(-100 * float(np.quantile(R10iid, U, method='inverted_cdf')), 2)}% (batch SE "
     f"{f(100 * batch_se_q(R10iid, U), 2)} points), against the overlapping {f(100 * var_h(R10, U), 2)}% (A32-16) and "
     f"sqrt(10) x one-day {f(100 * sqrt(10) * var_h(R, U), 2)}%")                                         # 55
 print("\n".join(OUT))

@@ -195,8 +195,9 @@ the editor's exploration for the Volume II briefs (`processed/vol2_anchors.txt`)
   one-day snapshots of every ETF, `etf_snapshot__2017-01-17.csv` and `etf_snapshot__2026-10-08.csv` (`TaiwanStockPrice`
   without a `data_id`, which FinMind serves only above the Free plan: on a Free account fetch with
   `--exclude vol6/etf_snapshot`, and LM34 skips the one number that needs them). LM35's replays — SPY, TLT, GLD, USO
-  and DBO (`USStockPrice`, `date,adj_close,close`, registered with `--adjusted adj_close`; USO's 1-for-8 reverse split
-  of 2020-04-28 is one of its registered "ex-dates"), `USD_TWD__2007-07-02__2026-10-08.csv` (`TaiwanExchangeRate`,
+  and DBO (`USStockPrice`, `date,adj_close,close`, registered with `--adjusted adj_close`; FinMind's US `Close` is
+  already split-adjusted: USO's 1-for-8 reverse split of 2020-04-28 shows no jump in either column, and USO and GLD
+  register no ex-dates), `USD_TWD__2007-07-02__2026-10-08.csv` (`TaiwanExchangeRate`,
   `spot_buy,spot_sell`, without FinMind's −1 rows) and 0050's 2007–2008 closes and distributions
   (`0050__2007-07-02__2008-12-31.csv`, `0050_dividends__2007-07-02__2008-12-31.csv`, as Volume I's files).
 - `intraday/taiex5s/<year>/<date>.csv` and `intraday/tx1m/2025/<date>.csv` (Volume IV intraday, `fetch_intraday.py`,

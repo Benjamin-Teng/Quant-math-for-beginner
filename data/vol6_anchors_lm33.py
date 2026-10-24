@@ -1,4 +1,7 @@
-"""LM33 anchors (The Statistics of the Sharpe Ratio): every number the Stage 1 brief quotes (drafted 2026-10-24).
+"""LM33 anchors (The Statistics of the Sharpe Ratio): every number the Stage 1 brief quotes (drafted 2026-10-24,
+revised the same day to the editor's decisions on the briefs in plans/vol-5.md: b = 22, Bartlett HAC with the book's
+lag, sqrt(T - 1), n = 8 with n_eff beside it, the shared last-block handling; and to the source check of decision F,
+which read Ledoit and Wolf's JEF text and the authors' versions of Bailey and Lopez de Prado 2012 and 2014).
 
 Reads only data/processed/*.parquet, through the shared builders (run them first; this script runs neither):
   * E5, the through case (plans/vol-5.md): data/vol5_series.py's frames("E5") reads vol5_frames.parquet; the eight
@@ -19,28 +22,41 @@ moments, sqrt((1 - SR Skew + (Kurt - 1) SR^2 / 4) / T); "normal" uses Skew 0, Ku
 (the brief's (33.1)) is sqrt(g' Psi g / T) with g = (1/s, -mean/(2 s^3)) and Psi = (23.7)'s Bartlett estimate of the
 long-run covariance of y_t = (x_t - mean, (x_t - mean)^2 - s^2), lag L by the book's rule floor(4 (T/100)^(2/9)),
 no small-sample factor; at L = 0 it equals the plug-in (20.9). The two-Sharpe statistics follow Ledoit and Wolf
-(2008, IEW WP 320): v = (mu_j, mu_1, gamma_j, gamma_1) with uncentred second moments, f = a/sqrt(c - a^2) -
-b/sqrt(d - b^2), s(Delta) = sqrt(grad' Psi grad / T); Psi by (23.7) with the book's lag (their prewhitened QS kernel
-and T/(T-4) factor are not used); the studentized circular block bootstrap with block size b, the bootstrap
-standard error from the floor(T/b) complete blocks (Goetze-Kuensch, as their section 3.2.2), the centred statistic
-|Delta* - Delta| / s(Delta*), the p-value (#{d* >= d} + 1) / (B + 1) and the symmetric interval
-Delta +- z*_{0.95} s(Delta). Holm's adjusted p-values are (21.7)'s. PSR and MinTRL as Bailey and Lopez de Prado
-(2012, appendix code): sqrt(T - 1) and the "1 +" term. The expected maximum E Z_(n) of n iid standard normals is the
-exact integral from (21.9), int_0^inf (1 - Phi^n) - int_-inf^0 Phi^n; the approximation is Bailey and Lopez de
-Prado's (2014), (1 - g) Phi^-1(1 - 1/n) + g Phi^-1(1 - 1/(n e)), g = 0.5772156649 (Euler's constant). The deflated
+(2008, JEF, section 3, pp. 851-855): v = (mu_j, mu_1, gamma_j, gamma_1) with uncentred second moments,
+f = a/sqrt(c - a^2) - b/sqrt(d - b^2), s(Delta) = sqrt(grad' Psi grad / T); Psi by (23.7) with the book's lag (the
+book's choice: their prewhitened QS kernel and T/(T-4) factor, section 3.1, are not used); their studentized circular
+block bootstrap of the return pairs (section 3.2.2, p. 854) with block size b (the book's rule, below; theirs is
+calibrated by Algorithm 3.1). T = 1,851 is not a multiple of b, and the paper does not say how a resample is cut (the
+book's convention, shared decision "Counting", plans/vol-5.md): a resample draws ceil(T/b) block starts, its blocks
+are joined and cut to T rows. As the paper: its moments are centred at the resample's own means (divisor T); the
+Goetze-Kuensch block covariance Psi* uses only the floor(T/b) complete blocks, Psi* = sum_j S_j S_j' / (b floor(T/b))
+with S_j the j-th block sum of the centred rows (the last T - b floor(T/b) rows dropped from Psi* only);
+s(Delta*) = sqrt(grad*' Psi* grad* / T); the centred statistic |Delta* - Delta| / s(Delta*), the p-value
+(#{d* >= d} + 1) / (B + 1) (Remark 3.2, eq. (9), p. 855) and the symmetric interval Delta +- z*_{0.95} s(Delta)
+((6)-(7), p. 853). Holm's adjusted p-values are (21.7)'s. PSR and MinTRL as Bailey and Lopez de Prado (2012, eqs. (11)
+and (12)-(13) of the authors' July 2012 version, pp. 9-11): sqrt(T - 1), raw kurtosis and the "1 +" term. The
+expected maximum E Z_(n) of n iid standard normals is the exact integral from (21.9), int_0^inf (1 - Phi^n) -
+int_-inf^0 Phi^n; the approximation is Bailey and Lopez de Prado's (2014, eq. (1) of the authors' 31 July 2014
+version, p. 7), (1 - g) Phi^-1(1 - 1/n) + g Phi^-1(1 - 1/(n e)), g = 0.5772156649 (Euler's constant); their implied
+number of independent trials is eq. (9) there (p. 14), rho_bar + (1 - rho_bar) M. The deflated
 benchmark is SR_0 = E Z_(n) / sqrt(T - 1) per observation (the null standard deviation of (20.9) at SR = 0, on PSR's
 T - 1). Haircuts as Harvey and Liu (2015): the two-sided normal p-value of t = SR sqrt(T), adjusted for n tests
-(Bonferroni (21.6), Holm (21.7), or independent tests 1 - (1 - p)^n), back to SR via Phi^-1(1 - p_adj / 2) / sqrt(T);
-their own example uses t with T - 1 degrees of freedom, as they print it.
+(Bonferroni (21.6), Holm (21.7), or independent tests 1 - (1 - p)^n, their eqs. (1)-(5), pp. 13-14), back to SR via
+Phi^-1(1 - p_adj / 2) / sqrt(T); their t has T - 1 degrees of freedom (eq. (1)); Holm on the eight rules' own
+p-values is the book's adaptation (Harvey and Liu take the other p-values from a model of 300+ factors, p. 16).
 
 Experiments (one generator each, created once at the start, np.random.default_rng([e, 20261011])):
   e = 1: the seven Ledoit-Wolf tests R2..R8 against R1, B = 9,999 circular-block resamples of the 1,851 dates
          (block size b by the book's rule, below), one set of block starts per resample shared by the seven pairs;
   e = 2: the maximum of eight correlated standard normals, N_8(0, C) with C the correlation matrix of the rules'
          daily excess returns, 1,000,000 draws (Cholesky), for the effective number of trials;
-  e = 3: R2 against R1 at block sizes 1, 5, 10, 26, 50 and 100, B = 9,999 each, drawn in that order.
-Block size: the book's rule of LM22 (lm22.md:254) on the circular scheme: the largest circular estimate of arch's
-optimal_block_length among the eight rules' squared demeaned excess returns, rounded.
+  e = 3: R2 against R1 at block sizes 1, 5, 10, 26, 50 and 100, B = 9,999 each, drawn in that order (the grid of
+         the first draft, kept; 26 is the largest circular estimate; b = 22 itself is experiment 1's).
+Block size: the book's rule of LM22 (lm22.md:254), the largest stationary estimate of arch's optimal_block_length
+among the squared demeaned simple-return series the statistic involves, rounded: Ledoit and Wolf's statistic for a
+pair involves the two rules' own returns, and the seven pairs share one set of block starts, so the largest over the
+eight rules' squared demeaned excess returns (equal to their squared demeaned simple returns); the circular bootstrap
+uses the same length (editor's decision D, 2026-10-24).
 
 Rounding flags. Every number the brief prints passes through f(x, k1, k2, ...), which shows x with max(k) + 3
 decimals and flags it "NEAR" for each printed precision k at which x lies within a tenth of a last-digit unit of a
@@ -219,9 +235,9 @@ Lt = lag_rule(Tt)
 
 # ---------------------------------------------------------------- data role
 put(f"T {T} daily returns {dates[1]} .. {dates[-1]} (first trade {dates[0]}); tau = T/A_w {f(tau, 2, 4)} years; "
-    f"calendar years from the first trade {f(cal_years, 4)}")
+    f"calendar years from the first trade's close {f(cal_years, 2, 4)}")
 put(f"A_w {f(Aw, 2, 4)} (wealth frame {len(fr.wealth_dates)} sessions); RF {RF}; RF/A_w per session "
-    f"{f(RF / Aw * 1e4, 4)} bp; sqrt(A_w) {f(sqA, 4)}")
+    f"{f(RF / Aw * 1e4, 3)} bp; sqrt(A_w) {f(sqA, 4)}")
 ym = [d[:7] for d in dates]
 ends = [i for i in range(len(dates)) if i == len(dates) - 1 or ym[i] != ym[i + 1]]
 full = [i for i in ends if "2019-03" <= ym[i] <= "2026-09"]
@@ -232,7 +248,7 @@ TM = len(full) - 1
 put(f"months: {TM} full months {ym[full[1]]} .. {ym[full[-1]]}, {int(nsess.min())}-{int(nsess.max())} sessions "
     f"each; left out: 2019-03 ({mar19} returns from {dates[1]}), 2026-10 ({oct26} returns)")
 put(f"HAC lag rule floor(4 (T/100)^(2/9)): T={T} -> {L}; TR23 T={Tt} -> {Lt}; months T={TM} -> {lag_rule(TM)}")
-put(f"TR23: T {Tt} returns {tr['date'][0]} .. {tr['date'][-1]}; years {f(tr_years, 4)}; A {f(At, 2)}; r_f = 0")
+put(f"TR23: T {Tt} returns {tr['date'][0]} .. {tr['date'][-1]}; calendar years {f(tr_years, 2)}; A {f(At, 2)}; r_f = 0")
 
 # ---------------------------------------------------------------- checkpoint table, one line per rule
 SE9, SEH, SEN = {}, {}, {}
@@ -279,10 +295,14 @@ put(f"R4: two-sided 95% (20.9) {f((SR['R4'] - 1.959964 * SE9['R4']) * sqA, 2, pl
 put("SE(SR) a year by HAC lag (0 = (20.9) plug-in): " + "; ".join(
     f"{k} " + ", ".join(f"L={lg} {f(se_sr_hac(X[k], lg) * sqA, 3)}" for lg in (0, L, 20, 60)) for k in ("R1", "R2", "R4"))
     + "; HAC / iid at L=" + str(L) + ": " + ", ".join(f"{k} {f(SEH[k] / SE9[k], 2)}" for k in RULES))
-put("rho_1 of daily excess returns (19.5): " + ", ".join(
-    f"{k} {f(float((X[k][1:] - X[k].mean()) @ (X[k][:-1] - X[k].mean()) / ((X[k] - X[k].mean()) @ (X[k] - X[k].mean()))), 3)}"
-    for k in RULES) + "; rho_1 of squared demeaned R1 " + f(float(np.corrcoef(
-        (X['R1'] - X['R1'].mean())[1:] ** 2, (X['R1'] - X['R1'].mean())[:-1] ** 2)[0, 1]), 3))
+def rho1(y: Vec) -> float:
+    """(19.5)'s lag-1 autocorrelation, divisor T in both sums."""
+    c = y - y.mean()
+    return float(c[1:] @ c[:-1] / (c @ c))
+
+
+put("rho_1 (19.5) of daily excess returns: " + ", ".join(f"{k} {f(rho1(X[k]), 3)}" for k in RULES)
+    + "; of R1's squared deviations (x - mean)^2 " + f(rho1((X['R1'] - X['R1'].mean()) ** 2), 3))
 vr = {k: se_vol_hac(X[k], L) / (mom[k][1] * sqrt((mom[k][3] - 1) / (4 * T))) for k in RULES}
 put("vol SE HAC/iid at L=" + str(L) + ": " + ", ".join(f"{k} {f(vr[k], 2)}" for k in RULES)
     + "; R1 vol SE a year iid " + pc(mom['R1'][1] * sqrt((mom['R1'][3] - 1) / (4 * T)) * sqA, 2)
@@ -309,16 +329,16 @@ for k in RULES:
     srm = float(xm.mean() / xm.std())
     se_rob2 = sum((2 * (1 - j / 12)) ** 2 * float(np.sum(c[j:] ** 2 * c[:-j] ** 2)) / float(c @ c) ** 2
                   for j in range(1, 12))
-    line.append(f"{k} SR_month {f(srm, 4)}, x sqrt12 {f(srm * sqrt(12), 2)}, Lo {f(srm * eta[k], 2)} "
-                f"(eta {f(eta[k], 2)}; 1 + 2 sum (1-k/12) rho_k = {f(den[k], 2)}, robust SE (25.6) {f(sqrt(se_rob2), 2)}; "
+    line.append(f"{k} SR_month {f(srm, 3)}, x sqrt12 {f(srm * sqrt(12), 2)}, Lo {f(srm * eta[k], 2)} "
+                f"(eta {f(eta[k], 2)}; 1 + 2 sum (1-k/12) rho_k = {f(den[k], 2, 3)}, robust SE (25.6) {f(sqrt(se_rob2), 2)}; "
                 f"rho_1 {f(rho[0], 3)})")
 put("monthly log excess returns, 90 months: " + "; ".join(line))
 se_iid12 = sqrt(2 * (2 * 12 - 1) * (12 - 1) / (3 * 12 * TM))
-put(f"(25.6) iid SE of VR(12) - 1 at T={TM}: {f(se_iid12, 3)}; R1's {f(den['R1'] - 1, 2)} is "
-    f"{f((den['R1'] - 1) / se_iid12, 1)} SEs; eta range over rules {f(min(eta.values()), 2)}..{f(max(eta.values()), 2)} "
-    f"against sqrt12 {f(sqrt(12), 4)}")
+put(f"(25.6) iid SE of VR(12) - 1 at T={TM}: {f(se_iid12, 2, 3)}; R1's {f(den['R1'] - 1, 2, 3)} is "
+    f"{f((den['R1'] - 1) / se_iid12, 2)} SEs; eta range over rules {f(min(eta.values()), 2)} to {f(max(eta.values()), 2)} "
+    f"against sqrt12 {f(sqrt(12), 2)}")
 ar = 12 / sqrt(12 + 2 * sum((12 - j) * 0.2**j for j in range(1, 12)))
-put(f"Lo (2002) checks: eta(12) iid {f(sqrt(12), 2)}; AR(1) rho=0.2 {f(ar, 2, 3)} (Lo's Table 2: 2.88); "
+put(f"Lo (2002) checks: eta(12) iid {f(sqrt(12), 2, 3)}; AR(1) rho=0.2 {f(ar, 2, 3)} (Lo's Table 2, p. 41: 2.88); "
     f"eta(12) at rho=0.2 / sqrt12 {f(ar / sqrt(12), 3)}; sqrt12 / eta {f(sqrt(12) / ar, 3)}")
 xd = {k: np.log(paths[k].wealth[1:] / paths[k].wealth[:-1]) - np.log(1 + RF / Aw) for k in RULES}
 put("daily log excess SR x sqrt(A_w): " + ", ".join(f"{k} {f(xd[k].mean() / xd[k].std() * sqA, 2)}" for k in RULES))
@@ -335,7 +355,7 @@ zt = (SR["R2"]) * sqrt(T - 1) / sqrt(v209(SR["R2"], sk2, ku2))
 put(f"R2 PSR z with sqrt(T-1) {f(zt, 3)}, with sqrt(T) {f(zt * sqrt(T / (T - 1)), 3)}; factor sqrt(T/(T-1)) - 1 "
     f"= {pc(sqrt(T / (T - 1)) - 1, 3)}")
 n_tr = mintrl(srt, 0, skt, kut)
-put(f"TR23 PSR(0) {f(psr(srt, 0, Tt, skt, kut), 5)}; MinTRL(0) {f(n_tr, 0)} sessions = {f(n_tr / At, 2)} years; "
+put(f"TR23 PSR(0) {f(psr(srt, 0, Tt, skt, kut), 5)}; MinTRL(0) {f(n_tr, 0, 1)} sessions = {f(n_tr / At, 2)} years; "
     f"(21.4) one-sided at power 1/2, (1.645/SR)^2 = {f((stats.norm.ppf(0.95) / (srt * sqrt(At))) ** 2, 2)} "
     f"years; (21.4) two-sided 80% power 11.9 years (lm21.md:177, 183)")
 put("X4 normal returns, A_w: MinTRL(0) years at annual SR " + ", ".join(
@@ -345,8 +365,10 @@ put("X4 normal returns, A_w: MinTRL(0) years at annual SR " + ", ".join(
 bl12 = [2.0, 12**0.5, -0.72, 5.78]
 srm12 = bl12[0] / bl12[1]
 n12 = mintrl(srm12, 1 / 12**0.5, bl12[2], bl12[3])
-put(f"Bailey-LdP (2012) appendix example: monthly SR {f(srm12, 4)}, SR_0 {f(1 / 12**0.5, 4)}, skew -0.72, kurt 5.78: "
-    f"MinTRL {f(n12, 3)} months = {f(n12 / 12, 2)} years; PSR at 59.895 obs {f(psr(srm12, 1 / 12**0.5, 59.895, -0.72, 5.78), 4)}")
+n12n = mintrl(srm12, 1 / 12**0.5, 0, 3)
+put(f"Bailey-LdP (2012, p. 11) example, the appendix code's inputs: monthly SR {f(srm12, 4)} against SR_0 "
+    f"{f(1 / 12**0.5, 4)}, 95%: skew -0.72, raw kurt 5.78: MinTRL {f(n12, 1)} months = {f(n12 / 12, 2)} years; "
+    f"normal (skew 0, kurt 3): {f(n12n, 1)} months = {f(n12n / 12, 2)} years (they print 4.99 and 3.24 years)")
 put(f"R2 MinTRL against SR_0 = R1's estimate (the misuse): {f(mintrl(SR['R2'], SR['R1'], sk2, ku2) / Aw, 1)} years; "
     f"PSR(SR_R1) {f(psr(SR['R2'], SR['R1'], T, sk2, ku2), 3)}")
 
@@ -354,10 +376,16 @@ put(f"R2 MinTRL against SR_0 = R1's estimate (the misuse): {f(mintrl(SR['R2'], S
 obl = [optimal_block_length((X[k] - X[k].mean()) ** 2) for k in RULES]
 circ = [float(o["circular"].iloc[0]) for o in obl]
 stat_ = [float(o["stationary"].iloc[0]) for o in obl]
-b_rule = round(max(circ))
-put("optimal_block_length on squared demeaned excess returns, circular: " + ", ".join(
-    f"{k} {f(c, 2)}" for k, c in zip(RULES, circ, strict=True)) + f"; largest {f(max(circ), 2)} -> b = {b_rule}; "
-    f"stationary largest {f(max(stat_), 2)}")
+dif_ = [float(optimal_block_length((X[k] - X["R1"] - (X[k] - X["R1"]).mean()) ** 2)["stationary"].iloc[0])
+        for k in RULES[1:]]
+b_rule = round(max(stat_))
+assert b_rule == 22                                   # the editor's decision D fixed b = 22 before this run
+put("optimal_block_length on squared demeaned excess returns, stationary: " + ", ".join(
+    f"{k} {f(c, 2)}" for k, c in zip(RULES, stat_, strict=True)) + f"; largest {f(max(stat_), 2)} -> b = {b_rule} "
+    f"(T = {T} = {T // b_rule} x {b_rule} + {T % b_rule}: {ceil(T / b_rule)} blocks drawn, {T // b_rule} complete); "
+    f"circular estimates {f(min(circ), 2)} to {f(max(circ), 2)}; on the squared demeaned differences x_j - x_1 "
+    f"(not the series the statistic involves) the largest stationary estimate is {f(max(dif_), 2)} "
+    f"({RULES[1 + int(np.argmax(dif_))]} - R1)")
 
 
 def lw_parts(xj: Vec, x1: Vec, lag: int) -> tuple[float, float]:
@@ -414,10 +442,11 @@ for jj, (j, o) in enumerate(pairs):
 hb = holm(p_boot)
 hh = holm(p_hac)
 for (k, dl, sd, t, pb, zq, rr), a1, a2, ph in zip(rows, hb, hh, p_hac, strict=True):
-    put(f"{k} - R1: Delta a year {f(dl * sqA, 2, 3, plus=True)}; corr {f(rr, 3, 2)}; s(Delta) HAC(L={L}) a year "
-        f"{f(sd * sqA, 3)}; t-stat {f(t, 2, plus=True)}; HAC p {f(ph, 3, 2)} (Holm {f(a2, 2)}); boot p {f(pb, 3, 2)} "
+    put(f"{k} - R1: Delta a year {f(dl * sqA, 2, 3, 4, plus=True)}; corr {f(rr, 3, 2)}; s(Delta) HAC(L={L}) a year "
+        f"{f(sd * sqA, 3, 4)}; t-stat {f(t, 2, plus=True)}; HAC p {f(ph, 3, 2)} (Holm {f(a2, 2)}); boot p {f(pb, 3, 2)} "
         f"(Holm {f(a1, 2)}; MC SE {f(sqrt(pb * (1 - pb) / B), 3)}); z*(0.95) {f(zq, 2)}; 95% interval "
-        f"{f((dl - zq * sd) * sqA, 2, plus=True)} to {f((dl + zq * sd) * sqA, 2, plus=True)}")
+        f"{f((dl - zq * sd) * sqA, 2, plus=True)} to {f((dl + zq * sd) * sqA, 2, plus=True)}; HAC normal 95% "
+        f"{f((dl - 1.959964 * sd) * sqA, 2, plus=True)} to {f((dl + 1.959964 * sd) * sqA, 2, plus=True)}")
 
 # ---------------------------------------------------------------- R2 vs R1 detail
 dl21, sd21 = lw_parts(X["R2"], X["R1"], L)
@@ -425,7 +454,7 @@ r21 = float(np.corrcoef(X["R2"], X["R1"])[0, 1])
 naive = sqrt(SE9["R2"] ** 2 + SE9["R1"] ** 2)
 put(f"R2 vs R1: independent-samples SE a year (as (21.3)) {f(naive * sqA, 3)} against LW HAC {f(sd21 * sqA, 3)}; "
     f"ratio {f(sd21 / naive, 2)} (sqrt(1 - rho) {f(sqrt(1 - r21), 2)}); s(Delta) a year by lag: "
-    + ", ".join(f"L={lg} {f(lw_parts(X['R2'], X['R1'], lg)[1] * sqA, 3)}" for lg in (0, L, 26, 60))
+    + ", ".join(f"L={lg} {f(lw_parts(X['R2'], X['R1'], lg)[1] * sqA, 3)}" for lg in (0, L, b_rule, 60))
     + f"; one-sided Phi(t-stat) {f(float(stats.norm.cdf(dl21 / sd21)), 2, 3)}")
 c21 = sd21 * sqrt(tau)                        # s(Delta) per sqrt(year), annual units: SE = c / sqrt(years)
 z80 = stats.norm.ppf(0.975) + stats.norm.ppf(0.8)
@@ -447,7 +476,7 @@ put("E Z_(n) exact / Bailey-LdP approx / (21.9) median: " + "; ".join(
     for n in (2, 8, 10, 100, 1000, 10000)))
 s0 = 1 / sqrt(T - 1)
 SR0_8 = emax(8) * s0
-put(f"null SD of SR hat 1/sqrt(T-1): daily {f(s0, 5)}, a year {f(s0 * sqA, 3)}; deflated SR_0 at n=8 a year: exact "
+put(f"null SD of SR hat 1/sqrt(T-1): daily {f(s0, 4)}, a year {f(s0 * sqA, 3)}; deflated SR_0 at n=8 a year: exact "
     f"{f(SR0_8 * sqA, 2, 3)}, approx {f(emax_bldp(8) * s0 * sqA, 3)}")
 
 
@@ -477,7 +506,7 @@ neff = optimize.brentq(lambda n: emax(n) - emc, 1.000001, 8, xtol=1e-12)
 d_lo = optimize.brentq(lambda n: emax(n) - (emc - 2 * emc_se), 1.000001, 8, xtol=1e-12)
 d_hi = optimize.brentq(lambda n: emax(n) - (emc + 2 * emc_se), 1.000001, 8, xtol=1e-12)
 put(f"experiment 2: E max of N_8(0, C) {f(emc, 3)} (MC SE {f(emc_se, 4)}, 10^6 draws); n_eff {f(neff, 2)} "
-    f"(+-2 MC SE: {f(d_lo, 3)} to {f(d_hi, 3)}); rho_bar + (1 - rho_bar) 8 = {f(float(off.mean()) + (1 - float(off.mean())) * 8, 2)}; "
+    f"(+-2 MC SE: {f(d_lo, 3)} to {f(d_hi, 3)}); Bailey-LdP (2014) eq. (9) rho_bar + (1 - rho_bar) 8 = {f(float(off.mean()) + (1 - float(off.mean())) * 8, 2)}; "
     f"DSR of R2 at n_eff {f(psr(SR['R2'], emc * s0, T, sk2, ku2), 3)}; deflated SR_0 a year {f(emc * s0 * sqA, 2)}")
 sv2 = sqrt(v209(SR["R2"], sk2, ku2))
 
@@ -506,10 +535,11 @@ def dsr14(n: float, sk: float, ku: float) -> float:
 
 put(f"Bailey-LdP (2014) example (SR 2.5 a year, T 1250, V 1/2, skew -3, kurt 10, 250 a year): SR_0 daily "
     f"{f(sqrt(v14) * emax_bldp(100), 4)} at N=100, DSR {f(dsr14(100, -3, 10), 4)}; N=46 {f(dsr14(46, -3, 10), 4)}; "
-    f"normal N=88 {f(dsr14(88, 0, 3), 4)}")
+    f"normal N=88 {f(dsr14(88, 0, 3), 4)} (they print 0.1132, 0.9004, 0.9505 and 0.9505, pp. 9-10)")
 put("X6 deflated SR_0 a year (exact) at n = " + ", ".join(
     f"{n} {f(emax(n) * s0 * sqA, 2)}" for n in (1, 2, 8, 10, 100, 1000, 10000))
-    + f"; pass line SR_R2 - 1.645 SE(20.9) a year {f((SR['R2'] - stats.norm.ppf(0.95) * sqrt(v209(SR['R2'], sk2, ku2) / (T - 1))) * sqA, 2)}")
+    + f"; pass line SR_R2 - 1.645 sqrt(V/(T-1)) a year (PSR's T - 1) "
+    f"{f((SR['R2'] - stats.norm.ppf(0.95) * sqrt(v209(SR['R2'], sk2, ku2) / (T - 1))) * sqA, 2)}")
 
 # ---------------------------------------------------------------- haircuts
 pS = {k: two_sided(SR[k] * sqrt(T)) for k in RULES}
@@ -530,7 +560,7 @@ put("haircuts, n = 8 (two-sided normal p of SR sqrt(T)): " + "; ".join(hc_lines)
 k2 = "R2"
 put(f"E9 R2: t {f(SR[k2] * sqrt(T), 3)}, single p {f(pS[k2], 5)}; 1-(1-p)^8 {f(1 - (1 - pS[k2]) ** 8, 4)}; 8p "
     f"{f(8 * pS[k2], 4)}; t* {f(float(stats.norm.isf((1 - (1 - pS[k2]) ** 8) / 2)), 2)}; HSR (indep) "
-    f"{f(hsr(1 - (1 - pS[k2]) ** 8), 3)} a year, haircut {pc(1 - hsr(1 - (1 - pS[k2]) ** 8) / (SR[k2] * sqA), 1)}")
+    f"{f(hsr(1 - (1 - pS[k2]) ** 8), 2, 3)} a year, haircut {pc(1 - hsr(1 - (1 - pS[k2]) ** 8) / (SR[k2] * sqA), 1)}")
 t240 = 0.75 / sqrt(12) * sqrt(240)
 ps240 = float(2 * stats.t.sf(t240, 239))
 pm240 = 1 - (1 - ps240) ** 200
@@ -551,7 +581,7 @@ put(f"P2 SE of a monthly SR 0.30, skew -1.0, raw kurt 8.0, T 90 by (20.9): facto
     f"{f(sqrt(v209(0.3, -1, 8) / 90), 3)}; excess kurtosis 5 typed as Kurt: {f(sqrt(v209(0.3, -1, 5) / 90), 3)}; normal "
     f"{f(sqrt(v209(0.3, 0, 3) / 90), 3)}")
 n3, n3b, n3c = mintrl(0.05, 0, 0, 3), mintrl(0.05, 0, 0, 3, conf=0.975), mintrl(0.05 * sqrt(243.57), 0, 0, 3)
-put(f"P3 MinTRL(0) daily SR 0.05, normal, 95%: {f(n3, 1)} obs = {f(n3 / 243.57, 2)} years at 243.57; Phi^-1(0.975) "
+put(f"P3 MinTRL(0) daily SR 0.05, normal, 95%: {f(n3, 0)} obs = {f(n3 / 243.57, 2)} years at 243.57; Phi^-1(0.975) "
     f"in place of Phi^-1(0.95): {f(n3b, 0)} obs = {f(n3b / 243.57, 2)} years; the annual SR in the daily formula: "
     f"{f(n3c, 2)} obs = {f(n3c / 243.57, 3)} years")
 put(f"P4 E Z_(n) n=3 {f(emax(3), 4)}; n=5 {f(emax(5), 3, 4)}; approximation n=5 {f(emax_bldp(5), 3, 4)}; "
@@ -561,9 +591,9 @@ put(f"P5 (19.9) scale factor for months, rho_1 = 0.1 and no other: {f(12 / sqrt(
 put(f"P6 two SRs 1.0 and 0.8 a year, each SE 0.36, correlation 0.9: SE(diff) {f(0.36 * sqrt(2 * 0.1), 3)}, t "
     f"{f(0.2 / (0.36 * sqrt(2 * 0.1)), 2)}; as if independent {f(0.36 * sqrt(2), 3)}, t {f(0.2 / (0.36 * sqrt(2)), 2)}; "
     f"0.36 (1 - 0.9) {f(0.36 * 0.1, 3)}")
-put(f"P7 haircut: t 2.5, n 10 independent: p {f(two_sided(2.5), 4)}, p_M {f(1 - (1 - two_sided(2.5)) ** 10, 4)}, "
+put(f"P7 haircut: t 2.5, n 10 independent: p {f(two_sided(2.5), 4, 5)}, p_M {f(1 - (1 - two_sided(2.5)) ** 10, 3, 4)}, "
     f"t* {f(float(stats.norm.isf((1 - (1 - two_sided(2.5)) ** 10) / 2)), 3)}, haircut "
-    f"{pc(1 - float(stats.norm.isf((1 - (1 - two_sided(2.5)) ** 10) / 2)) / 2.5, 1)}; Bonferroni t* "
+    f"{pc(1 - float(stats.norm.isf((1 - (1 - two_sided(2.5)) ** 10) / 2)) / 2.5, 1)}; Bonferroni p {f(10 * two_sided(2.5), 4)}, t* "
     f"{f(float(stats.norm.isf(10 * two_sided(2.5) / 2)), 3)}, haircut {pc(1 - float(stats.norm.isf(10 * two_sided(2.5) / 2)) / 2.5, 1)}")
 
 put(f"KC 9: scipy.stats.kurtosis(R2's excess returns) with its defaults (fisher=True, bias=True) "

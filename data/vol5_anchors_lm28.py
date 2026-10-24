@@ -1,4 +1,5 @@
-"""LM28 anchors (Mean-Variance Optimization): every number the Stage 1 brief quotes (drafted 2026-10-24).
+"""LM28 anchors (Mean-Variance Optimization): every number the Stage 1 brief quotes (drafted 2026-10-24; revised
+the same day to the editor's decisions on the briefs, plans/vol-5.md).
 
 Reads only data/processed/*.parquet, through the shared builders (run them first; this script runs neither):
   * E5 (plans/vol-5.md, "Data"): data/vol5_series.py's frames("E5"), which reads data/processed/vol5_frames.parquet:
@@ -14,14 +15,18 @@ Reads only data/processed/*.parquet, through the shared builders (run them first
 Conventions. Annualized inputs, as the through case's signals use them: mu = A * (window mean), Sigma = A * cov0
 (divisor T, ddof=0), with E5's estimation-frame A; e = mu - r_f 1 with r_f = 1.5% a year (simple; r_f / A a day).
 These are plug-in estimates treated as known inputs (LM28 is In-sample except the one split). Linear systems are
-solved with numpy.linalg.solve (never an explicit inverse, except the 5 x 5 Jacobian check). Portfolios held out of
-sample keep constant weights (rebalanced every session, no costs) and earn w'R_t on the wealth frame; their
-annualized volatility and mean use A_w; SE(mean) = A_w s / sqrt(T) (LM20's (20.2)); SE(volatility) = vol *
-sqrt((Kurt - 1) / (4 T)) with the raw sample kurtosis (LM20, the delta method under iid days). Joint statistics of the
-test period (its covariance matrix, its ex-post frontier, the split by (28.3)) use the estimation frame's test rows. A
-single fund's test-period volatility is also printed on the fund's own one-session dates (traded on t and on the
-previous wealth-frame date). Weights print in percent; a weight with |w| < 1e-6 would print as 0 (none occurs).
-"Shorts" count weights below -1e-6. Gross exposure is the 1-norm of the weights.
+solved with numpy.linalg.solve, never with an explicit inverse (the Jacobian of (28.9) needs Sigma^-1 itself, and
+gets it by solving against the identity). Portfolios held out of sample keep constant weights (rebalanced every
+session, no costs) and earn w'R_t on the wealth frame; their annualized volatility and mean use A_w; SE(mean) =
+A_w s / sqrt(T) (LM20's (20.2)); SE(volatility) = vol * sqrt((Kurt - 1) / (4 T)) with the raw sample kurtosis (LM20,
+the delta method under iid days). Joint statistics of the test period (its covariance matrix, its ex-post frontier,
+the split by (28.3)) use the estimation frame's test rows. A single fund's test-period volatility (X1) is computed on
+the fund's own one-session dates (traded on t and on the previous wealth-frame date) and annualized by the fund's own
+sessions per year over E5: its one-session returns from the base close to 2026-10-08 divided by the same years as A
+(shared decision "E5's two frames"; decision C2). Horizons in years are calendar days / 365.25 from the close before
+the first return. Weights print in percent; a weight with |w| < 1e-6 would print as 0 (none occurs). "Shorts" count
+weights below -1e-6. Gross exposure is the 1-norm of the weights. A residual at machine precision prints as "below
+1e-15" (its digits depend on the order of operations); a larger one prints with two significant digits.
 
 Rounding flags. Every number the brief prints passes through f(x, k1, k2, ...), which shows x with max(k) + 3 decimals
 and flags it "NEAR" for each printed precision k at which x lies within a tenth of a last-digit unit of a rounding
@@ -70,6 +75,11 @@ def f(x: float, *ks: int, plus: bool = False) -> str:
         if abs(u - floor(u) - 0.5) < 0.1:
             NEAR.append(f"{x:.{k + 3}f} at {k} dp")
     return f"{x:{'+' if plus else ''}.{max(ks) + 3}f}"
+
+
+def tiny(x: float, bound: float = 1e-15) -> str:
+    """A residual: "below 1e-15" at machine precision, else two significant digits."""
+    return f"below {bound:.0e}" if abs(x) < bound else f"{abs(x):.1e}"
 
 
 def pct(v: Vec, *ks: int, plus: bool = False) -> str:
@@ -133,9 +143,11 @@ sig, trade, rows = sch[0]
 x = fr.X[rows - WINDOW:rows]
 w0, w1 = fr.est_dates[rows - WINDOW], fr.est_dates[rows - 1]
 assert w1 == sig
+assert fr.wealth_dates.index(w0) > 0
+b0w = fr.wealth_dates[fr.wealth_dates.index(w0) - 1]        # the close before the window's first return
 put(f"first signal {sig} (estimation rows through it {rows}), trade {trade}; first window {WINDOW} rows {w0} .. {w1}; "
-    f"T/A {f(WINDOW / A, 3, 4)} years-equivalent; calendar {f(years(w0, w1), 3)} years; signals {len(sch)}, "
-    f"last {sch[-1][0]} (trade {sch[-1][1]})")                                                          # 02
+    f"T/A {f(WINDOW / A, 3, 4)}; calendar years from the close before the first return ({b0w}) "
+    f"{f(years(b0w, w1), 2, 3)}; signals {len(sch)}, last {sch[-1][0]} (trade {sch[-1][1]})")         # 02
 wd = fr.wealth_dates
 i0 = wd.index(trade)
 Wt = fr.W[i0 + 1:]
@@ -162,15 +174,20 @@ put("window correlations " + ", ".join(f"{F[i]}-{F[j]} {f(C[i, j], 2, 3, plus=Tr
 St = A * cov0(Xt)
 sdt = np.sqrt(np.diag(St))
 Ct = St / np.outer(sdt, sdt)
+one_sess = fr.traded & np.vstack([np.ones((1, 5), dtype=np.bool_), fr.traded[:-1]])   # traded on t and t-1
+A_own = one_sess.sum(axis=0) / fr.years          # each fund's own sessions per year over E5 (base close to the end)
 own = []
 for j in range(5):
-    ok = fr.traded[i0 + 1:, j] & fr.traded[i0:-1, j]
-    own.append((int(ok.sum()), float(Wt[ok, j].std(ddof=0) * sqrt(Aw))))
-gap_own = max(abs(v - float(sj)) for (_, v), sj in zip(own, sdt, strict=True))
+    ok = one_sess[i0 + 1:, j]
+    s_j = float(Wt[ok, j].std(ddof=0))
+    own.append((int(ok.sum()), float(A_own[j]), s_j * sqrt(float(A_own[j])), s_j * sqrt(A)))
+gaps = [abs(va - float(sj)) for (_, _, _, va), sj in zip(own, sdt, strict=True)]
+jg = int(np.argmax(gaps))
 put("test vols, estimation frame (A) " + ", ".join(f"{s} {f(100 * v, 1, 2)}%" for s, v in zip(F, sdt, strict=True))
-    + "; own one-session dates (A_w) " + ", ".join(f"{s} {f(100 * v, 1, 2)}% (n {n})"
-                                                   for s, (n, v) in zip(F, own, strict=True))
-    + f"; largest |own - estimation frame| {f(100 * gap_own, 2)} points")                             # 08
+    + "; each fund's own one-session dates, annualized by its own sessions per year over E5 "
+    + ", ".join(f"{s} {f(100 * v, 1, 2)}% (n {n}, A_i {ai:.6f})" for s, (n, ai, v, _) in zip(F, own, strict=True))
+    + f"; largest |own - estimation frame| on a common A (both x sqrt(A)) {f(100 * gaps[jg], 2)} points "
+    f"({F[jg]})")                                                                                       # 08
 put("test correlations (estimation frame) "
     + ", ".join(f"{F[i]}-{F[j]} {f(Ct[i, j], 2, 3, plus=True)}" for i, j in pairs))                   # 09
 
@@ -183,8 +200,8 @@ put(f"w_mv {pct(o.wmv)}%; sigma_min {f(100 * sqrt(o.s2min), 2)}%; sigma_min^2 {f
 cov_mv = S @ o.wmv
 rc_share = o.wmv * cov_mv / o.s2min
 put(f"Cov(R_i, R_mv) = (Sigma w_mv)_i: {f(cov_mv.min(), 7)} .. {f(cov_mv.max(), 7)} (sigma_min^2 {f(o.s2min, 7)}); "
-    f"max |risk share - weight| {np.abs(rc_share - o.wmv).max():.1e}; beta_i,mv all 1 to "
-    f"{np.abs(cov_mv / o.s2min - 1).max():.1e}")                                                       # 11
+    f"max |risk share - weight| {tiny(np.abs(rc_share - o.wmv).max())}; |beta_i,mv - 1| "
+    f"{tiny(np.abs(cov_mv / o.s2min - 1).max())}")                                                     # 11
 smins: list[tuple[float, str]] = []
 negw, minw, r3gap = 0, 1.0, 0.0
 tanscan: list[tuple[float, str, float, float, float]] = []
@@ -200,7 +217,7 @@ srt = sorted(smins)
 rank = [s for _, s in srt].index(sig) + 1
 put(f"92 windows: sigma_min {f(100 * srt[0][0], 2)}% ({srt[0][1]}) .. {f(100 * srt[-1][0], 2)}% ({srt[-1][1]}); "
     f"first window rank {rank} from the lowest of {len(srt)}; windows with a negative w_mv weight {negw}; smallest "
-    f"w_mv weight in any window {f(100 * minw, 2)}%; largest gap to vol5_rules.minvar (long-only R3) {r3gap:.1e}")  # 12
+    f"w_mv weight in any window {f(100 * minw, 2)}%; largest gap to vol5_rules.minvar (long-only R3) {tiny(r3gap)}")  # 12
 u = u28()
 Su = u.A * cov0(u.X)
 ou = Opt(u.A * u.X.mean(axis=0), Su)
@@ -218,8 +235,8 @@ for part in (u.X[:H], u.X[-H:]):
     oh = Opt(u.A * part.mean(axis=0), u.A * cov0(part))
     hv.append(oh)
 cosh = float(hv[0].wmv @ hv[1].wmv / (np.linalg.norm(hv[0].wmv) * np.linalg.norm(hv[1].wmv)))
-put(f"U28 halves ({H} returns each): sigma_min {f(100 * sqrt(hv[0].s2min), 2)}% and {f(100 * sqrt(hv[1].s2min), 2)}% "
-    f"(each in its own half); shorts {int((hv[0].wmv < -1e-6).sum())} and {int((hv[1].wmv < -1e-6).sum())}; gross "
+put(f"U28 halves ({H} returns each; their sigma_min and 1/N are LM30's, A30-19): "
+    f"shorts {int((hv[0].wmv < -1e-6).sum())} and {int((hv[1].wmv < -1e-6).sum())}; gross "
     f"{f(np.abs(hv[0].wmv).sum(), 2)} and {f(np.abs(hv[1].wmv).sum(), 2)}; cosine of the two w_mv {f(cosh, 3)} "
     f"(lm11.md:467 prints 0.690 for the unscaled solutions)")                                          # 14
 
@@ -229,14 +246,15 @@ mN, sN = float(mu @ wN), sqrt(float(wN @ S @ wN))
 sf = sqrt(o.front_var(mN))
 me = o.mumv + sqrt(o.srinf2 * (sN**2 - o.s2min))
 wme = o.front_w(me)
-put(f"SR_inf {f(sqrt(o.srinf2), 3)} (SR_inf^2 {f(o.srinf2, 4)}); equal weights: mean {f(100 * mN, 2)}%, vol "
-    f"{f(100 * sN, 2)}% (below mu_mv by {f(100 * (o.mumv - mN), 2)} points); frontier vol at that mean "
+put(f"SR_inf {f(sqrt(o.srinf2), 3)} (SR_inf^2 {f(o.srinf2, 4)}); equal weights: mean {f(100 * mN, 2, 3)}%, vol "
+    f"{f(100 * sN, 2)}% (below mu_mv {f(100 * o.mumv, 2, 3)}% by {f(100 * (o.mumv - mN), 2)} points); frontier vol at that mean "
     f"{f(100 * sf, 2)}%; efficient mean at that vol {f(100 * me, 2)}%, weights {pct(wme)}%")           # 15
 K = np.vstack([o.one, mu])
 wl, val, lam = lemma(S, K, np.array([1.0, me]))
-put(f"(28.1) at mu_p {f(100 * me, 2)}%: max |w - (28.4)| {np.abs(wl - wme).max():.1e}; value {f(val, 6)} = w'Sw "
+put(f"(28.1) at mu_p {f(100 * me, 2)}%: max |w - (28.4)| {tiny(np.abs(wl - wme).max())}; value {f(val, 6)} = w'Sw "
     f"{f(float(wl @ S @ wl), 6)}; multipliers lambda {f(lam[0], 5, plus=True)}, lambda_mu {f(lam[1], 3, 4, plus=True)}; "
-    f"d sigma_p^2 / d mu_p = 2 (mu_p - mu_mv) / SR_inf^2 {f(2 * (me - o.mumv) / o.srinf2, 3, 4)}")         # 16
+    f"d sigma_p^2 / d mu_p = 2 (mu_p - mu_mv) / SR_inf^2 {f(2 * (me - o.mumv) / o.srinf2, 3, 4)} with mu_p - mu_mv "
+    f"{f(100 * (me - o.mumv), 4)} points")                                                               # 16
 put(f"(28.4): weights move by {pct(0.01 * o.dir / o.srinf2, 1, 2, plus=True)} points per point of target mean; at mu_p = "
     f"10%: weights {pct(o.front_w(0.10))}%, vol {f(100 * sqrt(o.front_var(0.10)), 2)}%")               # 17
 
@@ -244,11 +262,11 @@ put(f"(28.4): weights move by {pct(0.01 * o.dir / o.srinf2, 1, 2, plus=True)} po
 sr = sqrt(o.sr2)
 st = sqrt(float(o.wtan @ S @ o.wtan))
 k_best = int(np.argmax((mu - RF) / sd))
-put(f"1'Sigma^-1 e {f(o.den, 2, 3)} > 0 (mu_mv {f(100 * o.mumv, 2)}% > r_f 1.5%); w_tan {pct(o.wtan)}%; mean "
-    f"{f(100 * float(mu @ o.wtan), 2)}%, vol {f(100 * st, 2)}%; SR* {f(sr, 2, 3)}; gross {f(np.abs(o.wtan).sum(), 2)}; "
+put(f"1'Sigma^-1 e {f(o.den, 2, 3)} > 0 (mu_mv {f(100 * o.mumv, 2, 3)}% > r_f 1.5%); w_tan {pct(o.wtan)}%; mean "
+    f"{f(100 * float(mu @ o.wtan), 2, 3)}%, vol {f(100 * st, 2, 3)}%; SR* {f(sr, 2, 3)}; gross {f(np.abs(o.wtan).sum(), 2)}; "
     f"best single fund {F[k_best]} {f((mu[k_best] - RF) / sd[k_best], 2, 3)}")                          # 18
 put(f"(28.7): SR*^2 {f(o.sr2, 4)}; SR_inf^2 + ((mu_mv - r_f)/sigma_min)^2 {f(o.srinf2 + (o.mumv - RF) ** 2 / o.s2min, 4)}; "
-    f"difference {abs(o.sr2 - o.srinf2 - (o.mumv - RF) ** 2 / o.s2min):.1e}; ((mu_mv - r_f)/sigma_min) "
+    f"difference {tiny(o.sr2 - o.srinf2 - (o.mumv - RF) ** 2 / o.s2min)}; ((mu_mv - r_f)/sigma_min) "
     f"{f((o.mumv - RF) / sqrt(o.s2min), 3, 4)}")                                                          # 18 -> 19
 rfs = []
 w646 = []
@@ -294,7 +312,7 @@ for i in range(5):
     dW[:, i] = Opt(m2, S).wtan - o.wtan
 put("exact change of w_tan (points) for +1 point in one mean, columns = the fund whose mean rises: "
     + "; ".join(f"{F[i]}: {pct(dW[:, i], 1, 2, plus=True)}" for i in range(5)))                           # 25
-Jac = (np.eye(5) - np.outer(o.wtan, o.one)) @ np.linalg.inv(S) / o.den
+Jac = (np.eye(5) - np.outer(o.wtan, o.one)) @ np.linalg.solve(S, np.eye(5)) / o.den   # Sigma^-1 by solving
 gap = np.abs(0.01 * Jac - dW)
 put(f"(28.9) linear prediction for +1 point: 00635U's own weight {f(100 * 0.01 * Jac[3, 3], 1, 2)} against exact "
     f"{f(100 * dW[3, 3], 1, 2)} points; largest gap {f(100 * gap.max(), 1, 2)} points; 00642U column linear "
@@ -302,8 +320,8 @@ put(f"(28.9) linear prediction for +1 point: 00635U's own weight {f(100 * 0.01 *
 se_mu = sd / sqrt(WINDOW / A)
 put("SE of each window mean, A s / sqrt(T) (annual points): " + ", ".join(f"{s} {f(100 * v, 1)}" for s, v in
                                                                           zip(F, se_mu, strict=True))
-    + f"; 00635U: 1 point = {f(0.01 / se_mu[3], 2, 3)} SE; w_tan(00635U) {f(100 * o.wtan[3], 1, 2)}% -> "
-    f"{f(100 * (o.wtan[3] + dW[3, 3]), 1, 2)}%")                                                          # 27
+    + f"; 00635U: mean {f(100 * mu[3], 2)}% -> {f(100 * (mu[3] + 0.01), 2)}%, 1 point = {f(0.01 / se_mu[3], 2, 3)} SE; "
+    f"w_tan(00635U) {f(100 * o.wtan[3], 1, 2, 3)}% -> {f(100 * (o.wtan[3] + dW[3, 3]), 1, 2, 3)}%")        # 27
 col = np.linalg.solve(S, np.eye(5)[:, 3])
 put(f"exposure form at delta {f(dlt, 2)}: +1 point in 00635U's mean changes f* by 0.01 x column 4 of Sigma^-1 / delta "
     f"= {pct(0.01 * col / dlt, 1, 2, plus=True)} points exactly; L changes by {f(100 * 0.01 * col.sum() / dlt, 1, 2, plus=True)} "
@@ -325,14 +343,14 @@ for name, w in (("w_mv", o.wmv), ("w_tan", o.wtan)):
         f"SE {f(100 * vol / sqrt(2 * T), 2)}); predicted mean {f(100 * pm, 2)}%, realized "
         f"{f(100 * float(r.mean()) * Aw, 2)}% (SE {f(100 * se_m, 1, 2)}); log growth "
         f"{f(100 * float(np.log1p(r).sum()) / yt, 2)}% a year; min 1 + R {f(float((1 + r).min()), 3, 4)}; "
-        f"realized vol / predicted {f(vol / pv, 2)}; (realized - predicted) / SE: vol {f((vol - pv) / se_v, 1)}, "
+        f"realized vol / predicted {f(vol / pv, 2)}; (realized - predicted) / SE: vol {f((vol - pv) / se_v, 0, 1)}, "
         f"mean {f((float(r.mean()) * Aw - pm) / se_m, 1)}")                                              # 29, 30
 ot = Opt(A * Xt.mean(axis=0), St)
 parts = []
 for name, w in (("w_mv", o.wmv), ("w_tan", o.wtan)):
     dv = float((w - ot.wmv) @ St @ (w - ot.wmv))
     tot = float(w @ St @ w)
-    parts.append(f"{name}: weight-error term {f(dv, 5, 6)}, total {f(tot, 5, 6)} (check {abs(ot.s2min + dv - tot):.1e}), vol "
+    parts.append(f"{name}: weight-error term {f(dv, 5, 6)}, total {f(tot, 5, 6)} (check {tiny(ot.s2min + dv - tot)}), vol "
                  f"{f(100 * sqrt(tot), 2)}% (wealth frame {f(100 * held[name][0], 2)}%), added by the weight error "
                  f"{f(100 * (sqrt(tot) - sqrt(ot.s2min)), 2)} points")
 put(f"test period, estimation frame ({len(Xt)} rows): sigma_min^2 {f(ot.s2min, 5, 6)}, sigma_min {f(100 * sqrt(ot.s2min), 2)}% "
@@ -355,11 +373,13 @@ for solver, opts in ((cp.OSQP, OSQP_OPTS), (cp.CLARABEL, CLARABEL_OPTS)):
     d0, d1 = float(np.asarray(cons[0].dual_value)), float(np.asarray(cons[1].dual_value))
     stat = np.abs(2 * S @ vv + K.T @ np.array([d0, d1])).max()     # KKT stationarity with cvxpy's duals: 2 S w + K' nu
     prim = np.abs(K @ vv - np.array([1.0, me])).max()              # primal feasibility
-    duals.append(f"{solver} status {prob.status}, max weight gap {np.abs(vv - wl).max():.1e}, objective gap "
-                 f"{abs(float(prob.value) - val) / val:.1e}, KKT residuals: stationarity {stat:.1e}, feasibility "
-                 f"{prim:.1e}; dual values {f(d0, 5, plus=True)} and {f(d1, 3, 4, plus=True)}")
-put(f"KKT system [2 Sigma, K'; K, 0][w; -lambda] = [0; b]: max |w - (28.1)| {np.abs(sol[:5] - wl).max():.1e}, "
-    f"-lambda {f(sol[5], 5, plus=True)}, {f(sol[6], 3, 4, plus=True)}; cvxpy {version('cvxpy')}: " + "; ".join(duals))  # 33
+    duals.append(f"{solver} {opts} status {prob.status}, max weight gap {tiny(np.abs(vv - wl).max())}, objective gap "
+                 f"{tiny((float(prob.value) - val) / val)}, KKT residuals: stationarity {tiny(stat)}, feasibility "
+                 f"{tiny(prim)}; dual values {f(d0, 5, plus=True)} and {f(d1, 3, 4, plus=True)}")
+put(f"KKT system [2 Sigma, K'; K, 0][w; -lambda] = [0; b]: max |w - (28.1)| {tiny(np.abs(sol[:5] - wl).max())}, "
+    f"max |w - (28.4)| {tiny(np.abs(sol[:5] - wme).max())}, -lambda {f(sol[5], 5, plus=True)}, "
+    f"{f(sol[6], 3, 4, plus=True)}; cvxpy {version('cvxpy')} (OSQP {version('osqp')}, CLARABEL {version('clarabel')}), "
+    f"a fresh Problem per solver: " + "; ".join(duals))                                                  # 33
 
 # ---------------------------------------------------------------- problems (hypothetical inputs unless stated)
 S3 = np.diag([0.01, 0.04, 0.04])
@@ -375,7 +395,7 @@ put(f"P3 sigma_min 5%, mu_mv 4%, SR_inf 0.5, mu_p 8%: vol {f(100 * p3, 2)}%; dis
     f", {f(100 * 0.04 / 0.5, 1)}%")                                                                      # 36
 p4 = sqrt(0.5**2 + ((0.04 - 0.015) / 0.05) ** 2)
 put(f"P4 same, r_f 1.5%: SR* {f(p4, 3)}; distractors 0.50 (SR_inf), {f(0.5 + 0.5, 2)}; w_tan mean "
-    f"{f(100 * (0.04 + 0.5**2 * 0.05**2 / (0.04 - 0.015)), 2)}%")                                       # 37
+    f"{f(100 * (0.015 + p4**2 * 0.05**2 / (0.04 - 0.015)), 2)}%")                                       # 37
 put(f"P5 SR* 0.8, 1'Sigma^-1 e 8, delta 4: vol SR*/delta {f(100 * 0.8 / 4, 1)}%, L 8/4 {f(8 / 4, 1)}, borrowing "
     f"{f(8 / 4 - 1, 1)}; distractors L {f(4 / 8, 1)}, vol {f(100 * 0.8 * 4, 0)}%")                       # 38
 put(f"P6 r_f above mu_mv: Sigma^-1 e / 1'Sigma^-1 e has Sharpe -sqrt(e'Sigma^-1 e), the lowest of any fully invested "
@@ -384,18 +404,39 @@ s1, s2, s12 = 0.026800, 0.018353, -0.004908
 o7 = Opt(np.zeros(2), np.array([[s1, s12], [s12, s2]]))
 put(f"P9 LM7's 2017-2021 inputs (lm07.md:409): w_mv {pct(o7.wmv)}%, sigma_min {f(100 * sqrt(o7.s2min), 2)}%, lambda* "
     f"{f(2 * o7.s2min, 4)} (lm07.md:412-414 print 42.3%, 9.22%, 0.0170)")                              # 40
-Si = np.linalg.inv(S)
+col1 = np.linalg.solve(S, np.eye(5)[:, 0])
 put(f"P10 +1 point in 0050's mean: {pct(dW[:, 0], 1, 2, plus=True)} points; column 1 of Sigma^-1 (annual units) ("
-    + ", ".join(f(float(v), 1, 2) for v in Si[:, 0]) + f"); window correlation 0050-00646 {f(C[0, 1], 2, 3)}")  # 41
-rho = np.linspace(-0.999, 0.999, 19981)
-pd_ok = []
-for r_ in rho:
+    + ", ".join(f(float(v), 1, 2) for v in col1) + f"); window correlation 0050-00646 {f(C[0, 1], 2, 3)}")  # 41
+
+
+def with_corr(r_: float) -> Mat:
+    """The window's Sigma with corr(0050, 00646) replaced by r_ (the widget's third slider)."""
     S_ = S.copy()
     S_[0, 1] = S_[1, 0] = r_ * sd[0] * sd[1]
-    pd_ok.append(np.linalg.eigvalsh(S_).min() > 0)
-okr = rho[np.array(pd_ok)]
-put(f"widget: Sigma stays positive definite for corr(0050, 00646) in {f(okr.min(), 3)} .. {f(okr.max(), 3)} with the "
-    f"other window entries fixed (grid step 1e-4)")                                                     # 42
+    return S_
+
+
+def pd_edge(inside: float, outside: float) -> float:
+    """Bisection on the sign of the smallest eigenvalue between a PD and a non-PD correlation."""
+    assert np.linalg.eigvalsh(with_corr(inside)).min() > 0 >= np.linalg.eigvalsh(with_corr(outside)).min()
+    for _ in range(100):
+        mid = 0.5 * (inside + outside)
+        if np.linalg.eigvalsh(with_corr(mid)).min() > 0:
+            inside = mid
+        else:
+            outside = mid
+    return inside
+
+
+lo_r, hi_r = pd_edge(float(C[0, 1]), -0.999), pd_edge(float(C[0, 1]), 0.999)
+mu_s = mu.copy()
+mu_s[1], mu_s[3] = 0.100, 0.008                                  # the sliders' rounded starting values
+o_s = Opt(mu_s, with_corr(0.54))
+put(f"widget: Sigma stays positive definite for corr(0050, 00646) between {f(lo_r, 3, 4)} and {f(hi_r, 3, 4)} with the "
+    f"other window entries fixed (bisection on the smallest eigenvalue); at the sliders' rounded starting values "
+    f"(00646's mean 10.0%, 00635U's 0.8%, corr 0.54): w_mv {pct(o_s.wmv)}%, sigma_min {f(100 * sqrt(o_s.s2min), 2)}%, "
+    f"mu_mv {f(100 * o_s.mumv, 2)}%, w_tan {pct(o_s.wtan)}%, SR* {f(sqrt(o_s.sr2), 3)}, gross "
+    f"{f(np.abs(o_s.wtan).sum(), 2)}")                                                                   # 42
 
 ev5 = np.linalg.eigvalsh(S)
 put(f"E5 first window: kappa(Sigma) {f(ev5[-1] / ev5[0], 3)} against 1'Sigma^-1 e {f(o.den, 3)} (a numerical "
@@ -404,5 +445,13 @@ put(f"E5 first window: kappa(Sigma) {f(ev5[-1] / ev5[0], 3)} against 1'Sigma^-1 
 
 put(f"(11.4) bounds, first window: sqrt(lambda_N / N) {f(100 * sqrt(ev5[0] / 5), 2)}% <= sigma_min "
     f"{f(100 * sqrt(o.s2min), 2)}% <= equal weights {f(100 * sN, 2)}% <= sqrt(lambda_1 / N) {f(100 * sqrt(ev5[-1] / 5), 2)}%")  # 44
+
+Sw_tan = S @ o.wtan
+beta_tan = Sw_tan / float(o.wtan @ Sw_tan)                      # (27.5) with p = the tangency portfolio
+mu_tan = float(mu @ o.wtan)
+put("tangency betas, first window: (Sigma w_tan)_i / sigma_tan^2 (" + ", ".join(f(float(b), 2) for b in beta_tan)
+    + f"); mu_tan - r_f {f(100 * (mu_tan - RF), 2)} points; "
+    f"max |beta_i - e_i / (mu_tan - r_f)| {tiny(np.abs(beta_tan - o.e / (mu_tan - RF)).max())}; "
+    f"max |Sigma w_tan - e / 1'Sigma^-1 e| {tiny(np.abs(Sw_tan - o.e / o.den).max())}")                 # 45
 
 print("\n".join(OUT))

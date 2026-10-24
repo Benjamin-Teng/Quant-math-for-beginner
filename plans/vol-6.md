@@ -6,16 +6,18 @@ and the spines are in [`vol-5.md`](vol-5.md); they apply here unchanged. Every n
 [`vol-6-anchors.md`](vol-6-anchors.md), printed by `data/vol6_anchors_lmNN.py`. Until Stage 3 the briefs and anchors are
 the plan; from Stage 3 the module sources and their numbers scripts are authoritative.
 
-Status: the drafters' briefs and anchors of 2026-10-24, before the revisions that the editor's decisions in plans/vol-5.md require; anchors recomputed independently (416 of 423 reproduced as defined).
+Status: revised to the editor's decisions of 2026-10-24 (first revision); the anchors a revision added or changed await their independent recomputation.
 
 ## LM32 VaR, Expected Shortfall and Drawdown
 
 Stage 1 brief, drafted 2026-10-24 from the editor's spine (`plans/vol-5.md`, "### LM32 VaR, Expected Shortfall and
-Drawdown") and the shared decisions above it. Every number carries its anchor ID at first appearance;
-`data/vol6_anchors_lm32.py` prints them all (55 rows, `## LM32` of `plans/vol-6-anchors.md`). Numbers quoted from
-published modules carry their file:line instead; the through case's definitions are cited to LM27–LM31 (their briefs'
-tags, rechecked when those modules are written). Statistics owned by another module are not printed (shared decision
-"Owners").
+Drawdown") and the shared decisions above it, and revised the same day to the editor's decisions on the briefs
+(cross-module A–G and "Per module"), the independent recomputation, the cross-module check and decision F's source
+check. Every number carries its anchor ID at first appearance; `data/vol6_anchors_lm32.py` prints them all (55
+rows, `## LM32` of `plans/vol-6-anchors.md`). Numbers quoted from published modules carry their file:line instead; the through case's
+definitions are cited to LM27–LM31 by their briefs' tags (decision C8), rechecked when those modules are written.
+Statistics owned by another module are not printed, or are echoed with the owner's anchor ID (shared decision
+"Owners", decision A).
 
 **Prereq:** `[1, 5, 10, 12, 14, 15, 16, 18, 19, 20, 21, 22, 26, 27, 28, 29, 30, 31]`. What each supplies (tags rechecked
 in `src/` on 2026-10-24):
@@ -40,7 +42,8 @@ in `src/` on 2026-10-24):
 - LM18: the inverse transform (18.1), behind (32.1)'s tail-mean form; the Monte Carlo estimator, its standard error and
   interval (18.2), (18.3), and the batch standard error (lm18.md:153); antithetic and control variates (18.5), (18.6),
   named in one sentence; importance sampling (18.7) with its second moment $e^{k^2}\Phi(-2k)$ (lm18.md:300).
-- LM19: TR23's sample (lm19.md:46: $T=5{,}849$, 23.7645 years, $A=246.12$) and $\bar R$, $s$ (lm19.md:19); the variance
+- LM19: TR23's sample (lm19.md:46: $T=5{,}849$, 23.7645 years, $A=246.12$), $\bar R=0.0625\%$ (lm19.md:18; 0.062505% at
+  lm19.md:80) and $s=1.2084\%$ (lm19.md:19); the variance
   of an $m$-day sum (19.7), for the $\sqrt m$ rule; the promise that a drawdown is a path statistic (lm19.md:138).
 - LM20: Hill's estimator and its SE (20.10) with $k=108$ and $\hat\alpha=3.63$ at 3% (lm20.md:441); the Student-$t$ fit
   of TR23, $\nu=3.065$ (0.144), location 0.0997% (0.0124), scale 0.7761% (lm20.md:269); the promises of lm20.md:276 and
@@ -52,16 +55,21 @@ in `src/` on 2026-10-24):
 - LM26: EWMA (26.2), GARCH(1,1) (26.3), its unconditional variance and $m$-step forecasts (26.4); the forecast design
   (1,231 returns, monthly refits, 4,609 days; lm26.md:357) and the 2 April → 7 April forecasts 1.7222 and 1.5605
   (lm26.md:39); variance forecasts scored by (26.8) and (26.9), contrasted in §7 with scoring a quantile.
-- LM27: the wealth recursion (27.1)–(27.2) whose path the drawdowns use, E5's two frames, $\sigma_p$ (27.4), and R1 and
-  R2.
-- LM28 and LM29: R3 and R4 (LM29's long-only forms); LM29's linear programs and convexity for Problem 12's
-  expected-shortfall minimization (shared decision "LM29's scope").
+- LM27: the wealth recursion (27.1)–(27.2) whose path the drawdowns use, E5's two frames, $\sigma_p$ (27.4), R1 and
+  R2, and the cost of the first purchase (A27-23, echoed in §8).
+- LM28 and LM29: R3 and R4 (LM29's long-only forms); LM29's convex sets and functions (29.1) and the global minimum of
+  a convex problem (29.3), for Problem 12's expected-shortfall minimization, a linear program (shared decision "LM29's
+  scope").
 - LM30: R5. LM31: R6–R8, (31.7) for R8's exposure $L_t$ (cited, not printed).
 
-**Leads:** `[33, 34, 35, 36, 39, 44]`: LM33 (the rules' Sharpe ratios beside their tail risk; §8 points to it), LM34
-(net results beside the rules' drawdowns, (32.9)), LM35 (VaR and ES against scenario losses, the 7 April forecasts,
-(32.1)–(32.3), (32.8), (32.9)), LM36 (Brownian motion, behind (32.10)), LM39 (jumps, the day GARCH could not see; (32.3),
-(32.4), (32.8)), LM44 (drawdown control and drawdown probabilities under a model; (32.7), (32.9), (32.10)).
+**Leads:** `[33, 34, 35, 36, 39, 44]`: LM33 (§8's forward pointer: the rules' Sharpe ratios beside their tail risk;
+LM33's brief cites no LM32 tag), LM34 (§8's forward pointer: net results beside the rules' drawdowns; LM34's brief
+cites no LM32 tag, so the lead stands on the pointer, decision C9), LM35 (its brief contrasts scenario losses with VaR
+and ES in words and cites (32.9) and the rules' drawdowns, A32-35, in its four failure forms; it owns each rule's loss
+on 7 April 2025, decision A1), LM36 (Brownian motion, behind (32.10); §8's pointer), LM39 (jumps, the day GARCH could
+not see; §6's pointer), LM44 (drawdown control and drawdown probabilities under a model; §8's pointer). LM36, LM39 and
+LM44 are not briefed yet: they are leads by the pointers, and the tags they may cite are listed when their briefs are
+written.
 
 **Forward links honoured.**
 
@@ -84,46 +92,48 @@ lm14:122; lm15:194, 469; lm18:300; lm19:138; lm20:276, 449; lm26:183), the spine
 "LM32". Plan promises with no published link, also kept: `plans/vol-2.md:578` and ROADMAP's Simulation row (Monte
 Carlo VaR → LM32; LM12's leads list 32): §6's ten-day Monte Carlo and the lab's coloured portfolio draws;
 `plans/vol-3.md:1627` (LM17's Leaves: drawdown statistics → LM32): §8. Not taken: `plans/vol-3.md:1543` lists LM32
-among the users of (16.10), the correlation given an event; LM32 does not need it, and LM35's correlation break is its
-natural user (Open O9).
+among the users of (16.10), the correlation given an event; LM32 does not need it, and LM35's brief uses it in its §5
+and E7 (O9, closed).
 
 **Outcomes** ("After this module you should be able to:"; the level in brackets is the brief's, and the page keeps
 AUTHORING §3's form, the level showing in the verb):
 
-1. [D] define $\operatorname{VaR}_u$ and $\operatorname{ES}_u$ over $m$ days from the quantile function, and derive the historical estimators and the normal and Student-t formulas
-2. [C] compute historical, normal, Student-t and Hill-tail VaR and ES of a return sample in NumPy and SciPy, stating the quantile convention, and diagnose which part of the tail each model misses
-3. [C] compute a distribution-free interval and a standard error for a VaR estimate, and explain why one year of returns cannot pin down a 99% VaR
-4. [D] state the four coherence axioms, show with a constructed portfolio that VaR can fail subadditivity, and derive expected shortfall as the minimum of a convex function
-5. [C] turn EWMA and GARCH forecasts into one-day and ten-day VaR and ES, by formula and by Monte Carlo, and compute how rare a loss is under each model
-6. [C] backtest VaR forecasts by their exceedances with the exact binomial test, the Basel traffic light and an independence check, stating the number of tests
-7. [C] compute a portfolio's drawdowns, maximum drawdown, longest spell under water and loss from initial wealth, and show by permutation and block bootstrap how much the order of returns matters
-8. [U] explain what the $\sqrt m$ rule, the Basel choice of ES at 97.5% and the Brownian-motion drawdown result assume, and choose among VaR, ES and drawdown for a stated purpose
+1. [D] define VaR and ES from the quantile function, and derive their historical, normal and Student-t forms
+2. [C] compute historical, normal, Student-t and Hill-tail VaR and ES, and diagnose what each model misses
+3. [C] compute a VaR's interval and standard error, and explain why one year of data is too short
+4. [D] state the coherence axioms, show VaR failing subadditivity, and derive ES as a convex minimum
+5. [C] turn EWMA and GARCH forecasts into VaR and ES, and compute how rare a loss is
+6. [C] backtest VaR forecasts with exact binomial tests and Basel's traffic light, counting every test
+7. [C] compute drawdowns from the peak and from initial wealth, and resample returns to test their order
+8. [U] explain what the $\sqrt m$ rule, Basel's ES and the Brownian drawdown result assume, and choose a measure
 
-Taught, practised, assessed (REVIEW_PROMPT item 10): 1 — §2, §3 (derivations, Deep Dive §3); E1, E3; Problems 2, 3, 5.
-2 — §2, §3, §9; E2, E3; X3; Problems 1, 11; KC §9. 3 — §4; E5; Problem 6; KC §4. 4 — §5 (Deep Dive §5); E6; Problems 7,
-12; KC §5. 5 — §6; E7, E8; Problem 10; KC §6. 6 — §7; E9; Problems 8, 9; KC §7. 7 — §8; E10; Problem 4; KC §8. 8 — §3,
-§5, §8; E4; KCs §3, §5, §8.
+Taught, practised, assessed (REVIEW_PROMPT item 10): 1 — §2, §3 (derivations, Deep Dive §3); E1, E3; Problems 2,
+3, 5. 2 — §2, §3, §9; E2, E3; X3; Problems 1, 11; KC §9. 3 — §4; E5; Problem 6; KC §4. 4 — §5 (Deep Dive §5); E6;
+Problems 7, 12; KC §5. 5 — §6; E7, E8; Problem 10; KC §6. 6 — §7; E9; Problems 8, 9; KC §7. 7 — §8; E10; Problem 4;
+KC §8. 8 — §3, §5, §8; E4; KCs §3, §5, §8.
 
 **Owns.** VaR and ES defined from the quantile of an $m$-day simple return at tail probability $u$, positive for a
 loss, (32.1), with the continuous-case tail mean by (18.1); the historical estimators (32.2), $-R_{(j)}$ and Acerbi and
-Tasche's tail mean of $\hat F$ (the book's one ES estimator, every later module uses it; decided below); normal VaR and
+Tasche's tail mean of $\hat F$ (the book's one ES estimator, every later module uses it; decision D); normal VaR and
 ES (32.3), derived from (15.6) and (5.11); Student-$t$ VaR and ES (32.4), derived; the moments each needs; Hill-tail
 VaR and ES (one paragraph, Problem 11); the horizon $m$, the $\sqrt m$ rule and its conditions, the ten-session VaR of
 TR23 (E4); the precision of a quantile: the distribution-free interval (32.5), the asymptotic SE (32.6) *stated
 without proof*, iid and block bootstrap SEs, one year of returns; coherence (four axioms, Artzner et al. 1999),
 subadditivity of normal VaR, a constructed portfolio where VaR fails it (E6), ES coherent (Acerbi and Tasche 2002,
 *stated*), Rockafellar and Uryasev's minimum (32.7), derived, and the minimum-ES linear program (Problem 12, citing
-LM29); ES at 97.5% against VaR at 99% (BCBS 2019, MAR33.3); filtered VaR and ES (32.8) from LM26's forecasts; the
-ten-day Monte Carlo VaR under GARCH-t; how rare a loss is under a model, with importance sampling (Problem 10);
+LM29's (29.1) and (29.3)); ES at 97.5% against VaR at 99% (BCBS 2019, MAR33.3); filtered VaR and ES (32.8) from
+LM26's forecasts; the ten-day Monte Carlo VaR under GARCH-t; how rare a loss is under a model, with importance
+sampling (Problem 10);
 backtesting: exceedances, the exact binomial coverage test, Basel's 1996 traffic light, an independence check by
 LM21's exact count, twelve tests and Bonferroni; $\mathrm{DD}_t$ (LM1), MDD, the longest spell under water and
 $\mathrm{DD}^0_t$ (32.9); the rules' VaR, ES and drawdowns; MDD under permutation and the stationary bootstrap, with
 the bootstrap's atoms; the Brownian-motion expected maximum drawdown (32.10), *stated without proof* with its model.
 Values owned: every A32 anchor except the echoes (TR23's sample, LM14's quantiles, LM15's and LM20's fits, LM26's
-forecast SDs, LM27's frames), which are cited to their modules.
+forecast SDs, LM27's frames and its first-purchase cost A27-23), which are cited to their modules.
 
 **Leaves.** The rules' Sharpe ratios, intervals and tests → LM33. Net wealth, log growth, turnover, costs → LM34 (the
-drawdown criterion of the shared decision is LM32's). Scenario replays without probabilities, limit locks, holidays,
+drawdown criterion of the shared decision is LM32's). Each rule's loss on 7 April 2025 → LM35 (A35-13, a frozen book
+without the day's interest; decision A1). Scenario replays without probabilities, limit locks, holidays,
 the overnight gap → LM35 (LM32 says once that 7 April's return spans four non-trading days and that limits capped it).
 Brownian motion → LM36; jump models → LM39; drawdown probabilities under a model, drawdown control and limits
 (Busseti, Ryu and Boyd's bound is relative to initial wealth, guidance g:136) → LM44; Kelly sizing under a VaR or ES
@@ -131,7 +141,7 @@ limit → Volume VIII. Not in the book (one sentence each): backtests of ES, ext
 (lm20.md:449), multivariate GARCH (shared decision), conditional drawdown measures. To the lab and problems (density,
 g:60–63): Hill-tail VaR (Problem 11), importance sampling (Problem 10), the minimum-ES LP (Problem 12), a coloured
 portfolio Monte Carlo, a likelihood-ratio form of the coverage and independence tests (only if read, O2), intraday
-drawdowns from T5S (per-day statistics), a 250-return backtest window (the extension).
+log falls from T5S (per-day statistics), a 250-return backtest window (the extension).
 
 **Uses before taught** (one sentence each in the text):
 
@@ -144,23 +154,26 @@ drawdowns from T5S (per-day statistics), a 250-return backtest window (the exten
 
 - **TR23** (Volume III), through `data/lm26_common.py`, which reads `data/processed/vol3_taiex.parquet` (built and
   checked by `data/vol3_series.py`; FinMind `TaiwanStockTotalReturnIndex`, data_id TAIEX, retrieved 18 October 2026)
-  and the committed `data/derived/vol4_rv.csv`. $T=5{,}849$ simple returns, 3 January 2003 → 8 October 2026, 23.7645
-  years, $A=246.12$ [A32-01] (lm19.md:46). Log returns in percent $y_t=100\ln(1+R_t)$ for EWMA and GARCH (LM26's
-  units). 7 April 2025 is checked to be the exact minimum with `Fraction` on the two-decimal closes [A32-02].
+  and the committed `data/derived/vol4_rv.csv`. $T=5{,}849$ simple returns of the total-return index, 3 January 2003
+  → 8 October 2026, 23.7645 years (calendar days ÷ 365.25), $A=246.12$ [A32-01] (lm19.md:46). Log returns in percent
+  $y_t=100\ln(1+R_t)$ for EWMA and GARCH (LM26's units). 7 April 2025 is checked to be the exact minimum with
+  `Fraction` on the two-decimal closes [A32-02].
 - **LM26's forecasts** (`forecasts()`): window $\operatorname{round}(5A)=1{,}231$, GARCH(1,1) with normal and with $t$
-  innovations refitted at each month's first session (226 refits per law), EWMA 0.94 with zero mean; forecast days
-  2 January 2008 → 8 October 2026, $n=4{,}609$ [A32-04]. HS and N use the same trailing 1,231 simple returns every day;
-  the $t$ model refits `scipy.stats.t.fit` on them at each month's first session (LM26's schedule). The window is
-  LM26's, fixed before LM32 (decided below).
+  innovations refitted at each calendar month's first session (226 refits per law), EWMA 0.94 with zero mean;
+  forecast days 2 January 2008 → 8 October 2026, $n=4{,}609$ [A32-04]. HS and N use the trailing 1,231 simple returns
+  of each day (for 7 April 2025, 12 March 2020 → 2 April 2025); the $t$ model refits `scipy.stats.t.fit` on the 1,231
+  returns before each month's first session (LM26's schedule; its fit of 1 April 2025 uses 10 March 2020 → 31 March
+  2025) [A32-05]. The window is LM26's, fixed before LM32 (decision D).
 - **E5's wealth frame and the rules** (Volume V): `vol5_series.frames("E5")` and `vol5_rules` (`signals`,
   `wealth_path`), recomputed and asserted equal to `data/processed/vol5_rules.parquet` [A32-03]. A rule's return is its
   net wealth ratio; the returns run from the session after the first trade, 1,851 sessions, 5 March 2019 → 8 October
-  2026, 7.60 years [A32-03]; the drawdown path starts at the cash of 1 before the first purchase, as `summary()` does,
-  so the first purchase's cost (0.142% for R2 [A32-40]) is in it. No path reaches wealth ≤ 0 (asserted; guidance g:94).
-  Problem 12 uses the through case's first window, 504 estimation rows to 27 February 2019 [A32-24].
+  2026, 7.60 years (calendar days from the first trade ÷ 365.25) [A32-03]; the drawdown path starts at the cash of 1
+  before the first purchase, as `summary()` does, so the first purchase's cost (0.142% for R1 and R2, LM27's A27-23,
+  echoed in [A32-40]) is in it. No path reaches wealth ≤ 0 (asserted; guidance g:94). Problem 12 uses the through
+  case's first window, the 504 rows of the estimation frame (joint dates) to 27 February 2019 [A32-24].
 - **T5S** (Volume IV), lab only: three raw days under `data/raw/intraday/taiex5s/` (7 April 2025, 5 August 2024, 19
-  March 2020), the TAIEX price index; 09:00:00 is the previous close (PITFALLS §3); per-day statistics only, never a
-  path [A32-44].
+  March 2020), the TAIEX price index; 09:00:00 is the previous close (PITFALLS §3); every change is a log change from
+  it (decision C7); per-day statistics only, never a path [A32-44].
 - **Constructed and hypothetical inputs:** E6's bonds [A32-22] and Problem 7's [A32-50]; Problem 4's wealth path
   [A32-48]; Problem 9's counts [A32-52]; the 20% drawdown limit of §8; the Brownian example's $\sigma=20\%$, ten years
   [A32-38].
@@ -169,16 +182,20 @@ drawdowns from T5S (per-day statistics), a 250-return backtest window (the exten
   (`method="inverted_cdf"`, passed explicitly). Historical ES (32.2). Normal: $\bar R$ and $s$ with divisor $T$
   (`ddof=0`). Student $t$: maximum likelihood on returns in percent, written in (15.11)'s form. Filtered models: (32.8)
   on $y$, mapped to $R$ by $e^{y/100}-1$. An exceedance is $R_t<-\operatorname{VaR}_t-10^{-12}$, and the smallest
-  margin is printed (1.1e-4 for HS) [A32-31]. Coverage: one-sided exact binomial upper tail; independence: the count of
-  exceedances followed by another against $\operatorname{Bin}(\text{trials},x/n)$ (LM21's exact form); Basel zones by
-  BCBS (1996)'s cumulative probabilities. Drawdowns in sessions; years are calendar days ÷ 365.25. Every count against
-  a threshold uses one guard.
+  margin $\min_t\lvert R_t+\operatorname{VaR}_t\rvert$ is printed (0.011 percentage points for HS) [A32-31]. Coverage:
+  one-sided exact binomial upper tail; independence: the count of exceedances followed by another against
+  $\operatorname{Bin}(\text{trials},x/n)$ (LM21's exact form); Basel zones by BCBS (1996)'s cumulative probabilities.
+  Drawdowns in sessions; years are calendar days ÷ 365.25, except a model's "once in so many years", which divides
+  sessions by $A$ and says so. Every count against a threshold uses one guard.
 - **Seeds** (one generator per experiment, `np.random.default_rng([e, 20261011])`, created once): 1 the ten-day GARCH-t
-  Monte Carlo (100,000 paths) [A32-28]; 2 importance sampling (10,000 draws) [A32-53]; 3 permutations of each rule's
-  returns (10,000 per rule, rules in order) [A32-36]; 4 the stationary bootstrap of each rule's returns (10,000 per
-  rule) [A32-37]; 5 and 6 the iid and stationary bootstrap of TR23's 1% quantile (10,000 each) [A32-20]; 7 ten iid
-  sessions from TR23 (100,000) [A32-55]. Batch standard errors use 20 batches (divisor 20), as LM18. The widget does not
-  simulate.
+  Monte Carlo (100,000 paths; each of the ten steps draws all paths' innovations at once) [A32-28]; 2 importance
+  sampling (10,000 draws) [A32-53]; 3 permutations of each rule's returns (10,000 per rule, rules in order) [A32-36]; 4
+  the stationary bootstrap of each rule's returns (10,000 per rule, rules in order) [A32-37]; 5 and 6 the iid and
+  stationary bootstrap of TR23's 1% quantile (10,000 each) [A32-20]; 7 ten iid sessions from TR23 (100,000 sums, each
+  batch a 5,000 × 10 array of day indices) [A32-55]. Every stationary resample is drawn as LM22's `stationary_idx`
+  (lm22.md:365–383), start days then uniforms, which equals arch's `StationaryBootstrap` (asserted on twin generators;
+  shared decision "Counting, simulation"), one resample after another. Batch standard errors use 20 consecutive
+  batches (divisor 20), as LM18. The widget does not simulate.
 - **Published files** (Volume IV's X37 rule): no file carries a daily series in date order. X4 plots three models'
   $-\operatorname{VaR}$ thinned to weekly points plus every cited day, and the returns of exceedance days only (HS and
   GARCH-t, at most 133 dated points); X7 thins the drawdown paths to weekly points plus every cited peak, trough and
@@ -219,7 +236,7 @@ Local symbols:
 | $X$, $x$ | the count of exceedances and its value | a random variable; LM32 writes no data matrix (Problem 12 writes $\mathbf R_t$) |
 | $n$ | forecast days of a backtest (4,609), the trials of $\operatorname{Bin}(n,u)$ | §6's $n$; Monte Carlo draws are written as numbers, not $n$ |
 | $\theta$ | the threshold variable of (32.7) | §6's parameter $\theta$; LM32 has no angle and no other parameter symbol |
-| $\mathcal R(\cdot)$ | a risk measure in the coherence axioms | new: Artzner et al.'s $\rho$ is the book's correlation (Open O6) |
+| $\mathcal R(\cdot)$ | a risk measure in the coherence axioms | new: Artzner et al.'s $\rho$ is the book's correlation (accepted, decision B5) |
 | $R_1$, $R_2$ | the returns of two positions (E6's bonds) | asset index, as $R_{i,t}$ |
 | $\eta$, $\zeta$ | the constants of the axioms (scale and shift) | LM5's letters (§6) |
 | $F_\xi^{-1}(u)$ | the quantile of LM26's standardized innovation: $\Phi^{-1}(u)$, or $\sqrt{(\nu-2)/\nu}\,F_Y^{-1}(u)$ | subscripted; no $z_u$ |
@@ -229,26 +246,29 @@ Not used: $\kappa$ (LM5's threshold; the condition number book-wide), $\alpha$ f
 $L$ for a loss (R8's $L_t$; losses are $-R$), a Cholesky $L$ in the main text, $\gamma$ for Magdon-Ismail et al.'s
 constant (book-wide a growth rate; (32.10) writes $\sqrt{\pi/2}$), $z_u$, $k$ for a number of standard deviations
 (written in words; Problem 10 writes (18.7)'s first line with the shift $a$, a generic constant in a module without
-bets, declared), $\hat\sigma_{t+1\mid t}$ (LM26 writes no hat; Open O6).
+bets, declared), $\hat\sigma_{t+1\mid t}$ (LM26 writes no hat; decision B1).
 
-**Motivating case: "Did any model see 7 April coming?"** (box, about 160 words; 11 sentences, the longest 22 words)
+**Motivating case: "Did any model see 7 April coming?"** (box, about 165 words; 12 sentences, the longest 20 words,
+mean under 14)
 
 > Wednesday 2 April 2025 was the last session before the Qingming holiday. That evening six models forecast the next
 > session's one-day 99% value at risk of the TAIEX total-return index. Their answers ran from 2.66% (a normal law on
 > five years of returns) to 4.14% (GARCH with Student-t innovations) [A32-05]. The next session came after four days
-> without trading. On Monday 7 April the index fell 9.70%, the worst of its 5,849 days since 2003 [A32-02]. That loss
-> was 2.3 to 3.6 times each model's value at risk, and 1.8 to 3.2 times its expected shortfall [A32-05, A32-54]. Over
-> the ten sessions from 7 April it lost 8.92% in all [A32-28]. The eight allocation rules of the through case lost
-> 5.06% to 8.33% that day, the worst day for seven of them [A32-06]. Was every model wrong, or was the day just rare?
-> How precise is a 99% value at risk in the first place? And what does a one-day number say about the fall from a
-> peak?
+> without trading. On Monday 7 April the index fell 9.70%, the worst of its 5,849 daily returns since 2003 [A32-02].
+> That loss was 2.3 to 3.6 times each model's value at risk, and 1.8 to 3.2 times its expected shortfall
+> [A32-05, A32-54]. Over the ten sessions from 7 April it lost 8.92% in all [A32-28]. It was also the worst day for
+> seven of the eight allocation rules of the through case [A32-06]. What each rule lost is [[LM35]]'s replay. Was every
+> model wrong, or was the day just rare? How precise is a 99% value at risk in the first place? And what does a
+> one-day number say about the fall from a peak?
 
 Resolved: (a) the models: §6, E7 (under GARCH-n the loss was a once-in-3.7-million-years day, under GARCH-t once in
-32.6 years [A32-27]) and §7 (every model counted it as an exceedance [A32-34]; over 4,609 days no model passes
-both tests at the Bonferroni level [A32-32]); (b) precision: §4 (the 1% quantile's SE is 0.145 points by (32.6) for
-iid days and 0.256 by the block bootstrap; from 250 returns it has no distribution-free lower bound [A32-19, A32-20,
-A32-21]); (c) the path: §8 (the rules' maximum drawdowns run from 18.42% to 33.56%, in 2020 for R1 and in 2022 for
-the others [A32-35]).
+32.6 years, years of TR23's 246.12 sessions [A32-27]) and §7 (every model counted it as an exceedance [A32-34]; over
+4,609 days no model passes both tests at the Bonferroni level [A32-32]); (b) precision: §4 (the 1% quantile's SE is
+0.145 points by (32.6) for iid days and 0.257 by the block bootstrap; from 250 returns it has no distribution-free
+lower bound [A32-19, A32-20, A32-21]); (c) the path: §8 (the rules' maximum drawdowns run from 18.42% to 33.56%: R1's
+fall ran from January to March 2020, the others' from peaks in January to March 2022 to troughs in October 2022, R4's
+in March 2023 [A32-35]). The rules' losses on 7 April are cited from LM35 (A35-13), not printed as LM32's (decision
+A1).
 The case is the sample's extreme, and says so (AUTHORING §8): the ten-session figure is its multi-day check, and the
 caption adds that the 10% limit capped many stocks that day (936 listed stocks closed limit-down; SOURCES, TechNews
 2025-04-07), so the index return understates the selling.
@@ -263,8 +283,8 @@ caption adds that the 10% limit capped many stocks that day (936 listed stocks c
 | 4 | How Precise Is a Value at Risk? {3} | (32.5) derived (a quantile lies below $R_{(j)}$ when at least $j$ returns do); (32.6) *stated without proof* (Glasserman 2003, (9.7)); E5 (TR23's 1% quantile and median; lm20.md:276); iid and block bootstrap SEs (LM22's tools; dependence doubles the SE); one year of returns; pitfall: a 99% VaR from 250 returns; KC (8.11%) | 480 |
 | 5 | Coherence and Expected Shortfall {4,8} | a risk measure's four axioms (Artzner et al. 1999), definition box; normal VaR is subadditive ((16.4): $\sigma_p\le\sigma_1+\sigma_2$); E6 (bonds); ES coherent (Acerbi and Tasche 2002, *stated*); (32.7) derived (Deep Dive: continuous $F$, then $\hat F$, A32-25); the LP of Problem 12 ([[LM29]]); ES 97.5% against VaR 99% (BCBS 2019, MAR33.3); 導讀; KC | 520 |
 | 6 | Value at Risk from Volatility Forecasts {5} | quantile equivariance and (32.8); LM26's forecasts into VaR and ES (lm26.md:183); E7 (the 2 April forecasts, VaR, ES, rarity); ten days: (26.4)'s mean reversion and the Monte Carlo of E8; a portfolio by LM12's colouring in one sentence; importance sampling (18.7) for a tail probability, (18.5) and (18.6) in one sentence, Problem 10 (lm18.md:300); jumps → [[LM39]]; KC (log to simple) | 520 |
-| 7 | Backtesting Value at Risk {6} | exceedances as Bernoulli($u$) under a correct model; the exact binomial count (LM21); E9 (Basel's table recomputed); X4, X5, X6; independence by LM21's count (Christoffersen 1998 named, O2); 12 tests and Bonferroni; the reading: HS has the right count but clusters, the filtered models do not cluster but exceed too often; 7 April; scoring a quantile against LM26's (26.8), (26.9); pitfall: the 4,609-day zones are Basel's probabilities applied, not Basel's table; 導讀; KC | 600 |
-| 8 | Drawdowns of the Rules {7,8} | (32.9): $\mathrm{DD}_t$ (LM1), MDD, the longest spell, $\mathrm{DD}^0_t$; the two definitions (g:92); X7, X8; E10 (R1's episode; R2's MDD against its $\mathrm{DD}^0$); a hypothetical 20% limit; R6 against R8; the path statistic: permutations and the stationary bootstrap, X9, the 2020 atoms; (32.10) stated with its model; pointers to [[LM33]], [[LM34]], [[LM44]]; 導讀; KC | 640 |
+| 7 | Backtesting Value at Risk {6} | exceedances as Bernoulli($u$) under a correct model; the exact binomial count (LM21); E9 (Basel's table recomputed); X4, X5, X6a, X6b; independence by LM21's exact count (no paper named for it, decision E); 12 tests and Bonferroni; the reading: HS has the right count but clusters; the filtered models cluster far less than HS, not rejected at the Bonferroni level, but exceed too often; 7 April; scoring a quantile against LM26's (26.8), (26.9); pitfall: the 4,609-day zones are Basel's probabilities applied, not Basel's table; 導讀; KC | 600 |
+| 8 | Drawdowns of the Rules {7,8} | (32.9): $\mathrm{DD}_t$ (LM1), MDD, the longest spell, $\mathrm{DD}^0_t$; the two definitions (g:92); X7, X8a, X8b; E10 (R1's episode; R2's MDD against its $\mathrm{DD}^0$; R6 against R8 by ES and MDD); a hypothetical 20% limit; the path statistic: permutations and the stationary bootstrap, X9, the 2020 atoms; (32.10) stated with its model; pointers to [[LM33]], [[LM34]], [[LM35]], [[LM44]]; 導讀; KC | 640 |
 | 9 | Risk Measures in Python {2} | `np.quantile(..., method="inverted_cdf")`; (32.2) as a function; `scipy.stats.t.fit`, `t.ppf`, `t.pdf`; `quad` for (32.4); the forecasts from LM26's code; cvxpy for Problem 12 with CLARABEL's tolerances; lab box | 160 |
 | — | Summary (7) / Problems (12) / Solutions | | 130 / 400 / 500 |
 | | **Total** | | **5,450** |
@@ -279,21 +299,21 @@ caption adds that the 10% limit capped many stocks that day (936 listed stocks c
 - §4: with 250 iid returns, the chance that none falls below the true 1% quantile is $0.99^{250}=8.11\%$ [A32-21],
   the first cell of Basel's Table 2; so no order statistic is a 95% lower bound for the 1% quantile.
 - §5: under a normal law ES at 2.5% is $2.338\sigma$ and VaR at 1% is $2.326\sigma$ (ratio 1.005) [A32-23]. Why could
-  Basel switch measures without changing the normal case's capital, and why does the switch bite on TR23 (historical
-  ratio 1.048, $t$ 1.109)?
+  Basel switch measures without changing the normal case's capital, and why does the switch bite on TR23 (ES at 2.5%
+  ÷ VaR at 1%, X3: historical 1.05, $t$ 1.11)?
 - §6: a 1% quantile of $-4\%$ for the log return is $e^{-0.04}-1=-3.92\%$ for the simple return [A32-29]. Quantiles
   pass through an increasing map; why does the same step not give the ES?
 - §7: HS's 56 exceedances against 46.09 expected; the binomial SD is 6.75, so $z=1.47$ [A32-33]. The count passes;
   what does the count not test?
-- §8: (a) R2's MDD is 22.97% but its largest loss from the starting capital is 0.39%, on 8 March 2019, 0.142 points
-  of it the purchase cost [A32-40]. Which number answers an investor who started in March 2019? (b) (32.10) gives
-  0.793 for $\sigma=20\%$ over ten years [A32-38]; which of its assumptions does R1 break?
+- §8: (a) R2's MDD is 22.97% but its largest loss from the starting capital is 0.39%, on 8 March 2019 [A32-40],
+  0.142 points of it the purchase cost (LM27's A27-23). Which number answers an investor who started in March 2019?
+  (b) (32.10) gives 0.793 for $\sigma=20\%$ over ten years [A32-38]; which of its assumptions does R1 break?
 - §9: `np.quantile(R, 0.01)` gives −3.5668% by default and −3.5671% with `inverted_cdf` [A32-43].
 
 中文導讀 in §2 (風險值 (value at risk), 預期短缺 (expected shortfall), 分位數 (quantile), 順序統計量 (order
 statistic), 歷史模擬法 (historical simulation)), §3 (厚尾 (fat tails), 尾部風險 (tail risk), the $\sqrt m$ rule),
-§5 (一致性風險量數 (coherent risk measure), 劣可加性 (subadditivity; O7), 條件風險值 (CVaR), named once as ES's other
-name), §7 (回測 (backtest), 二項分布 (binomial distribution), 獨立性檢定 (independence test)), §8 (回撤 (drawdown),
+§5 (一致性風險量數 (coherent risk measure), 劣可加性 (subadditivity; the shared list, decision C1), 條件風險值
+(CVaR), named once as ES's other name), §7 (回測 (backtest), 二項分布 (binomial distribution), 獨立性檢定 (independence test)), §8 (回撤 (drawdown),
 最大回撤 (maximum drawdown), 置換檢驗 (permutation test), 區塊自助重抽法 (block bootstrap)). Deep Dives: §3 "The
 Student-t tail mean": $\frac{d}{dy}(1+y^2/\nu)^{-(\nu-1)/2}=-\frac{\nu-1}{\nu}\,y\,(1+y^2/\nu)^{-(\nu+1)/2}$, so
 $\int_{-\infty}^{q}y\,f_Y(y)\,dy=-\frac{\nu+q^2}{\nu-1}f_Y(q)$ for $\nu>1$, checked by quadrature [A32-15]. §5 "Why the
@@ -305,14 +325,16 @@ $1-\#\{L_t>\theta\}/(uT)$ changes sign at the $j$th largest loss, and its value 
 
 **Exhibits.**
 
-- X1 `case` (table, §1): "7 April 2025 against the forecasts of 2 April". Rows: historical (1,231 returns), normal
-  (same window), Student $t$ (fit of 1 April), EWMA ($\lambda=0.94$), GARCH normal, GARCH $t$. Columns: 99% VaR (%)
-  3.53, 2.66, 3.08, 3.57, 3.83, 4.14 [A32-05]; 99% ES (%) 4.58, 3.06, 4.38, 4.07, 4.39, 5.26 [A32-54]; loss ÷ VaR 2.7,
-  3.6, 3.2, 2.7, 2.5, 2.3 [A32-05]; "one day in" (GARCH rows only) 3.7 million years and 32.6 years [A32-27]. Foot rows:
-  the loss 9.70% (log −10.20%) [A32-02]; ten sessions 7–18 April −8.92% [A32-28]; the eight rules −5.06% (R7) to
-  −8.33% (R4) [A32-06]. Note: forecasts from data through 2 April, out of sample; the return spans four non-trading
-  days, and the 10% limit capped many stocks. Source: FinMind `TaiwanStockTotalReturnIndex`, retrieved 18 October 2026;
-  LM26's forecasts. Computations: `data/lm32_numbers.py`.
+- X1 `case` (table, §1): "7 April 2025 against the forecasts of 2 April". Rows: historical (the 1,231 returns 12 March
+  2020 → 2 April 2025), normal (same window), Student $t$ (the fit of 1 April on the 1,231 returns to 31 March), EWMA
+  ($\lambda=0.94$), GARCH normal, GARCH $t$. Columns: 99% VaR (%) 3.53, 2.66, 3.08, 3.57, 3.83, 4.14 [A32-05]; 99% ES
+  (%) 4.58, 3.06, 4.38, 4.07, 4.39, 5.26 [A32-54]; loss ÷ VaR 2.75, 3.65, 3.15, 2.72, 2.53, 2.34 [A32-05] (two
+  decimals, so that each follows from the printed 9.70 and VaR); "one day in"
+  (GARCH rows only) 3.7 million years and 32.6 years [A32-27]. Foot rows: the loss 9.70% (log −10.20%) [A32-02]; ten
+  sessions 7–18 April −8.92% [A32-28]. Note: forecasts from data through 2 April, out of sample; TAIEX total-return
+  index; "years" are TR23's 246.12 sessions; the return spans four non-trading days, and the 10% limit capped many
+  stocks; the eight rules' losses that day are [[LM35]]'s replay (A35-13). Source: FinMind
+  `TaiwanStockTotalReturnIndex`, retrieved 18 October 2026; LM26's forecasts. Computations: `data/lm32_numbers.py`.
 - X2 `tail` (line, `step: true`, §2): the lowest 5% of TR23's returns (the 293 worst [A32-11]) as a histogram of
   losses, bins of 0.25 points from 1.75% to 10.00%, $x$ the loss in % (`fmt: "n2"`), $y$ days. Solid `vline`s at the
   historical VaR 3.57% and ES 4.69%; dashed at the normal's 2.75% and 3.16% [A32-11, A32-13]. Note: the 59 worst days
@@ -330,28 +352,45 @@ $1-\#\{L_t>\theta\}/(uT)$ changes sign at the $j$th largest loss, and its value 
 - X5 `zones` (`bar`, §7): six models' exceedances 56, 110, 69, 103, 102, 77 (`valueLabels`) [A32-31]; dashed `hline`
   "expected 46.09" [A32-04]; `hline`s "yellow from 57" and "red from 73" [A32-30]. Note: the zones are Basel's 1996
   probabilities (95% and 99.99%) applied to 4,609 days, not Basel's 250-day table.
-- X6 `backtest` (table, §7): the six models' exceedances and rate, $\Pr(X\ge x)$, zone, exceedances followed by another
-  against expected and the p-value, the shares of 250-day windows in yellow and red, the most in one window and its
-  last day, the mean VaR [A32-31]; a foot row: the Bonferroni level 0.0042 and which tests it rejects [A32-32]. Note:
-  out of sample, 12 tests on the same forecasts.
+- X6a `coverage` (table, §7; split from the first plan's ten-column table so that no PDF page shrinks, decision C10):
+  rows the six models; five columns: exceedances, their rate, $\Pr(X\ge x)$, zone, mean VaR (HS 56, 1.22%, 0.085,
+  green, 3.24%; N 110, 2.39%, $6.5\times10^{-16}$, red, 2.58%; t 69, 1.50%, $9.1\times10^{-4}$, yellow, 3.09%; EWMA 103,
+  2.23%, $2.7\times10^{-13}$, red, 2.51%; GARCH-n 102, 2.21%, $6.2\times10^{-13}$, red, 2.43%; GARCH-t 77, 1.67%,
+  $1.8\times10^{-5}$, red, 2.66%) [A32-31]. Note: out of sample, 4,609 days, 46.09 expected; zones by Basel's 1996
+  probabilities applied to 4,609 days [A32-30].
+- X6b `clusters` (table, §7): rows the six models; five columns: exceedances followed by another, of those with a next
+  forecast day (9 of 56, 15 of 110, 12 of 69, 6 of 103, 6 of 102, 5 of 77), expected under independence (0.68, 2.63,
+  1.03, 2.30, 2.26, 1.29), p-value ($2.6\times10^{-8}$, $6.4\times10^{-8}$, $5.1\times10^{-10}$, 0.028, 0.026, 0.0095),
+  shares of 250-day windows in Basel's yellow and red (20.0 and 3.4%; 32.2 and 17.0%; 21.8 and 9.5%; 70.8 and 0.4%;
+  60.6 and 2.9%; 43.2 and 0.4%), the most in one window (12, 27, 16, 10, 11, 10) [A32-31]; a foot row: the Bonferroni
+  level 0.0042, rejecting coverage for N, t, EWMA, GARCH-n and GARCH-t and independence for HS, N and t [A32-32]. Note:
+  out of sample, 12 tests on the same forecasts; overlapping windows are dependent, so their shares are descriptive;
+  the windows with the most exceedances end on 8 January 2009 (HS, N, t), 18 October 2010 (EWMA), 25 April 2022
+  (GARCH-n) and 7 April 2025 (GARCH-t).
 - X7 `underwater` (line, date, §8): $-\mathrm{DD}_t$ of R1 (1), R3 (2), R6 (3) and R8 (4), 4 March 2019 → 8 October 2026,
   weekly points plus every cited peak, trough and recovery; points at the troughs R1 −23.19% (19 Mar 2020), R3 −19.11%,
   R6 −18.90%, R8 −18.42% (21 Oct 2022) [A32-35]; a dashed `hline` at −20% "hypothetical 20% limit". Note: the chart
-  plots $-\mathrm{DD}_t$ (AUTHORING §6); out of sample, net of costs, fixed in advance; R2, R4, R5 and R7 are in X8.
-- X8 `rules` (table, §8): R1–R8. Columns: 7 April return (−7.70 … −5.06%) and worst day [A32-06]; VaR 1%, ES 1%, ES
-  2.5% [A32-07]; normal VaR 1% [A32-41]; MDD with peak → trough → back [A32-35]; longest spell under water (484–733
-  sessions); max $\mathrm{DD}^0$ and its date; $\mathrm{DD}_t$ on 8 October 2026 [A32-35]. Note: the rules'
-  out-of-sample returns, 1,851 sessions; the normal column is in-sample; Sharpe ratios are LM33's and net wealth
-  LM34's.
+  plots $-\mathrm{DD}_t$ (AUTHORING §6); out of sample, net of costs, fixed in advance; R2, R4, R5 and R7 are in X8b.
+- X8a `rulestail` (table, §8; the first plan's twelve-column table is split in two, decision C10): rows R1–R8; four
+  columns: historical VaR 1%, ES 1% and ES 2.5% [A32-07], normal VaR 1% [A32-41]. Note: the rules' out-of-sample net
+  returns, 1,851 sessions, 5 March 2019 → 8 October 2026; the normal column is *In-sample*; each rule's worst day was 7
+  April 2025, except R7's, 19 March 2020 [A32-06], and what each lost that day is [[LM35]]'s (A35-13); Sharpe ratios
+  are LM33's and net wealth LM34's.
+- X8b `rulesdd` (table, §8): rows R1–R8; four columns: MDD, the longest spell under water (sessions; 484–733), max
+  $\mathrm{DD}^0$, $\mathrm{DD}_t$ on 8 October 2026 [A32-35]. Note: the dates, kept out of the columns: each MDD's
+  peak → trough → back, the longest spells' peaks and ends, and the dates of max $\mathrm{DD}^0$ (R3, R5, R7 and R8 on 5
+  March 2019, their first day, chiefly the purchase cost) [A32-35]; paths from the cash of 1 before the first purchase.
 - X9 `mddboot` (`scatter`, forest plot, §8): $y$ = R1–R8 (`ticks` 1–8 with `tickLabels`); $x$ MDD in % (`fmt:
   "n1"`). For each rule an unnamed thin grey `lines` entry for the permutation 5–95% range and a thick one for the
   stationary bootstrap's [A32-36, A32-37]; named point series "realized MDD" [A32-35], "permutation median" and
-  "bootstrap median". Values cited: R1 23.19 against 17.2 and 21.0 [A32-35]; resampled MDDs at or above the realized
-  one, 1,069 and 3,285 of 10,000; R2's 557 under permutation [A32-36, A32-37] (printed as counts: as percentages at one
-  decimal several are exact ties). Note: experiments 3 and 4, 10,000 resamples each; block lengths 17–22
-  by LM22's rule; in 400 to 1,820 of the 10,000 bootstrap resamples, by rule, the whole March 2020 fall sits in one
-  block and is the resample's MDD, so the bootstrap distribution has an atom, and R5's and R6's medians sit on it
-  [A32-37].
+  "bootstrap median". Values cited: R1 23.19 [A32-35] against the medians 17.2 and 20.7; resampled MDDs at or above
+  the realized one, 1,069 and 3,305 of 10,000; R2's 557 under permutation [A32-36, A32-37] (printed as counts: as
+  percentages at one decimal several are exact ties). Note: experiments 3 and 4, 10,000 resamples each; the stationary
+  bootstrap in LM22's draw order, block lengths 17–22 by LM22's rule (decision D); in 399 to 1,737 of the 10,000
+  bootstrap resamples, by rule, one realized fall into 19 March 2020 (from 21 February, 24 February or 9 March) sits
+  whole in one block and is the resample's MDD, so the bootstrap distribution has an atom, and R5's and R6's medians
+  sit on it; 223 of R1's 3,305 equal its realized MDD exactly (a block that holds the whole fall of 6 January → 19
+  March 2020 rebuilds it) [A32-37].
 
 **Widget `varLevel` — "VaR and ES of a rule at any level."** `Book.controls`: rule (select, R1–R8), tail probability
 $u$ (slider, 0.1% to 10.0% in steps of 0.1%). Chart: `bar`, categories "historical", "normal", "Student t"; series
@@ -377,22 +416,22 @@ SDs, $t$ parameters and quantile grids (about 30 KB). No simulation.
 - E3 §3 `normt`, TR23 at 1% by (32.3) and (32.4): the normal ($\bar R=0.0625\%$, $s=1.2084\%$) gives VaR 2.75% and ES
   3.16% [A32-13], the $t$ ($\nu=3.065$, location 0.0997%, scale 0.7761%) 3.37% and 5.19% [A32-14], the data 3.57% and
   4.69% [A32-11]. The normal misses both; the $t$ comes close on VaR but overshoots ES, "too heavy from −5%"
-  (lm15.md:461). (32.4) agrees with quadrature to 7.7e-13 [A32-15].
+  (lm15.md:461). (32.4) agrees with quadrature to better than 1e-12 [A32-15].
 - E4 §3 `horizon`, ten sessions of TR23: 5,840 overlapping compound returns give a 99% VaR of 10.49%; $\sqrt{10}$
   times the one-day VaR gives 11.28%; iid normal log returns give 8.02% [A32-16]; ten days drawn independently from
   TR23's own returns give 8.75% (experiment 7, 100,000 sums, batch SE 0.04) [A32-55]. The daily law's non-normal
   shape (fat tails and skewness, not separated here) raises the iid figure from 8.02% to 8.75%; keeping the real order
   of days, with its clustering, raises it to 10.49%. The $\sqrt{10}$ rule scales a fat-tailed one-day quantile, while
   a sum of ten iid days is already close to its normal counterpart (8.75% against 8.02%), so the rule overstates. R1
-  over 20 sessions: 8.66%
-  against the $\sqrt{20}$ rule's 9.40% [A32-09]. Neighbouring overlapping sums share nine of their ten days, so 10.49%
-  is itself imprecise; the text says so.
+  over 20 sessions: 8.66% against $\sqrt{20}$ times its one-day 2.102% [A32-07], 9.40% [A32-09]. Neighbouring
+  overlapping sums share nine of their ten days, so 10.49% is itself imprecise; the text says so.
 - E5 §4 `precision`, TR23's 1% quantile $R_{(59)}=-3.567\%$: by (32.5) the ranks 44 and 75 give −4.016% to −3.425%
   with coverage 0.9587 [A32-18]; (32.6) with the spacing density gives an SE of 0.145 points [A32-19]; the iid
-  bootstrap 0.119 (batch SE 0.0014) and the stationary bootstrap with $\ell=145$ 0.256 (0.0020), 2.1 times as large
-  [A32-20]. The median (lm20.md:276): $R_{(2925)}=0.0879\%$, interval 0.069% to 0.114% (ranks 2,850 and 3,000, coverage
-  0.9502) [A32-18], SE 0.0116 points against LM20's location SE 0.0124 (lm20.md:269) [A32-19]. (32.5) assumes iid days;
-  the block bootstrap says clustering doubles the uncertainty of a tail quantile.
+  bootstrap 0.119 (batch SE 0.0014) and the stationary bootstrap with $\ell=145$, in LM22's draw order, 0.257
+  (0.0019), 2.2 times as large [A32-20]. The median (lm20.md:276): $R_{(2925)}=0.0879\%$, interval 0.069% to
+  0.114% (ranks 2,850 and 3,000, coverage 0.9502) [A32-18], SE 0.0116 points against LM20's location SE 0.0124
+  (lm20.md:269) [A32-19]. (32.5) assumes iid days; the block bootstrap says clustering more than doubles the
+  uncertainty of a tail quantile.
 - E6 §5 `bonds` (*constructed*): two independent bonds, each losing 60% with probability 0.8% and gaining 2% otherwise.
   At $u=1\%$ one bond's VaR is −2.00% (a gain, since default is rarer than 1%) and its ES 47.60%. Half in each: some
   default has probability 1.59%, above 1%, so the VaR is 29.00% while the halves' VaRs sum to −2.00%; the ES is 29.20%,
@@ -401,11 +440,13 @@ SDs, $t$ parameters and quantile grids (about 30 KB). No simulation.
   (GARCH-n), 1.7040% (GARCH-t) a day [A32-26] (lm26.md:39); with the refits' means 0.1020% and 0.1190% and $\nu=6.39$
   [A32-26], (32.8) gives VaR 3.57%, 3.83% and 4.14% [A32-05], and ES 4.07%, 4.39% and 5.26% [A32-54]. The day's log
   return −10.20% [A32-02] is $-5.98$ forecast SDs under GARCH-n, probability $1.1\times10^{-9}$, once in 3.7 million
-  years; under GARCH-t $-6.06$, probability $1.2\times10^{-4}$, once in 8,014 sessions, 32.6 years [A32-27]. Both are *Model*
-  statements: the law's tail, not the data, decides the answer.
+  years; under GARCH-t $-6.06$, once in 8,014 sessions (probability $1.2\times10^{-4}$), 32.6 years [A32-27]. A year
+  here is TR23's 246.12 sessions (decision C7). Both are *Model* statements: the law's tail, not the data, decides
+  the answer.
 - E8 §6 `mc10`, ten days under GARCH-t from 2 April (experiment 1, 100,000 paths, the 1 April refit, innovations scaled
-  to variance 1): the ten-day 99% VaR is 10.5% (batch SE 0.07 points) against $\sqrt{10}$ times the one-day 4.14%
-  [A32-05], 13.10%; the realized ten sessions lost 8.92% [A32-28]. Two things pull the model's ten-day figure below the
+  to variance 1, each step drawn for all paths at once, batches of 5,000 consecutive paths): the ten-day 99% VaR is
+  10.5% (batch SE 0.07 points) against $\sqrt{10}$ times the one-day 4.142% [A32-05], 13.10%; the realized ten
+  sessions lost 8.92% [A32-28]. Two things pull the model's ten-day figure below the
   rule: the forecast variance reverts toward the fit's unconditional 1.116% a day [A32-26], by (26.4), and a sum of ten
   $t$ innovations is closer to normal than one (E4's effect); the brief does not split the two.
 - E9 §7 `basel`: Basel's Table 2 recomputed: for 250 days at 99%, $\Pr(X\le x)$ is 8.11, 28.58, 54.32, 75.81, 89.22%
@@ -416,10 +457,10 @@ SDs, $t$ parameters and quantile grids (about 30 KB). No simulation.
   and back on 13 January 2021 (205 more); its longest spell under water is another episode, 484 sessions from 7 March
   2022 to 5 March 2024; its largest loss from the start is 10.24%, on 19 March 2020 [A32-08]; recovering the MDD needed
   +30.19% (1.17) [A32-40]. R2's MDD is 22.97% (2022), but its loss from the start never exceeded 0.39%, reached on 8
-  March 2019, its first week, 0.142 points of it the purchase cost [A32-40, A32-35]: the two definitions answer
-  different investors. R6 against R8, its volatility-scaled version (LM31's): on 7 April R8 lost 7.94% against 5.96%,
-  1.33 times as much, and its 1% ES is higher (3.16% against 2.86%), yet its MDD is lower (18.42% against 18.90%)
-  [A32-39]: the one-day tail and the path rank the two rules in opposite orders.
+  March 2019, its first week [A32-40, A32-35]; 0.142 points of it is the purchase cost (LM27's A27-23). The two
+  definitions answer different investors. R6 against R8, its volatility-scaled version (LM31's): R8's 1% ES is higher
+  (3.16% against 2.86%), yet its MDD is lower (18.42% against 18.90%) [A32-39], so the one-day tail and the path rank
+  the two rules in opposite orders. Their losses on 7 April are [[LM35]]'s (A35-13; decision A1).
 
 **Problems plan** (12; MC keys C, A, B, A, B, C; the lab solves 6, 9, 10, 11, 12). Stems state the sample or the
 hypothetical inputs, the tail probability and horizon, the quantile rule ($\hat F^{-1}(u)=R_{(\lceil uT\rceil)}$), the
@@ -457,53 +498,64 @@ and the label *In-sample*.
     0.000011 tail draws, the shifted ones get 4,927, and the variance falls by a factor $1.34\times10^8$ [A32-53].
 11. Python, Hill-tail VaR (LM20's $x_0=3\%$, $k=108$): $\hat\alpha=3.63$; VaR and ES at 1% 3.55% and 4.90%, at 0.1%
     6.69% and 9.23%, against the historical 3.57%, 4.69%, 6.31%, 7.36% [A32-17]; why $u$ must stay below $k/T$.
-12. Python, minimum ES (*In-sample*, citing LM29): on the through case's first window (504 rows, 13 February 2017 → 27
-    February 2019), $u=2.5\%$, long-only weights summing to 1, solve (32.7) as a linear program in cvxpy with CLARABEL
-    (tolerances 1e-12) and check with HiGHS: weights 0.078, 0.203, 0.398, 0.290, 0.030, ES 0.857%, $\theta^*=0.693\%$
-    = VaR; R3's ES 0.880% and R1's 1.303% on the same rows [A32-24].
+12. Python, minimum ES (*In-sample*, citing LM29's (29.1) and (29.3)): on the through case's first window (the 504
+    rows of the estimation frame, joint dates 13 February 2017 → 27 February 2019), $u=2.5\%$, long-only weights
+    summing to 1, solve (32.7) as a linear program in cvxpy with CLARABEL (tolerances 1e-12) and check with HiGHS:
+    weights 0.078, 0.203, 0.398, 0.290, 0.030 (rounded; their sum prints as 0.999), ES 0.857%, $\theta^*=0.693\%$ =
+    VaR; R3's ES 0.880% and R1's 1.303% on the same rows [A32-24].
 
-**Lab parts** (`build/make_lab32.py`; reads only its `data/`: `taiex_tr.csv` (TR23, as LM23's lab), the rules' net
-wealth paths and the wealth frame (derived files, O4), LM26's forecasts or the means to refit them (O4), and three T5S
-days (O4)): 1 data, conventions, the sample counts; 2 historical VaR and ES, (32.2) against the two count means, E1,
-E2, X2, `np.quantile`'s methods; 3 normal, $t$ and Hill (Problem 11), (32.4) by quadrature, E4 with experiment 7; 4
+**Lab parts** (`build/make_lab32.py`; reads only its `data/`: `taiex_tr.csv` (TR23, as LM23's lab), and the derived
+files `data/make_lab_data.py` builds from `data/raw/` under the shared decision "Labs" (decision C6): the wealth
+frame, the eight rules' net wealth paths, LM26's six forecast series and the three raw T5S days): 1 data,
+conventions, the sample counts; 2 historical VaR and ES, (32.2) against the two count means, E1, E2, X2,
+`np.quantile`'s methods; 3 normal, $t$ and Hill (Problem 11), (32.4) by quadrature, E4 with experiment 7; 4
 precision: (32.5), (32.6), experiments 5 and 6 (E5), Problem 6; 5 coherence: E6 and Problem 7 exactly, (32.7) on TR23,
 Problem 12; 6 filtered VaR and ES: E7, A32-54's quadrature, E8 (experiment 1), Problem 10 (experiment 2), a portfolio
-VaR by colouring with LM12's Cholesky factor, checked against (32.3) with $\sigma_p$; 7 backtests: X4–X6, E9, Problems
-8 and 9; 8 drawdowns: X7–X9 with experiments 3 and 4, the atoms, E10; the intraday drawdowns of 7 April 2025, 5 August
-2024 and 19 March 2020 from T5S (−9.80%, −8.57% and −7.54% lows, per-day statistics only) [A32-44]. Extension
+VaR by colouring with LM12's Cholesky factor, checked against (32.3) with $\sigma_p$; 7 backtests: X4–X6b, E9,
+Problems 8 and 9; 8 drawdowns: X7–X9 with experiments 3 and 4, the atoms, E10; the largest intraday log falls from the
+running peak (the previous close included) on 7 April 2025, 5 August 2024 and 19 March 2020, 10.31%, 8.96% and 7.84%,
+each at the day's low (TAIEX price index; log changes, decision C7; per-day statistics only) [A32-44]. Extension
 (*Out-of-sample*, one variant declared in advance): rerun the HS and normal backtests with a 250-return window, Basel's
-minimum one year (BCBS 1996b, B.4(d)), and compare the counts with X6; the closing sentence says that the second window
+minimum one year (BCBS 1996b, B.4(d)), and compare the counts with X6a; the closing sentence says that the second window
 is a second trial on the same data, which LM34 treats. Labs write plain "LM29", never `[[LM29]]`.
 
-**Cross-module tags.**
+**Cross-module tags** (the later modules whose revised briefs of 2026-10-24 cite each by number, decision C8: LM35
+cites (32.9); it contrasts its scenario losses with VaR and ES in words, without a tag; LM33 and LM34 cite no LM32
+tag; Volumes VII–VIII are not briefed yet, so their planned uses stay under Leads):
 
 - (32.1) $\operatorname{VaR}_u:=-F_R^{-1}(u)$, $\operatorname{ES}_u:=-\frac1u\int_0^uF_R^{-1}(v)\,dv$, for the
   $m$-day simple return $R$, $0<u<1$, $\E\lvert R\rvert<\infty$ for ES; for continuous $F_R$,
-  $\operatorname{ES}_u=-\E[R\mid R\le F_R^{-1}(u)]$ (LM35, LM39, LM44).
+  $\operatorname{ES}_u=-\E[R\mid R\le F_R^{-1}(u)]$ (in-module; LM35 may cite it where it contrasts scenario losses
+  with VaR and ES).
 - (32.2) $\operatorname{VaR}=-R_{(j)}$ and
   $\operatorname{ES}=-\frac1u\big[\frac1T\sum_{i<j}R_{(i)}+(u-\frac{j-1}{T})R_{(j)}\big]$, $j=\lceil uT\rceil$: (32.1)
-  under $\hat F$ (every module that prints a historical ES; LM34, LM35).
+  under $\hat F$ (the book's one historical ES estimator, shared decision "Counting, simulation"; no later brief
+  prints a historical ES yet).
 - (32.3) normal: $\operatorname{VaR}_u=-\mu-\sigma\Phi^{-1}(u)$, $\operatorname{ES}_u=-\mu+\sigma\varphi(\Phi^{-1}(u))/u$
-  (LM35, LM39).
+  (in-module).
 - (32.4) $R=\mu+\sigma\sqrt{(\nu-2)/\nu}\,Y$, $Y\sim t_\nu$, $\nu>2$, $q=F_Y^{-1}(u)$:
   $\operatorname{VaR}_u=-\mu-\sigma\sqrt{(\nu-2)/\nu}\,q$,
-  $\operatorname{ES}_u=-\mu+\sigma\sqrt{(\nu-2)/\nu}\,\frac{(\nu+q^2)f_Y(q)}{(\nu-1)u}$ (LM39).
+  $\operatorname{ES}_u=-\mu+\sigma\sqrt{(\nu-2)/\nu}\,\frac{(\nu+q^2)f_Y(q)}{(\nu-1)u}$ (in-module).
 - (32.5) for iid returns with continuous $F_R$ and $j_1<j_2$:
-  $\Pr\big(R_{(j_1)}\le F_R^{-1}(u)<R_{(j_2)}\big)=\Pr(j_1\le X\le j_2-1)$, $X\sim\operatorname{Bin}(T,u)$ (in-module;
-  LM45 may cite).
+  $\Pr\big(R_{(j_1)}\le F_R^{-1}(u)<R_{(j_2)}\big)=\Pr(j_1\le X\le j_2-1)$, $X\sim\operatorname{Bin}(T,u)$
+  (in-module).
 - (32.6) $\operatorname{SE}\big(R_{(\lceil uT\rceil)}\big)\approx\sqrt{u(1-u)/T}\,/\,f_R\big(F_R^{-1}(u)\big)$ for iid
   returns with a positive continuous density at the quantile, large $T$, *stated without proof* (Glasserman 2003, (9.7))
   (in-module).
 - (32.7) $\operatorname{ES}_u=\min_\theta\big\{\theta+\tfrac1u\E[(-R-\theta)^+]\big\}$, attained at
   $\theta=\operatorname{VaR}_u$; convex in $\theta$, and jointly convex with the weights when $R=\mathbf w^{\top}\mathbf
-  R_t$ (LM44; Volume VIII's risk-limited sizing).
+  R_t$ (in-module: Problem 12).
 - (32.8) $r=g+\sigma_{t+1\mid t}\xi_{t+1}$ with $\xi$ iid of quantile $F_\xi^{-1}(u)$:
-  $\operatorname{VaR}_u=1-\exp\big(g+\sigma_{t+1\mid t}F_\xi^{-1}(u)\big)$ (log returns in decimals) (LM35, LM39).
+  $\operatorname{VaR}_u=1-\exp\big(g+\sigma_{t+1\mid t}F_\xi^{-1}(u)\big)$ (log returns in decimals) (in-module).
 - (32.9) $\mathrm{MDD}:=\max_t\mathrm{DD}_t$ with LM1's $\mathrm{DD}_t$; $\mathrm{DD}^0_t:=\max(0,1-W_t/W_0)$; a spell
-  under water runs from a peak to the first date with $W_t$ at or above it (LM34, LM35, LM44).
+  under water runs from a peak to the first date with $W_t$ at or above it (LM35: the rules' drawdowns, A32-35).
 - (32.10) for $\ln W_t$ a Brownian motion with zero drift and volatility $\sigma$ a year, the expected maximum drop of
   $\ln W$ over $\tau$ years is $\sqrt{\pi/2}\,\sigma\sqrt\tau$, *stated without proof* (Magdon-Ismail et al. 2004)
-  (LM44).
+  (in-module).
+
+Tags of earlier briefs that LM32 cites by number (for their lists): (27.1)–(27.2) and (27.4) (LM27's lists name
+LM32); (29.1) and (29.3) (LM29's entries name no user; they should name LM32, for Problem 12); (31.7) (LM31's list
+names LM32; its (31.8) now names no later user, as this brief asked).
 
 **Pitfalls to pre-empt.**
 
@@ -520,9 +572,9 @@ is a second trial on the same data, which LM34 treats. Labs write plain "LM29", 
 - The $\sqrt m$ rule assumes iid days; on TR23 it overstates the ten-day VaR while clustering understates the iid
   figures (E4, E8); never call either effect the cause without the comparison of A32-55.
 - Precision: a 99% VaR from 250 returns is the third worst; its distribution-free interval has no lower end (A32-21);
-  dependence doubles a tail quantile's SE (A32-20).
+  dependence more than doubles a tail quantile's SE (A32-20).
 - Backtests: twelve tests on the same forecasts (Bonferroni); the 4,609-day zones apply Basel's probabilities, not its
-  table; exceedance counts in overlapping 250-day windows are dependent (X6's shares are descriptive); the guard and its
+  table; exceedance counts in overlapping 250-day windows are dependent (X6b's shares are descriptive); the guard and its
   smallest margin are printed.
 - 7 April spans four non-trading days, and the 10% limit capped many stocks (936 listed limit-down; SOURCES): a one-day
   forecast met a five-calendar-day gap, and the index return understates the selling (PITFALLS §7, limit days).
@@ -534,7 +586,8 @@ is a second trial on the same data, which LM34 treats. Labs write plain "LM29", 
 - (32.10) is for log wealth, zero drift and constant $\sigma$; $1-e^{-0.793}=54.7\%$ is the fall that equals the mean
   log drawdown, not the mean percentage drawdown (Jensen, LM14's (14.10)).
 - Ownership: the rules' VaR, ES and drawdowns are LM32's; their Sharpe ratios LM33's, net wealth and costs LM34's,
-  scenario losses LM35's, exposures LM31's; LM26 owns the variance forecasts, LM32 their VaR.
+  scenario losses LM35's (each rule's loss on 7 April 2025 included, A35-13), exposures LM31's, the cost of the first
+  purchase LM27's (A27-23); LM26 owns the variance forecasts, LM32 their VaR.
 - Unexplained extremes: TR23's −6.46% of 17 July 2026, the worst of the last 250 returns (A32-21), gets no cause
   without a dated source (shared decision).
 
@@ -547,7 +600,7 @@ is a second trial on the same data, which LM34 treats. Labs write plain "LM29", 
 - g:54–58, outcome levels: [D] for (32.1)–(32.5) and (32.7), [C] for estimation, filtering, backtests and drawdowns,
   [U] for the $\sqrt m$ rule, Basel's choice and (32.10).
 - g:60–63, density: LM32 is one of the four dense modules; Hill, importance sampling, the LP, the coloured portfolio
-  Monte Carlo, likelihood-ratio tests and intraday drawdowns go to problems and the lab.
+  Monte Carlo, likelihood-ratio tests (only if read, O2) and intraday log falls go to problems and the lab.
 - g:87–90, failure forms: LM32 shows the drawdown-limit failure on the same rules: a hypothetical 20% limit is breached
   by R1, R2 and R4 (23.19%, 22.97%, 33.56% [A32-35]); weak growth is LM34's, funding and ruin LM35's.
 - g:92, define drawdown: $\mathrm{DD}_t$ and $\mathrm{DD}^0_t$, with R2 as the example where they differ (E10).
@@ -562,12 +615,13 @@ is a second trial on the same data, which LM34 treats. Labs write plain "LM29", 
 
 - `leads` gain 32 in lm01.md:6 ((1.17), $\mathrm{DD}_t$), lm05.md:6 ((5.11); on the Stage 4 list), lm10.md:6 ((10.4)),
   lm21.md:6 (the exact binomial tests, (21.6)) and lm22.md:6 ((22.3), the block rule). lm12, lm14, lm15, lm16, lm18,
-  lm19, lm20 and lm26 already list 32; LM12 keeps it through §6's colouring sentence (O9).
+  lm19, lm20 and lm26 already list 32; LM12 keeps it through §6's colouring sentence. These five are on the editor's
+  merged list (decision G).
 - lm04.md:46–50 and 510 print maximum drawdowns as negative numbers (−93.3%); with §6's $\mathrm{DD}\ge0$ and LM32's MDD
-  they become 93.3% (the column header stays "Maximum drawdown"). Optional and minor; the editor decides.
+  they become 93.3% (the column header stays "Maximum drawdown"). Optional (decision G lists it so).
 - No other wording change: lm20.md:276's "its standard error is [[LM32]]'s" is kept by E5; lm18.md:300's "applies these
   estimators to value at risk" by §6 and Problem 10 (a tail probability at a loss level is the inverse question of a
-  VaR, and the lab also reads a VaR off the weighted draws, O8).
+  VaR, and the lab also reads a VaR off the weighted draws).
 
 **Sources** (verified 2026-10-24 unless marked; paraphrased, nothing quoted beyond a phrase):
 
@@ -592,12 +646,14 @@ is a second trial on the same data, which LM34 treats. Labs write plain "LM29", 
   Banking & Finance* 26 (7): 1443–1471. DOI 10.1016/S0378-4266(02)00271-6. Crossref rechecked; **text not read**, not
   relied on, not cited unless Stage 2 reads it.
 - Kupiec, P. H. (1995). "Techniques for Verifying the Accuracy of Risk Measurement Models." *Journal of Derivatives* 3
-  (2): 73–84. DOI 10.3905/jod.1995.407942. Crossref rechecked (issued 30 November 1995). **Text not read**: the FEDS
-  95-24 version could not be downloaded (both Federal Reserve URLs tried returned an HTML page); its test statistic
-  and table are not relied on (O2).
+  (2): 73–84. DOI 10.3905/jod.1995.407942. Crossref rechecked (issued 30 November 1995). **Text not read**, also by
+  decision F's source check of 2026-10-24 (its report, §4: the FEDS 95-24 links return "Page not Found", FRASER timed
+  out, the Internet Archive was offline, the journal is paywalled). Its test statistic and table are not relied on,
+  and the text does not name it (decision E; O2).
 - Christoffersen, P. F. (1998). "Evaluating Interval Forecasts." *International Economic Review* 39 (4): 841–862. DOI
-  10.2307/2527341. Crossref rechecked: first page 841 only; the end page 862 rests on the survey's IDEAS and JSTOR
-  citation. **Text not read**; its tests are not relied on (O2).
+  10.2307/2527341. Crossref rechecked (again by the source check): first page 841 only; the end page 862 comes from
+  the RePEc handle. **Text not read**, also by the source check (§4: JSTOR only, no open copy, ResearchGate refused).
+  Its tests are not relied on, and the text does not name it (decision E; O2).
 - Basle Committee on Banking Supervision (1996a). *Supervisory framework for the use of "backtesting" in conjunction
   with the internal models approach to market risk capital requirements.* January 1996 (BCBS 22). Read in the BIS PDF
   (the survey's download, reread by the drafter): §III's three zones, the 95% and 99.99% cumulative-probability rule,
@@ -611,9 +667,9 @@ is a second trial on the same data, which LM34 treats. Labs write plain "LM29", 
   documents spell the committee "Basle".
 - Magdon-Ismail, M., A. F. Atiya, A. Pratap and Y. S. Abu-Mostafa (2004). "On the maximum drawdown of a Brownian
   motion." *Journal of Applied Probability* 41 (1): 147–161. DOI 10.1239/jap/1077134674. Crossref rechecked. The
-  zero-drift expected maximum drawdown $2\gamma\sigma\sqrt T$ with $\gamma=\sqrt{\pi/8}\approx0.6267$ is eq. (16) of the
-  authors' preprint dated 1 September 2003 (read by the drafter); the journal's equation number not compared, so the
-  text cites the paper without it.
+  zero-drift expected maximum drawdown $2\gamma\sigma\sqrt T$, with the constant $\gamma\approx0.6267$, is eq. (16) of
+  the authors' preprint dated 1 September 2003, which gives $\gamma=\sqrt{\pi/8}$ from Bond (2003) (reread in this
+  revision); the journal's equation number not compared, so the text cites the paper without it.
 - Glasserman (2003), §9.1.2 and (9.7) (SOURCES, LM18's closing check): the asymptotic variance of a quantile estimate
   needs the density at the quantile; cited for (32.6).
 - In SOURCES and used through earlier modules: Hill (1975) (LM20), Politis and Romano (1994) and the block rule's
@@ -633,8 +689,8 @@ is a second trial on the same data, which LM34 treats. Labs write plain "LM29", 
   - expected shortfall: 期望損失 (統計學名詞), 預期損失 (管理學名詞); the book keeps LM5's 預期短缺 (lm05.md:785; one
     term per concept).
   - order statistic: 順序統計量 (數學名詞), as LM14; quantile: 分位數 (數學名詞, 統計學名詞); sample quantile: 樣本分位數.
-  - subadditivity: 劣可加性 (數學名詞); finite subadditivity: 有限[的]次加性；有限[的]劣加性. The shared decision prints
-    劣加性 (from 劣加性函數); the entry for the term itself is 劣可加性 (O7).
+  - subadditivity: 劣可加性 (數學名詞); finite subadditivity: 有限[的]次加性；有限[的]劣加性. The shared list now prints
+    劣可加性, the term's own entry (decision C1).
   - risk measure: 風險量數 (統計學名詞); "coherent risk measure": no entry, so 一致性風險量數 stays the book's form.
   - backtesting: 回溯測試 (管理學名詞); the book keeps 回測 (SOURCES, Volume V line).
   - historical simulation method: 歷史模擬法 (管理學名詞).
@@ -645,67 +701,59 @@ is a second trial on the same data, which LM34 treats. Labs write plain "LM29", 
   - no entry: drawdown, coherent risk measure, tail risk, exceedance, positive homogeneity, translation invariance;
     the axioms' names stay in English in the text, and "exceedance" is glossed 超過 VaR 的日子 in the §7 box.
 
-**Open before Stage 2** (each with the drafter's recommendation and evidence):
+**Open before Stage 2** (revised 2026-10-24: the editor's decisions settle O1 and O3–O10, and decision F's source
+check settles how O2 stands until a reading succeeds; each is closed below with how).
 
-- **O1. The historical ES estimator** (the shared decision leaves it to this brief). Recommendation: (32.2), Acerbi and
-  Tasche's tail mean of $\hat F$, in every module. Evidence: it is (32.1) applied to the book's own empirical
-  distribution and independent of the quantile convention (their Corollary 4.3); it is continuous in $u$ (the widget's
-  slider moves smoothly); Rockafellar and Uryasev's minimum on $\hat F$ equals it exactly (4.689045% on TR23 at 1%
-  [A32-25]), so Problem 12's LP and the estimator agree; it equals the mean of the $uT$ worst when $uT$ is whole. The
-  simpler mean of the $\lceil uT\rceil$ worst is close on TR23 at 1% (4.679% against 4.689% [A32-11]) but not in E1
-  (1.65% against 1.93% [A32-10]); the text shows it once as an approximation.
-- **O2. Kupiec and Christoffersen were not read.** The spine names "Kupiec's test" and "Christoffersen's independence
-  test stated"; neither paper's text is in hand (Kupiec's FEDS PDF did not download; both journals are paywalled).
-  Recommendation: the text's coverage test is LM21's exact binomial tail, introduced as the count test on which Basel's
-  1996 framework rests (BCBS 1996a, read), and its independence check is LM21's exact count of consecutive exceedances
-  (lm21.md:207); Kupiec (1995) and Christoffersen (1998) are cited by name, for the likelihood-ratio forms, only if
-  Stage 2 reads them (the editor's or the owner's library access); otherwise they are left out. The anchors depend on
-  neither paper.
-- **O3. The backtest window and the bootstrap's block length** (the spine leaves both to the brief). Recommendation:
-  LM26's 1,231 returns, fixed before LM32, so that all six models forecast the same 4,609 days [A32-04]; Basel's
-  one-year minimum (BCBS 1996b) appears as the lab's declared extension, not as a second text result. For the
-  drawdown bootstrap, LM22's rule per rule (17–22 days [A32-37]), stated as a rule, not the right length; the atoms of
-  the March 2020 fall (400 to 1,820 of 10,000 resamples [A32-37]) are reported in X9's note, since they make a batch SE
-  of the median meaningless for R5 and R6.
-- **O4. The lab's data** (shared decision "Labs"). The lab needs each rule's net wealth path (not only weights and
-  the wealth frame; LM31's O3 asks the same), LM26's daily forecasts (or the time to refit GARCH 226 times for each
-  innovation law; LM26's lab does it), and three T5S days for the intraday drawdowns. Recommendation: `make_lab_data.py` writes the rules' net
-  wealth paths and LM26's six forecast series as derived files for the labs that need them, and copies the three raw
-  T5S days into LM32's `data/` (git-ignored, per-day statistics only in the notebook's output).
-- **O5. Two new anchors and six revised rows.** A32-54 (the six models' ES forecasts for 7 April) gives X1 and the
-  case their ES column, and A32-55 (ten iid sessions) separates fat tails from clustering in E4, which PITFALLS §7
-  requires before a cause is named. A32-20, A32-35, A32-36, A32-37, A32-40 and A32-47 changed, and seven rows now
-  check every printed precision for rounding flags (anchors' Status). Recommendation: accept them; no other module's
-  number moves.
-- **O6. Notation.** (a) A generic risk measure: Artzner et al. write $\rho$, the book's correlation; the brief proposes
-  $\mathcal R(\cdot)$ (unused book-wide), or the axioms stated for $\operatorname{VaR}_u$ and $\operatorname{ES}_u$
-  directly. (b) AUTHORING §6's Portfolios row writes $\hat\sigma_{t+1\mid t}$ "(LM26)", but LM26 writes
-  $\sigma_{t+1\mid t}$ without a hat (lm26.md:99, and §6's Volume IV row); LM32 follows LM26, and the row should drop the
-  hat (LM31's brief raises the same point).
-- **O7. 劣加性 or 劣可加性.** The shared decision prints 劣加性 "(the mathematics listing's 劣加性函數)"; 樂詞網's entry for
-  "subadditivity" itself is 劣可加性 (數學名詞), and 劣加性 appears only inside "finite subadditivity"'s alternatives.
-  Recommendation: 劣可加性, the term's own entry; a change to the shared list, so the editor decides.
-- **O8. Importance sampling and VaR** (lm18.md:300). Problem 10 estimates a tail probability at a given loss, the
-  inverse of a VaR. Recommendation: keep it (it answers "how rare was 7 April", the case's question), and let the lab
-  read a VaR at a far level off the same weighted draws, numbers produced by the lab; no anchor needed.
-- **O9. Leads and plan promises.** LM12's published leads list 32: kept by one sentence of §6 (colouring for a
-  portfolio Monte Carlo) and the lab part, as the plan promised (`plans/vol-2.md:578`). (16.10), which
-  `plans/vol-3.md:1543` gives LM32 and LM35, is left to LM35 (a correlation break in a crash is a stress topic).
-  Recommendation: as stated; the editor may instead drop 32 from LM12's leads at Stage 4 and the sentence here.
-- **O10. The 4,609-day traffic light.** Basel's table is for 250 days; X5 and X6 apply its probabilities (95%,
-  99.99%) to 4,609 days [A32-30]. Recommendation: keep, labelled "Basel's rule applied to 4,609 days", because a single
-  250-day table would discard most of the sample; X6's 250-day window shares show Basel's own table in use.
+Closed by the decisions:
+
+- **O1, the historical ES estimator:** (32.2), Acerbi and Tasche's tail mean of $\hat F$, in every module (decision D;
+  the shared decision "Counting, simulation, quantiles, rounding" now says so).
+- **O2, Kupiec (1995) and Christoffersen (1998):** decision F's source check (2026-10-24, its report §4 and
+  "Consequences by brief", LM32) could obtain neither text, so decision E stands: §7 uses LM21's exact binomial tail
+  and exact count only, names neither paper, and attributes no likelihood-ratio test; the lab's likelihood-ratio
+  extension stays out. No anchor depends on either paper. Only a later reading in the original reopens this: then
+  one sentence of §7 may name the paper for its likelihood-ratio form, and the lab may add that form.
+- **O3, the backtest window and the block length:** LM26's 1,231 returns, and LM22's rule per rule, drawn in LM22's
+  order (decision D). A32-20 and A32-37 are recomputed in that order: the block SE is 0.257 points, 2.2 times the iid
+  one; the X9 medians, the counts at or above the realized MDD and the atoms (399 to 1,737 resamples) changed. A32-28
+  and A32-55 now state their draw layouts; their values are unchanged.
+- **O4, the lab's data:** the shared decision "Labs" lists the wealth frame, the rules' net and gross wealth paths,
+  LM26's six forecast series and the T5S raw days, all from `make_lab_data.py` (decision C6).
+- **O5, the new and revised anchors:** accepted (decision D). This revision's changed rows are listed in the anchors'
+  Status for independent recomputation. Derived results now follow from the inputs printed beside them: X1's loss ÷
+  VaR at two decimals (the printed 9.70 ÷ 3.08 gives 3.1, the unrounded ratio 3.2 at one decimal), E8's one-day
+  4.142%, E4's 2.102%, KC §5's ratios at two decimals, and E7's GARCH-t rarity stated as 8,014 sessions first.
+- **O6, notation:** $\mathcal R(\cdot)$ for a general risk measure is accepted (B5); $\sigma_{t+1\mid t}$ has no hat,
+  and AUTHORING §6 is amended (B1).
+- **O7, 劣可加性:** the shared list prints it (C1).
+- **O8, importance sampling and VaR:** kept as proposed (decision D accepts the briefs' proposals); the lab reads a
+  far-level VaR off the weighted draws, with no anchor.
+- **O9, leads and plan promises:** kept as proposed. LM12's lead stands on §6's colouring sentence; (16.10) is LM35's,
+  whose brief uses it in its §5 and E7; LM34's lead stands on §8's pointer (decision C9).
+- **O10, the 4,609-day traffic light:** kept, labelled "Basel's rule applied to 4,609 days" (X5, X6a).
+- **Owners (decision A1, A5):** each rule's loss on 7 April 2025 is LM35's (A35-13). A32-06 keeps only the worst-day
+  dates and A32-39 only ES and MDD; X1's rules row, X8's 7 April column and E10's loss comparison are gone. The first
+  purchase's cost is LM27's A27-23, echoed in A32-40.
+- **For another brief (decision C8):** LM31's revised brief now lists LM32 for (31.7) only and no user of (31.8),
+  which this brief had asked for (closed). LM29's entries for (29.1) and (29.3) name no user; recommendation: they
+  name LM32 (Problem 12).
+
+Still open: none for LM32's Stage 2 writer. Two items wait on others: the Kupiec and Christoffersen reading (O2,
+whoever obtains the texts) and LM29's tag lists (the editor's merge).
 
 ## LM33 The Statistics of the Sharpe Ratio
 
-Stage 1 brief, drafted 2026-10-24 from the editor's spine (`plans/vol-5.md`, "### LM33 The Statistics of the Sharpe
-Ratio") and the shared decisions above it. Every number carries its anchor ID at first appearance in a passage;
-`data/vol6_anchors_lm33.py` prints them all (64 rows, `## LM33` of `plans/vol-6-anchors.md`; draft in
+Stage 1 brief, drafted 2026-10-24 from the editor's spine (`plans/vol-5.md`, "### Spine of LM33 The Statistics of the
+Sharpe Ratio") and the shared decisions above it, and revised the same day to the editor's decisions on the briefs
+(`plans/vol-5.md`, "Editor's decisions on the briefs (2026-10-24)": A3, B5, C7–C10, D, F, G and the LM33 line), the
+independent recomputation (M1, m1–m6) and the source check of decision F (its report of 2026-10-24 read Ledoit and
+Wolf's JEF text, the authors' versions of Bailey and López de Prado 2012 and 2014, and Harvey and Liu's JPM text).
+Every number carries its anchor ID at first appearance in a passage; `data/vol6_anchors_lm33.py` prints them all (64 rows, `## LM33` of `plans/vol-6-anchors.md`; draft in
 `lm33_anchors.md`). Numbers quoted from published modules carry their file:line. Statistics another module owns
-("Owners", shared decision "Through case") are echoed with that module's name.
+(shared decision "Owners") are echoed with that module's name and anchor ID.
 
 **Prereq:** `[4, 16, 18, 19, 20, 21, 22, 23, 24, 25, 27, 28, 29, 30, 31]`. What each supplies (tags rechecked in
-`src/`; LM27–LM31 are briefs, so their results are named, not tagged):
+`src/`; LM27–LM31 are briefs, so their results are cited with the tags and anchor IDs their briefs propose):
 
 - LM4: the Sharpe ratio $(\mu-r_f)/\sigma$ and its promise (lm04.md:120); the quadratic fraction (4.3)
   $f_q\approx\mu/\sigma^2$ and the pitfall's $f^*\approx\mathrm{SR}/\sigma$ (lm04.md:561); "size from a haircut
@@ -726,8 +774,8 @@ Ratio") and the shared decisions above it. Every number carries its anchor ID at
   a Sharpe ratio needs, 11.9 years for TR23 (lm21.md:177, 183); (21.6) Bonferroni; (21.7) Holm; (21.9)
   $\Pr(\max_iZ_i\le x)=\Phi(x)^m$; the rule that every test reports how many ran on the same data (lm21.md:284).
 - LM22: (22.1) the bootstrap standard error; (22.2) percentile and basic intervals; (22.4) the bootstrap p-value of a
-  t-stat; circular blocks (lm22.md:192); the book's block-length rule (lm22.md:254); TR23's Sharpe standard errors by
-  scheme, 0.205, 0.247, 0.244, 0.233 (lm22.md:216–219).
+  t-stat; circular blocks (lm22.md:192); the book's block-length rule (lm22.md:254) and its use of one length for every
+  scheme; TR23's Sharpe standard errors by scheme, 0.205, 0.247, 0.244, 0.233 (lm22.md:216–219).
 - LM23: (23.7) Newey–West with Bartlett weights; the lag rule $\ell=\lfloor4(T/100)^{2/9}\rfloor$ (lm23.md:223); the
   pointer to LM33 (lm23.md:266).
 - LM24: Bayes' rule (24.1) and the normal posterior (24.3); under a flat prior the posterior probability of a negative
@@ -735,13 +783,16 @@ Ratio") and the shared decisions above it. Every number carries its anchor ID at
   data (lm24.md:203–205). LM33 reads PSR in that light (§5, one sentence).
 - LM25: (25.4) the robust standard error of $\hat\rho_k$; (25.6) the variance-ratio t-stat with iid and robust
   standard errors.
-- LM27–LM31 (briefs above): the eight rules (R1 and R2, LM27; R3 and R4, LM28–LM29; R5, LM30; R6–R8, LM31), the wealth
-  recursion and the cost model (LM27); the realized volatilities of R1, R3 and R5 (LM30) and of R6–R8 (LM31), echoed
-  in the checkpoint table.
+- LM27–LM31 (briefs above): the eight rules (R1 and R2, LM27; R3 and R4, LM28–LM29; R5, LM30; R6–R8, LM31, with R8's
+  exposure (31.7)); the portfolio return and the wealth recursion with costs, (27.1)–(27.2), which give each rule's net
+  wealth $W_t$ (LM27); the realized volatilities of R1, R3 and R5 (LM30, A30-12) and of R6–R8 (LM31, A31-27), echoed in
+  the checkpoint table.
 
-**Leads:** `[34, 45]`: LM34 cites the intervals, (33.4) and (33.6) for its walk-forward comparison and re-teaches
-none of them (shared decision, "LM34 against the Research hygiene page and LM21"); LM45 sizes from an uncertain
-Sharpe ratio, citing (33.2), (33.3) and (33.7) (spine, "Leaves").
+**Leads:** `[34, 35, 45]` (decision C9). LM34 cites the rules' Sharpe ratios, their tests against R1 and the deflated
+Sharpe ratio by pointer and re-teaches none of them (shared decision, "LM34 against the Research hygiene page and
+LM21"); it cites no LM33 tag. LM35's lab checkpoint compares rules by "the Sharpe ratio with LM33's interval", that
+is (33.1)'s; LM35's prerequisites gain 33. LM45 sizes from an uncertain Sharpe ratio (§8's pointer); it has no brief
+yet, so no tag is claimed for it.
 
 **Forward links honoured.**
 
@@ -749,9 +800,9 @@ Sharpe ratio, citing (33.2), (33.3) and (33.7) (spine, "Leaves").
 |:--|:--|:--|
 | lm04.md:120 | "[[LM33]] studies its estimation" | §2–§4: the standard error, dependence, annualization |
 | lm04.md:563 | backtests overstate Sharpe ratios: size from a haircut, then a fraction of Kelly | §8, E9: the haircut of R2 and its effect on (4.3)'s fraction; sizing proper to LM45 |
-| lm19.md:359 | Lo (2002): the $\sqrt{12}$ rule's conditions; "[[LM33]] gives the Sharpe ratio's standard error when returns are correlated" | §3 ((33.1)) and §4 (Lo's correction on 90 months) |
+| lm19.md:359 | Lo (2002): the $\sqrt{12}$ rule's conditions; "[[LM33]] gives the Sharpe ratio's standard error when returns are correlated" | §3 ((33.1)) and §4 (Lo's correction on 90 calendar months) |
 | lm20.md:407 | "The Sharpe ratio of dependent returns is [[LM33]]'s", since $\sqrt A$ is exact only for log returns on uncorrelated days | §3, §4, E5; KC §4 |
-| lm21.md:373 | "[[LM33]] deflates a Sharpe ratio for the number of trials" | §7, E8: DSR at $n=8$ and $n_{\mathrm{eff}}$ |
+| lm21.md:373 | "[[LM33]] deflates a Sharpe ratio for the number of trials" (reworded at Stage 4 in LM34's wording, which keeps LM33's part; decision G) | §7, E8: DSR at $n=8$ and $n_{\mathrm{eff}}$ |
 | lm22.md:141 | standard errors for dependent returns, PSR, DSR and Ledoit and Wolf's (2008) test are [[LM33]]'s | §3, §5, §6, §7 |
 | lm23.md:266 | "[[LM33]] applies the long-run variance to a Sharpe ratio" | §3, (33.1) with (23.7) and the book's lag |
 | lm24.md:376 | "Haircuts for a backtest's Sharpe ratio are [[LM33]]'s" | §8, (33.7) |
@@ -759,18 +810,19 @@ Sharpe ratio, citing (33.2), (33.3) and (33.7) (spine, "Leaves").
 
 The grep of `src/*.md` and `src/pages/*.md` for `LM33` finds exactly these 11 lines, and `build/make_lab*.py` has
 none; the spine missed nothing. Leads that already list 33: LM16, 19, 20, 21, 22, 23, 24, 25; LM4 and LM18 gain it
-at Stage 4.
+at Stage 4 (decision G).
 
-**Outcomes** ("After this module you should be able to:"; the level in brackets is the brief's, not the page's):
+**Outcomes** ("After this module you should be able to:"; the level in brackets is the brief's, not the page's; each
+within 30 words, decision C10, and 15.6 on average):
 
-1. [C] compute a Sharpe ratio's standard error and interval from (20.9) with raw kurtosis, and name the moments it needs
-2. [D] derive the standard error of a Sharpe ratio under dependent returns from the delta method and the long-run variance, and check its sensitivity to the lag
-3. [C] annualize the Sharpe ratio of autocorrelated monthly returns with Lo's correction, and judge whether the data support the correction
-4. [D] derive the probabilistic Sharpe ratio and the minimum track record length, and relate them to the power calculation for a mean
-5. [C] test the difference of two Sharpe ratios with a HAC standard error and a studentized block bootstrap, and correct a family of such tests
-6. [C] deflate the best of $n$ Sharpe ratios for the number of trials, and estimate an effective number of trials for correlated rules
-7. [U] explain how a haircut adjusts a backtest's Sharpe ratio for multiple testing, and what it implies for position sizing
-8. [C] compute these statistics in NumPy and check them against SciPy and arch with every option passed explicitly
+1. [C] compute a Sharpe ratio's standard error and interval by (20.9), with raw kurtosis
+2. [D] derive a Sharpe ratio's HAC standard error by the delta method, and check its lag sensitivity
+3. [C] annualize a Sharpe ratio of autocorrelated returns by Lo's correction, and judge whether the data need it
+4. [D] derive the probabilistic Sharpe ratio and the minimum track record length, and relate them to power
+5. [C] compare two Sharpe ratios by Ledoit and Wolf's test, and correct a family of such tests
+6. [C] deflate the best of $n$ Sharpe ratios, and estimate the effective number of correlated trials
+7. [U] explain how a haircut corrects a Sharpe ratio for multiple testing, and its effect on sizing
+8. [C] compute these statistics in NumPy, and check them against SciPy and arch with every option passed
 
 | Outcome | Taught | Practised | Assessed |
 |:--|:--|:--|:--|
@@ -783,18 +835,20 @@ at Stage 4.
 | 7 | §8 | E9 | KC §8; problem 9 |
 | 8 | §9 | the lab | KC §9; problems 10–12 |
 
-**Owns.** The rules' Sharpe ratios, their intervals and their tests (shared decision "Owners"), and with them the
-uncertainty of each rule's mean excess return and volatility in the checkpoint table (Volume IV's checkpoint, guidance
-g:43). The methods: (20.9) applied with raw kurtosis to the eight rules; the HAC standard error (33.1), the delta method
-(20.8) with (23.7)'s long-run covariance and the book's lag; Lo's (2002) annualization of autocorrelated returns,
-applied through (19.9), with (25.6) for the noise of the correction; the probabilistic Sharpe ratio (33.2) and the
-minimum track record length (33.3) (Bailey and López de Prado 2012), one-sided, with $\sqrt{T-1}$ and the "1 +" term,
-against (21.4); the expected maximum $\E Z_{(n)}$ (33.4) from (21.9) and the deflated Sharpe ratio (Bailey and López de
-Prado 2014), the track record after $n$ trials (33.5), an effective number of trials (experiment 2); Ledoit and Wolf's
-(2008) difference of two Sharpe ratios (33.6), HAC and a studentized circular block bootstrap, on the seven pairs
-R2–R8 against R1, with Holm; haircuts (33.7) (Harvey and Liu 2015) by Bonferroni, Holm and independent tests; the
-haircut's effect on (4.3)'s fraction (one paragraph). Values owned: every A33 anchor except the echoed numbers of LM19,
-LM20, LM21 and LM22 (file:line in the anchors) and the volatilities LM30 and LM31 own (echoed).
+**Owns** (shared decision "Owners", decision A3). The rules' mean excess returns, R2's and R4's realized volatility,
+their Sharpe ratios and every standard error, interval and test of the checkpoint table (Volume IV's checkpoint,
+guidance g:43). The methods: (20.9) applied with raw kurtosis to the eight rules; the HAC standard error (33.1), the
+delta method (20.8) with (23.7)'s long-run covariance, Bartlett weights and the book's lag (decision D); Lo's (2002)
+annualization of autocorrelated returns, applied through (19.9), with (25.6) for the noise of the correction; the
+probabilistic Sharpe ratio (33.2) and the minimum track record length (33.3) (Bailey and López de Prado 2012),
+one-sided, with $\sqrt{T-1}$ and the "1 +" term, against (21.4); the expected maximum $\E Z_{(n)}$ (33.4) from (21.9)
+and the deflated Sharpe ratio (Bailey and López de Prado 2014), the track record after $n$ trials (33.5), an effective
+number of trials (experiment 2); Ledoit and Wolf's (2008) difference of two Sharpe ratios (33.6), by HAC and by
+their studentized circular block bootstrap with $b=22$ (the scheme read in their JEF text, decision F), on the seven
+pairs R2–R8 against R1, with Holm; haircuts (33.7) (Harvey and Liu 2015) by Bonferroni and independent tests, as
+they define them, and by Holm on the eight rules' own p-values (the book's adaptation); the haircut's effect on
+(4.3)'s fraction (one paragraph). Values owned: every A33 anchor except the echoed numbers of LM19, LM20, LM21 and
+LM22 (file:line in the anchors) and the volatilities of R1, R3 and R5 (LM30, A30-12) and of R6–R8 (LM31, A31-27).
 
 **Leaves.** Testing the best rule of a search on later data, White's reality check, PBO and gross against net Sharpe
 ratios → LM34 (one sentence each in §6 and §7). Sizing from an uncertain Sharpe ratio (bootstrap Kelly, shrinkage of
@@ -802,7 +856,8 @@ the fraction) → LM45 (§8, one sentence). Bayesian shrinkage of a Sharpe ratio
 sentence (§5). Ledoit and Wolf's calibration of the block size (their Algorithm 3.1), their prewhitened
 quadratic-spectral kernel and the GMM form of Lo's standard error → named once, not used (§6, §3). The test of one
 Sharpe ratio against a benchmark index (the information ratio) → not in the book, one sentence (§6). Harvey and Liu's
-false-discovery haircut (their BHY version) → named once (§8); LM21 owns the false discovery rate.
+false-discovery haircut (their BHY version) → named once (§8); LM21 owns the false discovery rate. Whether two rules'
+volatilities differ beyond chance → not in the book (LM31 drops that promise; the editor's LM33 decision).
 
 **Uses before taught** (one sentence each in the text):
 
@@ -816,42 +871,61 @@ false-discovery haircut (their BHY version) → named once (§8); LM21 owns the 
 
 **Data role.**
 
-- **E5's wealth frame, the through case** (shared decisions, "Data" and "Through case"). `data/vol5_series.py`'s
-  `frames("E5")` reads `data/processed/vol5_frames.parquet` (FinMind `TaiwanStockPrice`, `TaiwanStockDividendResult`
-  and `TaiwanStockSplitPrice`, registered 2026-10-24); `data/vol5_rules.py` gives the eight rules (`signals`,
-  `wealth_path`, `summary`), net of costs; no rule is re-implemented. The wealth paths equal
+- **E5's wealth frame, the through case** (shared decisions "Data", "E5's two frames" and "Through case").
+  `data/vol5_series.py`'s `frames("E5")` reads `data/processed/vol5_frames.parquet` (FinMind `TaiwanStockPrice`,
+  `TaiwanStockDividendResult` and `TaiwanStockSplitPrice`, registered 2026-10-24); `data/vol5_rules.py` gives the
+  eight rules (`signals`, `wealth_path`, `summary`), net of costs through (27.1)–(27.2); no rule is re-implemented. A
+  rule's own returns are a portfolio's, so they use the wealth frame and $A_{\mathrm w}$. The wealth paths equal
   `data/processed/vol5_rules.parquet` exactly, none is ruined, and $\sqrt{A_{\mathrm w}}\,\bar x/s$ equals
   `summary()`'s Sharpe ratio to 1e-12. Daily: $T=1{,}851$ net returns $R_t=W_t/W_{t-1}-1$, 5 March 2019 → 8 October
-  2026, from the session after the first trade (4 March 2019); $\tau=T/A_{\mathrm w}=7.60$ years [A33-01];
-  $A_{\mathrm w}=243.5686$ from the wealth frame's 2,368 sessions; $r_f=1.5\%$ accrues 0.616 bp a session [A33-02].
-  Excess returns $x_t=R_t-r_f/A_{\mathrm w}$.
+  2026, from the session after the first trade (4 March 2019) [A33-01]; $A_{\mathrm w}=243.5686$ from the wealth
+  frame's 2,368 sessions; $r_f=1.5\%$ accrues 0.616 bp a session [A33-02]. Excess returns $x_t=R_t-r_f/A_{\mathrm w}$.
+- **Years** (decision C7: every "years" names its count). A span is calendar days ÷ 365.25 (AUTHORING §8): the record
+  runs 7.60 calendar years (7.5975) from the first trade's close to 8 October 2026 [A33-01]. A track record's length
+  is its sessions ÷ $A$ of the sample, "years of sessions": MinTRL, the years a gap needs, and
+  $\tau=T/A_{\mathrm w}=7.60$ (7.5995) for the observed record [A33-01]. The text names the count at its first use in
+  each passage and compares a MinTRL with the record in sessions (1,796 against 1,851 [A33-49]).
 - **Months.** The 90 full calendar months April 2019 → September 2026, 12 to 23 sessions each; the 19 returns of March
   2019 and the 6 of October 2026 are left out, and the text says so [A33-03]. A month's log excess return is the log
   change of net wealth between month-end sessions minus the month's accrued log interest, sessions $\times
   \ln(1+r_f/A_{\mathrm w})$. Log returns, because (19.9) needs sums.
-- **TR23** (Volume III): `data/processed/vol3_taiex.parquet`'s $R$, $T=5{,}849$ returns 2003-01-03 → 2026-10-08,
-  23.7645 years, $A=246.12$, $r_f=0$ (Volume IV's convention) [A33-05]: the long record against which the through
-  case's 7.60 years [A33-01] are judged. LM19's and LM20's numbers are quoted as printed and recomputed only as checks
-  [A33-21].
+- **TR23** (Volume III), the TAIEX total-return index: `data/processed/vol3_taiex.parquet`'s $R$, $T=5{,}849$ returns
+  2003-01-03 → 2026-10-08, 23.76 calendar years, $A=246.12$, $r_f=0$ (Volume IV's convention) [A33-05]: the long
+  record against which the through case's 7.60 calendar years [A33-01] are judged. LM19's and LM20's numbers are quoted
+  as printed and recomputed only as checks [A33-21].
 - **Conventions.** Sharpe ratios are per observation in every formula and annualized only for printing:
   $\sqrt{A_{\mathrm w}}$ for E5's days, $\sqrt{12}$ for months, $\sqrt A$ for TR23, always a convention on simple
   returns (LM19). Means, $s$, skewness and raw kurtosis divide by $T$ (19.3); every kurtosis printed says "raw" or
   "excess" (shared decisions, "LM33's load"). (20.9) is the plug-in with the sample moments; "normal" sets skewness 0
-  and kurtosis 3, which is Lo's iid-normal $\sqrt{(1+\mathrm{SR}^2/2)/T}$. HAC: (23.7)'s Bartlett weights, the book's
-  lag, 7 at $T=1{,}851$, 9 for TR23 and 3 for 90 months [A33-04], no small-sample factor. Two-sided normal intervals
-  $\pm1.959964$ standard errors; PSR, MinTRL and DSR are one-sided at 95%. "Years" of a track record are sessions ÷ $A$
-  of the sample (MinTRL), and $\tau=T/A_{\mathrm w}$ for the through case; the criteria's calendar years (7.5975
-  [A33-01]) are LM34's.
+  and kurtosis 3, which is Lo's iid-normal $\sqrt{(1+\mathrm{SR}^2/2)/T}$. HAC (decision D): (23.7)'s Bartlett
+  weights, the book's lag, 7 at $T=1{,}851$, 9 for TR23 and 3 for 90 months [A33-04], no small-sample factor.
+  Two-sided normal intervals $\pm1.959964$ standard errors; PSR, MinTRL and DSR are one-sided at 95%, with
+  $\sqrt{T-1}$ (decision D).
+- **Bootstrap** (shared decision "Counting", decision D). Circular blocks of $b=22$: LM22's rule (lm22.md:254), the
+  largest stationary estimate among the squared demeaned return series the statistic involves, is R4's 22.41
+  [A33-32]. Ledoit and Wolf's statistic for a pair involves the two rules' own returns, and the seven pairs share one
+  set of block starts, so the rule runs over the eight rules. The circular scheme uses the same length, as LM22 used
+  145 for every scheme (lm22.md:216–219); the circular estimates themselves reach 25.65 [A33-32]. $T=1{,}851$ is
+  $84\times22+3$: a resample draws 85 block starts, joins the blocks and keeps the first 1,851 rows; its moments are
+  centred at its own means; its Götze–Künsch covariance uses the 84 complete blocks only [A33-32]. The source check
+  read Ledoit and Wolf's JEF text (decision F) and found the script's scheme in it: circular blocks of return pairs
+  (§3.2.2, p. 854), the centred studentized statistic, the Götze–Künsch variance on the $\lfloor T/b\rfloor$ complete
+  blocks with each resample centred at its own estimates, and the p-value with "+1" (Remark 3.2, eq. (9), p. 855).
+  So the bootstrap is printed beside the HAC test. Three settings are the book's, and the text labels them so: the
+  Bartlett HAC error with $\ell=7$ (theirs: a prewhitened quadratic-spectral kernel with a $T/(T-4)$ factor, §3.1), $b$
+  by LM22's rule (theirs: calibrated by Algorithm 3.1, pp. 854–855), and the resample's length when $T$ is not a
+  multiple of $b$ (the paper does not say).
 - **Guard and exact checks.** Bootstrap counts use $\ge$ the statistic $-10^{-12}$; Holm's rejections use
   $\le0.05+10^{-12}$. A bootstrap p-value is a multiple of 1/10,000 and is printed to two decimals.
 - **Seeds.** Experiment 1: the seven Ledoit–Wolf tests, `default_rng([1, 20261011])`, $B=9{,}999$ circular-block
-  resamples of the 1,851 dates with $b=26$, one set of block starts per resample shared by the seven pairs. Experiment
+  resamples of the 1,851 dates with $b=22$, one set of block starts per resample shared by the seven pairs. Experiment
   2: $10^6$ draws of $\mathcal N_8(\mathbf 0,C)$, `default_rng([2, 20261011])`. Experiment 3: R2 against R1 at block
-  sizes 1, 5, 10, 26, 50 and 100, $B=9{,}999$ each, `default_rng([3, 20261011])`, drawn in that order. Monte Carlo
+  sizes 1, 5, 10, 26, 50 and 100, $B=9{,}999$ each, `default_rng([3, 20261011])`, drawn in that order (the first
+  draft's grid, kept; 26 is the largest circular estimate, and $b=22$ itself is experiment 1's). Monte Carlo
   standard errors: $\sqrt{p(1-p)/B}$ for a p-value (lm18.md:151), SD ÷ $\sqrt{10^6}$ for experiment 2's mean (18.2).
   The widget does not simulate.
 - **Published files.** Only statistics: per-rule moments and estimates, lag and block-size curves, model curves. No
-  daily series of a rule in date order is published, and no intraday path.
+  daily series of a rule in date order is published, and no intraday path (shared decision "Charts", X37).
 - **Scripts.** `data/lm33_numbers.py` (every printed value, asserted against `src/lm33.md`, compared with the anchors,
   rounding boundaries flagged) and `data/lm33_charts.py` (X2–X7 and the widget's data block); both read the outputs of
   `data/vol5_series.py`, `data/vol5_rules.py` and `data/vol3_series.py` and run none of them.
@@ -870,15 +944,16 @@ $n=8$ and says what independence that count assumes. Lag and block-size curves a
 are in sample, as [[LM19]] and [[LM20]] printed them; the track-record curves and the correlated simulation are model
 results."
 
-**Notation.** AUTHORING §6 with the Portfolios table. Used: $R_t$, $r$, $T$ (a count), $t$, $\tau$ (years), $A$,
-$A_{\mathrm w}$, $r_f$, $W_t$, $\mathrm{SR}$, $\widehat{\mathrm{SR}}$, $\mathrm{SR}_0$, PSR, DSR, MinTRL, $\mu$,
-$\sigma$, $s$, $\widehat{\operatorname{Skew}}$, $\widehat{\operatorname{Kurt}}$ (raw), $\rho_k$, $\hat\rho_k$,
-$\hat\rho$, $C$ (the rules' correlation matrix), (19.7)'s ratio written out (no $\operatorname{VR}$ symbol, as LM26
-does), $\E$, $\Var$, $\Cov$, $\Phi$, $\Phi^{-1}$, $\varphi$,
+**Notation.** AUTHORING §6 with the Portfolios table. Used: $R_t$, $r$, $T$ (a count), $t$, $\tau$ (years of
+sessions), $A$, $A_{\mathrm w}$, $r_f$, $W_t$, $\mathrm{SR}$, $\widehat{\mathrm{SR}}$, $\mathrm{SR}_0$, PSR, DSR,
+MinTRL, $\mu$, $\sigma$, $s$, $\widehat{\operatorname{Skew}}$, $\widehat{\operatorname{Kurt}}$ (raw), $\rho_k$,
+$\hat\rho_k$, $\hat\rho$, $C$ (the rules' correlation matrix), $\bar\rho$ (the mean of its off-diagonal entries,
+§7), (19.7)'s ratio written out (no $\operatorname{VR}$
+symbol, as LM26 does), $\E$, $\Var$, $\Cov$, $\Phi$, $\Phi^{-1}$, $\varphi$,
 $\mathcal N$, $\mathcal N_8$, $Z$, $\mathbf Z$, $\operatorname{SE}$, $\text{t-stat}$, $H_0$, $H_1$, $\alpha$ (the
 significance level, LM33's meaning), $n$ (trials), $m$ (periods summed in (19.9)), $k$ (a lag), $B$, $\ell$ (the HAC
 lag), $\hat F^{-1}_{\text{boot}}$ (LM22's), $\boldsymbol\theta$, $\hat{\boldsymbol\theta}$, $\nabla h$ ((20.8)), $f_q$
-((4.3), §8 only). Local symbols, declared in the notation note:
+((4.3), §8 only). Local symbols, declared in the notation note and accepted as declared (decision B5):
 
 | Symbol | Meaning | Check against §6 |
 |:--|:--|:--|
@@ -886,35 +961,41 @@ lag), $\hat F^{-1}_{\text{boot}}$ (LM22's), $\boldsymbol\theta$, $\hat{\boldsymb
 | $\widehat{\mathrm{SR}}_j$, $\Delta$, $\hat\Delta$ | rule $j$'s estimate ($j=1,\dots,8$ for R1–R8); $\mathrm{SR}_j-\mathrm{SR}_1$ and its estimate | common $\Delta$ for a difference; "a year" marks annual values |
 | $\hat V_{\mathrm{SR}}$ | $1-\widehat{\mathrm{SR}}\,\widehat{\operatorname{Skew}}+\tfrac14(\widehat{\operatorname{Kurt}}-1)\widehat{\mathrm{SR}}^2$, (20.9)'s plug-in, so $\operatorname{SE}=\sqrt{\hat V_{\mathrm{SR}}/T}$ | new; no SVD $V$ in LM33; Bailey and López de Prado's $V$ (the variance across trials) is written in words |
 | $\mathbf v_t$, $\Psi$, $\hat\Psi$, $\hat\Gamma_k$ | the per-date terms of a statistic (a column); their long-run covariance; (23.7)'s estimate; the lag-$k$ sample autocovariance of $\mathbf v_t$ (divisor $T$) | new; the discount factor $v$ is not in LM33; $\hat\Gamma_k$ as LM23's |
-| $b$ | the block size of the circular block bootstrap (Ledoit and Wolf's letter) | §6's $B$, $\ell$ row: LM33 declares two letters, $\ell$ the lag (LM23's) and $b$ the block; LM33 has no bets |
+| $b$ | the block size of the circular block bootstrap (Ledoit and Wolf's letter), 22 here | §6's $B$, $\ell$ row: LM33 declares two letters, $\ell$ the lag (LM23's) and $b$ the block; LM33 has no bets |
 | $\hat\Delta_{\text{boot},i}$ | the difference in resample $i$ | LM22's subscript; no star |
 | $Z_{(n)}$, $\E Z_{(n)}$ | the largest of $n$ iid standard normals; its mean | as §6's $R_{(j)}$; $n$ is §6's number of trials |
 | $n_{\mathrm{eff}}$ | the effective number of trials | new, subscripted |
 | $\gamma_{\mathrm E}$ | Euler's constant, 0.5772 (in the approximation of (33.4)) | subscripted; $\gamma$ (growth of cash flows) is not in LM33 |
-| $\mathrm{HSR}$, $\text{t-stat}_{\text{adj}}$ | the haircut Sharpe ratio; the t-stat whose single-test p-value equals the adjusted one | new; HSR upright like PSR (Open item 9) |
+| $\mathrm{HSR}$, $\text{t-stat}_{\text{adj}}$ | the haircut Sharpe ratio; the t-stat whose single-test p-value equals the adjusted one | new, local (decision B5); HSR upright like PSR |
 
 Not used: $\eta(q)$ for Lo's scale factor (LM5's $\eta$; written "the scale factor"), a star on a bootstrap quantile or
 an adjusted t-stat, $d$ for Ledoit and Wolf's studentized statistic (written out), $\gamma_3$, $\gamma_4$ for the
 moments, $p_{\mathrm S}$, $p_{\mathrm M}$ (p-values in words, as §6 asks outside LM21), $L$ (R8's exposure appears only
 through LM31), $q$. LM33 says once that (21.6)–(21.9)'s $m$ tests read as $n$ trials.
 
-**Motivating case: "Better, or lucky?"** (box, about 150 words)
+**Motivating case: "Better, or lucky?"** (box, 150 words in three paragraphs of at most 80; 10 sentences, each within
+30 words and 15.0 on average, decision C10)
 
 > Eight rules for five Taiwan-listed funds were fixed on 24 October 2026, before any result was computed. Net of
-> costs, they earned 1,851 daily returns from 5 March 2019 to 8 October 2026, 7.60 years [A33-01]. The constructed
-> reference mix R2 has the highest Sharpe ratio, 1.14 a year. Equal weights, R1, earn 0.98, and the maximum-Sharpe rule
-> R4 the lowest, 0.63 [A33-14]. Is R2 better, or lucky? Its standard error is 0.37, so its 95% interval runs from 0.42
-> to 1.86 [A33-07] and holds all seven other estimates [A33-14]. R2 beats R1 by 0.16 a year, but their daily returns
-> correlate 0.70, and Ledoit and Wolf's test gives a p-value of 0.53 [A33-33]. R2 is also the best of eight. If eight
-> independent rules all had a true Sharpe ratio of zero, the best of them would still average 0.52 a year [A33-45].
+> costs, they earned 1,851 daily returns from the close of 4 March 2019 to 8 October 2026, 7.60 calendar years
+> [A33-01]. The constructed reference mix R2 has the highest Sharpe ratio, 1.14 a year. Equal weights, R1, earn 0.98,
+> and the maximum-Sharpe rule R4 the lowest, 0.63 [A33-14].
+>
+> Is R2 better, or lucky? Its standard error is 0.367, so its 95% interval runs from 0.42 to 1.86 [A33-07] and holds
+> all seven other estimates [A33-14]. R2 beats R1 by 0.16 a year, and their daily returns correlate 0.70. Ledoit and
+> Wolf's test of the gap gives a p-value of 0.52, by HAC and by bootstrap alike [A33-33].
+>
+> R2 is also the best of eight. If eight independent rules all had a true Sharpe ratio of zero, the best of them would
+> still average 0.52 a year [A33-45].
 
 Resolved: (a) the precision of one ratio: §2–§4, X1, X2 (HAC interval 0.39 to 1.89 [A33-07]; Lo's monthly ratio 0.94
-[A33-22]); (b) how long a record must be: §5, X4 (MinTRL against zero, 2.15 years [A33-26]; 7.37 years after eight
-trials [A33-49], against 7.60 observed [A33-01]); (c) R2 against R1: §6, X5 (HAC p-value 0.52, interval −0.35 to +0.67
-[A33-33]; 146 years of data for 80% power if the gap were true [A33-41]); (d) the best of eight: §7–§8, X6, X7 (DSR
-0.955 at $n=8$ [A33-46], 0.994 at the effective 2.07 trials [A33-48]; a haircut of 21% [A33-54]). The verdict the module
-reaches: R2's Sharpe ratio is very probably above zero, but 7.60 years cannot rank it above R1, so the data do not
-support allocating more to R2 than to R1 (guidance g:116).
+[A33-22]); (b) how long a record must be: §5, X4 (MinTRL against zero, 523 sessions or 2.15 years of sessions
+[A33-26]; 1,796 sessions, 7.37 years of sessions, after eight trials [A33-49], against the 1,851 observed [A33-01]);
+(c) R2 against R1: §6, X5 (HAC p-value 0.52 and interval −0.33 to +0.66, bootstrap p-value 0.52 and interval −0.34 to
++0.67 [A33-33]; 146 years of sessions for 80% power if the gap were true [A33-41]); (d) the best of eight: §7–§8,
+X6, X7 (DSR 0.955 at $n=8$ [A33-46], 0.994 at the effective 2.07 trials [A33-48]; a haircut of 21% [A33-54]). The
+verdict the module reaches: R2's Sharpe ratio is very probably above zero, but 7.60 calendar years cannot rank it
+above R1, so the data do not support allocating more to R2 than to R1 (guidance g:116).
 
 **Sections** (prose words, AUTHORING §1 count):
 
@@ -923,11 +1004,11 @@ support allocating more to R2 than to R1 (guidance g:116).
 | 1 | Introduction | the layer LM33 adds: Volume IV gave one Sharpe ratio an error bar, Volume VI compares eight rules and corrects for picking the best; case + X1; roadmap; notation and hygiene notes | 360 |
 | 2 | The Checkpoint: Eight Rules with Error Bars {1} | Volume IV's checkpoint on the through case (g:43): (20.9) applied, raw kurtosis named; E1 (R2 by hand); E2 (all eight: mean excess, volatility and Sharpe ratio with standard errors); X2; R4's two-sided interval and one-sided test; pitfall: excess kurtosis typed into (20.9); 導讀; KC | 600 |
 | 3 | Dependent Days: the HAC Standard Error {2} | why returns that are nearly uncorrelated still need care (R1's squares have $\hat\rho_1=0.246$ [A33-19]); (33.1) from (20.8) and (23.7); conditions stated; Deep Dive: (33.1) at $\ell=0$ is (20.9); X3, the lag curve; E3 (HAC over (20.9) 0.92 to 1.04 for the Sharpe ratio [A33-18], 1.51 to 1.60 for the volatility [A33-20]); E4 (TR23 against LM20 and LM22); one sentence on Lo's GMM form; 導讀 (HAC, long-run variance); KC | 500 |
-| 4 | Annualizing Autocorrelated Returns {3} | (19.9) as Lo's scale factor; Lo's AR(1) check; E5 on 90 months; the correction's own noise by (25.6); simple against log ratios; KC | 480 |
+| 4 | Annualizing Autocorrelated Returns {3} | (19.9) as Lo's scale factor; Lo's AR(1) check; E5 on 90 calendar months; the correction's own noise by (25.6); simple against log ratios; KC | 480 |
 | 5 | The Probabilistic Sharpe Ratio and the Minimum Track Record {4} | (33.2) as one minus a one-sided p-value (21.2), not a probability without a prior ([[LM24]]); (33.3) by inversion; against (21.4): one-sided, power ½, the "1 +" and $\hat V_{\mathrm{SR}}$; $T$ against $T-1$; X4; E6; TR23; the published example reproduced; pitfall: $\mathrm{SR}_0$ is a benchmark, not another rule's estimate; 導讀 (one-sided test); KC | 620 |
-| 6 | Comparing Two Sharpe Ratios {5} | Ledoit and Wolf's delta method on four moments (33.6) with (23.7); correlation shrinks the error ((16.3)), against (21.3); the studentized circular block bootstrap, its p-value against (22.4); the block size by the book's rule; X5; E7; the seven pairs and Holm; the years a gap of 0.16 needs [A33-41]; one sentence each on [[LM34]] and the information ratio; 導讀 (studentized interval, circular blocks); KC | 640 |
-| 7 | Deflating the Best of Eight {6} | the winner's expected maximum from (21.9), (33.4), Deep Dive; the approximation stated; DSR at $n=8$; what $n=8$ assumes; the effective number (experiment 2); the cross-section's dispersion; (33.5); X6; E8; the published example reproduced; one sentence on PBO ([[LM34]]); pitfall: a DSR near 0.95 is not a verdict; 導讀 (selection bias, order statistic); KC | 600 |
-| 8 | Haircuts and Sizing {7} | Harvey and Liu's haircut (33.7): Bonferroni, Holm, independent tests; X7; E9; their example reproduced; Holm's running maximum; the haircut on (4.3)'s fraction, then a fraction of Kelly (LM4's promise), [[LM45]] pointer; "the data are too thin" as a valid conclusion; KC | 400 |
+| 6 | Comparing Two Sharpe Ratios {5} | Ledoit and Wolf's delta method on four moments (33.6) with (23.7); correlation shrinks the error ((16.3)), against (21.3); the studentized circular block bootstrap with $b=22$ by the book's rule, its p-value against (22.4); the book's three settings labelled (Bartlett $\ell=7$, $b$, the last block); X5; E7; the seven pairs and Holm; the years a gap of 0.16 needs [A33-41]; one sentence each on [[LM34]] and the information ratio; 導讀 (studentized interval, circular blocks); KC | 640 |
+| 7 | Deflating the Best of Eight {6} | the winner's expected maximum from (21.9), (33.4), Deep Dive; the approximation stated; DSR at $n=8$; what $n=8$ assumes; the effective number (experiment 2) beside Bailey and López de Prado's eq. (9); the cross-section's dispersion; (33.5); X6; E8; the published example reproduced; one sentence on PBO ([[LM34]]); pitfall: a DSR near 0.95 is not a verdict; 導讀 (selection bias, order statistic); KC | 600 |
+| 8 | Haircuts and Sizing {7} | Harvey and Liu's haircut (33.7): Bonferroni and independent tests as theirs, Holm on the eight rules' own p-values as the book's adaptation; X7; E9; their example reproduced; Holm's running maximum; the haircut on (4.3)'s fraction, then a fraction of Kelly (LM4's promise), [[LM45]] pointer; "the data are too thin" as a valid conclusion; KC | 400 |
 | 9 | Sharpe Statistics in Python {8} | NumPy by hand; `scipy.stats.skew` and `kurtosis` with `fisher`, `bias` passed; arch `optimal_block_length`'s two columns; the bootstrap loop with one generator; lab box | 180 |
 | — | Summary (7) / Problems (12) / Solutions | | 140 / 400 / 520 |
 | | **Total** | | **5,440** |
@@ -939,12 +1020,14 @@ support allocating more to R2 than to R1 (guidance g:116).
 - §3: R1's daily excess returns have $\hat\rho_1=-0.054$, its squared deviations 0.246 [A33-19]. Which standard error
   should dependence move more, the mean's or the volatility's? The volatility's: HAC over iid is 1.51 for R1's
   volatility [A33-20] but 0.98 for its Sharpe ratio [A33-18].
-- §4: for monthly AR(1) returns with $\rho=0.2$, (19.9) gives a scale factor 2.88 against $\sqrt{12}=3.46$, so the
-  $\sqrt{12}$ rule overstates the annual ratio by 20% (1.203) [A33-24]; Lo's Table 2 prints 2.88 [A33-24].
-- §5: setting $\mathrm{SR}_0$ to R1's estimate makes R2's MinTRL 106 years and its PSR 0.67 [A33-31]. What is wrong?
-  R1's 0.98 [A33-06] is an estimate with its own error; comparing two estimates is §6's test.
-- §6: the standard error of R2 − R1 that treats the two as independent is 0.52 a year, Ledoit and Wolf's 0.25; the
-  ratio 0.49 is near $\sqrt{1-\hat\rho}=0.55$ [A33-40], by (16.3) with equal errors.
+- §4: for monthly AR(1) returns with $\rho=0.2$, (19.9) gives a scale factor 2.879 against $\sqrt{12}=3.464$, so the
+  $\sqrt{12}$ rule overstates the annual ratio by 20% (a factor 1.203) [A33-24]; Lo's Table 2 prints 2.88 [A33-24].
+- §5: setting $\mathrm{SR}_0$ to R1's estimate makes R2's MinTRL 106 years of sessions and its PSR 0.67 [A33-31]. What
+  is wrong? R1's 0.98 [A33-06] is an estimate with its own error; comparing two estimates is §6's test.
+- §6: the standard error of R2 − R1 that treats the two as independent is 0.521 a year, Ledoit and Wolf's 0.253
+  [A33-40]. Why is the second smaller? The daily returns correlate 0.70 [A33-33], so the two errors move together
+  ((16.3)). With equal errors and no other term, (16.3) would give the ratio $\sqrt{1-\hat\rho}=0.55$; the full
+  delta method gives 0.49 [A33-40].
 - §7: $\E Z_{(8)}$ is 1.424; the approximation gives 1.459 and (21.9)'s median 1.39 [A33-44]. Why is the mean above the
   median? The maximum's distribution is skewed to the right.
 - §8: Holm's haircut of R4 is 0% while Bonferroni's is 75% [A33-53]. Why? R4 has the largest p-value, which Holm
@@ -966,18 +1049,24 @@ extreme-value theory).
 
 **Exhibits.**
 
-- X1 `case` (table, §1): the eight rules, daily net excess returns, 5 March 2019 → 8 October 2026, $r_f=1.5\%$. Columns:
-  Sharpe ratio a year; SE by (20.9); SE by (33.1), $\ell=7$; 95% interval (HAC); PSR(0); minus R1 a year; bootstrap
-  p-value. Rows R1–R8 in the order fixed in advance (not sorted by result): R1 0.98, 0.370, 0.363, 0.26 to 1.69
-  [A33-06], 0.996 [A33-16]; R2 1.14, 0.367, 0.382, 0.39 to 1.89 [A33-07], 0.999 [A33-16], +0.16, 0.53 [A33-33]; R3 0.77,
-  0.370, 0.373, 0.04 to 1.51 [A33-08], 0.982 [A33-16], −0.20, 0.41 [A33-34]; R4 0.63, 0.368, 0.340, −0.04 to 1.30
-  [A33-09], 0.956 [A33-16], −0.35, 0.24 [A33-35]; R5 0.84, 0.370, 0.374, 0.11 to 1.58 [A33-10], 0.989 [A33-16], −0.13,
-  0.57 [A33-36]; R6 0.95, 0.371, 0.370, 0.23 to 1.68 [A33-11], 0.995 [A33-16], −0.02, 0.88 [A33-37]; R7 0.92, 0.370,
-  0.368, 0.20 to 1.64 [A33-12], 0.993 [A33-16], −0.06, 0.79 [A33-38]; R8 0.94, 0.371, 0.368, 0.21 to 1.66 [A33-13],
-  0.994 [A33-16], −0.04, 0.80 [A33-39]. Note row: DSR of R2 at $n=8$ 0.955 [A33-46]. Note: out of sample; net of costs;
-  $A_{\mathrm w}=243.57$ [A33-02]; bootstrap $B=9{,}999$, $b=26$, seed `[1, 20261011]`, Monte Carlo SE at most 0.005
-  [A33-33]. Source: FinMind `TaiwanStockPrice`, `TaiwanStockDividendResult`, `TaiwanStockSplitPrice`, registered 24
-  October 2026; Computations: `data/lm33_numbers.py`.
+- X1 `case` (two tables, §1, split so that no PDF page shrinks, decision C10): the eight rules, daily net excess
+  returns, 5 March 2019 → 8 October 2026, $r_f=1.5\%$; rows in the order fixed in advance (not sorted by result).
+  (a) Per rule, six columns: rule; Sharpe ratio a year; SE by (20.9); SE by (33.1), $\ell=7$; 95% interval (HAC);
+  PSR(0); the ratio carries three decimals so that each interval follows from the printed ratio and SE. R1 0.976,
+  0.370, 0.363, 0.26 to 1.69 [A33-06], 0.996 [A33-16]; R2 1.138, 0.367, 0.382, 0.39 to 1.89 [A33-07], 0.999 [A33-16];
+  R3 0.775, 0.370, 0.373, 0.04 to 1.51 [A33-08], 0.982 [A33-16]; R4 0.629, 0.368, 0.340, −0.04 to 1.30 [A33-09], 0.956
+  [A33-16]; R5 0.843, 0.370, 0.374, 0.11 to 1.58 [A33-10], 0.989 [A33-16]; R6 0.955, 0.371, 0.370, 0.23 to 1.68
+  [A33-11], 0.995 [A33-16]; R7 0.918, 0.370, 0.368, 0.20 to 1.64 [A33-12], 0.993 [A33-16]; R8 0.935, 0.371, 0.368, 0.21
+  to 1.66 [A33-13], 0.994 [A33-16]. Note row: DSR of R2 at $n=8$ 0.955 [A33-46]. (b) Each rule against
+  R1, six columns: pair; $\hat\Delta$ a year; $\operatorname{SE}(\hat\Delta)$, $\ell=7$; HAC p-value; bootstrap
+  p-value; Holm-adjusted p-value, for both families ($\hat\Delta$ to three decimals, so that each HAC p-value follows
+  from the printed $\hat\Delta$ and SE). R2 +0.162, 0.253, 0.52, 0.52 [A33-33]; R3 −0.201, 0.243, 0.41, 0.41 [A33-34];
+  R4 −0.347, 0.285, 0.22, 0.25 [A33-35]; R5 −0.134, 0.229, 0.56, 0.56 [A33-36]; R6 −0.022, 0.137, 0.87, 0.88 [A33-37];
+  R7 −0.058, 0.207, 0.78, 0.78 [A33-38]; R8 −0.041, 0.163, 0.80, 0.81 [A33-39]; Holm 1.00 for every pair in both
+  families [A33-43]. Note: out of sample; net of costs; $A_{\mathrm w}=243.57$ [A33-02]; the bootstrap is Ledoit and
+  Wolf's (circular blocks, $B=9{,}999$, seed `[1, 20261011]`, Monte Carlo SE at most 0.005 [A33-33]), with the
+  book's $\ell=7$, $b=22$ and last-block rule. Source: FinMind `TaiwanStockPrice`, `TaiwanStockDividendResult`,
+  `TaiwanStockSplitPrice`, registered 24 October 2026; Computations: `data/lm33_numbers.py`.
 - X2 `forest` (`scatter`, forest plot, §2): y the eight rules, `ticks` 1–8 with `tickLabels` R1 … R8 in fixed order; x
   the annual Sharpe ratio, −0.2 to 2.0 (`fmt: "n2"`). One named point series "estimate" (colour 1); per rule an unnamed
   thick `lines` entry for the (20.9) interval (colour 1) and a thin grey one, offset by 0.2 in y, for the HAC interval
@@ -987,36 +1076,41 @@ extreme-value theory).
   series R1, R2, R4 (colours 1–3); dashed `hline` at the normal SE 0.363 [A33-06]; dashed `vline` at $\ell=7$. Values
   cited: R1 0.370, 0.363, 0.359, 0.367; R2 0.367, 0.382, 0.393, 0.389; R4 0.368, 0.340, 0.316, 0.300 at $\ell=0$, 7,
   20, 60 [A33-18]. Note: $\ell=0$ is (20.9); a stability check.
-- X4 `psrT` (`line`, log x, §5): x years of daily data, 0.5 to 15 (`ticks` 0.5, 1, 2, 5, 10); y PSR(0) (`fmt: "n3"`,
-  0.5 to 1); series "annual SR 0.5", "1.0", "1.5" (colours 1–3), normal returns, $A_{\mathrm w}$; dashed `hline` 0.95;
-  dashed `vline` at $\tau=7.60$; `point`s at the crossings. Values cited: MinTRL 10.83, 2.72 and 1.21 years; PSR(0) at
-  7.60 years 0.916, 0.997, 1.000 [A33-29]. Note: *Model*; the estimate held fixed as the record lengthens.
+- X4 `psrT` (`line`, log x, §5): x years of sessions of daily data, 0.5 to 15 (`ticks` 0.5, 1, 2, 5, 10); y PSR(0)
+  (`fmt: "n3"`, 0.5 to 1); series "annual SR 0.5", "1.0", "1.5" (colours 1–3), normal returns, $A_{\mathrm w}$; dashed
+  `hline` 0.95; dashed `vline` at $\tau=7.60$; `point`s at the crossings. Values cited: MinTRL 10.83, 2.72 and 1.21
+  years of sessions; PSR(0) at 7.60 years of sessions 0.916, 0.997, 1.000 [A33-29]. Note: *Model*; the estimate held
+  fixed as the record lengthens.
 - X5 `pairs` (`scatter`, forest plot, §6): y R2 … R8 against R1 (`ticks` 1–7, `tickLabels` "R2 − R1" …); x $\hat\Delta$
-  a year, −1.0 to 0.8; points "difference" (colour 1), thick `lines` for the bootstrap 95% intervals; dashed `vline`
-  at 0. Values cited: A33-33 to A33-39; R2 − R1 +0.16, −0.35 to +0.67 [A33-33]; R4 − R1 −0.35, −0.95 to +0.25
-  [A33-35]. Note: Ledoit and Wolf's symmetric studentized interval, circular blocks $b=26$, $B=9{,}999$, seed
-  `[1, 20261011]`; seven tests on the same returns, none rejected after Holm [A33-43].
+  a year, −1.0 to 0.8; points "difference" (colour 1), thick `lines` for the HAC normal 95% intervals, thin grey
+  ones, offset by 0.2 in y, for the bootstrap intervals; dashed `vline` at 0. Values cited: A33-33 to A33-39; R2 − R1
+  +0.16, HAC −0.33 to +0.66, bootstrap −0.34 to +0.67 [A33-33]; R4 − R1 −0.35, HAC −0.91 to +0.21, bootstrap −0.95 to
+  +0.25 [A33-35]. Note: Ledoit and Wolf's HAC interval with (23.7), $\ell=7$; their symmetric studentized bootstrap
+  interval with circular blocks, $b=22$, $B=9{,}999$, seed `[1, 20261011]` ($\ell$ and $b$ the book's choices); seven
+  tests on the same returns, none rejected after Holm [A33-43].
 - X6 `deflate` (`line`, log x, §7): x the number of trials $n$, 1 to 10,000; y the deflated benchmark
   $\mathrm{SR}_0$ a year (`fmt: "n2"`); series "exact, (33.4)" (colour 1) and "approximation" (colour 2, dashed);
-  dashed `hline` at R2's pass line 0.53 ("the largest $\mathrm{SR}_0$ R2 passes at 95%"); dashed `vline`s at $n=8$
-  and $n_{\mathrm{eff}}=2.07$. Values cited: 0, 0.20, 0.52, 0.56, 0.91, 1.18, 1.40 at $n=1$, 2, 8, 10, 100, 1,000,
+  dashed `hline` at R2's pass line 0.53 ("the largest $\mathrm{SR}_0$ R2 passes at 95%") [A33-52]; dashed `vline`s at
+  $n=8$ and $n_{\mathrm{eff}}=2.07$ [A33-48]. Values cited: 0, 0.20, 0.52, 0.56, 0.91, 1.18, 1.40 at $n=1$, 2, 8, 10, 100, 1,000,
   10,000 [A33-52]; approximation 0.529 at 8 [A33-45]; $n_{\mathrm{eff}}$ [A33-48]. Note: $T=1{,}851$; the null
   standard deviation $1/\sqrt{T-1}$, 0.363 a year [A33-45].
 - X7 `haircut` (`bar`, §8): categories R1–R8; series "Sharpe ratio", "HSR, independent tests", "HSR, Holm" (colours 1–3;
   `fmt: "n2"`). Values cited: A33-53; R2 1.14 [A33-07], 0.90, 0.89 [A33-53]. Note: $n=8$; two-sided normal p-values of
-  $\widehat{\mathrm{SR}}\sqrt T$; the rules are correlated, so independence overstates the haircut (§7).
+  $\widehat{\mathrm{SR}}\sqrt T$; Holm on the eight rules' own p-values is the book's adaptation of Harvey and Liu;
+  the rules are correlated, so independence overstates the haircut (§7).
 
 **Widget `minTrack` — "How long must a record be?"** `Book.controls`: start from (select R1–R8, setting the next
 three to that rule's unrounded moments), annual Sharpe ratio (0.2 to 2.5, step 0.01), skewness (−2 to 1, step 0.01),
 raw kurtosis (3 to 25, step 0.1), trials $n$ (select 1, 2, 3, 5, 8, 10, 20, 50, 100, 1,000), observations a year
 (select 12, 52, 243.57), confidence (select 90%, 95%, 99%). Readouts: $\E Z_{(n)}$, exact and approximate; MinTRL by
-(33.5) in observations and years; PSR(0) and DSR at the through case's 7.60 years [A33-01], that is $7.60A$
-observations. Chart: DSR against years of data
+(33.5) in observations and years of sessions; PSR(0) and DSR at the through case's 7.60 years of sessions [A33-01],
+that is $7.60A$ observations. Chart: DSR against years of sessions
 (0.5 to 20, log x), dashed `hline` at the confidence, dashed `vline` at MinTRL. $\E Z_{(n)}$ by module-local Simpson
 quadrature of (33.4) on [−10, 10] with `Book.dist.Phi` (under 30 lines), tested against the script's values to 1e-6
 as `data/lm15_charts.py` tests its code; quantiles by `Book.dist.PhiInv`. Initial state (PDF): R2, $n=8$, 95%:
-MinTRL 1,796 sessions, 7.37 years [A33-49], DSR 0.955 [A33-46]; at $n=1$ 2.15 years [A33-26]. Data block
-`chart-lm33-minTrack`: the eight rules' $\widehat{\mathrm{SR}}$, skewness, raw kurtosis and $T$ (32 numbers).
+MinTRL 1,796 sessions, 7.37 years of sessions [A33-49], DSR 0.955 [A33-46]; at $n=1$ 2.15 years of sessions [A33-26].
+Data block `chart-lm33-minTrack`: the eight rules' $\widehat{\mathrm{SR}}$, skewness, raw kurtosis and $T$ (32
+numbers).
 
 **Examples** (results recomputed from the printed inputs):
 
@@ -1024,152 +1118,174 @@ MinTRL 1,796 sessions, 7.37 years [A33-49], DSR 0.955 [A33-46]; at $n=1$ 2.15 ye
   V_{\mathrm{SR}}=1+0.0082+0.0167=1.0249$; SE 0.0235 a day, 0.367 a year; $\widehat{\mathrm{SR}}\sqrt T=3.14$, the
   t-stat of the mean excess return with divisor $T$, by LM21's identity (lm21.md:172) [A33-15]. The skewness term is
   small because R2's skewness is only −0.11 [A33-07]; kurtosis adds more.
-- E2 §2 `checkpoint`, all eight rules (guidance g:43): mean excess returns a year from 7.71% (R3) to 13.74% (R2) with
-  iid SEs 3.61% and 4.38%; volatilities 9.96% to 16.53% with iid SEs 0.45% and 0.59% [A33-07, A33-08, A33-09]; raw
-  kurtosis 10.3 (R4) to 23.0 (R8) [A33-09, A33-13]; the normal SE 0.363 for every rule, (20.9) 0.367 to 0.371 [A33-06 to
-  A33-13]. The volatilities of R1, R3 and R5 are LM30's and those of R6–R8 LM31's, echoed; their SEs are LM33's. Every
-  other rule's estimate lies inside R2's interval [A33-14]. R4: two-sided 95% −0.09 to 1.35; one-sided PSR(0) 0.956
-  [A33-17]. All eight PSR(0) exceed 0.95, from 0.956 (R4) to 0.999 (R2), and Holm (21.7) on the eight one-sided p-values
-  rejects all eight, the largest adjusted p-value 0.044 [A33-16].
+- E2 §2 `checkpoint`, all eight rules (guidance g:43), on the 1,851 out-of-sample net returns: mean excess returns a
+  year from 7.71% (R3) to 13.74% (R2) with iid SEs 3.61% and 4.38%; realized volatilities 9.96% (R3) to 16.53% (R4)
+  with iid SEs 0.45% and 0.59% [A33-07, A33-08, A33-09]; raw kurtosis 10.3 (R4) to 23.0 (R8) [A33-09, A33-13]; the
+  normal SE 0.363 for every rule, (20.9) 0.367 to 0.371 [A33-06 to A33-13]. The volatilities of R1, R3 and R5 are
+  LM30's (A30-12) and those of R6–R8 LM31's (A31-27), echoed; R2's and R4's, and every SE, are LM33's (decision A3).
+  Every other rule's estimate lies inside R2's interval [A33-14]. R4: two-sided 95% −0.09 to 1.35; one-sided PSR(0)
+  0.956 [A33-17]. All eight PSR(0) exceed 0.95, from 0.956 (R4) to 0.999 (R2), and Holm (21.7) on the eight one-sided
+  p-values rejects all eight, the largest adjusted p-value 0.044 [A33-16].
 - E3 §3 `hac`, R1, R2 and R4 by lag: R2's SE grows from 0.367 at $\ell=0$ to 0.382 at 7 and 0.393 at 20; R4's falls to
   0.340 at 7 [A33-18]; HAC over (20.9) at $\ell=7$ runs from 0.92 (R4) to 1.04 (R2) [A33-18]. The volatility's SE
-  rises by half: HAC over iid 1.51 to 1.60 at $\ell=7$, and R1's 0.58% becomes 0.87%, 1.03% and 1.16% at $\ell=7$, 20,
-  60 [A33-20]. Days are nearly uncorrelated ($\hat\rho_1$ from −0.054 to 0.002 [A33-19]); their squares are not.
-  Interval with HAC: R2 0.39 to 1.89 [A33-07].
-- E4 §3 `tr23`, the long record: TR23's 0.81 a year (0.0517 a day), skewness −0.34, raw kurtosis 8.27; SE 0.207 by
-  (20.9), as LM20 printed (lm20.md:401), 0.213 by (33.1) at $\ell=9$ and 0.243 at $\ell=145$, against LM22's blocks of
-  145, 0.233 stationary, 0.244 circular, 0.247 moving (lm22.md:216–219) [A33-21]. HAC at the block length agrees with
-  the blocks.
-- E5 §4 `monthly`, 90 months of log excess returns: R1's monthly ratio 0.305 gives 1.06 by $\sqrt{12}$ and 0.92 by
-  (19.9) with $\hat\rho_1,\dots,\hat\rho_{11}$; its ratio $1+2\sum_k(1-k/12)\hat\rho_k=1.31$ has a robust SE of 0.38
-  by (25.6) [A33-22], and its distance from 1 is 0.78 iid SEs (0.40) [A33-23]. R2: 1.05 and 0.94; R4: 0.62 and 0.49
-  [A33-22]. The scale factors run from 2.74 to 3.33 against 3.46 [A33-23]. The daily log-return ratios, 0.54 (R4) to
-  1.08 (R2) [A33-25], show the simple-against-log gap separately. Conclusion: 90 months cannot tell whether the
+  rises by half: HAC over iid 1.51 to 1.60 at $\ell=7$, and the SE of R1's realized volatility, 0.58%, becomes 0.87%,
+  1.03% and 1.16% at $\ell=7$, 20, 60 [A33-20]. Days are nearly uncorrelated ($\hat\rho_1$ from −0.054 to 0.002
+  [A33-19]); their squares are not. Interval with HAC: R2 0.39 to 1.89 [A33-07].
+- E4 §3 `tr23`, the long record (TAIEX total-return index): TR23's 0.81 a year (0.0517 a day), skewness −0.34, raw
+  kurtosis 8.27; SE 0.207 by (20.9), as LM20 printed (lm20.md:401), 0.213 by (33.1) at $\ell=9$ and 0.243 at
+  $\ell=145$, against LM22's blocks of 145, 0.233 stationary, 0.244 circular, 0.247 moving (lm22.md:216–219)
+  [A33-21]. HAC at the block length agrees with the blocks.
+- E5 §4 `monthly`, 90 calendar months of log excess returns: R1's monthly ratio 0.305 gives 1.06 by $\sqrt{12}$ and
+  0.92 by (19.9) with $\hat\rho_1,\dots,\hat\rho_{11}$; its ratio $1+2\sum_k(1-k/12)\hat\rho_k=1.309$ has a robust SE
+  of 0.38 by (25.6) [A33-22], and its excess over 1, 0.309, is 0.78 iid SEs of 0.395 [A33-23]. R2: 1.05 and 0.94;
+  R4: 0.62 and 0.49 [A33-22]. The scale factors run from 2.74 to 3.33 against 3.46 [A33-23]. The daily log-return
+  ratios, 0.54 (R4) to 1.08 (R2) [A33-25], show the simple-against-log gap separately. Conclusion: 90 months cannot tell whether the
   correction is needed, and the corrected ratio carries the noise of 11 autocorrelations.
-- E6 §5 `mintrl`: R2's PSR(0) 0.999 and MinTRL(0) 523 sessions, 2.15 years (normal moments 2.10); R1's 0.996, 720
-  sessions, 2.96 years (2.85); R4's 0.956, 1,717 sessions, 7.05 years (6.85) [A33-26] against its 7.60 [A33-01]. $T$
-  against $T-1$: R2's z-value 3.097 with $\sqrt{T-1}$, 3.098 with $\sqrt T$, a factor of 0.027% [A33-27]. TR23: PSR(0)
-  0.99995, MinTRL 1,035 sessions, 4.20 years; (21.4) one-sided at power ½ gives 4.11 years; LM21's two-sided 80% power
-  needs 11.9 years (lm21.md:183) [A33-28]. The published check: Bailey and López de Prado's appendix inputs give 59.895
-  months, 4.99 years, and PSR 0.95 at that length [A33-30].
-- E7 §6 `lw`, R2 against R1: $\hat\Delta=+0.16$ a year, correlation 0.70, $\operatorname{SE}(\hat\Delta)=0.253$
-  ($\ell=7$), t-stat +0.64, HAC p-value 0.52; bootstrap p-value 0.53 (Monte Carlo SE 0.005), $\hat
-  F^{-1}_{\text{boot}}(0.95)=2.01$, interval −0.35 to +0.67 [A33-33]. Independent-samples SE 0.52 [A33-40]. If 0.16
-  were the true gap, 80% power at 5% two-sided would need 146 years, and a one-sided 95% test at power ½ 50 years
-  [A33-41]. Block sizes 1 to 100 give p-values 0.53 to 0.56 [A33-42]; lags 0 to 60 give SEs 0.280 to 0.243 [A33-40].
-  All seven pairs: none rejected after Holm, smallest adjusted p-value 1.00 [A33-43].
+- E6 §5 `mintrl`: R2's PSR(0) 0.999 and MinTRL(0) 523 sessions, 2.15 years of sessions (normal moments 2.10); R1's
+  0.996, 720 sessions, 2.96 (2.85); R4's 0.956, 1,717 sessions, 7.05 (6.85) [A33-26], against the 1,851 sessions
+  observed [A33-01]. $T$ against $T-1$: R2's z-value 3.097 with $\sqrt{T-1}$, 3.098 with $\sqrt T$, a factor of 0.027%
+  [A33-27]. TR23: PSR(0) 0.99995, MinTRL 1,034.8 sessions, 4.20 years of sessions; (21.4) one-sided at power ½ gives 4.11
+  years; LM21's two-sided 80% power needs 11.9 years (lm21.md:183) [A33-28]. The published check: Bailey and López de
+  Prado (2012, p. 11) print a MinTRL of 3.24 years for normal monthly returns and 4.99 years with skewness −0.72 and
+  raw kurtosis 5.78; (33.3) with their appendix code's inputs gives 38.9 and 59.9 months, 3.24 and 4.99 years
+  [A33-30].
+- E7 §6 `lw`, R2 against R1: $\hat\Delta=+0.162$ a year, correlation 0.70, $\operatorname{SE}(\hat\Delta)=0.253$
+  ($\ell=7$), t-stat +0.64, HAC p-value 0.52 and HAC normal interval −0.33 to +0.66 [A33-33]. Ledoit and Wolf's
+  bootstrap ($b=22$): p-value 0.52 (Monte Carlo SE 0.005), $\hat F^{-1}_{\text{boot}}(0.95)=2.00$ and the interval
+  −0.34 to +0.67 [A33-33]. Independent-samples SE 0.521 [A33-40]. If the gap were truly 0.1617 a year, with the SE
+  0.2528 of 7.60 years of sessions [A33-33, A33-01], 80% power at 5% two-sided would need 146 years of sessions, and a
+  one-sided 95% test at power ½ 50 years [A33-41]. Experiment 3: block sizes 1, 5, 10, 26, 50 and 100 give p-values
+  0.53 to 0.56 [A33-42], against 0.52 at $b=22$ [A33-33]. At $\ell=0$, 7, 22 and 60 the SE is 0.280, 0.253, 0.250
+  and 0.243 [A33-40]. All seven pairs: none rejected after Holm, by either p-value; the smallest adjusted p-value is
+  1.00 [A33-43].
 - E8 §7 `dsr`, R2 deflated: $\E Z_{(8)}=1.424$ [A33-44], so $\mathrm{SR}_0=0.52$ a year (0.517) [A33-45] and DSR
   0.955; with the approximation 0.951, with R2's HAC SE 0.948; DSR falls to 0.95 at $n=8.8$ [A33-46]. Correlations:
-  mean 0.82, R3–R5 0.998, R6–R8 0.96, R2–R1 0.70 [A33-47]. Experiment 2: $\E\max$ of $\mathcal N_8(\mathbf 0,C)$
-  0.588 (Monte Carlo SE 0.0009), $n_{\mathrm{eff}}=2.07$, $\mathrm{SR}_0=0.21$, DSR 0.994 [A33-48]. The eight
-  estimates have SD 0.141 a year, about the 0.144 that equal true ratios would give [A33-50]. MinTRL after $n$ trials
-  (33.5): 2.15 years at $n=1$, 7.37 at 8 (1,796 sessions), 3.92 at $n_{\mathrm{eff}}$, 13.5 at 100 [A33-49]. The
-  published check: Bailey and López de Prado's example gives DSR 0.900 at $N=100$, 0.9505 at 46 and, for normal
-  returns, 0.9505 at 88 [A33-51].
-- E9 §8 `haircut`, R2: t-stat 3.14, single two-sided p-value 0.0017; adjusted for eight independent tests 0.0136
+  mean 0.821, R3–R5 0.998, R6–R8 0.96, R2–R1 0.70 [A33-47]. Experiment 2: $\E\max$ of $\mathcal N_8(\mathbf 0,C)$
+  0.588 (Monte Carlo SE 0.0009), $n_{\mathrm{eff}}=2.07$, $\mathrm{SR}_0=0.21$, DSR 0.994 [A33-48]. Bailey and López
+  de Prado's own interpolation (eq. (9) of their 31 July 2014 version), $\bar\rho+(1-\bar\rho)8$ at the mean
+  correlation $\bar\rho=0.821$ [A33-47], gives 2.25 [A33-48]. The eight estimates have SD 0.141 a year, about the 0.144 that
+  equal true ratios would give [A33-50]. MinTRL after $n$ trials
+  (33.5), in years of sessions: 2.15 at $n=1$, 7.37 at 8 (1,796 sessions), 3.92 at $n_{\mathrm{eff}}$, 13.5 at 100
+  [A33-49]. The published check: Bailey and López de Prado's example (2014, pp. 9–10) gives $\mathrm{SR}_0=0.1132$ a
+  day and DSR 0.9004 at $N=100$, 0.9505 at 46 and, for normal returns, 0.9505 at 88, as they print [A33-51].
+- E9 §8 `haircut`, R2: t-stat 3.14, single two-sided p-value 0.00171; adjusted for eight independent tests 0.0136
   (Bonferroni 0.0137); $\text{t-stat}_{\text{adj}}=2.47$; HSR 0.90 a year, a haircut of 21% [A33-54]. At a fixed
-  volatility, (4.3)'s fraction falls by the same 21% [A33-56]. The published check: Harvey and Liu's example (240
-  months, 0.75 a year, 200 tests) with the normal reference gives 0.0008, 0.15 and 0.32, as they print; their
-  "approximately 60%" is (0.75 − 0.32)/0.75, 57% [A33-55]. With $t_{239}$, as their text says, the HSR is 0.31
-  [A33-55].
+  volatility, (4.3)'s fraction falls by the same 21% [A33-56]. The published check: Harvey and Liu's example
+  (pp. 13–14: 240 months, 0.75 a year, 200 tests) with the normal reference gives 0.0008, 0.15 and 0.32, as they
+  print; their "approximately 60%" is (0.75 − 0.32)/0.75, 57% [A33-55]. With $t_{239}$, as their eq. (1) says, the
+  HSR is 0.31 [A33-55].
 
 **Problems plan** (12; MC keys B, C, A, B, C, A; the lab solves 10, 11, 12). Stems state the sample (E5's through
 case: daily net returns 5 March 2019 → 8 October 2026, $T=1{,}851$, $A_{\mathrm w}=243.57$, $r_f=1.5\%$; or the
 hypothetical inputs), the period of each Sharpe ratio, raw or excess kurtosis, divisor $T$, normal or (20.9), one- or
-two-sided, the level, and rounding; problems 11 and 12 give the lag, the block size, $B$ and the seed.
+two-sided, the level, the count behind "years", and rounding; problems 11 and 12 give the lag, the block size, the
+last-block handling, $B$ and the seed.
 
 1. MC: normal returns, daily Sharpe ratio 0.06, $T=1{,}851$, $A=243.57$; the annual SE. A 0.0233 (not annualized).
    **B** 0.363. C 5.67 (times $A$, not $\sqrt A$) [A33-57].
 2. MC: monthly Sharpe ratio 0.30, skewness −1.0, raw kurtosis 8.0, $T=90$; the SE by (20.9). A 0.124 (excess kurtosis 5
    typed as raw). B 0.108 (normal). **C** 0.127 [A33-58].
-3. MC: normal returns, daily Sharpe ratio 0.05, $\mathrm{SR}_0=0$, 95%, $A=243.57$; MinTRL in years. **A** 4.45. B 6.32
-   ($\Phi^{-1}(0.975)$, a two-sided quantile). C 0.028 (the annual ratio in the daily formula) [A33-59].
+3. MC: normal returns, daily Sharpe ratio 0.05, $\mathrm{SR}_0=0$, 95%, $A=243.57$; MinTRL in years of sessions. **A**
+   4.45. B 6.32 ($\Phi^{-1}(0.975)$, a two-sided quantile). C 0.028 (the annual ratio in the daily formula) [A33-59].
 4. MC: $\E Z_{(5)}$. A 1.193 (the approximation). **B** 1.163. C 1.129 ((21.9)'s median) [A33-60].
 5. MC: monthly log returns with $\rho_1=0.1$ and no other autocorrelation; the scale factor to a year. A 3.464
    ($\sqrt{12}$). B 3.833 (the sign of $\rho_1$ reversed). **C** 3.184 [A33-61].
 6. MC: two annual Sharpe ratios 1.0 and 0.8, each SE 0.36, correlation 0.9; the SE of the difference. **A** 0.161
    (t-stat 1.24). B 0.509 (independent; t-stat 0.39). C 0.036 ($0.36\times(1-0.9)$) [A33-62].
 7. Derive (33.3) from (33.2) by setting PSR equal to $1-\alpha$; then (33.5) from (33.4); check that (33.5) at $n=1$ is
-   (33.3), and that R2's 7.37 years [A33-49] lie below its 7.60 observed [A33-01], consistent with DSR 0.955 [A33-46].
+   (33.3), and that R2's 1,796 sessions [A33-49] lie below its 1,851 observed [A33-01], consistent with DSR 0.955
+   [A33-46].
 8. Show $\E\max(Z_1,Z_2)=1/\sqrt\pi=0.5642$ for independent standard normals, from $\max(a,b)=\tfrac12(a+b+\lvert
    a-b\rvert)$, (16.3), (16.7) and (19.2)'s $\E\lvert R-\mu\rvert=\sigma\sqrt{2/\pi}$; compare (33.4)'s integral at
    $n=2$ and the approximation 0.520 [A33-44].
-9. Haircut (hypothetical): t-stat 2.5, ten independent tests; the single and adjusted p-values 0.0124 and 0.117,
-   $\text{t-stat}_{\text{adj}}=1.565$, haircut 37.4%; Bonferroni's 1.537 and 38.5% [A33-63]; why Bonferroni cuts more.
-10. Python: R1's 90 monthly log excess returns; the monthly ratio 0.305, 1.06 by $\sqrt{12}$, 0.92 by (19.9), the ratio
-    1.31 and its robust SE 0.38 by (25.6) [A33-22]; would you apply the correction?
+9. Haircut (hypothetical): t-stat 2.5, ten independent tests; the single and adjusted p-values 0.01242 and 0.1175,
+   $\text{t-stat}_{\text{adj}}=1.565$, haircut 37.4%; Bonferroni's adjusted 0.1242, 1.537 and 38.5% [A33-63]; why
+   Bonferroni cuts more.
+10. Python: R1's 90 monthly log excess returns (calendar months); the monthly ratio 0.305, 1.06 by $\sqrt{12}$, 0.92 by
+    (19.9), the ratio 1.31 and its robust SE 0.38 by (25.6) [A33-22]; would you apply the correction?
 11. Python: (33.1) for R2 at $\ell=0$, 7, 20, 60: 0.367, 0.382, 0.393, 0.389 a year [A33-18]; check $\ell=0$ against
     (20.9).
-12. Python: Ledoit and Wolf's test of R4 against R1, $\ell=7$, $b=26$, $B=9{,}999$, seed `[1, 20261011]` (the block
-    starts do not depend on the pairs, so one pair reproduces experiment 1): $\hat\Delta=-0.35$, SE 0.285, HAC p-value
-    0.22, bootstrap 0.24 (Monte Carlo SE 0.004), interval −0.95 to +0.25 [A33-35].
+12. Python: Ledoit and Wolf's test of R4 against R1, $\ell=7$, $b=22$ (85 blocks drawn and cut to 1,851 rows, the
+    block covariance from the 84 complete blocks), $B=9{,}999$, seed `[1, 20261011]` (the block starts do not depend
+    on the pairs, so one pair reproduces experiment 1): $\hat\Delta=-0.347$, SE 0.285, HAC p-value 0.22 and HAC
+    normal interval −0.91 to +0.21; bootstrap p-value 0.25 (Monte Carlo SE 0.004),
+    $\hat F^{-1}_{\text{boot}}(0.95)=2.10$, interval −0.95 to +0.25 [A33-35].
 
 **Lab parts** (`build/make_lab33.py`; reads only its `data/`: the eight rules' net wealth paths on the wealth frame's
-dates as one derived file from `data/make_lab_data.py` (Open item 7), and `taiex_tr.csv` (TR23)): 1 data: $R_t$, $x_t$,
-$T$, $A_{\mathrm w}$, the 90 months, a check against the criteria's Sharpe ratios; 2 X1, X2, E1, E2, `scipy.stats`
-with `fisher=False, bias=True` passed; 3 (33.1) by hand, X3, E3, E4, problem 11; 4 E5, Lo's AR(1) check, problem 10; 5
-X4, E6, the 2012 appendix example; 6 Ledoit and Wolf by hand, experiment 1, X5, E7, experiment 3, problem 12; 7 (33.4)
-by quadrature against the approximation, experiment 2, X6, E8, the 2014 example; 8 X7, E9, Harvey and Liu's example.
-Extension (*Stability check*): R2's PSR(0) on rolling windows of 730 sessions (about three years), with a closing
-sentence that picking a window after seeing the curve is one more trial ([[LM34]]'s subject; the lab writes plain
-"LM34").
+dates, a derived file from `data/make_lab_data.py` built locally and never committed (shared decision "Labs"), and
+`taiex_tr.csv` (TR23)): 1 data: $R_t$, $x_t$, $T$, $A_{\mathrm w}$, the 90 calendar months, a check against the
+criteria's Sharpe ratios; 2 X1, X2, E1, E2, `scipy.stats` with `fisher=False, bias=True` passed; 3 (33.1) by hand, X3,
+E3, E4, problem 11; 4 E5, Lo's AR(1) check, problem 10; 5 X4, E6, the 2012 appendix example; 6 Ledoit and Wolf by
+hand, X5, E7, problem 12, experiments 1 and 3; 7 (33.4) by quadrature against the approximation, experiment 2, X6,
+E8, the 2014 example; 8 X7, E9, Harvey and Liu's example. Extension (*Stability check*): R2's PSR(0) on rolling
+windows of 730 sessions (about three years of sessions), with a closing sentence that picking a window after seeing
+the curve is one more trial ([[LM34]]'s subject; the lab writes plain "LM34").
 
-**Cross-module tags.**
+**Cross-module tags** (decision C8: each lists only the later modules that cite it).
 
 - (33.1) $\operatorname{SE}_{\mathrm{HAC}}(\widehat{\mathrm{SR}})=\sqrt{\nabla h^{\top}\hat\Psi\nabla h/T}$, $\nabla
   h=(1/s,\,-\bar x/(2s^3))^{\top}$, $\hat\Psi$ by (23.7) on $\mathbf v_t=(x_t-\bar x,\,(x_t-\bar x)^2-s^2)^{\top}$ with
   the book's lag; at $\ell=0$ it is (20.9)'s plug-in; stationary terms with fading dependence and finite fourth moments,
-  large $T$ (stated) (LM34, LM45).
+  large $T$ (stated). Cited by LM35 (the lab checkpoint's interval).
 - (33.2) $\operatorname{PSR}(\mathrm{SR}_0)=\Phi\big((\widehat{\mathrm{SR}}-\mathrm{SR}_0)\sqrt{T-1}/\sqrt{\hat
-  V_{\mathrm{SR}}}\big)$, one minus the one-sided p-value of $H_0:\mathrm{SR}\le\mathrm{SR}_0$; per observation (LM34,
-  LM45).
+  V_{\mathrm{SR}}}\big)$, one minus the one-sided p-value of $H_0:\mathrm{SR}\le\mathrm{SR}_0$; per observation. No
+  later brief cites it; LM45 (no brief yet) is its expected user.
 - (33.3) $\mathrm{MinTRL}=1+\hat V_{\mathrm{SR}}\big(\Phi^{-1}(1-\alpha)/(\widehat{\mathrm{SR}}-\mathrm{SR}_0)\big)^2$
   observations, for $\widehat{\mathrm{SR}}>\mathrm{SR}_0$; with $\hat V_{\mathrm{SR}}=1$, $\mathrm{SR}_0=0$ and without
-  the 1 it is (21.4) one-sided at power ½ (LM45).
+  the 1 it is (21.4) one-sided at power ½. No later brief cites it; LM45 is its expected user.
 - (33.4) $\E Z_{(n)}=\int_0^\infty(1-\Phi(z)^n)\,dz-\int_{-\infty}^0\Phi(z)^n\,dz$; DSR $=\operatorname{PSR}(\E
   Z_{(n)}/\sqrt{T-1})$, iid trials with true ratio zero under $H_0$; the approximation
-  $(1-\gamma_{\mathrm E})\Phi^{-1}(1-1/n)+\gamma_{\mathrm E}\Phi^{-1}(1-1/(ne))$ stated (LM34).
+  $(1-\gamma_{\mathrm E})\Phi^{-1}(1-1/n)+\gamma_{\mathrm E}\Phi^{-1}(1-1/(ne))$ stated. No later brief cites it (LM34
+  cites the deflated ratio by pointer).
 - (33.5) $T\ge1+\big((\Phi^{-1}(1-\alpha)\sqrt{\hat V_{\mathrm{SR}}}+\E Z_{(n)})/\widehat{\mathrm{SR}}\big)^2$, the
-  track record that makes DSR $\ge1-\alpha$ after $n$ trials (LM34, LM45).
+  track record that makes DSR $\ge1-\alpha$ after $n$ trials. No later brief cites it; LM45 is its expected user.
 - (33.6) $\operatorname{SE}(\hat\Delta)=\sqrt{\nabla h^{\top}\hat\Psi\nabla h/T}$ for
   $h(\boldsymbol\theta)=\theta_1/\sqrt{\theta_3-\theta_1^2}-\theta_2/\sqrt{\theta_4-\theta_2^2}$ at
   $\hat{\boldsymbol\theta}=(\bar x_j,\bar x_1,\overline{x_j^2},\overline{x_1^2})$, $\hat\Psi$ by (23.7); the bootstrap
   p-value $\big(\#\{i:\lvert\hat\Delta_{\text{boot},i}-\hat\Delta\rvert/\operatorname{SE}(\hat\Delta_{\text{boot},i})\ge
-  \lvert\hat\Delta\rvert/\operatorname{SE}(\hat\Delta)\}+1\big)/(B+1)$ with circular blocks (LM34).
+  \lvert\hat\Delta\rvert/\operatorname{SE}(\hat\Delta)\}+1\big)/(B+1)$ with circular blocks (Ledoit and Wolf's
+  Remark 3.2, eq. (9)). No later brief cites it (LM34 cites the tests by pointer).
 - (33.7) adjusted p-value $1-(1-\text{p-value})^n$ (independent tests), $\min(1,n\,\text{p-value})$ (Bonferroni) or
-  (21.7)'s; $\mathrm{HSR}=\Phi^{-1}(1-\text{adjusted p-value}/2)/\sqrt T$ per observation (LM45).
+  (21.7)'s; $\mathrm{HSR}=\Phi^{-1}(1-\text{adjusted p-value}/2)/\sqrt T$ per observation. No later brief cites it;
+  LM45 is its expected user.
 
 **Pitfalls to pre-empt.**
 
 - Raw against excess kurtosis: (20.9), PSR and MinTRL take raw kurtosis; `scipy.stats.kurtosis` returns excess by
   default (10.58 against 13.58 for R2 [A33-64]); TR23's raw 8.27 (lm20.md:370, 388, 403) is excess 5.27 (lm19.md:20),
   and 0050's 8.12 in LM4–LM5 (lm04.md:132) is excess. Problem 2's distractor is this error.
-- Moments the formulas need (PITFALLS §7): (20.9) needs a finite fourth moment, (33.1) and Ledoit and Wolf's (4) about
-  4 + δ; the rules' raw kurtosis runs to 23.0 (R8) [A33-13] and carries no standard error itself (LM20's pitfall).
+- Moments the formulas need (PITFALLS §7): (20.9) needs a finite fourth moment; (33.1) and Ledoit and Wolf's (4)
+  need finite moments of order 4 + δ and a mixing condition for time series (their p. 852); the rules' raw kurtosis
+  runs to 23.0 (R8) [A33-13] and carries no standard error itself (LM20's pitfall).
 - One-sided against two-sided: PSR, MinTRL and DSR are one-sided at 95%; the intervals and (21.4) are two-sided; R4 sits
   between [A33-17]. Never compare a PSR with a two-sided interval without saying so.
-- $\mathrm{SR}_0$ is a fixed benchmark. Setting it to another rule's estimate ignores that estimate's error (106 years,
-  [A33-31]); comparing two rules is (33.6).
+- $\mathrm{SR}_0$ is a fixed benchmark. Setting it to another rule's estimate ignores that estimate's error (106 years
+  of sessions, [A33-31]); comparing two rules is (33.6).
 - Correlated rules: the independent-samples error of a difference is about twice Ledoit and Wolf's here (0.52 against
   0.25 [A33-40]); yet even the right error leaves the gap far inside noise.
 - PSR is not a probability that the true ratio exceeds $\mathrm{SR}_0$ without a prior ([[LM24]]); Bailey and López de
   Prado's wording is paraphrased with that caveat.
 - The count of trials: $n=8$ treats the rules as independent; they correlate 0.82 on average [A33-47], so
   $n_{\mathrm{eff}}=2.07$ [A33-48]. The in-sample variants of LM28–LM31 are not candidates (shared decision); had 100
-  versions been tried, R2 would need 13.5 years [A33-49]. Say which $n$ every DSR uses.
+  versions been tried, R2 would need 13.5 years of sessions [A33-49]. Say which $n$ every DSR uses.
 - A DSR near the line: 0.955 by the exact integral, 0.951 by the approximation, 0.948 with the HAC error [A33-46]. Print
   the number and its method, never "passes".
 - Holm's haircut keeps a running maximum: R6, R7 and R8 share 0.71 and R4 keeps its whole ratio [A33-53]; it is not
   "no correction".
 - Annualization: $\sqrt A$ on simple returns is a convention (LM19); the criteria's Sharpe ratios are on simple returns,
   Lo's correction on log returns; say which in every caption (E5).
+- Two counts of years: the record's 7.60 calendar years and its 7.60 years of sessions agree here (7.5975 and 7.5995
+  [A33-01]), but a MinTRL is a count of sessions; compare it with the record in sessions (decision C7).
 - Bootstrap: Ledoit and Wolf centre the resampled statistic at $\hat\Delta$ (they resample the data, not a null world);
   a count of uncentred $\lvert\hat\Delta_{\text{boot},i}\rvert$ would test nothing. The "+1" makes the p-value never 0.
-  Two decimals only (Monte Carlo SE 0.005).
-- The block-length rule names the stationary estimate (lm22.md:254); LM33 applies it to the circular scheme it uses
-  and says so (Open item 1).
-- Ownership: the volatilities of R1, R3, R5 (LM30) and R6–R8 (LM31) are echoed; net wealth, log growth, turnover and
-  gross against net are LM34's; nothing re-implements a rule.
+  Two decimals only (Monte Carlo SE 0.005 [A33-33]). With $T$ not a multiple of $b$, say how the last block is handled:
+  Ledoit and Wolf's paper does not say, the book's convention is the shared one, and the independent recomputation
+  found that another handling moves a printed second decimal.
+- The block-length rule takes the stationary estimate (lm22.md:254) even for circular blocks, as LM22 did (145 for
+  every scheme); here that is 22, against the circular estimate's 26 [A33-32]. The choice moves nothing that is
+  printed in a conclusion: $b$ from 1 to 100 gives 0.52 to 0.56 [A33-33, A33-42].
+- Ownership: the volatilities of R1, R3, R5 (LM30, A30-12) and R6–R8 (LM31, A31-27) are echoed; net wealth, log growth,
+  turnover and gross against net are LM34's; nothing re-implements a rule.
 
 **Curriculum guidance carried** (`plans/vol-5.md`'s table):
 
@@ -1179,47 +1295,61 @@ sentence that picking a window after seeing the curve is one more trial ([[LM34]
 - g:54–58, outcome levels: [D] 2 and 4, [C] 1, 3, 5, 6 and 8, [U] 7.
 - g:111, fixed in advance: every caption and the hygiene note say the rules were fixed on 24 October 2026.
 - g:116, "the data are too thin to support more leverage" is a valid conclusion: the case's verdict (§6–§8), E7's 146
-  years.
+  years of sessions.
 - g:124, taught, practised, assessed: the outcome table above.
 
-**Stage 4 for earlier modules.** `leads` gain 33 in lm04.md:6 (on the plan's Stage 4 list) and lm18.md:6 (new: LM33
-cites (18.2) and lm18.md:151). LM16, LM19–LM25 already list 33; the Volume V briefs' leads should include 33 (each
-brief's own list). No wording change: every forward link above is honoured as written.
+**Stage 4 for earlier modules.** `leads` gain 33 in lm04.md:6 and lm18.md:6 (decision G's merged list; LM33 cites
+(18.2) and lm18.md:151). LM16, LM19–LM25 already list 33; the Volume V briefs' leads should include 33 (each brief's own
+list), and LM35's prerequisites gain 33 (decision C9). No wording change: every forward link above is honoured as
+written (lm21.md:373 is reworded in LM34's wording, which keeps LM33's part).
 
 **Sources** (verified 2026-10-24 unless marked; paraphrased, nothing quoted beyond a phrase):
 
 - Lo, A. W., "The Statistics of Sharpe Ratios", *Financial Analysts Journal* 58(4): 36–52, July 2002, DOI
-  10.2469/faj.v58.n4.2453. Crossref (run 2026-10-24) for the record; already in SOURCES (LM19). Read in the FAJ text
-  (the survey's download, rechecked by the drafter): $V_{\mathrm{IID}}$ (eq. 8) and the iid-normal SE
-  $\sqrt{(1+\mathrm{SR}^2/2)/T}$ (eq. 9), the scale factor for aggregated returns (eq. 20), the AR(1) form (eq. 22)
-  and Table 2 (2.88 at a monthly first-order autocorrelation of 20% and $q=12$, 3.46 for iid returns; recomputed,
+  10.2469/faj.v58.n4.2453. Crossref (run 2026-10-24) for the record; already in SOURCES (LM19, abstract only). Read in
+  the FAJ text, the survey's copy in the journal's layout (drafter; rechecked by this revision, 2026-10-24):
+  $V_{\mathrm{IID}}$ (eq. (8)) and the iid-normal SE $\sqrt{(1+\mathrm{SR}^2/2)/T}$ (eq. (9)), p. 38; the scale factor
+  for aggregated returns (eq. (20)), p. 40; the AR(1) form (eq. (22)) and Table 2, p. 41 (2.88 at a monthly
+  first-order autocorrelation of 20% and $q=12$, 3.46 for iid returns; the text beside it states both; recomputed,
   A33-24); the abstract's "as much as 65 percent" (as lm19.md:359 prints).
 - Bailey, D. H., and M. López de Prado, "The Sharpe Ratio Efficient Frontier", *Journal of Risk* 15(2): 3–44, December
-  2012, DOI 10.21314/jor.2012.255 (Crossref). Read in the author-hosted July 2012 version: PSR and MinTRL in the
-  appendix's Python code, with $\sqrt{\text{obs}-1}$ and the "1 +" term and raw kurtosis; the code's example inputs
-  (mean 2, SD $\sqrt{12}$, skewness −0.72, kurtosis 5.78, reference $1/\sqrt{12}$, 59.895 observations, 95%)
-  reproduced (A33-30). The printed equations are lost in text extraction; the journal's equation numbers are not used.
+  2012, DOI 10.21314/jor.2012.255 (Crossref). Read in the authors' July 2012 version (drafter; source check of
+  decision F): the asymptotic distribution of the estimate, (8), and the $n-1$ in its standard deviation, §2.5, p. 8;
+  PSR, eq. (11), p. 9, with $\sqrt{n-1}$ and raw kurtosis; MinTRL, eqs. (12)–(13), pp. 10–11, counted in observations
+  with the "1 +" term; the examples on p. 11, among them 3.24 years for normal monthly returns and 4.99 years with
+  skewness −0.72 and kurtosis 5.78, both reproduced (A33-30) from the inputs of the code in Appendix A.3, p. 20
+  (monthly mean 2, SD $\sqrt{12}$, skewness −0.72, kurtosis 5.78, reference $1/\sqrt{12}$; the page also prints
+  59.895 months, about 4.99 years; rechecked by this revision in the source check's copy). Equation and page numbers
+  are the authors' version's; the journal's were not compared. Not yet in SOURCES: the editor adds it.
 - Bailey, D. H., and M. López de Prado, "The Deflated Sharpe Ratio: Correcting for Selection Bias, Backtest
   Overfitting, and Non-Normality", *Journal of Portfolio Management* 40(5): 94–107, 2014, DOI
-  10.3905/jpm.2014.40.5.094 (Crossref; online 30 September 2014). Read in the author-hosted 31 July 2014 version: the
-  approximation of the expected maximum with the Euler–Mascheroni constant (their code, `getExpMaxSR`); DSR as a PSR at
-  that threshold; the numerical example (about 90% at $N=100$, 0.9505 at $N=46$, normal returns at $N=88$) reproduced
-  (A33-51); Appendix A.3, the "implied independent trials" from an average correlation. **UNVERIFIED:** the exact
-  form of their eq. (9) (its symbols are lost in the extracted text; the text says the estimate interpolates between
-  one trial at correlation 1 and $M$ at 0); LM33 prints $\bar\rho+(1-\bar\rho)8$ only as that reading, flagged, and
-  relies on experiment 2's own definition.
+  10.3905/jpm.2014.40.5.094 (Crossref; online 30 September 2014). Read in the authors' 31 July 2014 version (drafter;
+  source check): the approximation of the expected maximum with the Euler–Mascheroni constant, eq. (1), p. 7 (derived
+  in Appendix A.1, p. 12); DSR, eq. (2), p. 8, a PSR at that threshold with $\sqrt{T-1}$ and raw kurtosis; the
+  numerical example, pp. 9–10 ($\mathrm{SR}_0\approx0.1132$ and DSR $\approx0.9004$ at $N=100$, 0.9505 at $N=46$,
+  0.9505 at $N=88$ for normal returns; reproduced, A33-51); the implied number of independent trials, eq. (9),
+  Appendix A.3, p. 14, $\hat N=\hat\rho+(1-\hat\rho)M$ with $\hat\rho$ the average correlation (confirmed by the source
+  check; printed as A33-48's 2.25, cited "eq. (9) of the authors' 31 July 2014 version"). The journal's equation
+  numbers were not compared.
 - Ledoit, O., and M. Wolf, "Robust performance hypothesis testing with the Sharpe ratio", *Journal of Empirical Finance*
-  15(5): 850–859, December 2008, DOI 10.1016/j.jempfin.2008.03.002 (Crossref). Read in IEW Working Paper 320, University
-  of Zurich, January 2008: $f(a,b,c,d)$ on uncentred second moments (their (1)–(2)), the delta method (4)–(5), HAC
-  inference with a prewhitened quadratic-spectral kernel and a $T/(T-4)$ factor (§3.1), the symmetric studentized
-  interval (6)–(7), the circular block bootstrap with the Götze–Künsch block-sum covariance in each resample (§3.2.2),
-  the p-value (9) with "+1", the block-size calibration (Algorithm 3.1). Not compared with the journal text (as SOURCES
-  already records).
+  15(5): 850–859, December 2008, DOI 10.1016/j.jempfin.2008.03.002 (Crossref). The drafter read IEW Working Paper 320
+  (January 2008); the source check of decision F read the JEF text, and the brief cites it: $f(a,b,c,d)$ on uncentred
+  second moments, (1)–(2), the delta method (4) and the standard error (5), §3, pp. 851–852; the moment conditions,
+  p. 852; HAC inference with a prewhitened quadratic-spectral kernel and a $T/(T-4)$ factor, Bartlett named as the
+  $q=1$ kernel, §3.1, pp. 852–853; the symmetric studentized interval, (6)–(7), p. 853; the circular block bootstrap
+  of return pairs with the Götze–Künsch standard error in each resample, $\lfloor T/b\rfloor$ blocks centred at the
+  resample's own estimates, §3.2.2, p. 854 (footnote 7 on circular against moving blocks); the block-size
+  calibration, Algorithm 3.1, pp. 854–855; the p-value $(\#\{\tilde d^{*}\ge d\}+1)/(M+1)$, Remark 3.2, eq. (9),
+  p. 855. The paper does not say how a resample is cut when $T$ is not a multiple of $b$. SOURCES' entry (WP 320,
+  "footnote 5") is updated to the JEF text by the editor.
 - Harvey, C. R., and Y. Liu, "Backtesting", *Journal of Portfolio Management* 42(1): 13–28, 2015, DOI
-  10.3905/jpm.2015.42.1.013 (Crossref). Read in the JPM PDF: the t-stat $\hat\mu/\hat\sigma\cdot\sqrt T$ with $T-1$
-  degrees of freedom (eq. 1), the independent-test adjustment $1-(1-p)^N$ (eq. 4), the haircut Sharpe ratio (eq. 5),
-  Bonferroni and Holm, the example (240 months, 0.75, $N=200$: 0.0008, 0.15, 0.32, "approximately 60%") reproduced
-  with the normal reference (A33-55).
+  10.3905/jpm.2015.42.1.013 (Crossref; the hosted file prints 12 on its first page, the brief cites 13–28). Read in
+  the JPM layout (drafter; source check): the t-stat $\hat\mu/(\hat\sigma/\sqrt T)$ with $T-1$ degrees of freedom
+  (eq. (1)), the independent-test adjustment $1-(1-p)^N$ (eq. (4)) and the haircut Sharpe ratio (eq. (5)),
+  pp. 13–14; the example (240 months, 0.75, $N=200$: 0.0008, 0.15, 0.32, "approximately 60%"), reproduced with the
+  normal reference (A33-55); Bonferroni and Holm, p. 15, and BHY, pp. 15–16. For Holm and BHY they take the other
+  p-values from a model of 300+ factors (p. 16), so Holm on the eight rules' own p-values is the book's adaptation and
+  says so. SOURCES lists the article as bibliographic only; the editor upgrades the entry.
 - Götze, F., and H. R. Künsch, "Second-order correctness of the blockwise bootstrap for stationary observations",
   *Annals of Statistics* 24(5): 1914–1933, 1996, DOI 10.1214/aos/1069362303 (Crossref). Bibliographic only: named as
   Ledoit and Wolf's source for the resample's standard error.
@@ -1251,57 +1381,52 @@ brief's own list). No wording change: every forward link above is honoured as wr
   box, glossed in plain Chinese (for example 考慮試驗次數後的夏普比率); 長期變異數 (long-run variance) is proposed as the
   book's own form, labelled so in the Glossary.
 
-**Open before Stage 2** (each with the drafter's recommendation and evidence):
+**Open before Stage 2** (each with a recommendation). Settled by the editor's decisions of 2026-10-24 and closed
+here: the block size ($b=22$, LM22's rule as written, the circular scheme on the same length, the last block as the
+shared "Counting" decision says; decision D); the HAC kernel (Bartlett with $\ell=7$, Ledoit and Wolf's prewhitened
+quadratic-spectral kernel named once; D); the owners of the checkpoint's means and volatilities (A3; the five other
+volatilities echoed with A30-12 and A31-27); $T$ against $T-1$ ($\sqrt{T-1}$ as Bailey and López de Prado, one
+sentence on (20.9)'s $\sqrt T$, 0.027% [A33-27]; D); the effective number of trials ($n=8$ as the headline, 0.955
+[A33-46], with $n_{\mathrm{eff}}=2.07$ beside it [A33-48]; D); a DSR on the line (the number and its method, never a
+pass or fail; D accepts the brief's proposal); the lab's data (the eight rules' net wealth paths, shared "Labs"); the
+notation (HSR, $b$, $\hat V_{\mathrm{SR}}$, $\mathbf v_t$, $\Psi$ accepted as local symbols, B5); the widget's
+quadrature (module-local code under 30 lines tested against Python, shared "Widgets"); LM31's volatility promise
+(dropped from LM31, nothing added here). Closed by the source check of decision F (its report of 2026-10-24):
+Ledoit and Wolf's journal text (the JEF §3 has the script's scheme, so the bootstrap numbers are printed unchanged
+beside the HAC test in the case, X1 (b), X5, E7, problem 12 and the lab, and the book's three settings are labelled);
+Bailey and López de Prado's eq. (9) (it is $\hat N=\hat\rho+(1-\hat\rho)M$, so E8 prints 2.25 beside 2.07
+[A33-48]); the printed values of the published examples, each now cited with its page under Sources (Lo's 2.88 and
+3.46, eq. (22) and Table 2, p. 41, rechecked by this revision in the survey's copy of the FAJ text; Bailey and López
+de Prado 2012's 3.24 and 4.99 years, p. 11, with the appendix code's inputs and 59.895 months, p. 20; their 2014
+example's 0.1132, 0.9004 and 0.9505, pp. 9–10; Harvey and Liu's 0.0008, 0.15, 0.32 and "approximately 60%",
+pp. 13–14). Still open:
 
-1. **Block size.** The book's rule takes the largest *stationary* estimate (lm22.md:254), which here is 22.41, so 22;
-   Ledoit and Wolf use circular blocks, whose largest estimate is 25.65, so 26 [A33-32]. Recommendation: $b=26$, the
-   rule applied to the scheme in use, said once in §6; the choice does not matter here, since $b=1$ to 100 give
-   p-values 0.53 to 0.56 [A33-42]. Ledoit and Wolf's own calibration (Algorithm 3.1) is named, not run.
-2. **The HAC kernel in (33.1) and (33.6).** Ledoit and Wolf use a prewhitened quadratic-spectral kernel with a $T/(T-4)$
-   factor; the book has one long-run variance, (23.7) with Bartlett weights and its lag. Recommendation: Bartlett with
-   $\ell=7$, Ledoit and Wolf's choice stated in one sentence; the lag curve of $\operatorname{SE}(\hat\Delta)$, 0.280 to
-   0.243 over $\ell=0$ to 60 [A33-40], bounds what a kernel could change.
-3. **Owners of the checkpoint's mean and volatility.** The shared decision gives LM33 the rules' Sharpe ratios,
-   intervals and tests, LM30 the volatilities of R1, R3 and R5 and LM31 those of R6–R8; R2's and R4's volatilities and
-   every rule's mean excess return have no owner. Recommendation: LM33 owns the mean excess returns, R2's and R4's
-   volatilities and every standard error of the checkpoint, and echoes the five owned volatilities with their
-   modules' names (they are the same `summary()` values, so no number can differ).
-4. **$T$ against $T-1$** (the spine asks the brief to settle it). Recommendation: PSR, MinTRL and DSR as Bailey and
-   López de Prado's code ($\sqrt{T-1}$, the "1 +"), with one sentence that (20.9)'s $\sqrt T$ moves R2's z-value by
-   0.027% [A33-27]; the deflated benchmark uses the same $\sqrt{T-1}$.
-5. **The effective number of trials** (the spine asks the brief to settle it). Recommendation: $n_{\mathrm{eff}}$ is the
-   $n$ whose $\E Z_{(n)}$ equals experiment 2's mean maximum of eight correlated normals, 2.07 [A33-48]; the headline
-   DSR stays at $n=8$ (0.955 [A33-46]) as the spine asks, labelled as assuming independence; Bailey and López de
-   Prado's own recipe (the cross-section's SD, $\mathrm{SR}_0=0.21$, DSR 0.994 [A33-50]) is shown as the second
-   correction; their eq. (9) reading, 2.25 [A33-48], is printed only if its formula is confirmed in the published text.
-   Evidence: both corrections agree (0.994), and the cross-section's dispersion is what equal true ratios would give
-   (0.141 against 0.144 [A33-50]).
-6. **A DSR on the line.** 0.955, 0.951 and 0.948 by three defensible choices [A33-46]; the real $n$ at which DSR equals
-   0.95 is 8.8 [A33-46]. Recommendation: print the number with its method and never a pass or fail; the module's verdict
-   rests on the comparison with R1 (E7), which is not close.
-7. **Lab data.** The shared decision gives the labs the rules' per-date weights and the wealth frame; LM33's lab needs
-   each rule's net wealth path, which only the cost recursion (LM27's, in `vol5_rules.py`) produces. Recommendation:
-   `make_lab_data.py` writes one derived file with the eight net wealth paths on the wealth frame's dates (statistics
-   of FinMind data, built locally, never committed).
-8. **Ledoit and Wolf's journal text.** The scheme is read in Working Paper 320 only. Recommendation: cite the JEF
-   article with "read in IEW Working Paper 320", as SOURCES does for LM22, and compare the journal's §3 before Stage 3.
-9. **Notation for §6 of AUTHORING.** HSR joins the row of PSR, DSR, MinTRL and PBO; $b$ (block size) and $\ell$ (lag)
-   are LM33's two declared letters; $\hat V_{\mathrm{SR}}$, $\mathbf v_t$ and $\Psi$ are local. Recommendation: the
-   cross-check decides; none clashes with a symbol LM33 uses in its book-wide meaning.
-10. **The widget's quadrature.** The spine asks for closed forms with `Book.dist`; $\E Z_{(n)}$ has no closed form.
-    Recommendation: module-local Simpson quadrature under 30 lines, tested against Python, with the closed-form
-    approximation shown beside it.
+1. **The series behind $b$.** The shared "Counting" decision says that for a comparison with R1 the rule runs on the
+   differences from R1; on their squares it would give 37 (R4 − R1) [A33-32]. Decision D fixes $b=22$ for LM33, and
+   Ledoit and Wolf's statistic involves the two rules' own returns, not their difference, so the brief follows D.
+   Recommendation: keep $b=22$, and reword the shared parenthesis to "for a statistic of the differences from R1,
+   those differences" (LM34's reality check), so that the two decisions no longer read as conflicting. Experiment 3
+   already reaches 50 and 100 (0.54 and 0.56) [A33-42].
+2. **SOURCES entries** (the editor's shared file). Recommendation: in Stage 1's SOURCES pass, add Bailey and López de
+   Prado (2012), which SOURCES lacks; move Ledoit and Wolf's entry from Working Paper 320 and its "footnote 5" to the
+   JEF text (footnote 7, the pages under Sources); upgrade Harvey and Liu from bibliographic data to read, pp. 13–16;
+   add eq. (22) and Table 2, p. 41, to Lo's entry, after a fresh agent confirms the page (this revision's check is
+   the drafting side's); and record Bailey and López de Prado's 2014 pages and the authors'-version caveat.
+3. **Andrews and Monahan (1992)'s end page** is not in Crossref's record. The module names them once, through
+   Ledoit and Wolf, and relies on nothing in the paper. Recommendation: cite the first page only, as Crossref gives
+   it, unless the SOURCES pass finds the end page.
 
 ## LM34 Backtesting Without Fooling Yourself
 
 Stage 1 brief, drafted 2026-10-24 from the editor's spine (`plans/vol-5.md`, "### LM34 Backtesting Without Fooling
-Yourself") and the shared decisions above it; continued the same day by a second drafter after the first stopped at a
-usage limit (the script was kept and corrected, see the anchors' Status). Every number carries its anchor ID at first
-appearance; `data/vol6_anchors_lm34.py` prints them all (36 rows, `## LM34` of `plans/vol-6-anchors.md`). Numbers
-quoted from published modules carry their file:line; values another module owns ("Owners", shared decision "Through
-case") are echoed with that module's name and anchor and are not LM34's to print. Rows A34-18 to A34-21 need LM34's
-survivorship files, which are **pending registration** (Open O1); the brief quotes the values the script printed from
-the drafter's scratch copies of exactly those files.
+Yourself") and the shared decisions above it, and revised the same day to the editor's decisions on the briefs
+(`plans/vol-5.md`, "Editor's decisions on the briefs (2026-10-24)"), to the independent recomputation and to decision
+F's source check (Hansen, Romano and Wolf, Bailey et al., the Ministry of Finance and TWSE, read 2026-10-24). Every
+number carries its anchor ID at first appearance; `data/vol6_anchors_lm34.py` prints them all from the registered files (36
+rows, A34-21 withdrawn; `## LM34` of `plans/vol-6-anchors.md`). Numbers quoted from published modules carry their
+file:line; values another module owns ("Owners", shared decision "Through case", and decision A) are echoed with that
+module's name and anchor and are not LM34's to print. LM34's survivorship files are registered (`data/raw/vol6/`,
+`data/README.md`); the anchors computed from them equal the drafter's scratch run byte for byte.
 
 **Prereq:** `[4, 11, 17, 18, 20, 21, 22, 23, 26, 27, 28, 29, 30, 31, 33]`. What each supplies (tags rechecked in `src/`;
 LM27–LM33 are briefs, so their results are named, with the tags their briefs propose):
@@ -1326,32 +1451,33 @@ LM27–LM33 are briefs, so their results are named, with the tags their briefs p
 - LM22: (22.3), the stationary bootstrap's geometric block lengths (lm22.md:189), and its `stationary_idx`
   (lm22.md:371–379), which §6 and the script reuse; (22.4), a bootstrap p-value as a share of resampled statistics
   (lm22.md:337); the book's block-length rule, "the largest stationary estimate among the squared demeaned
-  simple-return series the statistic involves, rounded" (lm22.md:254), 145 for TR23 (lm22.md:427); TR23's exact
-  in-sample Kelly root $\hat f^*=4.14$ (lm22.md:125, [[LM17]]'s), recomputed as 4.138 [A34-17].
+  simple-return series the statistic involves, rounded" (lm22.md:254), 145 for TR23 (lm22.md:427), applied to the
+  differences from R1 for a comparison with R1 (shared decision "Counting"); TR23's exact in-sample Kelly root
+  $\hat f^*=4.14$ (lm22.md:125, [[LM17]]'s), recomputed as 4.138 [A34-17].
 - LM23: (23.1), OLS, for the performance-degradation slope of §7; "data snooping that [[LM34]] treats"
   (lm23.md:369).
-- LM26: (26.2), the EWMA with $\lambda=0.94$ (lm26.md:99), for problem 8's daily scale; (26.8), QLIKE (lm26.md:361),
-  named in §2 as the loss on which a volatility model's choice would be judged on later data (lm26.md:54,
-  `make_lab26.py:1115`).
-- LM27 (brief): E5's wealth frame, (27.1) drift, (27.2) the self-financing trade with
+- LM26: (26.2), the EWMA with $\lambda=0.94$ (lm26.md:99), for problem 8's daily scale, run through each window as R8
+  runs it; (26.8), QLIKE (lm26.md:361), named in §2 as the loss on which a volatility model's choice would be judged
+  on later data (lm26.md:54, `make_lab26.py:1115`).
+- LM27 (brief): E5's wealth frame, (27.1) the book's return and drift, (27.2) the self-financing trade with
   $\operatorname{cost}(\mathbf x)=0.1425\%\lVert\mathbf x\rVert_1+\sum_i\text{tax}_i\max(0,-x_i)$, (27.3) $\mathrm{TO}_t$;
-  R1 and R2; the first purchase (A27-23) and R1's largest rebalance (A27-24), echoed in E2.
+  R1 and R2; the cost arithmetic of a single trade (decision A5): the first purchase (A27-23), R1's largest rebalance
+  (A27-24) and a switch of NT\$1 million between two funds (A27-43), echoed in E2.
 - LM28–LM30 (briefs): R3 and R4 (LM28 unconstrained, LM29 long-only, the through-case form), R5 (LM30).
 - LM31 (brief): R6, R7 and R8 ((31.7), R8's exposure $L_t$); R8's exposure path (A31-29), echoed in E3.
 - LM33 (brief): the rules' Sharpe ratios, their tests against R1 and the deflated Sharpe ratio for $n=8$ with an
   effective number of trials, all cited by pointer in §6 and §8; LM34 prints none of them.
 
-**Leads:** `[35, 45, 48, 49, 50]`: LM35 (the checkpoint's out-of-sample comparison and its costs: the protocol of §2,
-(34.1); LM35's brief confirms), LM45 (frictions and financing costs in Kelly sizing, (34.1); the lab's walk-forward
-Kelly), LM48 (the capstone's walk-forward comparison, §2's protocol, (34.3)), LM49 (from backtest returns to a size:
-(34.3), (34.4) before any sizing), LM50 (monitoring a rule chosen from several, (34.4)). Volume VIII–IX briefs may
-change the list; none is published.
+**Leads:** `[35, 45, 46, 48, 49, 50]`: LM35 (its adjusted prices carry their build date as (34.2)'s
+$P^{\mathrm{adj}}_{t\mid t'}$, decision B6; it cites LM34's net log growth and cost sources); LM45, LM46, LM48, LM49 and
+LM50, which the text points to forward (§2, §3 and §8, "Uses before taught"; decision C9 adds 46). The Volume VIII–IX
+briefs, not yet written, decide which tags they cite.
 
 **Forward links honoured.**
 
 | Earlier text | Promise | Kept in |
 |:--|:--|:--|
-| lm04.md:209 | a grid search returns "the highest bump, which is largely noise" | §7, X7, E9: the declared grid's best, 18.62% a year against a median of 11.02% [A34-27]; PBO 0.663 [A34-29] |
+| lm04.md:209 | a grid search returns "the highest bump, which is largely noise" | §7, X7, E9: the declared grid's best, 18.62% a year against a median of 10.96% [A34-27]; PBO 0.663 [A34-29] |
 | lm04.md:563 | "Backtests overstate Sharpe ratios ([[LM33]], [[LM34]])" | §6–§8: why the best of a search overstates (E7, E10); sizing from a haircut stays [[LM33]]'s and [[LM45]]'s |
 | lm11.md:406 | an out-of-sample test fits on earlier data and judges on later data ([[LM34]]) | §2: the walk-forward protocol and its timing |
 | lm17.md:51, lm21.md:57, lm25.md:54, lm26.md:54 | "Nothing is tested on later data ([[LM34]])" | §2 (one paragraph: what a test on later data needs, with LM26's model choice judged by (26.8) as the example) |
@@ -1362,7 +1488,7 @@ change the list; none is published.
 | lm22.md:352 | "Testing many strategies with the bootstrap (the reality check) is [[LM34]]'s" | §6, E7, E8 |
 | lm23.md:369 | "Searching many sectors, rules or windows and keeping the best is the data snooping that [[LM34]] treats" | §6, §7 |
 | research-hygiene.md:7, 62 | LM34 covers look-ahead and survivorship bias, costs, walk-forward testing and PBO | §2–§7, one each |
-| research-hygiene.md:35 | "[[LM34]] gives Taiwan's official rates" | §3 and its sources (TWSE Operating Rules Art. 94; the Securities Transaction Tax Act Arts. 2 and 2-1) |
+| research-hygiene.md:35 | "[[LM34]] gives Taiwan's official rates" | §3 and its sources (TWSE Operating Rules Art. 94; the Securities Transaction Tax Act Arts. 2 and 2-1; for the futures ETFs, Art. 2 with TWSE's ETF page and the Ministry of Finance's 財政統計通報 No. 21 in support) |
 | `make_lab04.py:642` | the month-end Kelly walk-forward ("LM34 (walk-forward tests)") | lab part 7 (on TR23, as the spine decides; Lab 4 runs it on 0050) |
 | `make_lab23.py:901` | choosing among many rules is the data snooping LM34 treats | §6–§7 |
 | `make_lab25.py:836` | a year-by-year table is a stability check ("LM34 tests on later data") | §2 |
@@ -1373,16 +1499,17 @@ lm21:57, 373; lm22:57, 144, 352; lm23:369; lm25:54; lm26:54; research-hygiene:7,
 `build/make_lab*.py` for "LM34" finds make_lab04:642, make_lab23:14 (a style note), 901, make_lab25:836,
 make_lab26:1115. The spine listed every one of them; the style note at make_lab23:14 holds no promise.
 
-**Outcomes** ("After this module you should be able to:"; the level in brackets, shared decision "Outcome levels"):
+**Outcomes** ("After this module you should be able to:"; the level in brackets, shared decision "Outcome levels";
+decision C10; average 15.5 words, longest 18; with the case box, 20 sentences averaging 13.5):
 
-1. [C] run a walk-forward backtest whose window, signal dates, trade timing, costs and valuation are fixed in advance, and report net wealth, log growth, turnover and costs
-2. [D] derive the cost of a trade under Taiwan's commission and transaction tax, and prove that the log gap between gross and net wealth equals $-\sum\ln(1-\text{cost}/W^{\mathrm{pre}})$ when costs are scale-free
-3. [C] detect look-ahead in a backtest (adjusted price levels, a close used before it is known, a full-sample parameter) and measure its effect by rerunning with the information available at each decision
+1. [C] run a walk-forward backtest fixed in advance, and report its net wealth, growth, turnover and costs
+2. [D] derive the log gap (34.1) between gross and net wealth, and compute costs at Taiwan's official rates
+3. [C] detect look-ahead, and measure it by rerunning with only what each decision knew
 4. [C] measure survivorship bias by fixing the universe from a dated list that includes delisted funds
-5. [C] test whether the best of many rules beats a benchmark with White's reality check by the stationary bootstrap, and explain what Romano and Wolf's stepdown and Hansen's test add
-6. [C] estimate the probability of backtest overfitting by combinatorially symmetric cross-validation on a declared grid, and read its logit distribution and performance degradation
-7. [D] derive why the in-sample best of $n$ strategies without skill has a Sharpe ratio that grows with $n$ while its expected out-of-sample Sharpe ratio stays 0
-8. [U] choose among the reality check, PBO and the deflated Sharpe ratio for a given question, and explain when the right conclusion is that the data do not support a rule
+5. [C] test whether the best of many rules beats a benchmark, using White's reality check
+6. [C] estimate the probability of backtest overfitting by CSCV on a declared grid, and read its logits
+7. [D] derive the in-sample best Sharpe ratio of $n$ skill-free strategies and its expected out-of-sample value
+8. [U] choose among the reality check, Romano–Wolf, Hansen's test, PBO and deflation, and say when no rule is supported
 
 Taught, practised, assessed (`reviews/REVIEW_PROMPT.md` item 10):
 
@@ -1395,32 +1522,35 @@ Taught, practised, assessed (`reviews/REVIEW_PROMPT.md` item 10):
 | 5 [C] | §6 | E7, E8, lab 5 | KC §6, problems 5, 11 |
 | 6 [C] | §7 | E9, widget, lab 6 | KC §7, problems 3, 4 |
 | 7 [D] | §7 | E10 | problem 12 |
-| 8 [U] | §8 | §8's checklist | KC §8, problem 6 |
+| 8 [U] | §6, §8 | §8's checklist | KC §8, problem 6 |
 
 **Owns.** The walk-forward protocol: the information set at each decision (the month-end close is known after 13:30,
 so the trade is at the next close on which every fund trades; the rolling 504-row window; the first purchase from
 cash; valuation without terminal liquidation), applied to R1–R8 with the cost model and its official sources (TWSE
-Operating Rules Art. 94; the Securities Transaction Tax Act, Arts. 2 and 2-1, as amended 2025-01-02; the futures-ETF
-rate, Open O2); the rules' net wealth, net log growth, turnover and costs, gross against net, the costs' tax share,
-the sensitivity at twice the costs, R8's growth at borrowing spreads of 0, 2 and 5 points; the identity (34.1) and its
-Deep Dive; look-ahead shown on data (in the text: adjusted prices rebuilt backward, (34.2), and the through case
-traded at the signal's own close; in problems: a daily scale that uses the same day's close, a full-sample Kelly
-root); survivorship on delisted Taiwan ETFs; White's reality check by the stationary bootstrap on Experiment 10's
-10,000 rules and on the grid, with its studentized form, (34.4); Romano–Wolf's stepdown and Hansen's SPA *stated*
-(their first step and statistic computed; the stepdown in the lab); the declared PBO grid, CSCV, (34.3), its logit
-distribution and performance degradation; the noise benchmark and its (21.9) derivation; the widget. Values owned:
-every A34 anchor except the echoes (A34-01 from `vol5_series`, A34-11's exposures from LM31's A31-29, A34-12's first
-purchase and largest rebalance from LM27's A27-23 and A27-24, A34-22 recomputing LM21's Experiment 10, A34-17's 4.138
-recomputing lm22.md:125).
+Operating Rules Art. 94; the Securities Transaction Tax Act, Arts. 2 and 2-1, as amended 2025-01-02, with TWSE's ETF
+page and the Ministry of Finance's 財政統計通報 No. 21 in support for the futures ETFs, decision F); the rules' net
+wealth, net log growth, annual turnover and costs (decision A2), gross against net, the costs' tax share, the
+sensitivity at twice the costs, R8's growth at borrowing spreads of 0, 2 and 5 points; the identity (34.1) and its Deep
+Dive; look-ahead shown on data (in the text: adjusted prices rebuilt backward, (34.2), and the through case's
+rebalances traded at the signal's own close; in problems: a daily scale that uses the same day's close, a full-sample
+Kelly root); survivorship on delisted Taiwan ETFs; White's reality check by the stationary bootstrap on Experiment 10's
+10,000 rules and on the grid, with its studentized form, (34.4); Romano–Wolf's stepdown and Hansen's SPA *stated* as
+the source check read them, with the SPA p-value and the stepdown's first step on Experiment 10 (the full stepdown in
+the lab); the declared PBO grid, CSCV, (34.3), its logit distribution and performance degradation; the noise benchmark
+and its (21.9) derivation; the widget. Values owned: every A34 anchor except the echoes (A34-01 from
+`vol5_series`, A34-11's exposures from LM31's A31-29, A34-12's first purchase and largest rebalance from LM27's
+A27-23 and A27-24, A34-13 = LM27's A27-43, A34-22 recomputing LM21's Experiment 10, A34-17's 4.138 recomputing
+lm22.md:125); A34-21 is withdrawn.
 
-**Leaves.** Sharpe-ratio standard errors, intervals and tests of the rules, the probabilistic and deflated Sharpe
-ratios, effective trials and haircuts → LM33 (cited; LM34 prints no rule's Sharpe ratio). VaR, expected shortfall and
-drawdowns of the rules → LM32. Scenario losses → LM35. R8's exposure path → LM31 (echoed). Kelly sizing of a
-backtested strategy → LM45 and LM49; the capstone's walk-forward → LM48; monitoring and re-estimation → LM50. To the
-lab (density, guidance): Romano–Wolf's full stepdown and the Kelly walk-forward on TR23. Not in the book, one sentence
-each: slippage and market-impact models (no sourced spread or impact figure exists for these funds, shared decision
-"Cost model"), purged and embargoed cross-validation (the through case has no overlapping labels), the multiple-testing
-literature beyond White, Romano–Wolf and Hansen (Harvey, Liu and Zhu's hurdle is LM21's, lm21.md:25).
+**Leaves.** The cost arithmetic of a single trade → LM27 (decision A5; echoed in E2). Sharpe-ratio standard errors,
+intervals and tests of the rules, the probabilistic and deflated Sharpe ratios, effective trials and haircuts → LM33
+(cited; LM34 prints no rule's Sharpe ratio). VaR, expected shortfall and drawdowns of the rules → LM32. Scenario
+losses → LM35. R8's exposure path → LM31 (echoed). Kelly sizing of a backtested strategy → LM45 and LM49; the
+capstone's walk-forward → LM48; monitoring and re-estimation → LM50. To the lab (density, guidance): Romano–Wolf's
+full stepdown and the Kelly walk-forward on TR23. Not in the book, one sentence each: slippage and market-impact
+models (no sourced spread or impact figure exists for these funds, shared decision "Cost model"), purged and embargoed
+cross-validation (the through case has no overlapping labels), the multiple-testing literature beyond White,
+Romano–Wolf and Hansen (Harvey, Liu and Zhu's hurdle is LM21's, lm21.md:25).
 
 **Uses before taught** (one sentence each in the text):
 
@@ -1428,7 +1558,8 @@ literature beyond White, Romano–Wolf and Hansen (Harvey, Liu and Zhu's hurdle 
 - §3: "Margin and the instruments that carry leverage are [[LM46]]'s; R8's borrowing rate here is illustrative."
 - §6: "Romano and Wolf's stepdown and Hansen's test are stated without proof; both rest on large-$T$ bootstrap theory
   beyond this book."
-- §8: "A walk-forward comparison with a Kelly-type rule among the candidates is [[LM48]]'s capstone."
+- §8: "A walk-forward comparison with a Kelly-type rule among the candidates is [[LM48]]'s capstone; sizing one
+  backtested strategy is [[LM49]]'s, and monitoring a chosen rule is [[LM50]]'s."
 
 **Data role.**
 
@@ -1437,8 +1568,9 @@ literature beyond White, Romano–Wolf and Hansen (Harvey, Liu and Zhu's hurdle 
   estimation frame $T=2{,}362$ from 2017-01-18, $A=242.95$; wealth frame 2,368 sessions, $A_{\mathrm w}=243.57$
   [A34-01]. Rules from `data/vol5_rules.py` (imported, never re-implemented): 92 month-end signals, the first on
   2019-02-27 with the window 2017-02-13 → 2019-02-27, traded 2019-03-04; the last on 2026-09-30, traded 2026-10-01;
-  1,851 daily returns 2019-03-05 → 2026-10-08; $\tau=7.5975$ years from the first trade [A34-02]. Gross paths remove
-  commission and tax only (`cost_mult=0`; cash interest and R8's borrowing kept).
+  1,851 daily returns 2019-03-05 → 2026-10-08; $\tau=7.5975$ years from the first trade, in calendar days ÷ 365.25
+  (decision C7; LM33's $T/A_{\mathrm w}$ is a different count) [A34-02]. Gross paths remove commission and tax only
+  (`cost_mult=0`; cash interest and R8's borrowing kept).
 - **The PBO grid (declared 2026-10-24, before any result of it was computed; the drafter had seen only the through
   case's summary, `data/processed/vol5_rules.txt`).** Rules R1–R8 exactly as `vol5_rules.py` defines them (costs,
   cash, financing, valuation end, drift). Estimation window (trailing rows of E5's estimation frame through the
@@ -1455,53 +1587,61 @@ literature beyond White, Romano–Wolf and Hansen (Harvey, Liu and Zhu's hurdle 
   $k^*$'s out-of-sample Sharpe ratio on its in-sample one, and the share of splits with an out-of-sample ratio below 0.
   Grid order: R1 1m, 3m, 6m; R2 1m, 3m, 6m; then R3 … R8, each by window 126, 252, 504 and frequency 1, 3, 6. The
   declaration was written to the drafter's notes before the grid was run and is reproduced here unchanged; the text
-  prints it in §7 as declared. The grid calls `signals()` with `vol5_rules.WINDOW` set for the call and restored, and
+  prints it in §7 as declared. Dropping the earliest rows is the book's convention (Bailey et al.'s Algorithm 2.3
+  asks only for equal blocks; Sources), and with $n=60$ no logit is exactly 0, so "≤ 0" and "< 0" agree. The grid calls `signals()` with `vol5_rules.WINDOW` set for the call and restored, and
   checks that the 504-row signals equal the through case's; CLARABEL's cross-check failed once (R4, window 126,
   2025-06-30), and the polished OSQP solution was checked against the exact solution instead (gap 3.6e-17) [A34-26],
-  which meets the shared solver rule.
-- **TR23** (Volume III): `data/processed/vol3_taiex.parquet` (FinMind `TaiwanStockTotalReturnIndex`, TAIEX,
-  retrieved 2026-10-18), 5,849 returns 2003-01-03 → 2026-10-08, $r_f=0$ (Volume IV). Uses: Experiment 10 recomputed
-  with LM21's seed [A34-22]; the reality check on it (experiment 1, $\ell=145$, LM22's TR23 length) [A34-24]; problem
-  8's daily volatility scale, 5,345 days 2005-01-11 → 2026-10-08 [A34-16]; the lab's Kelly walk-forward, 250
-  month-ends 2005-12-30 → 2026-09-30, 5,104 days [A34-17].
+  which meets the shared solver rule. As `vol5_rules` defines R4, it holds R3 at four of the grid's signals, where no
+  window mean exceeds $r_f/A$ (window 126 on 2022-09-30 and 2023-02-24; 252 on 2023-03-31 and 2023-04-28; none at
+  504) [A34-26]. The grid's median is taken as every quantile of the book (`inverted_cdf`, the 30th of 60, decision D).
+- **TR23** (Volume III, the TAIEX total-return index): `data/processed/vol3_taiex.parquet` (FinMind
+  `TaiwanStockTotalReturnIndex`, retrieved 2026-10-18), 5,849 returns 2003-01-03 → 2026-10-08, $r_f=0$ (Volume IV).
+  Uses: Experiment 10 recomputed with LM21's seed [A34-22]; the reality check on it (experiment 1, $\ell=145$: LM22's
+  rule on the 10,000 rules' returns gives 145.44, as TR23's own length, lm22.md:427) [A34-24]; problem 8's daily
+  volatility scale, 5,345 days 2005-01-11 → 2026-10-08 [A34-16]; the lab's Kelly walk-forward, 250 calendar month-ends
+  2005-12-30 → 2026-09-30, 5,104 days [A34-17].
 - **0050's adjusted prices** (§4): `ohlc("0050")` with `data/raw/vol5/0050_dividends.csv` (filter `^息$`, PITFALLS §3)
-  and the 2025-06-18 4-for-1 split from `splits__2016-12-01__2026-10-08.csv`, read directly; 20 distributions after
-  2017-01-17 [A34-14]. The adjusted series is the book's own, (34.2), built from closes and distributions, so its
-  levels are exact for a stated build date. FinMind's `TaiwanStockPriceAdj` (not registered; its levels change at
-  every retrieval, PITFALLS §3) was compared by the drafter only as a check: its 2017-01-17 value differs from the
-  book's by about 0.1%, which leaves §4's point unchanged; no FinMind adjusted level is printed.
-- **Survivorship** (§5; capability B4; pending registration, O1): `TaiwanStockDelisting` (ids from "00"),
-  `TaiwanStockPrice` snapshots of every ETF on 2017-01-17 and 2026-10-08, and the daily prices of the four futures
-  ETFs that E5 does not hold (00672L, 00673R, 00674R, 00677U; 00635U and 00642U come from E5's own files), retrieved
-  2026-10-24. The two snapshots are one-date queries without a `data_id`, which FinMind serves only above its Free
-  tier (`list_datasets` marks `TaiwanStockPrice` "Free (w/ data_id)"; the owner's Sponsor plan served them), so only
-  A34-18 reads them; A34-19 to A34-21 and the lab use Free files alone (O1). 69 ETFs had a row on 2017-01-17; 10 had
-  none on 2026-10-08, each in the delisting list [A34-18]. A fund's
-  growth factor skips untraded rows (close 0), checks every other close against the spread, and restates a
-  registered split's previous close per new unit (00673R's and 00674R's reverse splits); none of the six pays
-  distributions (no unexplained spread mismatch) [A34-19]. A delisted fund is valued at its last traded close, kept as
-  cash at 0: its holders' actual liquidation payout is not in FinMind (O9).
+  and the 2025-06-18 4-for-1 split from `splits__2016-12-01__2026-10-08.csv` ($s_t=4$, the registered prices'
+  ratio rounded to an integer), read directly; 20 distributions after 2017-01-17 [A34-14]. The adjusted series is the
+  book's own, (34.2), built from closes and distributions, so its levels are exact for a stated build date. FinMind's
+  `TaiwanStockPriceAdj` is not used (not registered; its levels change at every retrieval, PITFALLS §3), and no FinMind
+  adjusted level is printed.
+- **Survivorship** (§5; capability B4; registered under `data/raw/vol6/`, retrieved 2026-10-24, `data/README.md`):
+  `TaiwanStockDelisting` (ids from "00", 63 rows), the daily prices of 00672L, 00673R, 00674R and 00677U (00635U and
+  00642U come from E5's files), and `TaiwanStockPrice` snapshots of every ETF on 2017-01-17 and 2026-10-08. The
+  snapshots have no `data_id`, which FinMind serves only above its Free plan: a Free account fetches the others with
+  `--exclude vol6/etf_snapshot`, and then A34-18 alone prints a note instead of its value. 69 ETFs had a row on
+  2017-01-17; 10 had none on 2026-10-08, each in the delisting list [A34-18]. The six funds of §5 are the ETFs on the
+  2017 list whose names name an S&P gold or oil index or the VIX (FinMind `TaiwanStockInfo`, retrieved 2026-10-24 and
+  not registered; the delisting file confirms 00672L's and 00677U's names; O12). A fund's growth factor skips untraded
+  rows (close 0) and accepts a zero spread only on the first traded row after an untraded one (00674R: 11 of each);
+  every other close equals the previous traded close plus the spread. Splits are restated with integer ratios (00673R
+  1 for 4 on 2025-10-22, 00674R 1 for 5 on 2026-04-22; the registered prices are exact multiples), and none of the six
+  pays distributions [A34-19]. A delisted fund is valued at its last traded close, kept as cash at 0: its holders'
+  actual liquidation payout is not in FinMind (O9).
 - **Conventions.** Growth $g=\ln W_{\text{end}}/\tau$ from the cash of 1 at the first trade's close (the first
   purchase's cost counts; LM27's criteria); costs = the sum over trades of cost ÷ pre-trade wealth; turnover = the
   one-way $\mathrm{TO}$ of the 91 trades after the first purchase, summed, ÷ $\tau$ [A34-06]. CSCV Sharpe ratios use
   population moments over each half's days; annualized by $\sqrt{A_{\mathrm w}}$ only for display. t-stats (21.1)
-  divide by $s_{\mathrm u}$. Quantiles `inverted_cdf`.
+  divide by $s_{\mathrm u}$. Quantiles and medians `inverted_cdf`.
 - **Guard and exact checks.** Counts against a threshold use the guard 1e-12 (t ≥ 3, bootstrap shares, logit ≤ 0).
   The identity (34.1) is checked on every rule: the largest gap is 1.3e-14 [A34-07]. No path is ruined (the script
   asserts $1+R_p>0$ on every day of every path, and $1+fR>0$ on TR23's scaled paths).
-- **Seeds.** One generator per experiment, `default_rng([e, 20261011])`, created once: $e=1$ the reality check on
-  Experiment 10 ($B=10{,}000$, $\ell=145$); $e=2$ the noise panels (200 panels of 60 strategies); $e=3$ the widget's
-  grid (40 panels per state); $e=4$ the grid's reality check ($B=10{,}000$, $\ell=74$ by LM22's rule); $e=5$ its
-  sensitivity at $\ell=17$. Experiment 10 keeps LM21's `default_rng([10, 20261011])`. Every Monte Carlo proportion
-  prints its standard error $\sqrt{p(1-p)/B}$; the noise PBO prints the SD of the 200 panel values ÷ √200.
-- **Published files** (plan). X2 stores weekly wealth points of the eight rules (every fifth session plus the last),
-  under 100 KB; X9 stores every fifth split (2,574 points); X6 and X8 store bin counts only; the widget stores 30
-  precomputed means and a test matrix. No raw FinMind value is published; the survivorship exhibit stores six growth
-  factors.
+- **Seeds and block lengths.** One generator per experiment, `default_rng([e, 20261011])`, created once: $e=1$ the
+  reality check on Experiment 10 ($B=10{,}000$, $\ell=145$); $e=2$ the noise panels (200 panels of 60 strategies);
+  $e=3$ the widget's grid (40 panels per state); $e=4$ the grid's reality check ($B=10{,}000$, $\ell=75$, LM22's rule
+  on the 59 differences from R1, decision D); $e=5$ its sensitivity at $\ell=17$ (R1 monthly's own estimate,
+  rounded). Experiment 10 keeps LM21's `default_rng([10, 20261011])`. Every Monte Carlo proportion prints its standard
+  error $\sqrt{p(1-p)/B}$; the noise PBO prints the SD of the 200 panel values ÷ √200.
+- **Published files** (plan; Volume IV's rule X37, shared decision "Charts"). X2 stores the eight rules' wealth at the
+  last session of each week (week keys by ISO year and week) plus every cited value, about 400 dated points a series,
+  under 100 KB; X9 stores every fifth split (2,574 points, no dates); X6 and X8 store bin counts only; the widget stores
+  30 precomputed means and a synthetic test matrix. No raw FinMind value is published; the survivorship exhibit stores
+  six growth factors.
 - **Scripts.** `data/lm34_numbers.py` (every printed value, asserted against `src/lm34.md`, compared with the anchors,
   rounding flags) and `data/lm34_charts.py` (X2, X3, X5–X9 and the widget block, with a Node check of the widget's
   CSCV against Python's, as `data/lm15_charts.py` does); both after `data/vol3_series.py`, `data/vol5_series.py` and
-  `data/vol5_rules.py` have written `data/processed/`, and after O1's registrations.
+  `data/vol5_rules.py` have written `data/processed/`.
 
 **Hygiene declaration.** *Out-of-sample:* the eight rules' results (windows, dates, timing, costs and criteria fixed in
 advance on 2026-10-24, before any result was computed); the daily scale set at the previous close (problem 8) and the
@@ -1509,30 +1649,32 @@ Kelly walk-forward (lab), each a *hypothetical* rule judged on data after its es
 grid, by design, declared after the through case's results were seen, and the grid's reality check against R1; the
 reality check on Experiment 10 is a *model* result on TR23's returns, as LM21 labels the experiment (lm21.md:364).
 *Model:* Experiment 10, the noise panels, the widget's grid and simulator. *Descriptive:* fund histories, the ETF
-lists, adjusted prices, the survivorship gap. Look-ahead versions (the signal's own close, the same-day scale, the
-full-sample Kelly root) are labelled *look-ahead, not achievable*. Count of versions on the same data: the 8 rules
-($n=8$, [[LM33]]'s count), 52 more grid configurations ($n=60$ in all), LM21's 10,000 random rules (recomputed), and
-the variants labelled where they appear (gross, twice the costs, three borrowing spreads, the signal's own close; two
-daily scales; four Kelly versions in the lab). Local note: "The eight rules' results are **out-of-sample**: their
-windows, dates, costs and criteria were fixed on 24 October 2026, before any result existed. The 60-configuration grid
-is **in-sample** by design and was declared after those results were seen. Experiment 10, the noise panels and the
-widget are **model** results. Fund histories and adjusted prices are **descriptive**. This module compares 8 rules, 60
-configurations and [[LM21]]'s 10,000 random rules on the same data, and corrects for the last two."
+lists, adjusted prices, the survivorship gap. Look-ahead versions (rebalances at the signal's own close, the same-day
+scale, the full-sample Kelly root) are labelled *look-ahead, not achievable*. Count of versions on the same data: the
+8 rules ($n=8$, [[LM33]]'s count), 52 more grid configurations ($n=60$ in all), LM21's 10,000 random rules
+(recomputed), and the variants labelled where they appear (gross, twice the costs, three borrowing spreads, the
+signal's own close; two daily scales; four Kelly versions in the lab). Local note: "The eight rules' results are
+**out-of-sample**: their windows, dates, costs and criteria were fixed on 24 October 2026, before any result existed.
+The 60-configuration grid is **in-sample** by design and was declared after those results were seen. Experiment 10,
+the noise panels and the widget are **model** results. Fund histories and adjusted prices are **descriptive**. This
+module compares 8 rules, 60 configurations and [[LM21]]'s 10,000 random rules on the same data, and corrects for the
+last two."
 
 **Notation.** AUTHORING §6 with the "Portfolios, risk and backtests" table. Used: $R$, $r$, $T$, $t$, $A$,
-$A_{\mathrm w}$, $N=5$ (E5's funds), $i$ (a fund), $W$, $W^{\mathrm{pre}}_t$ (LM27's), $\mathbf w$, $\mathbf f$,
+$A_{\mathrm w}$, $N=5$ (E5's funds), $i$ (a fund), $W$, $W^{\mathrm{pre}}_t$ (§6, decision B2), $\mathbf w$, $\mathbf f$,
 $\mathbf w^{\mathrm{drift}}_t$, $\mathrm{TO}_t$, $\text{tax}_i$, $\lVert\mathbf x\rVert_1$, $L_t$ (R8's), $r_f$,
-$\mathrm{SR}$, $\widehat{\mathrm{SR}}$, $g$, $G$, $\tau$ (a span in years, since $T$ is a count), $P$, $D$, $f$,
-$\hat f^*$ (lab), $\bar\sigma_t$, $\hat\sigma_{t+1\mid t}$, $\lambda=0.94$ (only LM26's decay, problem 8), $\bar R$,
-$s_{\mathrm u}$, $\text{t-stat}$, $\Phi$, $\Phi^{-1}$, $B$, $\ell$, $n$ (strategies tried; LM21's $m$ tests read as $n$
-trials, shared notation decision), PBO. Local symbols, declared in the notation note:
+$\mathrm{SR}$, $\widehat{\mathrm{SR}}$, $g$, $G$, $\tau$ (a span in years, since $T$ is a count), $P$, $D$, $s_t$
+(LM27's split ratio, in (34.2); decision B6), $f$, $\hat f^*$ (lab), $\bar\sigma_t$, $\sigma_{t+1\mid t}$ (no hat, as
+LM26 prints it; decision B1), $\lambda=0.94$ (only LM26's decay, problem 8), $\bar R$, $s_{\mathrm u}$, $\text{t-stat}$,
+$\Phi$, $\Phi^{-1}$, $B$, $\ell$ (a mean block length, §6's scoped row), $n$ (strategies tried; LM21's $m$ tests read
+as $n$ trials, shared notation decision), PBO. Local symbols, declared in the notation note (accepted, decision B5):
 
 | Symbol | Meaning | Check |
 |:--|:--|:--|
-| $W^{\text{net}}_t$, $W^{\text{gross}}_t$ | a rule's wealth with and without commission and tax (financing kept), from the cash of 1 at the first trade | superscripted §6 $W$; LM27's $W^{\mathrm{pre}}_t$ cited |
+| $W^{\text{net}}_t$, $W^{\text{gross}}_t$ | a rule's wealth with and without commission and tax (financing kept), from the cash of 1 at the first trade | superscripted §6 $W$; §6's $W^{\mathrm{pre}}_t$ cited |
 | $\operatorname{cost}$ | LM27's cost of a trade, (27.2); in (34.1) each term is one trade's cost ÷ its pre-trade wealth | an operator, not a scalar symbol (§6: no scalar cost symbol) |
 | $G_{t,t'}$ | total-return growth factor from the close of $t$ to that of $t'$ | §6's $G$ with two dates |
-| $P^{\mathrm{adj}}_{t\mid t'}$ | adjusted close of day $t$ in a series built on day $t'$, (34.2) | new; upright superscript |
+| $P^{\mathrm{adj}}_{t\mid t'}$ | adjusted close of day $t$ in a series built on day $t'$, (34.2) | new; upright superscript; LM35 uses it (B6) |
 | $k$, $n$ | a strategy (rule, configuration) and the number tried | §6's $n$ (Volume VI); LM34 writes no lag and no count of SDs, so $k$ is free |
 | $\bar R_k$, $\bar R_{k,\text{boot}}$ | strategy $k$'s mean daily return (in excess of the benchmark's); its value on a resample | subscripted $\bar R$; "boot" as LM22's $\hat\theta_{\text{boot}}$, no star |
 | $S$ | the number of CSCV blocks, 16 | Bailey et al.'s letter; LM34 has no SVD and no TAIEX close $S_t$ |
@@ -1542,25 +1684,25 @@ trials, shared notation decision), PBO. Local symbols, declared in the notation 
 
 Not used: $c$ (no Kelly fraction, and no scalar cost), $\lambda$ for the logit, a letter for White's statistic (written
 $\max_k\sqrt T\,\bar R_k$; $V$ and "RC" are taken: $\mathrm{RC}_i$ is a risk contribution), $m$ for a block's length
-(written $\lfloor T/S\rfloor$), $s_t$ for a split factor (written in words), $P$ for a probability, a star for a
-bootstrap draw.
+(written $\lfloor T/S\rfloor$), $P$ for a probability, a star for a bootstrap draw, a hat on the EWMA forecast.
 
-**Motivating case: "The grid's winner"** (box, about 150 words)
+**Motivating case: "The grid's winner"** (box, about 150 words; 12 sentences, average 12.1 words, longest 25)
 
-> From March 2019 to October 2026, the through case's eight rules grew between 8.70% (R3) and 14.49% (R2) a year,
-> after Taiwan's commission and tax [A34-04]. Now vary each rule's estimation window (126, 252 or 504 sessions) and how
-> often it trades (every 1, 3 or 6 months): 60 configurations [A34-26]. The best, maximum Sharpe on a 252-session
-> window traded every six months, grew 18.62% a year, against 11.02% for the median configuration and 10.51% for the
-> same rule as fixed in advance [A34-27]. Would you trade it? Three questions come first. Did the test use only what
-> was known at each decision? Did its universe include the funds that later vanished? Of the six commodity and
-> volatility futures ETFs listed in January 2017, two were delisted; the four survivors gained 5.4% in all, while the
-> six together lost 27.7% [A34-20]. And how much of 18.62% is the search itself?
+> From March 2019 to October 2026, the through case's eight rules grew between 8.70% (R3) and 14.49% (R2) a year after
+> Taiwan's commission and tax [A34-04]. Now vary each rule's estimation window (126, 252 or 504 sessions) and how
+> often it trades (every one, three or six month-ends). That gives 60 configurations [A34-26]. The best, maximum
+> Sharpe on a 252-session window traded every six months, grew 18.62% a year [A34-27]. The median configuration grew
+> 10.96%, and the same rule as fixed in advance 10.51%. Would you trade it? Three questions come first. Did the test
+> use only what was known at each decision? Did its universe include the funds that later vanished? Of the six gold,
+> oil and VIX futures funds listed in January 2017, two were delisted. The six together lost 27.7%, while the four
+> survivors gained 5.4% [A34-20]. And how much of 18.62% is the search itself?
 
-Resolved: (a) timing: §2's protocol and §4 (on monthly rules the signal's own close moves growth by −0.48 to +0.74
-points [A34-36]; on a daily rule the same mistake turns 14.92% into 16.72% [A34-16]); (b) the universe: §5, E6, and E5's
-own funds are among the survivors; (c) the search: §6–§7. No configuration's mean return beats R1's beyond chance (the
-largest t-stat, 1.30, has a reality-check p-value of 0.375 [A34-32]), and the in-sample best ranks in the lower half
-out of sample in 0.663 of the splits [A34-29]. The winner is the highest bump of lm04.md:209.
+Resolved: (a) timing: §2's protocol and §4 (on the monthly rules, moving each rebalance to the signal's own close
+changes growth by −0.41 to +0.89 points a year, and seven of the eight rules gain [A34-36]; on a daily rule the same
+mistake turns 14.93% into 16.74% [A34-16]); (b) the universe: §5, E6, and E5's own funds are among the survivors; (c)
+the search: §6–§7. No configuration's mean return beats R1's beyond chance (the largest t-stat, 1.30, has a
+reality-check p-value of 0.375 [A34-32]), and the in-sample best ranks in the lower half out of sample in 0.663 of the
+splits [A34-29]. The winner is the highest bump of lm04.md:209.
 
 **Sections** (prose words, AUTHORING §1 count):
 
@@ -1568,15 +1710,15 @@ out of sample in 0.663 of the splits [A34-29]. The winner is the highest bump of
 |:--|:--|:--|--:|
 | 1 | Introduction | a backtest as an experiment with hidden choices; the layer LM34 adds (LM27–LM31 built the rules, LM33 measured their Sharpe ratios; LM34 tests the procedure that produced them); case + X1; roadmap; notation and hygiene notes | 320 |
 | 2 | The Walk-Forward Protocol {1} | the information set at a decision; signal at a month-end close, known after 13:30, trade at the next close on which every fund trades (Research hygiene); rolling against expanding windows (one sentence; the through case rolls 504 rows); first purchase from cash; valuation without liquidation (its cost is not charged, said once); what "fixed in advance" fixes; a test on later data of a model choice, LM26's GARCH variants judged by (26.8), one paragraph; E1; X2; [[LM33]] tests the differences; pitfall: re-running a "fixed" test after a change is a second trial; 導讀; KC | 520 |
-| 3 | Costs at Taiwan's Official Rates {2} | the rates and their sources (Art. 94: 0.1425% is the level above which a broker must give notice, not a cap; tax 0.1% on ETF sales, Art. 2; bond ETFs exempt to 2026-12-31, Art. 2-1, 00679B throughout; futures ETFs at 0.1%); (27.2) cited; the first purchase $0.001425/1.001425$; a round trip, 0.385% [A34-13]; E2; (34.1) with its Deep Dive; X3; the tax share; E3: twice the costs (why no slippage model: no sourced figure), R8's borrowing spreads; pitfall: one constant subtracted at the end (Research hygiene); 導讀; KC | 600 |
-| 4 | Look-Ahead Bias {3} | definition: a rule may use only what was known when it acted; (34.2), adjusted levels change with the build date; E4, X4: returns from adjusted prices are total returns, levels are not; E5: the through case traded at the signal's own close, small and of either sign for monthly rules; the daily scale (problem 8) and the full-sample Kelly root (problem 9) named; pitfall: a statistic fitted to all data inside a rule; KC | 500 |
-| 5 | Survivorship Bias {4} | a list of today's funds leaves out the vanished; TaiwanStockDelisting; X5; E6; E5's own universe: 00635U and 00642U were chosen in 2026 from survivors, and the leveraged oil fund 00672L was delisted in 2020; data policy: fix the universe from a dated list (Research hygiene's "Fix the universe"); the last close as a valuation (O9); funds that disappear tend to have done poorly (Elton, Gruber and Blake 1996, abstract); 導讀 (前視偏誤, 存活者偏誤); KC | 450 |
-| 6 | Correcting a Search on the Same Data {5} | recap of [[LM21]]'s Experiment 10, (21.6) and (21.9) (no re-teaching); White's null (the best has no superiority over the benchmark) and statistic; recentred stationary resamples (LM22's (22.3)), (34.4), *stated without proof* (White 2000, Corollary 2.4); E7; X6; studentized form; Romano–Wolf's stepdown and Hansen's SPA stated (one paragraph each, no p-value of SPA until O3); E8: correlated rules, where the bootstrap's threshold 2.43 sits far below Bonferroni's 3.14 [A34-32]; the block-length rule and its sensitivity; pitfall: the reality check asks whether the best beats the benchmark, not which rules do; 導讀 (資料偵伺, 族系誤差率, 平穩自助重抽法); KC | 680 |
+| 3 | Costs at Taiwan's Official Rates {2} | the rates and their sources (Art. 94: 0.1425% is the level above which a broker must give notice, not a cap; tax 0.1% on ETF sales, Art. 2; bond ETFs exempt to 2026-12-31, Art. 2-1, 00679B throughout; futures ETFs at 0.1% under Art. 2, as TWSE's ETF page and 財政統計通報 No. 21 also show); (27.2) and LM27's cost arithmetic cited (the first purchase, A27-23; a switch of NT\$1 million, A27-43); E2; (34.1) with its Deep Dive; X3; the tax share; E3: twice the costs (why no slippage model: no sourced figure), R8's borrowing spreads; pitfall: one constant subtracted at the end (Research hygiene); 導讀; KC | 600 |
+| 4 | Look-Ahead Bias {3} | definition: a rule may use only what was known when it acted; (34.2), adjusted levels change with the build date; E4, X4: returns from adjusted prices are total returns, levels are not; E5: the rebalances traded at the signal's own close over the same span, small for monthly rules but a gain for seven of eight; the daily scale (problem 8) and the full-sample Kelly root (problem 9) named; pitfall: a statistic fitted to all data inside a rule; KC | 500 |
+| 5 | Survivorship Bias {4} | a list of today's funds leaves out the vanished; TaiwanStockDelisting; X5; E6; E5's own universe: 00635U and 00642U were chosen in 2026 from survivors, and the leveraged oil fund 00672L was delisted in 2020 (LM27's §4 points here); data policy: fix the universe from a dated list (Research hygiene's "Fix the universe"); the last close as a valuation (O9); funds that disappear tend to have done poorly (Elton, Gruber and Blake 1996, abstract); 導讀 (前視偏誤, 存活者偏誤); KC | 450 |
+| 6 | Correcting a Search on the Same Data {5} | recap of [[LM21]]'s Experiment 10, (21.6) and (21.9) (no re-teaching); White's null (the best has no superiority over the benchmark) and statistic; recentred stationary resamples (LM22's (22.3)), (34.4), *stated without proof* (White 2000, Corollary 2.4); E7; X6; studentized form; Romano–Wolf's stepdown and Hansen's SPA stated (one paragraph each, from the originals; E7 prints the SPA p-value and the stepdown's first step, and says where the code departs from the papers); E8: correlated rules, where the bootstrap's threshold 2.42 sits far below Bonferroni's 3.14 [A34-32]; the block-length rule and its sensitivity; pitfall: the reality check asks whether the best beats the benchmark, not which rules do; 導讀 (資料偵伺, 族系誤差率, 平穩自助重抽法); KC | 700 |
 | 7 | The Probability of Backtest Overfitting {6,7} | the declared grid as declared; X7: the highest bump; CSCV definition box; (34.3); why $\binom{16}{8}=12{,}870$ (the paper prints 12,780) and which logits are possible; E9; X8; performance degradation, X9; what PBO measures (selection within a grid, not profit: its out-of-sample Sharpe ratio is below 0 in only 0.99% of splits [A34-29]); E10, the noise benchmark and (21.9)'s derivation; PBO's own noise (0.12 to 0.87 across noise panels [A34-33]); the widget; pitfall: adding configurations after a result is another search; 導讀 (過度配適, 交叉確認, 對數勝算, 秩); KC | 780 |
 | 8 | Reading a Backtest {8} | the case resolved; a checklist (timing, universe, costs inside, the count of versions, reality check or PBO, [[LM33]]'s deflation); which tool answers which question; "the data do not support the rule" as a valid conclusion (guidance); the lab's Kelly walk-forward in one sentence; KC | 300 |
 | 9 | Backtesting in Python {1,5,6} | `vol5_rules`' `wealth_path` with `cost_mult`; LM22's `stationary_idx` against arch's `StationaryBootstrap`; CSCV in NumPy: block sums, `itertools.combinations(range(16), 8)` and one mask product; lab box | 180 |
 | — | Summary (8) / Problems (12) / Solutions | | 150 / 420 / 520 |
-| | **Total** | | **5,420** |
+| | **Total** | | **5,440** |
 
 **Elements.** 10 examples (E1 §2; E2, E3 §3; E4, E5 §4; E6 §5; E7, E8 §6; E9, E10 §7). Knowledge checks:
 
@@ -1592,7 +1734,7 @@ out of sample in 0.663 of the splits [A34-29]. The winner is the highest bump of
 - §5: E5 holds 00642U, an oil futures ETF. Which oil fund listed in January 2017 did not survive, and what was it worth
   per unit of its first close when it was delisted? 00672L, delisted 13 November 2020, $G=0.038$ [A34-19].
 - §6: on Experiment 10, White's p-value 0.283 and (21.9)'s 0.298 nearly agree [A34-23, A34-24]; on the grid the
-  bootstrap's 95% point for the largest t-stat is 2.43 against Bonferroni's 3.14 [A34-32]. Why the difference? The
+  bootstrap's 95% point for the largest t-stat is 2.42 against Bonferroni's 3.14 [A34-32]. Why the difference? The
   random rules are independent by construction; the grid's differences from R1 correlate with median 0.78.
 - §7: with $n=60$, which logits can occur, and why is none exactly 0? $\ln(j/(61-j))$ for $j=1,\dots,60$: from
   −4.094 to 4.094, and $\omega=j/61$ is never $\tfrac12$ (at $j=30$ and 31 the logit is ∓0.0328) [A34-35].
@@ -1618,22 +1760,22 @@ so that for means the out-of-sample sum is the full-sample sum minus the in-samp
 **Exhibits.**
 
 - X1 `case` (table, §1): the grid's winner against the through case. Rows: R4 as fixed in advance (504 rows,
-  monthly) 10.51% a year, rank 39 of 60; the grid's best (R4, 252, every 6 months) 18.62%; second (R4, 126, 6
-  months) 17.38%; median 11.02%; worst (R7, 126, monthly) 7.60% [A34-27]; R2 as fixed 14.49%, rank 8 [A34-04,
-  A34-27]; PBO 0.663 [A34-29]; reality-check p-value of the best t-stat against R1, 0.375 [A34-32]; the six futures
-  ETFs held from 17 January 2017: all −27.7%, survivors +5.4% [A34-20]. Note: E5's wealth frame, net of commission
-  and tax, 5 March 2019 to 8 October 2026; the grid is in-sample by design; survivorship rows descriptive. Source:
-  FinMind `TaiwanStockPrice`, `TaiwanStockDividendResult`, `TaiwanStockSplitPrice` (E5, registered 2026-10-24) and
-  `TaiwanStockDelisting` (retrieved 2026-10-24); Computations: `data/lm34_numbers.py`.
+  monthly) 10.51% a year, rank 39 of 60; the grid's best (R4, 252, every 6 month-ends) 18.62%; second (R4, 126, 6
+  month-ends) 17.38%; median (R3, 126, 6 month-ends) 10.96%; worst (R7, 126, monthly) 7.60% [A34-27]; R2 as fixed
+  14.49%, rank 8 [A34-04, A34-27]; PBO 0.663 [A34-29]; reality-check p-value of the best t-stat against R1, 0.375
+  [A34-32]; the six futures ETFs held from 17 January 2017: all −27.7%, survivors +5.4% [A34-20]. Note: E5's wealth
+  frame, net of commission and tax, 5 March 2019 to 8 October 2026; the grid is in-sample by design; survivorship rows
+  descriptive. Source: FinMind `TaiwanStockPrice`, `TaiwanStockDividendResult`, `TaiwanStockSplitPrice` (E5,
+  registered 2026-10-24) and `TaiwanStockDelisting` (registered 2026-10-24); Computations: `data/lm34_numbers.py`.
 - X2 `wealth` (line, date axis with shared `x.values`, §2): net wealth of the eight rules from the cash of 1 at 4
-  March 2019 to 8 October 2026, weekly points; R1 (colour 1), R2 (2), R4 (3), R8 (4) named, R3, R5, R6 and R7 as
-  `quiet` lines named in the caption. Values cited: final wealth 2.662, 3.008, 1.937, 2.221, 2.040, 2.272, 2.183,
-  2.412 [A34-03]. Note: out-of-sample, fixed in advance; no terminal liquidation.
-- X3 `grossnet` (bar, `stack: true`, approved C1, §3): categories R1–R8; series "net growth" (colour 1) and
-  "commission and tax" (colour 2, gross minus net), so each bar's total is the gross growth and its label shows it;
-  `fmt: "pct2"`. Values cited: net 12.89%, 14.49%, 8.70%, 10.51%, 9.38%, 10.80%, 10.28%, 11.59% [A34-04]; gross 12.99%,
-  14.58%, 8.85%, 11.06%, 9.52%, 10.91%, 10.44%, 11.99% [A34-05]. Note: gross keeps cash interest and R8's borrowing;
-  the tax share of the costs is 17% to 22% [A34-09].
+  March 2019 to 8 October 2026, weekly points plus every cited value (X37); R1 (colour 1), R2 (2), R4 (3), R8 (4)
+  named, R3, R5, R6 and R7 as `quiet` lines named in the caption. Values cited: final wealth 2.662, 3.008, 1.937,
+  2.221, 2.040, 2.272, 2.183, 2.412 [A34-03]. Note: out-of-sample, fixed in advance; no terminal liquidation.
+- X3 `grossnet` (bar, `stack: true`, approved C1, §3; decision E): categories R1–R8; series "net growth" (colour 1)
+  and "commission and tax" (colour 2, gross minus net), so each bar's total is the gross growth and its label shows
+  it; `fmt: "pct2"`. Values cited: net 12.89%, 14.49%, 8.70%, 10.51%, 9.38%, 10.80%, 10.28%, 11.59% [A34-04]; gross
+  12.99%, 14.58%, 8.85%, 11.06%, 9.52%, 10.91%, 10.44%, 11.99% [A34-05]. Note: gross keeps cash interest and R8's
+  borrowing; the tax share of the costs is 17% to 22% [A34-09].
 - X4 `adjusted` (table, §4): 0050's close of 17 January 2017 and the same day in adjusted series built on three later
   dates: 72.30; 65.12 (built 2 January 2020), 55.20 (31 December 2024), 13.25 (8 October 2026) [A34-14]; the 2017
   distributions NT\$1.70 and NT\$0.70 over the previous close, 2.32% and 0.85%, and over the adjusted close of a series
@@ -1648,13 +1790,13 @@ so that for means the out-of-sample sum is the full-sample sum minus the in-samp
   descriptive.
 - X6 `rc` (line, `step` histogram, §6): Experiment 1's 10,000 resampled maxima of the studentized statistic, bins of
   0.1; a second series, (21.9)'s density of the largest of 10,000 independent standard normals; dashed `vline`s at the
-  observed 3.97 [A34-22], the bootstrap 95% point 4.77 [A34-25] and (21.9)'s 4.41 [A34-23]. Note: model on TR23's
-  returns; $B=10{,}000$, `default_rng([1, 20261011])`, mean block 145; p-values 0.283 (White) and 0.281 (studentized),
-  MC SE 0.0045 [A34-24, A34-25].
+  observed 3.97 [A34-22], the bootstrap 95% point 4.77 [A34-25] and (21.9)'s 4.41 [A34-23]. Note: model on the
+  returns of TR23 (the TAIEX total-return index); $B=10{,}000$, `default_rng([1, 20261011])`, mean block 145 (LM22's rule); p-values 0.283 (White) and 0.281
+  (studentized), MC SE 0.0045 [A34-24, A34-25].
 - X7 `bumps` (scatter, §7): the 60 configurations' net growth; x the rule (ticks at R1…R8 with `tickLabels`, windows
-  offset within a rule), series by frequency "monthly", "3 months", "6 months" (colours 1–3); the through case's
-  eight as marked `points`; dashed `hline` at the median 11.02%. Values cited: best 18.62%, second 17.38%, worst 7.60%
-  [A34-27]; R4's configurations from 10.51% to 18.62%, R1's from 12.85% to 12.96% [A34-28]. Note: in-sample by
+  offset within a rule), series by frequency "monthly", "3 month-ends", "6 month-ends" (colours 1–3); the through
+  case's eight as marked `points`; dashed `hline` at the median 10.96%. Values cited: best 18.62%, second 17.38%, worst
+  7.60% [A34-27]; R4's configurations from 10.51% to 18.62%, R1's from 12.85% to 12.96% [A34-28]. Note: in-sample by
   design; declared 24 October 2026 before it was computed.
 - X8 `logits` (bar, §7): the 12,870 splits' logits in 18 bins of 0.5 from −4.5 to 4.5 (ends clipped) [A34-31], series
   "the grid" (colour 1) and "noise, mean of 200 panels" (colour 2, scaled to 12,870 splits; chart data only).
@@ -1671,49 +1813,58 @@ so that for means the out-of-sample sum is the full-sample sum minus the in-samp
 SD 1%, strategy 1's drift $\mathrm{SR}/\sqrt{A_{\mathrm w}}\times1\%$), runs CSCV with $S=16$ (module-local code under 30
 lines: block sums, the 12,870 masks of 8 of 16 bits, ranks, logits) and shows the logit histogram (X8's bins) with
 the panel's PBO; a readout gives the mean PBO of 40 panels for the chosen state, precomputed by experiment 3 [A34-34]
-(for example $n=60$: 0.51 at a true ratio of 0, 0.05 at 2, flagged). Initial state (PDF): $n=60$, ratio 0, seed 1. Data block
-`chart-lm34-pboSim`: the 30 means, their largest SE 0.051 [A34-34], and a 160 × 5 test matrix with its Python logits,
-against which `data/lm34_charts.py` checks the widget's CSCV in Node. Cost: $1{,}851\times100$ draws and
-$12{,}870\times100$ comparisons at most, well within the PDF printer's wait. *Model*; the simulator's draws are not
-NumPy's, so its panel values differ from experiment 3's while their means agree within the printed SE.
+(for example $n=60$: 0.51 at a true ratio of 0, 0.05 at 2, flagged). Initial state (PDF): $n=60$, ratio 0, seed 1. Data
+block `chart-lm34-pboSim`: the 30 means, their largest SE 0.051 [A34-34], and a synthetic 160 × 5 test matrix (seeded
+normal draws, no market data) with its Python logits, against which `data/lm34_charts.py` checks the widget's CSCV in
+Node. Cost: $1{,}851\times100$ draws and $12{,}870\times100$ comparisons at most, well within the PDF printer's wait.
+*Model*; the simulator's draws are not NumPy's, so its panel values differ from experiment 3's while their means agree
+within the printed SE.
 
 **Examples** (results recomputed from the printed inputs):
 
 - E1 §2 `netresults`, the through case net of costs: final wealth R2 3.008, R1 2.662, R8 2.412, R6 2.272, R4 2.221,
   R7 2.183, R5 2.040, R3 1.937 [A34-03]; growth 14.49%, 12.89%, 11.59%, 10.80%, 10.51%, 10.28%, 9.38%, 8.70% a year over
-  $\tau=7.5975$ years [A34-02, A34-04]; turnover from 0.18 a year (R2) to 1.45 (R4) [A34-06]; ranking R2 > R1 > R8 >
-  R6 > R4 > R7 > R5 > R3 [A34-08]. The two rules without estimates lead; whether any difference beats chance is
-  [[LM33]]'s test.
-- E2 §3 `costs`: the first purchase costs $0.001425/1.001425=0.1423\%$ of wealth (LM27's A27-23); a round trip of
-  NT\$1,000,000 in 0050 costs NT\$1,425 + NT\$1,425 + NT\$1,000 = NT\$3,850, 0.385%, and NT\$2,850 in 00679B [A34-13];
+  $\tau=7.5975$ years (calendar days ÷ 365.25) [A34-02, A34-04]; turnover from 0.18 a year (R2) to 1.45 (R4) [A34-06];
+  ranking R2 > R1 > R8 > R6 > R4 > R7 > R5 > R3 [A34-08]. The two rules without estimates lead; whether any difference
+  beats chance is [[LM33]]'s test.
+- E2 §3 `costs`: LM27's cost arithmetic first (decision A5): the first purchase costs $0.001425/1.001425=0.1423\%$ of
+  wealth for R1–R7 (LM27's A27-23), and R8's is smaller because its first exposure is below 1 [A34-12]; switching
+  NT\$1,000,000 from 0050 into 00679B costs NT\$3,850, and back NT\$2,850 (LM27's A27-43) [A34-13]. LM34's totals:
   R1's 91 later rebalances turn over 1.96% of wealth on average (the largest 8.06%, LM27's A27-24) and cost 0.0073%
-  each [A34-12]; summed over 92 trades the costs are 0.81% of wealth for R1 and 4.22% for R4, and (34.1) gives R1's log
-  gap 0.0080768 against the sum 0.0080755 [A34-07]; the tax is 17% to 22% of the costs [A34-09].
+  each [A34-12]; summed over 92 trades the costs are 0.81% of wealth for R1 and 4.22% for R4, and (34.1) gives R1's
+  log gap 0.0080768 against the sum 0.0080755 [A34-07]; the tax is 17% to 22% of the costs [A34-09].
 - E3 §3 `twice`: at twice the costs R4 falls 0.56 points to 9.95% and drops below R7; R1 loses 0.11 points (12.78%);
   the order becomes R2 > R1 > R8 > R6 > R7 > R4 > R5 > R3 [A34-10]. R8's growth at borrowing spreads of 0, 2 and 5
-  points: 11.99%, 11.59%, 10.99% [A34-11]; R8 borrows at 62 of its 92 trades (LM31's A31-29, echoed in A34-11).
+  points: 11.99%, 11.59%, 10.99% [A34-11]; at a spread of 0 R8 still pays commission and tax, so this 11.99% is not
+  its gross growth, which also rounds to 11.99% [A34-05]. R8 borrows at 62 of its 92 trades (LM31's A31-29, echoed in
+  A34-11).
 - E4 §4 `adjusted`: 0050 closed at 72.30 on 17 January 2017. In an adjusted series built on 2 January 2020 that day
   shows 65.12; built on 31 December 2024, 55.20; built on 8 October 2026, after 20 distributions and the 4-for-1 split,
   13.25 [A34-14]. Its February 2017 distribution of NT\$1.70 yielded 2.32% of the previous close but reads as 12.65%
   on today's adjusted series [A34-15]. Returns from either series agree; only the levels moved.
-- E5 §4 `sameclose`: trade every signal at the signal day's own close (impossible: the close is known only after
-  13:30). Growth from the cash of 1 at 27 February 2019: R1 13.01%, R2 14.44%, R4 10.03%, R8 12.33%; changes from the
-  through case run from −0.48 points (R4) to +0.74 (R8) [A34-36]. For monthly rules the one-day shift is small and of
-  either sign; problem 8 shows a daily rule where the same mistake is large.
+- E5 §4 `sameclose`: move each of the 91 later trades to its signal day's own close (impossible: the close is known
+  only after 13:30), and keep the first purchase on 4 March 2019, so that both paths start from the same cash and
+  cover the same 7.5975 years (calendar days ÷ 365.25). Growth: R1 13.14%, R2 14.59%, R4 10.09%, R8 12.48%; the changes from the through case,
+  from unrounded values, run from −0.41 points (R4) to +0.89 (R8), and seven of the eight rules gain [A34-36]. For monthly rules the one-day
+  shift is small; problem 8 shows a daily rule where the same mistake is large.
 - E6 §5 `survivors`: of 69 ETFs with a row on 17 January 2017, 10 had none on 8 October 2026, and each is in the
-  delisting list [A34-18]. The six commodity and volatility futures ETFs of January 2017: equal amounts held to 8
-  October 2026 grew to 0.723 (−27.7%, −3.33% a year); the four survivors to 1.054 (+5.4%, +0.54% a year); the gap is
-  3.87 points a year over 9.7221 years [A34-20]. E5's 00635U and 00642U are two of the survivors.
-- E7 §6 `rc10`, Experiment 10 corrected: the best t-stat 3.97 [A34-22]; its one-sided p-value $3.5\times10^{-5}$,
-  Bonferroni's 0.354, (21.9)'s 0.298 [A34-23]; White's reality check (stationary bootstrap, $\ell=145$, $B=10{,}000$,
-  `default_rng([1, 20261011])`) 0.283, studentized 0.281, both with MC SE 0.0045; the bootstrap's 95% point for the
-  largest t-stat 4.77, so Romano and Wolf's first step rejects no rule [A34-24, A34-25]. The best of 10,000 random rules
-  is what chance gives.
+  delisting list [A34-18]. The six gold, oil and VIX futures ETFs of January 2017: equal amounts held to 8 October
+  2026 grew to 0.7234 (−27.7%, −3.33% a year); the four survivors to 1.0539 (+5.4%, +0.54% a year); the gap is 3.87
+  points a year over 9.7221 years (calendar days ÷ 365.25) [A34-20]. E5's 00635U and 00642U are two of the survivors.
+- E7 §6 `rc10`, Experiment 10 on TR23 (the total-return index) corrected: the best t-stat 3.97 [A34-22]; its
+  one-sided p-value $3.5\times10^{-5}$, Bonferroni's 0.354, (21.9)'s 0.298 [A34-23]; White's reality check (stationary
+  bootstrap, $\ell=145$ by LM22's rule, $B=10{,}000$, `default_rng([1, 20261011])`) 0.283, studentized 0.281, both
+  with MC SE 0.0045; the bootstrap's 95% point for the largest t-stat is 4.77, and no rule's t-stat reaches it, so
+  Romano and Wolf's first step rejects nothing [A34-24, A34-25]. That step divides by each rule's sample $s_{\mathrm u}$
+  inside the resamples (their footnote 22's variant) and centres at the sample means (their Remark 3.4). Hansen's
+  consistent SPA recentres the 9,814 rules with t ≥ $-\sqrt{2\ln\ln T}=-2.079$ and gives 0.277 (MC SE 0.0045); the code
+  uses each rule's iid $s_{\mathrm u}$ where Hansen recommends a kernel estimate, and its count "at or above" gives the
+  same 0.277 as his strict count [A34-25]. The best of 10,000 random rules is what chance gives.
 - E8 §6 `rcgrid`, the grid against R1 monthly: the largest t-stat of the 59 mean differences is 1.30 (R4, 126, every
-  6 months), one-sided p-value 0.0975, Bonferroni's 1; the studentized reality check with $\ell=74$ (LM22's rule over
-  the 60 configurations; R4 126 monthly gives 73.50) has p-value 0.375 (MC SE 0.0048), and at R1's own $\ell=17$,
-  0.421 (MC SE 0.0049); the bootstrap's 95% point is 2.43 against Bonferroni's 3.14, because the differences correlate
-  with median 0.78 [A34-32].
+  6 month-ends), one-sided p-value 0.0975, Bonferroni's 1; the studentized reality check with $\ell=75$ (LM22's rule on
+  the 59 differences from R1: R4 126 monthly's gives 74.63) has p-value 0.375 (MC SE 0.0048), and at $\ell=17$ (R1
+  monthly's own estimate, rounded) 0.421 (MC SE 0.0049); the bootstrap's 95% point is 2.42 against Bonferroni's 3.14,
+  because the differences correlate with median 0.78 [A34-32].
 - E9 §7 `pbo`, CSCV on the declared grid: 16 blocks of 115 days (11 earliest days dropped), 12,870 splits; PBO 0.663;
   logits' median −0.72; $k^*$'s out-of-sample Sharpe ratio is below 0 in 0.99% of the splits; its mean annualized
   ratio falls from 1.31 in sample to 0.80 out of sample; the slope of out-of-sample on in-sample is −0.86 [A34-29].
@@ -1727,16 +1878,17 @@ NumPy's, so its panel values differ from experiment 3's while their means agree 
 
 **Problems plan** (12; MC keys B, A, C, B, A, C; the lab solves 9, 11 and 12). Stems state the sample (E5's wealth
 frame, 5 March 2019 → 8 October 2026, net of commission 0.1425% each side and tax 0.1% on sales, 0 for 00679B; or
-TR23, 2003–2026, $r_f=0$), the window, the rebalancing dates and the label (shared decision "Problems"), the seed and
-draws, and the rounding.
+TR23, the TAIEX total-return index, 2003–2026, $r_f=0$), the window, the rebalancing dates and the label (shared
+decision "Problems"), the seed and draws, and the rounding.
 
-1. MC: NT\$1,000,000 of 0050 bought and later sold at the same price, commission 0.1425% on each side, tax 0.1% on the
-   sale; the round-trip cost. A NT\$2,850 (commission only: the 00679B case). **B** NT\$3,850. C NT\$2,425 (one side's
-   commission plus the tax) [A34-13].
-2. MC: a first purchase from cash at commission 0.1425%, self-financing; cost ÷ pre-trade wealth. **A** 0.1423%. B
-   0.1425% (ignores that the cost reduces the amount bought). C 0.2850% (a round trip's commission) [A34-12, A34-13].
-3. MC: CSCV with 16 blocks; the number of splits. A 12,780 (the figure the paper prints; `plans/vol-5.md:250`). B 65,536 (every subset of the
-   blocks). **C** 12,870 [A34-35].
+1. MC: which sale of an E5 fund on 1 October 2026 pays no securities transaction tax? A 00635U (a futures ETF, taxed
+   at 0.1% like other ETFs). **B** 00679B (a bond ETF of a securities investment trust, exempt to 2026-12-31 by
+   Art. 2-1). C 00646 (holding foreign stocks exempts no fund from Art. 2's 0.1%).
+2. MC: R1's costs over its 92 trades sum to 0.0080755 of pre-trade wealth [A34-07]; which is true of
+   $\ln(W^{\text{gross}}/W^{\text{net}})$? **A** it is slightly larger, 0.0080768, because $-\ln(1-x)>x$. B it equals
+   the sum, because the costs are scale-free. C it is smaller, because later trades are made on a smaller net book.
+3. MC: CSCV with 16 blocks; the number of splits. A 12,780 (the figure the paper prints; shared decision
+   "References"). B 65,536 (every subset of the blocks). **C** 12,870 [A34-35].
 4. MC: $n=60$ configurations; the in-sample best ranks 31st of 60 out of sample (1 = worst); its logit. A −0.0328
    (counts the rank from the best). **B** 0.0328. C 4.094 (uses its in-sample rank, 60) [A34-35].
 5. MC: the best of 10,000 independent null t-stats is 3.9738; (21.9)'s probability that the maximum reaches it.
@@ -1746,54 +1898,60 @@ draws, and the rounding.
    reject. **C** picking the in-sample best adds nothing over the grid's typical member, while the members' common
    positive return is not the search's doing [A34-29].
 7. Derive (34.1) for scale-free costs and the same targets, and show $\sum\text{cost}/W^{\mathrm{pre}}\le\ln(W^{\text{gross}}
-   /W^{\text{net}})$; check on R1 (0.0080755 against 0.0080768) and R4 (0.0422153 against 0.0422296) [A34-07].
-8. Look-ahead in a daily rule (TR23, $r_f=0$, cash and borrowing at 0): the scale $\min(1.5,\bar\sigma_t/\hat\sigma_{t+1\mid
-   t})$, $\bar\sigma_t^2$ the uncentred mean square of the last 504 returns, $\hat\sigma$ by (26.2) with $\lambda=0.94$.
-   Set at the previous close it grows 14.92% a year (volatility 18.21%, worst day −7.70%); computed with the same day's
-   return, 16.72% (17.02%, −4.93%) [A34-16]. On 7 April 2025 TR23 fell 9.70%: the scales were 0.725 and 0.428, the
-   scaled returns −7.03% and −4.15% [A34-16]. Which version could a trader run, and why does the other look safer?
-   The solution adds that TR23 itself grew 13.34% with volatility 18.62% over the same days [A34-16].
-9. A full-sample parameter (lab): the exact Kelly root of (4.5) on all of TR23 is 4.138; held from 2005-12-30 it grows
-   31.42% a year, against 21.75% for the trailing 729-return root capped to [0, 3] and 13.31% for $f=1$; borrowing at
-   3.5% a year on $f-1$ turns 31.42% into 20.43% and 21.75% into 16.11% [A34-17]. (a) Why is 31.42% not a backtest
-   result? (b) What does the borrowing rate change, and why is even 16.11% *hypothetical*? (c) State the protocol behind 21.75% (window, signal and trade dates, label).
+   /W^{\text{net}})$; check on R4 (0.0422153 against 0.0422296) [A34-07].
+8. Look-ahead in a daily rule (TR23, the TAIEX total-return index, $r_f=0$, cash and borrowing at 0): the scale
+   $\min(1.5,\bar\sigma_t/\sigma_{t+1\mid t})$, with $\bar\sigma_t^2$ the uncentred mean square of the 504 returns
+   through $t$ and $\sigma^2_{t+1\mid t}$ from (26.2) with $\lambda=0.94$, run through the same 504 returns from
+   $\bar\sigma_t^2$ (R8's convention). Set at the previous close it grows 14.93% a year (volatility 18.23%, worst day
+   −7.70%); computed with the same day's return, 16.74% (17.04%, −4.93%) [A34-16]. On 7 April 2025 TR23 fell 9.70%:
+   the scales were 0.725 and 0.428, the scaled returns −7.03% and −4.15% [A34-16]. Which version could a trader run,
+   and why does the other look safer? The solution adds that the index itself grew 13.34% with volatility 18.62% over
+   the same days [A34-16].
+9. A full-sample parameter (lab): the exact Kelly root of (4.5) on all of TR23 (the total-return index) is 4.138; held
+   from 2005-12-30 it grows 31.42% a year, against 21.75% for the trailing 729-return root capped to [0, 3] and 13.31%
+   for $f=1$; borrowing at 3.5% a year on $f-1$ turns 31.42% into 20.43% and 21.75% into 16.11% [A34-17]. (a) Why is
+   31.42% not a backtest result? (b) What does the borrowing rate change, and why is even 16.11% *hypothetical*? (c)
+   State the protocol behind 21.75% (window, signal and trade dates, label).
 10. Survivorship: the six growth factors of X5 [A34-19]; equal amounts on 17 January 2017; compute the mean of all six
-    and of the four survivors and the gap in log growth over 9.7221 years: 0.723, 1.054, 3.87 points a year [A34-20].
+    and of the four survivors and the gap in log growth over 9.7221 years (calendar days ÷ 365.25): 0.723, 1.054, 3.87
+    points a year [A34-20].
 11. Python: White's reality check on Experiment 10 with LM22's `stationary_idx` (`default_rng([1, 20261011])`,
     $B=10{,}000$, $\ell=145$): p-value 0.283 (MC SE 0.0045); studentized 0.281 [A34-24, A34-25]. Then the grid against
-    R1 at $\ell=74$ and 17: 0.375 and 0.421 [A34-32]; why LM22's rule takes the largest length.
+    R1 at $\ell=75$ and 17: 0.375 and 0.421 [A34-32]; why LM22's rule takes the largest length.
 12. Derive with (21.9) and (20.9) the median of the in-sample best's annualized Sharpe ratio for $n=60$ independent
     zero-skill strategies over 920 in-sample days, $\Phi^{-1}(0.5^{1/60})\sqrt{A_{\mathrm w}/920}=1.17$, and say why its
     expected out-of-sample value is 0; check against E10's 1.20 and −0.001 (`default_rng([2, 20261011])`, 200 panels)
     [A34-33].
 
-**Lab parts** (`build/make_lab34.py`; reads only its `data/`, built by `data/make_lab_data.py`: the rules' per-date
-targets and the wealth frame (the shared derived files of the Labs decision), the grid's 60 daily net-return series
-(`lm34_grid.csv`, a new derived file, O7), `taiex_tr.csv` (TR23), `0050_daily_raw.csv` and `0050_dividends.csv`, and
-after O1 the delisting list and the six futures funds' prices, all Free (the snapshots are not lab files)): 1 the protocol: rebuild R1's net path from its targets with (27.2), check it against
+**Lab parts** (`build/make_lab34.py`; reads only its `data/`, built by `data/make_lab_data.py` as the shared "Labs"
+decision lists: the rules' per-date targets and exposures, the wealth frame, the eight rules' net and gross wealth
+paths and the grid's 60 daily net-return series, `lm34_grid.csv`; and LM34's own files, `taiex_tr.csv` (TR23),
+`0050_daily_raw.csv`, `0050_dividends.csv`, the delisting list and the six futures funds' prices, all Free (the
+snapshots are not lab files; O7)): 1 the protocol: rebuild R1's net path from its targets with (27.2), check it against
 the derived wealth, E1, X2; 2 costs: (34.1) for every rule, X3, E3; 3 look-ahead: X4 and E4 from the closes and
 distributions, problem 8 on TR23; 4 survivorship: X5, E6, problem 10; 5 the reality check: E7 (experiment 1), problem
-11, Romano–Wolf's stepdown on Experiment 10 (the stepdown's details checked in the original first, O3); 6 CSCV: E9,
+11, Romano–Wolf's stepdown on Experiment 10 by their Algorithm 4.1 (the sample's $s_{\mathrm u}$, as E7) and
+Algorithm 4.2 (each resample's own), pp. 1252–1253; 6 CSCV: E9,
 X8, X9 from `lm34_grid.csv`, E10 on 20 panels; 7 the Kelly walk-forward on TR23 (lm22.md:144, `make_lab04.py:642`):
 problem 9, labelled *hypothetical* (daily rebalancing to the month's leverage, no trading costs, borrowing at 0 or
 3.5%); 8 problems 9, 11, 12. Extension (*In-sample*, declared first): add a fourth window (756 rows) to the grid, write
 the declaration before running it, and recompute PBO and the reality check with $n=78$; a closing sentence says that
 the extension is another search on the same data. Labs write plain "LM33", "LM45", never `[[…]]`.
 
-**Cross-module tags.**
+**Cross-module tags** (decision C8: the later briefs that cite each; Volume VIII–IX briefs are not yet written):
 
 - (34.1) $\ln\big(W^{\text{gross}}_T/W^{\text{net}}_T\big)=-\sum_{\text{trades}}\ln\big(1-\operatorname{cost}/W^{\mathrm{pre}}\big)
   \ge\sum_{\text{trades}}\operatorname{cost}/W^{\mathrm{pre}}$, for scale-free costs, both paths trading to the same
-  targets, and financing proportional to wealth (LM35, LM45, LM48).
-- (34.2) $P^{\mathrm{adj}}_{t\mid t'}=P_{t'}/G_{t,t'}$ with $G_{t,t'}$ the total-return growth factor (Volume I's
-  $(P_t+D_t)/(P_{t-1}/s)-1$ compounded); it depends on the build date $t'$, so a level from an adjusted series is
-  look-ahead for any rule acting before $t'$ (LM48, LM49).
+  targets, and financing proportional to wealth (no Volume V–VI brief cites it).
+- (34.2) $P^{\mathrm{adj}}_{t\mid t'}=P_{t'}/G_{t,t'}$ with $G_{t,t'}=\prod_{u=t+1}^{t'}(P_u+D_u)/(P_{u-1}/s_u)$, Volume
+  I's total return plus 1 compounded, $s_u$ LM27's split ratio; it depends on the build date $t'$, so a level from an
+  adjusted series is look-ahead for any rule acting before $t'$ (LM35, decision B6).
 - (34.3) CSCV and $\mathrm{PBO}=\#\{\text{splits with logit}\le0\}/\binom{S}{S/2}$, logit $=\ln\big(\omega/(1-\omega)\big)$,
-  $\omega=j/(n+1)$ (LM48, LM49, LM50).
+  $\omega=j/(n+1)$ (no Volume V–VI brief cites it).
 - (34.4) White's reality check: the share of $B$ recentred stationary resamples with
   $\max_k\sqrt T(\bar R_{k,\text{boot}}-\bar R_k)\ge\max_k\sqrt T\,\bar R_k$ ($\bar R_k$ in excess of the benchmark);
   studentized with $s_{\mathrm u,k}/\sqrt T$; valid for large $T$ under stationarity (*stated without proof*, White
-  2000) (LM49, LM50).
+  2000) (no Volume V–VI brief cites it).
 
 **Pitfalls to pre-empt.**
 
@@ -1808,24 +1966,31 @@ the extension is another search on the same data. Labs write plain "LM33", "LM45
   twice-the-costs sensitivity stands in for it; the bond-ETF exemption runs to 2026-12-31 as the law reads on
   2026-10-24 (an Executive Yuan draft of 2026-10-01 to extend it is not law).
 - The reality check asks whether the best beats the benchmark; a large p-value does not show that the rules are
-  equal, and a small one does not say which rules beat it. Its block length follows LM22's rule; report the
-  sensitivity (0.375 against 0.421, E8) [A34-32].
+  equal, and a small one does not say which rules beat it. Its block length follows LM22's rule on the series the
+  statistic involves; report the sensitivity (0.375 against 0.421, E8) [A34-32].
 - PBO measures how well in-sample ranks carry over within one grid, not whether the rules make money (E9); one
-  sample's PBO is itself noisy (0.12 to 0.87 across noise panels, E10) [A34-33]. Adding configurations after seeing results is a
-  new search: count it.
+  sample's PBO is itself noisy (0.12 to 0.87 across noise panels, E10) [A34-33]. Adding configurations after seeing
+  results is a new search: count it.
 - CSCV's count is $\binom{16}{8}=12{,}870$; the paper prints 12,780 (shared decision "References").
-- The Kelly walk-forward borrows for free unless the stem says otherwise; its leverage sits at the cap of 3 in 178 of
-  250 months [A34-17], so the cap, chosen in LM4's lab, drives the result.
+- The Kelly walk-forward borrows for free unless the stem says otherwise; its leverage sits at the cap of 3 at 178 of
+  the 250 month-ends [A34-17], so the cap, chosen in LM4's lab, drives the result.
 - Ownership: no rule's Sharpe ratio, volatility, VaR or drawdown is printed (LM33, LM30–LM31, LM32); R8's exposures
-  are LM31's and the single trades LM27's, echoed with their anchors.
-- Rounding (flagged anchors, print as rounded from the unrounded values): R2's 14.49%, R4's 10.51%, R5's 9.38%, R7's
-  10.28% [A34-04]; R4's gross minus net 0.56 points [A34-05]; R1's turnover 0.24 [A34-06]; R5's, R7's and R8's costs
-  1.03%, 1.28%, 3.06% [A34-07]; 15.44% [A34-15]; the scale 0.725 and TR23's 18.62% [A34-16]; 2.57 [A34-17]; 1.593 and
-  0.038 [A34-19]; the grid's best t-stat 1.30 [A34-32]; seven of the widget's 30 means [A34-34]. Never print a
-  difference of two printed rounded values (for example the two scales' growth gap) unless the script prints it.
+  are LM31's and the cost arithmetic of single trades LM27's (decision A5), echoed with their anchors.
+- Near-twins (decision C7): $\tau=7.5975$ years counts calendar days ÷ 365.25, while LM33's span counts sessions ÷
+  $A_{\mathrm w}$ [A34-02]; R8's 11.99% at a spread of 0 is not its gross 11.99% (E3) [A34-05, A34-11]; TR23 is named
+  as the total-return index beside its numbers; "month" is a month-end signal or a calendar month-end, said each time.
+- Rounding (flagged anchors, printed as rounded from the unrounded values): R2's 14.49%, R4's 10.51%, R5's 9.38%, R7's
+  10.28% [A34-04, A34-28]; R4's gross minus net 0.56 points [A34-05]; R1's turnover 0.24 [A34-06]; R5's, R7's and R8's
+  costs 1.03%, 1.28%, 3.06% [A34-07]; R8's tax share 18% [A34-09]; R8's 11.18% at twice the costs (printed-as only)
+  [A34-10]; R8's 10.99% at a 5-point spread [A34-11]; 15.44% [A34-15]; −4.93%, the scale 0.725 and the index's 18.62%
+  [A34-16]; 2.57 [A34-17]; 1.593 and 0.038 [A34-19]; R1's 12.96% [A34-28]; 0.99% [A34-29]; −4.09 and 3.38 [A34-31];
+  the best t-stat 1.30, the p-value 0.375, its MC SE 0.0048 and the 95% point 2.42 [A34-32]; seven of the widget's 30
+  means [A34-34]. Never print a difference of two printed rounded values (for example the two scales' growth gap)
+  unless the script prints it.
 - References: White (2000) read in the original for its statistic and p-value (Corollary 2.4, the p-value $1-M/N$);
-  Romano and Wolf (2005) and Hansen (2005) at the abstract level until O3; Bailey, Borwein, López de Prado and Zhu for
-  CSCV; Elton, Gruber and Blake (1996) only for its abstract's claim; Brown, Goetzmann, Ibbotson and Ross (1992)
+  Romano and Wolf (2005) and Hansen (2005) as decision F's source check read them, with the code's departures said
+  where the numbers are printed (E7); Bailey, Borwein, López de Prado and Zhu (2017) for CSCV, in the book's own words;
+  Elton, Gruber and Blake (1996) only for its abstract's claim; Brown, Goetzmann, Ibbotson and Ross (1992)
   bibliographic only (Sources).
 
 **Curriculum guidance carried** (`plans/vol-5.md`'s table):
@@ -1842,10 +2007,10 @@ the extension is another search on the same data. Labs write plain "LM33", "LM45
 - Different failures in one case (g:87–90): LM34 shows weak growth net of costs; drawdowns and funding are LM32's
   and LM35's.
 
-**Stage 4 for earlier modules.**
+**Stage 4 for earlier modules** (decision G).
 
-- `leads`: lm04.md:6 gains 34 and lm11.md:6 gains 34 (both on the plan's list); lm20.md:6 gains 34 ((20.9), E10 and
-  problem 12; new). lm17, lm18, lm21, lm22, lm23, lm25 and lm26 already list 34.
+- `leads`: lm04.md:6 gains 34, lm11.md:6 gains 34 and lm20.md:6 gains 34 ((20.9), E10 and problem 12), as decision G
+  lists them. lm17, lm18, lm21, lm22, lm23, lm25 and lm26 already list 34.
 - lm21.md:373 (on the plan's list), proposed wording: "[[LM4]] warned that backtests overstate Sharpe ratios. [[LM33]]
   deflates a Sharpe ratio for the number of trials. [[LM34]] corrects a search on the same data (White 2000; Romano
   and Wolf 2005) and tests the best rule on later data."
@@ -1863,23 +2028,40 @@ the extension is another search on the same data. Labs write plain "LM33", "LM45
   statistic among the sorted resampled ones over their number; the resamples use Politis and Romano's stationary
   bootstrap. Used for (34.4) and §6's Deep Dive.
 - Romano, J. P., and M. Wolf, "Stepwise Multiple Testing as Formalized Data Snooping", *Econometrica* 73(4):
-  1237–1282, 2005, DOI [10.1111/j.1468-0262.2005.00615.x](https://doi.org/10.1111/j.1468-0262.2005.00615.x). In
-  SOURCES; Crossref re-read 2026-10-24; abstract (OpenAlex record, 2026-10-24): a stepwise procedure that
-  asymptotically controls the familywise error rate, studentization advocated, set as strategies against a benchmark.
-  The stepdown's steps are not read in the original (O3): §6 states the idea; the lab's code waits for O3.
-- Hansen, P. R., "A Test for Superior Predictive Ability", *J. Business & Economic Statistics* 23(4): 365–380, 2005,
-  DOI [10.1198/073500105000000063](https://doi.org/10.1198/073500105000000063). In SOURCES (bibliographic); Crossref
-  and the OpenAlex abstract read 2026-10-24: a studentized statistic and a sample-dependent null distribution make the
-  test more powerful than the reality check and less sensitive to poor alternatives. **UNVERIFIED:** the threshold
-  $-\sqrt{2\ln\ln T}$ that the script uses to select the recentred rules (A34-25); not relied on (O3).
+  1237–1282, July 2005, DOI [10.1111/j.1468-0262.2005.00615.x](https://doi.org/10.1111/j.1468-0262.2005.00615.x). In
+  SOURCES; read in the published article by decision F's source check (2026-10-24). Algorithm 3.1 (p. 1247), the
+  stepdown: order the strategies by their statistics, reject each whose statistic exceeds one common critical value,
+  the bootstrap quantile, at the test's level, of the maximum over the hypotheses not yet rejected, and repeat until
+  no new rejection. The studentized form is Algorithm 4.1 (p. 1252), with its quantiles by Algorithm 4.2 (p. 1253). Footnote
+  22 (p. 1252): the original sample's standard deviation inside the resamples, Hansen's choice, is first-order
+  consistent, though the resample's own is preferred. Remark 3.4 (p. 1251): with the stationary bootstrap and a linear
+  statistic, the sample value may stand in for the centring parameter. E7's first step uses both (footnote 22's
+  variant, centred at the sample means); the lab codes Algorithms 4.1 and 4.2.
+- Hansen, P. R., "A Test for Superior Predictive Ability", *J. Business & Economic Statistics* 23(4): 365–380, October
+  2005, DOI [10.1198/073500105000000063](https://doi.org/10.1198/073500105000000063). In SOURCES (bibliographic); read
+  by decision F's source check (2026-10-24) in the UNC repository's postprint, which carries the journal's layout
+  without page numbers (pages counted from 365). The statistic is the largest studentized mean loss difference against
+  the benchmark, floored at 0 (p. 368). The consistent version recentres only the models whose t-statistic is at or
+  above $-\sqrt{2\ln\ln T}$ (his $n$ is the number of returns; p. 368, and the bootstrap form, §3, p. 372), the
+  natural logarithm of the law of the iterated logarithm (p. 370); the others keep their negative means, and only this version gives a consistent p-value
+  (Corollary 2, p. 371). Hansen uses the stationary bootstrap, recommends a kernel estimate of each standard deviation
+  and keeps the test valid without it (pp. 371–372), and counts resamples strictly above the statistic over $B$
+  (p. 372). A34-25 follows him except for the iid $s_{\mathrm u}$ and the count "at or above", which gives the same
+  0.277; E7 says both.
 - Politis, D. N., and J. P. Romano, "The Stationary Bootstrap", *JASA* 89(428): 1303–1313, 1994; Politis and White
   (2004) and Patton, Politis and White (2009) for the block length: in SOURCES ("LM22"), Crossref re-read 2026-10-24.
 - Bailey, D. H., J. M. Borwein, M. López de Prado and Q. J. Zhu, "The probability of backtest overfitting", *Journal of
-  Computational Finance*, DOI [10.21314/JCF.2016.322](https://doi.org/10.21314/JCF.2016.322). Crossref (2026-10-24):
-  authors, title and journal; issued 2016-09; Crossref holds no volume or pages. Volume 20(4): 39–69 and the
-  $\binom{16}{8}$ misprint are the editor's verified entries (`plans/vol-5.md`, "References"); the year to print (2016
-  online or the print issue's year) is to be confirmed with the volume (O8). Abstract (OpenAlex, 2026-10-24): PBO is
-  estimated by combinatorially symmetric cross-validation. Used for (34.3) and §7.
+  Computational Finance* 20(4): 39–69, April 2017, first published online 2016-09-19, DOI
+  [10.21314/JCF.2016.322](https://doi.org/10.21314/JCF.2016.322) (the publisher's article page, read by decision F's
+  source check, 2026-10-24); the year printed is 2017. CSCV (Algorithm 2.3) was read in the authors' Lawrence Berkeley
+  National Laboratory manuscript of 27 February 2015 (eScholarship); the JCF text was not compared. The steps: the
+  $T\times n$ matrix of the trials' synchronous performance, $S$ equal blocks of rows ($S$ even), every choice of $S/2$
+  blocks as the in-sample set kept in time order with its complement out of sample, the in-sample best's
+  out-of-sample relative rank and its logit; PBO is the share of logits at or below 0 (§3.1), and §3.2 adds the
+  degradation regression and the probability of loss. The manuscript prints 12,780 for $\binom{16}{8}=12{,}870$ and has
+  two slips (step c calls the in-sample set the testing set; step f drops the bars), so §7 states the steps in the
+  book's own words, citing the manuscript. Dropping the earliest rows to make 16 equal blocks is the book's
+  convention, said once. Used for (34.3) and §7.
 - Elton, E. J., M. J. Gruber and C. R. Blake, "Survivor Bias and Mutual Fund Performance", *Review of Financial
   Studies* 9(4): 1097–1120, 1996, DOI [10.1093/rfs/9.4.1097](https://doi.org/10.1093/rfs/9.4.1097). Crossref and the
   OpenAlex abstract (2026-10-24): funds that disappear tend to do so after poor performance; the study tracks every
@@ -1901,18 +2083,27 @@ the extension is another search on the same data. Labs write plain "LM33", "LM45
   and must notify a client before the order when the rate exceeds 1.425‰ of the value traded:
   [twse-regulation.twse.com.tw, FID FL007304](https://twse-regulation.twse.com.tw/m/LawContent.aspx?FID=FL007304), read
   2026-10-24 by the drafter.
-- TWSE, the 原型期貨 ETF (futures ETF) page, read 2026-10-24 by the drafter (URL not recorded; the editor records it
-  with O2): futures ETFs are issued by domestic futures trust enterprises under the futures trust fund rules; their
-  code ends in U and their short name starts with 期; rolling futures in contango causes losses the manager cannot
-  avoid, and the page says they are unsuited to long holding. Used in §5 (one sentence on why these funds shrink).
-- 財政部統計處 統計通報 (Ministry of Finance, statistics notice) of 2024-11-14 on ETF trading and tax, as reported by
-  [CNA, 2024-11-14](https://www.cna.com.tw/news/afe/202411140244.aspx) (read 2026-10-24): ETFs' tax rate is below
-  stocks', and bond ETFs are exempt from 106 to 115 (2017–2026). The report does not mention futures ETFs; the shared
-  decision's reading of the notice itself (futures ETFs among the ETFs taxed at 千分之1) is the editor's survey's, not
-  re-read here (O2).
+- 財政部 財政統計通報 (Ministry of Finance, statistics notice) No. 21, 2024-11-14, on ETF trading in January–September
+  2024: read in the Ministry's PDF by the editor (decision F) and by the source check (2026-10-24). Paragraph 1 gives
+  the ETF rate, 千分之1, below the rate on ordinary stocks; paragraph 2 the bond-ETF exemption from 民國106 to 115
+  (2017–2026); the table "113年1-9月ETF成交狀況－按投資標的分" has a 原型期貨 (futures ETF) column with its tax (0.2
+  億元). The notice prints no rate per column, so the text rests the futures ETFs' 0.1% on Art. 2 and cites the notice
+  in support. Its URL goes into SOURCES with the entry from the editor's copy. (CNA's report of the same day does not
+  mention futures ETFs and is not cited.)
+- TWSE, ETF 專區, the rules page,
+  [twse.com.tw/zh/products/securities/etf/overview/rules.html](https://www.twse.com.tw/zh/products/securities/etf/overview/rules.html),
+  read 2026-10-24 by the source check and again by the reviser; the page prints no date. Its cost row: "證交稅：ETF賣方課徵0.1%
+  (債券ETF免徵證交稅10年至2026年)", as the shared cost model states.
+- TWSE, ETF 總覽,
+  [twse.com.tw/zh/products/securities/etf/overview/introduction.html](https://www.twse.com.tw/zh/products/securities/etf/overview/introduction.html),
+  read 2026-10-24 by the reviser through a fetch tool (O13): a futures-trust ETF tracks a futures index and rolls its
+  contracts by the index's rules, and when far contracts cost more than near ones (正價差, contango) the roll buys high
+  and sells low, a loss it cannot avoid. The page does not call such funds unsuited to long holding, so §5's one
+  sentence says only the first part, once the source check confirms it.
 - FinMind datasets `TaiwanStockPrice`, `TaiwanStockDividendResult`, `TaiwanStockSplitPrice`,
   `TaiwanStockTotalReturnIndex` and `TaiwanStockDelisting` (retrieval dates under Data role), cited in every exhibit's
-  Source line; arch's `optimal_block_length` and `StationaryBootstrap` (SOURCES, "Python (Volume IV)").
+  Source line; `TaiwanStockInfo` (retrieved 2026-10-24, not registered) for the six funds' names (O12); arch's
+  `optimal_block_length` and `StationaryBootstrap` (SOURCES, "Python (Volume IV)").
 - Not relied on: Bailey, Borwein, López de Prado and Zhu, "Pseudo-Mathematics and Financial Charlatanism", *Notices of
   the AMS* 61(5), 2014, DOI 10.1090/noti1105 (Crossref gives the first page, 458, only).
 
@@ -1939,96 +2130,49 @@ for the rest):
 | delisting | 刪除表列 (電子計算機名詞 only) | 下市 (the common form; 樂詞網's entry is a computing term) |
 | benchmark | 基準 (統計學名詞) | 基準 |
 
-**Open before Stage 2** (each with a recommendation and its evidence):
+**Open before Stage 2** (each with a recommendation and its evidence). Closed by the editor's decisions and decision
+F's source check of 2026-10-24, kept here only as a record: O1 (the survivorship files are registered, commit
+6b02e71, with `--exclude vol6/etf_snapshot` for a Free account instead of an `OPTIONAL` entry; the script reads
+`data/raw/vol6/` and its A34-18 to A34-20 equal the scratch run; the 33-fund cohort is not registered and A34-21 is
+withdrawn); O2 (decision F and the source check: the notice and TWSE's ETF page were read, the page's URL is under
+Sources, and the notice prints no rate per column, so the text rests the futures ETFs' 0.1% on Art. 2 and cites both
+in support; the notice's URL goes into SOURCES from the editor's copy); O3 (the source check read Hansen and Romano
+and Wolf in the originals: the threshold $-\sqrt{2\ln\ln T}$ is Hansen's, p. 368, so A34-25 keeps its definition and
+value and E7 prints the SPA p-value 0.277 with the code's two departures; E7 names Romano and Wolf's first step with
+footnote 22's variant and Remark 3.4's centring; the lab codes Algorithms 4.1 and 4.2); O4 (decision E: X3 shows
+gross against net log growth); O5 (accepted: the prerequisite tags as listed, and lm20.md gains lead 34 at Stage 4,
+decision G); O6 (decision D: $\ell=75$ by LM22's rule on the 59 differences from R1, 17 as the sensitivity); O7 (the
+shared "Labs" decision now lists `lm34_grid.csv`); O8 (the source check: *J. Computational Finance* 20(4): 39–69,
+April 2017, online 2016-09-19, from the publisher's article page; 2017 is printed); O9 (accepted: the last traded
+close values a delisted fund, said in X5's note and §5); O10 (accepted: the widget runs CSCV live, checked in Node);
+O11 (LM27's §4 now points to §5, which says once that E5 was chosen from survivors).
 
-- **O1. Survivorship registrations (capability B4).** Recommendation: register the seven files below (the drafter
-  used 38 FinMind calls in all, within the 40 allowed). Five are Free (the delisting list and the four price files,
-  which A34-19 to A34-21 and the lab need); the two ETF snapshots are one-date queries without a `data_id`, outside
-  FinMind's Free tier (`list_datasets`: `TaiwanStockPrice` "Free (w/ data_id)"; an inference from that label, the
-  owner's Sponsor plan served them). A reader on a Free account could not rebuild the snapshots, as with Volume II's
-  Backer files today; so the drafter recommends adding `"vol6/etf_snapshot"` to `fetch_finmind.py`'s `OPTIONAL` tuple
-  (now `("vol4_settlement/",)`, a one-line code change for the owner to approve), after which `--verify` accepts them
-  missing and the script prints A34-18's own PENDING note while A34-19 to A34-21 still compute (tested on a copy
-  without the snapshots). The scratch copies at
-  `…/scratchpad/s1/briefs/lm34/raw_vol6/` were rendered from FinMind answers of 2026-10-24 exactly as
-  `fetch_finmind.py`'s `render()` writes, so they can be copied to `data/raw/vol6/` and registered; `--add` re-fetches
-  each query and refuses a file it cannot rebuild byte for byte (it needs `FINMIND_TOKEN`). Then
-  `uv run python data/check_chunk.py` on each price file, and the script's PENDING notes disappear; A34-18 to A34-20
-  must then equal the values above (the scratch run used the same bytes).
-
-  ```bash
-  F=data/fetch_finmind.py
-  uv run python $F --add vol6/delisting__2000-01-01__2026-10-08.csv --dataset TaiwanStockDelisting \
-      --start 2000-01-01 --end 2026-10-08 --filter "stock_id=^00" --sort date --sort stock_id
-  for D in 2017-01-17 2026-10-08; do
-    uv run python $F --add vol6/etf_snapshot__$D.csv --dataset TaiwanStockPrice --start $D --end $D \
-        --map volume=Trading_Volume --filter 'stock_id=^00\d{2,4}[A-Z]?$' --sort date --sort stock_id
-  done
-  for S in 00672L 00673R 00674R 00677U; do
-    uv run python $F --add vol6/${S}__2016-12-01__2026-10-08.csv --dataset TaiwanStockPrice --data-id $S \
-        --start 2016-12-01 --end 2026-10-08 --map volume=Trading_Volume
-  done
-  ```
-
-  Columns: delisting `date, stock_id, stock_name` (63 rows); snapshots `date, stock_id, close, volume` (69 and 358
-  rows; untraded funds print close 0, two on 2017-01-17); prices `date, open, max, min, close, spread, volume` (the
-  E5 file layout; 967, 2,396, 2,396 and 1,078 rows). `--add` infers the kinds from the file (stock ids hold letters, so
-  they stay strings). Run the `--filter` arguments from Git Bash with the single quotes shown (PowerShell would need
-  other quoting). The optional cohort (A34-21: the 33 funds whose codes end in L, R or U with a row on 2017-01-17; 27
-  more price files, same command) is **not recommended**: its equal-amount mean (4.127, against a median of 0.464 and
-  20 of 33 below 1) is driven by a few leveraged winners, so it teaches less than the six futures funds; keep A34-21's
-  ID with its PENDING note, or withdraw it.
-- **O2. The futures-ETF tax source.** The shared decision rests the 0.1% for 00635U and 00642U on the Ministry of
-  Finance's 統計通報 No. 21 and TWSE's ETF rules page. The drafter read the statute (Art. 2's 0.1% for "other
-  securities approved by the government"; Art. 2-1 exempts only securities-investment-trust bond ETFs, and futures ETFs
-  are futures-trust funds) and CNA's report of the notice, which does not mention futures ETFs. Recommendation: the
-  editor re-reads the notice's futures-ETF line (or TWSE's ETF rules page) and records both URLs in SOURCES before Stage
-  2; the rate itself is consistent with the statute.
-- **O3. Hansen's SPA and Romano–Wolf's stepdown in the original.** A34-25 prints a consistent-SPA p-value (0.277)
-  with a threshold the drafter took from memory, and the lab would code the stepdown. Recommendation: read Hansen
-  (2005) §2 and Romano and Wolf (2005) §3–4 before Stage 2; until then the text states both in words, prints
-  White's and the studentized p-values only, and E7 omits the SPA value. If the threshold differs, A34-25 changes.
-- **O4. The spine's exhibit "gross against net Sharpe ratio by rule".** The Owners decision gives the rules' Sharpe
-  ratios to LM33; LM34 owns growth, turnover and costs. Recommendation: X3 shows gross against net log growth
-  (stacked bars); LM33 may show the Sharpe ratios gross and net if it wants them.
-- **O5. Prerequisite tags.** The spine lists (22.2) and (26.1), (26.8), (26.9); LM34 uses (22.3) and (22.4) (the
-  stationary bootstrap and its p-value) and (26.2) and (26.8); (21.8) is not used (LM34 re-teaches no FDR). It also
-  adds LM20 for (20.9) (E10, problem 12), which puts 34 into lm20.md's leads at Stage 4. Recommendation: accept.
-- **O6. The grid's reality-check block length.** The first drafter used the ceiling of R1's own Politis–White estimate
-  (18), which is not LM22's rule. The script now takes LM22's rule over the 60 configurations (74, from R4 126
-  monthly's 73.50) and prints the sensitivity at R1's own length rounded (17): p-values 0.375 and 0.421 [A34-32].
-  Recommendation: keep LM22's rule as the printed result and the sensitivity in E8; both are far from rejecting.
-- **O7. Lab data for the grid.** The lab cannot import `vol5_rules.py` (Labs decision), and CSCV needs the 60
-  configurations' daily net returns. Recommendation: `data/make_lab_data.py` (the editor's file) writes
-  `lm34_grid.csv` (1,851 rows × 60 columns, a derived series of portfolio returns, git-ignored like every lab file)
-  from `vol5_rules` with the grid's windows, as it writes the through case's derived files.
-- **O8. Bailey, Borwein, López de Prado and Zhu's year and pages.** Crossref holds only the DOI record (issued
-  2016-09). Recommendation: the editor's verified 20(4): 39–69 stays, and the year printed is the print issue's,
-  confirmed on the publisher's page with the volume when SOURCES gains the entry.
-- **O9. A delisted fund's value.** The last traded close stands in for the liquidation payout, which FinMind does not
-  hold (00672L's last traded close, on 2020-11-12, gives $G=0.038$ [A34-19]). Recommendation: state the convention in X5's note
-  and §5; no payout figure is printed unless a dated official notice is found.
-- **O10. The widget's live CSCV.** Recommendation: live CSCV in `src/lm34.js` (module-local, under 30 lines) with the
-  30 precomputed means as a readout, checked in Node against Python on a fixed test matrix; the fallback is the
-  precomputed means alone with one stored histogram per state (30 histograms of 18 counts).
-- **O11. E5's own survivorship.** E5's 00635U and 00642U were chosen on 2026-10-24 from funds still listed; the
-  leveraged oil fund of the same family (00672L) was delisted in 2020 [A34-19]. Recommendation: §5 says so once and
-  the hygiene note keeps "fixed in advance" for the rules only; LM27's universe paragraph may gain a pointer to §5 at
-  Stage 4 (the LM27 brief's choice).
+- **O12. The six funds' names.** No registered file names the four survivors: the snapshots carry no `stock_name`,
+  and the delisting file names only 00672L and 00677U. The script fixes the six by code, with the names from FinMind
+  `TaiwanStockInfo` (retrieved 2026-10-24 by the drafter, not registered), and checks the two delisted names against
+  the registered file. 00672L's short name lacks the 期 prefix that TWSE gives futures ETFs. Recommendation: record
+  the names and their retrieval date in SOURCES (or register a `TaiwanStockInfo` extract, Free, the owner's call), and
+  confirm on the issuers' pages that each fund tracks a futures index before §5 calls them futures ETFs.
+- **O13. TWSE's futures-ETF sentence.** The reviser found the page (TWSE's ETF 總覽, URL under Sources) and read it
+  through a fetch tool on 2026-10-24: it says a futures-trust ETF's roll in contango (正價差) loses, unavoidably, and
+  does not call such funds unsuited to long holding. Recommendation: the source check confirms the sentence in a saved
+  copy before Stage 2; §5 then prints only the roll's loss with the URL, and otherwise keeps Elton, Gruber and Blake's
+  claim alone.
 
 ## LM35 Stress Testing
 
-Stage 1 brief, drafted 2026-10-24 from the editor's spine (`plans/vol-5.md`, "### LM35 Stress Testing") and the
-shared decisions above it. Every number carries its anchor ID at first appearance; `data/vol6_anchors_lm35.py`
-prints them all (57 rows, `## LM35` of `plans/vol-6-anchors.md`). Numbers quoted from published modules carry their
-file:line instead. Rows marked *pending* (A35-24 to A35-30, the 2008 and 2015 parts of A35-41, and A35-57) read the
-US proxies and 0050's 2007–2008 files, which are not registered yet ("Open before Stage 2", item 1). The script skips
-them with a printed note when `data/raw/vol6/` lacks the files; the values quoted here come from the drafter's scratch
-copies, fetched 2026-10-24 with `data/fetch_finmind.py`'s own `fetch()` and `render()`. They must be re-run after
-registration, because a re-fetch re-rounds the adjusted closes.
+Stage 1 brief, drafted 2026-10-24 from the editor's spine (`plans/vol-5.md`, "### Spine of LM35 Stress Testing") and
+the shared decisions above it, and revised the same day to the editor's decisions on the briefs (`plans/vol-5.md`,
+"Editor's decisions on the briefs", cross-module A–G and "Per module"), the independent recomputation, the
+cross-module check and decision F's source check (TWSE's Art. 8 and ETF page, read 2026-10-24). Every number carries
+its anchor ID at first appearance; `data/vol6_anchors_lm35.py` prints them all (58 rows, `## LM35` of
+`plans/vol-6-anchors.md`) from the registered raw files, the US proxies and 0050's 2007–2008 files included
+(`6b02e71`, retrieved 2026-10-24). Numbers quoted from published modules carry their file:line instead, and numbers of
+sibling briefs their anchor IDs. A printed value that the script flags within a tenth of a unit of a rounding boundary
+is marked "(flagged; from …)" with its unrounded value.
 
-**Prereq:** `[1, 2, 8, 16, 23, 26, 27, 28, 29, 30, 31, 32, 34]` (tags rechecked in `src/` on 2026-10-24; LM27–LM34 are
-briefs, so their tags are the briefs' and are rechecked at Stage 3). What each supplies:
+**Prereq:** `[1, 2, 8, 16, 23, 26, 27, 28, 29, 30, 31, 32, 33, 34]` (tags rechecked in `src/` on 2026-10-24; LM27–LM34
+are briefs, so their tags are the briefs' of 2026-10-24 and are rechecked at Stage 3). What each supplies:
 
 - LM1: drawdown $\mathrm{DD}_t:=1-W_t/\max(W_0,\dots,W_t)$ (lm01.md:519) and (1.17), the gain needed to recover
   (lm01.md:521). E1 contrasts a window's own peak with this running peak.
@@ -2043,28 +2187,35 @@ briefs, so their tags are the briefs' and are rechecked at Stage 3). What each s
   distance $d^2$ defined with (16.7) (lm16.md:322); (16.8), the conditional law of a normal pair and
   $\beta=\sigma_{XY}/\sigma_X^2$ (lm16.md:339); (16.9), the $\chi^2_2$ tail of $d^2$ (lm16.md:365), which LM35 does
   **not** attach to any scenario (shared decision "LM35 against LM39"); (16.10), the correlation given an event
-  (lm16.md:444), which `plans/vol-3.md:1543` routes to LM32 and LM35. LM16 already lists 35.
+  (lm16.md:444), which `plans/vol-3.md:1543` routes to LM32 and LM35, with its remark that a one-sided tail narrows
+  the spread of a normal variable (lm16.md:449). LM16 already lists 35.
 - LM23: (23.1) OLS (lm23.md:66), for the funds' betas on TR23; TX's settlement price $F_t=49{,}357$ on 8 October 2026
   and a contract worth $200F_t$ NT\$ (lm23.md:327).
 - LM26: (26.2), the EWMA forecast (lm26.md:99), through LM31's R8.
 - LM27 (brief): (27.1) the portfolio return, drift and the ruin rule $1+R_{p,t}\le0$; (27.2) the wealth recursion with
-  costs; (27.8) the factor split of $\sigma_p^2$; R1 and R2. LM27's leads list 35 for (27.1), (27.2), (27.8).
-- LM28 (brief): the N-asset Lagrangian with LM7's signs, used once for the reverse stress test (35.4); R3 and R4
-  unconstrained.
-- LM29 (brief): KKT sufficiency for convex problems, the solver-output rule and cvxpy, for the bounded reverse stress
-  test; R3 and R4 in their long-only form.
+  costs; (27.3) the one-way turnover (the checkpoint's limit); (27.5) $\beta_{i,p}$ (problem 7); (27.8) the factor
+  split of $\sigma_p^2$ (E6); R1 and R2. LM27's tag list names LM35 for all but (27.3) (Open item 2).
+- LM28 (brief): (28.1), the minimum of a quadratic form under linear equalities with LM7's signs, used for the reverse
+  stress test (35.4) and its bounded version; R3 and R4 unconstrained. (28.1)'s list gains LM35 (Open item 2).
+- LM29 (brief): (29.4), KKT conditions and their sufficiency for convex problems, the solver-output rule and cvxpy,
+  for the bounded reverse stress test; R3 and R4 in their long-only form. (29.4)'s list gains LM35 (Open item 2).
 - LM30 (brief): R5; (30.4), constraints as implicit shrinkage (Jagannathan and Ma 2003), for the checkpoint's "how
   constraints change the allocation".
 - LM31 (brief): R6 (31.1), R7, and R8's exposure (31.7) with its cap of 1.5, cash and borrowing; LM31 hands LM35
   "what R8 lost on 7 April 2025" and "higher caps against the ruin line".
-- LM32 (brief): VaR and ES as statistics of a return distribution, $\mathrm{DD}^0_t$ and $\mathrm{MDD}$, the rules'
-  drawdowns; LM35 contrasts a scenario loss with them and cites the drawdowns in the four failure forms (§9).
-- LM34 (brief): the rules' net log growth (the first failure form, §9) and the official cost sources.
+- LM32 (brief): VaR and ES as statistics of a return distribution, (32.9)'s $\mathrm{DD}^0_t$ and $\mathrm{MDD}$, the
+  rules' drawdowns (A32-35); LM35 contrasts a scenario loss with them and cites the drawdowns in the four failure forms
+  (§9).
+- LM33 (brief): the Sharpe ratio's HAC standard error (33.1), for the checkpoint's out-of-sample comparison (decision
+  C9: LM33's leads gain 35).
+- LM34 (brief): the rules' net log growth (A34-04, the first failure form, §9), (34.2)'s adjusted price
+  $P^{\mathrm{adj}}_{t\mid t'}$ with its build date (the US proxies, decision B6) and the official cost sources.
 
 **Leads:** `[39, 44, 45, 46, 48]`: LM39 (jump models for the gaps that LM35 replays without probabilities), LM44
 (drawdown control; LM35's ruin leverage (35.2)), LM45 (Kelly sizing under gaps and fat tails; (35.2)), LM46 (margin
 regimes and leverage instruments; LM35's TX margin example and (35.2)), LM48 (the capstone's own scenarios; (35.1),
-(35.4)). These are the forward pointers of the text; Volume VIII and IX briefs may add citations of the tags.
+(35.4)). These are the forward pointers of the text (shared decision "Leads and tags"); no later brief exists yet, so
+the tag list below names no user module (decision C8), and Volume VIII and IX briefs add theirs.
 
 **Forward links honoured.**
 
@@ -2077,8 +2228,9 @@ regimes and leverage instruments; LM35's TX margin example and (35.2)), LM48 (th
 | ROADMAP, Module boundaries, Stress row | replay historical or specified shocks, assign no probabilities | §6 (a distance, not (16.9)), §9 |
 | ROADMAP, Per-volume notes, VI row | scenarios 2008, 2015, 2020, 2024-08-05, 2025-04-07 without probabilities; T5S per-day statistics for overnight gaps | §2, §7 (X5) |
 | LM27 brief ("LM35 shows a book that can" reach wealth ≤ 0) | a book that can be ruined | §8: ruin leverage (35.2), X7 |
-| LM31 brief §7 ("What R8 lost on 7 April 2025 is LM35's replay"); Leaves ("higher caps against the ruin line") | R8's crash loss; caps against ruin | §3 (E3: R8's 1 April trade to 1.33 [A35-42]), §8 (X7 with the cap and R8's largest ratio) |
-| LM30 brief, leads ((30.4) for the checkpoint) | how constraints change the allocation | Lab part 9 (checkpoint rubric item 7) |
+| LM31 brief §7 ("What R8 lost on 7 April 2025 is LM35's replay"); Leaves ("higher caps against the ruin line") | R8's crash loss; caps against ruin | §3 (E2's table: R8's loss on 2025-04-07 [A35-13]; E3: R8's trade of 3 March 2025 from 1.005 (flagged; from 1.004600) to 1.319 [A35-42]), §8 (X7 with the cap and R8's largest ratio; decision E) |
+| LM30 brief, tags ((30.4) for the checkpoint) | how constraints change the allocation | Lab part 9 (checkpoint task (d), rubric item 7) |
+| LM33 brief, leads (decision C9) | the Sharpe ratio's interval in the checkpoint | Lab part 9 (task (b), (33.1)) |
 
 The grep of `src/*.md` and `src/pages/*.md` for `[[LM35` finds no line, and `build/make_lab*.py` has no "LM35"
 (2026-10-24): no published text promises anything to LM35. The rows above are the plans' and the sibling briefs'
@@ -2087,21 +2239,24 @@ promises; the spine missed none of the published ones (there are none) and liste
 **Outcomes** ("After this module you should be able to:"; the level in brackets is the brief's, the page keeps
 AUTHORING §3's form):
 
-1. [C] replay a historical scenario on a portfolio: define its window, worst day and worst 5 and 20 sessions, compute
-   the frozen and the named-day loss $\mathbf f^{\top}\mathbf R^{\mathrm{sc}}$ with each fund's contribution, and
-   compare them with the rule's own path
-2. [C] build a hypothetical scenario on proxies for funds that did not exist, convert a US fund's return into New
-   Taiwan dollars by the pairing rule, and check the proxy against the fund where both exist
+1. [C] replay a historical scenario on a book: define its window, compute the frozen and named-day losses
+   $\mathbf f^{\top}\mathbf R^{\mathrm{sc}}$ by fund, and compare the rule's own path
+2. [C] replay a hypothetical scenario on proxies for missing funds, converting US returns into New Taiwan dollars by
+   the pairing rule, and check each proxy against its fund
 3. [D] derive a factor shock through betas and a partial scenario from the conditional mean (16.8), and check that a
-   changed correlation matrix is still positive semidefinite
-4. [D] derive the reverse stress test, the shock of least Mahalanobis distance that reaches a given loss, and solve its
-   version with a price-limit bound in cvxpy, checked by KKT residuals and a closed form
-5. [C] compute the loss of a levered book at a limit lock and at the next open, its ruin leverage $-1/R$, and a futures
-   position's distance to its maintenance margin from a dated TAIFEX table
-6. [U] explain how price limits, holidays and overnight gaps change a "one-day" loss, and which of the funds have no
-   daily limit under TWSE's rules
-7. [U] explain why a stress test assigns no probability, why surviving the named scenarios does not cover unseen
-   losses, and how weak growth, a drawdown limit, funding and ruin differ as failures of the same rules
+   changed correlation matrix stays positive semidefinite
+4. [D] derive the reverse stress test, the shock of least Mahalanobis distance reaching a loss, and solve it under a
+   price limit in cvxpy, checked by KKT
+5. [C] compute a levered book's loss at a limit lock and at the next open, its ruin leverage $-1/R$, and a futures
+   position's distance to its maintenance margin
+6. [U] explain how price limits, holidays and overnight gaps change a "one-day" loss, and which funds have no daily
+   limit under TWSE's rules
+7. [U] explain why a stress test assigns no probability and why surviving the named scenarios does not cover unseen
+   losses
+8. [U] compare weak growth, a drawdown limit, funding and ruin as four failures of the same rules
+
+(Words per outcome, AUTHORING §1's count without the level mark: 25, 27, 25, 26, 27, 22, 19, 16; the draft's 1, 2, 4,
+5 and 7 ran over 30 and are cut, or split into 7 and 8; decision C10.)
 
 | Outcome | Taught | Practised | Assessed |
 |:--|:--|:--|:--|
@@ -2111,7 +2266,8 @@ AUTHORING §3's form):
 | 4 [D] | §6 | E8; Lab 6 | KC §6; problems 5, 7, 11 |
 | 5 [C] | §7, §8 | E9, E10; Lab 7 | KC §7, §8; problems 2, 3, 12 |
 | 6 [U] | §7 | E9, X5, X8 | KC §7 |
-| 7 [U] | §6, §9 | §9's table; Lab 9 (checkpoint) | KC §9; problem 2's solution |
+| 7 [U] | §6, §9 | KC §6's question; Lab 9 (rubric item 6) | KC §9 |
+| 8 [U] | §8, §9 | §9's table; E10 (funding against ruin) | KC §8; problem 12's last question |
 
 **Owns.** Historical replay: scenario windows on TR23 (peak, trough, the worst day, the worst 5 and 20 sessions;
 the definitions below); the frozen replay (35.1) on a book's exposures at the window's first close, the named-day
@@ -2124,10 +2280,13 @@ each" day; reverse stress testing (35.4) with the Mahalanobis distance as a rank
 bounded by 0050's limit (cvxpy, KKT); leverage and ruin (35.2), $1+L R^{\mathrm{sc}}_p\le0$, reported, never
 floored; limit locks (sales only at the limit; the next open's loss); TWSE's limit rule for domestic and
 cross-border ETFs; the overnight gap from T5S per-day statistics; TX on limit days and the dated TAIFEX margin; the
-four failure forms compared on the same rules (guidance g:87–90). The rules' scenario losses are LM35's numbers
-(shared decision "Owners"). Values owned: every A35 anchor except the echoed inputs (A35-23, A35-38: the rules'
-weights, LM27–LM31's; A35-42: R8's exposure path, LM31's; A35-33's full-sample correlation, LM27's; A35-43's
-00631L figures, LM2's), which the text cites rather than prints. The lab's final part is the batch's checkpoint.
+four failure forms compared on the same rules (guidance g:87–90). The rules' scenario losses are LM35's numbers,
+each rule's loss on 2025-04-07 included (shared decision "Owners", decision A1: LM32 points here). Values owned: every
+A35 anchor except the echoed inputs (A35-23, A35-38: the rules' weights, LM27–LM31's; A35-42's exposures and uncapped
+ratios, R8's path, LM31's; A35-33's and A35-35's full-sample daily correlations and A35-34's full-sample weekly
+one, LM27's A27-11; A35-43's 00631L figures, LM2's; A35-03's count, A19-02; A35-44's $F_t$, A23-36), which the text
+cites rather than prints. The lab's final part is the batch's
+checkpoint.
 
 **Leaves.** Probabilities of extreme moves and jump models → LM39. Margin regimes, margin trading (融資) and leverage
 instruments → LM46. Drawdown control and drawdown probabilities under a model → LM44 (LM32's drawdowns are empirical).
@@ -2154,16 +2313,18 @@ sentence in §9.
   to 1e-12 (largest difference 1.4e-14 over 92 trades, 2019-03-04 → 2026-10-01) [A35-02]; no rule is re-implemented.
 - **TR23** (`vol3_taiex.parquet`): 5,849 returns 2003-01-03 → 2026-10-08 [A35-03], for the windows, the holiday spans,
   the betas' factor and the 2022 illustration.
-- **0050** (pending): 0050's own 2007-07-02 → 2008-12-31 closes and distributions (two new files, Open item 1); the
-  script checks every close against the spread in exact arithmetic, the two ex-dates against `before_price`, and the
-  dates against TR23's. Without them TR23 stands in, and the caption says so. For 2015, LM2's sample
-  (`etf_daily_returns.parquet`, all 82 TR23 dates of the window present) [A35-22].
-- **US proxies** (pending, capability B5): `USStockPrice` `adj_close` and `close` of SPY, TLT, GLD, USO and DBO
-  (DBO needs approval, Open item 2), 2007-07-02 → 2026-10-08, and `TaiwanExchangeRate` USD `spot_buy`, `spot_sell`
-  (mid; FinMind's −1 rows filtered out): 4,849 US sessions and 4,793 FX rows [A35-24]. The pairing rule (35.5) is the
-  capability check's: the New York close of session $D$ takes the first FX row dated after $D$, and a Taiwan date
-  compounds the US sessions since the previous Taiwan date. Of 4,736 TR23 dates from 2007-07-03, 170 have no new US
-  session, 4,421 one, 94 two and 51 three or more; one date (2012-01-02) has its FX row after it [A35-24].
+- **0050 in 2007–2008** (registered, `data/raw/vol6/0050__2007-07-02__2008-12-31.csv` and its distributions,
+  approved with capability B1 on 2026-10-24): the script checks every close against the spread in exact arithmetic,
+  the two ex-dates (2007-10-24, 2008-10-24) against `before_price`, and the dates against TR23's, and stops on a
+  mismatch. For 2015, LM2's sample (`etf_daily_returns.parquet`, all 82 TR23 dates of the window present) [A35-22].
+- **US proxies** (registered, capability B5; DBO approved by the owner on 2026-10-24): `USStockPrice` `adj_close` and
+  `close` of SPY, TLT, GLD, USO and DBO, 2007-07-02 → 2026-10-08, and `TaiwanExchangeRate` USD `spot_buy`,
+  `spot_sell` (mid; FinMind's −1 rows filtered out at registration): 4,849 US sessions and 4,793 FX rows [A35-24].
+  An adjusted close is LM34's $P^{\mathrm{adj}}_{t\mid t'}$ ((34.2)) with $t'$ the retrieval date, 2026-10-24
+  (`data/README.md`). The pairing rule (35.5) is the capability check's: the New York close of session $D$ takes the
+  first FX row dated after $D$, and a Taiwan date compounds the US sessions since the previous Taiwan date. Of 4,736
+  TR23 dates from 2007-07-03, 170 have no new US session, 4,421 one, 94 two and 51 three or more; one date
+  (2012-01-02) has its FX row after it [A35-24].
 - **T5S** (Volume IV): the raw files of the five named days only, through per-day statistics (log changes from the
   previous close to 09:01:00, to the day's low and to the close; the low's time; for 2025-04-07 also the stale 09:00:05
   open) [A35-45]. The script stops unless each day's 09:00:00 value equals TR23's previous price close (PITFALLS §3).
@@ -2176,32 +2337,41 @@ sentence in §9.
   2026-10-01) [A35-47]. 00720B tracks the Bloomberg US 20+ Year BBB Corporate Bond liquid index (Yuanta's page, read
   2026-10-24); 0056 and 00720B's labels are the capability check's. The frames show no halt and no split of 00662 or
   the other two through 2026-10-08 (drafter's check of `frames`).
-- **Scenario windows** (TR23; fixed here, Open item 4): the trough is TR23's lowest close of the named calendar year
-  (2008, 2015, 2020) or of the 20 sessions from the named day (2024-08-05, 2025-04-07); the peak is TR23's highest
-  close after the previous scenario's trough (for 2008, from TR23's first close) and before the trough; the window's
-  worst day is its worst TR23 return; the worst $m$ sessions ($m=5,20$) are the worst compound TR23 returns over $m$
-  consecutive sessions ending in (peak, trough], which may start before the peak.
+- **Scenario windows** (TR23, the TAIEX total-return index; adopted by the editor's decision D, 2026-10-24): the
+  trough is TR23's lowest close of the named calendar year (2008, 2015, 2020) or of the 20 sessions from the named day
+  (2024-08-05, 2025-04-07); the peak is TR23's highest close after the previous scenario's trough (for 2008, from
+  TR23's first close) and before the trough; the window's worst day is its worst TR23 return; the worst $m$ sessions
+  ($m=5,20$) are the worst compound TR23 returns over $m$ consecutive sessions ending in (peak, trough], which may
+  start before the peak. A span of $m$ sessions is printed from the close before its first return to the close of its
+  last ("from the 2025-03-31 close to 2025-04-09" holds five returns).
 - **Replays.** Frozen: the exposures at the window's first close held fixed, $\mathbf f^{\top}\mathbf R^{\mathrm{sc}}$
   with each fund's compound wealth-frame return over (peak, trough], interest on cash and borrowing left out (the text
-  says so). Named day: the exposures at the previous close times that
-  day's returns (no rule trades on a named day: none is a trade date). Actual: the rule's wealth at the trough ÷ wealth
-  at the peak − 1, trades and costs included.
-- **Conventions.** Simple returns in percent; T5S statistics are log changes and say so. $\hat\Sigma$ and
-  $\bar{\mathbf R}$ of the full estimation frame, divisor $T$ (`cov0`, `ddof` passed). Betas: OLS slope with an
-  intercept on TR23's same-day $R$. Mahalanobis $d=\sqrt{d^2}$ with that mean and $\hat\Sigma$. Ruin leverage
-  $-1/R$ for a loss $R<0$. Quantiles `inverted_cdf`. Solver settings as the shared decision "Solver output"
-  (CLARABEL 1e-12, OSQP 1e-10 polished), in percent units (the shared decision annualizes; for a distance
-  minimization the scale only conditions the problem, and percent units gave KKT residuals of at most 1.4e-14
-  [A35-40]).
+  says so). Named day: the exposures at the previous close times that day's returns (no rule trades on a named day:
+  none is a trade date), also without the session's interest (decision A1). R1–R7 hold no cash, so their wealth fell
+  by exactly $\mathbf f^{\top}\mathbf R$ on 2025-04-07; R8's wealth, one session's borrowing interest included, fell
+  7.94328%, 0.005 points more than its replay's 7.93853% [A35-13]. Actual: the rule's wealth at the trough ÷ wealth at
+  the peak − 1, trades and costs included.
+- **Conventions.** Simple returns in percent; T5S statistics are log changes of the TAIEX price index and say so;
+  every TAIEX number names its index (TR23 total return; the price index for T5S and the TX comparison; decision C7).
+  $\hat\Sigma$ and $\bar{\mathbf R}$ of the full estimation frame, divisor $T$ (`cov0`, `ddof` passed). Betas: OLS slope
+  with an intercept on TR23's same-day $R$. Mahalanobis $d=\sqrt{d^2}$ with that mean and $\hat\Sigma$. Ruin leverage
+  $-1/R$ for a loss $R<0$. Quantiles `inverted_cdf`. Weekly returns compound the daily ones within ISO weeks, keys
+  (ISO year, ISO week), with the span's first and last week dropped, complete or not (LM27's convention; decision D
+  and the first revision's "Weeks and months").
+  Solver settings as the shared decision "Solver output" (CLARABEL 1e-12, OSQP 1e-10 polished), in percent units,
+  which that decision allows with the KKT residuals printed: below 1e-13, and CLARABEL, OSQP and the closed form agree
+  to 1e-9 [A35-40] (decisions C5, X19; residuals print as bounds because their digits are rounding noise).
 - **Guard and exact checks.** Counts against a threshold use the guard 1e-12; 0050's −10% on 2025-04-07 is exactly
   $-1/10$ by `Fraction` on the two-decimal closes [A35-12]; the lock days are those with open = high = low = close
   [A35-46].
 - **Rounding.** Every printed value passes through `f(x, k…)`, which flags values within a tenth of a last-digit unit
-  of a rounding boundary ("NEAR"); the brief rounds them from the unrounded value. A number computed from an adjusted
-  close is also flagged "CENT" when a change of one cent in each adjusted close could move its first decimal: it prints
-  to 0 dp, or with "about" when 0 dp is not safe either (PITFALLS §3, "Back-adjusted prices change at every
-  retrieval"). The largest such effect on a proxy return is 0.17 points in the 2020–2025 windows and 0.22 points on
-  2015-08-24 [A35-26, A35-30] (pending).
+  of a rounding boundary ("NEAR"); the brief rounds them from the unrounded value and marks them "(flagged; from …)".
+  A number computed from an adjusted close is also flagged "CENT" when a change of one cent in each adjusted close
+  could move its first decimal: it prints to 0 dp, or with "about" when 0 dp is not safe either (PITFALLS §3,
+  "Back-adjusted prices change at every retrieval"). The largest such effect on a proxy return is 0.17 points in the
+  2020–2025 windows and 0.22 points on 2015-08-24 [A35-26, A35-30]. The registered files are byte-identical to the
+  drafter's copies (recomputation, `cmp` on all eight), so every proxy value stands; a later re-fetch re-rounds the
+  adjusted closes, and the CENT flags are re-read then.
 - **Seeds.** None: LM35 simulates nothing, and its widget draws nothing.
 - **Published files** (Stage 2). No file carries a daily series in date order: X2–X4 and X6 are per-scenario or
   per-fund bars, X7 straight lines from (35.2), X5 and X8 tables of per-day statistics. The widget embeds
@@ -2217,8 +2387,10 @@ actual replays of the rules' own books (the books come from rules fixed in advan
 through case's out-of-sample holdings; the replay estimates nothing); limit days, locks, TX volumes and the T5S
 per-day statistics; the 2022 illustration. *In-sample:* the betas, $\bar{\mathbf R}$ and $\hat\Sigma$ of the full
 estimation frame (they include the scenario days), the historical distances, the partial scenario, the reverse stress
-tests and the (16.10) check. *Hypothetical:* 2008 and 2015 on the rules' first weights with 0050 and proxies (the
-one place LM35 combines data sources within one number, by construction, each source named); the factor shock; the
+tests and the (16.10) check. *Hypothetical:* 2008 and 2015 on the rules' first weights with 0050 and proxies, and
+the 2020 check of that replay (0050 itself with the proxies against the funds): the replays that combine data sources
+within one number, by construction, each source named (the shared decision "Data"'s one exception, decisions X27,
+C4); the factor shock; the
 correlation break (a *constructed* correlation of 0.30); the worst-of-each day (*constructed*); the TX position at the
 2026 margins; the widget's presets applied to the current books; every problem's inputs. No probability is attached
 to any scenario. Count: the eight through-case rules ($n=8$, none selected or ranked by a scenario), five named
@@ -2237,40 +2409,48 @@ $\mathrm{DD}_t$ (LM1's), $\mathrm{DD}^0_t$ and $\mathrm{MDD}$ (LM32's, cited), $
 $\hat\Sigma^{-1}$, $\Sigma$, $\boldsymbol\mu$ (in the derivations), $s_p$, $\sigma_p$, $\rho$, $\hat\rho$, $C$ (a
 correlation matrix, §5), $\lambda_N$ (its smallest eigenvalue), $\beta_i$ (a fund's market beta on TR23, (23.1)),
 $\beta_{i,p}$ (LM27's, in problem 7), $d^2$ (§6's) and $d=\sqrt{d^2}$, $k$ (a number of standard deviations: the bound
-$d\le k$), $\mathbf R^{\mathrm{sc}}$ and $R^{\mathrm{sc}}_i$, $\E$, $\Var$, $\Cov$, $\mathcal N$, $F_t$ (TX's settlement
-price), $P_t$, $r_f$, $\lambda$ and $\nu$ (the multipliers of §6's Deep Dive, LM7's signs), $K$ and $\mathbf b$ (the
-two active constraints of the bounded problem, as LM28–LM29 write them). Local symbols, declared in the notation note:
+$d\le k$), $\mathbf R^{\mathrm{sc}}$ and $R^{\mathrm{sc}}_i$, $\E$, $\Var$, $\Cov$, $\mathcal N$, $F_t$ (TX's
+settlement price), $P_t$, $r_f$, $\lambda$ and $\nu$ (the multipliers of §6's Deep Dive, LM7's signs), $K$ and
+$\mathbf b$ (the two active constraints of the bounded problem, as LM28–LM29 write them), $\mathrm{TO}_t$ and $\mathbf
+w^{\mathrm{drift}}_t$ (the checkpoint's turnover limit, §6's Portfolios rows). Local symbols, declared in the notation
+note:
 
 | Symbol | Meaning | Check |
 |:--|:--|:--|
 | $R^{\mathrm{sc}}_p$ | a book's scenario return $\mathbf f^{\top}\mathbf R^{\mathrm{sc}}$ | subscript $p$ as $\sigma_p$; §6's $\mathbf R^{\mathrm{sc}}$ row |
 | $\mathbf R^{\mathrm{sc}*}$, $d^*$ | the reverse stress shock and its distance | a star marks an optimum (§6) |
-| $\ell$ | the loss a reverse stress test must reach (10% in the text) | §6's $B,\ell$ row scopes $\ell$ to LM22, LM23, LM32; LM35 writes no block length, lag or likelihood: a scoped row is proposed (Open item 7) |
-| $L_{\mathrm{ruin}}$ | $-1/R^{\mathrm{sc}}_p$, the total exposure at which a scenario ruins a book | subscripted $L$, the same quantity as §6's $L$ |
-| $\mathrm{FX}_t$ | the USD/TWD mid rate attached to a US close by (35.5) | upright, as TO, MRC; $X$ stays free (no data matrix is written), $S_t$ stays the TAIEX close |
-| $P^{\mathrm{adj}}$, $P^{\mathrm{TWD}}$ | a US fund's adjusted close; its value in New Taiwan dollars | superscripted $P$ |
-| $t^{\mathrm{US}}$ | the last US session before Taiwan date $t$ | $D$ stays a dividend |
+| $\ell$ | the loss a reverse stress test must reach (10% in the text) | §6's $B,\ell$ row now scopes LM35's $\ell$ as this loss level (decision B3); LM35 writes no block length, lag or likelihood |
+| $L_{\mathrm{ruin}}$ | $-1/R^{\mathrm{sc}}_p$, the total exposure at which a scenario ruins a book | subscripted $L$, the same quantity as §6's $L$ (decision B5) |
+| $\mathrm{FX}_t$ | the USD/TWD mid rate attached to a US close by (35.5) | upright, as TO, MRC; $X$ stays free (no data matrix is written), $S_t$ stays the TAIEX close (decision B5) |
+| $P^{\mathrm{adj}}_{t\mid t'}$, $P^{\mathrm{TWD}}_t$ | a US fund's adjusted close for session $t$ as built on date $t'$, LM34's (34.2), here $t'=$ 2026-10-24, the retrieval date; its value in New Taiwan dollars | LM34's symbol with its build date (decision B6) |
+| $t^{\mathrm{US}}$ | the last US session before Taiwan date $t$ | $D$ stays a dividend (decision B5) |
 | $S_t(\text{09:01:00})$ | TAIEX's value at 09:01:00 on day $t$ (per-day statistics only) | §6's $S_t$ with a time |
 
 Not used: $\mathbf h$ (LM35 writes exposures; the shared table says so), $V$ for a value, $D$ for a date, $g$ for a gap
 (it is the log growth rate), a probability for any scenario, $\Pr$ or $\chi^2$ with a distance, $\kappa$, $\alpha$.
 
-**Motivating case: "Five days, one session"** (box, about 150 words; 11 sentences)
+**Motivating case: "Five days, one session"** (box, 174 words; 13 sentences, the longest 19 words, average 13.4)
 
-> The TAIEX closed on 2 April 2025 and did not trade again until 7 April. That session TR23 fell 9.70%, its worst day
-> since 2003 [A35-08]. 0050 traded at one price all day, 158.40, exactly 10% below its last close: 29.6 million units
-> changed hands, none lower [A35-12]. 00646 and 00642U have no daily limit, and they fell 12.59% and 14.62% [A35-11].
-> The through case's eight rules lost from 5.06% (R7) to 8.33% (R4) of wealth in one session [A35-13]. R8 had raised
-> its exposure to 1.33 at the trade of 1 April [A35-42], and it lost 7.94% [A35-13]. A beta model fitted on 2,362 days
-> predicted a loss of 3.62% for R1, under half the actual 7.70% [A35-01, A35-32]. Three questions follow. What did
-> each rule lose in the other scenarios that ROADMAP names? Which shock, not seen yet, would cost a rule a tenth of
-> its wealth? And what would a book levered five times have lost at the next open?
+> Taiwan's market closed on 2 April 2025 and did not trade again until 7 April. That session the TAIEX total-return
+> index (TR23) fell 9.70%, its worst day since 2003 [A35-08]. Its five sessions to 9 April lost 15.96%, second only to
+> March 2020's 16.51% [A35-58]. 0050 traded at one price all day, 158.40, exactly 10% below its last close [A35-12].
+> Its 29.6 million units changed hands at that price, none lower [A35-12]. 00646 and 00642U have no daily limit, and
+> they fell 12.59% and 14.62% [A35-11]. The through case's eight rules lost from 5.06% (R7) to 8.33% (R4) of wealth
+> [A35-13]. R8 had raised its exposure to 1.319 at its trade of 3 March, and it lost 7.94% [A35-42, A35-13]. A beta
+> model fitted on 2,362 days predicted a loss of 3.62% for R1, under half the actual 7.70% [A35-01, A35-32]. Three
+> questions follow. What did each rule lose in the other scenarios that ROADMAP names? Which shock, not seen yet, would
+> cost a rule a tenth of its wealth? And what would a book levered five times have lost at the next open?
+
+Flagged values in the box, rounded from the unrounded ones: 12.59 (−12.58562), 14.62 (−14.62428), 5.06 (−5.05563),
+8.33 (−8.33446). The box's day is the extreme of TR23's 5,849 daily returns (rank 1) [A35-08], and its multi-day figure
+(AUTHORING §8) is the window's worst five sessions, rank 2 of TR23's 5,845 overlapping five-session spans, behind only
+2020's span ending 2020-03-19 [A35-58]. The draft's claim that the day was also the extreme of a multi-day measure was
+false and is dropped (decision LM35; recomputation finding 4): its 20-session loss ranks 8th of 5,830 spans [A35-58].
 
 Resolved: (a) §2–§4, X2, X3: the five windows and the rules' losses in each, with 2008 and 2015 hypothetical; (b) §6,
 E8, X6: R8's current book reaches a 10% loss at $d^*=12.27$, below 2025-04-07's own distance of 12.94 [A35-39,
-A35-37]; (c) §7–§8, E9: a fivefold book of 0050 loses 50.00% at the locked close and 70.45% at the next open, 151.20
-[A35-52], and is ruined from $L_{\mathrm{ruin}}=7.10$ [A35-43]. The case's day is the extreme of TR23's 5,849 returns
-(rank 1) and also of a multi-day measure: the worst 5 sessions of its window lost 15.96% (AUTHORING §8) [A35-08].
+A35-37]; (c) §7–§8, E9: a fivefold book of 0050 loses 50.00% at the locked close and 70.45% (flagged; from −70.45455)
+at the next open, 151.20 [A35-52]; its ruin leverage at the next open is $L_{\mathrm{ruin}}=7.10$ [A35-43].
 
 **Sections** (prose words, AUTHORING §1 count):
 
@@ -2278,35 +2458,39 @@ A35-37]; (c) §7–§8, E9: a fivefold book of 0050 loses 50.00% at the locked c
 |:--|:--|:--|--:|
 | 1 | Introduction | the layer added (LM32 measures losses as statistics of a distribution; LM35 asks what named and constructed shocks do to the same books, with no probability); case + X1; roadmap; notation and hygiene notes | 340 |
 | 2 | Scenarios from History {1,6} | a scenario as a return vector, $W_0\mathbf f^{\top}\mathbf R^{\mathrm{sc}}$ by (8.4); the window rule (peak, trough, worst day, worst $m$ sessions); X2; E1 (2025's window against LM1's running peak); holiday spans (A35-10); pitfall: a "one-day" return can span ten calendar days; 導讀 (壓力測試, 歷史情境); KC | 500 |
-| 3 | Replaying the Rules {1} | frozen replay (35.1) and attribution; named-day replay; the actual path; X3, X4; E2 (R1 on 2025-04-07); E3 (R8: frozen against actual, the 1 April trade); interest left out, said once; pitfall: a frozen book ignores the rule's own trades; 導讀; KC | 560 |
+| 3 | Replaying the Rules {1} | frozen replay (35.1) and attribution; named-day replay; the actual path; X3, X4; E2 (R1 on 2025-04-07); E3 (R8: frozen against actual; the 3 March trade raised the book, A35-42); interest left out, said once (R8's 0.005 points [A35-13], decision A1); pitfall: a frozen book ignores the rule's own trades; 導讀; KC | 560 |
 | 4 | Funds That Did Not Exist {2} | the pairing rule (35.5), the 13:30 close against New York's (shared decision "Timing of E5"); 0050 itself in 2008; E4 (2008 at the first weights); E5 (proxies checked in 2020; USO against DBO; the US-holiday blind spot); pitfall: a proxy's error is part of the scenario; 導讀 (代理資產, 匯率); KC | 520 |
 | 5 | Hypothetical Shocks {3} | factor shock through betas (23.1); E6 (the beta model on 2025-04-07; the partial scenario (35.3) from (16.8)); correlation break with a PSD check; E7 (the break; 2022, when 0050 and 00679B fell together; (16.10) on 0050's 48 worst days); 導讀 (因子模型, 條件期望值); KC | 560 |
 | 6 | Reverse Stress Testing {4} | the problem; derivation by LM28's Lagrangian; (35.4); the worst loss within $d\le k$; the distance as a ranking, not (16.9): the sample's distances (A35-37), the largest an oil gain; E8 (R1, R4, R8; the bounded version for R2, cvxpy and KKT); X6; Deep Dive (KKT and the closed form with both constraints active); pitfall: the closest shock may break a price limit; Python block; 導讀 (反向壓力測試, Mahalanobis距離); KC | 600 |
-| 7 | Limits, Locks and Overnight Gaps {5,6} | TWSE's rule (受益憑證買賣辦法 Art. 8: which funds have a limit); X8; a lock: sales only at the limit, none below (0050's OHLC); the next open; T5S's gap, low and close (X5); the stale 09:00:05 open; E9 (0050 and 00631L; TX's volume on limit days); pitfall: the daily open is not the opening price level; 導讀 (漲跌停限制, 跳空, 隔夜); KC | 480 |
-| 8 | Leverage, Ruin and Margin {5} | (35.2), ruin reported, never floored ((27.1)'s rule); X7 (R6's book scaled by $L$; R8's cap 1.5 and its largest ratio 2.135 [A35-42]); E10 (TX at TAIFEX's 2026 margins: $f=14.08$, the margin call after 1.65%, equity below zero on a limit day [A35-44]); funding as a failure distinct from ruin; 導讀 (權益歸零, 保證金追繳); KC | 440 |
-| 9 | What a Stress Test Cannot Say {7} | no probability (ROADMAP's Stress row); BCBS (2018) on severe but plausible scenarios and Breuer et al. (2009) on plausibility, one sentence each; the four failure forms on the same rules (table citing LM34 and LM32); the closing pitfall: surviving the scenarios does not cover unseen losses; the lab box and the checkpoint; KC | 380 |
-| — | Summary (7) / Problems (12) / Solutions | | 140 / 400 / 560 |
-| | **Total** | | **5,480** |
+| 7 | Limits, Locks and Overnight Gaps {5,6} | TWSE's rule (受益憑證買賣辦法 Art. 8: which funds have a limit, the same since June 2016, so over all of E5); X8; a lock: sales only at the limit, none below (0050's OHLC); the next open; T5S's gap, low and close (X5); the stale 09:00:05 open; E9 (0050 and 00631L; TX's volume on limit days); pitfall: the daily open is not the opening price level; 導讀 (漲跌停限制, 跳空, 隔夜); KC | 480 |
+| 8 | Leverage, Ruin and Margin {5,8} | (35.2), ruin reported, never floored ((27.1)'s rule); X7 (R6's book scaled by $L$; R8's cap 1.5 and its largest uncapped ratio 2.135 [A35-42]; the ruin line in place of replays at higher caps, decision E); E10 (TX at TAIFEX's 2026 margins: $f=14.08$, the margin call after 1.65%, equity below zero on a limit day [A35-44]); funding as a failure distinct from ruin; 導讀 (權益歸零, 保證金追繳); KC | 440 |
+| 9 | What a Stress Test Cannot Say {7,8} | no probability (ROADMAP's Stress row); Breuer et al. (2009), one sentence from the journal's summary (a plausible region searched for the largest loss; BCBS 2018 stays out until read, Open item 3); the four failure forms on the same rules (table citing LM34's A34-04 and LM32's A32-35); the closing pitfall: surviving the scenarios does not cover unseen losses; the lab box and the checkpoint; KC | 360 |
+| — | Summary (8) / Problems (12) / Solutions | | 150 / 400 / 560 |
+| | **Total** | | **5,470** |
 
 **Elements.** 10 examples (E1 §2; E2, E3 §3; E4, E5 §4; E6, E7 §5; E8 §6; E9 §7; E10 §8). Knowledge checks:
 
-- §2: 2020's worst day, 2020-01-30 (−5.75%, rank 8 of 5,849), came ten calendar days after the previous session
-  [A35-06]: is it one day of news? Returns that span four or more calendar days are 140 of 5,849 (2.4%), and their mean
-  absolute size is 1.39% against 0.83% for the rest [A35-10].
+- §2: TR23's worst day of 2020's window, 2020-01-30 (−5.75%, rank 8 of 5,849), came ten calendar days after the
+  previous session [A35-06]: is it one day of news? Returns that span four or more calendar days are 140 of 5,849
+  (2.4%), and their mean absolute size is 1.39% against 0.83% for the rest [A35-10].
 - §3: R8's 2025 window frozen at 2025-02-21 lost 10.15% [A35-19], but its own path lost 13.84% [A35-21]. Why? Its trade
-  of 1 April raised its exposure from 1.005 to 1.330 [A35-42], two sessions before the drop.
+  of 3 March raised its exposure from 1.005 (flagged; from 1.004600) to 1.319, and that book frozen over the whole
+  window would have lost 13.35% [A35-42]; the trade of 1 April moved it only from 1.317 to 1.330.
 - §4: on 2008-01-22 every proxy returns exactly 0 [A35-28]. Why? No US session lies between the Taiwan dates
   2008-01-21 and 2008-01-22, so both carry the same New York close and FX row. E5 has 80 such dates, on which 00646
-  still moved 0.43% on average, against 0.67% on dates with one US session [A35-57] (pending).
+  still moved 0.43% on average, against 0.67% on dates with one US session [A35-57].
 - §5: under the correlation break R4's loss stays 6.89% [A35-33]. Why? R4's current book holds no 00679B (0.000)
   [A35-38].
-- §6: R4's $d^*=9.91$ lies below 2025-04-07's 12.94 [A35-39, A35-37]. What does that say? A shock less unusual than a
-  day already in the sample reaches a 10% loss; within $d\le12.94$ R4's worst loss is 13.08% [A35-39].
+- §6: R4's $d^*=9.91$ (flagged; from 9.90502) lies below 2025-04-07's 12.94 [A35-39, A35-37]. What does that say? A
+  shock less unusual than a day already in the sample reaches a 10% loss; within $d\le12.94$ R4's worst loss is 13.08%
+  (flagged; from 13.08486) [A35-39]. Neither number is a probability: returns are not normal, and (16.9) holds for
+  $N=2$ only.
 - §7: TX's near month traded 2,736 contracts on 2025-04-07, against 211,207 on 2024-08-05 and 152,423 on 2025-04-08
   [A35-44]. What does the volume say about selling at the limit?
-- §8: R6's book survives every replay of 2020–2025 below $L=7.7$ (2020's window) [A35-41]. Does $L=5$ make it safe?
-  No: the replays are a few past paths; the worst-of-each day already costs its current book 11.11% at $L=1$
-  [A35-36], five times that at $L=5$, and a gap leaves no chance to cut the exposure first.
+- §8: R6's book survives every replay of 2020–2025 at any $L$ below its smallest ruin leverage, 7.671 (2020's
+  window) [A35-41]. Does $L=5$ make it safe? No: the replays are a few past paths; the worst-of-each day
+  already costs its current book 11.11% at $L=1$ [A35-36], five times that at $L=5$, and a gap leaves no chance to cut
+  the exposure first. A margin call or a financing limit can end the book long before ruin (E10).
 - §9: name two losses the replay set cannot show: a shock beyond the sample's largest distance (the worst-of-each day
   sits at 19.07 against 15.02 [A35-36, A35-37]); a lock that blocks the exit (§7).
 
@@ -2316,60 +2500,82 @@ A35-37]; (c) §7–§8, E9: a fivefold book of 0050 loses 50.00% at the locked c
 (overnight)), §8 (槓桿 (leverage), 權益歸零 (zero equity), 保證金追繳 (margin call)). Deep Dives: §6 "The bounded
 reverse stress test": with both constraints active, $K\mathbf R=\mathbf b$ ($K$'s rows are $\mathbf f^{\top}$ and
 $(1,0,0,0,0)$, written out), the minimizer is
-$\bar{\mathbf R}+\hat\Sigma K^{\top}(K\hat\Sigma K^{\top})^{-1}(\mathbf b-K\bar{\mathbf R})$, and KKT sufficiency
-(LM29) makes it the answer when both multipliers are non-negative (R1: 37.3 and 0.8877 in percent units [A35-40]).
+$\bar{\mathbf R}+\hat\Sigma K^{\top}(K\hat\Sigma K^{\top})^{-1}(\mathbf b-K\bar{\mathbf R})$ ((28.1) with
+$\hat\Sigma^{-1}$ in place of $\Sigma$ and the shock measured from $\bar{\mathbf R}$), and KKT sufficiency (29.4)
+makes it the answer when both multipliers are non-negative (R1: 37.3 and 0.8877 in percent units [A35-40]).
 §5 "Conditional means without normality": $\mu_j+(\sigma_{jk}/\sigma_{kk})(x-\mu_k)$ is the best linear predictor of
 $R_j$ from $R_k$ for any law with finite variances (LM23's slope); normality makes it the conditional mean ((16.8)).
 
 **Exhibits.**
 
 - X1 `case` (table, §1): 2025-04-07, E5's wealth frame. Rows: the five funds. Columns: TWSE daily limit (10% / none,
-  §7's rule); the day's return from the 2025-04-02 close: 0050 −10.00%, 00646 −12.59%, 00679B +1.81%, 00635U −3.10%,
-  00642U −14.62% [A35-11]; beta on TR23 (estimation frame): 1.048, 0.527, −0.071, 0.161, 0.198 [A35-31]; beta × TR23's
-  −9.70%: −10.17, −5.11, +0.69, −1.56, −1.92 [A35-32]. Note row: the rules' losses R1 −7.70% … R8 −7.94% (R8 at
-  exposure 1.331) [A35-13]; R1's beta-model loss −3.62% [A35-32]. Note: the betas are in-sample; the day's returns span
-  five calendar days. Source: FinMind `TaiwanStockPrice`, `TaiwanStockDividendResult`, `TaiwanStockSplitPrice`,
+  §7's rule); the day's return from the 2025-04-02 close: 0050 −10.00%, 00646 −12.59% (flagged; from −12.58562),
+  00679B +1.81%, 00635U −3.10%, 00642U −14.62% (flagged; from −14.62428) [A35-11]; beta on TR23 (estimation frame):
+  1.048, 0.527, −0.071, 0.161, 0.198 (flagged; from 0.198400) [A35-31]; beta × TR23's −9.70%: −10.17, −5.11, +0.69,
+  −1.56 (flagged; from −1.56413), −1.92 (flagged; from −1.92442) [A35-32]. Note row: the rules' losses R1 −7.70% … R8
+  −7.94% (R8 at exposure 1.331) [A35-13]; R1's beta-model loss −3.62% [A35-32]. Note: TR23 is the TAIEX total-return
+  index; the betas are in-sample; the day's returns span five calendar days; interest is left out (R8's wealth, with a
+  session's borrowing interest, fell 0.005 points more). Source: FinMind `TaiwanStockPrice`,
+  `TaiwanStockDividendResult`, `TaiwanStockSplitPrice`,
   `TaiwanStockTotalReturnIndex`, retrieval dates as registered in `data/raw_manifest.json` (`data/vol5_series.py`,
   `data/vol3_series.py`); Computations: `data/lm35_numbers.py`.
 - X2 `windows` (`bar`, §2): categories the five scenarios; four series "worst day", "worst 5 sessions", "worst 20
-  sessions", "peak to trough" (`fmt: "pct1"`): 2008 −6.51, −12.55, −27.69, −56.02 [A35-04]; 2015 −4.82, −9.72, −12.49,
-  −23.18 [A35-05]; 2020 −5.75, −16.51, −25.99 (flagged; from −25.99467), −28.55 [A35-06]; 2024-08-05 −8.33, −10.44,
-  −15.14, −18.31 [A35-07]; 2025-04-07 −9.70, −15.96, −22.38, −26.54 [A35-08]. Note: TR23, total return; each window's
-  dates in the note (peak → trough: 2007-10-29 → 2008-11-20, 265 sessions; …); 2008's limit was 7% (SOURCES); the
-  2024-08-05 window's worst 20 sessions start before its peak (2024-07-04).
-- X3 `replay` (`bar`, §3): categories the five scenarios (2008 and 2015 marked "hypothetical"); series R1, R3, R6, R8
-  (four named; the others in the note): frozen window losses. 2020: −19.84, −10.17, −13.04, −17.04 [A35-15]; 2024:
-  −5.84, +0.11, −3.25, −3.61 [A35-17]; 2025: −12.97, −8.03, −10.10, −10.15 [A35-19]; 2008 (first weights, USO): −24.5,
-  −9, −15, −12 [A35-27] (pending; CENT values at 0 dp); 2015: −7.2, +1.8, −2.1, −1.8 [A35-29] (pending). Note:
-  2020–2025 frozen at each rule's book at the window's first close, Descriptive; 2008 and 2015 hypothetical; interest
-  left out. Values cited also for the other four rules in a table under the chart.
+  sessions", "peak to trough" (`fmt: "pct2"`, the precision of the values printed here; at `pct1` four of them would
+  sit near a boundary, recomputation finding 10): 2008 −6.51, −12.55, −27.69, −56.02 [A35-04]; 2015 −4.82, −9.72,
+  −12.49, −23.18 [A35-05]; 2020 −5.75, −16.51, −25.99 (flagged; from −25.99467), −28.55 [A35-06]; 2024-08-05 −8.33,
+  −10.44, −15.14, −18.31 [A35-07]; 2025-04-07 −9.70, −15.96, −22.38, −26.54 [A35-08]. Note: TR23, the TAIEX
+  total-return index; each window's dates in the note (peak → trough: 2007-10-29 → 2008-11-20, 265 sessions; …), each
+  span of $m$ sessions from the close before its first return; TWSE's stock limit was 7% until 2015-06-01 (SOURCES,
+  "TWSE company history"); the 2024-08-05 window's
+  worst 20 sessions start before its peak (from the 2024-07-04 close).
+- X3 `replay` (`bar`, §3): categories the three scenarios on the rules' own books (2020, 2024-08-05, 2025-04-07,
+  *Descriptive*); series R1, R3, R6, R8 (`fmt: "pct2"`): frozen window losses. 2020: −19.84 (flagged; from
+  −19.84416), −10.17, −13.04 (flagged; from −13.03595), −17.04 [A35-15]; 2024: −5.84, +0.11, −3.25, −3.61 [A35-17];
+  2025: −12.97, −8.03, −10.10 (flagged; from −10.10499), −10.15 [A35-19]. A table under the chart gives all eight rules
+  in all five scenarios, the actual paths and the named-day losses beside the frozen losses [A35-21, A35-16, A35-18,
+  A35-20], and 2008 and 2015 as a separate block
+  labelled *hypothetical* (first weights, 0050 itself, oil by USO), each value at the digits its CENT flag allows:
+  2008 R1 −24.5, R3 −9, R6 −15 (flagged; from −14.5599), R8 −12 [A35-27]; 2015 R1 −7.2, R3 +1.8, R6 −2.1, R8 −1.8
+  [A35-29]. (The hypothetical
+  values stay out of the bars: one series format cannot show 0 dp beside 2 dp, and the two labels differ.) Note:
+  frozen at each rule's book at the window's first close; interest left out.
 - X4 `attrib` (`bar`, `stack: true`, approved C1, §3): categories R1, R3, R6, R8; five series: 0050, 00646, 00635U,
   00642U in colours 1–4 and 00679B in `"var(--muted)"`, named in the caption (the only fund that gained); values
-  $f_iR_i$ on 2025-04-07 [A35-14]; the category total is the rule's loss [A35-13]. Note: R6's rounded parts do not add
-  to its rounded total (A35-14 against A35-13), so the note gives the parts to three decimals, or the text cites only
-  the total for R6 (pitfall below).
-- X5 `gaps` (table, §7): the five named days. Columns: log change from the previous close to 09:01:00; to the day's
-  low and its time; to the close; gap ÷ close. Values: 2008-01-22 −6.56%, −6.94% at 12:50:00, −6.74%, 0.97;
-  2015-08-24 −1.66%, −7.79% at 10:25:45, −4.96%, 0.34; 2020-01-30 −3.48%, −5.95% at 13:25:00, −5.92%, 0.59; 2024-08-05
-  −5.07%, −8.96% at 13:03:10, −8.72%, 0.58; 2025-04-07 −10.28%, −10.31% at 09:00:20, −10.20%, 1.01 [A35-45]. Note row:
-  2025-04-07's daily open (09:00:05) gives −5.52% [A35-45] (PITFALLS §3). Note: per-day statistics of TAIEX's 5-second
-  values (FinMind `TaiwanVariousIndicators5Seconds`, TWSE), log changes; no intraday path is published. Flagged values
-  rounded from the unrounded ones.
-- X6 `reverse` (`bar`, §6): categories the five funds; series "R1" (closed form) −10.47, −8.79, −1.21, −6.12, −23.00;
-  "R8" −8.90, −7.65, −4.57, −6.75, −14.14 [A35-39]; "R2, 0050 ≥ −10%" −10.00, −10.81, −9.89, −8.67, −0.34 [A35-40];
-  "each fund's worst day" −10.00, −12.59, −7.15, −11.09, −22.20 [A35-36]. Note: shocks of least Mahalanobis distance
-  reaching a one-day loss of 10% for each rule's book at the 2026-10-08 close; full-sample mean and covariance
-  (in-sample); distances 13.52, 12.27 and 17.01 against 19.07 for the worst-of-each day [A35-39, A35-40, A35-36].
+  $f_iR_i$ on 2025-04-07 [A35-14]; the category total is the rule's loss [A35-13]. Note: R6's parts rounded to two
+  decimals (−1.35, −2.73, +0.56 (flagged; from +0.55586), −0.68, −1.75) add to −5.95, not its −5.96 (flagged; from
+  −5.96415) (A35-14 against A35-13), so the note gives
+  R6's parts to three decimals, −1.351, −2.733 (flagged; from −2.733457), +0.556, −0.684, −1.752 (flagged; from
+  −1.751579), which add to −5.964
+  (pitfall below); R1's, R3's
+  and R8's two-decimal parts add to their totals.
+- X5 `gaps` (table, §7): the five named days. Columns: log change of the TAIEX price index from the previous close to
+  09:01:00; to the day's low and its first time; to the close; gap ÷ close. Values: 2008-01-22 −6.56%, −6.94%
+  (flagged; from −6.93589) at 12:50:00, −6.74% (flagged; from −6.73508), 0.97 (flagged; from 0.97415); 2015-08-24
+  −1.66% (flagged; from −1.66449), −7.79% at 10:25:45, −4.96%, 0.34 (flagged; from 0.33579); 2020-01-30 −3.48%, −5.95%
+  (flagged; from −5.95402) first at 13:25:00 and unchanged through 13:29:55, the closing call auction (AUTHORING §8),
+  −5.92%, 0.59; 2024-08-05 −5.07%, −8.96% at 13:03:10, −8.72%, 0.58; 2025-04-07 −10.28%, −10.31% at 09:00:20, −10.20%,
+  1.01 [A35-45]. Note row: 2025-04-07's daily open (09:00:05) gives −5.52% (flagged; from −5.52421) [A35-45]
+  (PITFALLS §3). Note: per-day statistics of TAIEX's 5-second values (FinMind `TaiwanVariousIndicators5Seconds`,
+  TWSE), log changes; a tied low is given at its first time; no intraday path is published.
+- X6 `reverse` (`bar`, §6): categories the five funds; series "R1" (closed form) −10.47, −8.79, −1.21, −6.12 (flagged;
+  from −6.12409), −23.00; "R8" −8.90, −7.65, −4.57, −6.75, −14.14 (flagged; from −14.13557) [A35-39]; "R2, 0050 ≥ −10%"
+  −10.00, −10.81, −9.89, −8.67 (flagged; from −8.67454), −0.34 (flagged; from −0.33575) [A35-40]; "each fund's worst
+  day" −10.00, −12.59 (flagged; from −12.58562), −7.15, −11.09, −22.20 [A35-36]. Note: shocks of least Mahalanobis
+  distance reaching a one-day loss of 10% for each rule's book at the 2026-10-08 close; full-sample mean and covariance
+  (in-sample); distances 13.52 (flagged; from 13.51595), 12.27 and 17.01 against 19.07 for the worst-of-each day
+  [A35-39, A35-40, A35-36]; a distance, not a probability.
 - X7 `ruin` (`line`, §8): $x$ the total exposure $L$ from 0 to 20; $y$ wealth after the scenario, $1+LR^{\mathrm{sc}}_p$
-  (`fmt: "pct0"`), four series: R6's 2020 window (−13.04% a unit), R6's 2025 window (−10.10%), R6 on 2025-04-07
-  (−5.96%) [A35-41], and 0050 to the next open of 2025-04-08 (−14.09%) [A35-43]; `hline` at 0 ("ruin"); dashed
-  `vline`s at R8's cap 1.5 and its largest uncapped ratio 2.135 [A35-42]. Values cited: ruin at 7.7, 9.9, 16.8 and
-  7.10 [A35-41, A35-43]. Note: frozen books, no trades inside the scenario; a book rebalanced to constant leverage
-  daily would differ.
+  (`fmt: "pct0"`), four series: R6's 2020 window (−13.04% (flagged; from −13.03595) a unit), R6's 2025 window
+  (−10.10%, flagged; from −10.10499), R6 on 2025-04-07 (−5.96%, flagged; from −5.96415) [A35-41], and 0050 to the next
+  open of 2025-04-08 (−14.09%) [A35-43]; `hline` at 0 ("ruin"); dashed `vline`s at R8's cap 1.5 and its largest
+  uncapped ratio 2.135 [A35-42]. Values cited: the ruin leverages 7.67, 9.90, 16.77 and 7.10, where each line crosses
+  zero [A35-41, A35-43]. Note: frozen books, no trades inside the scenario; a book rebalanced to constant leverage
+  daily would differ. (In place of the spine's replays at higher caps: the cap bound at no window start, decision E.)
 - X8 `limits` (table, §7): E5's funds. Columns: TWSE limit and the clause (受益憑證買賣辦法 Art. 8); the wealth frame's
-  lowest and highest return; days beyond ±10%: 0050 −10.00 / +10.00, 0; 00646 −12.59 / +10.39, 2; 00679B −7.15 /
-  +8.57, 0; 00635U −11.09 / +7.74, 1; 00642U −22.20 / +33.10, 14 [A35-46]. Note row: 0050 locked (open = high = low =
-  close) on 2025-04-07 and 2025-04-10 [A35-46]; the checkpoint's 0056 locked at 31.66 on 2025-04-07 [A35-48].
+  lowest and highest return; days beyond ±10%: 0050 −10.00 / +10.00, 0; 00646 −12.59 (flagged; from −12.58562) /
+  +10.39 (flagged; from +10.38576), 2; 00679B −7.15 / +8.57, 0; 00635U −11.09 / +7.74, 1; 00642U −22.20 / +33.10
+  (flagged; from +33.09524), 14 [A35-46]. Note row: 0050 locked (open = high = low = close) on 2025-04-07 and
+  2025-04-10 [A35-46]; the checkpoint's 0056 locked at 31.66 on 2025-04-07 [A35-48].
 
 **Widget `scenarioBuilder` — "Build a shock, see the loss."** `Book.controls`: rule (select R1–R8); preset (select:
 2025-04-07, 2020 window, 2024 window, 2025 window, factor −10%, correlation break, worst of each, the rule's reverse
@@ -2387,65 +2593,87 @@ KB), computed by `data/lm35_charts.py`. No optimizer and no simulation (shared d
 **Examples** (results recomputed from the printed inputs):
 
 - E1 §2 `window25`, the 2025 window: peak 2025-02-21, trough 2025-04-09, 30 sessions, −26.54%; worst day 2025-04-07,
-  −9.70%, rank 1, five calendar days after 2025-04-02; worst 5 sessions 2025-03-31 → 04-09, −15.96%; worst 20
-  2025-03-10 → 04-09, −22.38% [A35-08]. LM1's running peak tells another story: TR23 stood 27.72% below its peak of
+  −9.70%, rank 1, five calendar days after 2025-04-02; worst 5 sessions from the 2025-03-31 close to 04-09 (the
+  returns of 04-01, 04-02, 04-07, 04-08 and 04-09), −15.96%; worst 20 from the 2025-03-10 close to 04-09, −22.38%
+  [A35-08]. Among all 5,845 overlapping five-session spans of TR23, only the one ending 2020-03-19 lost more [A35-58].
+  LM1's running peak tells another story: TR23 stood 27.72% below its peak of
   2024-07-11 on 2025-04-09, 176 sessions later, and 18.31% below it on 2024-08-05 [A35-09]; the window rule keeps the
   two scenarios apart. Holiday spans: 140 of 5,849 returns cover four or more calendar days, and two of the ten worst
   days are among them, 2025-04-07 (five days) and 2020-01-30 (ten) [A35-10].
 - E2 §3 `day25`, R1 on 2025-04-07: exposures at the 2025-04-02 close times the day's returns give −7.70% [A35-13], of
   which 0050 −2.00, 00646 −2.53, 00679B +0.36, 00635U −0.62 and 00642U −2.91 points [A35-14] (they add to −7.70 as
-  printed); 00646 and 00642U supply the two largest parts. R3, the long-only minimum-variance book, loses 5.40%,
-  4.07 points of it from 00646 [A35-13, A35-14]. Equal weights are not equal risk on a crash day.
-- E3 §3 `frozen`, frozen against actual: 2020's window (2020-01-14 → 03-19) frozen at the first close costs R1 19.84%,
-  R6 13.04% and R8 17.04% [A35-15]; their own paths lost 21.44%, 14.43% and 12.58% [A35-21]. R8 entered at exposure
-  1.307 [A35-15] and its own trades cut the loss. In 2025 the order reverses: frozen at 2025-02-21 R8 loses 10.15% at
-  exposure 1.005 [A35-19], its path 13.84% [A35-21], because the trade of 2025-04-01 raised its exposure to 1.330
-  (uncapped ratio; the cap of 1.5 did not bind) [A35-42]. R8 scales by its two-year volatility over its EWMA
-  forecast, and on 31 March the forecast lay below the two-year figure. The named day of 2020, 2020-01-30, cost R1
-  1.60% but gave R3 +0.91%, as 00679B rose 5.26% [A35-16].
-- E4 §4 `y2008`, 2008 at the rules' first weights (hypothetical, pending): over 2007-10-29 → 2008-11-20 0050 itself
-  lost 55.66% (TR23 56.02%); in New Taiwan dollars SPY −44%, TLT +19%, GLD −4.1%, USO −37.3% and DBO −27% (0 dp:
-  CENT); USD/TWD rose from 32.390 to 33.390 (+3.09%) [A35-27]. R1 at its first weights [A35-23] loses 24.5% with USO
-  and 22% with DBO; R2 (no oil) 25.9%; R3 9% [A35-27]. The oil proxy alone moves R1 by about two points. On
-  2008-01-22, TR23's worst day of the window [A35-04], 0050 fell 6.93% and every proxy returned 0, since the data
-  hold no US session on 21 January [A35-28]; R2 loses 2.8% that day.
-- E5 §4 `proxycheck`, the proxies where the funds exist (pending): daily correlations with their funds on the
-  estimation frame 0.705 (SPY), 0.783 (TLT), 0.745 (GLD), 0.655 (USO), 0.696 (DBO), and 0.944, 0.952, 0.925, 0.845,
-  0.894 over ISO weeks [A35-25]; the daily figures are lower because the funds close at 13:30 Taipei time, hours after
-  the New York close they are paired with (shared decision "Timing of E5"). Over 2020's window 00642U lost 46.42%, USO
-  60.7% and DBO about 46% [A35-26]; R1 on the proxies (0050 by TR23) loses 21.5% with USO against 19.84% on the funds
-  [A35-26]. On the 80 E5 dates without a new US session the proxies cannot move at all [A35-57].
-- E6 §5 `factor`, the beta model on 2025-04-07: betas on TR23 from 0.527 (00646) to 1.048 (0050) with R-squared 0.363
-  and 0.924; 00679B −0.071 [A35-31]. Times TR23's −9.70% they predict 00646 −5.11% against −12.59% actual, 00642U
-  −1.92% against −14.62%, and R1 −3.62% against −7.70% [A35-32]. A factor shock of −10% on the current books costs R1
-  3.77%, R4 7.28% [A35-31]. Partial scenario (35.3): with 0050 at −10% and the other funds at their conditional means,
-  00646 −4.79%, 00679B +0.71%, 00635U −1.46%, 00642U −1.69% [A35-33]. Both shocks are averages of ordinary days.
-- E7 §5 `break`: setting the correlation of 0050 and 00679B from −0.105 (LM27's figure) to a *constructed* +0.30
-  keeps the correlation matrix positive definite (smallest eigenvalue 0.298) and turns 00679B's conditional move from
-  +0.71% to −2.04% [A35-33]. R3's loss rises from 1.41% to 2.95%, R7's from 1.40% to 3.00% [A35-33]. 2022 shows a real
-  case (illustration, not a ROADMAP scenario): from 2022-01-17 to 2022-10-25 TR23 lost 28.47%, 0050 33.93% and 00679B
-  22.15%; frozen at the start, R2 lost 22.37% and R4 29.86% [A35-34]. Their daily correlation inside the window was
-  −0.138, and −0.008 over 40 ISO weeks [A35-34]: the bonds fell with the stocks while the correlation stayed near
-  zero, because both trended down. On the 48 days when 0050 fell two standard deviations or more, its correlation with
-  00646 was 0.540, against 0.669 from (16.10) and 0.599 in the full sample [A35-35]: the normal model's crash
-  correlation is not the data's.
-- E8 §6 `reverse`, the current books (2026-10-08) and a 10% one-day loss: R1's $s_p=0.743\%$ gives $d^*=13.52$, with
-  the shock 0050 −10.47%, 00646 −8.79%, 00679B −1.21%, 00635U −6.12%, 00642U −23.00% [A35-39]. R4 needs only
-  $d^*=9.91$, R5 17.54 [A35-39]. The sample's largest distance is 15.02 on 2026-03-09, when 00642U rose 33.10%; then
-  12.97 (2020-03-09) and 12.94 (2025-04-07); the median is 1.60 [A35-37]. Within $d\le15.02$ R1 can lose 11.12%
-  [A35-39]. R1's shock puts 0050 below its limit; with $R^{\mathrm{sc}}_{0050}\ge-10\%$ R1's distance barely moves
-  (13.52) but R2's rises from 13.93 to 17.01, its shock needing 00679B at −9.89%, beyond that fund's worst day (−7.15%)
-  [A35-39, A35-40, A35-36]. CLARABEL and OSQP agree within 7.6e-11, KKT residuals at most 1.4e-14 [A35-40].
+  printed); 00646 and 00642U supply the two largest parts. R3, the long-only minimum-variance book, loses 5.40%
+  (flagged; from −5.40431), 4.07 points of it from 00646 [A35-13, A35-14]. Equal weights are not equal risk on a crash
+  day. The replay leaves out the session's interest; R1 holds no cash, so its wealth fell by exactly this [A35-13].
+- E3 §3 `frozen`, frozen against actual: 2020's window (2020-01-14 → 03-19) frozen at the first close costs R1 19.84%
+  (flagged; from −19.84416), R6 13.04% (flagged; from −13.03595) and R8 17.04% [A35-15]; their own paths lost 21.44%,
+  14.43% and 12.58% (flagged; from −12.57566) [A35-21]. R8 entered at exposure 1.307 [A35-15], and its trades of
+  3 February and 2 March cut it to 0.991 and 0.884; frozen over the whole window, those books lose 13.20% and 11.68%
+  (flagged; from −11.68458) [A35-42]. In 2025 the order reverses: frozen at 2025-02-21 R8 loses 10.15% at exposure
+  1.005 (flagged; from 1.004556) [A35-19], its path 13.84% [A35-21]. Its trade of 3 March raised the exposure from
+  1.005 (flagged; from 1.004600) to 1.319, and that book frozen over the whole window loses 13.35% [A35-42]. The trade
+  of 1 April moved it only from 1.317 to 1.330 (13.42%) [A35-42], so the 3 March trade did the raising; the cap of 1.5
+  bound at neither. R8 scales by its two-year volatility over its EWMA forecast, so a ratio of 1.319 at the signal of
+  27 February means the forecast lay below the two-year figure (31.7). The named day of 2020, 2020-01-30, cost R1
+  1.60% but gave R3 +0.91% (flagged; from +0.91470), as 00679B rose 5.26% [A35-16].
+- E4 §4 `y2008`, 2008 at the rules' first weights (*hypothetical*): over 2007-10-29 → 2008-11-20 0050 itself lost
+  55.66% (TR23 56.02%); in New Taiwan dollars SPY −44% (flagged; from −44.1503), TLT +19%, GLD −4.1%, USO −37.3% and
+  DBO −27% (0 dp: CENT); USD/TWD rose from 32.390 to 33.390 (+3.09%) [A35-27]. R1 at its first weights [A35-23] loses
+  24.5% with USO and 22% (flagged; from −22.4690) with DBO; R2 (no oil) 25.9%; R3 9% [A35-27]. The oil proxy alone
+  moves R1 by about two points (unrounded 24.4958 against 22.4690, A35-27; the text prints only the rounded pair).
+  On 2008-01-22, TR23's worst day of the window [A35-04],
+  0050 fell 6.93% and every proxy returned 0, since the data hold no US session on 21 January [A35-28]; R2 loses
+  2.8% that day.
+- E5 §4 `proxycheck`, the proxies where the funds exist (*hypothetical* in the replay line): daily correlations with
+  their funds on the estimation frame 0.705 (SPY), 0.783 (TLT), 0.745 (GLD), 0.655 (USO), 0.696 (DBO), and 0.944,
+  0.952, 0.926, 0.845, 0.894 over its 500 ISO weeks, the first and last dropped [A35-25]; the daily figures are lower
+  because the funds close at 13:30 Taipei time, hours after the New York close they are paired with (shared decision
+  "Timing of E5"). Over 2020's window 00642U lost 46.42% (flagged; from −46.41598), USO 60.7% and DBO about 46%
+  (flagged; from −45.5666) [A35-26]. Replayed on 0050 itself and the proxies, as 2008 is, R1 loses 21.5% with USO and
+  19% (flagged; from −18.5660) with DBO, against 19.84% (flagged; from −19.84416) on the funds [A35-26]: a proxy's
+  error is part of a hypothetical scenario. On the 80 E5 dates without a new US session the proxies cannot move at all
+  [A35-57].
+- E6 §5 `factor`, the beta model on 2025-04-07: betas on TR23 of 1.048 for 0050 (R-squared 0.924) and 0.527 for 00646
+  (0.363); the other three lie near zero, 00679B −0.071, 00635U 0.161 and 00642U 0.198 (flagged; from 0.198400)
+  [A35-31]. Times TR23's −9.70% they predict 00646 −5.11% against −12.59% (flagged; from −12.58562) actual, 00642U
+  −1.92% (flagged; from −1.92442) against −14.62% (flagged; from −14.62428), and R1 −3.62% against −7.70% [A35-32]. A
+  factor shock of −10% on the current books costs R1 3.77% (flagged; from −3.76600), R4 7.28% [A35-31]. Partial
+  scenario (35.3): with 0050 at −10% and the other funds at their conditional means, 00646 −4.79%, 00679B +0.71%,
+  00635U −1.46%, 00642U −1.69% (flagged; from −1.68551) [A35-33]. Both shocks are averages of ordinary days. (27.8)
+  shows the gap: 00642U's R-squared is under 1%, so almost all of its variance is residual, which a factor shock
+  leaves at its mean.
+- E7 §5 `break`: setting the correlation of 0050 and 00679B from −0.105 (flagged; from −0.105430; LM27's figure) to a
+  *constructed* +0.30 keeps the correlation matrix positive definite (smallest eigenvalue 0.298) and turns 00679B's
+  conditional move from +0.71% to −2.04% [A35-33]. R3's loss rises from 1.41% to 2.95%, R7's from 1.40% to 3.00%
+  [A35-33]. 2022 shows a real case (illustration, not a ROADMAP scenario): from 2022-01-17 to 2022-10-25 TR23 lost
+  28.47%, 0050 33.93% and 00679B 22.15% (flagged; from −22.15471); frozen at the start, R2 lost 22.37% (flagged; from
+  −22.36518) and R4 29.86% (flagged; from −29.86499) [A35-34]. Their daily correlation inside the window was −0.138,
+  and +0.019 over the window's 38 ISO weeks, against −0.023 over the full sample's 500 (LM27's A27-11) [A35-34]: the
+  bonds fell with the stocks while the correlation stayed near zero, because both trended down. On the 48 days when
+  0050 fell two standard deviations or more, its correlation with 00646 was 0.540, against 0.669 from (16.10) and
+  0.599 in the full sample (LM27's A27-11) [A35-35]. For a normal variable a one-sided tail narrows the spread
+  (lm16.md:449), but 0050's variance on those days is 1.449 (flagged; from 1.449459) times its full-sample variance
+  [A35-35]: its fat tail widens the spread. So (16.10) raises the correlation above 0.599, while the data lower it;
+  the normal model's crash correlation is not the data's.
+- E8 §6 `reverse`, the current books (2026-10-08) and a 10% one-day loss: R1's $s_p=0.743\%$ (flagged; from 0.743415)
+  gives $d^*=13.52$ (flagged; from 13.51595), with the shock 0050 −10.47%, 00646 −8.79%, 00679B −1.21%, 00635U
+  −6.12% (flagged; from −6.12409), 00642U −23.00% [A35-39]. R4 needs only $d^*=9.91$ (flagged; from 9.90502), R5
+  17.54 (flagged; from 17.54465) [A35-39]. The sample's largest distance is 15.02 on 2026-03-09, when 00642U rose
+  33.10% (flagged; from +33.09524); then 12.97 (2020-03-09) and 12.94 (2025-04-07); the median is 1.60 [A35-37].
+  Within $d\le15.02$ R1 can lose 11.12% [A35-39]. R1's shock puts 0050 below its limit; with
+  $R^{\mathrm{sc}}_{0050}\ge-10\%$ R1's distance barely moves (13.52) but R2's rises from 13.93 (flagged; from
+  13.93480) to 17.01, its shock needing 00679B at −9.89%, beyond that fund's worst day (−7.15%) [A35-39, A35-40,
+  A35-36]. CLARABEL, OSQP and the closed form agree to 1e-9, and the KKT residuals are below 1e-13 [A35-40].
 - E9 §7 `lock`: 0050 on 2025-04-07 opened, peaked, bottomed and closed at 158.40, exactly −1/10 from 176.00, on
   29,578,872 units [A35-12]. A sale not filled at the lock had to wait for 2025-04-08, which opened at 151.20: 4.55%
-  below the lock and 14.09% below 2 April [A35-12]. 00631L, limited at 20%, fell 19.995% and then 11.20% (lm02.md:498)
-  [A35-43]. TX settled 10.00% down that day against TAIEX's −9.70% on 2,736 contracts [A35-44]: the futures locked
-  too.
+  (flagged; from −4.54545) below the lock and 14.09% below 2 April [A35-12]. 00631L, limited at 20%, fell 19.995% and
+  then 11.20% (lm02.md:498) [A35-43]. TX settled 10.00% down that day against the TAIEX price index's −9.70% on 2,736
+  contracts [A35-44]: the futures locked too.
 - E10 §8 `margin`: one TX contract at $F_t=49{,}357$ is NT\$9,871,400 of exposure; with TAIFEX's initial margin of
   NT\$701,000 as the only equity, $f=14.08$ (lm02.md:462) [A35-44]. A fall of 1.65% reaches the maintenance margin of
   NT\$538,000, and a 10% limit day loses 1.41 times the equity, leaving NT\$−286,140 [A35-44]: ruined, and the loss
-  is reported, not floored. R6's unit book, by contrast, is ruined only from $L=7.7$ in 2020's window, 9.9 in
-  2025's, 16.8 on 2025-04-07 [A35-41]; R8's uncapped ratio never exceeded 2.135 [A35-42].
+  is reported, not floored. R6's unit book, by contrast, has ruin leverage 7.67 in 2020's window, 9.90 in 2025's and
+  16.77 on 2025-04-07 [A35-41]; R8's uncapped ratio peaked at 2.135 (signal 2021-07-30) [A35-42].
 
 **Problems plan** (12; MC keys B, A, C, B, C; the lab solves 9, 10, 11). Stems state the book (exposures, $L$), the
 scenario (returns and their span), simple returns, that interest and costs are left out, and the rounding; an
@@ -2456,12 +2684,12 @@ optimization stem states the feasible set, the solver and its tolerances.
 2. MC: a unit book loses 8% in a scenario; the total exposure at which the scenario ruins it. **A** 12.5. B 8.0 (the
    percent read as a multiple). C 11.5 ($(1-0.08)/0.08$) [A35-51]. The solution adds that ruin is $1+LR\le0$.
 3. MC: $L=5$ on 0050, locked at 158.40 from 176.00, next open 151.20; the loss at the first possible sale. A −50.00% (at
-   the locked close). B −22.73% (from the locked close only). **C** −70.45% [A35-52].
+   the locked close). B −22.73% (from the locked close only). **C** −70.45% (flagged; from −70.45455) [A35-52].
 4. MC: a US fund gains 1.0% and then loses 4.0% over the two New York sessions before a Taiwan date, and USD/TWD moves
    from 32.00 to 32.48; the return in New Taiwan dollars. A −3.04% (US dollars). **B** −1.59% (flagged; from −1.5856).
-   C −4.47% (the FX change subtracted) [A35-53].
-5. MC: $s_p=0.8\%$ a day, mean 0, a one-day loss of 10%; $d^*$. A 156.25 ($d^{*2}$). B 3.54 (a square root).
-   **C** 12.5 [A35-54].
+   C −4.47% (the FX rate applied the wrong way, $\times32.00/32.48$) [A35-53].
+5. MC: $s_p=0.8\%$ a day, mean 0, a one-day loss of 10%; $d^*$. A 156.25 ($d^{*2}$). B 3.54 (a square root; flagged;
+   from 3.53553). **C** 12.5 [A35-54].
 6. A book holds 40% 0050 and 60% of a bond fund. 0050 falls 10%; the bond fund's beta on 0050 is −0.07 in normal
    times and +0.30 in a break (hypothetical). Compute the bond fund's move and the book's return in both cases: the
    bond fund +0.70% or −3.00%, the book −3.58% or −5.80%, 2.22 points apart [A35-55]. Explain why diversification
@@ -2470,14 +2698,15 @@ optimization stem states the feasible set, the solver and its tolerances.
    $d^*$, and the worst loss $ks_p-\mathbf f^{\top}\bar{\mathbf R}$ within $d\le k$ (Cauchy–Schwarz in the
    $\hat\Sigma^{-1}$ inner product). Then two funds with SDs 1.2% and 0.8%, correlation −0.1, $\mathbf f=(0.5,0.5)$,
    mean 0, $\ell=5\%$: $s_p=0.687\%$, $d^*=7.28$, shock −7.12% and −2.88%; show that the shock is $-\ell\beta_{i,p}$
-   with LM27's $\beta_{i,p}$ = 1.424 and 0.576 [A35-56].
+   with LM27's $\beta_{i,p}$ of (27.5), 1.424 and 0.576 [A35-56].
 8. Derive the partial scenario (35.3) from (16.8) for each fund; check that changing one correlation of a $3\times3$
    correlation matrix keeps it PSD by its smallest eigenvalue; apply to E7's figures (0050 −10%: 00679B +0.71% with the
    full-sample correlation, −2.04% with 0.30) [A35-33].
 9. Python: from the lab's weights file, R1's exposures at the 2025-04-02 close and the day's returns; reproduce −7.70%
    and the five contributions [A35-13, A35-14].
-10. Python: 2020's window frozen against actual for R6 and R8 (−13.04% and −17.04% frozen, −14.43% and −12.58% actual)
-    [A35-15, A35-21]; explain the sign of each difference from the rules' trades.
+10. Python: 2020's window frozen against actual for R6 and R8 (−13.04% (flagged; from −13.03595) and −17.04% frozen,
+    −14.43% and −12.58% (flagged; from −12.57566) actual) [A35-15, A35-21]; explain the sign of each difference from the
+    rules' trades (R8's are listed in A35-42).
 11. Python: the bounded reverse stress test for R2's current book with cvxpy (CLARABEL, `tol_gap_abs`, `tol_gap_rel`,
     `tol_feas` 1e-12; percent units; status `optimal` required): $d=17.01$, 00679B −9.89%; check the KKT residuals,
     OSQP's answer and the closed form with both constraints active [A35-40].
@@ -2486,73 +2715,87 @@ optimization stem states the feasible set, the solver and its tolerances.
     14.08, 1.65%, NT\$−286,140 [A35-44]. Why does a margin call come long before ruin, and why can a locked market
     prevent meeting it?
 
-**Lab parts** (`build/make_lab35.py`; reads only its `data/`: E5's estimation and wealth frames and the rules'
-per-date exposures (derived files from `make_lab_data.py`), `taiex_tr.csv` (TR23), the five T5S days, the TX23
-limit-day rows, LM2's 0050 and 00631L pairs, the proxies and 0050's 2007–2008 files once registered, and the
-checkpoint universe's frames): 1 data, frames, windows' dates; 2 X2, E1 (the window rule and LM1's running peak),
+**Lab parts** (`build/make_lab35.py`; reads only its `data/`, built locally by `make_lab_data.py` and never committed
+(shared decision "Labs", decisions C6, X21): E5's estimation and wealth frames, the rules' per-date targets and
+exposures and their net wealth paths, `taiex_tr.csv` (TR23), the five T5S days (per-day statistics and the raw days
+the lab studies), the TX23 limit-day rows, LM2's 0050 and 00631L pairs, LM35's proxies and 0050's 2007–2008 files, and
+the checkpoint universe's frames): 1 data, frames, windows' dates; 2 X2, E1 (the window rule and LM1's running peak),
 holiday spans; 3 X3, X4, E2, E3, problems 9 and 10; 4 the pairing rule (35.5) implemented and checked against the
-anchors, E4, E5, problem 4; 5 betas, E6, E7, the PSD check, (16.10) on 0050's worst days; 6 (35.4) by hand, E8,
-cvxpy with both solvers and the KKT check, problem 11; 7 X5 from the five T5S days (per-day statistics only), X8,
-E9, X7, E10, problem 12; 8 the widget's presets reproduced; 9 **the batch's checkpoint** (below). Labs write plain
-"LM39", "LM44", "LM46", never `[[…]]`. Extension (*hypothetical*): replay 2008 with R2's fixed mix instead of the
-first weights and with DBO instead of USO, and say which choice moves the loss more.
+anchors, E4, E5, problem 4; 5 betas, E6, E7, the PSD check, (16.10) on 0050's worst days; 6 (35.4) by hand, E8, cvxpy
+with both solvers and the KKT check, problem 11; 7 X5 from the five T5S days (per-day statistics only), X8, E9, X7,
+E10, problem 12; 8 the widget's presets reproduced; 9 **the batch's checkpoint** (below). Labs write plain "LM39",
+"LM44", "LM46", never `[[…]]`. Extension (*hypothetical*): replay 2008 with R2's fixed mix instead of the first
+weights and with DBO instead of USO, and say which choice moves the loss more.
 
-**Checkpoint (Lab part 9; guidance g:44, adjusted by the shared decisions).** Universe: E5 plus 0056 (元大高股息), 00662
-(富邦NASDAQ) and 00720B (元大20年期以上BBB級美元公司債), so that E5's answers cannot be reused (A35-47). Before any result
-the reader writes down, in one cell that is not edited afterwards: the rules (R1, R3, R6 and R8 with the cap 1.5;
-R2's fixed mix is defined only for E5), the 504-row window, the month-end signals and next-session trades, the cost
-model (commission 0.1425%, tax 0.1% on 0056 and 00662 sales, 0 on 00720B through 2026-12-31 as a bond ETF), long-only
-limits and, for R3, a 30% cap per fund. Tasks: (a) allocate and run the wealth recursion (LM27's (27.1)–(27.2)) from
-2020-04-01 to 2026-10-08, checking $1+R_{p,t}>0$ on every date; (b) compare out of sample: net log growth (LM34), the
-Sharpe ratio with LM33's interval, maximum drawdown (LM32), turnover and costs, naming $n=4$; (c) stress: the 2024-08-05
-and 2025-04-07 windows and named days on the rules' own books (frozen and actual), 2020 on the first weights
-(the first trade comes after that window; the funds' 2020 returns are A35-48's), and each final book's reverse stress
-test at 10% with the limit bounds of 0050 and 0056 (the two funds with a limit); (d) explain how the cap and long-only
-change R3's allocation, with its multipliers (LM29) and (30.4); (e) the failure forms of R8 at caps 1.5 and 3: ruin
-leverage against exposure. Rubric (each item observable in the notebook): 1 settings fixed before results; 2 every
+**Checkpoint (Lab part 9; guidance g:44, adjusted by the shared decisions; universe and rules adopted by the editor's
+decision D, 2026-10-24).** Universe: E5 plus 0056 (元大高股息), 00662 (富邦NASDAQ) and 00720B (元大20年期以上BBB級美元公司債), so that
+E5's answers cannot be reused (A35-47). Before any result the reader writes down, in one cell that is not edited
+afterwards: the rules (R1, R3, R6 and R8 with the cap 1.5; R2's fixed mix is defined only for E5), the 504-row window,
+the month-end signals and next-session trades, the cost model (the shared decision's, with LM34's sources: commission
+0.1425%; tax 0.1% on ETF sales, 0056, 00662 and the two futures ETFs included; 0 on the bond ETFs 00679B and 00720B
+through 2026-12-31), long-only limits, for R3 a 30% cap per fund, and a one-way turnover limit of 20% per trade after
+the first purchase (decision D, X24: the guidance's "turnover limits"). A trade whose target $\mathbf f_t$ would need
+$\mathrm{TO}_t=\tfrac12\lVert\mathbf f_t-\mathbf w^{\mathrm{drift}}_t\rVert_1>0.20$ ((27.3)) stops on the straight
+line to the target, at $\mathbf w^{\mathrm{drift}}_t+(0.20/\mathrm{TO}_t)(\mathbf f_t-\mathbf w^{\mathrm{drift}}_t)$
+(this form is the brief's proposal, Open item 1). Tasks: (a) allocate and run the wealth recursion ((27.1)–(27.2))
+from 2020-04-01 to 2026-10-08, checking $1+R_{p,t}>0$ on every date and counting the trades the turnover limit cut;
+(b) compare out of sample: net log growth (LM34), the Sharpe ratio with its HAC interval (33.1), maximum drawdown
+((32.9)), turnover and costs, naming $n=4$; (c) stress: the 2024-08-05 and 2025-04-07 windows and named days on the
+rules' own books (frozen and actual), 2020 on the first weights (the first trade comes after that window; the funds'
+2020 returns are A35-48's), and each final book's reverse stress test at 10% with the limit bounds of 0050 and 0056
+(the two funds with a limit); (d) explain how the cap, long-only and the turnover limit change R3's allocation, with
+its multipliers ((29.4)) and (30.4); (e) the failure forms of R8 at caps 1.5 and 3: ruin leverage against exposure.
+Rubric (each item observable in the notebook): 1 settings fixed before results, the turnover limit among them; 2 every
 number names its sample and label; 3 the wealth recursion matches an independent recomputation to 1e-12 and checks
 $1+R_{p,t}>0$; 4 the comparison gives intervals and the count of rules; 5 frozen and actual losses for two windows,
 contributions adding to the loss; 6 reverse stress shocks checked by KKT and a second solver, the distance compared
 with the sample's largest, no probability attached; 7 the active constraints and their multipliers explained; 8 a
 conclusion with its evidence, which may be "the data do not support more leverage" (g:116). The reference answers
-(Stage 2, `data/lm35_numbers.py`) sit in a collapsed cell after the reader's own.
+(Stage 2, `data/lm35_numbers.py`) sit in a collapsed cell after the reader's own; `vol5_rules.py` has neither R3's cap
+nor the turnover limit, so where they are implemented is Open item 1.
 
 **Cross-module tags.**
 
 - (35.1) Scenario P&L $\Delta W=W_0\,\mathbf f^{\top}\mathbf R^{\mathrm{sc}}$ ((8.4) with a scenario's returns); a
   frozen book over a window uses $R^{\mathrm{sc}}_i=\prod_t(1+R_{i,t})-1$ (fixed holdings, no trades, interest left
-  out), and the loss splits exactly into $f_iR^{\mathrm{sc}}_i$ (LM44, LM46, LM48).
+  out), and the loss splits exactly into $f_iR^{\mathrm{sc}}_i$ (used within LM35; the text points to LM44, LM46 and
+  LM48, whose briefs add their citations; decision C8).
 - (35.2) A unit book with $R^{\mathrm{sc}}_p<0$, scaled to total exposure $L$, is ruined when
   $1+LR^{\mathrm{sc}}_p\le0$, that is from $L_{\mathrm{ruin}}=-1/R^{\mathrm{sc}}_p$; frozen holdings within the
-  scenario (LM44, LM45, LM46, LM48).
+  scenario (used within LM35; pointed to by LM44, LM45, LM46, LM48).
 - (35.3) Partial scenario: $\E[R_j\mid R_k=x]=\mu_j+(\sigma_{jk}/\sigma_{kk})(x-\mu_k)$ for a normal vector ((16.8)
-  fund by fund); for any law with finite variances, the best linear predictor (in-module; LM48).
+  fund by fund); for any law with finite variances, the best linear predictor (used within LM35).
 - (35.4) Reverse stress test: for $\Sigma$ positive definite and $\mathbf f\ne\mathbf 0$, the minimizer of
   $d^2=(\mathbf x-\boldsymbol\mu)^{\top}\Sigma^{-1}(\mathbf x-\boldsymbol\mu)$ subject to $\mathbf f^{\top}\mathbf
   x=-\ell$ is $\mathbf R^{\mathrm{sc}*}=\boldsymbol\mu-(\ell+\mathbf f^{\top}\boldsymbol\mu)\Sigma\mathbf
   f/\sigma_p^2$, with $d^*=(\ell+\mathbf f^{\top}\boldsymbol\mu)/\sigma_p$; the largest loss with $d\le k$ is
-  $k\sigma_p-\mathbf f^{\top} \boldsymbol\mu$; a distance, not a probability (LM44, LM46, LM48).
-- (35.5) A US fund's Taiwan-date return in New Taiwan dollars: $P^{\mathrm{TWD}}=P^{\mathrm{adj}}_{t^{\mathrm{US}}}
-  \mathrm{FX}$, the FX row the first dated after that New York close, and
-  $R_t=P^{\mathrm{TWD}}_t/P^{\mathrm{TWD}}_{t-1}-1$ (in-module; LM48).
+  $k\sigma_p-\mathbf f^{\top} \boldsymbol\mu$; a distance, not a probability (used within LM35; pointed to by LM48).
+- (35.5) A US fund's Taiwan-date return in New Taiwan dollars:
+  $P^{\mathrm{TWD}}_t=P^{\mathrm{adj}}_{t^{\mathrm{US}}\mid t'}\,\mathrm{FX}_{t^{\mathrm{US}}}$, with LM34's (34.2)
+  build date $t'$ (the retrieval date) and the FX row the first dated after that New York close, and
+  $R_t=P^{\mathrm{TWD}}_t/P^{\mathrm{TWD}}_{t-1}-1$ (used within LM35).
 
 **Pitfalls to pre-empt.**
 
 - A "one-day" return can span holidays: 2025-04-07 covers five calendar days, 2020-01-30 ten [A35-08, A35-06]; say the
   span with every named day (shared decision "LM35 against LM39").
-- A window's peak is not LM1's running peak (E1); the worst 20 sessions of 2024's window start before its peak.
+- A window's peak is not LM1's running peak (E1); the worst 20 sessions of 2024's window start before its peak. A
+  span of $m$ sessions is dated from the close before its first return, or a reader counts $m+1$ sessions.
 - A frozen replay ignores the rule's own trades: R8 lost more on its own path in 2025 and less in 2020 (E3). Report
-  both.
+  both, and name the trade that moved the book (A35-42 lists every trade into a window).
 - A stacked bar's parts must add to its label as printed (AUTHORING §7): R6's rounded contributions do not (X4).
 - Proxies: the pairing rule gives 0 on US holidays [A35-57]; the adjusted closes re-round at every retrieval, so CENT
-  values print to 0 dp and every proxy number is re-run after registration (PITFALLS §3); the oil proxy's roll rule
-  matters (USO −60.7% against DBO about −46% in 2020 [A35-26]); never call a proxy the fund.
-- A hypothetical book combines sources (0050, TR23, proxies, FX) in one number by design: name each in the caption,
-  and never mix them in a statistic of the through case.
+  values print to 0 dp and every proxy number is re-run after a re-fetch (PITFALLS §3); the oil proxy's roll rule
+  matters (USO −60.7% against DBO about −46% (flagged; from −45.5666) in 2020 [A35-26]); never call a proxy the fund.
+- A hypothetical book combines sources (0050, proxies, FX) in one number by design: name each in the caption, and
+  never mix them in a statistic of the through case (the shared decision "Data"'s one exception covers only these
+  replays).
 - Mahalanobis distance ranks how unusual a shock is, in both directions: the sample's most unusual day was an oil gain
-  of 33.10% [A35-37]. It is not (16.9)'s probability: returns are not normal, and (16.9) holds for $N=2$ only.
+  of 33.10% (flagged; from +33.09524) [A35-37]. It is not (16.9)'s probability: returns are not normal, and (16.9)
+  holds for $N=2$ only.
 - The closest shock can be impossible in one day: R1's puts 0050 at −10.47% (E8) [A35-39]; bound it by the limit.
-- The daily open is stale: on 2025-04-07 it gives a gap of −5.52% against −10.28% by 09:01:00 [A35-45] (PITFALLS §3,
+- The daily open is stale: on 2025-04-07 it gives a gap of −5.52% (flagged; from −5.52421) against −10.28% by 09:01:00
+  [A35-45] (PITFALLS §3,
   "An intraday index opens at the previous close").
 - Limit ratios: on 2025-04-07 the ratio of 00631L's to 0050's return shows the limits, not the fund (PITFALLS §7;
   lm02.md:498).
@@ -2564,18 +2807,23 @@ conclusion with its evidence, which may be "the data do not support more leverag
   April 2025 tariffs (White House fact sheet, 2 April 2025) and the TWD's rise of 2 to 5 May 2025 (TechNews, FTV) are in
   SOURCES; 2008, 2015, 2020, 2022 and 2026-03-09 are described by their data only, unless the editor adds a dated
   source.
-- The limit rule: the current version of 受益憑證買賣辦法 Art. 8 (amended 2025-09-30) was read; earlier versions were
-  not, so the text says "under TWSE's current rules" and backs the past with the data (X8).
+- The limit rule: 受益憑證買賣辦法 Art. 8 was last amended on 2024-12-31 (2025-09-30 is the rules' version date, and
+  that amendment changed other articles), and its items 1–3 read the same since 2016-06-03 (source check). So the text
+  says the rule for E5's funds has applied since June 2016, which covers E5's span, and X8's extremes agree. For the
+  hypothetical 2008 and 2015 replays the rule then in force was not read: there the text says "under TWSE's current
+  rules".
 
 **Curriculum guidance carried** (`plans/vol-5.md`'s table; `plans/curriculum-guidance.md`):
 
 - Each module says which layer it adds (g:30): §1's first paragraph.
 - Three outcome levels and taught/practised/assessed (g:54–58, g:124): the Outcomes table.
 - Checkpoint after Volume VI (g:44, adjusted): Lab part 9 on the eight-fund universe, with the rubric above.
-- Different failures in one case (g:87–90): §9's table on R1, R6 and R8: weak growth (LM34's net log growth), a
-  drawdown limit (LM32's MDD and $\mathrm{DD}^0$), funding (the margin call of E10; R8's borrowing at 3.5%), ruin
-  ($L_{\mathrm{ruin}}$, (35.2)); LM35 prints only the last two and cites the others by anchor once LM32's and LM34's
-  exist (Open item 8).
+- Different failures in one case (g:87–90): §9's table on R1, R6 and R8: weak growth (LM34's net log growth, A34-04:
+  12.89%, 10.80% and 11.59% a year), a drawdown limit (LM32's MDD and largest $\mathrm{DD}^0$ by (32.9), A32-35:
+  23.19%, 18.90% and 18.42% (flagged; from 18.41569); 10.24%, 0.60% and 0.15%), funding (the margin call of E10;
+  R8's borrowing at 3.5%), ruin ($L_{\mathrm{ruin}}$, (35.2), A35-41). LM35 prints the last two and cites the first
+  two by anchor (the cross-module check's H1); the cited values are the owners' and are rechecked against their final
+  anchors at Stage 2.
 - Wealth ≤ 0 is reported, never hidden (g:94): (35.2), E10, X7, the widget's readout.
 - Surviving the scenarios does not cover unseen losses (g:95): §9's closing pitfall, KC §9.
 - Decision flow (g:69–85), LM35's part: a lock removes the trade the flow assumes; a month-end rule meets a gap with
@@ -2586,37 +2834,49 @@ conclusion with its evidence, which may be "the data do not support more leverag
 **Stage 4 for earlier modules.** `leads` gain 35 in lm01.md:6 (DD$_t$, (1.17)), lm02.md:6 (00631L's limit day, the TX
 margins), lm23.md:6 ((23.1), TX's $F_t$) and lm26.md:6 ((26.2) through R8); all four are on the plan's Stage 4 list or
 follow from this brief's prerequisites (the plan names LM1, LM23 and LM26; LM2 is added here). lm08.md:6 and
-lm16.md:6 already list 35. LM27–LM34's front matter lists 35 from their own briefs (LM27, LM30, LM31 do; LM28's lists
-LM32–LM35; LM29's, LM32's and LM34's briefs to confirm). No wording change in published modules: none promises LM35
-anything.
+lm16.md:6 already list 35. LM27–LM34's briefs (revised 2026-10-24) all list 35 in their leads, LM33's by decision C9;
+this list matches the editor's merged Stage 4 list (decision G: lm01 +35, lm02 +35, lm23 +35, lm26 +35). No wording
+change in published modules: none promises LM35 anything.
 
 **Sources** (verified 2026-10-24 unless marked; paraphrased, nothing quoted beyond a phrase):
 
-- TWSE, 臺灣證券交易所受益憑證買賣辦法 (Rules Governing Trading of Beneficial Certificates), Art. 8, as amended
-  2025-09-30, [ZH](https://twse-regulation.twse.com.tw/TW/law/DAT0201.aspx?FLCODE=FL007114) (already in SOURCES for
-  ¶2): a listed beneficial certificate follows the listed-stock limit, except four kinds with no limit:
-  foreign-constituent index ETFs (and their attached listings), ETFs tracking a foreign futures index, overseas ETFs and
-  foreign-constituent active ETFs; a leveraged or inverse ETF on domestic constituents has 10% times its multiple,
-  one with any foreign constituent none. Read through a page fetcher on 2026-10-24; the editor re-reads the article's
-  text before Stage 3. Applied: 0050 and 0056 10% (domestic constituents); 00646, 00679B, 00662 and 00720B none
-  (foreign-constituent index ETFs: US stocks, US Treasuries, US stocks, US corporate bonds); 00635U and 00642U none
-  (futures ETFs on S&P GSCI gold and crude-oil indices, LM27's issuer check); 00631L 20%. Consistent with every fund's
-  extreme days (X8) and with FinMind printing no limits for the bond ETFs (shared decision "Limits and locks").
+- TWSE, 臺灣證券交易所受益憑證買賣辦法 (Rules Governing Trading of Beneficial Certificates), Art. 8,
+  [ZH](https://twse-regulation.twse.com.tw/TW/law/DAT0201.aspx?FLCODE=FL007114) (SOURCES' row has ¶2 only and gains ¶1
+  and Art. 8's own amendment date, Open item 3): a listed beneficial certificate follows the listed-stock limit,
+  except four kinds with no limit: foreign-constituent index ETFs (and their attached listings), ETFs tracking a
+  foreign futures index, overseas ETFs and foreign-constituent active ETFs; a leveraged or inverse ETF on domestic
+  constituents has 10% times its multiple, one with any foreign constituent none (¶1 items 1–4 and ¶2). Read in the
+  original on TWSE's regulation site by the source check of 2026-10-24 (decision F; verified): the current text
+  (DAT0201 and the Art. 8 page), the English text, the history page and the versions of 2016-06-03 (臺證交字第1050009905號)
+  and 2024-02-23. Art. 8 itself was last amended on 2024-12-31 (臺證上二字第1131705681號, effective at once), which added
+  item 4 and reworded item 1; 2025-09-30 is the rules' version date, and that amendment (公告 1140205581) changed Arts.
+  5-1, 5-2 and 14 only. Items 1–3 and ¶2 read the same in the 2016 and 2024 versions, so the rule for index and
+  futures ETFs has stood since 2016-06-03 (versions before 2016 were not read). Applied: 0050 and 0056 10% (domestic
+  constituents); 00646, 00679B, 00662 and 00720B none (foreign-constituent index ETFs: US stocks, US Treasuries, US
+  stocks by a press summary of 00662's index, US corporate bonds); 00635U and 00642U none (futures ETFs on S&P GSCI
+  gold and crude-oil indices, LM27's issuer check); 00631L 20%. Consistent with every fund's extreme days (X8) and
+  with FinMind printing no limits for the bond ETFs (shared decision "Limits and locks").
+- TWSE's ETF rules page (ETF 專區, 交易規則; the source check's saved page, 2026-10-24): ticks 0.01 below NT\$50 and
+  0.05 from NT\$50; the daily limit as for stocks (10%), none for an ETF holding overseas stocks; tax 0.1% on ETF
+  sales, bond ETFs exempt through 2026. The page prints no date (footer ©2023; the server's Last-Modified header
+  2026-10-22). The text cites Art. 8 for the limits, since the page's sentence is narrower.
 - TWSE's limit history (7% to 10% on 2015-06-01) and TAIFEX's TX specification (±10%), TAIFEX's margins effective
   2026-08-12: SOURCES rows "TWSE company history", "TAIFEX TX", "TAIFEX index margins" (via lm02.md:462).
 - TWSE Holiday Schedule 2025 (SOURCES): 3 April 2025 adjusted holiday, 4 April Children's Day and Tomb-sweeping Day,
   for "four non-trading days" before 7 April.
 - Basel Committee on Banking Supervision (2018), *Stress testing principles*, BCBS d450, 17 October 2018,
   [BIS](https://www.bis.org/bcbs/publ/d450.htm): the BIS page confirms the title, the date and that it replaces the
-  2009 principles (read 2026-10-24); its "severe but plausible" wording and its description of reverse stress tests are
-  the survey's reading of the PDF (Volume VI survey, §3), to re-read before §9 prints them.
+  2009 principles (read 2026-10-24). Its "severe but plausible" wording and its description of reverse stress tests
+  are the survey's reading of the PDF; the source check of 2026-10-24 did not read the PDF, so §9 does not cite them
+  (decision F: a claim whose source is not read stays out of the text; Open item 3).
 - Breuer, T., M. Jandačka, K. Rheinberger and M. Summer (2009), "How to Find Plausible, Severe, and Useful Stress
   Scenarios", *International Journal of Central Banking* 5(3), September 2009,
   [IJCB](https://www.ijcb.org/journal/ijcb09q3a7.htm): title, authors, volume, issue and date verified on the journal's
   page (2026-10-24); pages 205–224 from the survey's reading of the PDF headers; no DOI on Crossref (survey). The
-  journal's summary: they define a plausible region from the risk factors' distribution and search it for the
-  scenario with the largest loss. §6's "worst loss within $d\le k$" is that idea for an ellipsoid; that the paper
-  measures plausibility by a Mahalanobis distance is the survey's reading, to confirm before §9 credits it.
+  journal page's summary: they define a plausible region from the risk factors' distribution and search it for the
+  scenario with the largest loss. §9 cites only that summary, and §6's "worst loss within $d\le k$" is presented as the
+  same idea for an ellipsoid, the book's own construction; that the paper measures plausibility by a Mahalanobis
+  distance is the survey's reading and stays out until the paper is read (Open item 3).
 - Boyer, Gibson and Loretan (1999), Theorem 1, for (16.10), and Wasserman (2004) for $d^2$: via LM16 (SOURCES).
 - Jagannathan and Ma (2003), Proposition 1, via LM30's (30.4) (shared decision "References").
 - Kupiec, P. H. (1998), "Stress Testing in a Value at Risk Framework", *The Journal of Derivatives* 6(1): 7–24, DOI
@@ -2627,8 +2887,9 @@ anything.
   Corporate Bond liquid index, listed 2018-02-01); the E5 funds' indices from LM27's brief (Yuanta pages read
   2026-10-24). USO, issuer page ([USCF](https://www.uscfinvestments.com/uso), read 2026-10-24): the benchmark is the
   near-month NYMEX light sweet crude contract, rolled over five days each month; operations began 2006-04-10; a
-  1-for-8 reverse split on 2020-04-28. UNVERIFIED and not relied on: DBO's index and roll rule (Invesco's page did not
-  load), 00662's index (Fubon's page was under maintenance; a press summary gives the Nasdaq-100).
+  1-for-8 reverse split on 2020-04-28. UNVERIFIED: DBO's index and roll rule (Invesco's page did not load; not relied
+  on), 00662's index (Fubon's page was under maintenance; a press summary gives the Nasdaq-100, used only to class
+  00662 under Art. 8, which its data confirm; Open item 3).
 - News already in SOURCES: White House fact sheet of 2 April 2025 (the April tariffs); Atkinson (7 April 2025),
   TechNews: 936 listed stocks closed limit-down; TechNews and FTV, 5 May 2025: USD/TWD 31.064 on 2 May and 30.145 on 5
   May (project/SOURCES.md:205), the day of 00679B's worst return [A35-36].
@@ -2646,83 +2907,57 @@ scenario", "historical scenario", "hypothetical scenario", "gap risk", "proxy va
 "proxy" entries are computing and accounting terms) and 鎖跌停 (limit-down lock), each with its English in every box.
 AUTHORING's own: 權益歸零 (zero equity), never 斷頭.
 
-**Open before Stage 2** (each with the drafter's recommendation and evidence):
+**Open before Stage 2** (revised 2026-10-24: how the draft's ten items closed, then the items still open, each with
+the reviser's recommendation and evidence).
 
-1. **Registrations (capability B5 and 0050 in 2008).** Write the files under `data/raw/vol6/` with
-   `fetch_finmind.py`'s own `fetch()` and `render()` (the drafter's scratch scripts
-   `…/briefs/lm35/code/fetch_proxies.py`, with `OUT` set to `data/raw/vol6` and DBO added to its symbols if approved,
-   and `…/code/fetch_0050_2008.py`; 8 Free calls), check the Taiwan files with `data/check_chunk.py` (0050: two
-   mismatches, both ex-dates, 2007-10-24 and 2008-10-24, with spread 0.0 and the previous close equal to
-   `before_price`; drafter's check), then register:
+Closed by the editor's decisions and the source check:
 
-   ```text
-   uv run python data/fetch_finmind.py --add vol6/SPY__us_2007-07-02__2026-10-08.csv --dataset USStockPrice \
-       --data-id SPY --start 2007-07-02 --end 2026-10-08 --map adj_close=Adj_Close --map close=Close \
-       --adjusted adj_close
-   (the same for TLT, GLD, USO and, if approved, DBO)
-   uv run python data/fetch_finmind.py --add vol6/USD_TWD__2007-07-02__2026-10-08.csv --dataset TaiwanExchangeRate \
-       --data-id USD --start 2007-07-02 --end 2026-10-08 --filter 'spot_buy=^[1-9]'
-   uv run python data/fetch_finmind.py --add vol6/0050__2007-07-02__2008-12-31.csv --dataset TaiwanStockPrice \
-       --data-id 0050 --start 2007-07-02 --end 2008-12-31
-   uv run python data/fetch_finmind.py --add vol6/0050_dividends__2007-07-02__2008-12-31.csv \
-       --dataset TaiwanStockDividendResult --data-id 0050 --start 2007-07-02 --end 2008-12-31 \
-       --map cash_dividend=stock_and_cache_dividend --filter 'stock_or_cache_dividend=^息$'
-   ```
+- Draft item 1 (registrations): closed. The US proxies, the FX rates and 0050's 2007–2008 files are registered
+  (`6b02e71`, retrieved 2026-10-24) and byte-identical to the drafter's copies (`cmp` on all eight, recomputation).
+  The script reads only registered files and stops if one is absent; on them it gives the draft's values, so every
+  value once marked pending stands (decision X9). The rows whose definitions changed since are re-run (the anchors'
+  Status lists them).
+- Draft item 2 (DBO): closed; the owner approved DBO as a second oil proxy on 2026-10-24 (capability check).
+- Draft item 3 (0050 in 2008): closed; approved and registered with capability B1's E5 data.
+- Draft item 4 (windows; the 2008 and 2015 weights): closed by decision D, adopted as proposed.
+- Draft item 5 (the checkpoint): closed by decision D, with a one-way turnover limit of 20% per trade added (X24); its
+  form is item 1 below.
+- Draft item 6 (the limit rule): closed by decision F's source check, which read Art. 8 in the original. Its scope is
+  as the draft said; its last amendment is 2024-12-31, not the rules' version date 2025-09-30; items 1–3 read the
+  same since 2016-06-03. The brief now says the rule has stood since June 2016, which covers E5, and keeps "under
+  TWSE's current rules" for 2008 and 2015 (pitfall "The limit rule", Sources). The shared decision "Limits and locks"
+  carries the wider scope.
+- Draft item 7 (the symbol $\ell$): closed by decision B3; AUTHORING §6's $B,\ell$ row scopes LM35's loss level.
+- Draft item 8 (the four failure forms): closed; §9's table cites A34-04 and A32-35 (the cross-module check's H1).
+- Draft item 9 (R8 at higher caps): closed by decision E; X7 draws the ruin line instead.
+- Draft item 10: (a) the TWSE 2020 schedule, (b) BCBS's wording and (c) 00662's index are item 3 below; (d) the
+  spine's sector closes are item 4.
 
-   (the dividend entry mirrors the registered `0050_dividends.csv`; the FX filter drops FinMind's −1 rows; the
-   files' columns are `date,adj_close,close`, `date,spot_buy,spot_sell`, `date,close,spread` and
-   `date,before_price,after_price,cash_dividend`). USO's reverse split of 2020-04-28 will show as an "ex-date" in its
-   `--adjusted` summary, and that entry's stored "distributions" sum then includes the split; the check still works
-   (a re-fetch has the same day), but `data/README.md` should say so. SPY's file also serves LM27's open item 5
-   (00646 against SPY's previous session). Then re-run the script: A35-24–A35-30, A35-41's 2008 and 2015 parts and
-   A35-57 replace the scratch values, and their CENT flags decide 1 dp or 0 dp. Recommendation: register all of them
-   now; the brief's pending numbers change by at most their CENT bounds.
-2. **DBO, beyond the approved proxies.** The owner approved SPY, TLT, GLD and USO (ROADMAP, "Batch 4 capabilities").
-   DBO is the drafter's addition (one more Free call) and needs the owner's yes (memory: ask before widening an owner
-   rule). Evidence: 00642U tracks an "enhanced" crude-oil index (LM27's issuer check), while USO holds the near month
-   (USCF's page); over 2020's window 00642U lost 46.42%, USO 60.7%, DBO about 46% [A35-26]; daily correlations 0.655
-   and 0.696; but over the whole frame USO's log growth is closer (gap +0.02 against −6.63 points a year) [A35-25]; the
-   choice moves R1's 2008 loss by about two points [A35-27]. Recommendation: approve DBO and show both, which teaches
-   that a proxy's error is part of a hypothetical scenario; if declined, print USO only and state its 2020 gap.
-3. **0050 itself in 2008, a new Taiwan registration.** The spine says "on the funds that existed"; 0050 listed in
-   2003, but the registered 0050 files start on 2014-10-31, so TR23 would stand in. Evidence that the stand-in errs:
-   TR23 against 0050 over the windows −23.18 / −20.96 (2015), −18.31 / −21.30 (2024) [A35-22]; in 2008 −56.02 /
-   −55.66, and on 2008-01-22 −6.51 / −6.93 [A35-04, A35-27, A35-28] (pending). Two Free calls. Recommendation:
-   register (item 1); it is within the data rule (FinMind, `--add`), but it is not in the approved capability list, so
-   the editor confirms it with the owner together with item 2.
-4. **The scenario windows and the replayed weights.** The spine leaves both to the brief. Windows: the rule under
-   "Data role" (trough of the named year or of the 20 sessions from the named day; peak after the previous trough). It
-   keeps 2024 and 2025 apart (by LM1's running peak they merge: 27.72% from 2024-07-11 [A35-09]) and puts 2008's worst
-   day in January (2008-01-22, −6.51%, rank 4), not in October [A35-04]. Weights for 2008 and 2015: the rules' first
-   target exposures of 2019-03-04 [A35-23], all eight rules, R2's fixed mix among them; R8's first exposure is 0.849,
-   the rest in cash [A35-23]. Recommendation: adopt both; the alternative windows (running peak; calendar month of the
-   named day) go to the lab's extension, not the text.
-5. **The checkpoint's universe and rubric.** Recommendation: the eight funds of `frames("E5+checkpoint")` [A35-47] and
-   the four rules R1, R3, R6, R8 (R2 is E5's fixed mix), with the rubric above. Evidence: three new funds alone (0056,
-   00662, 00720B) give $N=3$, too few for minimum variance and ERC to differ much; the eight-fund universe changes every
-   answer, adds a second domestic fund with a limit (0056 locked at 31.66 on 2025-04-07 [A35-48]) and a bond fund
-   without tax, and its first trade (2020-04-01) comes after 2020's window, so the reader must replay that window
-   hypothetically. The reference answers are computed in Stage 2 (not anchors now). The editor confirms that
-   `vol5_rules`' functions run R1, R3, R6 and R8 on the eight-fund frames unchanged (A35-47 shows `schedule()` does).
-6. **The limit rule (settled; re-read).** TWSE's 受益憑證買賣辦法 Art. 8 (current version) gives 0050 and 0056 a 10% limit
-   and none to 00646, 00679B, 00635U, 00642U, 00662 and 00720B (Sources). The shared decision "Limits and locks" wrote
-   "an ETF holding overseas stocks has none"; the rule is wider (overseas bonds and foreign futures indices too), and
-   the data agree (X8). Recommendation: the text states the rule as above, "under TWSE's current rules", after the
-   editor re-reads the article's original text (the drafter read it through a page fetcher) and adds ¶1 to SOURCES'
-   row.
-7. **The loss level's symbol.** $\ell$ in (35.4) needs a scoped entry in §6's $B,\ell$ row ("LM35's loss level"), since
-   the row lists LM22's block length, LM23's lag and LM32's block length. LM35 writes none of these. Alternatives:
-   write the constraint with the number ($-10\%$) and the general case in words, losing (35.4)'s general form.
-   Recommendation: the scoped row.
-8. **The four failure forms (§9) depend on LM32 and LM34.** LM35 prints ruin and funding; growth and drawdowns are
-   LM34's and LM32's numbers, which do not exist yet. Recommendation: §9's table cites their anchors by ID when their
-   briefs are done, for R1, R6 and R8; until then the table has those two columns empty in the draft.
-9. **R8 "at higher caps".** The cap did not bind at any window start (R8's exposures 1.307, 1.111, 1.005; the uncapped
-   ratios at the preceding trades 1.308, 1.114, 1.005) [A35-42], so a higher cap changes none of the frozen replays.
-   Recommendation: X7 shows the ruin line against $L$ with the cap and R8's largest uncapped ratio (2.135) marked,
-   instead of replays at higher caps; the checkpoint's task (e) asks for caps 1.5 and 3 on the new universe.
-10. **Smaller checks.** (a) 2020-01-30 follows ten calendar days without a session; name Taiwan's Lunar New Year
-    closure only after checking TWSE's 2020 schedule (its JSON endpoint returned no 2020 rows on 2026-10-24). (b)
-    BCBS (2018)'s wording on reverse stress tests is to be read in the PDF before §9 prints it. (c) 00662's issuer page
-    before the lab names its index. (d) The spine's "27 sector closes from 2007-07-02 for 2008" are not needed: E5 has
-    one Taiwan equity fund, and 0050 itself covers 2008 (item 3).
+Still open:
+
+1. **The checkpoint's turnover limit and R3's cap: form and code.** Decision D fixes the limit at 20% per trade; the
+   brief proposes three details. (a) The first purchase is exempt: from cash, $\mathrm{TO}_t$ is 0.5 for a fully
+   invested target, so a 20% limit would take three months to fill the book. (b) A trade beyond the limit stops on
+   the straight line to its target, at $\mathbf w^{\mathrm{drift}}_t+(0.20/\mathrm{TO}_t)(\mathbf f_t-\mathbf
+   w^{\mathrm{drift}}_t)$. (c) $\mathrm{TO}_t$ is LM27's (27.3), R8's total exposure included. `vol5_rules.py` has
+   neither the limit nor R3's 30% cap, and the reference answers need both. Recommendation: adopt (a)–(c), and let
+   `data/lm35_numbers.py` add both on top of `vol5_rules`' functions as checkpoint settings, labelled so (shared code
+   is the editor's, so the editor decides where they live).
+2. **Tag users in the sibling briefs (decision C8).** LM35 cites (27.1), (27.2), (27.3), (27.5), (27.8), (28.1),
+   (29.4), (30.4), (31.1), (31.7), (32.9), (33.1) and (34.2). The revised sibling briefs name LM35 for all of them
+   except (27.3), whose list reads "(LM29, LM31, LM34)", (28.1), "(LM29)", and (29.4), "(LM30)" (rechecked against
+   the briefs of 2026-10-24). Recommendation: those three lists gain LM35 (the checkpoint's turnover limit, the
+   reverse stress test's equality-constrained minimum and the bounded version's KKT check).
+3. **Sources outside the source check's list.** Decision F's check read Art. 8, TWSE's ETF page and the Ministry of
+   Finance's notice, all applied above. These were not on its list and stay unread. BCBS d450's wording on severe but
+   plausible scenarios and on reverse stress tests, and Breuer et al.'s plausibility measure: §9 cites neither (only
+   the journal page's summary of Breuer et al.). 00662's index (Fubon's page): the brief uses a press summary only to
+   class 00662 as a foreign-constituent ETF, which its −14.30% on 2025-04-07 confirms [A35-48]. DBO's index and roll
+   rule (Invesco's page): the text describes DBO by its data only. TWSE's 2020 holiday schedule: 2020-01-30's ten-day
+   span is printed from the data, without naming the Lunar New Year closure. One consequence of the check needs the
+   editor's file: SOURCES' Art. 8 row gains ¶1 and Art. 8's own amendment date, 2024-12-31. Recommendation: one fresh
+   agent reads BCBS d450, the IJCB PDF and Fubon's 00662 page before Stage 2; if they stay unread, §9 keeps its single
+   sentence and the lab names 00662's index only after the read.
+4. **The spine's 27 sector closes from 2007-07-02.** Not used: E5 has one Taiwan equity fund, and 0050's own files
+   cover 2008. This departure from the spine is not on decision E's list. Recommendation: drop the sector closes from
+   LM35's data line.

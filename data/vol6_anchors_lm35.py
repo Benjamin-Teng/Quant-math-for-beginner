@@ -1,7 +1,8 @@
-"""LM35 anchors (Stress Testing): every number the Stage 1 brief quotes (drafted 2026-10-24).
+"""LM35 anchors (Stress Testing): every number the Stage 1 brief quotes (drafted 2026-10-24, revised the same day to
+the editor's decisions on the briefs, plans/vol-5.md).
 
-Reads only data/processed/*.parquet through the shared builders, plus the raw files the plan names (run the builders
-first: data/vol3_series.py, data/vol4_series.py, data/build_series.py, data/vol5_series.py, data/vol5_rules.py):
+Reads only data/processed/*.parquet through the shared builders, plus the registered raw files the plan names (run the
+builders first: data/vol3_series.py, data/vol4_series.py, data/build_series.py, data/vol5_series.py, data/vol5_rules.py):
   * E5 (the through case): vol5_series.frames("E5"): the estimation frame (T = 2,362 joint one-session returns,
     2017-01-18 .. 2026-10-08) and the wealth frame (2,368 TR23 sessions; a halted fund earns 0 and books its spanning
     return when it trades again); vol5_series.ohlc(fund) for the daily open, high, low, close and volume. The
@@ -19,48 +20,52 @@ first: data/vol3_series.py, data/vol4_series.py, data/build_series.py, data/vol5
   * T5S (Volume IV): data/raw/intraday/taiex5s/<year>/<date>.csv for the five named days only, used for per-day
     statistics: the log change from the previous close (printed at 09:00:00) to 09:01:00, the day's low and its time,
     the close; and, for 2025-04-07, the 09:00:05 value (the daily open).
-  * US proxies (capability B5, PENDING REGISTRATION): data/raw/vol6/<SYM>__us_2007-07-02__2026-10-08.csv for SPY, TLT,
-    GLD, USO and DBO (USStockPrice: date, adj_close, close) and data/raw/vol6/USD_TWD__2007-07-02__2026-10-08.csv
-    (TaiwanExchangeRate, USD: date, spot_buy, spot_sell; FinMind's -1 sentinel rows filtered out). The environment
-    variable LM35_VOL6 overrides the folder (the drafter's scratch copies). When a file is absent, each anchor that
-    needs it prints a PENDING note in place of its value; every other anchor is computed.
-  * 0050 in 2008 (PENDING REGISTRATION): data/raw/vol6/0050__2007-07-02__2008-12-31.csv (TaiwanStockPrice: date,
+  * US proxies (capability B5, registered in 6b02e71, retrieved 2026-10-24): data/raw/vol6/<SYM>__us_2007-07-02__
+    2026-10-08.csv for SPY, TLT, GLD, USO and DBO (USStockPrice: date, adj_close, close) and data/raw/vol6/USD_TWD__
+    2007-07-02__2026-10-08.csv (TaiwanExchangeRate, USD: date, spot_buy, spot_sell; FinMind's -1 rows filtered out
+    at registration). The script stops if a file is absent (rebuild data/raw/ with data/fetch_finmind.py).
+  * 0050 in 2008 (registered the same way): data/raw/vol6/0050__2007-07-02__2008-12-31.csv (TaiwanStockPrice: date,
     close, spread) and data/raw/vol6/0050_dividends__2007-07-02__2008-12-31.csv (TaiwanStockDividendResult, 0050's
     label 息). The script checks every close against the spread in exact arithmetic (ex-dates only excepted, with the
     previous close equal to before_price) and the dates against TR23's, and replays 2008 on 0050's own total return
-    (P_t + D_t) / P_{t-1} - 1. Without the files it uses TR23 as 0050's stand-in and says so.
+    (P_t + D_t) / P_{t-1} - 1.
 
 Conventions. Returns are simple and printed in percent unless a line says log. A scenario window runs from a peak
 close to a trough close of TR23: the trough is TR23's lowest close of the named calendar year (2008, 2015, 2020) or of
 the 20 sessions from the named day (2024-08-05, 2025-04-07); the peak is TR23's highest close after the previous
 scenario's trough (for 2008, from TR23's first close) and before the trough. The named day of a window is its worst
 TR23 day; the worst 5 and 20 sessions are the worst compound TR23 returns of m consecutive sessions ending inside the
-window (peak, trough]. A frozen replay holds the book's exposures f at the window's first close fixed (LM8's (8.4) with
-the compound returns R_sc over the window): loss = f'R_sc, interest on cash and on borrowing left out. A named-day
-replay uses the exposures at the previous close (no rule trades on a named day). The rules' actual path is their
-wealth ratio over the window (their own trades included). A proxy's TWD value for US session D is the adjusted close
-of D times the mid rate (spot_buy + spot_sell) / 2 of the first FX row dated after D; a Taiwan date d takes the last
-US session before d, so its return compounds the US sessions D with d_prev <= D < d and the FX change (plans/vol-5.md,
-capability B5). 0050 is itself in 2008 (its own files; TR23 stands in while they are absent) and in 2015 (LM2's
-sample). Mahalanobis distances use the
-full estimation frame's mean and covariance (divisor T); the reverse stress test minimizes d^2 = (x - mu)' S^-1 (x - mu)
-subject to f'x = -l (closed form) and, bounded, with 0050's shock >= -10% (cvxpy: CLARABEL and OSQP in percent units,
-tolerances printed, KKT residuals and the closed form with the active bound checked). Betas are OLS slopes with an
-intercept on the estimation frame (TR23's R on the same dates). The ruin leverage of a loss R < 0 is -1/R (1 + L R <= 0).
-Counts on two-decimal prices use Fraction; counts on computed values the guard 1e-12.
+window (peak, trough], printed from the close before the first of the m returns to the close of the last. A frozen
+replay holds the book's exposures f at the window's first close fixed (LM8's (8.4) with the compound returns R_sc
+over the window): loss = f'R_sc, interest on cash and on borrowing left out. A named-day replay uses the exposures at
+the previous close (no rule trades on a named day). The rules' actual path is their wealth ratio over the window
+(their own trades included). A proxy's TWD value for US session D is the adjusted close of D (as retrieved on
+2026-10-24) times the mid rate (spot_buy + spot_sell) / 2 of the first FX row dated after D; a Taiwan date d takes
+the last US session before d, so its return compounds the US sessions D with d_prev <= D < d and the FX change
+(plans/vol-5.md, capability B5). 0050 is itself in every hypothetical book: its own 2007-2008 files in 2008, LM2's
+sample in 2015, the wealth frame in the 2020 proxy check. Weekly returns compound daily returns within ISO weeks,
+keys (ISO year, ISO week); the first and last week of a span, in which it starts and ends, are dropped, complete or
+not (LM27's convention; plans/vol-5.md, "Weeks and months"). Mahalanobis distances use the full estimation frame's
+mean and covariance (divisor T); the reverse stress test minimizes d^2 = (x - mu)' S^-1 (x - mu) subject to
+f'x = -l (closed form) and, bounded, with 0050's shock >= -10% (cvxpy: CLARABEL and OSQP in percent units, which the
+shared decision "Solver output" allows with the KKT residuals printed; tolerances printed, KKT residuals and the
+closed form with the active bound checked).
+Betas are OLS slopes with an intercept on the estimation frame (TR23's R on the same dates). The ruin leverage of a
+loss R < 0 is -1/R (1 + L R <= 0). Counts on two-decimal prices use Fraction; counts on computed values the guard
+1e-12.
 
 Rounding flags. Every number the brief prints passes through f(x, k1, k2, ...), which shows x with max(k) + 3 decimals
 and flags it "NEAR" for each printed precision k at which x lies within a tenth of a last-digit unit of a rounding
 boundary (|frac(10^k |x|) - 0.5| < 0.1). The brief prints a flagged value as rounded from the unrounded value here.
 A number computed from an adjusted close (the US proxies) is printed to 1 dp and flagged "CENT" when a change of one
 cent in each adjusted close it uses could move its 1-dp rounding (PITFALLS section 3: a re-fetch re-rounds the
-column); the brief prints such a number to 0 dp, or as "about" when the flag says 0 dp is not safe either.
+column); the brief prints such a number to 0 dp, or as "about" when the flag says 0 dp is not safe either. Solver
+residuals and gaps print as bounds (the script stops if one is exceeded), because their digits are rounding noise.
 
 Prints one line per anchor, "A35-NN <value>", in ID order, and writes nothing.
 
 Run:  PYTHONUTF8=1 uv run python data/vol6_anchors_lm35.py
 """
-import os
 import sys
 from bisect import bisect_left, bisect_right
 from datetime import date
@@ -81,7 +86,7 @@ from vol5_series import frames, ohlc
 
 PROC = HERE / "processed"
 T5S = HERE / "raw" / "intraday" / "taiex5s"
-V6 = Path(os.environ.get("LM35_VOL6", str(HERE / "raw" / "vol6")))
+V6 = HERE / "raw" / "vol6"
 PROXY_WINDOW = "2007-07-02__2026-10-08"
 PROXIES = {"00646": "SPY", "00679B": "TLT", "00635U": "GLD", "00642U": "USO"}
 EPS = 1e-12
@@ -128,6 +133,7 @@ def pu(x: float, u: float) -> str:
     if floor(10 * lo + 0.5) != floor(10 * hi + 0.5):
         ok0 = floor(lo + 0.5) == floor(hi + 0.5)
         CENT.append(f"{100 * x:.4f} +- {100 * u:.4f}" + ("" if ok0 else " (0 dp too: write 'about')"))
+        return pc(x, 0, 1)                       # printed at 0 dp: flag that precision too
     return pc(x, 1)
 
 
@@ -137,6 +143,7 @@ def lu(x: float, u: float) -> str:
     if floor(10 * a + 0.5) != floor(10 * b + 0.5):
         ok0 = floor(a + 0.5) == floor(b + 0.5)
         CENT.append(f"L {-1 / x:.4f} in [{a:.4f}, {b:.4f}]" + ("" if ok0 else " (0 dp too: write 'about')"))
+        return f(-1 / x, 0, 1)                   # printed at 0 dp: flag that precision too
     return f(-1 / x, 1)
 
 
@@ -159,6 +166,9 @@ TRADES = pl.read_parquet(PROC / "vol5_trades.parquet")
 RULEW = pl.read_parquet(PROC / "vol5_rules.parquet")
 
 
+PRE: dict[str, dict[str, Vec]] = {}     # rule -> trade date -> drifted exposures before that trade
+
+
 def book(rule: str) -> tuple[list[str], Mat, Vec]:
     """The rule's exposures h/W after each day's trade and its wealth, from its first trade (rebuilt, then checked)."""
     t = TRADES.filter(pl.col("rule") == rule).sort("trade")
@@ -170,12 +180,14 @@ def book(rule: str) -> tuple[list[str], Mat, Vec]:
     dts: list[str] = []
     ex: list[Vec] = []
     ws: list[float] = []
+    PRE[rule] = {}
     for i in range(i0, len(WD)):
         if i > i0:
             h = h * (1 + fr.W[i])
             c *= 1 + ((RF if c >= 0 else RF + SPREAD) / fr.A_wealth)
         w = float(h.sum() + c)
         if WD[i] in tgt:
+            PRE[rule][WD[i]] = h / w
             tf, cost = tgt[WD[i]]
             w = w * (1 - cost)
             h = w * tf
@@ -212,6 +224,19 @@ def growth(a: str, b: str) -> Vec:
     return np.prod(1 + fr.W[WIDX[a] + 1:WIDX[b] + 1], axis=0) - 1
 
 
+def weeks(dates: list[str], x: Mat) -> tuple[int, Mat]:
+    """Compound daily returns (rows of x) within ISO weeks, keys (ISO year, ISO week); the first and last week of the
+    span, in which it starts and ends, are dropped, complete or not (LM27's convention). Returns the count and the
+    rows."""
+    keys = [date.fromisoformat(d).isocalendar()[:2] for d in dates]
+    uk = sorted(set(keys))
+    acc = {k: np.ones(x.shape[1]) for k in uk}
+    for k, r in zip(keys, x, strict=True):
+        acc[k] = acc[k] * (1 + r)
+    kept = uk[1:-1]
+    return len(kept), np.array([acc[k] - 1 for k in kept])
+
+
 def rules_line(vals: dict[str, float], k: int = 2) -> str:
     return ", ".join(f"{r} {pc(v, k)}" for r, v in vals.items())
 
@@ -232,6 +257,7 @@ put(f"TR23: {int(np.isfinite(RT).sum())} returns {TD[1]} .. {TD[-1]} (A19-02)")
 # ---------------------------------------------------------------- scenario windows (TR23)
 SCEN = [("2008", "year"), ("2015", "year"), ("2020", "year"), ("2024-08-05", "day"), ("2025-04-07", "day")]
 WIN: dict[str, tuple[str, str, str]] = {}      # name -> (peak, trough, named day)
+WORST: dict[str, dict[int, tuple[float, int]]] = {}   # name -> m -> (worst m-session return, index of its last close)
 prev = -1
 for name, kind in SCEN:
     if kind == "year":
@@ -248,11 +274,12 @@ for name, kind in SCEN:
         worst[m] = min(g)
     rank = int((RT[np.isfinite(RT)] < RT[nd] - EPS).sum()) + 1
     WIN[name] = (TD[p], TD[k], TD[nd])
+    WORST[name] = worst
     gap = (date.fromisoformat(TD[nd]) - date.fromisoformat(TD[nd - 1])).days
     put(f"scenario {name}: peak {TD[p]}, trough {TD[k]}, {k - p} sessions, TR23 {pc(LV[k] / LV[p] - 1, 2)}; worst day "
         f"{TD[nd]} {pc(RT[nd], 2)} (rank {rank} of 5849; previous session {TD[nd - 1]}, {gap} calendar days); worst 5 "
-        f"sessions {TD[worst[5][1] - 5]} -> {TD[worst[5][1]]} {pc(worst[5][0], 2)}; worst 20 sessions "
-        f"{TD[worst[20][1] - 20]} -> {TD[worst[20][1]]} {pc(worst[20][0], 2)}")
+        f"sessions from the close of {TD[worst[5][1] - 5]} to {TD[worst[5][1]]} {pc(worst[5][0], 2)}; worst 20 sessions "
+        f"from the close of {TD[worst[20][1] - 20]} to {TD[worst[20][1]]} {pc(worst[20][0], 2)}")
     prev = k
 k25, k24 = TPOS["2025-04-09"], TPOS["2024-08-05"]
 put(f"running-peak drawdown (LM1's DD_t) at the troughs: 2024-08-05 {pc(1 - LV[k24] / LV[:k24 + 1].max(), 2)} and "
@@ -284,12 +311,19 @@ put(f"0050 on 2025-04-07: open {o} high {h} low {lo} close {c}, volume {v:,} sha
     f"{exact} exactly (Fraction); next open (2025-04-08) {o8}: {pc(o8 / c - 1, 2)} from the locked close, "
     f"{pc(o8 / c0 - 1, 2)} from 2025-04-02")
 day7 = {k: float(expo(k, "2025-04-02") @ fr.W[i7]) for k in RULES}
+net7 = {k: wealth(k, "2025-04-07") / wealth(k, "2025-04-02") - 1 for k in RULES}   # no trade on 2025-04-07
+full7 = max(abs(net7[k] - day7[k]) for k in RULES if k != "R8")
+if full7 > EPS:
+    fail(f"a fully invested rule's wealth ratio on 2025-04-07 differs from f'R by {full7:.1e}")
 put(f"rules' one-day scenario loss on 2025-04-07, exposures at the 2025-04-02 close: {rules_line(day7)}; R8's total "
-    f"exposure {f(expo('R8', '2025-04-02').sum(), 3)}")
+    f"exposure {f(expo('R8', '2025-04-02').sum(), 3)}; against the wealth ratio of that session: R1-R7 (no cash) equal "
+    f"below 1e-12, R8 {pc(net7['R8'], 2)} (one session's interest on its borrowing included), "
+    f"{f(100 * (day7['R8'] - net7['R8']), 3)} points below f'R")
 parts = []
 for k in ("R1", "R3", "R6", "R8"):
     e = expo(k, "2025-04-02")
-    parts.append(f"{k}: " + ", ".join(f"{s} {pc(e[j] * fr.W[i7, j], 2)}" for j, s in enumerate(FUNDS)))
+    kk = (2, 3) if k == "R6" else (2,)           # R6's parts print to 3 dp (their 2-dp roundings miss the total)
+    parts.append(f"{k}: " + ", ".join(f"{s} {pc(e[j] * fr.W[i7, j], *kk)}" for j, s in enumerate(FUNDS)))
 put("attribution f_i R_i on 2025-04-07 (points): " + "; ".join(parts))
 
 # ---------------------------------------------------------------- replays on the rules' holdings
@@ -338,43 +372,38 @@ put("rules' first target exposures (trade 2019-03-04; owners LM27-LM31, echoed a
     + "; ".join(f"{k} " + "/".join(f(x, 3) for x in FIRST[k]) for k in RULES)
     + f" (order {'/'.join(FUNDS)}; R8 sums to {f(FIRST['R8'].sum(), 3)})")
 
-# ---------------------------------------------------------------- proxies (pending registration)
+# ---------------------------------------------------------------- proxies (registered, retrieved 2026-10-24)
 need = [V6 / f"{s}__us_{PROXY_WINDOW}.csv" for s in ("SPY", "TLT", "GLD", "USO", "DBO")]
-need.append(V6 / f"USD_TWD__{PROXY_WINDOW}.csv")
-HAVE = all(p.exists() for p in need)
-PEND = ("PENDING REGISTRATION: " + ", ".join(p.name for p in need if not p.exists())
-        + f" absent from {V6} (capability B5); skipped")
+need += [V6 / f"USD_TWD__{PROXY_WINDOW}.csv", V6 / "0050__2007-07-02__2008-12-31.csv",
+         V6 / "0050_dividends__2007-07-02__2008-12-31.csv"]
+if missing := [p.name for p in need if not p.exists()]:
+    fail(f"{', '.join(missing)} absent from {V6}: rebuild data/raw/ with data/fetch_finmind.py")
+fx = pl.read_csv(V6 / f"USD_TWD__{PROXY_WINDOW}.csv", infer_schema=False)
+fxd = fx["date"].to_list()
+fxm = (np.asarray(fx["spot_buy"].cast(pl.Float64).to_numpy(), dtype=np.float64)
+       + np.asarray(fx["spot_sell"].cast(pl.Float64).to_numpy(), dtype=np.float64)) / 2
+if fxm.min() <= 0:
+    fail("USD_TWD: a non-positive rate (FinMind's -1 sentinel?)")
 PV: dict[str, Vec] = {}
 ADJ: dict[str, Vec] = {}
-USRATE = np.zeros(0)
-LASTD = np.zeros(len(TD), dtype=np.int64)
-if HAVE:
-    fx = pl.read_csv(V6 / f"USD_TWD__{PROXY_WINDOW}.csv", infer_schema=False)
-    fxd = fx["date"].to_list()
-    fxm = (np.asarray(fx["spot_buy"].cast(pl.Float64).to_numpy(), dtype=np.float64)
-           + np.asarray(fx["spot_sell"].cast(pl.Float64).to_numpy(), dtype=np.float64)) / 2
-    if fxm.min() <= 0:
-        fail("USD_TWD: a non-positive rate (FinMind's -1 sentinel?)")
-    usd: list[str] = []
-    for s in ("SPY", "TLT", "GLD", "USO", "DBO"):
-        df = pl.read_csv(V6 / f"{s}__us_{PROXY_WINDOW}.csv", infer_schema=False)
-        if usd and df["date"].to_list() != usd:
-            fail(f"{s}: US sessions differ from SPY's")
-        usd = df["date"].to_list()
-        adj = np.asarray(df["adj_close"].cast(pl.Float64).to_numpy(), dtype=np.float64)
-        USRATE = np.array([fxm[j] if (j := bisect_right(fxd, d)) < len(fxd) else np.nan for d in usd])
-        PV[s] = adj * USRATE
-        ADJ[s] = adj
-    LASTD = np.array([bisect_left(usd, d) - 1 for d in TD], dtype=np.int64)
-    first_tw = TPOS["2007-07-03"]
-    ns = [int(LASTD[i] - LASTD[i - 1]) for i in range(first_tw, len(TD))]
-    late = [TD[i] for i in range(first_tw, len(TD))
-            if (j := bisect_right(fxd, usd[LASTD[i]])) < len(fxd) and fxd[j] > TD[i]]
-    put(f"proxy data: {len(usd)} US sessions {usd[0]} .. {usd[-1]}; {len(fxd)} FX rows; TR23 dates "
-        f"{TD[first_tw]} .. {TD[-1]} ({len(ns)}) with 0 / 1 / 2 / 3+ US sessions: {ns.count(0)} / {ns.count(1)} / "
-        f"{ns.count(2)} / {sum(1 for x in ns if x >= 3)}; dates whose FX row comes after the date: {late}")
-else:
-    put(PEND)
+usd: list[str] = []
+for s in ("SPY", "TLT", "GLD", "USO", "DBO"):
+    df = pl.read_csv(V6 / f"{s}__us_{PROXY_WINDOW}.csv", infer_schema=False)
+    if usd and df["date"].to_list() != usd:
+        fail(f"{s}: US sessions differ from SPY's")
+    usd = df["date"].to_list()
+    ADJ[s] = np.asarray(df["adj_close"].cast(pl.Float64).to_numpy(), dtype=np.float64)
+USRATE = np.array([fxm[j] if (j := bisect_right(fxd, d)) < len(fxd) else np.nan for d in usd])
+for s, adj in ADJ.items():
+    PV[s] = adj * USRATE
+LASTD = np.array([bisect_left(usd, d) - 1 for d in TD], dtype=np.int64)
+first_tw = TPOS["2007-07-03"]
+ns = [int(LASTD[i] - LASTD[i - 1]) for i in range(first_tw, len(TD))]
+late = [TD[i] for i in range(first_tw, len(TD))
+        if (j := bisect_right(fxd, usd[LASTD[i]])) < len(fxd) and fxd[j] > TD[i]]
+put(f"proxy data: {len(usd)} US sessions {usd[0]} .. {usd[-1]}; {len(fxd)} FX rows; TR23 dates "
+    f"{TD[first_tw]} .. {TD[-1]} ({len(ns)}) with 0 / 1 / 2 / 3+ US sessions: {ns.count(0)} / {ns.count(1)} / "
+    f"{ns.count(2)} / {sum(1 for x in ns if x >= 3)}; dates whose FX row comes after the date: {late}")
 
 
 def prox(s: str, a: str, b: str) -> float:
@@ -395,92 +424,66 @@ def cents(pairs: list[tuple[str, str, str]]) -> str:
 
 
 def book_u(e: Vec, us: list[float]) -> float:
-    """The one-cent bound of f'R_sc: the stand-in (index 0, an index or 0050's own closes) is exact."""
+    """The one-cent bound of f'R_sc: 0050's own return (index 0) is exact."""
     return float(sum(abs(float(e[j])) * us[j] for j in range(1, len(e))))
 
 
-if HAVE:
-    rows = []
-    for fund, s in [*PROXIES.items(), ("00642U", "DBO")]:
-        j = FUNDS.index(fund)
-        rp = np.array([PV[s][LASTD[i]] / PV[s][LASTD[i - 1]] - 1 for i in ci])
-        wk = [d[:4] + str(date.fromisoformat(d).isocalendar()[1]).zfill(2) for d in fr.est_dates]
-        wkey = sorted(set(wk))
-        ga = {w: 1.0 for w in wkey}
-        gb = {w: 1.0 for w in wkey}
-        for w, x, y in zip(wk, rp, fr.X[:, j], strict=True):
-            ga[w] *= 1 + float(x)
-            gb[w] *= 1 + float(y)
-        wa = np.array([ga[w] - 1 for w in wkey])
-        wb = np.array([gb[w] - 1 for w in wkey])
-        gapy = (np.log1p(fr.X[:, j]).sum() - np.log1p(rp).sum()) / fr.years
-        rows.append(f"{fund}~{s} daily {f(np.corrcoef(rp, fr.X[:, j])[0, 1], 3)} weekly {f(np.corrcoef(wa, wb)[0, 1], 3)} "
-                    f"gap {pc(gapy, 2)}")
-    put("proxies against the funds on the estimation frame (correlation daily and over ISO weeks; annual log-growth gap, "
-        "fund minus proxy): " + "; ".join(rows))
-else:
-    put(PEND)
+rows = []
+for fund, s in [*PROXIES.items(), ("00642U", "DBO")]:
+    j = FUNDS.index(fund)
+    rp = np.array([PV[s][LASTD[i]] / PV[s][LASTD[i - 1]] - 1 for i in ci])
+    nwk, wkr = weeks(fr.est_dates, np.column_stack([rp, fr.X[:, j]]))
+    gapy = (np.log1p(fr.X[:, j]).sum() - np.log1p(rp).sum()) / fr.years
+    rows.append(f"{fund}~{s} daily {f(np.corrcoef(rp, fr.X[:, j])[0, 1], 3)} weekly "
+                f"{f(np.corrcoef(wkr[:, 0], wkr[:, 1])[0, 1], 3)} gap {pc(gapy, 2)}")
+put(f"proxies against the funds on the estimation frame (correlation daily and over {nwk} ISO weeks, the first and "
+    "last dropped; annual log-growth gap, fund minus proxy): " + "; ".join(rows))
 
-if HAVE:
-    out = []
-    for name in ("2020", "2024-08-05", "2025-04-07"):
-        a, b, _ = WIN[name]
-        g = growth(a, b)
-        out.append(f"{name}: " + ", ".join(f"{fund} {pc(g[FUNDS.index(fund)], 2)} / {s} "
-                                          f"{pu(prox(s, a, b), cent(s, a, b))}"
-                                          for fund, s in [*PROXIES.items(), ("00642U", "DBO")]))
-    a, b, _ = WIN["2020"]
-    gfund = growth(a, b)
-    for oil in ("USO", "DBO"):
-        gp = np.array([LV[TPOS[b]] / LV[TPOS[a]] - 1, prox("SPY", a, b), prox("TLT", a, b), prox("GLD", a, b),
-                       prox(oil, a, b)])
-        us = [0.0, cent("SPY", a, b), cent("TLT", a, b), cent("GLD", a, b), cent(oil, a, b)]
-        out.append(f"2020 rules on proxies ({oil}) against the funds: "
-                   + ", ".join(f"{k} {pu(float(expo(k, a) @ gp), book_u(expo(k, a), us))} / "
-                               f"{pc(float(expo(k, a) @ gfund), 2)}" for k in RULES))
-    pairs = [(s, *WIN[n][:2]) for n in ("2020", "2024-08-05", "2025-04-07") for s in ("SPY", "TLT", "GLD", "USO", "DBO")]
-    put("windows, fund / proxy (TWD): " + "; ".join(out) + "; " + cents(pairs))
-else:
-    put(PEND)
+out = []
+for name in ("2020", "2024-08-05", "2025-04-07"):
+    a, b, _ = WIN[name]
+    g = growth(a, b)
+    out.append(f"{name}: " + ", ".join(f"{fund} {pc(g[FUNDS.index(fund)], 2)} / {s} "
+                                      f"{pu(prox(s, a, b), cent(s, a, b))}"
+                                      for fund, s in [*PROXIES.items(), ("00642U", "DBO")]))
+a, b, _ = WIN["2020"]
+gfund = growth(a, b)
+for oil in ("USO", "DBO"):
+    gp = np.array([gfund[0], prox("SPY", a, b), prox("TLT", a, b), prox("GLD", a, b), prox(oil, a, b)])
+    us = [0.0, cent("SPY", a, b), cent("TLT", a, b), cent("GLD", a, b), cent(oil, a, b)]
+    out.append(f"2020 rules on 0050 itself and the proxies ({oil}) against the funds: "
+               + ", ".join(f"{k} {pu(float(expo(k, a) @ gp), book_u(expo(k, a), us))} / "
+                           f"{pc(float(expo(k, a) @ gfund), 2)}" for k in RULES))
+pairs = [(s, *WIN[n][:2]) for n in ("2020", "2024-08-05", "2025-04-07") for s in ("SPY", "TLT", "GLD", "USO", "DBO")]
+put("windows, fund / proxy (TWD): " + "; ".join(out) + "; " + cents(pairs))
 
-W50 = "2007-07-02__2008-12-31"
-F50 = [V6 / f"0050__{W50}.csv", V6 / f"0050_dividends__{W50}.csv"]
-HAVE50 = all(p.exists() for p in F50)
+px = pl.read_csv(V6 / "0050__2007-07-02__2008-12-31.csv", infer_schema=False)
+dv = pl.read_csv(V6 / "0050_dividends__2007-07-02__2008-12-31.csv", infer_schema=False)
+divs = {d: (Fraction(bp), Fraction(cd)) for d, bp, _, cd in dv.iter_rows()}
+ds = px["date"].to_list()
+cl = [Fraction(x) for x in px["close"].to_list()]
+spr = [Fraction(x) for x in px["spread"].to_list()]
+if ds != [d for d in TD if "2007-07-02" <= d <= "2008-12-31"]:
+    fail("0050 2007-2008: its dates differ from TR23's")
 R50: dict[str, float] = {}       # 0050's own total return, 2007-07-03 .. 2008-12-31
-if HAVE50:
-    px = pl.read_csv(F50[0], infer_schema=False)
-    dv = pl.read_csv(F50[1], infer_schema=False)
-    divs = {d: (Fraction(bp), Fraction(cd)) for d, bp, _, cd in dv.iter_rows()}
-    ds = px["date"].to_list()
-    cl = [Fraction(x) for x in px["close"].to_list()]
-    spr = [Fraction(x) for x in px["spread"].to_list()]
-    if ds != [d for d in TD if "2007-07-02" <= d <= "2008-12-31"]:
-        fail("0050 2007-2008: its dates differ from TR23's")
-    for i in range(1, len(ds)):
-        dvd = divs.get(ds[i])
-        if dvd is None and cl[i] - cl[i - 1] != spr[i]:
-            fail(f"0050 {ds[i]}: close against spread")
-        if dvd is not None and (spr[i] != 0 or dvd[0] != cl[i - 1]):
-            fail(f"0050 {ds[i]}: ex-date row is not as TaiwanStockDividendResult says")
-        R50[ds[i]] = float((cl[i] + (dvd[1] if dvd else 0)) / cl[i - 1] - 1)
+for i in range(1, len(ds)):
+    dvd = divs.get(ds[i])
+    if dvd is None and cl[i] - cl[i - 1] != spr[i]:
+        fail(f"0050 {ds[i]}: close against spread")
+    if dvd is not None and (spr[i] != 0 or dvd[0] != cl[i - 1]):
+        fail(f"0050 {ds[i]}: ex-date row is not as TaiwanStockDividendResult says")
+    R50[ds[i]] = float((cl[i] + (dvd[1] if dvd else 0)) / cl[i - 1] - 1)
 PROXY_RET: dict[str, dict[str, Vec]] = {}
 PROXY_U: dict[str, dict[str, list[float]]] = {}
 SYMS = ("SPY", "TLT", "GLD")
 for name in ("2008", "2015"):
     a, b, nd = WIN[name]
-    if not HAVE:
-        put(PEND)
-        put(PEND)
-        continue
     pd_ = TD[TPOS[nd] - 1]
     if name == "2015":
         stand, stand_d, lab = g0050_15, float(r0050[EPOS[nd]]), "0050 itself (LM2's sample)"
-    elif HAVE50:
+    else:
         stand = float(np.prod([1 + R50[d] for d in TD if a < d <= b]) - 1)
         stand_d, lab = R50[nd], f"0050 itself (its 2007-2008 files; TR23 {pc(LV[TPOS[b]] / LV[TPOS[a]] - 1, 2)})"
-    else:
-        stand, stand_d = LV[TPOS[b]] / LV[TPOS[a]] - 1, float(RT[TPOS[nd]])
-        lab = "TR23 standing in for 0050 (0050's 2007-2008 files PENDING REGISTRATION)"
     fxa, fxb = float(USRATE[LASTD[TPOS[a]]]), float(USRATE[LASTD[TPOS[b]]])
     res: dict[str, Vec] = {}
     uu: dict[str, list[float]] = {}
@@ -556,21 +559,13 @@ g22 = growth(a, b)
 ep = np.array([a < d <= b for d in fr.est_dates])
 
 
-def weekly(mask: NDArray[np.bool_]) -> Mat:
-    wk = [d[:4] + str(date.fromisoformat(d).isocalendar()[1]).zfill(2) for d, m in zip(fr.est_dates, mask, strict=True)
-          if m]
-    keys = sorted(set(wk))
-    acc = {w: np.ones(len(FUNDS)) for w in keys}
-    for w, x in zip(wk, X[mask], strict=True):
-        acc[w] = acc[w] * (1 + x)
-    return np.array([acc[w] - 1 for w in keys])
-
-
-wf, we = weekly(np.ones(len(fr.est_dates), dtype=np.bool_)), weekly(ep)
+nwf, wf = weeks(fr.est_dates, X)
+nwe, we = weeks([d for d, m in zip(fr.est_dates, ep, strict=True) if m], X[ep])
 put(f"2022 (an illustration, not a ROADMAP scenario): TR23 peak {a}, trough {b}, {k22 - p22} sessions, "
     f"{pc(LV[k22] / LV[p22] - 1, 2)}; funds {funds_line(FUNDS, g22)}; 0050/00679B correlation daily "
-    f"{f(np.corrcoef(X[ep, 0], X[ep, 2])[0, 1], 3)} and over {len(we)} ISO weeks {f(np.corrcoef(we[:, 0], we[:, 2])[0, 1], 3)} "
-    f"(full sample, {len(wf)} weeks: {f(np.corrcoef(wf[:, 0], wf[:, 2])[0, 1], 3)}); rules frozen at {a}: "
+    f"{f(np.corrcoef(X[ep, 0], X[ep, 2])[0, 1], 3)} and over the window's {nwe} ISO weeks "
+    f"(its first and last dropped) {f(np.corrcoef(we[:, 0], we[:, 2])[0, 1], 3)} (full sample, {nwf} ISO weeks: "
+    f"{f(np.corrcoef(wf[:, 0], wf[:, 2])[0, 1], 3)}, LM27's A27-11); rules frozen at {a}: "
     + rules_line({k: float(expo(k, a) @ g22) for k in RULES}))
 s0 = X[:, 0].std()
 ev = X[:, 0] <= MU[0] - 2 * s0 + EPS
@@ -580,8 +575,9 @@ for j in (1, 2):
     rho = float(np.corrcoef(X[:, 0], X[:, j])[0, 1])
     model = rho / sqrt(rho**2 + (1 - rho**2) * s0**2 / vs)
     out.append(f"{FUNDS[j]}: data {f(np.corrcoef(X[ev, 0], X[ev, j])[0, 1], 3)}, (16.10) {f(model, 3)}, full {f(rho, 3)}")
-put(f"(16.10) on the days 0050 fell 2 standard deviations or more below its mean ({int(ev.sum())} days; conditional "
-    f"variance ratio {f(s0**2 / vs, 3)}): " + "; ".join(out))
+put(f"(16.10) on the days 0050 fell 2 standard deviations or more below its mean ({int(ev.sum())} days; variance "
+    f"ratio full / tail {f(s0**2 / vs, 3)}, so 0050's variance on the tail days is {f(vs / s0**2, 3)} times the full "
+    f"sample's): " + "; ".join(out))
 
 
 def maha(x: Vec) -> float:
@@ -656,11 +652,12 @@ def bounded(e: Vec) -> tuple[Vec, float, str]:
         cf = MU100 - (100 * LOSS + e @ MU100) * (S100 @ e) / float(e @ S100 @ e)
     gap_cf = float(np.abs(xs - cf).max())
     gap_osqp = float(np.abs(xs - sols[1]).max())
-    if gap_cf > 1e-6 or float(np.abs(grad).max()) > 1e-6:
-        fail(f"bounded reverse stress: closed form gap {gap_cf:.1e}, KKT residual {np.abs(grad).max():.1e}")
+    kkt = float(np.abs(grad).max())
+    if gap_cf > 1e-9 or gap_osqp > 1e-9 or kkt > 1e-13:     # printed as bounds: their digits are rounding noise
+        fail(f"bounded reverse stress: closed form gap {gap_cf:.1e}, OSQP gap {gap_osqp:.1e}, KKT residual {kkt:.1e}")
     return xs / 100, sqrt(float((xs - MU100) @ SI100 @ (xs - MU100))), (
         f"bound {'active' if active else 'inactive'}, multipliers {duals[0]:.4g} and {duals[1]:.4g}, KKT residual "
-        f"{np.abs(grad).max():.1e}, closed-form gap {gap_cf:.1e}, OSQP gap {gap_osqp:.1e}")
+        f"below 1e-13, closed-form and OSQP gaps below 1e-9")
 
 
 lines = []
@@ -677,18 +674,15 @@ for name in ("2020", "2024-08-05", "2025-04-07"):
     eve = WD[WIDX[nd] - 1]
     lw = float(expo("R6", a) @ growth(a, b))
     ld = float(expo("R6", eve) @ fr.W[WIDX[nd]])
-    ruin.append(f"{name}: window {pc(lw, 2)} -> L {f(-1 / lw, 1)}; named day {pc(ld, 2)} -> L "
-                + (f"{f(-1 / ld, 1)}" if ld < 0 else "none (a gain)"))
+    ruin.append(f"{name}: window {pc(lw, 2)} -> L {f(-1 / lw, 1, 2)}; named day {pc(ld, 2)} -> L "
+                + (f"{f(-1 / ld, 1, 2)}" if ld < 0 else "none (a gain)"))
 for name in ("2008", "2015"):
-    if name in PROXY_RET:
-        lw = float(FIRST["R6"] @ PROXY_RET[name]["USO"])
-        lwd = float(FIRST["R6"] @ PROXY_RET[name]["DBO"])
-        uw = book_u(FIRST["R6"], PROXY_U[name]["USO"])
-        uwd = book_u(FIRST["R6"], PROXY_U[name]["DBO"])
-        ruin.append(f"{name} (hypothetical, first weights, USO / DBO): {pu(lw, uw)} / {pu(lwd, uwd)} -> L "
-                    f"{lu(lw, uw)} / {lu(lwd, uwd)}")
-    else:
-        ruin.append(f"{name}: PENDING REGISTRATION")
+    lw = float(FIRST["R6"] @ PROXY_RET[name]["USO"])
+    lwd = float(FIRST["R6"] @ PROXY_RET[name]["DBO"])
+    uw = book_u(FIRST["R6"], PROXY_U[name]["USO"])
+    uwd = book_u(FIRST["R6"], PROXY_U[name]["DBO"])
+    ruin.append(f"{name} (hypothetical, first weights, USO / DBO): {pu(lw, uw)} / {pu(lwd, uwd)} -> L "
+                f"{lu(lw, uw)} / {lu(lwd, uwd)}")
 put("R6's unit book: scenario loss and ruin leverage -1/R (frozen holdings): " + "; ".join(ruin))
 vars(vr)["CAP"] = inf                       # R8 uncapped, to echo its ratio (module global read by signals)
 sigs = vr.signals(fr, [])
@@ -697,18 +691,26 @@ ratio = np.array([s.targets["R8"].sum() for s in sigs])
 stored = np.asarray(TRADES.filter(pl.col("rule") == "R8").sort("trade")["exposure"].to_numpy(), dtype=np.float64)
 if float(np.abs(np.minimum(1.5, ratio) - stored).max()) > 1e-12:
     fail("R8's uncapped ratio, capped at 1.5, does not reproduce the stored exposures")
-r8tr = TRADES.filter(pl.col("rule") == "R8").sort("trade")["trade"].to_list()
-before = []
+r8t = TRADES.filter(pl.col("rule") == "R8").sort("trade")
+r8tr, r8sg = r8t["trade"].to_list(), r8t["signal"].to_list()
+into = []
 for n in ("2020", "2024-08-05", "2025-04-07"):
-    j = max(i for i, d in enumerate(r8tr) if d <= WIN[n][0])
-    jd = max(i for i, d in enumerate(r8tr) if d < WIN[n][2])
-    before.append(f"{n} {f(ratio[j], 3)} (trade {r8tr[j]}; before the named day {WIN[n][2]}: trade {r8tr[jd]}, "
-                  f"ratio {f(ratio[jd], 3)})")
+    a, b, _ = WIN[n]
+    g = growth(a, b)
+    js = [max(i for i, d in enumerate(r8tr) if d <= a)] + [i for i, d in enumerate(r8tr) if a < d <= b]
+    cells = []
+    for i in js:
+        d = r8tr[i]
+        cells.append(f"trade {d} (signal {r8sg[i]}) exposure {f(PRE['R8'][d].sum(), 3)} -> {f(expo('R8', d).sum(), 3)} "
+                     f"(uncapped ratio {f(ratio[i], 3)}), that book over the whole window {pc(float(expo('R8', d) @ g), 2)}")
+    into.append(f"{n} ({a} -> {b}; frozen at {a}, exposure {f(expo('R8', a).sum(), 3)}: "
+                f"{pc(float(expo('R8', a) @ g), 2)}; actual {pc(wealth('R8', b) / wealth('R8', a) - 1, 2)}): "
+                + "; ".join(cells))
 put(f"R8's uncapped exposure ratio (LM31 owns the path; echoed): {len(ratio)} signals, range {f(ratio.min(), 3)} .. "
     f"{f(ratio.max(), 3)} (max at signal {sigs[int(np.argmax(ratio))].signal}), {int((ratio >= 1.5 - EPS).sum())} at or "
-    f"above the cap 1.5; R8's exposure at the windows' first closes "
-    + ", ".join(f"{n} {f(expo('R8', WIN[n][0]).sum(), 3)}" for n in ("2020", "2024-08-05", "2025-04-07"))
-    + "; uncapped ratio at the last trade before each window " + ", ".join(before))
+    f"above the cap 1.5; R8's trades into each window (the last trade on or before its first close, then every trade "
+    f"inside it; drifted exposure before -> target after; each post-trade book frozen over the whole window, (35.1)): "
+    + " | ".join(into))
 xo = o8 / c0 - 1
 put(f"limit lock: a book of 0050 at leverage L loses 10.000% L at the 2025-04-07 close and {f(-100 * xo, 3)}% L at the "
     f"next open; ruin leverage {f(10.0, 2)} at the close, {f(-1 / xo, 2)} at the next open; 00631L (LM2's sample) "
@@ -739,11 +741,13 @@ for name in ("2008", "2015", "2020", "2024-08-05", "2025-04-07"):
         fail(f"T5S {nd}: 09:00:00 is not the previous close")
     after = np.array([x > "09:00:00" for x in tt])
     kl = int(np.argmin(np.where(after, vv, np.inf)))
+    ties = [tt[i] for i in range(len(tt)) if after[i] and vv[i] == vv[kl] and i != kl]
     gap = log(vv[tt.index("09:01:00")] / p0)
     cl = log(PRICE[TPOS[nd]] / p0)
     stale = f", 09:00:05 (the daily open) {f(100 * log(vv[tt.index('09:00:05')] / p0), 2)}%" if nd == "2025-04-07" else ""
-    gl.append(f"{nd}: gap {f(100 * gap, 2)}%, low {f(100 * log(vv[kl] / p0), 2)}% at {tt[kl]}, close {f(100 * cl, 2)}%, "
-              f"gap / close {f(gap / cl, 2)}{stale}")
+    tie = f" (first; the same value at {len(ties)} later times, the last {ties[-1]})" if ties else ""
+    gl.append(f"{nd}: gap {f(100 * gap, 2)}%, low {f(100 * log(vv[kl] / p0), 2)}% at {tt[kl]}{tie}, close "
+              f"{f(100 * cl, 2)}%, gap / close {f(gap / cl, 2)}{stale}")
 put("T5S per-day statistics, log changes from the previous close (09:00:00) to 09:01:00, to the day's low, to the "
     "close: " + "; ".join(gl))
 lk = []
@@ -790,7 +794,7 @@ put(f"P3 L = 5 on 0050, locked at 158.40 from 176.00, next open 151.20: loss at 
     f"{pc(5 * -0.10, 2)}; from the locked close only {pc(5 * (151.2 / 158.4 - 1), 2)}")
 p4 = 1.01 * 0.96 * (32.48 / 32.00) - 1
 put(f"P4 US fund +1.0% then -4.0%, USD/TWD 32.00 -> 32.48: TWD return {pc(p4, 2)}; USD only {pc(1.01 * 0.96 - 1, 2)}; FX "
-    f"subtracted {pc(1.01 * 0.96 * (32.00 / 32.48) - 1, 2)}")
+    f"applied the wrong way (x 32.00 / 32.48) {pc(1.01 * 0.96 * (32.00 / 32.48) - 1, 2)}")
 put(f"P5 sigma_p 0.8% a day, mean 0, one-day loss 10%: d* {f(10 / 0.8, 2)}; d*^2 {f((10 / 0.8) ** 2, 2)}; sqrt "
     f"{f(sqrt(10 / 0.8), 2)}")
 b_n, b_b = -0.07, 0.30
@@ -805,16 +809,27 @@ put(f"P7 two funds, sd 1.2% and 0.8%, correlation -0.1, f = (0.5, 0.5), mean 0, 
     f"d* {f(0.05 / sp2, 3)}, x* {pc(xs2[0], 2)} / {pc(xs2[1], 2)} (beta_ip {f((S2 @ e2)[0] / sp2**2, 3)} / "
     f"{f((S2 @ e2)[1] / sp2**2, 3)})")
 
-# ---------------------------------------------------------------- the proxy rule's blind spot (pending)
-if HAVE:
-    nus_e = np.array([int(LASTD[TPOS[d]] - LASTD[TPOS[d] - 1]) for d in fr.est_dates])
-    z, one = nus_e == 0, nus_e == 1
-    put(f"proxy rule's blind spot, E5 estimation frame: {int(z.sum())} dates with no new US session (every proxy, FX "
-        f"included, returns exactly 0 there), {int(one.sum())} with one, {int((nus_e >= 2).sum())} with two or more; "
-        "mean |R| of the foreign funds on dates with none / one: "
-        + ", ".join(f"{s} {f(100 * np.abs(X[z, j]).mean(), 2)}% / {f(100 * np.abs(X[one, j]).mean(), 2)}%"
-                    for j, s in enumerate(FUNDS) if j >= 1))
-else:
-    put(PEND)
+# ---------------------------------------------------------------- the proxy rule's blind spot
+nus_e = np.array([int(LASTD[TPOS[d]] - LASTD[TPOS[d] - 1]) for d in fr.est_dates])
+z, one = nus_e == 0, nus_e == 1
+put(f"proxy rule's blind spot, E5 estimation frame: {int(z.sum())} dates with no new US session (every proxy, FX "
+    f"included, returns exactly 0 there), {int(one.sum())} with one, {int((nus_e >= 2).sum())} with two or more; "
+    "mean |R| of the foreign funds on dates with none / one: "
+    + ", ".join(f"{s} {f(100 * np.abs(X[z, j]).mean(), 2)}% / {f(100 * np.abs(X[one, j]).mean(), 2)}%"
+                for j, s in enumerate(FUNDS) if j >= 1))
+
+# ---------------------------------------------------------------- the case's multi-day figure (AUTHORING section 8)
+mr = []
+for m in (5, 20):
+    gm = LV[m:] / LV[:-m] - 1                        # every span of m consecutive TR23 returns, overlapping
+    cells = []
+    for name in ("2020", "2025-04-07"):
+        x, jl = WORST[name][m]
+        worse = [TD[i + m] for i in np.nonzero(gm < x - EPS)[0]]
+        cells.append(f"{name}'s worst ({TD[jl - m]} -> {TD[jl]}, {pc(x, 2)}) rank {len(worse) + 1}"
+                     + (f" (worse spans end {', '.join(worse)})" if worse else ""))
+    mr.append(f"{m} sessions ({len(gm)} spans): " + "; ".join(cells))
+put("multi-day ranks among all overlapping TR23 spans of m sessions, 2003-01-03 .. 2026-10-08 (1 = worst): "
+    + " | ".join(mr))
 
 print("\n".join(OUT))

@@ -1,4 +1,6 @@
-"""LM27 anchors (Portfolio Return and Risk): every number the Stage 1 brief quotes (drafted 2026-10-24).
+"""LM27 anchors (Portfolio Return and Risk): every number the Stage 1 brief quotes (drafted 2026-10-24; revised the
+same day to the editor's decisions on the briefs, plans/vol-5.md: printed precisions that let each derived figure
+follow from its printed inputs, R1's and R2's mu_p, the widget's monthly and window matrices, Problem 6's stem).
 
 Reads only data/processed/*.parquet, through the shared builders (run them first; this script runs neither):
   * E5 (plans/vol-5.md, "Data"): vol5_series.frames("E5"), which reads data/processed/vol5_frames.parquet (built and
@@ -17,12 +19,14 @@ Reads only data/processed/*.parquet, through the shared builders (run them first
 Conventions. Simple returns throughout (portfolio returns aggregate them; plans/vol-5.md, "Return type"). Means,
 variances, covariances and correlations divide by T (ddof=0, passed explicitly; cov0). Annualization: A times a mean
 or a covariance, sqrt(A) times a standard deviation, with E5's estimation-frame A = 2,362 / years = 242.951422 (years
-= calendar days / 365.25 from the base close 2017-01-17), U28's A = 245.4794; weekly and monthly statistics use the
-periods a year as LM19 counts them (lm19.md:39): the weeks with a session over the years their calendar weeks span
-(500 of 506 ISO weeks; six Lunar New Year weeks have no session) and 12 months. Weekly and monthly returns compound
-the estimation frame's daily returns inside ISO weeks (Monday to Sunday) and calendar months; the first and last
-period, which the sample covers only in part (it starts on Wednesday 2017-01-18 and ends on Thursday 2026-10-08), are
-dropped.
+= calendar days / 365.25 from the base close 2017-01-17, so A = 2,362 x 365.25 / 3,551 as lm10.md:41 writes it),
+U28's A = 245.4794; weekly and monthly statistics use the periods a year as LM19 counts them (lm19.md:39): the weeks
+with a session over the years their calendar weeks span (500 of 506 ISO weeks; six Lunar New Year weeks have no
+session) and 12 months. Weekly and monthly returns compound the estimation frame's daily returns inside ISO weeks
+(Monday to Sunday; keys (ISO year, ISO week)) and calendar months; the first and last period, in which the sample
+starts (Wednesday 2017-01-18) and ends (Thursday 2026-10-08), are dropped, because the sample alone cannot show them
+complete (the first lacks two sessions; whether the last lacks one depends on 2026-10-09, after the sample's end).
+A27-10 prints what keeping the last week would change.
 Risk decomposition of weights w under a covariance matrix S: Cov(R_i, R_p) = (S w)_i, beta_{i,p} = (S w)_i / w'S w,
 MRC_i = (S w)_i / sqrt(w'S w), RC_i = w_i MRC_i, share_i = RC_i / sqrt(w'S w) = w_i beta_{i,p}; annualized volatility
 units multiply MRC_i, RC_i and sqrt(w'S w) by sqrt(A). "Full sample" is the estimation frame, 2,362 dates; a "window"
@@ -149,13 +153,16 @@ A = fr.A
 days = (date.fromisoformat(fr.wealth_dates[-1]) - date.fromisoformat(fr.base)).days
 put(f"E5 funds {', '.join(F)}; base close {fr.base}; last close {fr.wealth_dates[-1]}; {days} calendar days; "
     f"years {f(fr.years, 4)}")                                                                               # 01
-put(f"estimation frame T {T}, {fr.est_dates[0]} .. {fr.est_dates[-1]}; A = T / years {f(A, 2, 3)}")         # 02
+assert abs(A - T * 365.25 / days) < 1e-12 and abs(fr.A_wealth - len(fr.wealth_dates) * 365.25 / days) < 1e-12
+put(f"estimation frame T {T}, {fr.est_dates[0]} .. {fr.est_dates[-1]}; A = T / years = {T} x 365.25 / {days} "
+    f"{f(A, 2, 3)}")                                                                                       # 02
 est = set(fr.est_dates)
 only_w = [d for d in fr.wealth_dates if d not in est]
 halted = [(F[j], fr.wealth_dates[i]) for i, j in zip(*np.nonzero(~fr.traded), strict=True)]
-put(f"wealth frame {len(fr.wealth_dates)} sessions, {fr.wealth_dates[0]} .. {fr.wealth_dates[-1]}; A_w "
-    f"{f(fr.A_wealth, 2, 3)}; dates in the wealth frame only: {', '.join(only_w)} ({len(only_w)}); halted fund-days "
-    f"{len(halted)} ({', '.join(sorted({s for s, _ in halted}))})")                                         # 03
+put(f"wealth frame {len(fr.wealth_dates)} sessions, {fr.wealth_dates[0]} .. {fr.wealth_dates[-1]}; A_w = "
+    f"{len(fr.wealth_dates)} x 365.25 / {days} {f(fr.A_wealth, 2, 3)}; dates in the wealth frame only: "
+    f"{', '.join(only_w)} ({len(only_w)}); halted fund-days {len(halted)} ({', '.join(sorted({s for s, _ in halted}))})"
+    )                                                                                                      # 03
 c50 = {d: Fraction(str(c)) for d, c in ohlc("0050").select("date", "close").iter_rows()}
 r_split = 4 * c50["2025-06-18"] / c50["2025-06-10"] - 1
 iw = fr.wealth_dates.index("2025-06-18")
@@ -178,7 +185,8 @@ r1_span = float(p1.wealth[j1] / p1.wealth[j0] - 1)
 put("2025-06-10 -> 2025-06-18 (6 sessions of the wealth frame): fund returns "
     + ", ".join(f"{s} {f(100 * (float(g) - 1), 2, 3, plus=True)}%" for s, g in zip(F, G_span, strict=True))
     + f"; 1/N bought at the 06-10 close {f(100 * eq_span, 2, 3)}%; exp(mean log) - 1 {f(100 * log_avg, 2)}% "
-    f"(mean log {f(log_sum, 4)}); R1 (wealth path) {f(100 * r1_span, 2, 1)}%")                             # 05
+    f"(mean log {f(log_sum, 4, 5)}; exp(0.02524) - 1 = {f(100 * (np.exp(0.02524) - 1), 2, 3)}%); R1 (wealth path) "
+    f"{f(100 * r1_span, 2, 1)}%")                                                                          # 05
 gw, ge = np.prod(1 + fr.W, axis=0), np.prod(1 + fr.X, axis=0)
 put("growth factor, wealth frame vs estimation frame: "
     + "; ".join(f"{s} {f(float(a), 3, 4)} vs {f(float(b), 3, 4)}" for s, a, b in zip(F, gw, ge, strict=True))
@@ -212,22 +220,43 @@ mu = A * X.mean(axis=0)
 put(f"annualized volatilities (divisor T, A {f(A, 2)}) {fl(100 * vol, 2, 1)}%; annualized means A x mean "
     f"{fl(100 * mu, 2)}%")                                                                                 # 08
 Cd = corr_mat(X)
-put("daily correlations " + "; ".join(f"{F[a]}-{F[b]} {f(Cd[a, b], 3, 4)}" for a in range(N)
+put("daily correlations " + "; ".join(f"{F[a]}-{F[b]} {f(Cd[a, b], 2, 3, 4)}" for a in range(N)
                                       for b in range(a + 1, N)))                                         # 09
 kw, Xw = periods(fr.est_dates, X, "week")
 km, Xm = periods(fr.est_dates, X, "month")
-put(f"weekly: {len(kw)} complete ISO weeks {kw[0]} .. {kw[-1]}; monthly: {len(km)} complete months {km[0]} .. "
-    f"{km[-1]} (first and last period dropped)")                                                          # 10
+kw_all, Xw_all = periods(fr.est_dates, X, "week", drop=False)
+last_wk = [d for d in fr.est_dates if kw_all[-1] == f"{date.fromisoformat(d).isocalendar()[0]}-W"
+           f"{date.fromisoformat(d).isocalendar()[1]:02d}"]
+Ck = corr_mat(Xw_all[1:])
+put(f"weekly: {len(kw)} ISO weeks {kw[0]} .. {kw[-1]}; monthly: {len(km)} calendar months {km[0]} .. {km[-1]} (the "
+    f"first and last period, in which the sample starts and ends, dropped); keeping the last week ({kw_all[-1]}: "
+    f"{last_wk[0]} .. {last_wk[-1]}, {len(last_wk)} sessions) would give {len(kw) + 1} weeks and weekly correlations "
+    f"0050-00646 {f(Ck[0, J['00646']], 3)}, 0050-00679B {f(Ck[0, J['00679B']], 3)}")                  # 10
 frq = {"daily": X, "weekly": Xw, "monthly": Xm}
 rows = []
-for j in range(1, N):
-    cells = []
+pairs = [(0, j) for j in range(1, N)] + [(J["00679B"], J["00642U"])]
+se: dict[tuple[int, int, str], tuple[float, float, float]] = {}
+for a, b in pairs:
     for nm, x in frq.items():
-        r, se_n, se_p = se_rho(x[:, 0], x[:, j])
-        cells.append(f"{nm} {f(r, 3, 2)} (SE {f(se_n, 3)} normal, {f(se_p, 3)} plug-in)")
-    rows.append(f"0050-{F[j]}: " + ", ".join(cells))
-c79 = [f(corr_mat(x)[J["00679B"], J["00642U"]], 3, 2) for x in frq.values()]
-put("; ".join(rows) + f"; 00679B-00642U daily, weekly, monthly {', '.join(c79)}")                      # 11
+        se[a, b, nm] = se_rho(x[:, a], x[:, b])
+for a, b in pairs[:4]:
+    cells = [f"{nm} {f(se[a, b, nm][0], 3, 2)} (SE {f(se[a, b, nm][1], 3)} normal, {f(se[a, b, nm][2], 3)} plug-in)"
+             for nm in frq]
+    rows.append(f"{F[a]}-{F[b]}: " + ", ".join(cells))
+a9, b9 = pairs[4]
+c79 = [f(se[a9, b9, nm][0], 3, 2) for nm in frq]
+s79 = [f"{f(se[a9, b9, nm][1], 3)}, {f(se[a9, b9, nm][2], 3)}" for nm in frq]
+ratio = {(a, b): se[a, b, "daily"][2] / se[a, b, "daily"][1] for a, b in pairs}
+lo_p, hi_p = min(ratio, key=ratio.__getitem__), max(ratio, key=ratio.__getitem__)
+gap = {(a, b): abs(se[a, b, "daily"][0] - se[a, b, "weekly"][0]) for a, b in pairs}
+g_n = {k: gap[k] / se[k[0], k[1], "weekly"][1] for k in pairs}
+g_p = {k: gap[k] / se[k[0], k[1], "weekly"][2] for k in pairs}
+kg = max(g_n, key=g_n.__getitem__)
+assert kg == max(g_p, key=g_p.__getitem__)
+put("; ".join(rows) + f"; 00679B-00642U daily, weekly, monthly {', '.join(c79)} (SE normal, plug-in: "
+    f"{'; '.join(s79)}); daily plug-in over normal-theory SE, five pairs: {f(ratio[lo_p], 1, 2)} "
+    f"({F[lo_p[0]]}-{F[lo_p[1]]}) to {f(ratio[hi_p], 1, 2)} ({F[hi_p[0]]}-{F[hi_p[1]]}); largest daily-weekly gap "
+    f"{F[kg[0]]}-{F[kg[1]]} {f(gap[kg], 3)} = {f(g_n[kg], 1)} weekly normal-theory SEs, {f(g_p[kg], 1)} plug-in SEs")  # 11
 w1 = np.full(N, 1 / N)
 # periods a year as LM19 counts them (lm19.md:39: periods with data over the years they span): the complete ISO weeks
 # run from the Monday of kw[0] to the Sunday of kw[-1]; weeks without a session (Lunar New Year) are not periods
@@ -246,14 +275,14 @@ for nm, x in frq.items():
     if nm == "weekly":
         cells[-1] += f" (vol {f(100 * sp * sqrt(365.25 / 7), 2)}% with A = 365.25 / 7)"
 put(f"R1's weights by frequency (A = {f(A, 2)}, {f(A_week, 2)}, 12; weekly A = {len(kw)} weeks with a session of "
-    f"the {n_cal_weeks} calendar weeks {wk_first} .. {wk_last} over {f(years_wk, 4)} years): "
-    + "; ".join(cells))                                                                                    # 12
+    f"the {n_cal_weeks} calendar weeks {wk_first} .. {wk_last} over {f(years_wk, 4)} years = {len(kw)} x 365.25 / "
+    f"{(wk_last - wk_first).days + 1}): " + "; ".join(cells))                                              # 12
 
 # ---------------------------------------------------------------- R1 and R2 on the full-sample covariance
 sp1, b1, m1, rc1, sh1 = split(SA, w1)
 sw = float(w1 @ vol)
 var_terms = float((w1**2 * np.diag(SA)).sum()) / sp1**2
-put(f"R1 weights 1/5: s_p {f(100 * sp1, 2, 1)}%; w's {f(100 * sw, 2)}%; ratio w's / s_p {f(sw / sp1, 3, 2)}; "
+put(f"R1 weights 1/5: s_p {f(100 * sp1, 1, 2, 3)}%; w's {f(100 * sw, 2)}%; ratio w's / s_p {f(sw / sp1, 3, 2)}; "
     f"variance terms {f(100 * var_terms, 1)}% of the variance, covariance terms {f(100 * (1 - var_terms), 1)}%")  # 13
 covp = SA @ w1
 put(f"R1 Cov(R_i, R_p) x A {fl(1e4 * covp, 2)} (%^2); beta_(i,p) {fl(b1, 3)}; sum w_i beta_(i,p) "
@@ -263,7 +292,8 @@ put(f"R1 MRC {fl(100 * m1, 2)}% ; RC {fl(100 * rc1, 2)}% (sum {f(100 * rc1.sum()
 stand = w1 * vol / sw
 vterm = w1**2 * np.diag(SA) / sp1**2
 put(f"R1 other splits: stand-alone w_i s_i / w's {fl(100 * stand, 1)}%; variance terms w_i^2 s_i^2 / s_p^2 "
-    f"{fl(100 * vterm, 1)}% (sum {f(100 * vterm.sum(), 1)}%)")                                            # 16
+    f"{fl(100 * vterm, 1, 3)}% (sum {f(100 * vterm.sum(), 1, 3)}%; the three-decimal parts sum to "
+    f"{sum(round(100 * float(v), 3) for v in vterm):.3f})")                                                # 16
 w2 = np.array([R2[s] for s in F])
 sp2, b2, m2, rc2, sh2 = split(SA, w2)
 put(f"R2 weights {fl(100 * w2, 0)}%: s_p {f(100 * sp2, 2)}%; w's {f(100 * float(w2 @ vol), 2)}%; ratio "
@@ -290,24 +320,30 @@ for _, _, n_rows in sch:
     x = X[n_rows - WINDOW:n_rows]
     shw.append(split(cov0(x), w1)[4])
 SH = np.array(shw)
-neg = [sch[k][0] for k in range(len(sch)) if SH[k, J["00679B"]] < 0]
+kneg = [k for k in range(len(sch)) if SH[k, J["00679B"]] < 0]
+neg = [sch[k][0] for k in kneg]
+kneg_last = kneg[-1]
+span_n = kneg[-1] - kneg[0] + 1
+neg_1bp = [sch[k][0] for k in kneg if SH[k, J["00679B"]] < -1e-4]
 k6 = J["00642U"]
 put(f"{len(sch)} windows of {WINDOW} rows (signals {sch[0][0]} .. {sch[-1][0]}); R1's 00642U share "
     f"{f(100 * SH[:, k6].min(), 1)}% ({sch[int(SH[:, k6].argmin())][0]}) to {f(100 * SH[:, k6].max(), 1)}% "
     f"({sch[int(SH[:, k6].argmax())][0]}); 0050 {f(100 * SH[:, 0].min(), 1)}% to {f(100 * SH[:, 0].max(), 1)}%; "
     f"00679B negative in {len(neg)} windows ({neg[0]} .. {neg[-1]}), lowest {f(100 * SH[:, J['00679B']].min(), 2)}% "
-    f"({sch[int(SH[:, J['00679B']].argmin())][0]}), highest {f(100 * SH[:, J['00679B']].max(), 1)}%")   # 20
+    f"({sch[int(SH[:, J['00679B']].argmin())][0]}), highest {f(100 * SH[:, J['00679B']].max(), 1)}%; "
+    f"{span_n} windows from {neg[0]} to {neg[-1]}, the last negative share {f(100 * SH[kneg_last, J['00679B']], 4)}%; "
+    f"below -0.01% in {len(neg_1bp)} windows, the last {neg_1bp[-1]}")                                    # 20
 first_rows = sch[0][2]
 put(f"first window {fr.est_dates[first_rows - WINDOW]} .. {fr.est_dates[first_rows - 1]}: R1 shares "
     f"{fl(100 * SH[0], 1)}%")                                                                              # 21
-kneg = int(SH[:, J["00679B"]].argmin())
-xn = X[sch[kneg][2] - WINDOW:sch[kneg][2]]
+kmin = int(SH[:, J["00679B"]].argmin())
+xn = X[sch[kmin][2] - WINDOW:sch[kmin][2]]
 Sn = A * cov0(xn)
 spn, bn, mn, _, shn = split(Sn, w1)
 rho_b = float((Sn @ w1)[J["00679B"]] / sqrt(Sn[J["00679B"], J["00679B"]]) / spn)
 vn2 = sqrt(float((w1 + dlt) @ Sn @ (w1 + dlt)))
-put(f"window through {sch[kneg][0]} ({fr.est_dates[sch[kneg][2] - WINDOW]} .. {fr.est_dates[sch[kneg][2] - 1]}): "
-    f"R1 s_p {f(100 * spn, 2)}%; 00679B corr with the book {f(rho_b, 3)}, beta_(i,p) {f(bn[J['00679B']], 3)}, MRC "
+put(f"window through {sch[kmin][0]} ({fr.est_dates[sch[kmin][2] - WINDOW]} .. {fr.est_dates[sch[kmin][2] - 1]}): "
+    f"R1 s_p {f(100 * spn, 2)}%; 00679B corr with the book {f(rho_b, 3)}, beta_(i,p) {f(bn[J['00679B']], 3, 4)}, MRC "
     f"{f(100 * mn[J['00679B']], 2)}%, share {f(100 * shn[J['00679B']], 2)}%; 00642U share "
     f"{f(100 * shn[k6], 1)}%; 5 points from 00642U to 00679B: s_p -> {f(100 * vn2, 2)}%")               # 22
 
@@ -336,7 +372,8 @@ W_post = post_trade(W_pre, drift, tb.target, tax)
 assert abs(W_post - p1.wealth[ib]) < 1e-12 and abs(0.5 * float(np.abs(tb.target - drift).sum()) - tb.turnover) < 1e-15
 approx = 2 * COMMISSION * tb.turnover + float(tax @ np.clip(drift - tb.target, 0, None))
 put(f"R1's trade on {tb.trade} (signal {tb.signal}; the largest one-way turnover of {len(reb)} rebalances): "
-    f"W_pre {f(W_pre, 6)}, drift weights {fl(100 * drift, 2)}%, TO {f(100 * tb.turnover, 2)}%, W_post {f(W_post, 6)}, "
+    f"W_pre {f(W_pre, 6)}, drift weights {fl(100 * drift, 2, 3)}%, TO {f(100 * tb.turnover, 2, 3)}%, W_post "
+    f"{f(W_post, 6)}, "
     f"cost {f(100 * tb.cost, 4, 5)}% of W_pre ({f(1e6 * tb.cost, 0)} NT$ per NT$1 million); approximation "
     f"2 x 0.1425% x TO + tax on sales {f(100 * approx, 4, 5)}%")                                          # 24
 put(f"cost per unit of turnover, a rebalance of weights summing to 1 (approximation): 2 x 0.1425% = "
@@ -348,9 +385,18 @@ dbh = fr.wealth_dates[ifirst + 1:]
 ext = "; ".join(f"{s} {f(100 * wbh[:, j].min(), 1)}% ({dbh[int(wbh[:, j].argmin())]}) to "
                 f"{f(100 * wbh[:, j].max(), 1)}% ({dbh[int(wbh[:, j].argmax())]})" for j, s in enumerate(F))
 g0 = np.prod(1 + fr.W, axis=0)
-put(f"buy-and-hold from 1/N at the close of {t0.trade}: weights on {dbh[-1]} {fl(100 * wbh[-1], 1, 2)}%; range "
-    f"{ext}; {len(dbh) + 1} dates with the purchase date; from 1/N at the base close {fr.base}: "
-    f"{fl(100 * g0 / g0.sum(), 1)}%")                                                                      # 26
+# X2's thinned points (X37): the last session of each ISO week from the purchase date, the purchase date itself and
+# every fund's lowest and highest weight (dbh starts the session after the purchase, so its index i is point i + 1)
+d_all = fr.wealth_dates[ifirst:]
+wkey = [date.fromisoformat(d).isocalendar()[:2] for d in d_all]
+pts = {i for i in range(len(d_all)) if i == len(d_all) - 1 or wkey[i + 1] != wkey[i]} | {0}
+n_week = len(pts) - 1
+for j in range(N):
+    pts |= {int(wbh[:, j].argmin()) + 1, int(wbh[:, j].argmax()) + 1}
+put(f"buy-and-hold from 1/N at the close of {t0.trade}: weights on {dbh[-1]} {fl(100 * wbh[-1], 1, 3)}% (the "
+    f"three-decimal weights sum to {sum(round(100 * float(x), 3) for x in wbh[-1]):.3f}); range {ext}; "
+    f"{len(dbh) + 1} dates with the purchase date; thinned for X2 to {len(pts)} points ({n_week} last sessions of ISO "
+    f"weeks, the purchase date and the extremes); from 1/N at the base close {fr.base}: {fl(100 * g0 / g0.sum(), 1)}%")  # 26
 
 # ---------------------------------------------------------------- U28: drift echo and the factor split
 s = u28()
@@ -380,12 +426,12 @@ r2_book = float(np.corrcoef(rp_u, mkt)[0, 1] ** 2)
 Au = s.A
 put(f"U28 equal-weight book: s_p {f(100 * sqrt(Au * vp), 2)}% (lm10.md:36: 15.75%); TAIEX {f(100 * sqrt(Au * vm), 2)}% "
     f"(lm10.md:41: 17.82%); market betas {f(beta.min(), 3)} ({names[int(beta.argmin())]}) to {f(beta.max(), 3)} "
-    f"({names[int(beta.argmax())]}); book beta w'beta {f(bp, 4, 3)}; systematic {f(100 * v_sys / vp, 1, 2)}% of the "
-    f"variance (R-squared of the book on TAIEX {f(100 * r2_book, 2)}%), residual {f(100 * v_res / vp, 1, 2)}%: "
-    f"diagonal {f(100 * v_diag / vp, 1, 2)}%, off-diagonal {f(100 * (v_res - v_diag) / vp, 1, 2)}%")       # 28
-put(f"U28 book volatilities: systematic part {f(100 * sqrt(Au * v_sys), 2)}%, residual part "
-    f"{f(100 * sqrt(Au * v_res), 2)}%; with the residual covariances set to 0 {f(100 * sqrt(Au * (v_sys + v_diag)), 2)}% "
-    f"against {f(100 * sqrt(Au * vp), 2)}%")                                                               # 29
+    f"({names[int(beta.argmax())]}); book beta w'beta {f(bp, 4, 3)}; systematic {f(100 * v_sys / vp, 1, 3)}% of the "
+    f"variance (R-squared of the book on TAIEX {f(100 * r2_book, 1, 3)}%), residual {f(100 * v_res / vp, 1, 3)}%: "
+    f"diagonal {f(100 * v_diag / vp, 1, 3)}%, off-diagonal {f(100 * (v_res - v_diag) / vp, 1, 3)}%")       # 28
+put(f"U28 book volatilities: systematic part {f(100 * sqrt(Au * v_sys), 1, 2)}%, residual part "
+    f"{f(100 * sqrt(Au * v_res), 1, 2)}%; with the residual covariances set to 0 "
+    f"{f(100 * sqrt(Au * (v_sys + v_diag)), 2)}% against {f(100 * sqrt(Au * vp), 2)}%")                   # 29
 spu = sqrt(vp)
 rc_u = wu * (Su @ wu) / spu
 rc_sys = wu * beta * bp * vm / spu
@@ -410,7 +456,7 @@ put("widget matrix A S (daily, full sample, decimals): "
     + f"; initial state R1: s_p {f(100 * sp1, 2)}%, shares {fl(100 * sh1, 1)}%")                          # 33
 Tu = T
 put(f"np.cov's default divisor T - 1: volatility ratio sqrt(T/(T-1)) = {f(sqrt(Tu / (Tu - 1)), 6)} at T = {Tu}; "
-    f"R1's s_p {f(100 * sp1, 4)}% -> {f(100 * sp1 * sqrt(Tu / (Tu - 1)), 4)}%")                            # 34
+    f"R1's s_p {f(100 * sp1, 3, 4)}% -> {f(100 * sp1 * sqrt(Tu / (Tu - 1)), 3, 4)}%")                      # 34
 
 # ---------------------------------------------------------------- problems (hypothetical inputs unless stated)
 put(f"P1: 50/50, returns +10% and -5%: R_p {f(2.5, 2)}%; drifted weight 0.55 / 1.025 = {f(0.55 / 1.025, 4)}")  # 35
@@ -446,8 +492,10 @@ ex3 = sqrt(float((w3 + d3) @ S3 @ (w3 + d3))) - sp3
 put(f"P10: same inputs, 5 points from asset 3 to asset 2: linear {f(100 * lin3, 2, 3)} points, exact "
     f"{f(100 * ex3, 2, 3)} points; sigma_p -> {f(100 * (sp3 + ex3), 2)}%")                                 # 39
 r_m, se_m, _ = se_rho(Xm[:, 0], Xm[:, J["00646"]])
-put(f"P6: 0050-00646 monthly rho {f(r_m, 3)} on T = {len(km)}: normal-theory SE (1 - rho^2) / sqrt(T) "
-    f"{f(se_m, 4, 3)}; distractors 1 / sqrt(T) {f(1 / sqrt(len(km)), 4)}, (1 - rho^2) / T {f((1 - r_m**2) / len(km), 4)}")  # 40
+r_st = round(r_m, 4)                          # the stem gives the correlation to four decimals
+put(f"P6: 0050-00646 monthly rho {f(r_m, 3, 4)} on T = {len(km)}; the stem's rho {r_st:.4f}: normal-theory SE "
+    f"(1 - rho^2) / sqrt(T) {f((1 - r_st**2) / sqrt(len(km)), 4)} (from the unrounded rho {f(se_m, 4)}); distractors "
+    f"1 / sqrt(T) {f(1 / sqrt(len(km)), 4)}, (1 - rho^2) / T {f((1 - r_st**2) / len(km), 4)}")             # 40
 
 # ---------------------------------------------------------------- details added for the exhibits and checks
 x_tr = (W_post * tb.target - W_pre * drift) / W_pre
@@ -486,5 +534,14 @@ for drop in (True, False):
                      f"{fl(z, 3, 4)}")
 put("log returns ln(1 + R), estimation frame (a check of plans/vol-5.md, 'Timing of E5': 0.601, 0.592, 0.567; "
     "-0.105, -0.020, -0.014): " + "; ".join(cells))                                                       # 46
+put(f"mu_p = w'mu (A x mean, estimation frame): R1 {f(100 * float(w1 @ mu), 2)}%, R2 {f(100 * float(w2 @ mu), 2)}%")  # 47
+SM = 12 * cov0(Xm)
+spm, _, _, _, shm = split(SM, w1)
+put(f"widget matrix 12 S (monthly, {len(km)} calendar months, decimals): "
+    + "; ".join(" ".join(f"{SM[a, b]:.10f}" for b in range(N)) for a in range(N))
+    + f"; R1: s_p {f(100 * spm, 2)}%, shares {fl(100 * shm, 1)}%")                                        # 48
+put(f"widget matrix A S (daily, window {fr.est_dates[sch[kmin][2] - WINDOW]} .. {fr.est_dates[sch[kmin][2] - 1]}, "
+    f"A = {f(A, 2)}, decimals): " + "; ".join(" ".join(f"{Sn[a, b]:.10f}" for b in range(N)) for a in range(N))
+    + f"; R1: s_p {f(100 * spn, 2)}%, shares {fl(100 * shn, 1)}%")                                        # 49
 
 print("\n".join(OUT))

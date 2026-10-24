@@ -1,41 +1,44 @@
-"""LM34 anchors (Backtesting Without Fooling Yourself): every number the Stage 1 brief quotes (2026-10-24).
+"""LM34 anchors (Backtesting Without Fooling Yourself): every number the Stage 1 brief quotes (2026-10-24, revised).
 
-Reads only data/processed/*.parquet through the shared builders, plus the raw files named here (run the builders first):
+Reads only data/processed/*.parquet through the shared builders, plus the registered raw files named here (run the
+builders first):
   * E5 (the through case): data/vol5_series.py's frames("E5") and ohlc(fund) (data/processed/vol5_frames.parquet,
     vol5_ohlc.parquet), and data/vol5_rules.py's signals(), schedule(), wealth_path() and summary(), which every
-    Volume V-VI script imports; no rule is re-implemented here. 0050's distributions and the split table are read from
-    their registered raw files (data/raw/vol5/0050_dividends.csv, data/raw/vol5/splits__2016-12-01__2026-10-08.csv),
-    read-only: vol5_series's own readers delete its outputs on a failed check, so they are not called.
+    Volume V-VI script imports; no rule is re-implemented here. 0050's distributions, the split table and the price
+    files of 00635U and 00642U are read from their registered raw files under data/raw/vol5/, read-only:
+    vol5_series's own readers delete its outputs on a failed check, so they are not called.
   * TR23 (Volume III): data/processed/vol3_taiex.parquet (columns date, tr, price, R, Rp; R the total-return index's
     simple daily return), for LM21's Experiment 10 (recomputed with LM21's seed) and the TR23 problems.
-  * LM34's survivorship data, PENDING REGISTRATION under data/raw/vol6/ (the brief's "Open before Stage 2" lists the
-    exact --add commands): TaiwanStockDelisting (ids from "00"), TaiwanStockPrice snapshots of every ETF on 2017-01-17
-    and 2026-10-08, and the daily prices of the cohort funds from 2016-12-01. The anchors that need them print a
-    "PENDING REGISTRATION" note when the files are absent; their IDs stay fixed (A34-18 to A34-21). A34-18 alone reads
-    the two snapshots (TaiwanStockPrice without a data_id, served only above FinMind's Free tier); A34-19 to A34-21
-    need only Free files. The environment variable LM34_VOL6 may point at unregistered copies of these files, for a
-    test run only.
+  * LM34's survivorship files, registered under data/raw/vol6/ (data/README.md): TaiwanStockDelisting (ids from
+    "00"), the daily prices of 00672L, 00673R, 00674R and 00677U (Free), and two TaiwanStockPrice snapshots of every
+    ETF on 2017-01-17 and 2026-10-08 (no data_id, served only above FinMind's Free plan). A34-18 alone reads the
+    snapshots; on a Free account they are fetched with --exclude vol6/etf_snapshot, and A34-18 prints a note instead
+    of its value. The other files are required.
 
-Conventions (plans/vol-5.md, shared decisions). The through case's settings are vol5_rules.py's (window WINDOW = 504
-estimation rows, month-end signals, trade at the next session's close on which every fund trades, costs COMMISSION and
-TAX, cash at RF = 1.5% a year, borrowing at RF + SPREAD, valuation to 2026-10-08 with no terminal liquidation).
-"Growth" is ln(final wealth) / years from the cash of 1 at the first trade's close (years = calendar days / 365.25);
-"gross" is the same path with cost_mult = 0 (trading costs removed, financing kept); "costs" are the sum over trades of
-cost / pre-trade wealth; "turnover" is the sum of one-way turnovers after the first purchase per year (summary()).
-A rule's Sharpe ratio, volatility, VaR and drawdown are other modules' statistics (LM33, LM30-LM31, LM32) and are not
-printed. The PBO grid (declared before it was computed; the brief's "PBO grid") reuses signals() with
-vol5_rules.WINDOW set to 126, 252 or 504 for the call and restored after it, and keeps the through case's schedule from
-its first signal; a k-month configuration trades at signals 1, 1 + k, 1 + 2k, ... TR23's statistics use r_f = 0
-(Volume IV), except one sensitivity of the Kelly walk-forward that charges BORROW on the exposure above 1.
-Quantiles: inverted_cdf. Counts against a threshold use the guard EPS = 1e-12.
+Conventions (plans/vol-5.md, shared decisions and the editor's decisions on the briefs). The through case's settings
+are vol5_rules.py's (window WINDOW = 504 estimation rows, month-end signals, trade at the next session's close on which
+every fund trades, costs COMMISSION and TAX, cash at RF = 1.5% a year, borrowing at RF + SPREAD, valuation to
+2026-10-08 with no terminal liquidation). "Growth" is ln(final wealth) / years from the cash of 1 at the first trade's
+close (years = calendar days / 365.25); "gross" is the same path with cost_mult = 0 (trading costs removed, financing
+kept); "costs" are the sum over trades of cost / pre-trade wealth; "turnover" is the sum of one-way turnovers after the
+first purchase per year (summary()). A rule's Sharpe ratio, volatility, VaR and drawdown are other modules' statistics
+(LM33, LM30-LM31, LM32) and are not printed; the cost arithmetic of a single trade is LM27's and is echoed. The PBO
+grid (declared before it was computed; the brief's "PBO grid") reuses signals() with vol5_rules.WINDOW set to 126, 252
+or 504 for the call and restored after it, and keeps the through case's schedule from its first signal; a k-month
+configuration trades at signals 1, 1 + k, 1 + 2k, ... TR23's statistics use r_f = 0 (Volume IV), except one
+sensitivity of the Kelly walk-forward that charges BORROW on the exposure above 1.
+Block lengths follow LM22's rule (lm22.md:254): the largest stationary Politis-White estimate among the squared
+demeaned series the statistic involves, rounded; for a comparison with R1, the differences from R1.
+Quantiles and medians: inverted_cdf. Counts against a threshold use the guard EPS = 1e-12.
 Simulation (AUTHORING section 8): one generator per experiment, np.random.default_rng([e, 20261011]):
-  e = 1  the reality check on Experiment 10 (stationary bootstrap, mean block length 145, LM22's TR23 length, drawn by
-         LM22's stationary_idx, lm22.md:371-379; B_RC resamples in batches of 1,000);
+  e = 1  the reality check on Experiment 10 (stationary bootstrap, mean block length 145 by LM22's rule on the 10,000
+         rules' returns, as LM22's TR23 length, drawn by LM22's stationary_idx, lm22.md:371-379; B_RC resamples in
+         batches of 1,000);
   e = 2  noise strategies under CSCV (Model): N_NOISE panels of 60 iid normal strategies on the grid's evaluation days;
   e = 3  the widget's grid (Model): N_STATE panels per state, states in the order printed;
-  e = 4  the reality check on the PBO grid against R1 monthly (stationary bootstrap, mean block length by LM22's rule,
-         lm22.md:254: the largest Politis-White estimate among the configurations' squared demeaned returns, rounded);
-  e = 5  the same at R1 monthly's own Politis-White length, rounded (a block-length sensitivity, LM22's advice).
+  e = 4  the reality check on the PBO grid against R1 monthly (stationary bootstrap, mean block length by LM22's rule
+         on the 59 differences from R1);
+  e = 5  the same at ELL_SENS = 17, R1 monthly's own Politis-White length, rounded (the editor's sensitivity).
 LM21's Experiment 10 keeps LM21's generator default_rng([10, 20261011]). A Monte Carlo proportion's standard error is
 sqrt(p (1 - p) / B).
 
@@ -43,12 +46,11 @@ Rounding flags. Every number the brief prints passes through f(x, k1, k2, ...), 
 and flags it "NEAR" for each printed precision k at which x lies within a tenth of a last-digit unit of a rounding
 boundary (|frac(10^k |x|) - 0.5| < 0.1). The brief prints a flagged value as rounded from the unrounded value here.
 
-Prints one line per anchor, "A34-NN <value>", in ID order, and writes nothing.
+Prints one line per anchor, "A34-NN <value>", in ID order (A34-21 is withdrawn and keeps its ID), and writes nothing.
 
 Run:  PYTHONUTF8=1 uv run python data/vol6_anchors_lm34.py
 """
 import csv
-import os
 from collections.abc import Generator
 from contextlib import contextmanager
 from dataclasses import dataclass
@@ -63,6 +65,7 @@ import numpy as np
 import polars as pl
 import vol5_rules as V
 from arch.bootstrap import optimal_block_length
+from numpy.lib.stride_tricks import sliding_window_view
 from numpy.typing import NDArray
 from scipy import stats
 from scipy.optimize import brentq
@@ -71,22 +74,22 @@ from vol5_series import Frames, frames, ohlc
 HERE = Path(__file__).resolve().parent
 PROC = HERE / "processed"
 RAW5 = HERE / "raw" / "vol5"
-RAW6 = Path(os.environ.get("LM34_VOL6", HERE / "raw" / "vol6"))   # override only to test unregistered copies
+RAW6 = HERE / "raw" / "vol6"
 EPS = 1e-12
 SEED = 20261011
 B_RC = 10_000          # reality-check resamples (experiments 1 and 4)
 N_NOISE = 200          # noise panels (experiment 2)
 N_STATE = 40           # panels per widget state (experiment 3)
 BLOCKS = 16            # CSCV blocks
-ELL_TR23 = 145         # LM22's mean block length for TR23 (lm22.md:427)
+ELL_TR23 = 145         # LM22's mean block length for TR23 (lm22.md:427); checked against the rule in reality_check()
+ELL_SENS = 17          # the grid's block-length sensitivity (editor's decision D): R1 monthly's own estimate, rounded
 BORROW = V.RF + V.SPREAD   # 3.5% a year, the through case's illustrative borrowing rate, for the Kelly lab's sensitivity
 BASE, END = "2017-01-17", "2026-10-08"
-FUTURES6 = ["00635U", "00642U", "00672L", "00673R", "00674R", "00677U"]
-COHORT33 = ["00631L", "00632R", "00633L", "00634R", "00635U", "00637L", "00638R", "00640L", "00641R", "00642U",
-            "00647L", "00648R", "00650L", "00651R", "00653L", "00654R", "00655L", "00656R", "00658L", "00659R",
-            "00663L", "00664R", "00665L", "00666R", "00669R", "00672L", "00673R", "00674R", "00675L", "00676R",
-            "00677U", "00680L", "00681R"]
-E5_FILES = ("00635U", "00642U")    # cohort funds already in E5 (read through ohlc)
+# The six ETFs on the 2017-01-17 list whose names (FinMind TaiwanStockInfo, retrieved 2026-10-24, not registered) name
+# an S&P gold or oil index or the VIX; 00672L's and 00677U's names are also in the registered delisting file.
+FUTURES6 = {"00635U": "期元大S&P黃金", "00642U": "期元大S&P石油", "00672L": "元大S&P原油正2",
+            "00673R": "期元大S&P原油反1", "00674R": "期元大S&P黃金反1", "00677U": "期富邦VIX"}
+E5_FILES = ("00635U", "00642U")    # survivorship funds whose price files are E5's (data/raw/vol5/)
 Vec = NDArray[np.float64]
 Mat = NDArray[np.float64]
 
@@ -135,6 +138,11 @@ def stationary_idx(g: np.random.Generator, T: int, ell: float) -> NDArray[np.int
     return (start[first][blk] + step) % T
 
 
+def pw_stationary(x: Vec) -> float:
+    """Politis-White's stationary block length of the squared demeaned series (LM22's rule, before the rounding)."""
+    return float(optimal_block_length((x - x.mean()) ** 2)["stationary"].iloc[0])
+
+
 def num(m: dict[str, float | str], key: str) -> float:
     v = m[key]
     assert isinstance(v, float)
@@ -151,7 +159,9 @@ SPLITS = [(r["stock_id"], r["date"], Decimal(r["before_price"]), Decimal(r["afte
 
 
 def split_factor(sym: str) -> dict[str, float]:
-    """Date -> s, new units per old unit (k for a k-for-1 split, 1/k for a k-to-1 reverse split), from SPLITS."""
+    """Date -> s_t, new units per old unit (k for a k-for-1 split, 1/k for a k-to-1 reverse split), from SPLITS. The
+    ratio is the registered before / after price (or its inverse) rounded to an integer; it must lie within 0.01 of
+    one."""
     out = {}
     for s, d, b, a in SPLITS:
         if s == sym:
@@ -160,6 +170,13 @@ def split_factor(sym: str) -> dict[str, float]:
             assert k >= 2 and abs(q - k) < Decimal("0.01"), (sym, d, q)
             out[d] = float(k) if b >= a else 1 / k
     return out
+
+
+def split_ratio_gap(sym: str) -> float:
+    """Largest |registered price ratio - integer ratio| over sym's splits."""
+    gaps = [abs((b / a if b >= a else a / b) - (b / a if b >= a else a / b).to_integral_value())
+            for s, _, b, a in SPLITS if s == sym]
+    return float(max(gaps)) if gaps else 0.0
 
 
 # ================================================================ the through case (LM34 owns its net results)
@@ -185,7 +202,8 @@ def through_case() -> Case:
     put(f"signals {len(sigs)}: first {sigs[0].signal} (trade {sigs[0].trade}; window rows "
         f"{fr.est_dates[first_w[2] - V.WINDOW]} .. {fr.est_dates[first_w[2] - 1]}), last {sigs[-1].signal} (trade "
         f"{sigs[-1].trade}); valuation to {fr.wealth_dates[-1]}; {n_days} daily returns after the first trade "
-        f"({paths['R1'].dates[1]} .. {paths['R1'].dates[-1]}); evaluation years {f(ev_years, 2, 4)}")      # 02
+        f"({paths['R1'].dates[1]} .. {paths['R1'].dates[-1]}); evaluation years (calendar days / 365.25) "
+        f"{f(ev_years, 2, 4)}")                                                                             # 02
     gross = {k: V.wealth_path(fr, sigs, k, cost_mult=0.0) for k in rules}
     summ = {k: V.summary(fr, paths[k]) for k in rules}
     gsum = {k: V.summary(fr, gross[k]) for k in rules}
@@ -200,10 +218,10 @@ def through_case() -> Case:
     put("turnover a year (one-way, after the first purchase): "
         + ", ".join(f"{k} {f(num(summ[k], 'turnover'), 2, 3)}" for k in rules)
         + f"; trades {len(paths['R1'].trades)} each")                                                      # 06
-    put("costs (sum of cost / pre-trade wealth): " + ", ".join(f"{k} {f(num(summ[k], 'costs'), 4, 5)}" for k in rules)
+    put("costs (sum of cost / pre-trade wealth): " + ", ".join(f"{k} {f(num(summ[k], 'costs'), 4, 7)}" for k in rules)
         + "; per year: " + ", ".join(f"{k} {f(num(summ[k], 'costs') / ev_years, 4, 5)}" for k in rules)
         + "; ln(gross / net final wealth): "
-        + ", ".join(f"{k} {f(log(gross[k].wealth[-1] / paths[k].wealth[-1]), 4, 5)}" for k in rules)
+        + ", ".join(f"{k} {f(log(gross[k].wealth[-1] / paths[k].wealth[-1]), 7)}" for k in rules)
         + "; the identity -sum ln(1 - cost / pre-trade wealth) against it, largest difference over the rules "
         + f"{max(abs(log(gross[k].wealth[-1] / paths[k].wealth[-1]) + sum(log(1 - t.cost) for t in paths[k].trades))
                  for k in rules):.1e}")                                                                     # 07
@@ -231,20 +249,27 @@ def through_case() -> Case:
         + f"; R8 exposure at the trades (echo of LM31, A31-29): mean {f(float(np.mean(ex)), 2, 3)}, min "
         f"{f(min(ex), 2, 3)}, max "
         f"{f(max(ex), 2, 3)}, above 1 at {sum(v > 1 + EPS for v in ex)} of {len(ex)} trades")             # 11
-    t0 = paths["R1"].trades[0]
+    std = V.COMMISSION / (1 + V.COMMISSION)
+    for k in rules[:7]:
+        t0 = paths[k].trades[0]
+        assert abs(t0.exposure - 1) < 1e-12 and abs(t0.turnover - 0.5) < 1e-12 and abs(t0.cost - std) < 1e-15, k
+    t8 = paths["R8"].trades[0]
+    l8 = t8.exposure
+    assert abs(t8.cost - V.COMMISSION * l8 / (1 + V.COMMISSION * l8)) < 1e-15 and abs(t8.turnover - l8 / 2) < 1e-12
     to1 = [t.turnover for t in paths["R1"].trades[1:]]
     co1 = [t.cost for t in paths["R1"].trades[1:]]
-    put(f"first purchase (every rule, from cash; echo of LM27, A27-23): turnover {f(t0.turnover, 2)}, cost / wealth "
-        f"{f(t0.cost, 6)} "
-        f"(0.001425 / 1.001425 = {f(V.COMMISSION / (1 + V.COMMISSION), 6)}); R1's later rebalances: mean one-way "
-        f"turnover {f(float(np.mean(to1)), 4)} (largest {f(max(to1), 4)}, LM27's A27-24), mean cost / wealth "
-        f"{f(float(np.mean(co1)), 6)}")                                                                     # 12
+    put(f"first purchase from cash: R1-R7 (exposures summing to 1) turnover {f(0.5, 2)}, cost / wealth {f(std, 6)} "
+        f"(0.001425 / 1.001425; echo of LM27, A27-23, for R1 and R2); R8, first exposure L = {f(l8, 2)} below 1: "
+        f"turnover {f(t8.turnover, 4)}, cost / wealth {f(t8.cost, 6)} (0.001425 L / (1 + 0.001425 L)); R1's later "
+        f"rebalances: mean one-way turnover {f(float(np.mean(to1)), 4)} (largest {f(max(to1), 4)}, LM27's A27-24), "
+        f"mean cost / wealth {f(float(np.mean(co1)), 6)}")                                                  # 12
     v = 1_000_000
-    buy, tax_eq, tax_bd = v * V.COMMISSION, v * V.TAX["0050"], v * V.TAX["00679B"]
-    put(f"NT$1,000,000 bought and later sold at the same price: commission {buy:.0f} on each side, tax {tax_eq:.0f} "
-        f"(equity and futures ETFs) or {tax_bd:.0f} (00679B); round trip {2 * buy + tax_eq:.0f} = "
-        f"{f((2 * buy + tax_eq) / v, 4)} or {2 * buy + tax_bd:.0f} = {f((2 * buy + tax_bd) / v, 4)} of the value; one "
-        f"side's commission plus the tax (problem 1's distractor) {buy + tax_eq:.0f}")                     # 13
+    c1 = v * V.COMMISSION
+    sw_bd, sw_eq = 2 * c1 + v * V.TAX["00679B"], 2 * c1 + v * V.TAX["0050"]
+    put(f"echo of LM27, A27-43 (the cost arithmetic of a trade is LM27's): switching NT$1,000,000 between two funds, "
+        f"(27.3)'s approximation (commission {c1:.0f} on each side, tax {v * V.TAX['0050']:.0f} on a taxed sale, no "
+        f"cost on the cost): 00679B -> 0050 {sw_bd:.0f} NT$ = {f(sw_bd / v, 4)} of the value, 0050 -> 00679B "
+        f"{sw_eq:.0f} NT$ = {f(sw_eq / v, 4)}")                                                             # 13
     return Case(fr, sigs, paths, ev_years)
 
 
@@ -270,7 +295,8 @@ def adjusted_prices() -> None:
     put(f"0050 close {BASE} {c50[i17]:.2f}; adjusted close of that day in a series built on 2020-01-02 "
         f"{f(adj(BASE, '2020-01-02'), 2)}, on 2024-12-31 {f(adj(BASE, '2024-12-31'), 2)}, on {END} "
         f"{f(adj(BASE, END), 2)}; close {END} {c50[-1]:.2f}; distributions after {BASE}: "
-        f"{sum(1 for d in div50 if BASE < d <= END)}, split 2025-06-18 (4 for 1); growth factor {BASE} -> {END} "
+        f"{sum(1 for d in div50 if BASE < d <= END)}, split 2025-06-18 (4 for 1, s_t = 4; registered prices within "
+        f"{split_ratio_gap('0050'):.4f} of the integer ratio); growth factor {BASE} -> {END} "
         f"{f(float(cum[-1] / cum[i17]), 4)}")                                                               # 14
     ex17 = sorted(d for d in div50 if d.startswith("2017"))
     y_act = [div50[d] / c50[d50.index(d) - 1] for d in ex17]
@@ -294,16 +320,20 @@ def tr23() -> tuple[Vec, list[str]]:
 
 
 def vol_scale(R: Vec, TD: list[str]) -> None:
-    """A daily volatility scale min(1.5, sigma_bar / sigma_EWMA) set at the previous close or at the same close."""
-    T, W = len(R), 504
-    cs = np.concatenate([[0.0], np.cumsum(R**2)])
+    """A daily volatility scale min(1.5, sigma_bar_t / sigma_{t+1|t}) set at the previous close or at the same close.
+    As R8 (vol5_rules.signals): sigma_bar_t^2 is the uncentred mean square of the 504 returns through t, and
+    sigma^2_{t+1|t} is (26.2) with lambda 0.94 run through those 504 returns from the start value sigma_bar_t^2."""
+    T, W, lam = len(R), 504, V.LAM
+    win = sliding_window_view(R**2, W)            # win[j] holds R^2 at t - W + 1 .. t, t = j + W - 1
     sbar2 = np.full(T, np.nan)
-    for t in range(W - 1, T):
-        sbar2[t] = (cs[t + 1] - cs[t + 1 - W]) / W
-    ew = np.full(T, np.nan)                       # ew[t] = sigma^2_{t+1|t}: (26.2) on R up to t
-    ew[W - 1] = sbar2[W - 1]
-    for t in range(W, T):
-        ew[t] = 0.94 * ew[t - 1] + 0.06 * R[t] ** 2
+    sbar2[W - 1:] = win.mean(axis=1)
+    ew = np.full(T, np.nan)                       # ew[t] = sigma^2_{t+1|t}: R8's loop over the window, in closed form
+    ew[W - 1:] = lam**W * sbar2[W - 1:] + win @ ((1 - lam) * lam ** np.arange(W - 1, -1, -1))
+    for t in (W - 1, TD.index("2025-04-07"), T - 1):  # the closed form against R8's literal loop
+        s2 = float(sbar2[t])
+        for r in R[t - W + 1:t + 1]:
+            s2 = lam * s2 + (1 - lam) * r * r
+        assert abs(s2 - ew[t]) <= 1e-12 * s2, (TD[t], s2, ew[t])
     scale = np.minimum(1.5, np.sqrt(sbar2 / ew))  # known at the close of t
     honest = np.full(T, np.nan)
     honest[W:] = scale[W - 1:-1]                  # day t uses the scale set at the close of t - 1
@@ -321,12 +351,13 @@ def vol_scale(R: Vec, TD: list[str]) -> None:
     i7 = TD.index("2025-04-07")
     gh, vh, mh = run(honest)
     gp, vp, mp = run(peek)
-    put(f"TR23 volatility scale, 504-day uncentred window, (26.2) with lambda 0.94, cap 1.5, cash and borrowing at 0: "
-        f"{int(ok.sum())} days {TD[W]} .. {TD[-1]} ({f(yrs, 2)} years, A {f(A, 2)}); set at the previous close: growth "
-        f"{f(gh, 3, 4)}, volatility {f(vh, 3, 4)}, worst day {f(mh, 4)}; using the same day's close: growth "
-        f"{f(gp, 3, 4)}, volatility {f(vp, 3, 4)}, worst day {f(mp, 4)}; 2025-04-07 (R {f(R[i7], 4)}): scale "
-        f"{f(honest[i7], 3)} against {f(peek[i7], 3)}, the scaled return {f(honest[i7] * R[i7], 4)} against "
-        f"{f(peek[i7] * R[i7], 4)}; TR23 itself on these days: growth "
+    put(f"TR23 (total-return index) volatility scale, as R8: 504-return uncentred window, (26.2) with lambda 0.94 run "
+        f"through each window from its sigma_bar^2, cap 1.5, cash and borrowing at 0: "
+        f"{int(ok.sum())} days {TD[W]} .. {TD[-1]} ({f(yrs, 2)} years, calendar days / 365.25, A {f(A, 2)}); set at "
+        f"the previous close: growth {f(gh, 3, 4)}, volatility {f(vh, 3, 4)}, worst day {f(mh, 4)}; using the same "
+        f"day's close: growth {f(gp, 3, 4)}, volatility {f(vp, 3, 4)}, worst day {f(mp, 4)}; 2025-04-07 (R "
+        f"{f(R[i7], 4)}): scale {f(honest[i7], 3)} against {f(peek[i7], 3)}, the scaled return "
+        f"{f(honest[i7] * R[i7], 4)} against {f(peek[i7] * R[i7], 4)}; TR23 itself on these days: growth "
         f"{f(float(np.log1p(R[ok]).sum() / yrs), 3, 4)}, volatility {f(float(R[ok].std() * sqrt(A)), 3, 4)}")  # 16
 
 
@@ -360,9 +391,10 @@ def kelly_walk(R: Vec, TD: list[str]) -> None:
         """lv R minus interest on the borrowed part, BORROW / A_k a session on max(lv - 1, 0)."""
         return lv * R[mk] - np.maximum(lv - 1, 0.0) * BORROW / ak
 
-    put(f"Kelly walk-forward on TR23: {len(ends)} month-ends {TD[ends[0]]} .. {TD[ends[-1]]}, window {W} returns, "
-        f"root of (4.5) capped to [0, 3]; {int(mk.sum())} days ({f(yk, 2)} years); leverage mean "
-        f"{f(float(np.mean(fs)), 2)}, at the cap {sum(v >= 3 - EPS for v in fs)} months, at 0 "
+    put(f"Kelly walk-forward on TR23 (total-return index): {len(ends)} calendar month-ends {TD[ends[0]]} .. "
+        f"{TD[ends[-1]]}, window {W} returns, root of (4.5) capped to [0, 3]; {int(mk.sum())} days ({f(yk, 2)} years, "
+        f"calendar days / 365.25); mean of the {len(fs)} month-end leverages {f(float(np.mean(fs)), 2)}, at the cap "
+        f"{sum(v >= 3 - EPS for v in fs)} month-ends, at 0 "
         f"{sum(v <= EPS for v in fs)}; growth {f(grow(lev[mk] * R[mk]), 3, 4)}; f = 1: {f(grow(R[mk]), 3, 4)}; the "
         f"full-sample root {f(full, 2, 3)} held: {f(grow(full * R[mk]), 3, 4)}; half of it: "
         f"{f(grow(full / 2 * R[mk]), 3, 4)}; with borrowing at {BORROW:.3f} a year on the exposure above 1 "
@@ -370,67 +402,52 @@ def kelly_walk(R: Vec, TD: list[str]) -> None:
         f"full-sample root {f(grow(fin(np.full(int(mk.sum()), full))), 3, 4)}")                          # 17
 
 
-# ================================================================ survivorship (PENDING REGISTRATION: data/raw/vol6/)
-def growth_to_end(sym: str, raw6: Path) -> tuple[float, str]:
-    """Growth factor from BASE's close to the last traded close on or before END. Untraded rows (close 0) are
-    skipped and splits come from the registered table. Checked: every other traded close equals the previous traded
-    close plus the spread (FinMind prints 0.0 after an untraded day), and a split's before_price equals the previous
-    traded close. None of these funds pays distributions (no ex-date mismatch in their records)."""
-    if sym in E5_FILES:
-        o = ohlc(sym)
-        rows = [{"date": str(d), "close": repr(float(c)), "spread": "0"} for d, c in
-                zip(o["date"].to_list(), o["close"].to_list(), strict=True)]
-    else:
-        rows = read_rows(raw6 / f"{sym}__2016-12-01__2026-10-08.csv")
+# ================================================================ survivorship (registered: data/raw/vol6/)
+def growth_to_end(sym: str) -> tuple[float, str, int, int]:
+    """Growth factor from BASE's close to the last traded close on or before END, with the last traded date, the
+    untraded rows skipped (close 0) and the zero spreads accepted. Splits come from the registered table with integer
+    ratios (split_factor), and a split's before_price must equal the previous traded close. Every other traded close
+    must equal the previous traded close plus the spread, except that a spread of 0 is accepted on the first traded
+    row right after an untraded row (FinMind prints 0.0 there). None of these funds pays distributions."""
+    raw = RAW5 if sym in E5_FILES else RAW6
+    rows = [r for r in read_rows(raw / f"{sym}__2016-12-01__2026-10-08.csv") if BASE <= r["date"] <= END]
+    assert rows[0]["date"] == BASE and Decimal(rows[0]["close"]) != 0, (sym, rows[0])
     sp = split_factor(sym)
     before = {d: b for s, d, b, _ in SPLITS if s == sym}
-    rows = [r for r in rows if Decimal(r["close"]) != 0 and BASE <= r["date"] <= END]
-    assert rows[0]["date"] == BASE, (sym, rows[0]["date"])
-    g, prev = 1.0, Decimal(rows[0]["close"])
+    g, prev, idle_before, idle, zeros, last = 1.0, Decimal(rows[0]["close"]), False, 0, 0, BASE
     for r in rows[1:]:
         c = Decimal(r["close"])
+        if c == 0:
+            idle_before, idle = True, idle + 1
+            continue
         if r["date"] in sp:
             assert before[r["date"]] == prev, (sym, r["date"])
             g *= float(c) / (float(prev) / sp[r["date"]])
         else:
             spread = Decimal(r["spread"])
-            assert spread == 0 or c - prev == spread, (sym, r["date"])
+            if spread == 0 and c != prev:
+                assert idle_before, (sym, r["date"], "a zero spread not right after an untraded row")
+                zeros += 1
+            else:
+                assert c - prev == spread, (sym, r["date"], c, prev, spread)
             g *= float(c / prev)
-        prev = c
-    return g, rows[-1]["date"]
+        prev, idle_before, last = c, False, r["date"]
+    return g, last, idle, zeros
 
 
-def survivorship_files(raw6: Path) -> list[Path]:
-    """Free datasets (TaiwanStockDelisting; TaiwanStockPrice with a data_id): needed by A34-19 to A34-21."""
-    return [raw6 / "delisting__2000-01-01__2026-10-08.csv"] + [raw6 / f"{s}__2016-12-01__2026-10-08.csv"
-                                                               for s in FUTURES6 if s not in E5_FILES]
-
-
-def snapshot_files(raw6: Path) -> list[Path]:
-    """TaiwanStockPrice without a data_id (all securities on one date; FinMind serves it only above the Free tier):
-    needed by A34-18 alone."""
-    return [raw6 / f"etf_snapshot__{BASE}.csv", raw6 / f"etf_snapshot__{END}.csv"]
-
-
-def pending(raw6: Path, files: list[Path], what: str) -> str:
-    miss = [q.name for q in files if not q.exists()]
-    more = f" and {len(miss) - 3} more" if len(miss) > 3 else ""
-    return f"PENDING REGISTRATION ({what}): {raw6} lacks {', '.join(miss[:3])}{more}; skipped"
-
-
-def survivorship(raw6: Path) -> list[str]:
-    """The four survivorship anchors (A34-18 to A34-21) from the vol6 files in raw6, each with its own NEAR flags.
-    A34-18 needs the two ETF snapshots; A34-19 to A34-21 need only Free files."""
-    if not all(q.exists() for q in survivorship_files(raw6)):
-        return [pending(raw6, survivorship_files(raw6), "Free files")] * 4
+def survivorship() -> list[str]:
+    """The survivorship anchors A34-18 to A34-20, each with its own NEAR flags, and A34-21 (withdrawn)."""
     lines: list[str] = []
-    dl = read_rows(raw6 / "delisting__2000-01-01__2026-10-08.csv")
+    dl = read_rows(RAW6 / "delisting__2000-01-01__2026-10-08.csv")
     dld = {r["stock_id"]: r["date"] for r in dl}
-    if not all(q.exists() for q in snapshot_files(raw6)):
-        lines.append(pending(raw6, snapshot_files(raw6), "the two ETF snapshots, above FinMind's Free tier"))
+    dln = {r["stock_id"]: r["stock_name"] for r in dl}
+    snaps = [RAW6 / f"etf_snapshot__{BASE}.csv", RAW6 / f"etf_snapshot__{END}.csv"]
+    if not all(q.exists() for q in snaps):
+        lines.append(f"not computed: {RAW6} lacks the ETF snapshots {', '.join(q.name for q in snaps if not q.exists())}"
+                     " (TaiwanStockPrice without a data_id, fetched only above FinMind's Free plan; see data/README.md)")
     else:
-        s0 = read_rows(raw6 / f"etf_snapshot__{BASE}.csv")
-        s1 = {r["stock_id"] for r in read_rows(raw6 / f"etf_snapshot__{END}.csv")}
+        s0 = read_rows(snaps[0])
+        s1 = {r["stock_id"] for r in read_rows(snaps[1])}
         ids0 = sorted({r["stock_id"] for r in s0})
         assert all(s in ids0 for s in FUTURES6)
         gone = [i for i in ids0 if i not in s1]
@@ -445,30 +462,31 @@ def survivorship(raw6: Path) -> list[str]:
                              f"with a row on {END}: {len(s1)}; delisted ids from '00', {min(dld.values())} .. "
                              f"{max(dld.values())}: {len(dl)}, by year "
                              + ", ".join(f"{y} {n}" for y, n in sorted(by_year.items()))))                  # 18
-    g6 = {s: growth_to_end(s, raw6) for s in FUTURES6}
-    lines.append(flagged(f"commodity and volatility futures ETFs with a row on {BASE}: "
-                 + ", ".join(f"{s} G {f(g6[s][0], 3, 4)} to {g6[s][1]}"
-                             + (f" (delisted {dld[s]})" if s in dld else "") for s in FUTURES6)))         # 19
+    for s in ("00672L", "00677U"):
+        assert dln[s] == FUTURES6[s], (s, dln[s])
+    g6 = {s: growth_to_end(s) for s in FUTURES6}
+    lines.append(flagged(f"the six ETFs on the {BASE} list that track an S&P gold or oil index or the VIX (names "
+                 "from FinMind's TaiwanStockInfo): " + ", ".join(
+                     f"{s} G {f(g6[s][0], 3, 4)} to {g6[s][1]}" + (f" (delisted {dld[s]})" if s in dld else "")
+                     for s in FUTURES6)
+                 + "; untraded rows (close 0) skipped: " + ", ".join(f"{s} {g6[s][2]}" for s in FUTURES6 if g6[s][2])
+                 + "; zero spreads accepted on the first traded row after an untraded one: "
+                 + ", ".join(f"{s} {g6[s][3]}" for s in FUTURES6 if g6[s][3])
+                 + "; every other close equals the previous traded close plus the spread; splits: "
+                 + ", ".join(f"{s} {d} ({'1 for ' + str(round(1 / k)) if k < 1 else str(round(k)) + ' for 1'})"
+                             for s in FUTURES6 for d, k in split_factor(s).items())
+                 + ", registered prices within "
+                 f"{max(split_ratio_gap(s) for s in FUTURES6):.4f} of the integer ratios"))                    # 19
     all6 = float(np.mean([g6[s][0] for s in FUTURES6]))
     sur6 = float(np.mean([g6[s][0] for s in FUTURES6 if s not in dld]))
     y = years(BASE, END)
     lines.append(flagged(f"equal amounts on {BASE}, held (a delisted fund's last close kept as cash at 0): all six "
                  f"{f(all6, 3, 4)} ({f(all6 - 1, 3, 4, plus=True)}), log growth {f(log(all6) / y, 3, 4)} a year; "
                  f"the four survivors {f(sur6, 3, 4)} ({f(sur6 - 1, 3, 4, plus=True)}), {f(log(sur6) / y, 3, 4)} a "
-                 f"year; gap {f(log(sur6) / y - log(all6) / y, 3, 4)} a year; years {f(y, 4)}"))          # 20
-    absent = [s for s in COHORT33 if s not in E5_FILES and not (raw6 / f"{s}__2016-12-01__2026-10-08.csv").exists()]
-    if absent:
-        lines.append(f"optional cohort (codes ending L, R or U, {len(COHORT33)} funds): PENDING REGISTRATION "
-                     f"({len(absent)} files absent); skipped")                                              # 21
-    else:
-        gc = {s: growth_to_end(s, raw6)[0] for s in COHORT33}
-        a = float(np.mean(list(gc.values())))
-        b = float(np.mean([v for s, v in gc.items() if s not in dld]))
-        lines.append(flagged(f"optional cohort (codes ending L, R or U with a row on {BASE}): {len(gc)} funds, "
-                     f"{sum(s in dld for s in gc)} delisted ({', '.join(s for s in gc if s in dld)}); equal "
-                     f"amounts held: all {f(a, 2, 3)} ({f(log(a) / y, 3, 4)} a year), survivors {f(b, 2, 3)} "
-                     f"({f(log(b) / y, 3, 4)} a year); median G {f(float(np.median(list(gc.values()))), 2, 3)}; "
-                     f"G below 1: {sum(v < 1 for v in gc.values())} of {len(gc)}"))                        # 21
+                 f"year; gap {f(log(sur6) / y - log(all6) / y, 3, 4)} a year; years (calendar days / 365.25) "
+                 f"{f(y, 4)}"))                                                                               # 20
+    lines.append("withdrawn (editor's decision 2026-10-24: the 33-fund L/R/U cohort is not registered; the ID is "
+                 "kept so that later IDs do not move)")                                                      # 21
     return lines
 
 
@@ -492,8 +510,11 @@ def reality_check(R: Vec) -> None:
         f"(21.9) for 10,000 independent rules: Pr(max >= {tt[best]:.4f}) = {f(1 - stats.norm.cdf(tt[best]) ** M, 3)}; "
         f"(21.9)'s 95% quantile of the max {f(float(stats.norm.ppf(0.95 ** (1 / M))), 2)}; one-sided Bonferroni level "
         f"for 10,000 tests at 5% {f(float(stats.norm.isf(0.05 / M)), 2)}")                                 # 23
+    # LM22's rule on the series the statistic involves, the 10,000 rules' returns (the benchmark is no position)
+    pw = np.array([pw_stationary((2.0 * pos[k].astype(np.float64) - 1.0) * R) for k in range(M)])
+    assert round(float(pw.max())) == ELL_TR23
     g1 = rng(1)
-    thr = sqrt(2 * log(log(T)))                   # Hansen's threshold on the t scale
+    thr = sqrt(2 * log(log(T)))                   # Hansen (2005) p. 368 and p. 372: the consistent SPA's threshold
     keep = tt >= -thr                             # rules recentred by the consistent SPA
     mw, mt, mc = np.empty(B_RC), np.empty(B_RC), np.empty(B_RC)
     batch, chunk = min(1000, B_RC), 2000
@@ -514,17 +535,23 @@ def reality_check(R: Vec) -> None:
             c_ = np.maximum(c_, np.where(keep[r0:r0 + chunk, None], z, Db / se).max(axis=0))
         mw[b0:b0 + batch], mt[b0:b0 + batch], mc[b0:b0 + batch] = w_, t_, c_
     Vw = sqrt(T) * float(dbar.max())
-    pw = float((mw >= Vw - EPS).mean())
+    pw_ = float((mw >= Vw - EPS).mean())
     pt = float((mt >= tt[best] - EPS).mean())
     pc = float((np.maximum(mc, 0.0) >= max(float(tt[best]), 0.0) - EPS).mean())
+    pc_strict = float((np.maximum(mc, 0.0) > max(float(tt[best]), 0.0) + EPS).mean())    # Hansen's count, p. 372
     q95 = float(np.quantile(mt, 0.95, method="inverted_cdf"))
-    put(f"reality check, experiment 1 (stationary bootstrap, mean block {ELL_TR23}, B = {B_RC}): White's statistic "
-        f"max of sqrt(T) x mean = {f(Vw * 100, 4)} percent, p-value {f(pw, 3)} (MC SE {f(sqrt(pw * (1 - pw) / B_RC), 3)}); "
-        f"the best rule by mean is the best by t-stat: {int(np.argmax(dbar)) == best}")                     # 24
-    put(f"studentized (max t-stat): p-value {f(pt, 3)} (MC SE {f(sqrt(pt * (1 - pt) / B_RC), 3)}); bootstrap 95% "
-        f"quantile of the max {f(q95, 2)}; Romano-Wolf's first step at 5% rejects {int((tt > q95 + EPS).sum())} rules; "
-        f"Hansen's consistent SPA ({int(keep.sum())} rules recentred, those with t >= -{f(thr, 3)}): p-value "
-        f"{f(pc, 3)} (MC SE {f(sqrt(pc * (1 - pc) / B_RC), 3)})")                                           # 25
+    put(f"reality check, experiment 1 (stationary bootstrap, mean block {ELL_TR23}, B = {B_RC}; LM22's rule on the "
+        f"10,000 rules' squared demeaned returns: largest {f(float(pw.max()), 2)} (rule {int(pw.argmax()) + 1}), "
+        f"smallest {f(float(pw.min()), 2)}, TR23's own {f(pw_stationary(R), 2)}): White's statistic max of sqrt(T) x "
+        f"mean = {f(Vw * 100, 4)} percent, p-value {f(pw_, 3)} (MC SE {f(sqrt(pw_ * (1 - pw_) / B_RC), 3, 4)}); the "
+        f"best rule by mean is the best by t-stat: {int(np.argmax(dbar)) == best}")                         # 24
+    put(f"studentized (max t-stat; each resample's mean minus the sample mean, over the sample's s_u / sqrt(T)): "
+        f"p-value {f(pt, 3)} (MC SE {f(sqrt(pt * (1 - pt) / B_RC), 3, 4)}); bootstrap 95% quantile of the max "
+        f"{f(q95, 2)}; t-stats above it (Romano and Wolf's first step at 5%, their footnote 22 variant) "
+        f"{int((tt > q95 + EPS).sum())}; Hansen's consistent SPA ({int(keep.sum())} rules recentred, those with "
+        f"t >= -sqrt(2 ln ln T) = -{f(thr, 3)}, his p. 368; the others keep their means; each rule's iid s_u as his standard deviation): "
+        f"p-value {f(pc, 3)} (MC SE {f(sqrt(pc * (1 - pc) / B_RC), 3, 4)}) as a share at or above, "
+        f"{f(pc_strict, 3)} by Hansen's strict count")                                                     # 25
 
 
 # ================================================================ the PBO grid (declared in the brief before it was run)
@@ -586,6 +613,11 @@ def cscv(x: Mat, ex: float, S: int = BLOCKS) -> tuple[Vec, Vec, Vec, NDArray[np.
     return np.log(om / (1 - om)), sr_i[rows, ns], so, ns.astype(np.int64), m, n_t - m * S
 
 
+def median_ic(x: Vec | list[float]) -> float:
+    """The median as every quantile of the book: x_(ceil(T/2)), inverted_cdf."""
+    return float(np.quantile(np.asarray(x, dtype=np.float64), 0.5, method="inverted_cdf"))
+
+
 def pbo_grid(case: Case) -> int:
     fr, sigs, rules = case.fr, case.sigs, V.RULES
     by_w: dict[int, list[V.Signal]] = {}
@@ -597,6 +629,8 @@ def pbo_grid(case: Case) -> int:
         assert [s.signal for s in by_w[w]] == [s.signal for s in sigs]
     for a, b in zip(by_w[504], sigs, strict=True):
         assert all(np.array_equal(a.targets[k], b.targets[k]) for k in rules)
+    # R4 holds R3 when no fund's window mean exceeds r_f / A (vol5_rules assigns R3's array itself)
+    fallback = [f"{w} {s.signal}" for w in (126, 252, 504) for s in by_w[w] if s.targets["R4"] is s.targets["R3"]]
     conf = [(k, 0, q) for k in ("R1", "R2") for q in (1, 3, 6)]
     conf += [(k, w, q) for k in rules[2:] for w in (126, 252, 504) for q in (1, 3, 6)]
     n = len(conf)
@@ -607,18 +641,24 @@ def pbo_grid(case: Case) -> int:
         rets.append(p.wealth[1:] / p.wealth[:-1] - 1)
         growth.append(float(np.log(p.wealth[-1]) / case.ev_years))
     X = np.column_stack(rets)
+    assert float((1 + X).min()) > 0
     Tg = X.shape[0]
     name = [f"{k} {'-' if w == 0 else w} {q}m" for k, w, q in conf]
     order = list(np.argsort(-np.array(growth), kind="stable"))
     put(f"grid: {n} configurations (R1, R2 x 3 frequencies; R3-R8 x windows 126, 252, 504 x frequencies 1, 3, 6 "
-        f"months); {Tg} daily net returns {case.paths['R1'].dates[1]} .. {case.paths['R1'].dates[-1]}; trades per "
-        f"frequency {len(sigs)}, {len(sigs[::3])}, {len(sigs[::6])}; CLARABEL cross-checks that failed (OSQP "
-        f"checked instead): {len(SKIPPED)} ({'; '.join(SKIPPED)})")                                       # 26
+        f"month-end signals); {Tg} daily net returns {case.paths['R1'].dates[1]} .. {case.paths['R1'].dates[-1]}; "
+        f"trades per frequency {len(sigs)}, {len(sigs[::3])}, {len(sigs[::6])}; R4 holds R3 (no window mean above "
+        f"r_f / A) at {len(fallback)} signals (window, signal: {'; '.join(fallback)}); CLARABEL cross-checks that "
+        f"failed (OSQP checked instead): {len(SKIPPED)} ({'; '.join(SKIPPED)})")                          # 26
     tcase = [name.index(f"{k} {'-' if k in ('R1', 'R2') else 504} 1m") for k in rules]
     est = [i for i in order if conf[i][0] not in ("R1", "R2")]
+    med = median_ic(growth)
+    imed = [i for i in range(n) if growth[i] == med]
+    assert len(imed) == 1
     put(f"grid net growth a year: best {name[order[0]]} {f(growth[order[0]], 3, 4)}, second {name[order[1]]} "
-        f"{f(growth[order[1]], 3, 4)}, median {f(float(np.median(growth)), 3, 4)}, worst {name[order[-1]]} "
-        f"{f(growth[order[-1]], 3, 4)}; the through case's ranks (1 = best of {n}): "
+        f"{f(growth[order[1]], 3, 4)}, median (inverted_cdf, the {(n + 1) // 2}th of {n} from the lowest) "
+        f"{name[imed[0]]} {f(med, 3, 4)}, worst {name[order[-1]]} {f(growth[order[-1]], 3, 4)}; the through case's "
+        f"ranks (1 = best of {n}): "
         + ", ".join(f"{k} {order.index(i) + 1}" for k, i in zip(rules, tcase, strict=True))
         + f"; best estimated rule (R3-R8): {name[est[0]]} {f(growth[est[0]], 3, 4)}")                     # 27
     put("grid net growth by rule, min .. max over its configurations: "
@@ -628,12 +668,13 @@ def pbo_grid(case: Case) -> int:
     lg, is_, oos, ns, m, drop = cscv(X, V.RF / aw)
     sl, ic = np.polyfit(is_ * sqrt(aw), oos * sqrt(aw), 1)
     pbo = float((lg <= EPS).mean())
+    neg = int((oos < 0).sum())
     put(f"CSCV: S = {BLOCKS} blocks of {m} days ({drop} earliest days dropped), C(16, 8) = {comb(16, 8)} splits (the "
-        f"paper prints 12,780); PBO {f(pbo, 3)}; logit median {f(float(np.quantile(lg, 0.5, method='inverted_cdf')), 2)}, "
-        f"mean {f(float(lg.mean()), 2)}; the in-sample best's out-of-sample Sharpe ratio is below 0 in "
-        f"{f(float((oos < 0).mean()), 3)} of the splits; annualized (x sqrt A_w): in-sample best's mean {f(float(is_.mean()) * sqrt(aw), 2)} "
-        f"in sample, {f(float(oos.mean()) * sqrt(aw), 2)} out of sample; OLS of out-of-sample on in-sample: slope "
-        f"{f(sl, 2)}, intercept {f(ic, 2)}")                                                               # 29
+        f"paper prints 12,780); PBO {f(pbo, 3)} ({int((lg <= EPS).sum())} splits); logit median {f(median_ic(lg), 2)}, "
+        f"mean {f(float(lg.mean()), 2)}; the in-sample best's out-of-sample Sharpe ratio is below 0 in {neg} splits, "
+        f"{f(neg / len(lg), 3, 4)} of them; annualized (x sqrt A_w): in-sample best's mean "
+        f"{f(float(is_.mean()) * sqrt(aw), 2)} in sample, {f(float(oos.mean()) * sqrt(aw), 2)} out of sample; OLS of "
+        f"out-of-sample on in-sample: slope {f(sl, 2)}, intercept {f(ic, 2)}")                             # 29
     cnt = np.bincount(ns, minlength=n)
     top = list(np.argsort(-cnt, kind="stable")[:3])
     put("most frequent in-sample best: " + ", ".join(f"{name[i]} {int(cnt[i])} ({f(float(cnt[i]) / len(lg), 3)})" for i in top)
@@ -641,17 +682,19 @@ def pbo_grid(case: Case) -> int:
     edges = np.linspace(-4.5, 4.5, 19)
     hist = np.histogram(np.clip(lg, -4.5 + 1e-9, 4.5 - 1e-9), bins=edges)[0]
     put(f"logit histogram, bins of 0.5 from -4.5 to 4.5 (ends clipped): {', '.join(str(int(h)) for h in hist)}; min "
-        f"{f(float(lg.min()), 2)}, max {f(float(lg.max()), 2)}; possible values ln(r / ({n + 1} - r)), r = 1..{n}")  # 31
+        f"{f(float(lg.min()), 2)}, max {f(float(lg.max()), 2)}; possible values ln(j / ({n + 1} - j)), j = 1..{n}")  # 31
     bench = name.index("R1 - 1m")
     oth = [i for i in range(n) if i != bench]
     D = X[:, oth] - X[:, [bench]]
     dm, su = D.mean(axis=0), D.std(axis=0, ddof=1)
     tg = dm / (su / sqrt(Tg))
-    # LM22's rule (lm22.md:254): the largest stationary Politis-White estimate among the squared demeaned simple-return
-    # series the statistic involves (the 60 configurations), rounded
-    pws = [float(optimal_block_length((X[:, j] - X[:, j].mean()) ** 2)["stationary"].iloc[0]) for j in range(n)]
-    jpw = int(np.argmax(pws))
-    ell = float(round(pws[jpw]))
+    # LM22's rule (lm22.md:254) on the series the statistic involves: the 59 differences from R1 monthly
+    pwd = [pw_stationary(D[:, j]) for j in range(len(oth))]
+    jpw = int(np.argmax(pwd))
+    ell = float(round(pwd[jpw]))
+    pw_r1 = pw_stationary(X[:, bench])
+    assert round(pw_r1) == ELL_SENS
+
     def max_t(g: np.random.Generator, length: float) -> Vec:
         out = np.empty(B_RC)
         for b in range(B_RC):
@@ -660,25 +703,24 @@ def pbo_grid(case: Case) -> int:
         return out
 
     mx = max_t(rng(4), ell)
-    ell1 = float(round(pws[bench]))
-    mx1 = max_t(rng(5), ell1)                     # sensitivity: R1 monthly's own estimate, rounded
+    mx1 = max_t(rng(5), float(ELL_SENS))          # sensitivity: R1 monthly's own estimate, rounded
     jb = int(np.argmax(tg))
     pg = float((mx >= tg[jb] - EPS).mean())
     pg1 = float((mx1 >= tg[jb] - EPS).mean())
     cg = np.corrcoef(D, rowvar=False)
     iu = np.triu_indices(len(oth), 1)
     p1 = float(stats.norm.sf(tg[jb]))
-    put(f"reality check on the grid against R1 monthly (experiment 4, B = {B_RC}, mean block {ell:.0f}, LM22's rule: the "
-        f"largest Politis-White estimate on the 60 configurations' squared demeaned returns, {name[jpw]} "
-        f"{f(pws[jpw], 2)}; smallest {f(min(pws), 2)}, R1 monthly's {f(pws[bench], 2)}): best t-stat {name[oth[jb]]} "
-        f"{f(tg[jb], 2)}; "
+    put(f"reality check on the grid against R1 monthly (experiment 4, B = {B_RC}, mean block {ell:.0f}, LM22's rule on "
+        f"the {len(oth)} differences from R1 monthly (squared demeaned): largest {f(pwd[jpw], 2)} ({name[oth[jpw]]} "
+        f"minus R1), smallest {f(min(pwd), 2)}): best t-stat {name[oth[jb]]} {f(tg[jb], 2)}; "
         f"one-sided normal p {f(p1, 4)}, Bonferroni x {len(oth)} {f(min(1.0, len(oth) * p1), 3)}; reality-check p "
-        f"{f(pg, 3)} (MC SE {f(sqrt(pg * (1 - pg) / B_RC), 3)}); bootstrap 95% quantile of the max t-stat "
+        f"{f(pg, 3)} (MC SE {f(sqrt(pg * (1 - pg) / B_RC), 3, 4)}); bootstrap 95% quantile of the max t-stat "
         f"{f(float(np.quantile(mx, 0.95, method='inverted_cdf')), 2)} against Bonferroni's "
         f"{f(float(stats.norm.isf(0.05 / len(oth))), 2)}; correlations of the {len(oth)} differences: median "
-        f"{f(float(np.median(cg[iu])), 2)}, min {f(float(cg[iu].min()), 2)}; sensitivity (experiment 5, mean block "
-        f"{ell1:.0f}, R1 monthly's own estimate rounded): reality-check p {f(pg1, 3)} (MC SE "
-        f"{f(sqrt(pg1 * (1 - pg1) / B_RC), 3)})")                                                           # 32
+        f"{f(median_ic(cg[iu]), 2)}, min {f(float(cg[iu].min()), 2)}; sensitivity (experiment 5, mean block "
+        f"{ELL_SENS}, R1 monthly's own estimate {f(pw_r1, 2)} rounded): reality-check p {f(pg1, 3)} (MC SE "
+        f"{f(sqrt(pg1 * (1 - pg1) / B_RC), 3, 4)}), bootstrap 95% quantile "
+        f"{f(float(np.quantile(mx1, 0.95, method='inverted_cdf')), 2)}")                                    # 32
     return Tg
 
 
@@ -695,9 +737,9 @@ def noise(Tg: int, aw: float) -> None:
     mp, sp = float(np.mean(pb)), float(np.std(pb, ddof=0)) / sqrt(N_NOISE)
     half = (Tg // BLOCKS) * BLOCKS // 2
     put(f"noise (experiment 2, Model): {N_NOISE} panels of {n} iid normal strategies with mean 0, {Tg} days: PBO mean "
-        f"{f(mp, 3)} (SE {f(sp, 3)}), range {f(min(pb), 3)} .. {f(max(pb), 3)}; the in-sample best's annualized Sharpe "
-        f"ratio, mean over panels: {f(float(np.mean(a_is)), 2)} in sample, {f(float(np.mean(a_oos)), 2)} out of sample; "
-        f"(21.9)'s median of the max of {n} standard normals times sqrt(A_w / {half}): "
+        f"{f(mp, 3)} (SE {f(sp, 3)}), range {f(min(pb), 2, 3)} .. {f(max(pb), 2, 3)}; the in-sample best's annualized "
+        f"Sharpe ratio, mean over panels: {f(float(np.mean(a_is)), 2)} in sample, {f(float(np.mean(a_oos)), 3)} out "
+        f"of sample; (21.9)'s median of the max of {n} standard normals times sqrt(A_w / {half}): "
         f"{f(float(stats.norm.ppf(0.5 ** (1 / n))) * sqrt(aw / half), 2)}")                                # 33
     g3 = rng(3)
     out: dict[tuple[int, float], tuple[float, float]] = {}
@@ -709,28 +751,34 @@ def noise(Tg: int, aw: float) -> None:
                 Z[:, 0] += sr / sqrt(aw) * 0.01
                 v.append(float((cscv(Z, 0.0)[0] <= EPS).mean()))
             out[(k, sr)] = (float(np.mean(v)), float(np.std(v, ddof=0)) / sqrt(N_STATE))
-    put(f"widget grid (experiment 3, Model; {N_STATE} panels per state, in the order printed; configuration 1 has the "
+    put(f"widget grid (experiment 3, Model; {N_STATE} panels per state, in the order printed; strategy 1 has the "
         "annual Sharpe ratio 0, 0.5, 1, 1.5, 2, the others 0): mean PBO "
-        + "; ".join(f"N = {k}: " + " ".join(f(out[(k, s)][0], 2) for s in (0.0, 0.5, 1.0, 1.5, 2.0))
+        + "; ".join(f"n = {k}: " + " ".join(f(out[(k, s)][0], 2) for s in (0.0, 0.5, 1.0, 1.5, 2.0))
                     for k in (2, 5, 10, 20, 60, 100))
         + f"; largest SE {f(max(v[1] for v in out.values()), 3)}; {Tg} days, {BLOCKS} blocks")              # 34
     put(f"C(16, 8) = {comb(16, 8)}, C(10, 5) = {comb(10, 5)}, C(8, 4) = {comb(8, 4)}; every subset of 16 blocks "
-        f"2^16 = {2**16}; logit ln(r / (N + 1 - r)): "
-        f"N = 60, r = 30: {f(log(30 / 31), 4)}, r = 31: {f(log(31 / 30), 4)}, r = 60: {f(log(60 / 1), 3)}, r = 1: "
+        f"2^16 = {2**16}; logit ln(j / (n + 1 - j)): "
+        f"n = 60, j = 30: {f(log(30 / 31), 4)}, j = 31: {f(log(31 / 30), 4)}, j = 60: {f(log(60 / 1), 3)}, j = 1: "
         f"{f(log(1 / 60), 3)}")                                                                              # 35
 
 
 def same_close(case: Case) -> None:
-    """The through case traded at the signal's own close (impossible: the close is known only after 13:30)."""
+    """Look-ahead in the through case: the first purchase stays on its trade date (so that both paths start from the
+    cash of 1 at the same close and cover the same span), and each of the 91 later trades moves to its signal day's
+    own close, which is known only after 13:30."""
     fr, rules = case.fr, V.RULES
     idx = {d: i for i, d in enumerate(fr.wealth_dates)}
-    ok = [bool(fr.traded[idx[s.signal]].all()) for s in case.sigs]
-    early = [V.Signal(s.signal, s.signal, s.targets) for s in case.sigs]
+    later = case.sigs[1:]
+    assert all(bool(fr.traded[idx[s.signal]].all()) for s in later)
+    early = [case.sigs[0]] + [V.Signal(s.signal, s.signal, s.targets) for s in later]
     g = {k: num(V.summary(fr, V.wealth_path(fr, early, k)), "growth") for k in rules}
     base = {k: num(V.summary(fr, case.paths[k]), "growth") for k in rules}
-    put(f"trading at the signal's own close ({sum(ok)} of {len(ok)} signal days with every fund trading; growth from "
-        f"the cash of 1 at {early[0].trade}): " + ", ".join(f"{k} {f(g[k], 3, 4)}" for k in rules) + "; minus the "
-        "through case's: " + ", ".join(f"{k} {f(g[k] - base[k], 4, 5, plus=True)}" for k in rules))       # 36
+    gain = sum(g[k] > base[k] for k in rules)
+    put(f"the {len(later)} later trades at their signal day's own close (every fund traded on each of those days), the "
+        f"first purchase on {early[0].trade} as in the through case, growth from the cash of 1 at that close over the "
+        f"same {f(case.ev_years, 4)} years: " + ", ".join(f"{k} {f(g[k], 3, 4)}" for k in rules)
+        + "; minus the through case's: " + ", ".join(f"{k} {f(g[k] - base[k], 4, 5, plus=True)}" for k in rules)
+        + f"; rules that gain {gain} of {len(rules)}")                                                       # 36
 
 
 def main() -> None:
@@ -739,7 +787,7 @@ def main() -> None:
     R, TD = tr23()
     vol_scale(R, TD)
     kelly_walk(R, TD)
-    for line in survivorship(RAW6):
+    for line in survivorship():
         put(line)
     reality_check(R)
     Tg = pbo_grid(case)

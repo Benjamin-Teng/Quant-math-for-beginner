@@ -31,8 +31,15 @@ Seeds (AUTHORING section 8; one generator per experiment, created once): experim
 experiment 2, default_rng([2, 20261011]): 2,000 samples at each of seven lengths, in increasing order; experiment 3,
 default_rng([3, 20261011]): U28's first-half S as the truth (mean 0), 1,000 samples at each of seven lengths, in
 increasing order, one standard_normal((T, 28)) call per sample; experiment 4, default_rng([4, 20261011]): 1,000 iid
-bootstrap resamples of the first window's 504 rows (integers(0, 504, 504) per resample). A Monte Carlo mean's standard
-error is its SD (divisor n) over sqrt(n); a proportion's is sqrt(p (1 - p) / n).
+bootstrap resamples of the first window's 504 rows (integers(0, 504, 504) per resample). Standard errors: a Monte
+Carlo mean's is its SD (divisor n) over sqrt(n), and a paired difference's the same on the per-sample differences; a
+proportion's is sqrt(p (1 - p) / n); any other statistic of experiment 1 (a median, an SD, a ratio of SDs) gets a
+batch SE: the statistic on 20 consecutive batches of 500 samples, their SD (divisor 20) over sqrt(20).
+
+Revised 2026-10-24 to the editor's decisions on the briefs (plans/vol-5.md): experiment 2 prints each length's gap to
+SR(1/N) in SEs (A30-11), every Monte Carlo result carries its SE (A30-07, 08, 10, 21, 27), the excess of Ledoit and
+Wolf's noise estimate over (18.4)'s value is split by fund (A30-13, A30-15), A30-41 is withdrawn (decision D settled
+the Black-Litterman delta) and A30-42 adds the error of R1's risk shares in experiment 1 (LM27 hands it to LM30).
 
 Rounding flags. Every number the brief prints passes through f(x, k1, k2, ...), which shows x with max(k) + 3 decimals
 and flags it "NEAR" for each printed precision k at which x lies within a tenth of a last-digit unit of a rounding
@@ -43,6 +50,8 @@ Prints one line per anchor, "A30-NN <value>", in ID order, and writes nothing.
 Run:  PYTHONUTF8=1 uv run python data/vol5_anchors_lm30.py
 """
 import sys
+from collections.abc import Callable
+from datetime import date
 from math import floor, sqrt
 from pathlib import Path
 
@@ -58,6 +67,7 @@ sys.path.insert(0, str(HERE))
 from lm10_series import u28
 from vol5_rules import (
     CLARABEL_OPTS,
+    ERC_OPTS,
     R2,
     RF,
     WINDOW,
@@ -74,18 +84,24 @@ from vol5_series import frames
 SEED = 20261011
 EPS = 1e-12
 ZERO = 1e-6
+NB = 20                     # batches for the batch SE of experiment 1's non-mean statistics
+CONE_OPTS = ERC_OPTS        # CLARABEL at 1e-10, the shared tolerance for cone programs
 Vec = NDArray[np.float64]
 Mat = NDArray[np.float64]
 
 OUT: list[str] = []
 NEAR: list[str] = []
+LATE: dict[int, str] = {}   # anchors computed early but printed in ID order at the end
 
 
-def put(value: str) -> None:
+def put(value: str, num: int | None = None) -> None:
     """One anchor line; values that f() found near a rounding boundary are listed at its end."""
     tail = f" [NEAR a rounding boundary: {'; '.join(NEAR)}]" if NEAR else ""
-    OUT.append(f"A30-{len(OUT) + 1:02d} {value}{tail}")
     NEAR.clear()
+    if num is None:
+        OUT.append(f"A30-{len(OUT) + 1:02d} {value}{tail}")
+    else:
+        LATE[num] = f"A30-{num:02d} {value}{tail}"
 
 
 def f(x: float, *ks: int, plus: bool = False) -> str:
@@ -162,6 +178,28 @@ def mean_se(v: Vec) -> tuple[float, float]:
     return float(v.mean()), float(v.std() / sqrt(len(v)))
 
 
+def batch_se(stat: Callable[[Mat], NDArray[np.float64] | float], data: Mat) -> Vec:
+    """SE of stat(data) from NB consecutive batches of the samples (rows): SD (divisor NB) over sqrt(NB)."""
+    vals = np.array([np.asarray(stat(chunk), dtype=np.float64) for chunk in np.array_split(data, NB)])
+    return np.atleast_1d(vals.std(axis=0) / sqrt(NB))
+
+
+def noise_split(x: Mat) -> tuple[Vec, float]:
+    """Each fund's share of the excess of Ledoit and Wolf's noise estimate over (18.4)'s value, entry by entry, by row;
+    and c_hat with (18.4)'s value in place of the noise estimate (the window's S as the truth)."""
+    T, n = x.shape
+    xc = x - x.mean(axis=0)
+    S = xc.T @ xc / T
+    noise = np.zeros((n, n))
+    for v in xc:
+        noise += (np.outer(v, v) - S) ** 2
+    noise /= T**2
+    normal = (S**2 + np.outer(np.diag(S), np.diag(S))) / T
+    ex = noise - normal
+    d2 = fro2(S - float(np.trace(S)) / n * np.eye(n))
+    return ex.sum(axis=1) / ex.sum(), 1 - min(float(normal.sum()), d2) / d2
+
+
 # ---------------------------------------------------------------- E5 and the through case
 fr = frames("E5")
 F5 = fr.funds
@@ -176,8 +214,10 @@ put(f"{len(sch)} signals, first {sch[0][0]} (trade {sch[0][1]}), last {sch[-1][0
 rows0 = sch[0][2]
 x0 = fr.X[rows0 - WINDOW:rows0]
 tau = WINDOW / A
-put(f"first window: {WINDOW} returns {fr.est_dates[rows0 - WINDOW]} .. {fr.est_dates[rows0 - 1]}; tau = T/A "
-    f"{f(tau, 2, 4)} years")                                                                             # 03
+d_first, d_last = fr.est_dates[rows0 - WINDOW], fr.est_dates[rows0 - 1]
+cal0 = (date.fromisoformat(d_last) - date.fromisoformat(d_first)).days / 365.25
+put(f"first window: {WINDOW} returns {d_first} .. {d_last}; tau = T/A {f(tau, 2, 4)} years; calendar years from "
+    f"its first to its last date {f(cal0, 2)} (as A28-02)")                                              # 03
 mu_d = x0.mean(axis=0)
 S_d = cov0(x0)
 mu_a, S_a = A * mu_d, A * S_d
@@ -202,8 +242,9 @@ sr_1n = sr_true(w1)
 w_mv = gmv(S_d)
 r3_first = minvar(S_a, "R3 first window")
 put(f"model = first window: w_tan {pct(w_tan, 1)}%; delta = 1'S^-1 e {f(delta_m, 2)}; SR* {f(sr_star, 2, 3)}; "
-    f"SR(1/N) {f(sr_1n, 2, 3)}; w_mv {pct(w_mv, 1)}%, sigma_min {f(100 * vol(w_mv, S_d, A), 2, 3)}%; long-only "
-    f"R3 equals w_mv to {np.abs(r3_first - w_mv).max():.1e}")                                            # 05
+    f"SR(1/N) {f(sr_1n, 2, 3)} (equal weights' mean {f(100 * A * float(w1 @ mu_d), 2)}% and volatility "
+    f"{f(100 * vol(w1, S_d, A), 2)}%, as A28-15); w_mv {pct(w_mv, 1)}%, sigma_min {f(100 * vol(w_mv, S_d, A), 2, 3)}%; "
+    f"long-only R3 equals w_mv to {np.abs(r3_first - w_mv).max():.1e}")                                 # 05
 se_mean = sd_a / sqrt(tau)
 nbelow = int((np.abs(mu_a) < se_mean - EPS).sum())
 rms_rel = sqrt((1 + float(np.trace(S_a)) ** 2 / fro2(S_a)) / WINDOW)
@@ -217,6 +258,7 @@ n1 = 10_000
 sr_b, sr_m, sr_s = np.empty(n1), np.empty(n1), np.empty(n1)
 fb_all, fs_all = np.empty((n1, N5)), np.empty((n1, N5))
 mv_true, mv_pred = np.empty(n1), np.empty(n1)
+rs_all = np.empty((n1, N5))
 for i in range(n1):
     r = mu_d + rng1.standard_normal((WINDOW, N5)) @ Lc.T
     Sh = cov0(r)
@@ -228,30 +270,44 @@ for i in range(n1):
     fb_all[i], fs_all[i] = fb, fs
     wm = gmv(Sh)
     mv_true[i], mv_pred[i] = vol(wm, S_d, A), vol(wm, Sh, A)
+    g1 = Sh @ w1
+    rs_all[i] = w1 * g1 / float(w1 @ g1)          # R1's risk shares w_i (S_hat w)_i / w'S_hat w, LM27's statistic
 mb, sb = mean_se(sr_b)
 mm, sm = mean_se(sr_m)
 ms, ss = mean_se(sr_s)
 p_lose = float((sr_b < sr_1n - EPS).mean())
+med_se = float(batch_se(lambda c: q50(c[:, 0]), sr_b[:, None])[0])
 put(f"experiment 1 ({n1} samples of {WINDOW} days): mean true SR, means and covariances estimated {f(mb, 2, 3, 4)} "
-    f"(SE {f(sb, 3, 4)}), means only {f(mm, 2, 3, 4)} (SE {f(sm, 4)}), covariances only {f(ms, 2, 3, 4)} (SE {ss:.1e}); "
-    f"P(SR < SR(1/N)) {f(p_lose, 2, 3)} (SE {f(sqrt(p_lose * (1 - p_lose) / n1), 3, 4)}); median SR (both) "
-    f"{f(q50(sr_b), 2)}")                                                                                # 07
+    f"(SE {f(sb, 3, 4)}), means only {f(mm, 2, 3, 4)} (SE {f(sm, 3, 4)}), covariances only {f(ms, 2, 3, 4)} (SE "
+    f"{ss:.1e}); P(SR < SR(1/N)) {f(p_lose, 2, 3)} (SE {f(sqrt(p_lose * (1 - p_lose) / n1), 3, 4)}); median SR "
+    f"(both) {f(q50(sr_b), 2)} (batch SE {f(med_se, 3)})")                                               # 07
 sd_b, sd_s = fb_all.std(axis=0), fs_all.std(axis=0)
-put(f"SD of plug-in exposures across samples: both {pct(sd_b, 1)} points; covariances only {pct(sd_s, 1)} points; "
-    f"ratio {f(float((sd_b / sd_s).min()), 1)} to {f(float((sd_b / sd_s).max()), 1)}")                  # 08
+both = np.hstack([fb_all, fs_all])
+se_sd = batch_se(lambda c: c.std(axis=0), both)
+ratio = sd_b / sd_s
+se_ratio = batch_se(lambda c: c[:, :N5].std(axis=0) / c[:, N5:].std(axis=0), both)
+put(f"SD of plug-in exposures across samples: both {pct(sd_b, 0)} points (batch SEs {pct(se_sd[:N5], 1)}); "
+    f"covariances only {pct(sd_s, 1)} points (batch SEs {pct(se_sd[N5:], 2)}); ratio {f(float(ratio.min()), 0)} "
+    f"({F5[int(np.argmin(ratio))]}, batch SE {f(float(se_ratio[int(np.argmin(ratio))]), 1)}) to "
+    f"{f(float(ratio.max()), 0)} ({F5[int(np.argmax(ratio))]}, batch SE {f(float(se_ratio[int(np.argmax(ratio))]), 1)})")  # 08
 nneg = int((fb_all.sum(axis=1) <= EPS).sum())
 put(f"samples with 1'f_hat <= 0 (normalized weights would flip sign): {nneg} of {n1} "
     f"({f(100 * nneg / n1, 1)}%)")                                                                       # 09
 put(f"plug-in minimum variance in the model: mean true vol {f(100 * mv_true.mean(), 2, 3)}% (SE "
-    f"{f(100 * mv_true.std() / sqrt(n1), 4)}), mean predicted {f(100 * mv_pred.mean(), 2, 3)}%, true minimum "
-    f"{f(100 * vol(w_mv, S_d, A), 2, 3)}%")                                                             # 10
+    f"{f(100 * mv_true.std() / sqrt(n1), 4)}), mean predicted {f(100 * mv_pred.mean(), 2, 3)}% (SE "
+    f"{f(100 * mv_pred.std() / sqrt(n1), 2, 3)}), true minimum {f(100 * vol(w_mv, S_d, A), 2, 3)}%")    # 10
+rs_true = w1 * (S_d @ w1) / float(w1 @ S_d @ w1)
+rs_sd = rs_all.std(axis=0)
+rs_se = batch_se(lambda c: c.std(axis=0), rs_all)
+put(f"experiment 1, R1's risk shares w_i (S w)_i / w'S w: true (the model's) {pct(rs_true, 1)}% (as A27-21); SD of "
+    f"the estimated shares across the {n1} samples {pct(rs_sd, 1)} points (batch SEs {pct(rs_se, 2)}); mean "
+    f"estimated {pct(rs_all.mean(axis=0), 1)}%", num=42)                                                # 42
 
 # experiment 2: how long a sample the plug-in needs
 rng2 = np.random.default_rng([2, SEED])
 n2 = 2_000
 grid2 = [126, 252, 504, 1008, 2016, 4032, 8064]
 rows2 = []
-cross = None
 for T in grid2:
     vb, vs = np.empty(n2), np.empty(n2)
     for i in range(n2):
@@ -260,22 +316,24 @@ for T in grid2:
         vb[i] = sr_true(np.linalg.solve(Sh, r.mean(axis=0) - RF / A))
         vs[i] = sr_true(np.linalg.solve(Sh, e_d))
     (b_, bse), (s_, sse) = mean_se(vb), mean_se(vs)
-    if cross is None and b_ >= sr_1n:
-        cross = T
-    rows2.append(f"T {T} ({f(T / A, 1, 2)} y): {f(b_, 2, 3)} (SE {f(bse, 3, 4)}), {f(s_, 3)} (SE {sse:.1e})")
-put(f"experiment 2 ({n2} samples per length), mean true SR, both estimated and covariances only: " + "; ".join(rows2)
-    + f"; first length with a mean at or above SR(1/N) {f(sr_1n, 3)}: T {cross}")                        # 11
+    rows2.append(f"T {T} ({f(T / A, 1, 2)} y): {f(b_, 2, 3)} (SE {f(bse, 3, 4)}; minus SR(1/N) "
+                 f"{f((b_ - sr_1n) / bse, 1, plus=True)} SE), {f(s_, 3)} (SE {sse:.1e})")
+put(f"experiment 2 ({n2} samples per length; years T/A with E5's A), mean true SR, both estimated and covariances "
+    f"only: " + "; ".join(rows2) + f"; SR(1/N) {f(sr_1n, 3)}")                                           # 11
 
 log: list[str] = []
 sigs = signals(fr, log)
-vols = {k: float(summary(fr, wealth_path(fr, sigs, k))["vol"]) for k in ("R1", "R3", "R5")}
+paths = {k: wealth_path(fr, sigs, k) for k in ("R1", "R3", "R5")}
+vols = {k: float(summary(fr, p)["vol"]) for k, p in paths.items()}
+pd1 = paths["R1"].dates
 stored = pl.read_parquet(HERE / "processed" / "vol5_rules.parquet")
 for k, v in vols.items():
     wv = stored.filter(pl.col("rule") == k).sort("date")["wealth"].to_numpy()
     rr = wv[1:] / wv[:-1] - 1
     assert abs(float(rr.std()) * sqrt(fr.A_wealth) - v) < 1e-12, k
 pred3 = np.array([vol(sg.targets["R3"], cov0(fr.X[r_ - WINDOW:r_]), A) for sg, (_, _, r_) in zip(sigs, sch, strict=True)])
-put(f"through case, realized volatility net of costs: R1 {f(100 * vols['R1'], 2, 4)}%, R3 {f(100 * vols['R3'], 2, 4)}%, "
+put(f"through case, realized volatility net of costs, daily returns {pd1[1]} .. {pd1[-1]} ({len(pd1) - 1} returns, "
+    f"the session after the first trade to the end): R1 {f(100 * vols['R1'], 2, 4)}%, R3 {f(100 * vols['R3'], 2, 4)}%, "
     f"R5 {f(100 * vols['R5'], 2, 4)}% (R5 - R3 {f(100 * (vols['R5'] - vols['R3']), 2, 3, 4)} points; equal to "
     f"vol5_rules.parquet); R3 predicted in its windows: mean {f(100 * pred3.mean(), 2)}%, "
     f"{f(100 * pred3.min(), 2)}% to {f(100 * pred3.max(), 2)}%")                                         # 12
@@ -283,11 +341,19 @@ put(f"through case, realized volatility net of costs: R1 {f(100 * vols['R1'], 2,
 lam0, d20, b20, ch0 = lw_by_hand(x0)
 ck0 = c_lw(x0)
 cov_ok = float(np.abs(shrunk(x0) - (ch0 * S_d + (1 - ch0) * lam0 * np.eye(N5))).max())
+gaps = []
+for xs in (x0, sqrt(A) * x0):                     # daily units and annual units (returns times sqrt(A))
+    sk = float(LedoitWolf(assume_centered=False).fit(xs).shrinkage_)
+    ch_x = lw_by_hand(xs)[3]
+    gaps += [abs(ch_x - (1 - sk)), abs(sk - (1 - ch_x))]
+share0, _ = noise_split(x0)
 put(f"Ledoit-Wolf on the first window, annual units: lam_bar {f(A * lam0, 4, 5)} (a volatility of "
     f"{f(100 * sqrt(A * lam0), 1)}%); |S - lam_bar I|_F^2 {A**2 * d20:.4e}; noise estimate {A**2 * b20:.4e}; "
-    f"c_hat {f(ch0, 3, 4)}; scikit-learn shrinkage_ {f(1 - ck0, 3, 4)} (|hand - sklearn| {abs(ch0 - ck0):.1e}, "
-    f"covariance_ to {cov_ok:.1e}); normal-model oracle c* {f(oracle_c(S_d, WINDOW), 3, 4)}; noise estimate / "
-    f"normal value {f(b20 / normal_noise(S_d, WINDOW), 2)}")                                            # 13
+    f"c_hat {f(ch0, 3, 4)}; scikit-learn shrinkage_ {f(1 - ck0, 3, 4)} (largest gap of c_hat to 1 - shrinkage_ "
+    f"and of shrinkage_ to 1 - c_hat, daily and annual units, {max(gaps):.1e}; covariance_ to {cov_ok:.1e}; c_hat "
+    f"daily against annual {abs(ck0 - c_lw(sqrt(A) * x0)):.1e}); normal-model oracle c* "
+    f"{f(oracle_c(S_d, WINDOW), 3, 4)}; noise estimate / normal value {f(b20 / normal_noise(S_d, WINDOW), 2)}; "
+    f"each fund's share of the excess over the normal value (entry by entry, by row) {pct(share0, 0)}%")  # 13
 cs = np.array([c_lw(fr.X[r_ - WINDOW:r_]) for _, _, r_ in sch])
 imin = int(np.argmin(cs))
 n_low = int((cs < 0.9 - EPS).sum())
@@ -299,9 +365,12 @@ xm = fr.X[sch[imin][2] - WINDOW:sch[imin][2]]
 k0 = kurtosis(x0, axis=0, fisher=False, bias=True)
 km = kurtosis(xm, axis=0, fisher=False, bias=True)
 _, _, bm, _ = lw_by_hand(xm)
+share_m, c_norm_m = noise_split(xm)
 put(f"raw kurtosis, first window {vec(k0, 1)}; window to {sch[imin][0]} ({fr.est_dates[sch[imin][2] - WINDOW]} "
     f".. {fr.est_dates[sch[imin][2] - 1]}) {vec(km, 1)}; there the noise estimate is "
-    f"{f(bm / normal_noise(cov0(xm), WINDOW), 1)} times the normal value")                               # 15
+    f"{f(bm / normal_noise(cov0(xm), WINDOW), 1)} times the normal value, each fund's share of the excess "
+    f"{pct(share_m, 0)}%, and c_hat with the normal value in place of the noise estimate would be "
+    f"{f(c_norm_m, 3)} (against {f(float(cs[imin]), 3)})")                                               # 15
 d35 = np.array([float(np.abs(sg.targets["R3"] - sg.targets["R5"]).max()) for sg in sigs])
 jm = int(np.argmax(d35))
 sdm = np.sqrt(np.diag(A * cov0(xm)))
@@ -324,7 +393,7 @@ ev1 = np.linalg.eigvalsh(S1)
 c1 = c_lw(X1)
 lam1 = float(np.trace(S1)) / NU
 evc = c1 * ev1 + (1 - c1) * lam1
-put(f"first half: annual eigenvalues lambda_1 {f(AU * ev1[-1], 4)}, lambda_28 {f(AU * ev1[0], 5)}, mean "
+put(f"first half: annual eigenvalues lambda_1 {f(AU * ev1[-1], 4)}, lambda_28 {f(AU * ev1[0], 4, 5)}, mean "
     f"{f(AU * lam1, 4)}; kappa {f(kappa(S1), 2)} (lm11.md: 126.05); c_hat {f(c1, 3, 4)}; kappa after shrinkage "
     f"{f(float(evc[-1] / evc[0]), 2)}; normal-model oracle c* {f(oracle_c(S1, H), 3, 4)}")                # 18
 w_s = gmv(S1)
@@ -362,13 +431,19 @@ for T in (20, 30, 60, 120, 250, 504, 2191):
     if rk == NU:
         ws = gmv(S)
         body = (f"kappa {f(ev[-1] / ev[0], 0, 1)} -> {f(kc, 1)}; sample predicted {f(100 * vol(ws, S, AU), 2)}%, "
-                f"realized {f(100 * vol(ws, S2, AU), 2)}%, gross {f(float(np.abs(ws).sum()), 2)}")
+                f"realized {f(100 * vol(ws, S2, AU), 1, 2)}%, gross {f(float(np.abs(ws).sum()), 2)}")
     else:
         wp = np.linalg.pinv(S) @ np.ones(NU)
         wp /= wp.sum()
-        body = (f"kappa (shrunk) {f(kc, 1)}; sample singular; pseudoinverse predicted {f(100 * vol(wp, S, AU), 2)}%, "
+        qn = np.linalg.eigh(S)[1][:, :NU - rk]       # an orthonormal basis of S's null space
+        p1 = qn @ (qn.T @ np.ones(NU))
+        w0 = p1 / p1.sum()
+        body = (f"kappa (shrunk) {f(kc, 1)}; sample singular: the part of 1 outside S's column space has "
+                f"{f(float(np.linalg.norm(p1)) / sqrt(NU), 3)} of 1's length, so w = P1 / 1'P1 is fully invested "
+                f"with predicted volatility {100 * vol(w0, S, AU):.1e}% (the minimum is 0, not unique); "
+                f"pseudoinverse (the minimum within the column space) predicted {f(100 * vol(wp, S, AU), 2)}%, "
                 f"realized {f(100 * vol(wp, S2, AU), 2)}%, gross {f(float(np.abs(wp).sum()), 2)}")
-    lines.append(f"{head}; {body}; shrunk realized {f(100 * vol(wl, S2, AU), 2)}%, gross "
+    lines.append(f"{head}; {body}; shrunk realized {f(100 * vol(wl, S2, AU), 1, 2)}%, gross "
                  f"{f(float(np.abs(wl).sum()), 2)}; best c in hindsight {cg[int(np.argmin(rvT))]:.2f} "
                  f"({f(100 * float(rvT.min()), 2)}%)")
 put(" | ".join(lines))                                                                                    # 20
@@ -392,9 +467,13 @@ for T in (20, 30, 60, 120, 250, 504, 2191):
             vo.append(vol(minvar(AU * S, "experiment 3"), S1, AU))
     part = [f"shrunk {f(100 * float(np.mean(vl)), 2)}% (SE {f(100 * float(np.std(vl)) / sqrt(n3), 2, 3)})"]
     if vs:
+        dlo = 100 * (np.array(vo) - np.array(vl))
         part.insert(0, f"sample {f(100 * float(np.mean(vs)), 2)}% (SE {f(100 * float(np.std(vs)) / sqrt(n3), 2, 3)})")
-        part.append(f"long-only {f(100 * float(np.mean(vo)), 2)}% (SE {f(100 * float(np.std(vo)) / sqrt(n3), 2, 3)})")
-    part.append(f"mean c_hat {f(float(np.mean(cc)), 3)}")
+        part.append(f"long-only {f(100 * float(np.mean(vo)), 2)}% (SE {f(100 * float(np.std(vo)) / sqrt(n3), 2, 3)}; "
+                    f"minus shrunk, paired, {f(float(dlo.mean()), 2, 3, plus=True)} points, SE "
+                    f"{f(float(dlo.std()) / sqrt(n3), 2, 3)})")
+    ccm, ccs = mean_se(np.array(cc))
+    part.append(f"mean c_hat {f(ccm, 3)} (SE {ccs:.1e})")
     rows3.append(f"T {T}: " + ", ".join(part))
 put(f"experiment 3 ({n3} samples per length), mean true volatility: " + "; ".join(rows3)
     + f"; true minimum {f(100 * vol(w_true, S1, AU), 2, 3)}%, 1/N {f(100 * vol(wN, S1, AU), 2, 3)}%")       # 21
@@ -436,7 +515,7 @@ mex = float(wref @ e_a)
 vref = float(wref @ S_a @ wref)
 dl = mex / vref
 e_eq = dl * S_a @ wref
-put(f"R2 on the first window: mean excess {f(100 * mex, 2)}%, volatility {f(100 * sqrt(vref), 2)}%, Sharpe "
+put(f"R2 on the first window: mean excess {f(100 * mex, 2, 3)}%, volatility {f(100 * sqrt(vref), 2, 3)}%, Sharpe "
     f"{f(mex / sqrt(vref), 2, 3)}; delta = mean excess / variance {f(dl, 2)}; e_eq = delta S w_ref "
     f"{pct(e_eq, 2)}%")                                                                                  # 24
 K = np.array([-1.0, 1.0, 0.0, 0.0, 0.0])
@@ -450,8 +529,8 @@ for c in (0.0, 0.25, 0.5, 0.75, 1.0):
     assert np.abs(fbl - (wref + K * c * (b - kq) / (dl * KSK))).max() < 1e-12
     bl.append(f"c {c:.2f}: {pct(fbl, 1)}% (sum {f(100 * float(fbl.sum()), 1)}%)")
 fp = np.linalg.solve(S_a, e_a) / dl
-put(f"view K = (-1, 1, 0, 0, 0): b = K e_hat {f(100 * b, 2)} points, K e_eq {f(100 * kq, 2)} points, "
-    f"sqrt(K S K') {f(100 * sqrt(KSK), 2)}%; c = T/(T + n0), n0 = {WINDOW} gives c 0.5; f_BL " + "; ".join(bl)
+put(f"view K = (-1, 1, 0, 0, 0): b = K e_hat {f(100 * b, 2, 3)} points, K e_eq {f(100 * kq, 2, 3)} points, "
+    f"sqrt(K S K') {f(100 * sqrt(KSK), 2, 3)}%; c = T/(T + n0), n0 = {WINDOW} gives c 0.5; f_BL " + "; ".join(bl)
     + f"; plug-in S^-1 e_hat / delta {pct(fp, 1)}% (sum {f(100 * float(fp.sum()), 1)}%)")                 # 25
 f_all = np.linalg.solve(S_a, 0.5 * e_a + 0.5 * e_eq) / dl
 put(f"all five window means as views, c 0.5: f {pct(f_all, 1)}% (sum {f(100 * float(f_all.sum()), 1)}%), the average "
@@ -470,9 +549,11 @@ for i in range(B4):
         fallback += 1
         wb = minvar(Sb, "experiment 4 fallback")
     Wb[i] = wb
-put(f"experiment 4 ({B4} iid bootstrap resamples of the first window): mean weights {pct(Wb.mean(axis=0), 1)}%, SDs "
-    f"{pct(Wb.std(axis=0), 1)} points; share of resamples with a zero weight {pct((Wb < ZERO).mean(axis=0), 0)}%; "
-    f"no fund above r_f in {fallback} (long-only minimum variance held)")                                 # 27
+pz = (Wb < ZERO).mean(axis=0)
+put(f"experiment 4 ({B4} iid bootstrap resamples of the first window): mean weights {pct(Wb.mean(axis=0), 0)}% (SEs "
+    f"{pct(Wb.std(axis=0) / sqrt(B4), 1)} points), SDs {pct(Wb.std(axis=0), 1)} points; share of resamples with a "
+    f"zero weight {pct(pz, 0)}% (SEs {pct(np.sqrt(pz * (1 - pz) / B4), 1)} points); no fund above r_f in {fallback} "
+    f"(long-only minimum variance held)")                                                                 # 27
 
 # ---------------------------------------------------------------- repairing LM10's C_pw
 Cp = np.array([[1.0, 0.982, 0.199], [0.982, 1.0, -0.444], [0.199, -0.444, 1.0]])
@@ -491,10 +572,16 @@ for it in range(100_000):                       # Higham's (2002b) alternating p
     dS = Xp - Rm
     Yn = Xp.copy()
     np.fill_diagonal(Yn, 1.0)
-    done = float(np.abs(Yn - Y).max()) < 1e-15
+    done = float(np.abs(Yn - Y).max()) < 1e-15   # the stopping rule tests the unit-diagonal iterate Y
     Y = Yn
     if done:
         break
+Xc = cp.Variable((3, 3), symmetric=True)        # second solver: min |X - C_pw|_F^2, X PSD, unit diagonal
+pc = cp.Problem(cp.Minimize(cp.sum_squares(Xc - Cp)), [Xc >> 0, cp.diag(Xc) == 1])
+pc.solve(solver=cp.CLARABEL, **CONE_OPTS)
+assert pc.status == "optimal", pc.status
+assert Xc.value is not None
+gap_ncm = float(np.abs(np.asarray(Xc.value, dtype=np.float64) - Y).max())
 off = [(0, 1), (0, 2), (1, 2)]
 
 
@@ -502,10 +589,12 @@ def offd(M: Mat) -> str:
     return "(" + ", ".join(f(M[i, j], 3) for i, j in off) + ")"
 
 
-put(f"C_pw from lm10.md's printed entries: eigenvalues ({', '.join(f(v, 3) for v in evp)}), det {f(np.linalg.det(Cp), 3)}; "
+put(f"C_pw from lm10.md's printed entries: eigenvalues ({', '.join(f(v, 3, 4) for v in evp)}), det {f(np.linalg.det(Cp), 3)}; "
     f"largest c keeping c C + (1-c) I PSD 1/(1 - lambda_3) {f(cmax, 3, 4)}, giving {offd(Csh)}; clipped and rescaled "
-    f"{offd(Ccl)}; nearest correlation matrix {offd(Y)} (smallest eigenvalue {np.linalg.eigvalsh(Y)[0]:.1e}, "
-    f"{it + 1} iterations); Frobenius distances to C_pw: shrunk {f(np.sqrt(fro2(Csh - Cp)), 3)}, clipped "
+    f"{offd(Ccl)}; nearest correlation matrix {offd(Y)} (smallest eigenvalue {np.linalg.eigvalsh(Y)[0]:.1e}, PSD "
+    f"to rounding; {it + 1} iterations until no entry of the unit-diagonal iterate moves by 1e-15; cvxpy CLARABEL "
+    f"{pc.status} at 1e-10 agrees to {gap_ncm:.1e}); Frobenius distances to C_pw: shrunk "
+    f"{f(np.sqrt(fro2(Csh - Cp)), 3)}, clipped "
     f"{f(np.sqrt(fro2(Ccl - Cp)), 3)}, nearest {f(np.sqrt(fro2(Y - Cp)), 3)}")                         # 28
 put(f"single-index matrix: {2 * NU + 1} parameters against {NU * (NU + 1) // 2}; kappa {f(kappa(SF), 1)}; residual "
     f"correlations of the first half: mean {f(float(np.corrcoef(res, rowvar=False)[np.triu_indices(NU, 1)].mean()), 3)}")  # 29
@@ -550,8 +639,6 @@ put(f"KC 2: doubling the years divides the SE of an annual mean by sqrt 2: 00646
     f"{f(100 * se_mean[1], 2)}")                                                                           # 39
 put(f"KC 4 (rho 0.9, c 0.5 toward I): eigenvalues 1.9 and 0.1 -> {f(0.5 * 1.9 + 0.5, 2)} and {f(0.5 * 0.1 + 0.5, 2)}; "
     f"kappa {f(1.9 / 0.1, 1)} -> {f((0.5 * 1.9 + 0.5) / (0.5 * 0.1 + 0.5), 2)}")                        # 40
-dl_alt = 0.5 / sqrt(vref)                   # hypothetical: R2's Sharpe ratio assumed to be 0.5
-f_alt = wref + K * (b - dl_alt / dl * kq) / (dl_alt * KSK)
-put(f"Open 3, hypothetical delta = 0.5 / R2 volatility {f(dl_alt, 2)}: K e_eq {f(100 * dl_alt / dl * kq, 2)} "
-    f"points; f_BL c 1.00 {pct(f_alt, 1)}% (sum {f(100 * float(f_alt.sum()), 1)}%)")                  # 41
-print("\n".join(OUT))
+put("withdrawn (it served Open question 3; decision D fixed delta = 9.74, and the brief prints no other delta)")  # 41
+assert len(OUT) == 41 and sorted(LATE) == [42]
+print("\n".join(OUT + [LATE[k] for k in sorted(LATE)]))
