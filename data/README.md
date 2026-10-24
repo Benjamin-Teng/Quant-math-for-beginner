@@ -182,6 +182,23 @@ the editor's exploration for the Volume II briefs (`processed/vol2_anchors.txt`)
   script skips the cross-check when the file is absent. `fetch_finmind.py --verify`, and so `./build.sh --data`,
   accepts the file missing (`OPTIONAL` in that script) but not changed. On a plan without this dataset, fetch with
   `--exclude vol4_settlement/`.
+- `vol5/` (Volumes V–VI, retrieved 2026-10-24): the through case's funds E5 (0050, 00646, 00679B, 00635U, 00642U)
+  and the checkpoint funds (0056, 00662, 00720B): `<id>__2016-12-01__2026-10-08.csv`, `TaiwanStockPrice` (Free),
+  columns `date,open,max,min,close,spread,volume` (`volume` is `Trading_Volume`); `<id>_dividends.csv` for 0050 and
+  0056 (filter `^息$`) and 00679B and 00720B (filter `^除息$`), `TaiwanStockDividendResult`; and
+  `splits__2016-12-01__2026-10-08.csv`, every event of `TaiwanStockSplitPrice` in the window (its `type` is empty for
+  00631L's 2026 split). `vol5_series.py` checks them (spreads, ex-dates within a tick, splits, copies, the Volume I
+  files) and builds E5's estimation and wealth frames.
+- `vol6/` (Volume VI, retrieved 2026-10-24): LM34's survivorship example — `delisting__2000-01-01__2026-10-08.csv`
+  (`TaiwanStockDelisting`, ids beginning with "00", 63 rows), the price files of 00672L, 00673R, 00674R and 00677U
+  (as `vol5/`; 00673R reverse-split on 2025-10-22, and 00674R prints a close of 0 on days without a trade) and two
+  one-day snapshots of every ETF, `etf_snapshot__2017-01-17.csv` and `etf_snapshot__2026-10-08.csv` (`TaiwanStockPrice`
+  without a `data_id`, which FinMind serves only above the Free plan: on a Free account fetch with
+  `--exclude vol6/etf_snapshot`, and LM34 skips the one number that needs them). LM35's replays — SPY, TLT, GLD, USO
+  and DBO (`USStockPrice`, `date,adj_close,close`, registered with `--adjusted adj_close`; USO's 1-for-8 reverse split
+  of 2020-04-28 is one of its registered "ex-dates"), `USD_TWD__2007-07-02__2026-10-08.csv` (`TaiwanExchangeRate`,
+  `spot_buy,spot_sell`, without FinMind's −1 rows) and 0050's 2007–2008 closes and distributions
+  (`0050__2007-07-02__2008-12-31.csv`, `0050_dividends__2007-07-02__2008-12-31.csv`, as Volume I's files).
 - `intraday/taiex5s/<year>/<date>.csv` and `intraday/tx1m/2025/<date>.csv` (Volume IV intraday, `fetch_intraday.py`,
   listed in `raw_intraday_manifest.json`, not in `raw_manifest.json`; the request log is
   `intraday/fetch_intraday.log`). Each file is one day exactly as returned: FinMind's columns in its order, every

@@ -318,7 +318,10 @@ fact a decision rests on is stated here with its evidence.
 What the spines need and the repository lacks (survey, its critic and the fresh check: `book.js` rendered in headless
 Chromium, `build/`, `data/`, `pyproject.toml`). **The owner approved every item on 2026-10-24:** (A); (B1)–(B4);
 (B5) with US proxies; (C1)–(C3); and option (i) for (D). Each piece is built by the editor and reviewed by a fresh
-agent (0 differences on the published pages) before any writer starts.
+agent (0 differences on the published pages) before any writer starts. On the same day the owner also approved DBO as a second oil proxy for
+  LM35 (00642U tracks an enhanced crude-oil index; in 2020 it lost 46.4% against USO's 60.7% and DBO's about 46%).
+  0050's own 2007–2008 closes and distributions extend an E5 fund's data for LM35's replay on "the funds that existed"
+  (B1's E5 data, registered the same way).
 
 - **(A) Packages: approved 2026-10-11; added 2026-10-24 (`40e1876`).** cvxpy 1.9.3 (Apache-2.0) and scikit-learn
   1.9.1 (BSD-3-Clause) with 10 more packages, about 78 MB unpacked, cp313 Windows wheels for all, no existing pin

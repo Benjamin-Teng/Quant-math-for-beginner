@@ -165,7 +165,8 @@ Volume VII results it uses.
   (`plans/vol-5.md`): the E5 data and the checkpoint funds registered with `fetch_finmind.py --add`;
   `data/vol5_series.py` (E5's estimation and wealth frames) and `data/vol5_rules.py` (the through case's eight rules,
   costs and wealth); delisted ETFs for LM34; US proxies (SPY, TLT, GLD, USO, USD/TWD) for LM35's 2008 and 2015
-  replays; stacked bars, scatter `curves` and a series-colour check in the chart kit; and the repair of back-adjusted
+  replays (and DBO, approved 2026-10-24 as a closer proxy for 00642U than USO; both are shown); stacked bars,
+  scatter `curves` and a series-colour check in the chart kit; and the repair of back-adjusted
   entries (option (i)): `fetch_finmind.py` verifies an entry marked as back-adjusted (LM3's QQQ) by its returns to a
   stated tolerance instead of byte for byte (after the review: day by day against the close, with each day's
   cent-rounding allowance, off the registered ex-dates; the manifest stores the ex-dates and the window's
