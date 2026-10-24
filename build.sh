@@ -58,6 +58,8 @@ DATA_STEPS=(
   data/lm24_numbers.py data/lm24_charts.py   # TR23 and U28's halves
   data/lm25_charts.py data/lm25_numbers.py   # TX23 and TR23
   data/lm26_charts.py data/lm26_numbers.py   # raw intraday statistics only when data/raw/intraday/ is present
+  data/vol5_series.py           # Volumes V-VI: E5 and the checkpoint funds, checked (needs TR23's calendar)
+  data/vol5_rules.py            # the through case: eight rules, costs and wealth on E5
 )
 # Raw FinMind data are not committed (licence): fetch them with your token and verify against data/raw_manifest.json.
 if [ "$FETCH" = 1 ]; then

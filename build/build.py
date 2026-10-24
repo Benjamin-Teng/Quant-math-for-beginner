@@ -415,6 +415,47 @@ def check_bands(cid, spec):
             raise SystemExit(f"chart {cid}: a log x axis needs every x (series, x.values, x.min, x.max, x.ticks, "
                              f"annotations) to be a number > 0; values that are not: {len(bad)}, the first {bad[0]!r} {src}")
 
+def check_curves_bars_colours(cid, spec):
+    """A scatter or vector chart's `curves` pair x and y point by point (null breaks a curve); a bar chart's series hold
+    one value per category (a number or null), and `stack` is true or false. book.js has colour tokens for four series
+    only (--series-1 .. 4): a fifth series without its own `color` would be drawn black (bars, points) or invisible
+    (lines), so every series after the fourth names one, except a quiet line, which is muted by default. A `color` is a
+    CSS string or a token digit 1-4."""
+    src = f"(src/data/{cid}.json)"
+    typ = spec.get("type", "line")
+    for i, cv in enumerate(spec.get("curves") or [], 1):
+        cv = cv if isinstance(cv, dict) else {}
+        x, y = cv.get("x"), cv.get("y")
+        if typ not in ("scatter", "vector"):
+            raise SystemExit(f"chart {cid}: curves are drawn by scatter and vector charts only {src}")
+        if not (isinstance(x, list) and isinstance(y, list) and len(x) == len(y) and len(x) >= 2):
+            raise SystemExit(f"chart {cid}: curve {i}: x and y must be arrays of the same length, at least 2 {src}")
+        if not all(v is None or _finite(v) for v in x + y):
+            raise SystemExit(f"chart {cid}: curve {i}: x and y hold numbers or null {src}")
+    if typ == "bar":
+        if "stack" in spec and not isinstance(spec["stack"], bool):
+            raise SystemExit(f"chart {cid}: stack must be true or false {src}")
+        nc = len(spec.get("categories") or [])
+        for i, sr in enumerate(spec.get("series") or [], 1):
+            vals = sr.get("values") if isinstance(sr, dict) else None
+            if not (isinstance(vals, list) and len(vals) == nc):
+                raise SystemExit(f"chart {cid}: bar series {i}: values must be an array with one entry per category {src}")
+            if not all(v is None or _finite(v) for v in vals):
+                raise SystemExit(f"chart {cid}: bar series {i}: values hold numbers or null {src}")
+    unseen = "drawn invisible" if typ == "line" else "drawn black"
+    for i, sr in enumerate(spec.get("series") or [], 1):
+        if not isinstance(sr, dict):
+            continue
+        col = sr.get("color")
+        if col is not None and (isinstance(col, bool) or not isinstance(col, (int, str))):
+            raise SystemExit(f"chart {cid}: series {i}: color must be a CSS string or a digit 1 to 4 {src}")
+        if isinstance(col, (int, str)) and re.fullmatch(r"\d+", str(col)) and not 1 <= int(col) <= 4:
+            raise SystemExit(f"chart {cid}: series {i}: color {col!r} names no colour token (1 to 4) {src}")
+        if i > 4 and not col and not (typ == "line" and sr.get("quiet")):
+            raise SystemExit(f"chart {cid}: series {i} needs a color: book.js colours four series only, and a "
+                             f"fifth without one is {unseen} (for example \"var(--muted)\"; a quiet line series is "
+                             f"muted by default) {src}")
+
 # Size limits in bytes of UTF-8: one inlined chart or widget JSON (the build fails) and one built page (it warns).
 # The largest published page was 1.5 MB in edition 0.4 (LM7).
 CHART_MAX_BYTES, PAGE_WARN_BYTES = 300_000, 2_000_000
@@ -426,7 +467,7 @@ def chart_blob(cid, spec):
     if not isinstance(spec.get("type", "line"), str) or spec.get("type", "line") not in CHART_TYPES:
         raise SystemExit(f"chart {cid}: unknown type {spec.get('type')!r}; use one of {', '.join(sorted(CHART_TYPES))} "
                          f"(src/data/{cid}.json)")
-    for key in ("series", "ann", "bands", "ellipses"):
+    for key in ("series", "ann", "bands", "ellipses", "curves"):
         if key in spec and not isinstance(spec[key], list):
             raise SystemExit(f"chart {cid}: {key} must be an array (src/data/{cid}.json)")
     for ax in ("x", "y"):
@@ -434,6 +475,7 @@ def chart_blob(cid, spec):
             raise SystemExit(f"chart {cid}: {ax}.ticks must be an array (src/data/{cid}.json)")
     check_ellipses(cid, spec)
     check_bands(cid, spec)
+    check_curves_bars_colours(cid, spec)
     for k in ("x", "y"):   # book.js pairs tickLabels with ticks by position: one missing label shifts every later one
         a = spec.get(k)
         if isinstance(a, dict) and "tickLabels" in a and not (

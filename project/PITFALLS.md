@@ -117,6 +117,19 @@ unless stated.
   close plus the spread. Rule: look for values repeated from another date or from another series on the same date,
   and for closes the spread contradicts on both sides; repair them from the 13:30:00 value of
   `TaiwanStockEvery5SecondsIndex`, registered as raw files; the series builder stops on anything it cannot explain.
+- **Back-adjusted prices change at every retrieval** (2026-10-24). FinMind rebuilds `USStockPrice`'s `Adj_Close`
+  (and `TaiwanStockPriceAdj`) backward from the latest day: each distribution rescales and re-rounds the whole column,
+  and even without one the factor jitters by about 1e-7 and flips a value sitting on a half cent. A re-fetch of
+  `QQQ__us_2022.csv` differed by one cent in two cells; the byte-for-byte check wrote it as `.new` and failed, and a
+  reader's `data/raw/` and every lab's data could not be built. A first repair compared four summary statistics of
+  the column's log returns with a fixed tolerance: a review found it rejected 97% of TQQQ's rescaled re-fetches (a
+  cent near 8 USD is 1.2e-3 in log terms) yet passed a 1% error in one cell. `fetch_finmind.py --adjusted` now checks
+  the adjusted column against the close day by day, with each day's own rounding allowance, off the registered
+  ex-dates. A re-rounding still moves LM3's printed numbers (the five-decimal exact rebalancing effect −0.31325 became
+  −0.31324; after a distribution the adjusted levels move too). Rule: register unadjusted prices plus distributions
+  where FinMind has them (the Taiwan funds); register an adjusted column with `--adjusted`, keeping its close; scale
+  any tolerance to the price level; and print a number computed from an adjusted column only to digits that a cent
+  per value cannot move, never quoting its levels without their retrieval date.
 
 ## 4. Build system and rendering
 

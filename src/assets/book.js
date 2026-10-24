@@ -476,6 +476,7 @@
     var cx = px * k + (r.left - wr.left), cy = py * k + (r.top - wr.top);
     var left = cx + 12; if (left + c.tip.offsetWidth > wr.width) left = cx - c.tip.offsetWidth - 12;
     var top = cy - c.tip.offsetHeight - 10; if (top < 0) top = cy + 14;
+    var mt = wr.height - c.tip.offsetHeight; if (top > mt) top = Math.max(0, mt);   // a tall tip below its point stays inside the box, which scrolls and would cut it
     c.tip.style.left = Math.max(0, left) + "px"; c.tip.style.top = top + "px";
   }
   function tipRow(col, name, val, sq) {
@@ -499,18 +500,31 @@
   }
 
   /* ---------------- bar chart ---------------- */
-  // spec: {type:'bar', alt, height, legend, categories:[text], valueLabels,
+  // spec: {type:'bar', alt, height, legend, categories:[text], valueLabels, stack,
   //        x:{label}, y:{fmt,tfmt,label,min,max,ticks},
   //        series:[{name,color,values:[],fmt}], ann:[{type:'hline',y,label}]}
   // Bars start at zero (up for positive values, down for negative ones); with several series the bars of one
-  // category stand side by side, never wider together than 78% of their slot. Category labels that do not fit tilt by
+  // category stand side by side, never wider together than 78% of their slot. With stack:true each category has one
+  // bar: its positive values stack upward from zero and its negative values downward, in series order; the value
+  // label and the tooltip give the category's total. Category labels that do not fit tilt by
   // 40 degrees; when even tilted ones would touch, every k-th is shown (the tooltip names every category).
   // Value labels are dropped when they would not fit under the bars.
   Book.barChart = function (host, spec) {
     var series = spec.series || [], cats = spec.categories || [], nc = cats.length, ns = series.length, ys = spec.y || {}, xs = spec.x || {};
     var c = begin(host, spec, series.map(function (s, i) { return { name: s.name, color: s.color || String(i + 1) }; }), "sq");
     var W = c.W, narrow = W < 460, yf = ys.tfmt || ys.fmt;
-    var vals = []; series.forEach(function (s) { s.values.forEach(function (v) { if (v != null && isFinite(v)) vals.push(v); }); });
+    var stack = !!spec.stack, nb = stack ? 1 : ns, ok = function (v) { return v != null && isFinite(v); };
+    var sums = cats.map(function (cat, i) {   // [positive sum, negative sum, total, values] of each category (stacked)
+      var p = 0, n = 0, k = 0;
+      series.forEach(function (s) { var v = s.values[i]; if (ok(v)) { k++; if (v >= 0) p += v; else n += v; } });
+      var t = p + n;
+      if (Math.abs(t) <= 1e-12 * (p - n)) t = 0;   // a category that cancels prints 0, not -0.0
+      return [p, n, t, k];
+    });
+    var totFmt = ys.fmt || (series[0] && series[0].fmt);   // the total's format: the axis's, else the first series'
+    var vals = [];
+    if (stack) sums.forEach(function (pn) { vals.push(pn[0], pn[1]); });
+    else series.forEach(function (s) { s.values.forEach(function (v) { if (ok(v)) vals.push(v); }); });
     var y0 = ys.min != null ? ys.min : Math.min(0, Math.min.apply(null, vals)), y1 = ys.max != null ? ys.max : Math.max(0, Math.max.apply(null, vals));
     if (!(y1 > y0)) y1 = y0 + 1;
     var room = (y1 - y0) * (spec.valueLabels ? 0.1 : 0.03);
@@ -545,14 +559,25 @@
     if (y0 < 0 && y1 > 0) el("line", { class: "zero", x1: m.l, x2: W - m.r, y1: Y(0), y2: Y(0) }, svg);
     el("line", { x1: m.l, x2: W - m.r, y1: H - m.b, y2: H - m.b }, ax);
     // bars
-    var per = slot * 0.78 / Math.max(1, ns), gap = ns > 1 && per >= 4 ? 2 : 0, bw = Math.min(64, per - gap), group = ns * (bw + gap) - gap;   // group <= 0.78 slot: neighbours never interleave
+    var per = slot * 0.78 / Math.max(1, nb), gap = nb > 1 && per >= 4 ? 2 : 0, bw = Math.min(64, per - gap), group = nb * (bw + gap) - gap;   // group <= 0.78 slot: neighbours never interleave
     var labStep = tilt ? Math.max(1, Math.ceil(12 / (slot * 0.643))) : 1;   // tilted by 40 degrees, labels sit slot*sin40 apart: show every k-th so that they are 12 px apart
     var bars = el("g", { class: "bars" }, svg); clipTo(svg, bars, m.l, m.t - 2, pw, ph + 4);
     var labels = [];
     cats.forEach(function (cat, i) {
       var cx = m.l + (i + 0.5) * slot;
-      series.forEach(function (s, k) {
-        var v = s.values[i]; if (v == null || !isFinite(v)) return;
+      if (stack) {
+        var up = 0, down = 0, bx0 = cx - bw / 2;
+        series.forEach(function (s, k) {
+          var v = s.values[i]; if (!ok(v) || v === 0) return;
+          var lo = v > 0 ? up : down + v, hi = v > 0 ? up + v : down;
+          if (v > 0) up = hi; else down = lo;
+          var top = Y(hi), h = Y(lo) - Y(hi);
+          if (h > 0) el("rect", { class: "bar", x: bx0, y: top, width: bw, height: h, style: "fill:" + color(s.color || String(k + 1)) }, bars);
+        });
+        var tot = sums[i][2];
+        if (sums[i][3]) labels.push({ x: cx, y: tot >= 0 ? Y(sums[i][0]) - 4 : Y(sums[i][1]) + 12, t: fmt(tot, totFmt) });
+      } else series.forEach(function (s, k) {
+        var v = s.values[i]; if (!ok(v)) return;
         var bx = cx - group / 2 + k * (bw + gap), top = Math.min(Y(v), base), h = Math.abs(Y(v) - base);
         if (h > 0) el("rect", { class: "bar", x: bx, y: top, width: bw, height: h, style: "fill:" + color(s.color || String(k + 1)) }, bars);
         labels.push({ x: bx + bw / 2, y: v >= 0 ? Y(v) - 4 : Y(v) + 12, t: fmt(v, s.fmt || ys.fmt) });
@@ -569,7 +594,7 @@
       if (a.label) txt(ag, W - m.r - 4, Y(a.y) - 5, a.label, null, "end");
     });
     if (spec.valueLabels && labels.length) {   // 10.5 px, else 9 px, else none: the longest label must fit one bar's pitch
-      var longest = maxLen(labels.map(function (l) { return l.t; })), pitch = ns > 1 ? bw + gap : slot * 0.9;
+      var longest = maxLen(labels.map(function (l) { return l.t; })), pitch = nb > 1 ? bw + gap : slot * 0.9;
       var fs = longest * 6.1 <= pitch ? 10.5 : longest * 5.2 <= pitch ? 9 : 0;
       if (fs) labels.forEach(function (l) { el("text", { class: "bv", x: l.x, y: l.y, "text-anchor": "middle", style: "font-size:" + fs + "px" }, svg).textContent = l.t; });
     }
@@ -581,10 +606,11 @@
       var show = function () {
         cross(i);
         var tops = [], rows = series.map(function (s, k) {
-          var v = s.values[i]; if (v == null || !isFinite(v)) return "";
-          tops.push(Y(v));
+          var v = s.values[i]; if (!ok(v)) return "";
+          tops.push(Y(stack ? sums[i][0] : v));
           return tipRow(s.color || String(k + 1), s.name, fmt(v, s.fmt || ys.fmt), true);
         }).join("");
+        if (stack && sums[i][3]) rows += tipRow("transparent", "Total", fmt(sums[i][2], totFmt), true);   // no swatch
         showTip(c, '<div class="hd">' + rich(cat) + "</div>" + rows, m.l + (i + 0.5) * slot, tops.length ? Math.min.apply(null, tops) : m.t);
       };
       hit.addEventListener("pointermove", show); hit.addEventListener("pointerdown", show);
@@ -686,6 +712,8 @@
   //        bands:[{x:[],lo:[],hi:[],color,opacity,name}],                         filled between lo and hi, under everything
   //        lines:[{from:[x,y],to:[x,y],extend,dash,color,width,label}],          straight lines; extend runs the line to the edges
   //        segments:[...same keys...],                                            dashed by default (projections)
+  //        curves:[{x:[],y:[],color,dash,width,label}],                           polylines, one path each (a dash runs along
+  //                                                                               the whole curve); null breaks the curve
   //        ellipses:[{center:[x,y],cov:[[a,b],[b,c]],scale,color,fill,axes,label}],   the contour x'S^-1 x = scale^2
   //        vectors:[{from:[0,0],to:[x,y],label,color,width,dash,dx,dy}],           arrows
   //        points:[{at:[x,y],label,color,r,dx,dy}]}                                single marked points
@@ -719,7 +747,7 @@
     var lines = (spec.lines || []).map(function (l) { return { l: l, dash: l.dash === true }; })
       .concat((spec.segments || []).map(function (l) { return { l: l, dash: l.dash !== false }; }));
     var ells = (spec.ellipses || []).map(function (e) { return { e: e, s: ellipseShape(e.center, e.cov, e.scale || 1) }; });
-    var bands = spec.bands || [], bop = function (b) { return b.opacity != null ? b.opacity : 0.18; };
+    var bands = spec.bands || [], bop = function (b) { return b.opacity != null ? b.opacity : 0.18; }, curves = spec.curves || [];
     var c = begin(host, spec, series.map(function (s, i) { return { name: s.name, color: s.color || String(i + 1) }; })
       .concat(bands.filter(function (b) { return b.name != null; })
         .map(function (b) { return { name: b.name, color: b.color || "var(--ink-2)", shape: "band", opacity: Math.min(1, 1.6 * bop(b)) }; })), "dot");
@@ -730,6 +758,7 @@
     vectors.forEach(function (v) { var f = v.from || [0, 0]; add(f[0], f[1]); add(v.to[0], v.to[1]); });
     pts.forEach(function (p) { add(p.at[0], p.at[1]); });
     lines.forEach(function (o) { add(o.l.from[0], o.l.from[1]); add(o.l.to[0], o.l.to[1]); });
+    curves.forEach(function (cv) { cv.x.forEach(function (v, i) { add(v, cv.y[i]); }); });
     ells.forEach(function (o) { add(o.e.center[0] - o.s.hx, o.e.center[1] - o.s.hy); add(o.e.center[0] + o.s.hx, o.e.center[1] + o.s.hy); });
     if (!bx.length) { bx = [-1, 1]; by = [-1, 1]; }
     var x0 = Math.min.apply(null, bx), x1 = Math.max.apply(null, bx), y0 = Math.min.apply(null, by), y1 = Math.max.apply(null, by);
@@ -863,6 +892,22 @@
         el("circle", { class: "pt", cx: X(xv), cy: Y(yv), r: r, style: "fill:" + col, "fill-opacity": n > 150 ? 0.75 : null }, svg);
         if (s.labels && s.labels[j]) tag(X(xv) + 7, Y(yv) - 7, s.labels[j], "start", {});
       });
+    });
+    // curves: one path per curve, so that a dash pattern runs along the whole curve; over the cloud of points (a
+    // frontier through simulated portfolios) and under the marked points and labels, in their own clipped group
+    var cg = curves.length ? el("g", { class: "geo" }, svg) : null;
+    if (cg) clipTo(svg, cg, m.l, m.t, pw, ph);
+    curves.forEach(function (cv) {
+      var col = color(cv.color || "var(--ink-2)"), d = "", pen = false, last = null;
+      cv.x.forEach(function (xv, j) {
+        var yv = cv.y[j];
+        if (xv == null || yv == null || !isFinite(xv) || !isFinite(yv)) { pen = false; return; }
+        d += (pen ? "L" : "M") + X(xv).toFixed(1) + "," + Y(yv).toFixed(1); pen = true;
+        if (inside(xv, yv) && (!last || xv >= last[0])) last = [xv, yv];
+      });
+      if (!d) return;
+      el("path", { class: "ln", d: d, style: "fill:none;stroke:" + col + (cv.dash ? ";stroke-dasharray:5 4" : "") + (cv.width ? ";stroke-width:" + cv.width : "") }, cg);
+      if (cv.label && last) tag(clamp(X(last[0]), m.l + 4, W - m.r - 4), clamp(Y(last[1]), m.t + 12, H - m.b - 4) - 5, cv.label, "end", cv);
     });
     pts.forEach(function (p) {
       if (!inside(p.at[0], p.at[1])) return;

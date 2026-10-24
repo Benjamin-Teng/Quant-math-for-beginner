@@ -160,4 +160,13 @@ Volume VII results it uses.
   significant figures and `n6`; shared JavaScript helpers (a seeded random-number generator, distribution functions,
   slider controls); and the TR23 data pipeline (`data/raw/vol3/`, `data/vol3_series.py`, the LM13–LM18 lab files).
   No new package.
-- **Volume V packages** (2026-10-11): approved. Add `cvxpy` and `scikit-learn` with `uv add` when Volume V starts.
+- **Volume V packages** (2026-10-11): approved. Added on 2026-10-24 (cvxpy 1.9.3, scikit-learn 1.9.1).
+- **Batch 4 capabilities** (2026-10-24): approved, every item of the editor's Stage 1 capability check
+  (`plans/vol-5.md`): the E5 data and the checkpoint funds registered with `fetch_finmind.py --add`;
+  `data/vol5_series.py` (E5's estimation and wealth frames) and `data/vol5_rules.py` (the through case's eight rules,
+  costs and wealth); delisted ETFs for LM34; US proxies (SPY, TLT, GLD, USO, USD/TWD) for LM35's 2008 and 2015
+  replays; stacked bars, scatter `curves` and a series-colour check in the chart kit; and the repair of back-adjusted
+  entries (option (i)): `fetch_finmind.py` verifies an entry marked as back-adjusted (LM3's QQQ) by its returns to a
+  stated tolerance instead of byte for byte (after the review: day by day against the close, with each day's
+  cent-rounding allowance, off the registered ex-dates; the manifest stores the ex-dates and the window's
+  distribution yield, never a price).

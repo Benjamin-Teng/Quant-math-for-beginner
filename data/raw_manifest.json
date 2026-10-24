@@ -581,7 +581,20 @@
     "date"
    ],
    "rows": 254,
-   "sha256": "1bafe4ae9d2cb709365a01d4504b1411d8f9743e13505339b821fefb9d00cbc3"
+   "sha256": "1bafe4ae9d2cb709365a01d4504b1411d8f9743e13505339b821fefb9d00cbc3",
+   "adjusted": {
+    "column": "adj_close",
+    "reference": "close",
+    "other_sha256": "e63acaab427921379d7568a2cc3f04a50d853e44a2798746265fc0a622774023",
+    "ex_dates": [
+     "2022-03-21",
+     "2022-06-21",
+     "2022-09-19",
+     "2022-12-19"
+    ],
+    "distributions": 0.007320468,
+    "k": 3
+   }
   },
   {
    "path": "TAIEX__2025-04-01__2025-10-31.csv",
@@ -627,7 +640,17 @@
     "date"
    ],
    "rows": 254,
-   "sha256": "c9607dac1e615487030e447de25e0b22a0a4e03b4b498e75101d64aa16c2af94"
+   "sha256": "c9607dac1e615487030e447de25e0b22a0a4e03b4b498e75101d64aa16c2af94",
+   "adjusted": {
+    "column": "adj_close",
+    "reference": "close",
+    "other_sha256": "193e7e7b6b01afecefda30eea20531bcc4c14ab212d16d5f8707ac92b88b06c5",
+    "ex_dates": [
+     "2022-12-22"
+    ],
+    "distributions": 0.005314527,
+    "k": 3
+   }
   },
   {
    "path": "TX__2025-04-01__2025-10-31.csv",
@@ -28205,6 +28228,390 @@
    ],
    "rows": 277,
    "sha256": "0d30d0d0ea8dc82197bc6f9bbfb09c635cafc4e5ba822b05b3263d22d4a1fce0"
+  },
+  {
+   "path": "vol5/0050__2016-12-01__2026-10-08.csv",
+   "dataset": "TaiwanStockPrice",
+   "data_id": "0050",
+   "start_date": "2016-12-01",
+   "end_date": "2026-10-08",
+   "columns": {
+    "date": "date",
+    "open": "open",
+    "max": "max",
+    "min": "min",
+    "close": "close",
+    "spread": "spread",
+    "volume": "Trading_Volume"
+   },
+   "kinds": {
+    "date": "date",
+    "open": "float",
+    "max": "float",
+    "min": "float",
+    "close": "float",
+    "spread": "float",
+    "volume": "int"
+   },
+   "filter": {},
+   "sort": [
+    "date"
+   ],
+   "rows": 2396,
+   "sha256": "eb681534cf201b3a11bf554bce914c574119eeebd3ba39251458909e32ee7056"
+  },
+  {
+   "path": "vol5/0050_dividends.csv",
+   "dataset": "TaiwanStockDividendResult",
+   "data_id": "0050",
+   "start_date": "2016-12-01",
+   "end_date": "2026-10-08",
+   "columns": {
+    "date": "date",
+    "before_price": "before_price",
+    "after_price": "after_price",
+    "cash_dividend": "stock_and_cache_dividend"
+   },
+   "kinds": {
+    "date": "date",
+    "before_price": "float",
+    "after_price": "float",
+    "cash_dividend": "float"
+   },
+   "filter": {
+    "stock_or_cache_dividend": "^息$"
+   },
+   "sort": [
+    "date"
+   ],
+   "rows": 20,
+   "sha256": "7f383393d159564fa16ac5393a22d98a98b35e826815fc77d0775a056a46adb2"
+  },
+  {
+   "path": "vol5/0056__2016-12-01__2026-10-08.csv",
+   "dataset": "TaiwanStockPrice",
+   "data_id": "0056",
+   "start_date": "2016-12-01",
+   "end_date": "2026-10-08",
+   "columns": {
+    "date": "date",
+    "open": "open",
+    "max": "max",
+    "min": "min",
+    "close": "close",
+    "spread": "spread",
+    "volume": "Trading_Volume"
+   },
+   "kinds": {
+    "date": "date",
+    "open": "float",
+    "max": "float",
+    "min": "float",
+    "close": "float",
+    "spread": "float",
+    "volume": "int"
+   },
+   "filter": {},
+   "sort": [
+    "date"
+   ],
+   "rows": 2401,
+   "sha256": "cdaf19114f4d3648d9bcb80cf436f2e7ec46d87b43ecc003cff9f5617edbb88e"
+  },
+  {
+   "path": "vol5/0056_dividends.csv",
+   "dataset": "TaiwanStockDividendResult",
+   "data_id": "0056",
+   "start_date": "2016-12-01",
+   "end_date": "2026-10-08",
+   "columns": {
+    "date": "date",
+    "before_price": "before_price",
+    "after_price": "after_price",
+    "cash_dividend": "stock_and_cache_dividend"
+   },
+   "kinds": {
+    "date": "date",
+    "before_price": "float",
+    "after_price": "float",
+    "cash_dividend": "float"
+   },
+   "filter": {
+    "stock_or_cache_dividend": "^息$"
+   },
+   "sort": [
+    "date"
+   ],
+   "rows": 19,
+   "sha256": "7221b20db7b3095506c2c3cb0174a3b77ea887dd99ecd1f38e0c240d8f3551dc"
+  },
+  {
+   "path": "vol5/00635U__2016-12-01__2026-10-08.csv",
+   "dataset": "TaiwanStockPrice",
+   "data_id": "00635U",
+   "start_date": "2016-12-01",
+   "end_date": "2026-10-08",
+   "columns": {
+    "date": "date",
+    "open": "open",
+    "max": "max",
+    "min": "min",
+    "close": "close",
+    "spread": "spread",
+    "volume": "Trading_Volume"
+   },
+   "kinds": {
+    "date": "date",
+    "open": "float",
+    "max": "float",
+    "min": "float",
+    "close": "float",
+    "spread": "float",
+    "volume": "int"
+   },
+   "filter": {},
+   "sort": [
+    "date"
+   ],
+   "rows": 2401,
+   "sha256": "4f86c0b6ee5ac734a3d97cbe617630384f2bd58b55e7f543bc22aa0fed7cd43d"
+  },
+  {
+   "path": "vol5/00642U__2016-12-01__2026-10-08.csv",
+   "dataset": "TaiwanStockPrice",
+   "data_id": "00642U",
+   "start_date": "2016-12-01",
+   "end_date": "2026-10-08",
+   "columns": {
+    "date": "date",
+    "open": "open",
+    "max": "max",
+    "min": "min",
+    "close": "close",
+    "spread": "spread",
+    "volume": "Trading_Volume"
+   },
+   "kinds": {
+    "date": "date",
+    "open": "float",
+    "max": "float",
+    "min": "float",
+    "close": "float",
+    "spread": "float",
+    "volume": "int"
+   },
+   "filter": {},
+   "sort": [
+    "date"
+   ],
+   "rows": 2401,
+   "sha256": "2c318c35ed95ba48b8aaf0976b7d2a83efc61d69920b2db5ca7287982159c5e6"
+  },
+  {
+   "path": "vol5/00646__2016-12-01__2026-10-08.csv",
+   "dataset": "TaiwanStockPrice",
+   "data_id": "00646",
+   "start_date": "2016-12-01",
+   "end_date": "2026-10-08",
+   "columns": {
+    "date": "date",
+    "open": "open",
+    "max": "max",
+    "min": "min",
+    "close": "close",
+    "spread": "spread",
+    "volume": "Trading_Volume"
+   },
+   "kinds": {
+    "date": "date",
+    "open": "float",
+    "max": "float",
+    "min": "float",
+    "close": "float",
+    "spread": "float",
+    "volume": "int"
+   },
+   "filter": {},
+   "sort": [
+    "date"
+   ],
+   "rows": 2401,
+   "sha256": "63bb1f2632f06c1af7d5d1fcf6dcba6887f9aced054738bf8dd2ca07b8543bc1"
+  },
+  {
+   "path": "vol5/00662__2016-12-01__2026-10-08.csv",
+   "dataset": "TaiwanStockPrice",
+   "data_id": "00662",
+   "start_date": "2016-12-01",
+   "end_date": "2026-10-08",
+   "columns": {
+    "date": "date",
+    "open": "open",
+    "max": "max",
+    "min": "min",
+    "close": "close",
+    "spread": "spread",
+    "volume": "Trading_Volume"
+   },
+   "kinds": {
+    "date": "date",
+    "open": "float",
+    "max": "float",
+    "min": "float",
+    "close": "float",
+    "spread": "float",
+    "volume": "int"
+   },
+   "filter": {},
+   "sort": [
+    "date"
+   ],
+   "rows": 2401,
+   "sha256": "b263faf169076889fbaf2c5be5faf117e88daf852b9e41fcee322af31963e93f"
+  },
+  {
+   "path": "vol5/00679B__2016-12-01__2026-10-08.csv",
+   "dataset": "TaiwanStockPrice",
+   "data_id": "00679B",
+   "start_date": "2016-12-01",
+   "end_date": "2026-10-08",
+   "columns": {
+    "date": "date",
+    "open": "open",
+    "max": "max",
+    "min": "min",
+    "close": "close",
+    "spread": "spread",
+    "volume": "Trading_Volume"
+   },
+   "kinds": {
+    "date": "date",
+    "open": "float",
+    "max": "float",
+    "min": "float",
+    "close": "float",
+    "spread": "float",
+    "volume": "int"
+   },
+   "filter": {},
+   "sort": [
+    "date"
+   ],
+   "rows": 2369,
+   "sha256": "3d6469da53f8ca1b6b929e7dd93bc960e37d568431f731e856cffbd187b54133"
+  },
+  {
+   "path": "vol5/00679B_dividends.csv",
+   "dataset": "TaiwanStockDividendResult",
+   "data_id": "00679B",
+   "start_date": "2016-12-01",
+   "end_date": "2026-10-08",
+   "columns": {
+    "date": "date",
+    "before_price": "before_price",
+    "after_price": "after_price",
+    "cash_dividend": "stock_and_cache_dividend"
+   },
+   "kinds": {
+    "date": "date",
+    "before_price": "float",
+    "after_price": "float",
+    "cash_dividend": "float"
+   },
+   "filter": {
+    "stock_or_cache_dividend": "^除息$"
+   },
+   "sort": [
+    "date"
+   ],
+   "rows": 37,
+   "sha256": "5b238f42e58a52dd9c458869aa0e18e860e6008bf4052cb1a9b2ea383f1f5f72"
+  },
+  {
+   "path": "vol5/00720B__2016-12-01__2026-10-08.csv",
+   "dataset": "TaiwanStockPrice",
+   "data_id": "00720B",
+   "start_date": "2016-12-01",
+   "end_date": "2026-10-08",
+   "columns": {
+    "date": "date",
+    "open": "open",
+    "max": "max",
+    "min": "min",
+    "close": "close",
+    "spread": "spread",
+    "volume": "Trading_Volume"
+   },
+   "kinds": {
+    "date": "date",
+    "open": "float",
+    "max": "float",
+    "min": "float",
+    "close": "float",
+    "spread": "float",
+    "volume": "int"
+   },
+   "filter": {},
+   "sort": [
+    "date"
+   ],
+   "rows": 2111,
+   "sha256": "e4111b637b9c1487329d26c0504453a0e12d7ade352aefa3dd6d01ec66d7b5f3"
+  },
+  {
+   "path": "vol5/00720B_dividends.csv",
+   "dataset": "TaiwanStockDividendResult",
+   "data_id": "00720B",
+   "start_date": "2016-12-01",
+   "end_date": "2026-10-08",
+   "columns": {
+    "date": "date",
+    "before_price": "before_price",
+    "after_price": "after_price",
+    "cash_dividend": "stock_and_cache_dividend"
+   },
+   "kinds": {
+    "date": "date",
+    "before_price": "float",
+    "after_price": "float",
+    "cash_dividend": "float"
+   },
+   "filter": {
+    "stock_or_cache_dividend": "^除息$"
+   },
+   "sort": [
+    "date"
+   ],
+   "rows": 32,
+   "sha256": "1d1710b21d28c81effbdba6e3202a12997b8f350eb0be3b49cd052c9e197f149"
+  },
+  {
+   "path": "vol5/splits__2016-12-01__2026-10-08.csv",
+   "dataset": "TaiwanStockSplitPrice",
+   "data_id": "",
+   "start_date": "2016-12-01",
+   "end_date": "2026-10-08",
+   "columns": {
+    "date": "date",
+    "stock_id": "stock_id",
+    "type": "type",
+    "before_price": "before_price",
+    "after_price": "after_price"
+   },
+   "kinds": {
+    "date": "date",
+    "stock_id": "str",
+    "type": "str",
+    "before_price": "float",
+    "after_price": "float"
+   },
+   "filter": {},
+   "sort": [
+    "date",
+    "stock_id"
+   ],
+   "rows": 35,
+   "sha256": "359758f863637c9054880e1cf7b1ab3903c880523f3d7b41a8debe78e75688a9"
   }
  ]
 }

@@ -158,8 +158,8 @@ note says why.
 | $A$ | periods per year used to annualize, e.g. $A=243.1$ trading sessions; always say which sample it comes from |
 | $T$, $t$, $\tau$, $n$ | either a sample size (number of returns) or a horizon or maturity in years: a module uses one of the two and says which; time index; time to maturity or expiry, or any span in years when $T$ is a count; number of compounding or payment periods |
 | $P$, $W$, $D$, $\mathrm{DD}$ | price; wealth; cash dividend ($D_1$ the next dividend); drawdown |
-| $f$, $f^*$, $c$ | exposure ÷ equity of a position ($f>1$ is leverage); its growth-maximizing (Kelly) value; $c:=f/f^*$, the fraction of full Kelly (LM25, without Kelly, writes $c$ for an AR intercept; in LM24, $c$ is the data's weight in a posterior, which is the Kelly fraction its Bayes bet takes) |
-| $L$ | a leveraged fund's fixed daily multiple (00631L: $L=2$); for a portfolio, total exposure $\sum_i f_i$; in a module without leverage, a Cholesky factor, declared (table below) |
+| $f$, $f^*$, $c$ | exposure ÷ equity of a position ($f>1$ is leverage); its growth-maximizing (Kelly) value; $c:=f/f^*$, the fraction of full Kelly (LM25, without Kelly, writes $c$ for an AR intercept; in LM24, $c$ is the data's weight in a posterior, which is the Kelly fraction its Bayes bet takes; LM30, without a Kelly fraction, writes $c$ for the data's weight in a shrunk covariance) |
+| $L$ | a leveraged fund's fixed daily multiple (00631L: $L=2$); for a portfolio, total exposure $\sum_i f_i$ (a gross limit on $\lVert\mathbf f\rVert_1$ is written as a number, not as $L$); in a module without leverage, a Cholesky factor, declared (table below) |
 | $p$, $q$, $b$, $a$ | binary bet: win probability, $q=1-p$, gain $b$ and loss $a$ per unit staked, so $f^*=p/a-q/b$. In futures pricing $q$ is instead the continuous dividend yield; a module uses one of the two. LM21, without bets, writes $p_i$ for p-values and $q$ for a false-discovery level; LM26's auxiliary regressions write their coefficients $a$, $b$ |
 | $r_f$ | risk-free or financing rate (state the compounding) |
 | $\mathrm{SR}$ | Sharpe ratio $(\mu-r_f)/\sigma$ of a return; say the period (per day, or annualized) |
@@ -167,7 +167,7 @@ note says why.
 | $\varphi$, $\Phi$ | standard normal density and distribution function |
 | $B_t$ | standard Brownian motion ($W$ stays wealth, so $dW_t=W_t(\mu\,dt+\sigma\,dB_t)$ reads unambiguously); a module without Brownian motion may use $B$ for a balance, or (LM18) the number of bootstrap resamples, declared in its notation note |
 | $y$, $i$, $v$, $k$, $\gamma$ | yield to maturity or IRR; periodic interest rate; discount factor $1/(1+i)$; required return; growth rate of dividends or cash flows (simple, per period) |
-| $\lambda$, $\nu$, $\mathcal L$ | multiplier of an equality constraint (with a subscript, $\lambda_k$ is an eigenvalue: table below); multipliers of inequality constraints (KKT), or in a module about distributions a Student $t$'s degrees of freedom, and in LM24 a chi-square law's (a module uses one of the two); Lagrangian. In a module about distributions without constraints, $\lambda$ is a Poisson mean or an exponential rate. Volume IV has no constraints: there $\mathcal L(\theta)$ is a likelihood, and LM26's $\lambda$ is the EWMA decay |
+| $\lambda$, $\nu$, $\mathcal L$ | multiplier of an equality constraint (with a subscript, $\lambda_k$ is an eigenvalue: table below); multipliers of inequality constraints (KKT), or in a module about distributions a Student $t$'s degrees of freedom, and in LM24 a chi-square law's (a module uses one of the two); Lagrangian. In a module about distributions without constraints, $\lambda$ is a Poisson mean or an exponential rate. Volume IV has no constraints: there $\mathcal L(\theta)$ is a likelihood, and LM26's $\lambda$ is the EWMA decay. From Volume V: LM30 writes its multipliers $\nu$ ($\lambda_k$ and $\bar\lambda$ are eigenvalues there); in LM31 $\lambda$ is only LM26's decay |
 | $h$, $u$; $\psi$ | generic functions in modules where $f$ or $g$ already have their book-wide meaning ($f$, $g$, $h$ are fine in purely mathematical modules; from Volume III $u$ is instead a probability level or a uniform draw, table below); constraint functions, $\psi(x)=b$ or $\psi_i(x)\le b_i$ (there $b$ is a constraint level, not a bet's gain: a module uses one of the two) |
 
 **Vectors and matrices** (from Volume II; LM7 already writes vectors, transposes and $\Sigma$ this way):
@@ -200,12 +200,12 @@ note says why.
 | $X$, $Y$, $Z$; $x$, $y$, $z$ | random variables and their values; $Z$ a standard normal; $R$ and $r$ are random returns. A module that writes random variables does not use the data matrix $X$ |
 | $\mathbf X$, $\mathbf Z$ | random vectors; $\mathbf Z$ a standard normal vector ($\mathbf z_t$ stays LM12's whitened data) |
 | $p_X$, $f_X$, $F_X$, $F_X^{-1}$; $\hat F$, $\hat F^{-1}$, $\E_{\hat F}$ (also $\Var_{\hat F}$, $\Pr_{\hat F}$, LM22) | pmf, density, distribution function and quantile function $F_X^{-1}(u):=\min\{x:F_X(x)\ge u\}$, always subscripted ($f$ is an exposure, $p$ a win probability); empirical distribution function of a sample, mass $1/T$ on each observation, its quantile function (order statistics) and expectation under it |
-| $u$, $U$ | a probability level in $F^{-1}(u)$; a value of a uniform random variable $U\sim\operatorname{Unif}(0,1)$ |
+| $u$, $U$ | a probability level in $F^{-1}(u)$ (from Volume VI also the tail probability of $\operatorname{VaR}_u$ and $\operatorname{ES}_u$); a value of a uniform random variable $U\sim\operatorname{Unif}(0,1)$ |
 | $\E$, $\Var$, $\Cov$, $\operatorname{Corr}$; $\operatorname{Skew}$, $\operatorname{Kurt}$ | expectation, variance, covariance, correlation (macros `\E`, `\Var`, `\Cov`); standardized third and fourth moments, excess kurtosis $\operatorname{Kurt}-3$ |
 | $\mu_X$, $\sigma_X$, $\sigma_{XY}$, $\rho_{XY}$ | moments of random variables; unsubscripted $\mu$, $\sigma$, $\rho$ stay the return's. A population correlation is $\rho$, a sample one $\hat\rho$ in a module with both |
 | $\bar R$, $s$; $\bar r$, $s_r$; $g$, $\sigma_r$ | sample mean and standard deviation of $R$ and of $r$ (divisor $T$; $s_{\mathrm u}$ divides by $T-1$); model mean log return per day $g=\E[\ln(1+R)]$ and its standard deviation |
 | $\mathcal N$, $\mathcal N_N$, $t_\nu$, $\chi^2_N$, $\operatorname{Bin}(n,p)$, $\operatorname{Poisson}(\lambda)$, $\operatorname{Exp}(\lambda)$ | distributions; "iid" independent and identically distributed |
-| $n$, $\bar X_n$, $S_n$; $m$ | number of independent draws or trials, their mean and sum ($T$ stays the number of returns in a data sample); number of days summed or compounded in a model, whole sessions ($m=\operatorname{round}(A\tau)$) |
+| $n$, $\bar X_n$, $S_n$; $m$ | number of independent draws or trials (from Volume VI also the number of strategies tried, LM33, LM34), their mean and sum ($T$ stays the number of returns in a data sample); number of days summed or compounded in a model, whole sessions ($m=\operatorname{round}(A\tau)$) |
 | $j$, $R_{(j)}$; $k$ | the value of a count in a pmf, the $j$th smallest return; a number of standard deviations, $k\ge0$, in a module without a required return; in Volume IV a lag (statistics table), and in LM20 the Hill estimator's tail count, declared |
 | $\eta$, $\zeta$ | constants in $\Var(\eta X+\zeta)$ (LM5's letters; $a$, $b$ are a bet's) |
 | $d^2$ | squared Mahalanobis distance $(\mathbf x-\boldsymbol\mu)^{\top}\Sigma^{-1}(\mathbf x-\boldsymbol\mu)$ |
@@ -221,19 +221,19 @@ note):
 | $\mathcal L(\theta)$, $\ell(\theta)$, $\mathcal I(\theta)$ | likelihood, log-likelihood $\ln\mathcal L$, Fisher information ($I$ stays the identity) |
 | $H_0$, $H_1$; $\text{t-stat}$ | null and alternative hypotheses; a t-statistic, upright, with its estimate when needed, $\text{t-stat}(\hat\beta)$ ($t$ stays the date index and $t_\nu$ the distribution); the Dickey–Fuller statistic is "the DF t-stat" |
 | $p_i$, $p_{(i)}$; $m$; $q$ | in LM21: the p-values of $m$ tests and their ordered values; the number of tests; the false-discovery level. Elsewhere "p-value" is written in words |
-| $\alpha$ | one meaning per module: a significance level (LM21, LM22); a regression intercept and Jensen's alpha (LM23); a GARCH coefficient (LM26); a tail index (LM15, LM20). A module whose $\alpha$ is not the level writes the level as a percentage ("the 5% level") |
+| $\alpha$ | one meaning per module: a significance level (LM21, LM22); a regression intercept and Jensen's alpha (LM23); a GARCH coefficient (LM26); a tail index (LM15, LM20). A module whose $\alpha$ is not the level writes the level as a percentage ("the 5% level"). From Volume V: a VaR level or a shrinkage intensity is never $\alpha$; LM32's $\alpha$ is the tail index, LM33's the significance level |
 | $\beta$, $\hat{\boldsymbol\beta}$; $\alpha_0$, $\beta_0$ | regression or cointegrating coefficients (LM23, LM25), a GARCH coefficient (LM26); the parameters of a $\operatorname{Beta}(\alpha_0,\beta_0)$ prior (LM24) |
 | $\mu_0$, $\sigma_0$ | prior mean and standard deviation of a mean parameter (LM24); a parameter's density is an $f$ with a subscript |
 | $\varepsilon_t$, $\hat\varepsilon_t$; $\eta_t$; $\xi_t$ | a regression's error and residual (LM23), LM26's innovation $\varepsilon_t=\sigma_t\xi_t$; white noise of an AR or MA model (LM25); an iid standardized innovation, mean 0, variance 1, normal or scaled Student $t$ (LM26; $Z$ stays a standard normal) |
 | $X$, $d$ | LM23's $T\times d$ design matrix, first column $\mathbf 1$, and its number of coefficients (LM23 writes no random variable $X$) |
 | $\rho_k$, $\hat\rho_k$, $\gamma_k$, $\hat\gamma_k$ | autocorrelation and autocovariance at lag $k$, model and sample; $\hat\rho_k$ uses the full-sample mean and divisor $T$ in numerator and denominator (LM19). $\gamma$ without a lag keeps its meaning above |
 | $\operatorname{VR}(m)$ | variance ratio: the variance of overlapping $m$-day log-return sums, centred at $m\bar r$, over $m$ times the daily variance (LM19's (19.8); LM22, LM25; LM26 writes (19.7)'s ratio without the symbol) |
-| $\phi_j$, $\theta_j$; $\delta$ | AR and MA coefficients, always subscripted ($\phi_1$ even in an AR(1); $\varphi$ stays the normal density); the Dickey–Fuller coefficient $\delta=\phi_1-1$ (LM25) |
+| $\phi_j$, $\theta_j$; $\delta$ | AR and MA coefficients, always subscripted ($\phi_1$ even in an AR(1); $\varphi$ stays the normal density); the Dickey–Fuller coefficient $\delta=\phi_1-1$ (LM25); from Volume V, $\delta$ is risk aversion (LM28, LM30) |
 | $F_t$, $S_t$ | TX settlement price and TAIEX close (LM23 in E6's contract count, $200F_t$ a contract; LM25; LM6 writes $F$, $S$; $F_X$ keeps its subscript) |
 | $b_t$, $a_j$, $u_t$, $\zeta_t$, $K$; $h_t$; $u_i$, $h$ | LM25's log basis, ADF lag coefficients, one-day white noise, the persistent part's innovation and the Ljung–Box lag count; LM23's hat values; LM26's intraday noise and sampling interval (and its lag count $K$) — local, declared; each displaces a book-wide meaning its module does not use ($b$, $a$ a bet's; $u$ a probability level; $\zeta$ LM5's constant; $K$ a second matrix; $h$ a generic function) |
 | $\sigma_t^2$, $\sigma^2_{t+1\mid t}$ | conditional variance of day $t$; its forecast made on day $t$ (LM26) |
 | $\mathrm{RV}_t$ | realized variance of day $t$, the sum of squared intraday log returns at a stated interval (LM26; the table's $\mathrm{RV}$ is the same idea on simple returns) |
-| $B$, $\ell$ | number of bootstrap resamples; block length or mean block length (LM22), Newey–West lag (LM23); neither module writes a likelihood |
+| $B$, $\ell$ | number of bootstrap resamples; block length or mean block length (LM22, LM32), Newey–West lag (LM23); none of these modules writes a likelihood (LM33, with both a lag and a block length, declares two letters) |
 | $\hat f$, $\hat f^*$, $f_{\mathrm B}$ | $\bar R/s^2$, the plug-in Kelly fraction (from LM20); the exact in-sample root of (4.5) (LM22, LM24); LM24's Bayes fraction, $f_{\mathrm B}=c\hat f$ |
 | $\operatorname{med}$ | a sample median, $\hat F^{-1}(\tfrac12)$, upright (LM19); a tilde means centred ($\tilde X$, $\tilde r_t$) |
 
@@ -241,6 +241,31 @@ Words with one meaning each: "unconditional variance" is GARCH's $\omega/(1-\alp
 variance" the HAC target (LM23); "leverage" is $f>1$ (a regression point's influence is its hat value, LM23; LM26 quotes Hansen and Lunde's
 "leverage effect" as their term). Not used: $R^2$ for R-squared, a star for a bootstrap draw ($\bar R_{\text{boot}}$),
 $L$ for a lag operator (write $x_{t-1}$), $\tau$ for a Dickey–Fuller statistic, $Z_t$ for a non-normal innovation.
+
+**Portfolios, risk and backtests** (from Volumes V and VI, `plans/vol-5.md`; one meaning per module, declared in its
+notation note):
+
+| Symbol | Book-wide meaning |
+|:--|:--|
+| $\mathbf e$ | excess returns $\boldsymbol\mu-r_f\mathbf 1$ (LM7); LM27–LM31 write no basis vector $\mathbf e_i$ |
+| $\mu_p$; $\mathbf w_{t-1}$, $\mathbf w^{\mathrm{drift}}_t$ | portfolio mean; weights set at the previous close; weights after a period's returns, before trading |
+| $\lVert\mathbf x\rVert_1$ | the 1-norm $\sum_i\lvert x_i\rvert$; gross exposure $\lVert\mathbf f\rVert_1$ (LM8) |
+| $\mathbf w^{\mathrm{mv}}$, $\sigma^2_{\min}$, $\mathbf w^{\mathrm{tan}}$, $\mathrm{SR}^*$ | minimum-variance weights and variance; tangency weights; the best Sharpe ratio |
+| $K$, $\mathbf b$ | constraint matrix and right-hand side, $K\mathbf w=\mathbf b$ (LM28, LM29); in LM31 $\mathbf b$ is the risk budgets, and LM31 writes its constraints out |
+| $\beta_{i,p}$ | an asset's beta to its portfolio, $\operatorname{Cov}(R_i,R_p)/\sigma_p^2$ (LM27; $\beta_i$ stays a market beta) |
+| $\mathrm{MRC}_i$, $\mathrm{RC}_i$ | marginal and component risk contributions, $\mathrm{RC}_i=w_i(\Sigma\mathbf w)_i/\sigma_p$, $\sum_i\mathrm{RC}_i=\sigma_p$ (Euler) |
+| $\mathrm{TO}_t$; $\text{tax}_i$ | one-way turnover $\tfrac12\lVert\mathbf w_t-\mathbf w^{\mathrm{drift}}_t\rVert_1$; a fund's tax rate on sales (upright word); there is no scalar cost symbol |
+| $\hat\Sigma_{\mathrm{tgt}}$, $\hat\Sigma_c$ | a shrinkage target; the shrunk matrix $c\hat\Sigma+(1-c)\hat\Sigma_{\mathrm{tgt}}$ (LM30) |
+| $n_0$, $\mathbf w_{\mathrm{ref}}$, $\mathbf e_{\mathrm{eq}}$, $\Xi$ | Black–Litterman (LM30): the prior's worth in observations (LM24's $n_0$; the literature's $\tau=1/n_0$), reference weights, implied excess returns $\delta\Sigma\mathbf w_{\mathrm{ref}}$, view-error covariance; views $K\mathbf e=\mathbf b+\boldsymbol\varepsilon$ |
+| $d_{ij}$ | HRP's correlation distance $\sqrt{(1-\rho_{ij})/2}$ (LM31), half of LM8's per-date distance $\sqrt{2(1-\rho)}$ |
+| $\sigma_{\mathrm{tgt}}$, $\bar\sigma_t$, $\hat\sigma_{t+1\mid t}$ | a volatility target; a window's volatility; an EWMA forecast (LM26) |
+| $\operatorname{VaR}_u$, $\operatorname{ES}_u$ | value at risk $-F_{R_p}^{-1}(u)$ and expected shortfall over $m$ days, positive for a loss; "99% VaR" is $u=0.01$ |
+| $\mathrm{MDD}$, $\mathrm{DD}^0_t$ | maximum drawdown $\max_t\mathrm{DD}_t$; the loss from initial wealth $\max(0,1-W_t/W_0)$. An underwater chart plots $-\mathrm{DD}_t$ and says so |
+| $\widehat{\mathrm{SR}}$, $\mathrm{SR}_0$; PSR, DSR, MinTRL, PBO | an estimated Sharpe ratio; a benchmark ratio (no star); upright abbreviations (LM33, LM34) |
+| $\mathbf R^{\mathrm{sc}}$ | a stress scenario's return vector; P&L $W_0\mathbf f^{\top}\mathbf R^{\mathrm{sc}}$ (LM35) |
+
+Not used in Volumes V–VI: Merton's scalars $a,b,c,d$ for the frontier, $\gamma$ or $\lambda$ for risk aversion,
+$P$, $Q$, $\Omega$, $\tau$ for Black–Litterman, $\kappa$ for a VaR threshold.
 
 - Subscripted standard symbols are distinct symbols and may sit beside the table: $D_{\text{mod}}$, $D_{\text{Mac}}$,
   $D_{\mathrm{KL}}$, $a_{n,i}$, $s_{n,i}$, $T_1(x)$.
@@ -284,8 +309,11 @@ $L$ for a lag operator (write $x_{t-1}$), $\tau$ for a Dickey–Fuller statistic
   Format codes: `pct0..pct3`, `bp`, `x0..x2` (multiples), `n0..n6`, `sci0..sci3` (scientific, "2.00e−5") and
   `sig2..sig4` (significant figures with trailing zeros kept, "1.20"; scientific outside 1e−4 to 1e6). The sig codes are
   for tooltips and readouts: an axis ticks with an n or sci `tfmt` (a narrow sci axis can show a single tick: use
-  more digits). At most four named series; legend is
-  automatic.
+  more digits). At most four series in the book's colours, with the legend automatic; more only as below. The colour
+  tokens cover four series (`--series-1` to `--series-4`, or `"color": "1"` to `"4"`): from
+  Volume V `build.py` refuses a fifth or later series without its own `color` (a line would be invisible, a bar or
+  point black) except a `quiet` line, which is muted by default, and refuses a digit outside 1–4. A fifth series
+  takes an explicit colour such as `"var(--muted)"` and is named in the caption.
   From Volume III, series options: `step: true` draws a post-step line (`y[i]` holds from `x[i]` to `x[i+1]`), for
   histograms on bin edges and distribution functions; a series with `lo` and `hi` arrays instead of `y` is a band, the
   filled region between them (with a legend entry; `build.py` refuses lengths that differ from `x`); `quiet: true` is
@@ -306,7 +334,11 @@ $L$ for a lag operator (write $x_{t-1}$), $\tau$ for a Dickey–Fuller statistic
     `series: [{name, color, values, fmt}]`, `ann: [{"type": "hline", y, label}]`. Bars start at zero, several series
     stand side by side. Category labels that do not fit tilt by 40 degrees (long ones are cut with an ellipsis); with
     very many categories only every k-th is labelled, and the tooltip names every one. Value labels drop out when they
-    would not fit. Keep to about 30 categories on screen.
+    would not fit. Keep to about 30 categories on screen. From Volume V: `stack: true` draws one bar per category,
+    positive values stacked upward from zero and negative ones downward in series order (risk contributions, loss
+    attribution); the value label and the tooltip give the category's total (in `y.fmt`, else the first series'
+    `fmt`; a category with no value has neither). `build.py` refuses a series without one value per category and a
+    value that is not a number or null.
   - `"heatmap"`: `labels` (rows and columns alike) or `rows` and `cols`; `matrix` (one array per row; `null` is a
     blank cell); `fmt` (cell text, default `n2`), `min` and `max` (default -1 and 1), `scale: false` to hide the colour
     bar, `scaleFmt`, `valueName` (tooltip). The scale is diverging and centred at 0 (series 1 above, series 2 below).
@@ -329,6 +361,14 @@ $L$ for a lag operator (write $x_{t-1}$), $\tau$ for a Dickey–Fuller statistic
     `ticks`; `null` keeps the number) replaces the tick text on either axis. Long $y$ labels widen the left margin
     up to 40% of the chart's width and are cut with an ellipsis beyond that (about 20 characters on a phone); the
     tooltip of a point on a labelled $y$ tick prints the whole label.
+    From Volume V: `curves: [{x, y, color, dash, width, label}]` draws each curve as one polyline (a frontier, a
+    capital market line through a cloud of portfolios), so a dash runs along the whole curve, which a chain of
+    `lines` cannot do. Curves count in the axis range and are drawn over the series' points and under the marked
+    `points` and the labels; `null` breaks a curve; the label sits at the curve's point with the largest $x$ inside
+    the plot (a curve with no point inside has none). Curves have no legend entry and no tooltip: name them in the
+    caption or with `label`. `build.py` refuses curves outside scatter and vector charts, `x` and `y` of different
+    lengths or with fewer than two points, and values that are not numbers or null. A dendrogram is drawn with
+    `lines` (three per merge) and labelled $y$ ticks.
 - Series names, categories and labels may mark `a_1` and `x_{ij}` as subscripts and `A^T` and `x^{2}` as superscripts:
   in legends and tooltips of every chart type, in the text drawn on bar, heatmap, scatter and vector charts, and in
   line-chart end labels (not in a line chart's axis titles or annotations). A `^` or `_` followed by anything but a

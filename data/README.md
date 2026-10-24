@@ -10,13 +10,14 @@ repository. [`raw_manifest.json`](raw_manifest.json) records, for every raw file
 
 ```bash
 export FINMIND_TOKEN=...            # your FinMind API token
-uv run python data/fetch_finmind.py       # rebuild data/raw/ and verify every file byte for byte (or ./build.sh --fetch)
+uv run python data/fetch_finmind.py       # rebuild data/raw/ and verify every file (or ./build.sh --fetch)
 uv run python data/make_lab_data.py       # build labs/LMNN_lab/data/ from data/raw/ (sectors_close/ optional)
 uv run python data/fetch_finmind.py --verify   # later: confirm local files still match, no network
 ```
 
-If FinMind has revised a series, the fetched file is written as `<name>.new` and the script stops, so the book's
-numbers never change silently. New raw files are registered with `fetch_finmind.py --add` (see its `--help`).
+Every file must match the manifest byte for byte (a back-adjusted entry: within its rounding tolerance, and listed
+at the end of the run). If FinMind has revised a series, the fetched file is written as `<name>.new` and the script
+stops, so the book's numbers never change silently. New raw files are registered with `fetch_finmind.py --add` (see its `--help`).
 
 Volume IV's intraday series are served one request per day, so they have their own script and manifest,
 [`raw_intraday_manifest.json`](raw_intraday_manifest.json) (one entry per day: dataset, `data_id`, date, rows, SHA-256,
@@ -109,7 +110,7 @@ All files are exactly as returned by FinMind (retrieved 2026-10-10), in the wind
 - `TAIEX__2025-04-01__2025-10-31.csv`: TAIEX daily closes (146 rows).
 - `TX__2025-04-01__2025-10-31.csv`: `TaiwanFuturesDaily` for TX, regular session only, every listed contract month (876 rows). On its last trading day the expiring contract's `settlement_price` prints 0.0. The final settlement price is not in this field, and the day's `close` is not it either: for the TX contracts of 200901 → 202609 in TAIFEX's file the two agree on 105 of 189 and differ by up to 4 points (`vol4_settlement/` holds TAIFEX's published final settlement prices). On days a contract does not trade, `close` and `volume` print 0 while `settlement_price` is set by the exchange.
 - `lm06/`: for LM6, TAIEX closes (`TaiwanStockPrice`) for 2024-12-31 → 2025-03-31 and 2025-11-03 → 2025-12-31, which with the main TAIEX file cover calendar 2025; the TWSE total-return index (`TaiwanStockTotalReturnIndex`, columns `date,stock_id,price`) for the same three windows; TAIEX open, high (`max`), low (`min`), close and spread for 2025-06-26 → 2025-07-01. `lm06_basis.py` checks that every close satisfies the spread rule across the chunks, that both indices share their dates, and that the total-return index never falls behind the price index except by rounding (it gains only on ex-dividend days).
-- `QQQ__us_2022.csv`, `TQQQ__us_2022.csv`: `date,adj_close,close` from `USStockPrice`. Adjusted closes depend on the retrieval date; returns within the window do not.
+- `QQQ__us_2022.csv`, `TQQQ__us_2022.csv`: `date,adj_close,close` from `USStockPrice`. Adjusted closes depend on the retrieval date (FinMind rebuilds them backward from the latest day); returns within the window move only by cent rounding. Both entries are registered with `--adjusted adj_close`: `date` and `close` must match exactly, and `adj_close` must follow `close` within each day's cent-rounding allowance except on the registered ex-dates, with the window's distribution yield unchanged (`fetch_finmind.py`).
 - `sectors/` (Volume II, retrieved 2026-10-11): `date,close,spread` from `TaiwanStockPrice` for TAIEX and the 30 TWSE
   sector indices (`data_id` = the index id, e.g. `Semiconductor`), 2007-07-02 → 2026-10-08, in 13 windows of 18
   months per series (`<ID>__<start>__<end>.csv`, at most 378 rows each; 403 files). Every file passed `check_chunk.py`

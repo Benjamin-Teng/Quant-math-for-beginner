@@ -68,6 +68,17 @@ LM32–LM35 (Measuring True Risk and Return); the two can be written in parallel
 
 - [ ] Stage 1: survey, spines and shared decisions (`plans/vol-5.md`, `plans/vol-6.md`), capability check (owner),
   data, briefs and anchors (`plans/vol-5-anchors.md`, `plans/vol-6-anchors.md`), a fresh check of the whole.
+  - [x] Survey (eight surveyors and a critic, 2026-10-24); spines and shared decisions in `plans/vol-5.md`, revised
+    after a fresh adversarial check; `ROADMAP.md` and `reviews/REVIEW_PROMPT.md` (item 10) amended.
+  - [x] Capability check: every item approved by the owner on 2026-10-24 (`plans/vol-5.md`, ROADMAP "Decided by
+    the owner"). Built and reviewed by fresh agents: cvxpy and scikit-learn (`40e1876`); `fetch_finmind.py
+    --adjusted` (LM3's QQQ defect; re-reviewed after a failed first design); the E5 and checkpoint raw files
+    (`data/raw/vol5/`); `data/vol5_series.py` and `data/vol5_rules.py` (independently recomputed: every target,
+    wealth path and criterion); the chart kit's stacked bars, curves and colour check (published pages pixel- and
+    byte-identical); AUTHORING §6 (portfolio notation) and §7.
+  - [ ] US proxies for LM35 (capability B5), delisted ETFs for LM34 (B4): registered when those briefs name them.
+  - [ ] Briefs LM27–LM35 and their anchor scripts; cross-check; independent recomputation of the anchors; editor's
+    decisions; revisions; SOURCES and 樂詞網 entries; a fresh check of the whole of Stage 1.
 - [ ] Stage 2: drafts of LM27–LM35.
 - [ ] Stage 3: review rounds, closing check, final check.
 - [ ] Stage 4: publish edition 0.6.

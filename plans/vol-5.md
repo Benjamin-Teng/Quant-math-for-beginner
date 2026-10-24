@@ -113,27 +113,40 @@ fact a decision rests on is stated here with its evidence.
     Sharpe ratio on the window's sample means in excess of $r_f=1.5\%$ ($r_f/A$ a day), solved as the homogenized
     QP $\min\mathbf y^{\top}\hat\Sigma\mathbf y$ subject to $\hat{\mathbf e}^{\top}\mathbf y=1$, $\mathbf y\ge0$,
     $\mathbf w=\mathbf y/\mathbf 1^{\top}\mathbf y$; if no fund's mean exceeds $r_f/A$, R4 holds R3 (the fresh check
-    found two or more funds above it at every one of the 93 E5 month-ends; the fallback serves other universes).
+    found two or more funds above it at every one of the 92 signals; the fallback serves other universes).
     **R5** R3 with the Ledoit–Wolf covariance (scaled-identity target, scikit-learn). **R6** equal risk
     contributions, long-only. **R7** hierarchical risk parity as López de Prado (2016) publishes it: the distance
     $\sqrt{(1-\rho_{ij})/2}$, the Euclidean distance between columns of that matrix, single linkage,
-    quasi-diagonalization and recursive bisection with inverse-variance weights inside clusters (the brief checks
-    every step against the paper). **R8** R6 scaled by $L_t=\min\!\big(1.5,\ \bar\sigma_t/\hat\sigma_{t+1\mid t}\big)$,
-    set at each monthly trade and drifting between trades. $\hat\sigma^2_{t+1\mid t}$ is LM26's EWMA ($\lambda=0.94$,
-    uncentred, daily simple returns in decimals) of the returns of the R6 book as held, started at the window's
-    sample variance at the window's first row. $\bar\sigma_t$ is the R6 book's realized daily volatility over the
-    same 504 rows (divisor $T$). So R8 targets R6's own two-year volatility, with no level chosen in advance. Cash
+    quasi-diagonalization and recursive bisection with inverse-variance weights inside clusters (the review of
+    2026-10-24 confirmed each step against the paper's SSRN version, abstract 2708678, and the author's HRP.py; its
+    Example 2 reproduces; the published JPM text and pages are the LM31 brief's to confirm). **R8** R6 scaled by $L_t=\min\!\big(1.5,\ \bar\sigma_t/\hat\sigma_{t+1\mid t}\big)$,
+    set at each monthly trade and drifting between trades. Both volatilities come from one series: R6's new weights
+    applied to the window's 504 daily returns (a constant-weight series, defined at every signal, before any book is
+    held). $\bar\sigma_t^2$ is its uncentred mean square over the window, and $\hat\sigma^2_{t+1\mid t}$ LM26's EWMA
+    ($\lambda=0.94$, uncentred, daily simple returns in decimals) run through the window from the start value
+    $\bar\sigma_t^2$ (editor's clarification, 2026-10-24, before any result: the fresh check asked which series). So
+    R8 targets R6's own two-year volatility, with no level chosen in advance. Cash
     ($1-L_t>0$) earns $r_f=1.5\%$; borrowing ($L_t>1$) costs $r_f+2$ points $=3.5\%$ a year, an illustrative
     financing rate (Research hygiene puts financing among the costs; no official rate exists), with sensitivities
     at spreads of 0 and 5 points.
-  - **Costs** (the cost model below) on every trade: the value traded is $W\lVert\mathbf w_t-\mathbf w^{\mathrm{drift}}_t\rVert_1=2W\,\mathrm{TO}_t$;
-    the cost is $0.1425\%\times(\text{buys}+\text{sells})+\sum_i\text{tax}_i\times\text{sales}_i$, scale-free (no
-    minimum fee), deducted from wealth at the trade.
-  - **Comparison criteria, fixed now.** Net of costs: annualized log growth $\ln(W_{\mathrm{end}}/W_{\mathrm{start}})$
-    divided by the years (calendar days ÷ 365.25, AUTHORING §8); the Sharpe ratio of daily returns in excess of
-    $r_f=1.5\%$, $\times\sqrt A$ (one $r_f$ for every rule, since R8 holds cash); maximum drawdown; average annual
-    turnover; total costs. The benchmark is R1. LM33 tests each of R2–R8 against R1 (seven pairs, Ledoit and Wolf
-    2008) and deflates the best rule for $n=8$.
+  - **Costs** (the cost model below) on every trade, self-financing: with pre-trade holdings $\mathbf h$ (in money),
+    pre-trade wealth $W$ and target exposures $\mathbf f$, the post-trade wealth $W'$ solves
+    $W'=W-\operatorname{cost}(W'\mathbf f-\mathbf h)$, where the cost of trades $\boldsymbol\Delta$ is
+    $0.1425\%\times\lVert\boldsymbol\Delta\rVert_1+\sum_i\text{tax}_i\max(0,-\Delta_i)$, scale-free (no minimum fee);
+    the turnover is $\mathrm{TO}=\tfrac12\lVert\mathbf f-\mathbf h/W\rVert_1$. LM27, which owns the wealth recursion,
+    prints this equation. (The first plan wrote the value traded at the pre-trade $W$; the review of
+    `vol5_rules.py`, 2026-10-24, found the code's self-financing form better and the plan's wording incomplete, and
+    the editor kept the code: the two differ in the sixth decimal of the printed criteria.)
+  - **Comparison criteria, fixed now** (precise definitions, 2026-10-24; `vol5_rules.py`, `summary()`). Net of costs:
+    annualized log growth $\ln W_{\mathrm{end}}$ divided by the years (calendar days ÷ 365.25, AUTHORING §8), from the
+    cash of 1 at the first trade's close, so the first purchase's cost counts; the Sharpe ratio of the daily returns
+    from the session after the first trade, in excess of $r_f=1.5\%$, $\times\sqrt{A_{\mathrm w}}$ (one $r_f$ for
+    every rule, since R8 holds cash; $A_{\mathrm w}$ is the wealth frame's sessions per year, 243.57 against the
+    estimation frame's 242.95, and interest accrues $r_f/A_{\mathrm w}$ per session), and their volatility; the
+    maximum drawdown of the path with the starting 1; the annual turnover, the sum of the one-way turnovers after the
+    first purchase per year; the costs, the sum over trades of cost ÷ pre-trade wealth (about $\ln$ of gross over net
+    wealth). The benchmark is R1. LM33 tests each of R2–R8 against R1 (seven pairs, Ledoit and Wolf 2008) and
+    deflates the best rule for $n=8$.
   - **Owners.** Each rule is defined by its module: R3 and R4 by LM28 (unconstrained) and LM29 (long-only, the
     through-case form), R5 by LM30, R6–R8 by LM31; R1 and R2 by LM27. One owner per statistic of the rules, all
     computed by `vol5_rules.py`, net of costs unless the owner shows gross against net: LM27 the accounting
@@ -160,8 +173,9 @@ fact a decision rests on is stated here with its evidence.
   reference, not a cap, and brokers' discounts are not modelled. Securities transaction tax on sales: 0.1% for ETFs
   (Securities Transaction Tax Act, as amended 2025-01-02, Art. 2), 0 for bond ETFs to 2026-12-31 (Art. 2-1, which
   suspends it from 2017-01-01 for securities-investment-trust bond ETFs, leveraged and inverse ones excluded; 00679B
-  was exempt throughout E5). The futures ETFs 00635U and 00642U are taxed at 0.1% only if the Stage 1 source check
-  confirms it (Art. 2's "其他經政府核准之有價證券" is the likely category); no number uses their tax before. No
+  was exempt throughout E5). The futures ETFs 00635U and 00642U pay the ETF rate, 0.1%: the Ministry of Finance's
+  財政統計通報 No. 21 (2024-11-14) counts 原型期貨 ETFs among the ETFs taxed at 千分之1, and TWSE's ETF rules page
+  gives 0.1% on every ETF sale with bond ETFs exempt through 2026 (both read 2026-10-24). No
   slippage model, because no sourced spread or impact figure exists for these funds (survey); a sensitivity at twice
   the costs stands in for it, and the text says why the Research hygiene page's rule is met only that way.
 - **Sharpe ratio.** As Volume IV: $\mathrm{SR}=(\mu-r_f)/\sigma$ per period, annualized by $\sqrt A$ as a convention on
@@ -207,7 +221,7 @@ fact a decision rests on is stated here with its evidence.
 - **Solver output.** Solvers get annualized inputs ($A\hat\Sigma$, $A\hat{\boldsymbol\mu}$; fresh check: on
   daily-unit $\hat\Sigma$ CLARABEL's defaults missed the exact long-only solution by up to 4.6e-4 in a weight, and
   annualizing brought OSQP and CLARABEL within 4.1e-6). Tolerances are set and printed (CLARABEL `tol_gap_abs`,
-  `tol_gap_rel`, `tol_feas` 1e-10; OSQP `eps_abs`, `eps_rel` 1e-10 with polishing); the status must be `optimal`;
+  `tol_gap_rel`, `tol_feas` 1e-12; OSQP `eps_abs`, `eps_rel` 1e-10 with polishing); the status must be `optimal`;
   every printed solution is checked by its KKT residuals and against a closed form or a second solver, and the text
   names the solver. R6 is computed in `vol5_rules.py` by Newton or fixed-point iteration to 1e-12, with cvxpy's
   log-barrier form as the cross-check. A weight with $\lvert w_i\rvert<10^{-6}$ prints as 0, and a constraint is
@@ -302,7 +316,9 @@ fact a decision rests on is stated here with its evidence.
 ## Capability check (2026-10-24)
 
 What the spines need and the repository lacks (survey, its critic and the fresh check: `book.js` rendered in headless
-Chromium, `build/`, `data/`, `pyproject.toml`). **Owner's answers: pending**, except (A).
+Chromium, `build/`, `data/`, `pyproject.toml`). **The owner approved every item on 2026-10-24:** (A); (B1)–(B4);
+(B5) with US proxies; (C1)–(C3); and option (i) for (D). Each piece is built by the editor and reviewed by a fresh
+agent (0 differences on the published pages) before any writer starts.
 
 - **(A) Packages: approved 2026-10-11; added 2026-10-24 (`40e1876`).** cvxpy 1.9.3 (Apache-2.0) and scikit-learn
   1.9.1 (BSD-3-Clause) with 10 more packages, about 78 MB unpacked, cp313 Windows wheels for all, no existing pin
@@ -387,9 +403,10 @@ the constructed reference), and any Taiwan interest-rate history from outside Fi
   survey). The reverse stress test ranks shocks by LM16's Mahalanobis distance (lm16.md:322) as a distance only:
   LM16's tail probability for it ((16.9), lm16.md:363) is not attached (ROADMAP's Stress row).
 - **Limits and locks.** FinMind's `TaiwanStockPriceLimit` is wrong for ETFs (survey: 0050's `limit_down` 158.5 on
-  2025-04-07, when 0050 traded at 158.4 all day, exactly −10%). A limit is computed from the official rule, which the
-  LM35 brief sources: whether cross-border ETFs have a daily limit at all (survey, explored: 00646 fell 12.59% that
-  day). A locked day is shown by the daily open, high, low and close: on 2025-04-07 0050 traded 29.6 million shares,
+  2025-04-07, when 0050 traded at 158.4 all day, exactly −10%). TWSE's ETF rules page (read 2026-10-24): the daily
+  limit is 10% as for stocks, but an ETF holding overseas stocks has none (00646 fell 12.59% that day, survey); ticks
+  are 0.01 below 50 and 0.05 from 50. FinMind's distribution records print the limits as 9999.95 and 0.01 for the
+  bond ETFs (00679B, 00720B); the LM35 brief checks which E5 funds have no limit before any text says so. A locked day is shown by the daily open, high, low and close: on 2025-04-07 0050 traded 29.6 million shares,
   all at 158.4 (fresh check), so sales executed at the limit, none below it, queued orders were not guaranteed to
   fill, and the next open was 151.2.
 - **Unexplained extremes.** 2026-07-17 (TR23 −6.46%) and 2026-07-31 (+7.98%) are real in the data (T5S 13:30:00
@@ -408,6 +425,16 @@ Collected here as the briefs add them; applied at publication with the edition n
   data is the other half of LM34. Reword so the sentence says both.
 - `src/syllabus.yaml`: LM31's line ("Euler risk contributions and risk-based allocation") becomes risk budgeting with
   LM27's contributions.
+- LM3's TQQQ example (lm03.md:45, 464, 467, 469, 471; capability D). A re-fetch of QQQ's back-adjusted closes
+  re-rounds them: the exact rebalancing effect $-0.31325$ (unrounded −0.3132492, 0.42 of a unit from the five-decimal
+  boundary) became −0.31324, and the four-decimal −0.3132 sits 8e-7 from its own boundary. After the next distribution
+  every adjusted level moves (the review's simulation of 300 rescaled re-fetches: ln(8.27/39.55) = −1.56493 changed
+  in 299, 3 ln G = −1.18252 and the residual −0.0692 in 277, TQQQ's −79.09% in 205, QQQ's dividends 0.0074 in 168,
+  the residual against unadjusted closes −0.047 in 129, "6.7% of value" in 118, T3 −0.3107 in 67, QQQ's −32.58% in
+  31; RV and √RV in none), and `data/lm03_numbers.py:313` asserts the levels (39.55, 8.27) exactly, so `build.sh
+  --data` would fail on a fresh checkout. Fix in LM3: quote levels with their retrieval date (2026-10-10) or from
+  unadjusted closes, print each derived value only to digits a cent per value cannot move, replace the exact-level
+  assert by a ratio check, and align Lab 3 Part 6.
 - Each brief's "Stage 4 for earlier modules".
 
 ## Spines
