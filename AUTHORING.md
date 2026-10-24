@@ -206,7 +206,7 @@ note says why.
 | $\bar R$, $s$; $\bar r$, $s_r$; $g$, $\sigma_r$ | sample mean and standard deviation of $R$ and of $r$ (divisor $T$; $s_{\mathrm u}$ divides by $T-1$); model mean log return per day $g=\E[\ln(1+R)]$ and its standard deviation |
 | $\mathcal N$, $\mathcal N_N$, $t_\nu$, $\chi^2_N$, $\operatorname{Bin}(n,p)$, $\operatorname{Poisson}(\lambda)$, $\operatorname{Exp}(\lambda)$ | distributions; "iid" independent and identically distributed |
 | $n$, $\bar X_n$, $S_n$; $m$ | number of independent draws or trials (from Volume VI also the number of strategies tried, LM33, LM34), their mean and sum ($T$ stays the number of returns in a data sample); number of days summed or compounded in a model, whole sessions ($m=\operatorname{round}(A\tau)$) |
-| $j$, $R_{(j)}$; $k$ | the value of a count in a pmf, the $j$th smallest return; a number of standard deviations, $k\ge0$, in a module without a required return; in Volume IV a lag (statistics table), and in LM20 the Hill estimator's tail count, declared |
+| $j$, $R_{(j)}$; $k$ | the value of a count in a pmf, the $j$th smallest return; a number of standard deviations, $k\ge0$, in a module without a required return; in Volume IV a lag (statistics table), and in LM20 and LM32 the Hill estimator's tail count, declared |
 | $\eta$, $\zeta$ | constants in $\Var(\eta X+\zeta)$ (LM5's letters; $a$, $b$ are a bet's) |
 | $d^2$ | squared Mahalanobis distance $(\mathbf x-\boldsymbol\mu)^{\top}\Sigma^{-1}(\mathbf x-\boldsymbol\mu)$ |
 
@@ -253,7 +253,7 @@ notation note):
 | $\mathbf y$ | in LM29 the homogenized variable of the maximum-Sharpe QP, in LM31 the ERC variable before normalizing (modules without least squares) |
 | $\lVert\mathbf x\rVert_1$ | the 1-norm $\sum_i\lvert x_i\rvert$; gross exposure $\lVert\mathbf f\rVert_1$ (LM8) |
 | $\mathbf w^{\mathrm{mv}}$, $\sigma^2_{\min}$, $\mathbf w^{\mathrm{tan}}$, $\mathrm{SR}^*$ | minimum-variance weights and variance; tangency weights; the best Sharpe ratio |
-| $K$, $\mathbf b$ | constraint matrix and right-hand side, $K\mathbf w=\mathbf b$ (LM28, LM29); in LM31 $\mathbf b$ is the risk budgets, and LM31 writes its constraints out |
+| $K$, $\mathbf b$ | constraint matrix and right-hand side, $K\mathbf w=\mathbf b$ (LM28, LM29, LM35); in LM31 $\mathbf b$ is the risk budgets, and LM31 writes its constraints out |
 | $\beta_{i,p}$ | an asset's beta to its portfolio, $\operatorname{Cov}(R_i,R_p)/\sigma_p^2$ (LM27; $\beta_i$ stays a market beta) |
 | $\mathrm{MRC}_i$, $\mathrm{RC}_i$ | marginal and component risk contributions, $\mathrm{RC}_i=w_i(\Sigma\mathbf w)_i/\sigma_p$, $\sum_i\mathrm{RC}_i=\sigma_p$ (Euler) |
 | $\mathrm{TO}_t$; $\text{tax}_i$ | one-way turnover $\tfrac12\lVert\mathbf w_t-\mathbf w^{\mathrm{drift}}_t\rVert_1$; a fund's tax rate on sales (upright word); there is no scalar cost symbol |
@@ -427,7 +427,8 @@ $P$, $Q$, $\Omega$, $\tau$ for Black–Litterman, $\kappa$ for a VaR threshold.
   and TWSE.
 - Every number in the text, tables, examples, knowledge checks, problems and solutions must be produced by a script
   in `data/` or by the lab, and re-checked after the last edit.
-- Conventions: a horizon in years is calendar days ÷ 365.25 unless an instrument has its own day count, which is the
+- Conventions: a horizon in years is calendar days ÷ 365.25 (for a return sample, from the close before its first
+  return to its last close) unless an instrument has its own day count, which is the
   issuer's: name the bank or issuer whose terms you quote (DBS Taiwan accrues NTD deposits on actual/365; Bank of
   Taiwan credits whole months and only part months by day). Quote the annualization factor $A$ of the sample in use.
 - A motivating case built on one day says whether that day is typical or the extreme of the sample, and backs the

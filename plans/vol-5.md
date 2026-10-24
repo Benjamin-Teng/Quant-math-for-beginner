@@ -64,7 +64,8 @@ fact a decision rests on is stated here with its evidence.
   - **E5** (new, the through case): five Taiwan-listed ETFs, daily total returns in New Taiwan dollars. 0050
     (元大台灣50), 00646 (元大S&P500), 00679B (元大美債20年), 00635U (期元大S&P黃金) and 00642U (期元大S&P石油).
     Closes 2017-01-17 → 2026-10-08 on TR23's calendar, built by a new `data/vol5_series.py`. Total return
-    $(P_t+D_t)/(P_{t-1}/s_t)-1$ as Volume I (`data/README.md`): distributions from `TaiwanStockDividendResult` with
+    $(P_t+D_t)/P_{t-1}-1$ as Volume I (`data/README.md`; on a split day the previous close is restated per current
+    share, $P_{t-1}/4$ on 2025-06-18): distributions from `TaiwanStockDividendResult` with
     each fund's own label (0050 `息`, 00679B `除息`; PITFALLS §3), the 0050 4-for-1 split of 2025-06-18 from
     `TaiwanStockSplitPrice`. 00646, 00635U and 00642U pay no distributions (survey and fresh check: 0 dividend rows,
     0 spread mismatches, 0 zero closes, 0 repeated rows). The underlying indices are checked on the issuers' pages in
@@ -184,13 +185,14 @@ fact a decision rests on is stated here with its evidence.
   LM34 or this decision before LM34 by a pointer). Commission 0.1425% of the value traded on each side: TWSE's
   Operating Rules Art. 94 lets brokers set their rates and requires notice above 1.425‰, so it is the posted
   reference, not a cap, and brokers' discounts are not modelled. Securities transaction tax on sales: 0.1% for ETFs
-  (Securities Transaction Tax Act, as amended 2025-01-02, Art. 2), 0 for bond ETFs to 2026-12-31 (Art. 2-1, which
-  suspends it from 2017-01-01 for securities-investment-trust bond ETFs, leveraged and inverse ones excluded; 00679B
-  was exempt throughout E5). The futures ETFs 00635U and 00642U pay the ETF rate, 0.1% (Art. 2 names no ETF;
-  that ETFs fall in its 千分之一 class is the book's reading). Two sources state the rate: TWSE's ETF rules page gives
-  0.1% on every ETF sale with bond ETFs exempt through 2026,
-  and the Ministry of Finance's 財政統計通報 No. 21 (2024-11-14) states the ETF rate 千分之1 and lists 原型期貨 ETFs'
-  turnover and tax in its table, whose ratio fits 0.1% (the notice prints no rate per column; both read 2026-10-24). No
+  (Securities Transaction Tax Act Art. 2 item 2, 千分之一 on "other securities approved by the government"; Art. 2 last
+  amended 1993-01-30, the Act last on 2025-01-02, Arts. 2-2 and 12), 0 for bond ETFs to 2026-12-31 (Art. 2-1, last
+  amended 2016-12-30, which suspends it from 2017-01-01 for securities-investment-trust bond ETFs, leveraged and
+  inverse ones excluded; 00679B was exempt throughout E5). The futures ETFs 00635U and 00642U pay the same 0.1%: the
+  Ministry of Finance's ruling 台財稅字第09700161260號 (2008-08-11) taxes a transfer of futures-trust fund certificates
+  at 1‰ under Art. 2 item 2. TWSE's ETF rules page gives 0.1% on every ETF sale with bond ETFs exempt through 2026,
+  and the Ministry's 財政統計通報 No. 21 (2024-11-14) states the ETF rate 千分之1 and lists 原型期貨 ETFs' turnover and
+  tax, whose ratio fits it (all read 2026-10-24). No
   slippage model, because no sourced spread or impact figure exists for these funds (survey); a sensitivity at twice
   the costs stands in for it, and the text says why the Research hygiene page's rule is met only that way.
 - **Sharpe ratio.** As Volume IV: $\mathrm{SR}=(\mu-r_f)/\sigma$ per period, annualized by $\sqrt A$ as a convention on
@@ -410,7 +412,8 @@ the constructed reference), and any Taiwan interest-rate history from outside Fi
   Stage 4.
 - **Covariance forecasting** (lm26.md:409, "LM30's and LM31's subject"): LM31 forecasts the portfolio's variance with
   LM26's EWMA (R8) and states the EWMA covariance matrix
-  $\hat\Sigma_{t+1\mid t}=\lambda\hat\Sigma_{t\mid t-1}+(1-\lambda)\mathbf r_t\mathbf r_t^{\top}$ in one paragraph;
+  $\Sigma_{t+1\mid t}=\lambda\Sigma_{t\mid t-1}+(1-\lambda)\mathbf R_t\mathbf R_t^{\top}$ (no hat, simple returns, B1)
+  in one paragraph;
   LM30 compares the sample and shrunk matrices out of sample (with LM26's QLIKE, (26.8), if the brief wants a loss);
   multivariate GARCH is out of scope.
 - **LM29's scope.** Convex sets and functions in general (lm07.md:268, lm10.md:446), KKT for inequality constraints
@@ -471,10 +474,13 @@ limits).
   rule is LM34's; LM31 prints only R8's per-trade exposure statistics (mean over the 91 trades after the first
   purchase, largest trade), and LM29's X5 prints its planned turnover relative to $\theta=0$, labelled *planned*,
   pointing to LM34. A3: LM33 owns the rules' mean excess returns, R2's and R4's realized volatility and every
-  standard error; LM29's Leaves read "R3 → LM30, R4 → LM33". A4: LM28 owns every first-window statistic; R2's
-  first-window risk shares are LM31's. A5: duplicates get one owner — the U28 halves' 1/N and minimum variance are
-  LM30's, the 92 windows' $\sigma_{\min}$ range and the halves' gross exposure LM28's, the cost arithmetic of a trade and
-  the first purchase LM27's. A6: MRC, RC and Euler's identity are derived in LM27 only; LM31 cites (27.5)–(27.6), and
+  standard error; LM29's Leaves read "R3 → LM30, R4 → LM33". A4: LM28 owns every first-window statistic except
+  the risk shares (R1's are LM27's, A27-21; R2's are LM31's) and R2's mean excess return and volatility,
+  Black–Litterman's calibration (LM30's, A30-24; LM31 echoes them). A5: duplicates get one owner — the U28 halves'
+  1/N and minimum variance are LM30's, the 92 windows' $\sigma_{\min}$ range and the halves' gross exposure LM28's, the
+  cost arithmetic of a trade and the first purchase LM27's, "R3's caps never bind" LM29's (A29-09), the T5S per-day
+  lows of 2025-04-07 and 2024-08-05 LM35's (A35-45; LM32's lab echoes them); TR23's 2025-04-07 returns are cited to
+  lm26.md:32, not anchored again. A6: MRC, RC and Euler's identity are derived in LM27 only; LM31 cites (27.5)–(27.6), and
   its outcome 1 becomes "derive the budget conditions (31.1) and show when ERC gives inverse-volatility weights".
 - **B. Notation** (AUTHORING §6 follows). B1: the EWMA forecast has no hat, $\sigma_{t+1\mid t}$, as LM26 prints it;
   the matrix is $\Sigma_{t+1\mid t}=\lambda\Sigma_{t\mid t-1}+(1-\lambda)\mathbf R_t\mathbf R_t^{\top}$ on simple
@@ -489,7 +495,9 @@ limits).
   general risk measure; LM33 HSR, $b$, $\hat V_{\mathrm{SR}}$, $v_t$, $\Psi$; LM34 $W^{\mathrm{net}}$,
   $W^{\mathrm{gross}}$, $G_{t,t'}$, $P^{\mathrm{adj}}_{t\mid t'}$, $S$, $\omega$, logit; LM35 $\mathrm{FX}_t$,
   $L_{\mathrm{ruin}}$, $t^{\mathrm{US}}$). B6: LM29 writes the borrowing spread in words (its $s$ clashed with $s_p$);
-  LM34's (34.2) writes the split ratio as LM27's $s_t$ and drops it from the Not-used list; one TAIEX variance symbol,
+  no module writes a split ratio as a symbol ($s_i$ are standard deviations, AUTHORING §6): LM27's §4 writes the split
+  day's return as $(P_t+D_t)/(P_{t-1}/4)-1$, and LM34's (34.2) compounds Volume I's total returns,
+  $G_{t,t'}=\prod_{j=t+1}^{t'}(1+R_j)$ (LM35 cites it); one TAIEX variance symbol,
   $\sigma^2_{\mathrm{mkt}}$ (LM27, LM30); LM35's adjusted price carries its retrieval date as LM34's
   $P^{\mathrm{adj}}_{t\mid t'}$.
 - **C. Text conventions.** C1: the shared corrections are made (timing correlations, solver numbers, limits, 劣可加性,
@@ -498,14 +506,18 @@ limits).
   weekly points plus every cited extreme. C4: LM35's hypothetical replays are the one mixed-sample exception. C5:
   solver tolerances as the shared decision now says; LM31 states its conic cross-check tolerance (1e-5). C6: lab data
   as the shared "Labs" decision now lists. C7: labels for near-twins (X22): every R1 volatility names its window
-  (full-sample fixed weights 11.49% against out-of-sample 12.48%); "years" names its count (calendar days ÷ 365.25,
-  as AUTHORING §8, everywhere); "month" names calendar or holding months; price index and total-return index are named
+  (full-sample fixed weights 11.49% against out-of-sample 12.48%); "years" names its count (calendar days ÷ 365.25
+  from the close before a sample's first return to its last close, as AUTHORING §8, everywhere; a count of sessions
+  over $A$ says so); "month" names calendar or holding months; price index and total-return index are named
   beside every TAIEX number; every T5S change is a log change. C8: tags are cited by number ((27.5)–(27.6), (32.9),
   (34.2) …), and a brief lists only the modules that actually cite its tags. C9: prerequisites and leads both ways
   (X14: LM34's leads gain 46; LM33's leads gain 35 and LM35's prerequisites 33; LM32's lead 34 stands on the
   forward pointer). C10: every outcome and every sentence of the case box stays within 30 words (AUTHORING §1; X25
-  lists LM29 1, 3, 6, 7; LM32 1, 2, 7; LM34 1–3); wide tables are split (LM32 X6 and X8, LM30 X5, LM33 X1) so that no
-  PDF page shrinks.
+  lists LM29 1, 3, 6, 7; LM32 1, 2, 7; LM34 1–3), and a case box is cut into paragraphs of at most 80 words; wide
+  tables are split (LM32 X6 and X8, LM30 X5, LM33 X1) so that no PDF page shrinks. C11: NEAR flags live in the
+  anchors tables; a brief's text and the module print the rounded value without a flag mark. C12: an echo cites the
+  owner's anchor ID where it is printed and prints at most the owner's precision, unless a computation shown beside it
+  needs more.
 - **D. Parameters fixed before any further result** (each brief's proposals accepted, with these settings): LM27 the
   full-sample $\hat\Sigma$ on the estimation frame, the 92 windows as a stability check, weekly $A=51.56$ (LM19's count of
   weeks with data); LM28 no realized Sharpe ratio for held portfolios; LM29 the $\theta$ grid and the constructed
@@ -525,8 +537,8 @@ limits).
   guidance's "turnover limits", X24), week keys by ISO year (A35-25, A35-34 recomputed), R8's 2025 exposure credited
   to the 2025-03-03 trade (A35-42 prints every trade into a window).
 - **E. Departures from the spines** (X23), all accepted with their evidence: LM31's CCD widget and HRP on E5 in the
-  text; LM32 without Kupiec and Christoffersen by name until read (LM21's exact binomial tail and exact count do the
-  work); LM34's X3 as gross against net log growth; LM35's ruin-line chart in place of higher caps; LM27's widget with
+  text; LM32's tests are LM21's exact binomial tail and exact count, with Kupiec's and Christoffersen's likelihood
+  ratios named in §7 and computed in the lab (see the second recomputation's decisions); LM34's X3 as gross against net log growth; LM35's ruin-line chart in place of higher caps; LM27's widget with
   three matrices; LM28's held-portfolio returns on the wealth frame.
 - **F. Sources.** Before Stage 2 a fresh agent reads, in the original where it can be had, and records in SOURCES:
   Ledoit and Wolf (2008, JEF; until read, LM33 prints the HAC version of its test and holds the bootstrap p-values
@@ -576,8 +588,8 @@ limits).
 
 ### Decisions on the first revision (2026-10-24)
 
-The source check (F) read twelve of the thirteen items; Kupiec (1995) and Christoffersen (1998) could not be had
-(SOURCES). LM27–LM30 were revised before its report, so its consequences for them are decided here; LM31–LM35 were
+The source check (F) read twelve of its thirteen items; a second hunt read the thirteenth, Kupiec (1995) and
+Christoffersen (1998) (next section). LM27–LM30 were revised before its report, so its consequences for them are decided here; LM31–LM35 were
 revised with it.
 
 - **Sources.** LM27 cites Choueifaty and Coignard (2008) for the diversification ratio's definition (eq. (1), p. 41),
@@ -591,11 +603,6 @@ revised with it.
   to Michaud (1998) "as described by Michaud and Michaud (2008)", paraphrased, with experiment 4 (averaging
   maximum-Sharpe portfolios) named a variant, and Michaud (1989) at the level of its abstract. LM29's sentence on
   cvxpy's rewriting cites Agrawal et al. (2018) only once the paper is read (Stage 2's source pass).
-- **Notation.** B6 changes: no split-ratio symbol. LM27's §4 and LM34's (34.2) restate the previous close per current
-  share as LM1 does, $\tilde P_{t-1}$ ($P_{t-1}/4$ on 18 June 2025, lm01.md:118), since §6 gives $s_i$ to standard
-  deviations.
-- **Owners.** An exception to A4: R2's first-window mean excess return and volatility, Black–Litterman's calibration,
-  are LM30's (A30-24); LM31 echoes them.
 - **Weeks and months.** LM27's weekly and monthly returns drop the sample's first and last ISO week and calendar
   month, complete or not (2026-W41 holds four sessions and is dropped; the rule needs no holiday calendar).
 - **Labs.** `make_lab_data.py` writes both E5 frames, the wealth frame with its traded flags (shared "Labs").
@@ -603,8 +610,7 @@ revised with it.
   w_{\mathrm{tan}}$ in the market's place in LM23's CAPM equation (lm23.md:285): prerequisite 23, and lm23 gains +28
   (G).
 - **LM31.** A holding month's realized and target volatilities are both annualized with the estimation frame's $A$,
-  so their ratio is the daily one (45.3% against 7.84%, 5.78), and the text says so. NEAR flags stay in the anchors
-  table; the text prints the rounded value.
+  so their ratio is the daily one (45.3% against 7.84%, 5.78), and the text says so.
 - **LM33.** $b=22$ stands; the shared "Counting" decision now says which series the rule runs on for each kind of
   statistic. Andrews and Monahan (1992) is cited with the pages a fresh check confirms.
 - **LM34.** Before §5 calls the survivorship funds futures ETFs, each fund's index is confirmed on its issuer's or
@@ -620,14 +626,78 @@ revised with it.
 - **Across briefs.** Tag users, echoes, owners, prerequisites and leads are reconciled by one cross-check of the nine
   revised briefs (C8, C9).
 
+### Decisions on the second recomputation and cross-check (2026-10-24)
+
+Nine fresh recomputers reproduced all 185 added or changed anchors and audited every printed number; no wrong value
+would be printed, and the findings are derived results that do not follow from the inputs printed beside them,
+bounds that their values exceed, ambiguous definitions and wording. A fresh cross-check of the nine revised briefs
+found no critical item (Y1–Y20). Each brief is revised once more: every finding of its recomputation is fixed as the
+report proposes, every Y item naming it is applied, and the items the editor decided earlier are written into the
+brief text. These choices settle the open alternatives:
+
+- **Shared text.** B6 (no split-ratio symbol), A4's exceptions, A5's single owners, C7's year count, C10's 80-word
+  paragraphs, C11 (NEAR flags) and C12 (echoes) are written above; AUTHORING §6 scopes $k$ (LM32) and $K$, $\mathbf b$
+  (LM35), and §8 states where a sample's years start.
+- **Tags and leads (Y1, Y13, Y14).** LM27–LM29 take the cross-check's tag-user table and rewrite their Leads
+  sentences from it; speculative users go. LM35's leads drop 45 and 48 (no text points to them). lm07.md:786
+  (Chopra and Ziemba's issue number) joins the Stage 4 list of the brief that cites the paper, LM30 if it does, else
+  LM28.
+- **Notation (Y6–Y10).** LM32 writes a loss as $-R$; LM30 writes residual variances with LM27's "res" subscript;
+  LM33 writes "a moment of order a little above 4" for its $4+\delta$; LM28 outcome 1 reads "of $N$ assets".
+- **LM27.** E5 says no daily–weekly gap reaches two weekly standard errors and prints the 00679B–00642U monthly gap
+  without naming a cause (2.3 normal-theory standard errors, 2.0 plug-in; A27-11 prints it); E7's sentence becomes
+  "only Euler's parts add up to the book's volatility, and only they price a switch", with the stand-alone and
+  variance sums beside it.
+- **LM28.** A weight vector or column printed at one decimal carries "rounded separately; sums to 100.1" (the
+  PITFALLS rule allows saying so) rather than more digits.
+- **LM29.** A29-31 and problem 11 state SCS's settings (eps 1e-9, 200,000 iterations); R4's Sharpe ratio uses the
+  printed 18.85%; problem 11 prints $\mathbf f$ to two decimals.
+- **LM30.** The span echoes A28-02 (2.05 calendar years from the close of 2017-02-10). Monte Carlo digits: the last
+  printed digit sits at the standard error's first significant digit, everywhere (experiment 4's shares then print
+  one decimal, 3.8% to 35.2%). Bounds read "SEs 0.003", "SEs 0.008 to 0.001" and "the largest gap is 13.1 points".
+- **LM31.** KC §7 is rewritten on the win and loss totals (A31-35 extended and relabelled "the EWMA's two largest
+  QLIKE values"); A31-26 reads "the mean of R6's 92 target weights"; A31-19 and A31-30 are cited where the text uses
+  them or withdrawn.
+- **LM33.** $n_{\mathrm{eff}}$'s MinTRL prints 3.9 years (its second decimal is Monte Carlo noise); the other derived
+  results carry the digit their reports give.
+- **LM34.** The Executive Yuan draft is dropped (no source is recorded); problem 8's stem says daily simple returns,
+  as R8 uses (26.2); A34-33 and A34-34 state their draw layout.
+- **LM35.** A35-39's bound uses the unrounded distances, printed as 12.937 and 15.017; E8 prints each book's mean;
+  A35-35 states its divisor 48.
+- **Sources read by the second hunt** (two fresh agents; their consequences apply as they state them):
+  - LM32: Kupiec (1995) read in FEDS 95-24 and Christoffersen (1998) in the author's final manuscript (7 July 1998).
+    §7 names both at section level with those versions (no journal page or equation), Christoffersen's indicator
+    relabelled to exceedances with the statistics unchanged; the lab computes $\mathrm{LR}_{\mathrm{uc}}$,
+    $\mathrm{LR}_{\mathrm{ind}}$ and $\mathrm{LR}_{\mathrm{cc}}$ for the six models beside LM21's exact tests (new
+    anchors); LM21's exact-count check stays the book's own.
+  - LM29 cites Agrawal et al. (2018) for cvxpy's canonicalization (arXiv v2, abstract, §1.3 and §4); solver names and
+    defaults rest on A29-22.
+  - LM33: Lo (2002) read in the journal's layout (a copy posted by a student group; the abstract on the CFA Institute
+    page): its locations stand, written "Lo's IID formula (9)". Andrews and Monahan (1992) is pp. 953–966.
+  - LM31: Maillard, Roncalli and Teïletche in their 2009 working paper, López de Prado in SSRN 2708678 (23 May 2016)
+    and Harvey et al. (2018) in the journal reprint, with the hunt's wording corrections; no JPM page of the first two.
+  - LM34: the futures-ETF tax cites the Ministry's ruling (shared "Costs"); the six survivorship funds are
+    futures-trust ETFs on futures indices, three of them daily leveraged or inverse, and §5 says the gap mixes the
+    product types; the roll-loss sentence keeps TWSE's "may" (可能).
+  - LM35: BCBS d450 ("severe but plausible", Principle 4, p. 6) and Breuer et al. (2009, §2.1 p. 209, §2.3 p. 211) may
+    be printed; the worst loss within $d\le k$ is Breuer et al.'s construction; Kupiec (1998) only "as described by
+    Breuer et al."; DBO's roll rule stays out (its index methodology changed on 2025-11-10, after the replays); the
+    2020 Lunar New Year closure is 2020-01-21 → 01-29 (TWSE's schedule, an archived copy).
+- **Chinese terms** (a fresh 樂詞網 pass, 1,817 searches): LM33 單邊檢定 (as lm25.md:264); LM35 漲跌幅限制 (as the
+  published modules); a Latin name before Chinese takes a space (Mahalanobis 距離, Euler 常數, as LM16), and
+  studentized takes 統計學名詞's form where it lists one; LM31 指數加權移動平均模型 (as lm26.md:132); LM29's 對偶變量
+  carries "dual variable" at first use (LM18's 對偶變數 is antithetic variates); LM32 排列檢定; LM31's 導讀 says once
+  that its 風險預算 is a budget per asset (LM7's is a volatility limit); LM34's 導讀 glosses its 秩 as 名次; active
+  constraint 有效限制 (LM7's Glossary); ruin is 權益歸零 in captions and §8; the Stage 4 change to lm07.md covers lines
+  511–512.
+
 ## Stage 4 changes to earlier modules
 
 Collected here as the briefs add them; applied at publication with the edition note.
 
-- Leads: LM4 gains 33 and 34; LM5 32; LM7 30 and 31; LM11 34 (published forward links with no lead; survey). The
-  briefs' prerequisites add more (fresh check, draft: LM19 → 27; LM8 → 28; LM4, LM9, LM11, LM12 → 29; LM11 → 31;
-  LM1, LM10 → 32; LM1, LM23, LM26 → 35); each brief lists its own.
-- lm07.md:511: 切點組合 → 切點投資組合 (the Glossary's form, lm07.md:771).
+- Leads: list G of "Editor's decisions on the briefs" (merged from the briefs' prerequisites); each brief's "Stage 4
+  for earlier modules" names the files and lines.
+- lm07.md:511–512: 切點組合 → 切點投資組合 (the Glossary's form, lm07.md:771).
 - lm07.md:786: Chopra and Ziemba (1993) gains its issue number, 19(2): 6–11.
 - lm21.md:373: White (2000) and Romano–Wolf (2005) correct a search on the same data; testing the best rule on later
   data is the other half of LM34. Reword so the sentence says both.
@@ -1014,7 +1084,7 @@ part is the batch's checkpoint.
 **Leaves.** Probabilities of extreme moves and jump models → LM39; margin regimes and leverage instruments → LM46;
 drawdown control → LM44; the capstone's own data → LM48.
 
-**Data.** E5's wealth frame and the rules' holdings; TR23 and the 27 sector closes from 2007-07-02 for 2008; T5S
+**Data.** E5's wealth frame and the rules' holdings; TR23 and 0050's own 2007–2008 closes for 2008; T5S
 per-day statistics; TX23 on limit days; US proxies if approved; the checkpoint universe (0056, 00662, 00720B with
 E5's funds as the brief decides).
 
@@ -2258,7 +2328,7 @@ numbered because LM28 itself refers to it).
 
 - `leads` gain 28 in lm08.md:6 and lm20.md:6 ((20.2) and the volatility SE, lm20.md:362), both on decision G's list,
   and in lm23.md:6 (new with this revision: §4 cites the CAPM's equation, lm23.md:285).
-- lm07.md:511: 切點組合 → 切點投資組合 (on the plan's list).
+- lm07.md:511–512: 切點組合 → 切點投資組合 (on the plan's list).
 - No wording change: lm07.md:457's "where a line from the risk-free rate touches the set of risky portfolios" is a
   two-asset sentence about LM7's windows; LM28 adds the general condition ($r_f<\mu_{\mathrm{mv}}$) without
   rewording LM7.
