@@ -51,6 +51,10 @@ WHAT TO CHECK
    the hygiene declaration and result labels, the lab) and against the anchors; report every departure that the
    writer's hand-back does not justify. The lab's data cell does what the brief's "Labs" says, on the paid and
    the free plan.
+10. From Volume V: each outcome in the front matter is taught (a section derives or shows it), practised (an example
+   or problem uses it) and assessed (a knowledge check or problem tests it), at the level the brief marks: [D] derive
+   without the solution, [C] compute and diagnose, [U] know the use and the limits. Report an outcome that misses
+   any of the three.
 
 OUTPUT: a prioritized list. For each finding: severity (critical = a reader would learn wrong math or a wrong number;
 major = misleading, inconsistent or unsupported; minor = wording/style), location (section, quoted text, line number),
