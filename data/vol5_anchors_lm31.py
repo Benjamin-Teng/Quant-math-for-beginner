@@ -1,6 +1,9 @@
 """LM31 anchors (Risk Parity, HRP and Volatility Targeting): every number the Stage 1 brief quotes (drafted 2026-10-24;
 revised the same day to the editor's decisions on the briefs, plans/vol-5.md: owners A2, A4-A6, labels C7, the
-recomputation's findings).
+recomputation's findings; revised again to the decisions on the second recomputation and cross-check: A31-35 extended
+with the EWMA's QLIKE wins and losses, A31-26 worded as the mean of R6's 92 target weights, echoes at their owners'
+precision, C12; repaired after the third revision's check: A31-26 names each holding month's own target weights, and
+A31-17 prints the squares of A31-07's two-decimal volatilities beside the variances).
 
 Reads only data/processed/*.parquet, through the shared builders (run them first; this script runs neither):
   * E5 (plans/vol-5.md, "Data"): vol5_series.frames("E5"), which reads data/processed/vol5_frames.parquet (built and
@@ -24,8 +27,9 @@ under S (LM27's): MRC_i = (S w)_i / sqrt(w'S w), RC_i = w_i MRC_i, risk share_i 
 minimizer of h(y) = 1/2 y'S y - sum b_i ln y_i (Newton: vol5_rules.erc for equal budgets; cyclical coordinate descent,
 CCD, here: y_i <- (-c_i + sqrt(c_i^2 + 4 S_ii b_i)) / (2 S_ii), c_i = (S y)_i - S_ii y_i, sweeps i = 1..N, started at
 y_i = 1 / sqrt(S_ii), stopped when max |y_i (S y)_i - b_i| < 1e-12). Jacobi's fixed point (weights proportional to
-b_i / beta_{i,p}) is run on the annualized covariance from 1/N for at most 10,000 steps with tolerance 1e-12 (its step
-count depends on the scale; the point it settles at does not). Newton's step count follows vol5_rules.erc exactly (the
+b_i / beta_{i,p}) is run on the annualized covariance from 1/N for at most 10,000 steps, stopped when no weight moves by
+1e-12 or more in a step (max_i |w_{k+1,i} - w_{k,i}| < 1e-12); its step count depends on the scale, the point it
+settles at does not. Newton's step count follows vol5_rules.erc exactly (the
 same start, Armijo backtracking while max |y_i (S y)_i - b_i| > 1e-6, stop below 1e-13). Inverse-volatility (IV) weights are
 proportional to 1 / sqrt(S_ii); HRP's inverse-variance weights inside a cluster to 1 / S_ii. HRP (Lopez de Prado
 2016): d_ij = sqrt((1 - rho_ij) / 2); the column distance ||d_i - d_j|| (Euclidean, over the N entries of each column
@@ -44,16 +48,23 @@ ratio, the month's RMS and its target are both annualized with the target's A (e
 reads off the printed figures; the last month (5 sessions) is partial and left out. The SD of ln(ratio) divides by
 the 91 months (the book's divisor T). QLIKE (26.8): V / F - ln(V / F) - 1 with V the month's mean squared daily
 return of R6's net path and F a forecast made at its signal: sigma_bar^2 or the EWMA's sigma_{t+1|t}^2 (both daily).
+The EWMA "wins" a holding month when its QLIKE is below the window's; its gain there is the window's QLIKE minus its
+own, and its cost in a month it loses is its QLIKE minus the window's (so the costs minus the gains are 91 times the
+gap in mean QLIKE). R6's ex-post shares on the out-of-sample covariance use the mean of R6's 92 target weights
+(A31-24's means); holding month by holding month, each holding month's own R6 target weights on that holding month's
+covariance.
 Quantiles: inverted_cdf. Counts against a threshold use a 1e-12 guard. U28's halves: constant weights estimated on
 the first half; in-sample volatility sqrt(A w'S1 w), out-of-sample sqrt(A w'S2 w). A gap at machine precision prints
 as a bound ("below 1e-15"), since its digits depend on the order of the floating-point operations.
 Numbers printed by published modules are echoed with file:line; statistics owned by another module (plans/vol-5.md,
-"Owners" and decisions A1-A6) are echoed with that module's name and anchor ID and are not LM31's to print: the
-first window's fund volatilities and correlations (LM28's A28-06, A28-07), R1's first-window volatility (A28-15) and
-R3's first-window weights and volatility (A28-10); R1's first-window risk shares (LM27's A27-21); R2's first-window
-volatility (LM30's A30-24); the realized volatility of R1, R3 and R5 (LM30's A30-12); 1/N and minimum variance on
-U28's halves (LM30's A30-19). R2's first-window risk shares are LM31's (decision A4). Annual turnover of every rule is
-LM34's (A34-06); LM31 prints only R8's per-trade statistics (decision A2).
+"Owners" and decisions A1-A6) are echoed with that module's name and anchor ID, at most at the owner's precision unless
+a computation shown beside them needs more (decision C12), and are not LM31's to print: the first window's fund
+volatilities and correlations (LM28's A28-06, A28-07; one and two decimals there), R1's first-window volatility
+(A28-15) and R3's first-window weights and volatility (A28-10); R1's first-window risk shares (LM27's A27-21, decision
+A4's carve-out); R2's first-window volatility (LM30's A30-24, A4's exception); the realized volatility of R1, R3 and
+R5 (LM30's A30-12); 1/N and minimum variance on U28's halves (LM30's A30-19, decision A5). R2's first-window risk
+shares are LM31's (decision A4's exception). Annual turnover of every rule is LM34's (A34-06); LM31 prints only R8's
+per-trade statistics (decision A2).
 
 Rounding flags. Every number the brief prints passes through f(x, k1, k2, ...), which shows x with max(k) + 3 decimals
 and flags it "NEAR" for each printed precision k at which x lies within a tenth of a last-digit unit of a rounding
@@ -274,16 +285,16 @@ S0 = A * cov0(x0)
 v0 = np.sqrt(np.diag(S0))
 C0 = S0 / np.outer(v0, v0)
 rbar = float((C0.sum() - N) / (N * (N - 1)))
-put(f"first window (echo of LM28's A28-06, A28-07) vols {fl(100 * v0, 2)}%; corr 0050-00646 {f(C0[0, 1], 3)}, "
-    f"0050-00679B {f(C0[0, 2], 3)}, 00646-00679B {f(C0[1, 2], 3)}, 00679B-00635U {f(C0[2, 3], 3)}, 0050-00642U "
-    f"{f(C0[0, 4], 3)}, 00646-00642U {f(C0[1, 4], 3)}, 00679B-00642U {f(C0[2, 4], 3)}; mean off-diagonal (LM31's) "
+put(f"first window (echo of LM28's A28-06, A28-07) vols {fl(100 * v0, 1, 2)}%; corr 0050-00646 {f(C0[0, 1], 2)}, "
+    f"0050-00679B {f(C0[0, 2], 2)}, 00646-00679B {f(C0[1, 2], 2)}, 00679B-00635U {f(C0[2, 3], 2)}, 0050-00642U "
+    f"{f(C0[0, 4], 2)}, 00646-00642U {f(C0[1, 4], 2)}, 00679B-00642U {f(C0[2, 4], 2)}; mean off-diagonal (LM31's) "
     f"{f(rbar, 4)}")                                                                                        # 06
 pair = [J["0050"], J["00679B"]]
 S2 = S0[np.ix_(pair, pair)]
 w_two = erc(S2)
 iv_two = (1 / np.sqrt(np.diag(S2))) / float((1 / np.sqrt(np.diag(S2))).sum())
 mv_two = minvar(S2, "two funds")
-put(f"0050/00679B: vols {f(100 * sqrt(S2[0, 0]), 2)}% and {f(100 * sqrt(S2[1, 1]), 2)}%, rho {f(C0[0, 2], 3)}; ERC "
+put(f"0050/00679B: vols {f(100 * sqrt(S2[0, 0]), 2)}% and {f(100 * sqrt(S2[1, 1]), 2)}%, rho {f(C0[0, 2], 2)}; ERC "
     f"{fl(w_two, 4)} = IV {fl(iv_two, 4)} (max diff {bound(float(np.abs(w_two - iv_two).max()))}); shares "
     f"{fl(shares(w_two, S2), 4)}; minimum variance (LM7's formula) {fl(mv_two, 3)}; ERC vol "
     f"{f(100 * vol(w_two, S2), 1)}%, MV vol {f(100 * vol(mv_two, S2), 1)}%")                               # 07
@@ -319,7 +330,8 @@ for _, _, rw in sch:
     fails += jacobi(A * cov0(fr.X[rw - WINDOW:rw]), b5)[1] < 0
 gap6 = next(line for line in log_ if line.startswith("largest gap")).split("R6 ")[-1]
 put(f"R6 first window (annualized S): Newton {it_n} steps (diff to R6 {bound(float(np.abs(w_n - w6).max()))}); CCD "
-    f"{it_c} sweeps (diff {np.abs(w_c - w6).max():.1e}); Jacobi from 1/N stops after {it_j} steps at {fl(w_j, 3)} "
+    f"{it_c} sweeps (diff {np.abs(w_c - w6).max():.1e}); Jacobi from 1/N (stopped when max |w_(k+1) - w_k| < 1e-12) "
+    f"stops after {it_j} steps at {fl(w_j, 3)} "
     f"(shares {fl(shares(w_j, S0), 3)}); Jacobi does not settle in 10,000 steps at {fails} of {len(sch)} signals; "
     f"cvxpy's log form (CLARABEL, tol_gap_abs = tol_gap_rel = tol_feas = {ERC_OPTS['tol_feas']:.0e}) against Newton, "
     f"largest weight gap over the signals {gap6} (vol5_rules), inside the conic cross-check's tolerance "
@@ -352,13 +364,14 @@ Z3 = link(dd3)
 o3 = quasi_diag(Z3, 3)
 w3h, st3 = bisect(o3, S3)
 assert np.abs(w3h - hrp(x3, S3)).max() < 1e-15
-put(f"HRP 0050, 00646, 00679B: rho {f(C0[0, 1], 3)}, {f(C0[0, 2], 3)}, {f(C0[1, 2], 3)}; d12 {f(d3[0, 1], 3)} d13 "
+put(f"HRP 0050, 00646, 00679B: rho {f(C0[0, 1], 2)}, {f(C0[0, 2], 2)}, {f(C0[1, 2], 2)}; d12 {f(d3[0, 1], 3)} d13 "
     f"{f(d3[0, 2], 3)} d23 {f(d3[1, 2], 3)}; column distances {f(dd3[0, 1], 3)}, {f(dd3[0, 2], 3)}, {f(dd3[1, 2], 3)}; "
     f"merges {f(Z3[0, 2], 3)} then {f(Z3[1, 2], 3)}; order {[funds[three[i]] for i in o3]}; splits "
     + "; ".join(f"{[funds[three[i]] for i in a]} | {[funds[three[i]] for i in b]}: variances {f(1e4 * va, 2)}, "
                 f"{f(1e4 * vb, 2)} (%^2 a year), left share {f(vb / (va + vb), 4)}, right share "
                 f"{f(va / (va + vb), 4)}" for a, b, va, vb in st3)
-    + f"; weights {fl(w3h, 4)}")                                                                           # 17
+    + f"; weights {fl(w3h, 4)}; squares of A31-07's two-decimal volatilities (0050, 00679B), not the variances: "
+    + ", ".join(f(float(f"{100 * sqrt(S2[i, i]):.2f}") ** 2, 2) for i in range(2)))                         # 17
 d5, dd5 = dist(x0)
 Z5 = link(dd5)
 o5 = quasi_diag(Z5, N)
@@ -448,10 +461,12 @@ for k in range(len(sigs) - 1):
     monthly.append(shares(sigs[k].targets["R6"], cov0(fr.X[a:b])))
 mon = np.array(monthly)
 q10, q90 = (np.quantile(mon, q, axis=0, method="inverted_cdf") for q in (0.1, 0.9))
-put(f"R6 ex post: mean weights on the covariance of {len(est) - i_oos} estimation rows {est[i_oos]} -> {est[-1]}: "
-    f"shares {fl(100 * sh_post, 1)}%; holding month by holding month ({len(mon)} holding months, each one's own "
-    f"covariance) 10% quantile "
-    f"{fl(100 * q10, 1)}%, 90% {fl(100 * q90, 1)}%; months with a negative share {int((mon.min(1) < -EPS).sum())}")  # 26
+put(f"R6 ex post: the mean of R6's {len(W6)} target weights (A31-24's means) on the covariance of {len(est) - i_oos} "
+    f"estimation rows {est[i_oos]} -> {est[-1]}: "
+    f"shares {fl(100 * sh_post, 1)}%; holding month by holding month ({len(mon)} holding months, each holding month's "
+    f"own R6 target weights on that holding month's covariance) 10% quantile "
+    f"{fl(100 * q10, 1)}%, 90% {fl(100 * q90, 1)}%; holding months with a negative share "
+    f"{int((mon.min(1) < -EPS).sum())}")                                                                   # 26
 summ = {k: summary(fr, p) for k, p in paths.items()}
 put(f"realized volatility out of sample (summary, net, sqrt A_w, {p8.dates[1]} -> {p8.dates[-1]}): " + ", ".join(
     f"{k} {f(100 * float(summ[k]['vol']), 2)}%" for k in ("R6", "R7", "R8"))
@@ -503,7 +518,7 @@ while est[j] <= "2025-04-09":
     s225 = LAM * s225 + (1 - LAM) * float(fr.X[j] @ w25) ** 2
     track.append(f"{est[j]} EWMA {f(100 * sqrt(A * s225), 2)}%, implied L {f(min(CAP, sqrt(sb25 / s225)), 2)}")
     j += 1
-put(f"2025-03-31 (trade {sigs[k25].trade}): R6 {fl(w25, 4)}; sigma_bar {f(100 * sqrt(A) * sb[k25], 2)}%, EWMA "
+put(f"2025-03-31 (trade {sigs[k25].trade}): R6 {fl(w25, 3)}; sigma_bar {f(100 * sqrt(A) * sb[k25], 2)}%, EWMA "
     f"{f(100 * sqrt(A) * sf[k25], 2)}%, L {f(L[k25], 3, 2)} (borrowed {f(L[k25] - 1, 3, 2)}); continued daily on "
     f"R6's constant-weight returns: "
     + "; ".join(track) + f"; next trade {sigs[k25 + 1].trade} at L {f(L[k25 + 1], 3, 2)}")                 # 32
@@ -520,6 +535,8 @@ for k in ("R6", "R8"):
     rms = np.array([sqrt(float(np.mean(r[ii[m]:ii[m + 1]] ** 2))) for m in range(len(ii) - 1)])
     vmon[k] = rms**2
     ratio[k] = rms / sb[:-1]
+
+
 def month(m: int) -> str:
     """Holding month m: the session after trade m through trade m + 1."""
     return f"holding month {p8.dates[idx[m] + 1]} -> {p8.dates[idx[m + 1]]}"
@@ -544,14 +561,23 @@ loss = {nmq: V6 / F - np.log(V6 / F) - 1 for nmq, F in (("window", sb[:-1] ** 2)
 wins = int((loss["window"] < loss["EWMA"]).sum())
 wins_e = int((loss["EWMA"] < loss["window"]).sum())
 big = np.argsort(loss["EWMA"])[::-1][:2]
+gq = loss["EWMA"] - loss["window"]  # above 0: the EWMA loses the holding month; below 0: it wins it
+won, lost = gq < 0, gq > 0
+assert int(won.sum()) == wins_e and int(lost.sum()) == wins
+worst, best = int(gq.argmax()), int(gq.argmin())
 put(f"QLIKE of R6's holding month ({len(V6)} months): mean window {f(loss['window'].mean(), 3)}, EWMA "
     f"{f(loss['EWMA'].mean(), 3)}; median window {f(float(np.quantile(loss['window'], 0.5, method='inverted_cdf')), 3)}, "
-    f"EWMA {f(float(np.quantile(loss['EWMA'], 0.5, method='inverted_cdf')), 3)}; the window's loss is lower in {wins} "
-    f"months, the EWMA's in {wins_e}; EWMA's two largest losses " + ", ".join(
+    f"EWMA {f(float(np.quantile(loss['EWMA'], 0.5, method='inverted_cdf')), 3)}; the window's QLIKE is lower in {wins} "
+    f"months, the EWMA's in {wins_e}; the EWMA's {wins_e} wins gain {f(float(-gq[won].sum()), 2)} in all (mean "
+    f"{f(float(-gq[won].mean()), 3)}), its {wins} losses cost {f(float(gq[lost].sum()), 2)} (mean "
+    f"{f(float(gq[lost].mean()), 3)}); costs minus gains {f(float(gq.sum()), 2)} = {len(gq)} x the gap in means "
+    f"{f(float(gq.mean()), 3)}; largest loss {f(float(gq[worst]), 1)} ({month(worst)}), largest win "
+    f"{f(float(-gq[best]), 2)} ({month(best)}); the EWMA's two largest QLIKE values " + ", ".join(
         f"{f(loss['EWMA'][m], 2)} ({month(int(m))}; window {f(loss['window'][m], 2)})" for m in big)
-    + "; without those two months, means window "
-    + f"{f(float(np.delete(loss['window'], big).mean()), 3)}, EWMA {f(float(np.delete(loss['EWMA'], big).mean()), 3)}"
-    + f"; corr(ln EWMA/sigma_bar, ln realized/sigma_bar) "
+    + f"; without the largest loss's month only, means window {f(float(np.delete(loss['window'], worst).mean()), 3)}, "
+    f"EWMA {f(float(np.delete(loss['EWMA'], worst).mean()), 3)}; without the months of the two largest QLIKE values, "
+    f"means window {f(float(np.delete(loss['window'], big).mean()), 3)}, EWMA "
+    f"{f(float(np.delete(loss['EWMA'], big).mean()), 3)}; corr(ln EWMA/sigma_bar, ln realized/sigma_bar) "
     f"{f(float(np.corrcoef(np.log(sf[:-1] / sb[:-1]), np.log(ratio['R6']))[0, 1]), 2)}")                     # 35
 to8 = np.array([t.turnover for t in p8.trades[1:]])
 put(f"R8's trades (decision A2; annual turnover of every rule is LM34's, A34-06): one-way turnover per trade over the "
@@ -571,10 +597,11 @@ ew, itw = ccd(Sw, np.full(3, 1 / 3))
 assert np.abs(ew - erc(Sw)).max() < 1e-10
 jw, jit = jacobi(Sw, np.full(3, 1 / 3))
 ivw = (1 / vw) / float((1 / vw).sum())
-put(f"widget start (first window, 0050, 00679B, 00642U): vols {fl(100 * vw, 2)}%, corr {f(Cw[0, 1], 2)}, "
+put(f"widget start (first window, 0050, 00679B, 00642U): vols {fl(100 * vw, 1)}%, corr {f(Cw[0, 1], 2)}, "
     f"{f(Cw[0, 2], 2)}, {f(Cw[1, 2], 2)}; ERC {fl(ew, 4)} ({itw} CCD sweeps), vol {f(100 * vol(ew, Sw), 2)}%; IV "
     f"{fl(ivw, 4)}, shares {fl(100 * shares(ivw, Sw), 1)}%; 1/3 each: shares "
-    f"{fl(100 * shares(np.full(3, 1 / 3), Sw), 1)}%; Jacobi from 1/3 (annualized S): "
+    f"{fl(100 * shares(np.full(3, 1 / 3), Sw), 1)}%; Jacobi from 1/3 (annualized S; stopped when max |w_(k+1) - w_k| "
+    f"< 1e-12): "
     + (f"settles after {jit} steps at {fl(jw, 1)} (shares {fl(shares(jw, Sw), 3)}), not ERC" if jit > 0
        else "does not settle in 10,000 steps"))                                                              # 39
 

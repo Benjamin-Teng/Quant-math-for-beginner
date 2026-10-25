@@ -1,5 +1,8 @@
 """LM35 anchors (Stress Testing): every number the Stage 1 brief quotes (drafted 2026-10-24, revised the same day to
-the editor's decisions on the briefs, plans/vol-5.md).
+the editor's decisions on the briefs, on the first revision and on the second recomputation, plans/vol-5.md; labels
+repaired on 2026-10-25 after a verifier's check, no value changed; finished the same day to the decisions on the third
+revision: A35-48 adds the checkpoint funds' extreme returns and 00720B's exact return of 2020-03-19, which TPEx's
+no-limit rule allows, "Listing markets").
 
 Reads only data/processed/*.parquet through the shared builders, plus the registered raw files the plan names (run the
 builders first: data/vol3_series.py, data/vol4_series.py, data/build_series.py, data/vol5_series.py, data/vol5_rules.py):
@@ -49,18 +52,24 @@ not (LM27's convention; plans/vol-5.md, "Weeks and months"). Mahalanobis distanc
 mean and covariance (divisor T); the reverse stress test minimizes d^2 = (x - mu)' S^-1 (x - mu) subject to
 f'x = -l (closed form) and, bounded, with 0050's shock >= -10% (cvxpy: CLARABEL and OSQP in percent units, which the
 shared decision "Solver output" allows with the KKT residuals printed; tolerances printed, KKT residuals and the
-closed form with the active bound checked).
+closed form with the active bound checked). The objective is given as cp.quad_form(x - mu, cp.psd_wrap(S^-1)): the
+solvers' statuses and an inactive multiplier depend on the form (given as cp.sum_squares of a Cholesky factor of S^-1
+times x - mu, CLARABEL's inactive multiplier for R8 is about 6e-12, and OSQP's status for R2 can fall to
+optimal_inaccurate: in 18 of 40 last-bit perturbations of S in a verifier's check, against none of 40 with quad_form),
+so the brief states it.
 Betas are OLS slopes with an intercept on the estimation frame (TR23's R on the same dates). The ruin leverage of a
 loss R < 0 is -1/R (1 + L R <= 0). Counts on two-decimal prices use Fraction; counts on computed values the guard
 1e-12.
 
 Rounding flags. Every number the brief prints passes through f(x, k1, k2, ...), which shows x with max(k) + 3 decimals
 and flags it "NEAR" for each printed precision k at which x lies within a tenth of a last-digit unit of a rounding
-boundary (|frac(10^k |x|) - 0.5| < 0.1). The brief prints a flagged value as rounded from the unrounded value here.
-A number computed from an adjusted close (the US proxies) is printed to 1 dp and flagged "CENT" when a change of one
-cent in each adjusted close it uses could move its 1-dp rounding (PITFALLS section 3: a re-fetch re-rounds the
-column); the brief prints such a number to 0 dp, or as "about" when the flag says 0 dp is not safe either. Solver
-residuals and gaps print as bounds (the script stops if one is exceeded), because their digits are rounding noise.
+boundary (|frac(10^k |x|) - 0.5| < 0.1). The brief prints a flagged value as rounded from the unrounded value here
+(the flags stay in the anchors table; decision C11). A number computed from an adjusted close (the US proxies) is
+printed to 1 dp and flagged "CENT" when a change of one cent in each adjusted close it uses could move its 1-dp
+rounding (PITFALLS section 3: a re-fetch re-rounds the column); the brief prints such a number to 0 dp, or as "about"
+when the flag says 0 dp is not safe either, so a CENT value is checked for NEAR at 0 dp only. Solver residuals, gaps
+and an inactive constraint's multiplier print as bounds (the script stops if a residual or gap is exceeded), because
+their digits are rounding noise.
 
 Prints one line per anchor, "A35-NN <value>", in ID order, and writes nothing.
 
@@ -111,19 +120,20 @@ def put(value: str) -> None:
     CENT.clear()
 
 
-def f(x: float, *ks: int, plus: bool = False) -> str:
-    """x with max(ks) + 3 decimals; flagged for each printed precision k within 0.1 of a last-digit unit of a boundary."""
+def f(x: float, *ks: int, plus: bool = False, dec: int | None = None) -> str:
+    """x with max(ks) + 3 decimals (or dec); flagged for each printed precision k within 0.1 of a last-digit unit of a
+    boundary."""
     x = float(x)
     for k in ks:
         u = abs(x) * 10**k
         if abs(u - floor(u) - 0.5) < 0.1:
             NEAR.append(f"{x:.{k + 3}f} at {k} dp")
-    return f"{x:{'+' if plus else ''}.{max(ks) + 3}f}"
+    return f"{x:{'+' if plus else ''}.{max(ks) + 3 if dec is None else dec}f}"
 
 
-def pc(x: float, *ks: int) -> str:
+def pc(x: float, *ks: int, dec: int | None = None) -> str:
     """A return in percent, signed, through f()."""
-    return f(100 * float(x), *ks, plus=True)
+    return f(100 * float(x), *ks, plus=True, dec=dec)
 
 
 def pu(x: float, u: float) -> str:
@@ -133,7 +143,7 @@ def pu(x: float, u: float) -> str:
     if floor(10 * lo + 0.5) != floor(10 * hi + 0.5):
         ok0 = floor(lo + 0.5) == floor(hi + 0.5)
         CENT.append(f"{100 * x:.4f} +- {100 * u:.4f}" + ("" if ok0 else " (0 dp too: write 'about')"))
-        return pc(x, 0, 1)                       # printed at 0 dp: flag that precision too
+        return pc(x, 0, dec=4)                   # printed at 0 dp: flag that precision only
     return pc(x, 1)
 
 
@@ -143,7 +153,7 @@ def lu(x: float, u: float) -> str:
     if floor(10 * a + 0.5) != floor(10 * b + 0.5):
         ok0 = floor(a + 0.5) == floor(b + 0.5)
         CENT.append(f"L {-1 / x:.4f} in [{a:.4f}, {b:.4f}]" + ("" if ok0 else " (0 dp too: write 'about')"))
-        return f(-1 / x, 0, 1)                   # printed at 0 dp: flag that precision too
+        return f(-1 / x, 0, dec=4)               # printed at 0 dp: flag that precision only
     return f(-1 / x, 1)
 
 
@@ -252,7 +262,7 @@ first = TRADES.filter(pl.col("rule") == "R1").sort("trade")
 put(f"rules' books: {first.height} trades, first {first['trade'][0]} (signal {first['signal'][0]}), last "
     f"{first['trade'][-1]}; valuation to {WD[-1]}; rebuilt wealth against vol5_rules.parquet, largest relative "
     f"difference over the eight rules {max(BOOKERR.values()):.1e}")
-put(f"TR23: {int(np.isfinite(RT).sum())} returns {TD[1]} .. {TD[-1]} (A19-02)")
+put(f"TR23: {int(np.isfinite(RT).sum())} returns {TD[1]} .. {TD[-1]} (published, lm19.md:46)")
 
 # ---------------------------------------------------------------- scenario windows (TR23)
 SCEN = [("2008", "year"), ("2015", "year"), ("2020", "year"), ("2024-08-05", "day"), ("2025-04-07", "day")]
@@ -567,17 +577,17 @@ put(f"2022 (an illustration, not a ROADMAP scenario): TR23 peak {a}, trough {b},
     f"(its first and last dropped) {f(np.corrcoef(we[:, 0], we[:, 2])[0, 1], 3)} (full sample, {nwf} ISO weeks: "
     f"{f(np.corrcoef(wf[:, 0], wf[:, 2])[0, 1], 3)}, LM27's A27-11); rules frozen at {a}: "
     + rules_line({k: float(expo(k, a) @ g22) for k in RULES}))
-s0 = X[:, 0].std()
+s0 = X[:, 0].std(ddof=0)                      # divisor T, as the book's s
 ev = X[:, 0] <= MU[0] - 2 * s0 + EPS
-vs = X[ev, 0].var()
+vs = X[ev, 0].var(ddof=0)                     # divisor n, the number of tail days (48), as T for the full sample
 out = []
 for j in (1, 2):
     rho = float(np.corrcoef(X[:, 0], X[:, j])[0, 1])
     model = rho / sqrt(rho**2 + (1 - rho**2) * s0**2 / vs)
     out.append(f"{FUNDS[j]}: data {f(np.corrcoef(X[ev, 0], X[ev, j])[0, 1], 3)}, (16.10) {f(model, 3)}, full {f(rho, 3)}")
 put(f"(16.10) on the days 0050 fell 2 standard deviations or more below its mean ({int(ev.sum())} days; variance "
-    f"ratio full / tail {f(s0**2 / vs, 3)}, so 0050's variance on the tail days is {f(vs / s0**2, 3)} times the full "
-    f"sample's): " + "; ".join(out))
+    f"ratio full / tail {f(s0**2 / vs, 3)}, both with divisor the count (T = {len(X)}, {int(ev.sum())}), so 0050's "
+    f"variance on the tail days is {f(vs / s0**2, 3)} times the full sample's): " + "; ".join(out))
 
 
 def maha(x: Vec) -> float:
@@ -592,10 +602,10 @@ order = np.argsort(-dt)
 r7 = int(np.where(np.array(fr.est_dates)[order] == "2025-04-07")[0][0]) + 1
 put("worst of each fund on one day (constructed): " + ", ".join(f"{s} {pc(woe[j], 2)} ({WD[wi[j]]})" for j, s in
                                                              enumerate(FUNDS))
-    + f"; Mahalanobis distance {f(maha(woe), 1)}; rules' current books " + rules_line({k: float(CUR[k] @ woe) for k in RULES}))
-put(f"historical Mahalanobis distances (estimation frame): largest {f(dt[order[0]], 1)} on {fr.est_dates[order[0]]}, "
-    f"then {f(dt[order[1]], 1)} ({fr.est_dates[order[1]]}), {f(dt[order[2]], 1)} ({fr.est_dates[order[2]]}); 2025-04-07 "
-    f"{f(dt[fr.est_dates.index('2025-04-07')], 1)}, rank {r7} of {len(dt)}; median "
+    + f"; Mahalanobis distance {f(maha(woe), 2)}; rules' current books " + rules_line({k: float(CUR[k] @ woe) for k in RULES}))
+put(f"historical Mahalanobis distances (estimation frame): largest {f(dt[order[0]], 2, 3)} on {fr.est_dates[order[0]]}, "
+    f"then {f(dt[order[1]], 2, 3)} ({fr.est_dates[order[1]]}), {f(dt[order[2]], 2, 3)} ({fr.est_dates[order[2]]}); "
+    f"2025-04-07 {f(dt[fr.est_dates.index('2025-04-07')], 2, 3)}, rank {r7} of {len(dt)}; median "
     f"{f(np.quantile(dt, 0.5, method='inverted_cdf'), 2)}; returns on {fr.est_dates[order[0]]}: "
     f"{funds_line(FUNDS, X[order[0]])}; on {fr.est_dates[order[1]]}: {funds_line(FUNDS, X[order[1]])}")
 
@@ -604,17 +614,18 @@ put(f"current books ({LAST} close; owners LM27-LM31, echoed as inputs): "
     + "; ".join(f"{k} " + "/".join(f(x, 3) for x in CUR[k]) for k in RULES))
 lines = []
 XSTAR: dict[str, Vec] = {}
+kmax, k7 = float(dt.max()), float(dt[fr.est_dates.index("2025-04-07")])   # unrounded bounds k (printed to 3 dp)
 for k in RULES:
     e = CUR[k]
     sp = sqrt(float(e @ S @ e))
     mp = float(e @ MU)
     dstar = (LOSS + mp) / sp
     XSTAR[k] = MU - (LOSS + mp) * (S @ e) / sp**2
-    kmax, k7 = float(dt.max()), float(dt[fr.est_dates.index("2025-04-07")])
-    lines.append(f"{k} sigma_p {f(100 * sp, 3)}% d* {f(dstar, 2)}, worst loss within d <= {f(kmax, 2)} (the sample's "
-                 f"largest) {f(100 * (kmax * sp - mp), 2)}% and within d <= {f(k7, 2)} (2025-04-07's) "
+    lines.append(f"{k} mean f'R {f(100 * mp, 3)}% sigma_p {f(100 * sp, 3, 4)}% d* {f(dstar, 2)}, worst loss "
+                 f"within d <= k_max {f(100 * (kmax * sp - mp), 2)}% and within d <= k_0407 "
                  f"{f(100 * (k7 * sp - mp), 2)}%")
-put(f"reverse stress, one-day loss {f(100 * LOSS, 0)}%, full-sample mean and covariance: " + "; ".join(lines)
+put(f"reverse stress, one-day loss {f(100 * LOSS, 0)}%, full-sample mean and covariance; bounds k at the unrounded "
+    f"distances k_max = {f(kmax, 3)} (the sample's largest) and k_0407 = {f(k7, 3)} (2025-04-07's): " + "; ".join(lines)
     + "; shock x* R1 " + funds_line(FUNDS, XSTAR["R1"]) + "; R8 " + funds_line(FUNDS, XSTAR["R8"]))
 
 S100, MU100 = 1e4 * S, 100 * MU
@@ -623,7 +634,8 @@ SI100 = (SI100 + SI100.T) / 2
 
 
 def bounded(e: Vec) -> tuple[Vec, float, str]:
-    """min d^2 s.t. e'x <= -10 (percent), x_0050 >= -10, by CLARABEL and OSQP; KKT and the closed form checked."""
+    """min d^2 s.t. e'x <= -10 (percent), x_0050 >= -10, by CLARABEL and OSQP with the objective
+    quad_form(x - mu, psd_wrap(S^-1)) (the form the brief states); KKT and the closed form checked."""
     sols = []
     duals = None
     for solver, opts in ((cp.CLARABEL, vr.CLARABEL_OPTS), (cp.OSQP, vr.OSQP_OPTS)):
@@ -655,8 +667,10 @@ def bounded(e: Vec) -> tuple[Vec, float, str]:
     kkt = float(np.abs(grad).max())
     if gap_cf > 1e-9 or gap_osqp > 1e-9 or kkt > 1e-13:     # printed as bounds: their digits are rounding noise
         fail(f"bounded reverse stress: closed form gap {gap_cf:.1e}, OSQP gap {gap_osqp:.1e}, KKT residual {kkt:.1e}")
+    mult = [("below 1e-12" if abs(d) < 1e-12 else f(d, 1 if abs(d) >= 1 else 4))   # an inactive one is solver noise
+            for d in duals]
     return xs / 100, sqrt(float((xs - MU100) @ SI100 @ (xs - MU100))), (
-        f"bound {'active' if active else 'inactive'}, multipliers {duals[0]:.4g} and {duals[1]:.4g}, KKT residual "
+        f"bound {'active' if active else 'inactive'}, multipliers {mult[0]} and {mult[1]}, KKT residual "
         f"below 1e-13, closed-form and OSQP gaps below 1e-9")
 
 
@@ -664,7 +678,8 @@ lines = []
 for k in ("R1", "R2", "R8"):
     xb, db, note = bounded(CUR[k])
     lines.append(f"{k}: d {f(db, 2)}, shock {funds_line(FUNDS, xb)} ({note})")
-put("reverse stress with 0050's limit (shock >= -10%; CLARABEL tol 1e-12, OSQP eps 1e-10 polished; percent units): "
+put("reverse stress with 0050's limit (shock >= -10%; objective quad_form(x - mean, psd_wrap(inverse covariance)), "
+    "percent units; CLARABEL tol 1e-12, OSQP eps 1e-10 polished): "
     + "; ".join(lines))
 
 # ---------------------------------------------------------------- leverage, limits and ruin
@@ -674,8 +689,8 @@ for name in ("2020", "2024-08-05", "2025-04-07"):
     eve = WD[WIDX[nd] - 1]
     lw = float(expo("R6", a) @ growth(a, b))
     ld = float(expo("R6", eve) @ fr.W[WIDX[nd]])
-    ruin.append(f"{name}: window {pc(lw, 2)} -> L {f(-1 / lw, 1, 2)}; named day {pc(ld, 2)} -> L "
-                + (f"{f(-1 / ld, 1, 2)}" if ld < 0 else "none (a gain)"))
+    ruin.append(f"{name}: window {pc(lw, 2, 3)} -> L {f(-1 / lw, 2, 3)}; named day {pc(ld, 2, 3)} -> L "
+                + (f"{f(-1 / ld, 2, 3)}" if ld < 0 else "none (a gain)"))
 for name in ("2008", "2015"):
     lw = float(FIRST["R6"] @ PROXY_RET[name]["USO"])
     lwd = float(FIRST["R6"] @ PROXY_RET[name]["DBO"])
@@ -706,8 +721,8 @@ for n in ("2020", "2024-08-05", "2025-04-07"):
     into.append(f"{n} ({a} -> {b}; frozen at {a}, exposure {f(expo('R8', a).sum(), 3)}: "
                 f"{pc(float(expo('R8', a) @ g), 2)}; actual {pc(wealth('R8', b) / wealth('R8', a) - 1, 2)}): "
                 + "; ".join(cells))
-put(f"R8's uncapped exposure ratio (LM31 owns the path; echoed): {len(ratio)} signals, range {f(ratio.min(), 3)} .. "
-    f"{f(ratio.max(), 3)} (max at signal {sigs[int(np.argmax(ratio))].signal}), {int((ratio >= 1.5 - EPS).sum())} at or "
+put(f"R8's uncapped exposure ratio (LM31 owns the path, A31-29; echoed): {len(ratio)} signals, range "
+    f"{f(ratio.min(), 3)} .. {f(ratio.max(), 2, 3)} (max at signal {sigs[int(np.argmax(ratio))].signal}), {int((ratio >= 1.5 - EPS).sum())} at or "
     f"above the cap 1.5; R8's trades into each window (the last trade on or before its first close, then every trade "
     f"inside it; drifted exposure before -> target after; each post-trade book frozen over the whole window, (35.1)): "
     + " | ".join(into))
@@ -726,7 +741,7 @@ lev = notional / TX_MARGIN[0]
 put("TX settlement moves of 9.95% or more since 2015-06-01 (TX23): "
     + "; ".join(f"{d} TX {pc(a, 3)}, TAIEX price {pc(b, 2)}, volume {v:,}" for d, a, b, v in
                 lim.select("date", "RF", "RS", "volume").iter_rows())
-    + f"; 2025-04-08 volume {vol8:,}; TX at {LAST}: F = {F26:,.0f} (A23-36), notional NT$ {notional:,.0f}; with the "
+    + f"; 2025-04-08 volume {vol8:,}; TX at {LAST}: F = {F26:,.0f} (lm23.md:327), notional NT$ {notional:,.0f}; with the "
     f"initial margin {TX_MARGIN[0]:,} as equity f = {f(lev, 2)}, a 10% limit day loses {f(lev * 0.10, 3)} times equity "
     f"(equity {notional * -0.10 + TX_MARGIN[0]:,.0f}); maintenance {TX_MARGIN[1]:,} is reached after a fall of "
     f"{f(100 * (TX_MARGIN[0] - TX_MARGIN[1]) / notional, 3)}% (lm02.md:462)")
@@ -774,13 +789,29 @@ for name in ("2020", "2024-08-05", "2025-04-07"):
     lines.append(f"{name} window " + ", ".join(f"{s} {pc(g[j], 2)}" for j, s in enumerate(fc.funds) if j >= 5)
                  + " ; named day " + ", ".join(f"{s} {pc(fc.W[cw[nd], j], 2)}" for j, s in enumerate(fc.funds) if j >= 5))
 o56 = ohlc("0056").filter(pl.col("date") == "2025-04-07").row(0)
+ext = []
+for j, s in enumerate(fc.funds):
+    if j >= 5:                                   # the checkpoint's own funds (E5's are A35-46)
+        w = fc.W[:, j]
+        ext.append(f"{s} min {pc(w.min(), 2)} ({fc.wealth_dates[int(np.argmin(w))]}) max {pc(w.max(), 2)} "
+                   f"({fc.wealth_dates[int(np.argmax(w))]}), |R| > 10%: {int((np.abs(w) > 0.10 + EPS).sum())}")
+c720 = dict(ohlc("00720B").select("date", "close").iter_rows())
+d720 = sorted(c720)
+p720 = d720[d720.index("2020-03-19") - 1]
+if p720 != fc.wealth_dates[cw["2020-03-19"] - 1]:
+    fail("00720B: the close before 2020-03-19 is not the wealth frame's previous session")
+x720 = fx2(c720["2020-03-19"]) / fx2(c720[p720]) - 1
+if abs(float(x720) - fc.W[cw["2020-03-19"], fc.funds.index("00720B")]) > EPS:
+    fail("00720B on 2020-03-19: the wealth-frame return is not the price change (a distribution that day?)")
 put("checkpoint funds in the scenarios: " + "; ".join(lines) + f"; 0056 on 2025-04-07: open {o56[1]} high {o56[2]} low "
-    f"{o56[3]} close {o56[4]}")
+    f"{o56[3]} close {o56[4]}; extremes in the checkpoint wealth frame ({fc.wealth_dates[0]} .. {fc.wealth_dates[-1]}): "
+    + "; ".join(ext) + f"; 00720B on 2020-03-19: close {c720['2020-03-19']} from {c720[p720]} ({p720}), return {x720} "
+    "exactly (Fraction), equal to its wealth-frame return (no distribution that day)")
 
 # ---------------------------------------------------------------- the widget's initial state
 w7 = fr.W[i7]
 put("widget initial state (current books under the 2025-04-07 shock vector, Mahalanobis distance "
-    f"{f(maha(w7), 1)}): " + ", ".join(f"{k} {pc(float(CUR[k] @ w7), 2)} (ruin L {f(-1 / float(CUR[k] @ w7), 1)})"
+    f"{f(maha(w7), 2)}): " + ", ".join(f"{k} {pc(float(CUR[k] @ w7), 2)} (ruin L {f(-1 / float(CUR[k] @ w7), 2)})"
                                         for k in RULES))
 
 # ---------------------------------------------------------------- problems (hypothetical inputs)

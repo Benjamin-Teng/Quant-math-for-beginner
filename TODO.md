@@ -1,4 +1,4 @@
-# TODO — handoff (2026-10-24)
+# TODO — handoff (2026-10-25)
 
 > 給接手的 Claude Code：先讀 `CLAUDE.md`，再依下列順序執行。每完成一項就 commit 並直接 push 到 `main`，並用繁體中文向 Benjamin 回報。
 
@@ -76,9 +76,32 @@ LM32–LM35 (Measuring True Risk and Return); the two can be written in parallel
     (`data/raw/vol5/`); `data/vol5_series.py` and `data/vol5_rules.py` (independently recomputed: every target,
     wealth path and criterion); the chart kit's stacked bars, curves and colour check (published pages pixel- and
     byte-identical); AUTHORING §6 (portfolio notation) and §7.
-  - [ ] US proxies for LM35 (capability B5), delisted ETFs for LM34 (B4): registered when those briefs name them.
-  - [ ] Briefs LM27–LM35 and their anchor scripts; cross-check; independent recomputation of the anchors; editor's
-    decisions; revisions; SOURCES and 樂詞網 entries; a fresh check of the whole of Stage 1.
+  - [x] US proxies for LM35 (capability B5) and delisted ETFs for LM34 (B4), registered (`6b02e71`).
+  - [x] Briefs LM27–LM35 and their anchor scripts (`data/vol5_anchors_lm27.py` … `data/vol6_anchors_lm35.py`,
+    assembled into `plans/vol-5.md`, `plans/vol-6.md` and the two anchors files): drafted; recomputed independently
+    (all 423 anchors, then the 185 a revision changed, then each later change); two cross-module checks; revised
+    three times plus a last pass, each verified by a fresh agent. Every decision is in `plans/vol-5.md` ("Editor's
+    decisions on the briefs" and the sections on the first, second and third revisions).
+  - [x] Sources: two source hunts read every cited original that could be had (Kupiec 1995 and Christoffersen 1998 in
+    their working versions; TPEx's rules for the TPEx-listed 00679B and 00720B); SOURCES gained the Volume V and VI
+    papers, data, Python, Taiwan facts and 樂詞網 sections (each fragment verified by fresh agents).
+  - [ ] **Next (the owner paused the work here for usage on 2026-10-25):** a fresh check of the whole of Stage 1
+    (the nine briefs and anchors as assembled, the decisions, SOURCES), then the editor's fixes. Give it the minor
+    items the last verifiers left (reports in the session scratch, summarized here):
+    - LM28: the closed list's "LM30's E2 alone" (LM29's widget and LM31's E1 also print A28-06 to two decimals);
+      A28-06's Printed-as should record those two; LM31 cites A28-06 where its anchors name A31-07.
+    - LM29: the cost-model pointer reads as if the articles fixed the rate (they let brokers set it, with notice above
+      1.425‰); the Used list lacks the widget's $\sigma_i$ and $\rho$.
+    - LM30: the anchors Status omits A30-04's Printed-as change; X3's note "years of sessions are sessions over $A$"
+      should read "years are sessions over $A$".
+    - LM31: the Pitfalls line counts credit among Harvey et al.'s 50 futures and forwards (their 50 exclude credit).
+    - LM32: the hygiene note's first sentence has 31 words.
+    - LM33: E2's "the rules' own paths keep 1.5%" can be read as R8 borrowing at 1.5% (it borrows at 3.5%).
+    - LM34: A34-17's half-Kelly 23.56% does not follow from the printed root 4.14 (23.57%).
+    - LM35: the suspension wording against the SOURCES rows; "under TWSE's current rules" for the hypothetical
+      replays, which hold 00679B's proxy (TPEx); the read dates of the short names.
+  - [ ] Before Stage 2's labs: `data/make_lab_data.py` writes what the shared "Labs" decision lists (both E5 frames,
+    the rules' targets and wealth paths, LM34's grid, the T5S days, the checkpoint and proxy frames).
 - [ ] Stage 2: drafts of LM27–LM35.
 - [ ] Stage 3: review rounds, closing check, final check.
 - [ ] Stage 4: publish edition 0.6.

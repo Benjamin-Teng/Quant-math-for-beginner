@@ -1153,15 +1153,20 @@ ETFs; the checkpoint's universe and its rubric.
 
 Stage 1 brief, drafted 2026-10-24 from the editor's spine (`plans/vol-5.md`, "### Spine of LM27 Portfolio Return and
 Risk") and the shared decisions of the same file; revised the same day to the editor's decisions on the briefs
-(`plans/vol-5.md`, "Editor's decisions on the briefs (2026-10-24)", A–G and "Per module"), after the independent
-recomputation (46 of 46 anchors reproduced) and the cross-module check. Every number carries its anchor ID at first
-appearance; `data/vol5_anchors_lm27.py` prints them all (49 rows, `## LM27` of `plans/vol-5-anchors.md`). Numbers
-quoted from published modules carry their file:line and are echoed by the script where it says so. Each derived figure
-is printed with the digits its printed inputs need, so that a reader recomputes it from them; where no precision does
-that, the brief says "from unrounded inputs" (PITFALLS, "Printed numbers that do not recompute"). The script reads only
-`data/processed/vol5_frames.parquet`, `vol5_ohlc.parquet` and `vol2_closes.parquet` (built from the registered raw
-files) through the shared builders (`vol5_series.frames`, `ohlc`; `vol5_rules.schedule`, `signals`, `wealth_path`,
-`cov0`; `lm10_series.u28`), writes nothing, and passes `ruff check` and `ty check`.
+(`plans/vol-5.md`, "Editor's decisions on the briefs (2026-10-24)", A–G and "Per module"), after the first independent
+recomputation (46 of 46 anchors reproduced) and the cross-module check; and revised again the same day to the second
+recomputation (49 of 49 anchors reproduced, 208 printed numbers audited), the second cross-check (Y1–Y20) and the
+decisions on them ("Decisions on the first revision" and "Decisions on the second recomputation and cross-check"); and
+revised a third time on 2026-10-25 to the last verification (four minor items, one question) and "Decisions on the
+third revision (2026-10-25)", including "Listing markets". Every number carries its anchor ID at first appearance;
+`data/vol5_anchors_lm27.py` prints them all (50 rows, A27-46 withdrawn; `## LM27` of `plans/vol-5-anchors.md`).
+Numbers quoted from published modules carry their file:line and are echoed by the script where it says so. Each
+derived figure is printed with the digits its printed inputs need, so that a reader recomputes it from them; where no
+precision does that, the brief says "from unrounded inputs" (PITFALLS, "Printed numbers that do not recompute"). The
+script reads only `data/processed/vol5_frames.parquet`, `vol5_ohlc.parquet` and
+`vol2_closes.parquet` (built from the registered raw files) through the shared builders (`vol5_series.frames`, `ohlc`;
+`vol5_rules.schedule`, `signals`, `wealth_path`, `cov0`; `lm10_series.u28`), writes nothing, and passes `ruff check`
+and `ty check`.
 
 **Layer added.** LM7 priced two funds held at fixed weights; LM8 wrote a book's P&L and returns as dot products; LM10
 made $\mathbf w^{\top}\hat\Sigma\mathbf w$ a sample quantity; LM16 its population form; LM23 the market model. LM27 adds
@@ -1186,32 +1191,39 @@ wealth, the five-fund sample needs two date frames, and the book's risk splits a
   cap-weighted index whose weights drift (lm09.md:444).
 - LM10: (10.2) $\hat\Sigma=\tilde X^{\top}\tilde X/T$ (lm10.md:127); (10.3) $C$ (lm10.md:148); (10.4)
   $s_p^2=\mathbf w^{\top}\hat\Sigma\mathbf w$ exact for constant weights (lm10.md:181); (10.6) the equal-weight split
-  (lm10.md:208); (10.8) $\nabla(\mathbf w^{\top}M\mathbf w)=2M\mathbf w$ (lm10.md:403); (10.9) the exact second-order
-  expansion (lm10.md:409); the U28 book's 15.75%, 21.94%, 4.22%, 7.2% and 92.8% (lm10.md:21, 36, 41, 220); the form
-  "$T$ returns times 365.25, divided by the sample's calendar days" for $A$ (lm10.md:41).
+  (lm10.md:208); (10.8) $\nabla(\mathbf w^{\top}M\mathbf w)=(M+M^{\top})\mathbf w$, which is $2M\mathbf w$ for symmetric
+  $M$ (lm10.md:403); (10.9) the exact second-order expansion (lm10.md:409); the U28 book's 15.75%, 21.94%, 4.22%, 7.2%
+  and 92.8% (lm10.md:21, 36, 41, 220); the form "$T$ returns times 365.25, divided by the sample's calendar days" for
+  $A$ (lm10.md:41).
 - LM11: (11.4) $\lambda_N\le\mathbf u^{\top}M\mathbf u\le\lambda_1$ for unit $\mathbf u$ (lm11.md:184), in one knowledge
   check. The spine's (11.2) is not used.
 - LM12: (12.3) slopes from covariances (lm12.md:120), so $\beta_{i,p}$ is a regression slope; an index return is
   $\mathbf w_{t-1}^{\top}\mathbf R_t$ with weights set at the previous close (lm12.md:155–160).
 - LM16: (16.2) covariance (lm16.md:142); (16.4) $\Cov(M\mathbf X+\mathbf b)=M\Sigma M^{\top}$ (lm16.md:220); (16.8) the
   conditional mean in a normal pair (lm16.md:339), for the loss-share reading of a risk contribution.
-- LM19: weekly and monthly returns built from daily data, and the annualization rules with their conditions (19.9)
+- LM19: (19.3) the sample raw kurtosis, divisor $T$ (lm19.md:158), for the condition of the plug-in standard error;
+  weekly and monthly returns built from daily data, and the annualization rules with their conditions (19.9)
   (lm19.md:357; outcomes at lm19.md:15–16); a year counted as the periods with data, 1,185/23 = 51.52 weeks or 12
   months (lm19.md:39).
 - LM20: the normal-theory standard error of a correlation, $\Var\hat\rho\approx(1-\rho^2)^2/T$, and its plug-in
-  counterpart (Practice Problem 6, lm20.md:558).
+  counterpart (Practice Problem 6, lm20.md:558); a standard error built from fourth moments needs them finite
+  (lm20.md:364).
 - LM23: (23.1) OLS (lm23.md:66); the market model and beta (lm23.md:279–283); U28's market betas, 0.507 to 1.207
   (lm23.md:46); residual correlations across the 378 pairs, mean 0.112 (lm23.md:359).
 
-**Leads:** `[28, 29, 30, 31, 32, 33, 34, 35]`. Each later module cites LM27's tags by number (decision C8); the tags
-each one uses, from its brief of 2026-10-24: LM28 ((27.4)–(27.6): $\mu_p$, $\sigma_p^2$, $\beta_{i,p}$ and
-$\mathrm{RC}_i$, so that at $\mathbf w^{\mathrm{mv}}$ every $\beta_{i,p}=1$), LM29 ((27.1)–(27.5): drift, costs,
-turnover, $\sigma_p^2$ and $\beta_{i,p}$), LM30 ((27.2): the wealth recursion behind R1's realized volatility; R1 and
-R2), LM31 ((27.1)–(27.3) for R8's drift, cash and borrowing; (27.5)–(27.6) as the definitions its budgets build on,
-decision A6), LM32 ((27.1), (27.2), (27.4): the wealth path and $\sigma_p$), LM33 ((27.2): the rules' net returns; R1
-as the benchmark), LM34 ((27.1)–(27.3): net wealth, turnover and costs of every rule; A27-23 and A27-24 echoed), LM35
-((27.1), (27.2), (27.5), (27.8): replays, the ruin rule, $\beta_{i,p}$ and factor shocks). Every one of them lists 27
-among its prerequisites (decision C9). LM43 may cite (27.4) in Volume VIII; its brief decides.
+**Leads:** `[28, 29, 30, 31, 32, 33, 34, 35]`. Each later module cites LM27's tags by number (decision C8). The users
+below come from the cross-check's tag table of the revised briefs (Y1; decision "Tags and leads"), and "Cross-module
+tags" lists them per tag. LM28: (27.4)–(27.6), $\mu_p$, $\sigma_p^2$, $\beta_{i,p}$ and $\mathrm{RC}_i$, so that at
+$\mathbf w^{\mathrm{mv}}$ every $\beta_{i,p}=1$; it echoes E5's frame counts, A27-01 to A27-03, and names R1's
+first-window shares as LM27's (A27-21). LM29: (27.1)–(27.5), drift, costs, turnover, $\sigma_p^2$ and $\beta_{i,p}$; it
+echoes A27-02 and A27-03. LM30: (27.1), (27.2), (27.4), (27.5) and (27.8), the wealth recursion behind a rule's
+realized volatility, $\sigma_p^2$, the reading of its multipliers and the single-index matrix; it echoes A27-13 and
+A27-21. LM31: (27.1)–(27.3) for R8's drift, cash and borrowing, and (27.5)–(27.6) as the definitions its budgets build
+on (decision A6); it echoes A27-01 to A27-03, A27-13 and A27-21. LM32: (27.1), (27.2) and (27.4), the wealth path
+and $\sigma_p$; it echoes A27-23. LM33: (27.1) and (27.2), the rules' net returns, with R1 as the benchmark. LM34:
+(27.1)–(27.3), net wealth, turnover and costs of every rule; it echoes A27-23, A27-24 and A27-43. LM35: (27.1)–(27.3),
+(27.5) and (27.8), the replays, the ruin rule, the checkpoint's turnover limit, $\beta_{i,p}$ and factor shocks; it
+echoes A27-11. Every one of them lists 27 among its prerequisites (decision C9). No later brief cites (27.7).
 
 **Forward links honoured.**
 
@@ -1259,28 +1271,32 @@ Taught, practised and assessed (REVIEW_PROMPT item 10):
 weights between trades (27.1); buy-and-hold against rebalanced books (the drift exhibit; a cap-weighted index as a
 book that never trades); the wealth recursion with trades, the self-financing equation, its existence and uniqueness,
 turnover $\mathrm{TO}_t$ and the cost of a trade (27.2)–(27.3), citing the cost model and LM34 for its sources; the
-cost arithmetic of a trade and of the first purchase (decision A5: LM32 and LM34 echo A27-23, A27-24 and A27-43); the
-first purchase and one dated rebalance of R1 as worked trades; E5's two frames and why they differ (counts, $A$ and
-$A_{\mathrm w}$, the June 2025 halt, LM7's 2,363 against E5's 2,362 [A27-02, A27-07]); the domain of log growth
-($1+R_{p,t}>0$; ruin otherwise); simple returns across assets and log returns across time on E5; the asynchronous
-closes of E5 (daily, weekly and monthly correlations with their standard errors); $\mu_p$, $\sigma_p^2$ and
-annualization (27.4), with R1's and R2's $\mu_p$; the ratio of the weighted average volatility to the book's, from
-(8.11) (27.7); $\Cov(R_i,R_p)=(\Sigma\mathbf w)_i$ and $\beta_{i,p}$ (27.5); $\mathrm{MRC}_i$, $\mathrm{RC}_i$ and
-Euler's identity (27.6), derived here only (decision A6); which split is meaningful and why; negative contributions;
-the risk shares of R1 across the 92 windows, the first window's included (a stability check; LM31 cites its 50.2%);
-the factor split of $\sigma_p^2$ with market betas (27.8) on U28; R1 and R2 defined. Values owned: every A27 anchor
-except those echoed from LM7–LM10 and LM23, which are cited to their modules. LM27 prints no comparison criterion of any
-rule (shared decision "Owners").
+cost arithmetic of a trade and of the first purchase (decision A5; LM32 echoes A27-23, and LM34 echoes A27-23, A27-24
+and A27-43); the first purchase and one dated rebalance of R1 as worked trades; E5's two frames and why they differ
+(counts, $A$ and $A_{\mathrm w}$, the June 2025 halt, LM7's 2,363 against E5's 2,362 [A27-02, A27-07]); the domain of
+log growth ($1+R_{p,t}>0$; ruin otherwise); simple returns across assets and log returns across time on E5; the
+asynchronous closes of E5 (daily, weekly and monthly correlations with their standard errors and the funds' raw
+kurtosis, which the plug-in error's condition needs); $\mu_p$, $\sigma_p^2$ and annualization (27.4), with R1's and
+R2's $\mu_p$; the diversification ratio, the weighted average volatility over the book's, from (8.11) (27.7);
+$\Cov(R_i,R_p)=(\Sigma\mathbf w)_i$ and $\beta_{i,p}$ (27.5); $\mathrm{MRC}_i$, $\mathrm{RC}_i$ and Euler's identity
+(27.6), derived here only (decision A6); which split is meaningful and why; negative contributions; R1's full-sample
+$s_p$ (A27-13, which LM30 and LM31 echo); the risk shares of R1 across the 92 windows, the first window's included (a
+stability check; decision A4 leaves R1's first-window shares, A27-21, with LM27, and LM30 and LM31 echo them); the
+factor split of $\sigma_p^2$ with market betas (27.8) on U28; R1 and R2 defined. Values owned: every A27 anchor except
+those echoed from LM7–LM10 and LM23, which are cited to their modules. LM27 prints no comparison criterion of any rule
+(shared decision "Owners").
 
-**Leaves.** Choosing weights, minimum variance and tangency, and every statistic of the first window but R1's risk
-shares → LM28 (decision A4; one sentence: at LM28's minimum-variance portfolio every $\beta_{i,p}$ equals 1, so risk
-shares equal weights). R2's first-window risk shares → LM31 (A4). Constraints and costs as a term in the objective →
-LM29. The error in $\hat\Sigma$ and factor-model covariances as estimators (the single-index target) → LM30; the risk
-shares stay plug-in estimates with an unmeasured error, said once (shared decision "Estimate, standard error,
-interval"), and X7 shows how they move across windows. Contributions as targets (risk budgets, ERC), HRP, R8's
-exposure and its financing rate → LM31. Contributions to VaR or expected shortfall → not in the book (one sentence
-citing Qian 2006 for VaR). The rules' net wealth, log growth, annual turnover, costs and the cost sources → LM34
-(decision A2). Scenario losses → LM35. Net and gross exposure → LM8, cited.
+**Leaves.** Choosing weights, minimum variance and tangency → LM28. Every statistic of the first window → LM28
+(decision A4), except the risk shares (R1's are LM27's, A27-21; R2's are LM31's) and R2's first-window mean excess
+return and volatility, Black–Litterman's calibration (LM30's, A30-24; LM31 echoes them). One sentence: at LM28's
+minimum-variance portfolio every $\beta_{i,p}$ equals 1, so risk shares equal weights. Constraints and costs as a term
+in the objective → LM29. The error in $\hat\Sigma$ and factor-model covariances as estimators (the single-index
+target) → LM30. The risk shares stay plug-in estimates whose error LM27 does not measure, said once (shared decision
+"Estimate, standard error, interval"); [[LM30]] measures that of R1's first-window shares by simulation, standard
+deviations of 1.0 to 1.7 points (A30-42), and X7 shows how the shares move across windows. Contributions as targets
+(risk budgets, ERC), HRP, R8's exposure and its financing rate → LM31. Contributions to VaR or expected shortfall →
+not in the book (one sentence citing Qian 2006 for VaR). The rules' net wealth, log growth, annual turnover, costs and
+the cost sources → LM34 (decision A2). Scenario losses → LM35. Net and gross exposure → LM8, cited.
 
 **Uses before taught** (one sentence each in the text):
 
@@ -1289,7 +1305,7 @@ citing Qian 2006 for VaR). The rules' net wealth, log growth, annual turnover, c
 - §3: "The other six rules, R3 to R8, are defined in [[LM28]] to [[LM31]]; every rule trades by (27.2)."
 - §4: "The five funds were chosen in 2026 among funds still listed; [[LM34]] shows what such a choice can hide."
 - §5: "Every matrix here is a plug-in estimate with an error this module does not measure; [[LM30]] measures the
-  error of $\hat\Sigma$."
+  error of $\hat\Sigma$ and of R1's risk shares."
 - §6: "Equal contributions as a target are [[LM31]]'s risk parity."
 - §8: "Estimating a factor model's covariance, and the cost of ignoring residual covariances, is [[LM30]]'s subject."
 
@@ -1297,13 +1313,14 @@ citing Qian 2006 for VaR). The rules' net wealth, log growth, annual turnover, c
 
 - **E5** (shared decision "Data"): `vol5_series.frames("E5")` reads `data/processed/vol5_frames.parquet` (built and
   checked by `data/vol5_series.py`; FinMind `TaiwanStockPrice`, `TaiwanStockDividendResult` and
-  `TaiwanStockSplitPrice`, retrieved 2026-10-24 as `data/README.md` records). Funds and indices, read on the issuer's
-  pages 2026-10-24: 0050 元大台灣卓越50 (FTSE TWSE Taiwan 50 Index), 00646 元大S&P500 (S&P 500 Index), 00679B 元大美債20年
-  (ICE US Treasury 20+ Year, SOURCES), 00635U 期元大S&P黃金 (S&P GSCI Gold Excess Return Index; COMEX gold futures),
-  00642U 期元大S&P石油 (S&P GSCI Crude Oil Enhanced Excess Return; NYMEX WTI futures). Base close 17 January 2017, last
-  close 8 October 2026, 3,551 calendar days, 9.7221 years (calendar days ÷ 365.25) [A27-01]. Total returns as Volume I:
-  $R_{i,t}=(P_t+D_t)/(P_{t-1}/s_t)-1$, with 0050's split ratio $s_t=4$ on 18 June 2025 and 1 on every other date
-  (decision B6 gives LM34 this symbol).
+  `TaiwanStockSplitPrice`, retrieved 2026-10-24 as `data/README.md` records). Funds and the indices their issuer's
+  pages name (read 2026-10-24): 0050 元大台灣50 (FTSE TWSE Taiwan 50 Index), 00646 元大S&P500 (S&P 500 Index), 00679B
+  元大美債20年 (ICE US Treasury 20+ Year, SOURCES), 00635U 期元大S&P黃金 (S&P GSCI Gold Excess Return Index; COMEX gold
+  futures), 00642U 期元大S&P石油 (S&P GSCI Crude Oil Enhanced Excess Return; NYMEX WTI futures). Base close 17 January
+  2017, the close before the first return; last close 8 October 2026; 3,551 calendar days, 9.7221 years (calendar
+  days ÷ 365.25 from the close before the first return to the last close, decision C7) [A27-01]. Total returns as
+  Volume I: $R_{i,t}=(P_t+D_t)/P_{t-1}-1$; on 0050's 4-for-1 split day the previous close is restated per current
+  share, so 18 June 2025's return is $(P_t+D_t)/(P_{t-1}/4)-1$ (decision B6: no split-ratio symbol).
 - **Estimation frame:** $T=2{,}362$ one-session returns, 18 January 2017 → 8 October 2026; $A$ is 2,362 returns times
   365.25, divided by the sample's 3,551 calendar days, $A=242.951$ [A27-02], as lm10.md:41 writes U28's. Every
   covariance, correlation, mean and risk share, labelled "on the 2,362 joint dates" (decision C2). **Wealth frame:**
@@ -1315,13 +1332,15 @@ citing Qian 2006 for VaR). The rules' net wealth, log growth, annual turnover, c
 - **LM7's pair** (recorded use): 2,363 returns between common closes, recomputed to LM8's $\rho=-0.1056$ and 20.11%,
   13.50% [A27-07]; E5's frame gives −0.105 on 2,362, without 2025-06-18.
 - **Weekly and monthly returns:** compound the estimation frame's daily returns within ISO weeks (keys ISO year, ISO
-  week) and calendar months. The first and last period, in which the sample starts and ends, are dropped, because the
-  sample alone cannot show them complete: 500 weeks and 116 calendar months [A27-10]. Annualized as LM19 counts a
-  year (lm19.md:39), by the periods with data (decision D): $A=500\times365.25/3{,}542=51.56$ weeks, the 500 weeks
-  with a session over the 3,542 days (9.6975 years) of the 506 calendar weeks they span (six Lunar New Year weeks have
-  no session), and $A=12$ months [A27-12]; each caption says so. The last ISO week, 5–8 October 2026, happens to hold
-  all its sessions (TX's settlement file, `data/raw/vol4/`, has no session on 9 October); keeping it would move
-  0050–00679B's weekly correlation from −0.023 to −0.024 [A27-10] (Open, item 2).
+  week) and calendar months. The first and last period, in which the sample starts and ends, are dropped, complete or
+  not (decision "Weeks and months"; the rule needs no holiday calendar): 500 weeks and 116 calendar months [A27-10].
+  Weeks are annualized as LM19 counts a year (lm19.md:39), by the periods with data (decision D):
+  $A=500\times365.25/3{,}542=51.56$, the 500 weeks with a session over 9.6975 years from the close of 20 January 2017,
+  before the first weekly return, to that of 2 October 2026 (decision C7; the span of the 506 calendar weeks, six of
+  them Lunar New Year weeks without a session). Months use $A=12$, the book's monthly convention (shared decision
+  "Sharpe ratio") [A27-12]. Each caption says so. The last ISO week, 5–8 October 2026, holds all four of its sessions
+  (TX's settlement file, `data/raw/vol4/`, has no session on 9 October) and is dropped by the rule; keeping it would
+  move 0050–00679B's weekly correlation from −0.023 to −0.024 [A27-10], a figure the module does not print.
 - **Windows:** `vol5_rules.schedule`: the trailing 504 estimation rows through each of the 92 signals, 27 February 2019
   → 30 September 2026 [A27-20]; the first window runs 13 February 2017 → 27 February 2019 [A27-21]. A window's
   covariance is annualized with the full sample's $A=242.951$, as `vol5_rules.signals` does.
@@ -1329,29 +1348,36 @@ citing Qian 2006 for VaR). The rules' net wealth, log growth, annual turnover, c
   their trades of 4 March 2019 and 1 April 2026 and R1's return over 10–18 June 2025, all scale-free.
 - **U28** (Volume II, through `lm10_series.u28()`): 28 sector price indices and the TAIEX price index, $T=4{,}382$,
   $A=245.4794$ [A27-27]; price indices, no dividends: every caption says so, and only their covariances are used.
-- **Timing of the closes** (decision on LM27): §4 argues from the trading sessions and from the correlations by
-  frequency. The funds trade 09:00–13:30 Taipei time (TWSE); New York's core stock session, 9:30 a.m. to 4:00 p.m.
-  New York time (NYSE), ends at 04:00 Taipei time in US summer time and 05:00 otherwise. So the 13:30 closes of 00646
-  and 00679B follow the previous New York session, and 0050 at the same close reacts to that session too. The text
-  makes no claim about when the futures funds' indices are fixed (no source read) and prints no SPY figure.
+- **Timing of the closes** (decision on LM27; "Listing markets"): §4 argues from the trading sessions and from the
+  correlations by frequency. 0050, 00646, 00635U and 00642U trade on TWSE and 00679B on TPEx. Both markets match
+  orders from 09:00 to 13:30 Taipei time, with a closing call auction from 13:25: TWSE's Operating Rules Art. 3 and
+  its trading system page; TPEx's Business Rules (業務規則) Art. 40, applied to ETFs by its ETF rules' Art. 4 ¶2, and
+  its trading system page. New York's core stock session, 9:30 a.m. to 4:00 p.m. New York time (NYSE), ends at 04:00
+  Taipei time in US summer time and 05:00 otherwise (IANA time-zone data). So the 13:30 closes of 00646 and 00679B
+  follow the previous New York session, and 0050 at the same close reacts to that session too. TWSE's ETF overview
+  page adds that a futures-trust ETF on a foreign futures index is valued on European and US futures, so the time
+  difference is a risk. The text claims no fixing time for the futures funds' indices (no source states one) and
+  prints no SPY figure.
 - **Conventions.** Simple returns; divisor $T$ everywhere (`ddof=0` passed explicitly); every printed number rounded
   from its unrounded value; sample values of model symbols are plug-in values at $\hat\Sigma$ (the notation note says
-  so). A correlation's standard error is printed both by normal theory and by LM20's plug-in formula. Every R1
-  volatility names its sample and weights ("full sample, weights reset daily": 11.49%; LM30's out-of-sample 12.48%,
-  A30-12, is another number, decision C7).
+  so). A correlation's standard error is printed both by normal theory and by LM20's plug-in formula. Both assume
+  independent periods, and the plug-in one needs finite fourth moments, so §4 prints the funds' raw kurtosis beside
+  it [A27-50]. Every R1 volatility names its sample and weights ("full sample, weights reset daily": 11.49%; LM30's
+  out-of-sample 12.48%, A30-12, is another number, decision C7).
 - **Scripts.** `data/lm27_numbers.py` (every printed value, asserted against `src/lm27.md` and compared with the anchors)
   and `data/lm27_charts.py` (X2, X4, X6, X7 and the widget block), both after `data/vol5_series.py`,
   `data/vol5_rules.py`, `data/vol2_series.py` and `data/lm10_series.py`.
 
-**Hygiene declaration.** *Descriptive:* the full-sample covariance matrix, correlations by frequency, every risk split
-of R1's and R2's weights, the drift path, the U28 factor split, LM7's and LM9's echoes. *Stability check:* R1's risk
-shares in the 92 trailing windows. *Through case, fixed in advance (2026-10-24):* the trades of R1 and R2, shown as
-accounting, not compared: the module prints no comparison criterion. *Constructed:* R2's weights; Problems 1–4, 6 and
-10. Versions on the same data: two rules (R1, R2) and one variant shown only by its weights (the buy-and-hold book).
-Local note: "Every matrix and risk share here describes E5's 2,362 joint daily returns from 18 January 2017 to 8
-October 2026, or U28's sector price indices from 2008 to 2026: descriptive. R1's shares in its 92 trailing windows are
-a stability check. The trades are the through case's, fixed in advance on 24 October 2026; they show the accounting,
-and no rule is judged here. Nothing is tested on later data: [[LM30]], [[LM33]] and [[LM34]] do that."
+**Hygiene declaration.** *Descriptive:* the full-sample covariance matrix, correlations by frequency with the funds'
+kurtosis, every risk split of R1's and R2's weights, the drift path, the U28 factor split, LM7's and LM9's echoes, and
+Problem 6 (E5's monthly correlation). *Stability check:* R1's risk shares in the 92 trailing windows. *Through case,
+fixed in advance (2026-10-24):* the trades of R1 and R2, shown as accounting, not compared: the module prints no
+comparison criterion. *Constructed:* R2's weights; Problems 1–4 and 10. Versions on the same data: two rules (R1, R2)
+and one variant shown only by its weights (the buy-and-hold book). Local note: "Every matrix and risk share here
+describes E5's 2,362 joint daily returns from 18 January 2017 to 8 October 2026, or U28's sector price indices from
+2008 to 2026: descriptive. R1's shares in its 92 trailing windows are a stability check. The trades are the through
+case's, fixed in advance on 24 October 2026; they show the accounting, and no rule is judged here. Nothing is tested
+on later data: [[LM30]], [[LM33]] and [[LM34]] do that."
 
 **Notation.** AUTHORING §6 with the Portfolios table. Used: $R$, $r$, $T$ (returns at the stated frequency), $t$, $A$,
 $N$ (5, or 28 on U28), $i$, $j$ (assets), $\mathbf R_t$, $X$, $\tilde X$, $\bar{\mathbf R}$, $\hat\Sigma$, $\Sigma$, $\mathbf s$,
@@ -1366,7 +1392,6 @@ the notation note:
 | Symbol | Meaning | Check |
 |:--|:--|:--|
 | $R_{p,t}$, $R_{i,t}$ | the book's and fund $i$'s simple return on date $t$ | as LM8's $R_{j,t}$ |
-| $s_t$ | 0050's split ratio on date $t$ (new shares per old share: 4 on 18 June 2025, 1 otherwise), in §4's total-return display only | the shared decision's form; decision B6 names it LM27's; the date subscript keeps it apart from $s_i$ and $s_p$, which are standard deviations |
 | $\operatorname{cost}(\mathbf x)$ | the cost of trades $\mathbf x$ in money, $0.1425\%\,\lVert\mathbf x\rVert_1+\sum_i\text{tax}_i\max(0,-x_i)$ | upright function name; no scalar cost symbol (§6) |
 | $R_{\text{mkt},t}$, $\sigma_{\text{mkt}}^2$, $\boldsymbol\beta$ | TAIEX price return (LM23's), its variance, the vector of the $N$ market betas | as LM23; one TAIEX variance symbol in LM27 and LM30 (decision B6); $\boldsymbol\beta$ here collects $\beta_i$ across assets |
 | $\varepsilon_{i,t}$, $\Sigma_{\mathrm{res}}$ | sector $i$'s market-model residual; the $N\times N$ residual covariance matrix (divisor $T$) | new: LM23's $\Sigma_\varepsilon$ is the error covariance across dates |
@@ -1376,19 +1401,24 @@ contributions, without hats on $\beta_{i,p}$, $\mathrm{MRC}_i$, $\mathrm{RC}_i$ 
 assets ($i$, $j$), $T$ returns ($t$); the number of windows (92) and rebalances (91) are written as numbers. Positions
 in money are written $W^{\mathrm{pre}}_t\mathbf w^{\mathrm{drift}}_t$ (LM8's $\mathbf h$ counts units); cash is
 $W(1-\mathbf 1^{\top}\mathbf f)$, with no cash symbol; total exposure is $\mathbf 1^{\top}\mathbf f$ ($L$ is R8's, in
-LM31); the ratio (27.7) and the commission rate are written in words and numbers. Not used: $c$, $\mathbf e$ and
-$\mathbf e_i$.
+LM31); the ratio (27.7), the commission rate and the raw kurtosis ((19.3)) are written in words and numbers. The split
+day's restated close is written $P_{t-1}/4$ inside the return itself (decision B6), since $s_i$ and $s_p$ are standard
+deviations. Not used: $c$, $\mathbf e$ and $\mathbf e_i$.
 
-**Motivating case: "Which fund carries the risk?"** (box, about 160 words; 11 sentences, average 14.5 words, longest 25)
+**Motivating case: "Which fund carries the risk?"** (box, about 160 words in three paragraphs of at most 80 words,
+decision C10; 11 sentences, average 14.6 words, longest 25)
 
 > A reader holds [[LM7]]'s two funds, 0050 and 00679B, and adds three: 00646 (the S&P 500), 00635U (gold futures) and
 > 00642U (crude-oil futures). She puts a fifth of her money in each. On the 2,362 joint dates from January 2017 to
 > October 2026, when all five funds traded, their volatilities ran from 13.49% to 37.43% a year [A27-08]. Yet the mix,
-> reset to a fifth each day, had a volatility of 11.49% on the same dates [A27-13]. Which fund carried that risk?
-> 00642U held a fifth of the money and 45.9% of the risk; 00679B held a fifth and 2.6% [A27-15]. Left alone, the
-> weights drift. Bought on 4 March 2019 and held, 0050 grew to 48.6% of the book by 8 October 2026 [A27-26].
-> Resetting them each month costs money. The largest of 91 monthly resets, on 1 April 2026, traded 8.06% of the book
-> and cost 0.031% of its value [A27-24]. How should the risk be split, and what does each trade cost?
+> reset to a fifth each day, had a volatility of 11.49% on the same dates [A27-13].
+>
+> Which fund carried that risk? 00642U held a fifth of the money and 45.9% of the risk; 00679B held a fifth and
+> 2.6% [A27-15]. Left alone, the weights drift. Bought on 4 March 2019 and held, 0050 grew to 48.6% of the book by
+> 8 October 2026 [A27-26].
+>
+> Resetting the weights each month costs money. The largest of 91 monthly resets, on 1 April 2026, traded 8.06% of the
+> book and cost 0.031% of its value [A27-24]. How should the risk be split, and what does each trade cost?
 
 Resolved: (a) the split: §6, E7 (00642U's share is its weight times its beta to the book, $0.2\times2.295$
 [A27-14]), X6; (b) the drift: §2, (27.1), X2 (0050 from 19.1% in August 2019 to 49.1% in July 2026 [A27-26]); (c) the
@@ -1403,14 +1433,14 @@ The case says that 1 April 2026 is the largest of R1's 91 rebalances (AUTHORING 
 | 1 | Introduction | the layer added; case + X1; roadmap; notation and hygiene notes | 380 |
 | 2 | The Return of a Book {1} | weights set at the previous close (lm12.md:159), (8.3), (1.13); exposures and cash, (8.4); (27.1) and the drift; daily-rebalanced $X\mathbf w$ against a book that never trades ((8.12), (8.13)); a cap-weighted index as such a book (lm09.md:444); X2; E1 (the June 2025 span: simple returns add across funds, log returns over the six days, averaged logs understate); the domain $1+R_{p,t}>0$ and ruin; pitfall: averaging log returns across funds; 導讀; KC | 560 |
 | 3 | Trades, Turnover and Costs {2} | the trade at the next close (Research hygiene); (27.2): pre-trade wealth, the self-financing equation, existence and uniqueness (Deep Dive); the cost model (pointer to LM34); (27.3) $\mathrm{TO}_t$ and the approximation with its error bound; E2 (first purchase); E3 + X3 (2026-04-01); cash at $r_f$, R8 by pointer; no terminal sale in the through case; pitfall: turnover counted on both sides; 導讀; KC | 600 |
-| 4 | E5: Two Frames and Asynchronous Closes {3} | the five funds and their indices; total returns with distributions and the split, $s_t$ (Volume I's rule); the universe chosen among listed funds (pointer to LM34); E4 (why two frames; 2,362 against 2,368 and LM7's 2,363; the six June 2025 dates; growth factors by frame); the rule (joint statistics on the estimation frame, wealth on the wealth frame, one fund on its own dates; PITFALLS §3); asynchronous closes from the trading sessions (TWSE's 13:30 close, NYSE's core session ending at 04:00 or 05:00 Taipei time); X4; E5 (correlations by frequency with SEs; R1's volatility by frequency); Burns, Engle and Mezrich (1998) in one sentence; the rules use daily $\hat\Sigma$; 導讀; KC | 560 |
-| 5 | Portfolio Mean and Variance {4} | (27.4) from (16.4) and (10.4); annualization and its conditions ((19.9)); X5; E6 (R1 and R2: $\mu_p$, $s_p$; (10.6)'s split; the ratio (27.7) with (8.11), against U28's); the plug-in sentence; KC ((11.4)) | 460 |
-| 6 | Which Fund Carries the Risk {5,6} | (27.5) $\Cov(R_i,R_p)=(\Sigma\mathbf w)_i$ and $\beta_{i,p}$; (27.6) $\mathrm{MRC}_i=\partial\sigma_p/\partial w_i$ from (10.8) and the chain rule; Euler's identity derived, the homogeneity theorem in a Deep Dive (Maillard et al. 2010); X6; E7 (R1's split; three splits compared); which split is meaningful: it adds up exactly, it is the variance term plus half of each covariance term, it prices a switch (MRC differences, lm10.md:425), it is the slope of a fund's line on the book (12.3), and under joint normality the expected share of a move ((16.8); Qian 2006); E8 (switch of 5 points, (10.9)); the widget; LM28's minimum-variance sentence; 導讀; KC | 740 |
-| 7 | Negative and Moving Contributions {6} | $\mathrm{RC}_i<0$ exactly when $w_i\Cov(R_i,R_p)<0$; a hedge at the margin only ($\mathrm{MRC}_i$ rises with $w_i$ by $\sigma_i^2/\sigma_p$ to first order); E9 (the window through 2020-02-27); X7 (R1's shares across 92 windows: stability check); pitfall: a negative share is not a hedge at any size; KC | 360 |
+| 4 | E5: Two Frames and Asynchronous Closes {3} | the five funds and their indices; total returns with distributions and the split day's restated close, $P_{t-1}/4$ (Volume I's rule, decision B6); the universe chosen among listed funds (pointer to LM34); E4 (why two frames; 2,362 against 2,368 and LM7's 2,363; the six June 2025 dates; growth factors by frame); the rule (joint statistics on the estimation frame, wealth on the wealth frame, one fund on its own dates; PITFALLS §3); asynchronous closes from the trading sessions (the 13:30 close of TWSE, where four funds trade, and of TPEx, where 00679B trades; NYSE's core session ending at 04:00 or 05:00 Taipei time; TWSE's ETF overview page on futures-trust ETFs); X4; E5 (correlations by frequency with both SEs, their conditions and the funds' raw kurtosis; among the five pairs, the one daily–monthly gap of two SEs, no cause named; R1's volatility by frequency); Burns, Engle and Mezrich (1998) in one sentence; the rules use daily $\hat\Sigma$; 導讀; KC | 600 |
+| 5 | Portfolio Mean and Variance {4} | (27.4) from (16.4) and (10.4); annualization and its conditions ((19.9)); X5; E6 (R1 and R2: $\mu_p$, $s_p$; (10.6)'s split; the diversification ratio (27.7) with (8.11) and Choueifaty and Coignard's name and condition, against U28's); the plug-in sentence; KC ((11.4)) | 470 |
+| 6 | Which Fund Carries the Risk {5,6} | (27.5) $\Cov(R_i,R_p)=(\Sigma\mathbf w)_i$ and $\beta_{i,p}$; (27.6) $\mathrm{MRC}_i=\partial\sigma_p/\partial w_i$ from (10.8) and the chain rule, for $\sigma_p>0$; Euler's identity derived, the homogeneity theorem in a Deep Dive (Maillard et al. 2010); X6; E7 (R1's split; three splits compared, with what each adds up to); which split is meaningful: it adds up to the book's volatility, it is the variance term plus half of each covariance term, it prices a switch (MRC differences, lm10.md:425), it is the slope of a fund's line on the book (12.3), and under joint normality the expected share of a move ((16.8); Qian 2006); E8 (switch of 5 points, (10.9)); the widget; LM28's minimum-variance sentence; 導讀; KC | 740 |
+| 7 | Negative and Moving Contributions {6} | $\mathrm{RC}_i<0$ exactly when $w_i\Cov(R_i,R_p)<0$; a hedge at the margin only ($\mathrm{MRC}_i$ rises with $w_i$ by $\sigma_i^2/\sigma_p$ to first order); E9 (the window through 2020-02-27); X7 (R1's shares across 92 windows: stability check; LM30 measures the first window's error); pitfall: a negative share is not a hedge at any size; KC | 360 |
 | 8 | Systematic and Residual Risk {7} | the market model per asset ((23.1)); the book's beta $\mathbf w^{\top}\boldsymbol\beta$; (27.8) exact in sample (normal equations); per-asset split of $\mathrm{RC}_i$; E10 + X8 (U28's book); the diagonal-residual shortcut (single-index model) once, and its error; price indices; LM30 pointer; 導讀; KC | 460 |
 | 9 | Portfolio Accounts in Python {8} | `cov0` / `np.cov(..., ddof=0)`; `S @ w`, contributions, checks ($\sum\mathrm{RC}_i=s_p$, the slope check); Polars weekly and monthly returns (`dt.iso_year`, `dt.week`, `group_by`, `pl.col(...).add(1).product()`); the recursion in ten lines; lab box | 200 |
 | — | Summary (7) / Problems (12) / Solutions | | 140 / 420 / 520 |
-| | **Total** | | **5,400** |
+| | **Total** | | **5,450** |
 
 **Elements.** 10 examples (E1 §2; E2, E3 §3; E4, E5 §4; E6 §5; E7, E8 §6; E9 §7; E10 §8). Knowledge checks:
 
@@ -1434,21 +1464,22 @@ The case says that 1 April 2026 is the largest of R1's 91 rebalances (AUTHORING 
 
 中文導讀 in §2 (再平衡 (rebalancing), 買進持有 (buy-and-hold), 權重 (weights) 漂移, 簡單報酬 and 對數報酬), §3 (交易成本
 (transaction cost), 週轉率 (turnover), 手續費 (commission), 證券交易稅 (securities transaction tax), 自我融資
-(self-financing)), §4 (指數股票型基金 (ETF), 非同步 (asynchronous) 收盤, 相關係數 by frequency), §6 (投資組合 (portfolio),
-風險貢獻 (risk contribution), 邊際風險貢獻 (marginal risk contribution), 齊性函數 (homogeneous function), Euler 定理
-(Euler's theorem), 風險分散 (diversification); beta in English as LM23), §8 (系統性風險 (systematic risk), 殘差
-(residual), 市場模型 (market model), 單一指標模型 (single index model)). Deep Dives: §3 "One post-trade wealth": the map
-$g(W)=W+\operatorname{cost}(W\mathbf f_t-W^{\mathrm{pre}}_t\mathbf w^{\mathrm{drift}}_t)$ is continuous and strictly
-increasing when $(0.1425\%+\max_i\text{tax}_i)\lVert\mathbf f_t\rVert_1<1$ (its slope is at least $1$ minus that
-number, since cost is Lipschitz in $W$), so $g(W)=W^{\mathrm{pre}}_t$ has one root; it is at most
+(self-financing)), §4 (指數股票型基金 (ETF), 非同步 (asynchronous) 收盤, 相關係數 by frequency, 峰態 (kurtosis)), §6
+(投資組合 (portfolio), 風險貢獻 (risk contribution), 邊際風險貢獻 (marginal risk contribution), 一次齊性函數
+(homogeneous function of degree 1), Euler 定理 (Euler's theorem), 風險分散 (diversification); beta in English as
+LM23), §8 (系統性風險 (systematic risk), 殘差 (residual), 市場模型 (market model), 單一指標模型 (single index model)).
+Deep Dives: §3 "One post-trade wealth": the map $g(W)=W+\operatorname{cost}(W\mathbf f_t-W^{\mathrm{pre}}_t\mathbf w^{\mathrm{drift}}_t)$ is continuous
+and strictly increasing when $(0.1425\%+\max_i\text{tax}_i)\lVert\mathbf f_t\rVert_1<1$ (its slope is at least $1$ minus
+that number, since cost is Lipschitz in $W$), so $g(W)=W^{\mathrm{pre}}_t$ has one root; it is at most
 $W^{\mathrm{pre}}_t$ because $g(W^{\mathrm{pre}}_t)\ge W^{\mathrm{pre}}_t$, and positive when
 $g(0)=\operatorname{cost}(-W^{\mathrm{pre}}_t\mathbf w^{\mathrm{drift}}_t)<W^{\mathrm{pre}}_t$ (selling the whole book
 costs less than the book), which holds for every E5 rule; the fixed-point iteration
 $W\mapsto W^{\mathrm{pre}}_t-\operatorname{cost}(\cdot)$ contracts by that factor; with the signs of the trades known the
 root is a ratio of two linear expressions (E3 checks it). §6 "Euler's theorem": a differentiable $h$ with $h(a\mathbf x)=
 ah(\mathbf x)$ for all $a>0$ satisfies $\sum_ix_i\,\partial h/\partial x_i=h(\mathbf x)$ (differentiate in $a$ at $a=1$);
-volatility is such a function, variance is homogeneous of degree 2 and gives $\sum_iw_i\,\partial\sigma_p^2/\partial w_i=
-2\sigma_p^2$, which is why LM10's gradient is twice a covariance.
+volatility is such a function wherever $\sigma_p>0$ (at a zero-variance book it is not differentiable), and variance,
+homogeneous of degree 2, gives $\sum_iw_i\,\partial\sigma_p^2/\partial w_i=2\sigma_p^2$, which is why LM10's gradient is
+twice a covariance. The working paper of Maillard et al. states the split this way (§2.1, p. 4, and its footnote).
 
 **Exhibits.**
 
@@ -1457,16 +1488,19 @@ volatility is such a function, variance is homogeneous of degree 2 and gives $\s
   sample, weights reset daily), weighted average volatility 20.75% and 16.97%, their ratio 1.81 and 1.52 [A27-08,
   A27-13, A27-15, A27-17]. Note: daily total returns on the 2,362 joint dates ($A=242.951$), divisor $T$; R2
   *constructed*; descriptive. Source: FinMind `TaiwanStockPrice`, `TaiwanStockDividendResult`, `TaiwanStockSplitPrice`,
-  retrieved 24 October 2026; Computations: `data/lm27_numbers.py`.
+  retrieved 24 October 2026; Computations: `data/lm27_numbers.py`. Seven columns with the index names (cross-check
+  Y20): Stage 2 runs `build/qa/print_width.py` on the draft, and if X1 is wider than the A4 text width, the index
+  names move to the note.
 - X2 `drift` (`line`, date, shared `x.values`, §2): weights of a book bought at 1/N at the close of 4 March 2019 and
   held to 8 October 2026, five series: 0050, 00646, 00679B, 00642U in colours 1–4, 00635U in `"var(--muted)"` (named
   in the caption); dashed `hline` at 20%. Thinned (decisions C3, X37: buy-and-hold weights rebuild price ratios) to
   402 dated points: the last session of each ISO week (392), the purchase date and every fund's lowest and highest
-  weight [A27-26]. Values cited: end weights to three decimals, so that they sum to 100.000%: 48.619%, 19.734%,
-  5.422%, 14.513%, 11.712%; 0050 19.1% (2019-08-15) to 49.1% (2026-07-01); 00679B 28.0% (2020-03-23); 00642U 21.3%
-  (2019-04-23) and 7.0% (2020-11-02) [A27-26]. Note: wealth frame, weekly points plus the cited extremes; no trade and
-  no cost after the purchase (a purchase cost scales every holding alike, so weights do not depend on it); descriptive
-  history, not a rule of the through case.
+  weight (ten extremes on nine dates: 00646's low and 00679B's high both fall on 2020-03-23) [A27-26]. Values cited:
+  end weights to three decimals, so that they sum to 100.000%: 48.619%, 19.734%, 5.422%, 14.513%, 11.712%; 0050 19.1%
+  (2019-08-15) to 49.1% (2026-07-01); 00679B 28.0% (2020-03-23); 00642U 21.3% (2019-04-23) and 7.0% (2020-11-02)
+  [A27-26]. Note: wealth frame; the last session of each ISO week, the purchase date and every fund's lowest and
+  highest weight; no trade and no cost after the purchase (a purchase cost scales every holding alike, so weights do
+  not depend on it); descriptive history, not a rule of the through case.
 - X3 `trade` (table, §3, inside E3): R1's trade of 1 April 2026 on a book of NT\$10,000,000 before the trade. Rows the
   five funds; columns: pre-trade holding, trade, holding after the trade, commission, tax [A27-44, A27-41]; total row:
   TO 8.06%, cost NT\$3,100 (commission 291, 197, 185, 472, 1,149, in all 2,294; tax 806 on 00642U's sale), wealth
@@ -1475,13 +1509,12 @@ volatility is such a function, variance is homogeneous of degree 2 and gives $\s
   recursion is scale-free); rates per the shared cost model, sources in LM34.
 - X4 `freq` (`bar`, §4): categories 0050–00646, 0050–00679B, 0050–00635U, 0050–00642U, 00679B–00642U; series daily,
   weekly, monthly (colours 1–3); `fmt: "n3"`. Values cited [A27-11]. Note: simple returns on the 2,362 joint dates, 500
-  ISO weeks and 116 calendar months (first and last period dropped); normal-theory standard errors near zero
-  correlation about 0.02, 0.045 and 0.09 (0050–00679B: 0.020, 0.045, 0.093); the plug-in ones are 1.4 to 2.4 times as
-  large on daily data (0050–00679B: 0.040, 0.053, 0.095).
+  ISO weeks and 116 calendar months (the first and last period dropped, complete or not); normal-theory standard
+  errors near zero correlation about 0.02, 0.045 and 0.09 (0050–00679B: 0.020, 0.045, 0.093); the plug-in ones are
+  1.4 to 2.4 times as large on daily data (0050–00679B: 0.040, 0.053, 0.095). Both assume independent periods, and the
+  plug-in one finite fourth moments.
 - X5 `cov` (table, §5): annualized volatilities and means of the five funds and the correlation matrix to two decimals
-  [A27-08, A27-09]. Note: on the 2,362 joint dates (decision C2), divisor $T$, $A=242.951$; descriptive. Two entries
-  lie within a tenth of a unit of a rounding boundary (0050–00679B −0.1054, 00646–00635U 0.0948), printed −0.11 and
-  0.09 [A27-09].
+  [A27-08, A27-09]. Note: on the 2,362 joint dates (decision C2), divisor $T$, $A=242.951$; descriptive.
 - X6 `shares` (`bar`, `stack: true`, approved C1, §6): categories "R1 money", "R1 risk", "R2 money", "R2 risk"; five
   series by fund (00635U muted, named in the caption), `y.fmt: "pct1"`; each bar sums to 100% [A27-15, A27-17].
   Fallback: grouped bars, funds as categories and the four series. Note: risk shares $w_i\beta_{i,p}$ at the
@@ -1490,7 +1523,8 @@ volatility is such a function, variance is homogeneous of degree 2 and gives $\s
   (00635U muted); dashed `hline`s at 0 and 20%. Values cited: 00642U 54.3% (window through 2020-02-27) and 32.7%
   (2026-02-26); 00679B −1.89% (2020-02-27), negative in 22 of the 36 windows from May 2019 to April 2022, the last
   (through 2022-04-29) −0.0023%, too small to see on the chart [A27-20]; first window [A27-21]. Note: stability check;
-  plug-in shares with an unmeasured error; window covariances annualized with the full sample's $A$.
+  plug-in shares, whose error [[LM30]] measures for the first window; window covariances annualized with the full
+  sample's $A$.
 - X8 `factor` (table, §8): U28 equal-weight book: volatility 15.75% (lm10.md:36), TAIEX price index 17.82%, book beta
   0.807; shares of the variance to three decimals, so that they sum: systematic 83.426% (equal to the R-squared),
   residual 16.574% = 4.037% from residual variances + 12.537% from residual covariances; as volatilities 14.4% and
@@ -1538,16 +1572,25 @@ shares 21.2%, 17.7%, 2.6%, 12.6%, 45.9% [A27-15].
 - E5 §4 `async`: 0050 with 00679B: −0.105 daily, −0.023 weekly, −0.013 monthly; with 00635U: 0.180, 0.228, 0.187; with
   00646: 0.599, 0.588, 0.552; 00679B with 00642U: −0.18, −0.20, −0.36 [A27-11]. 0050–00679B's normal-theory standard
   errors are 0.020, 0.045 and 0.093; the plug-in ones, which do not assume normality (LM20's Problem 6), are 1.4 to 2.4
-  times as large on daily data across the five pairs (0.040 for 0050–00679B) [A27-11]. The largest daily–weekly gap,
-  0.082 for 0050–00679B, is 1.8 weekly normal-theory standard errors [A27-11]. So the daily figure can differ from the
-  weekly one either way, and no gap here reaches two standard errors; monthly correlations from 116 calendar months
-  carry errors near 0.09. R1's weights on the full sample give 11.49%, 10.55% and 10.02% a year at the three
-  frequencies ($A=242.951$, 51.56 and 12), and 00642U's share 45.9%, 41.9% and 45.0% [A27-12].
+  times as large on daily data across the five pairs (0.040 for 0050–00679B) [A27-11]. Both assume independent
+  periods, and the plug-in one needs finite fourth moments. So read the plug-in errors of 00642U's pairs with care: its
+  raw kurtosis, 26.6 on daily and 12.3 on monthly returns, is the largest of the five (the other four 11.2 to 21.0 and
+  4.3 to 5.7) [A27-50]. Of the five pairs, no daily–weekly gap reaches two weekly standard errors of either kind; the
+  largest, 0.082 for 0050–00679B, is 1.8 normal-theory ones [A27-11]. The daily figure can differ from the weekly one
+  either way: it is higher for 0050–00646, 0050–00642U and 00679B–00642U, lower for 0050–00679B and 0050–00635U
+  [A27-11]. Of the five pairs, one daily–monthly gap reaches two monthly standard errors: 00679B–00642U's daily and
+  monthly correlations differ by 0.1815 (from the unrounded correlations), which is 2.3 normal-theory standard errors
+  (0.0806) and 2.0 plug-in ones (0.0888) [A27-11]. The text names no cause. Monthly correlations from 116 calendar
+  months carry normal-theory errors near 0.09 when they are near zero, and plug-in errors up to 0.16 [A27-11]. R1's
+  weights on the full sample give 11.49%, 10.55% and 10.02% a year at the three frequencies ($A=242.951$, 51.56 and
+  12), and 00642U's share 45.9%, 41.9% and 45.0% [A27-12].
 - E6 §5 `mix`: R1: $\mu_p$ is the average of the five annual means 24.16%, 14.87%, −0.97%, 9.26%, 10.53% [A27-08],
   11.57% [A27-47]; $s_p=11.49\%$ (full sample, weights reset daily); variance terms 76.4% of $s_p^2$, covariance terms
   23.6% [A27-13], against 7.2% and 92.8% for U28's book (lm10.md:220, recomputed [A27-31]). Weighted average
-  volatility 20.75%, ratio 1.81. R2: $\mu_p=0.4\times24.16\%+0.2\times14.87\%+0.3\times(-0.97\%)+0.1\times9.26\%=13.27\%$
-  [A27-47]; $s_p=11.17\%$, weighted average 16.97%, ratio 1.52 [A27-17]; U28's book 21.94% over 15.75%, 1.393 [A27-31].
+  volatility 20.75%, so the diversification ratio (27.7) is 1.81. R2:
+  $\mu_p=0.4\times24.16\%+0.2\times14.87\%+0.3\times(-0.97\%)+0.1\times9.26\%=13.27\%$ [A27-47]; $s_p=11.17\%$,
+  weighted average 16.97%, ratio 1.52 [A27-17]; U28's book 21.94% over 15.75%, 1.393 [A27-31]. Each ratio exceeds 1,
+  as Choueifaty and Coignard's condition says for a long-only book not equivalent to a single asset.
 - E7 §6 `split`, R1 at the full-sample $\hat\Sigma$ on the 2,362 joint dates [A27-14, A27-15, A27-16]:
   $A(\hat\Sigma\mathbf w)_i$ = 139.80, 117.05, 17.22, 83.25, 303.13 (%²); dividing by $s_p^2=132.09$ (%²) gives
   $\beta_{i,p}$ = 1.058, 0.886, 0.130, 0.630, 2.295, and the shares $w_i\beta_{i,p}$ are 21.2%, 17.7%, 2.6%, 12.6%,
@@ -1556,8 +1599,10 @@ shares 21.2%, 17.7%, 2.6%, 12.6%, 45.9% [A27-15].
   covariances by the printed 11.49 moves four MRCs by 0.01). Three splits compared, in a table: Euler's shares (one
   decimal, sum 100.0%); the stand-alone split $w_is_i/\mathbf w^{\top}\mathbf s$, 19.4%, 15.5%, 13.0%, 16.0%, 36.1%
   (sum 100.0%); the variance terms to three decimals, so that they sum, 12.240%, 7.873%, 5.514%, 8.340%, 42.433%, a
-  total of only 76.400% (the 76.4% of E6) [A27-16]. Only Euler's adds up and prices a switch. The slopes of
-  $w_iR_{i,t}$ on $R_{p,t}$ equal the shares to about $10^{-16}$, machine precision [A27-18].
+  total of only 76.400% (the 76.4% of E6) [A27-16]. Only Euler's parts add up to the book's volatility, 11.49 points,
+  and only they price a switch; the stand-alone parts $w_is_i$ add up to the weighted average volatility, 20.75%, and
+  the variance terms to 76.4% of the variance [A27-13, A27-15, A27-16]. The slopes of $w_iR_{i,t}$ on $R_{p,t}$ equal
+  the shares to about $10^{-16}$, machine precision [A27-18].
 - E8 §6 `switch`, R1 on the full sample: move 5 points from 00642U to 00679B. The linear prediction $0.05\,(\mathrm{MRC}_{00679B}-
   \mathrm{MRC}_{00642U})$ is −1.24 points; the exact change by (10.9) is −1.10 points, 11.49% → 10.39% (variance 132.09
   → 107.92 %², linear term −28.59, quadratic +4.42) [A27-19].
@@ -1591,12 +1636,12 @@ sales of every E5 fund except 00679B), and the rounding.
 5. MC (no numbers): in a window, a fund's risk contribution to the book is negative. Which is true? **A** Moving a small
    weight into it from a fund with a positive $\mathrm{MRC}$ lowers the book's volatility. B Raising its weight lowers
    the volatility at any size. C Selling it lowers the volatility. The solution derives $\partial\mathrm{MRC}_i/\partial w_i$.
-6. MC: E5's monthly 0050–00646 correlation, 0.5521 on 116 calendar months; its normal-theory standard error, to four
-   decimals. A 0.0060 ($T$ for $\sqrt T$). **B** 0.0645. C 0.0928 ($1-\rho^2$ omitted) [A27-40]; the solution adds the
-   plug-in value 0.081 [A27-11].
-7. Derive $\partial\sigma_p/\partial w_i=(\Sigma\mathbf w)_i/\sigma_p$ from (10.8), Euler's identity (27.6), the shares
-   $w_i\beta_{i,p}$ and $\sum_iw_i\beta_{i,p}=1$; show that the Euler share is the variance term plus half of each
-   covariance term.
+6. MC: E5's monthly 0050–00646 correlation, 0.5521 on 116 calendar months (E5's data, descriptive); its normal-theory
+   standard error, to four decimals. A 0.0060 ($T$ for $\sqrt T$). **B** 0.0645. C 0.0928 ($1-\rho^2$ omitted)
+   [A27-40]; the solution adds the plug-in value 0.081 [A27-11].
+7. Derive $\partial\sigma_p/\partial w_i=(\Sigma\mathbf w)_i/\sigma_p$ for $\sigma_p>0$ from (10.8), Euler's identity
+   (27.6), the shares $w_i\beta_{i,p}$ and $\sum_iw_i\beta_{i,p}=1$; show that the Euler share is the variance term plus
+   half of each covariance term.
 8. Derive the self-financing solution of (27.2) when the signs of the trades are known, then (27.3)'s approximation and
    its bound $\lvert\text{error}\rvert\le(\operatorname{cost}/W^{\mathrm{pre}}_t)(0.1425\%+\max_i\text{tax}_i)\lVert\mathbf f_t\rVert_1$;
    check on E3 (0.0310028% against 0.0310231%) [A27-24].
@@ -1605,33 +1650,37 @@ sales of every E5 fund except 00679B), and the rounding.
    error from dropping residual covariances when they average positive (E10).
 10. Same inputs as 4: all three contributions, then a switch of 5 points from asset 3 to asset 2: linear −0.96 points,
     exact −0.89 points, $\sigma_p$ 13.30% → 12.41% [A27-38, A27-39]. Python part: check with (10.9).
-11. Python: build E5's two frames from the lab's closes, distributions and split; reproduce 2,362 and 2,368, 0.864% on
-    18 June 2025, the growth factors of A27-06, and the correlations of X4 from the ISO weeks and calendar months
-    without the first and last [A27-02–A27-06, A27-10, A27-11].
-12. Python: run (27.2) for R1 from 4 March 2019 with the shared cost rates and reproduce the lab's derived R1 weights
-    and wealth to $10^{-12}$; print the 1 April 2026 trade (X3); then R1's risk shares in the 92 windows (X7)
-    [A27-20, A27-24].
+11. Python: build E5's two frames from the lab's closes, distributions and split, and check them against the lab's
+    derived frames; reproduce 2,362 and 2,368, 0.864% on 18 June 2025, the growth factors of A27-06, and the
+    correlations of X4 from the ISO weeks and calendar months without the first and last [A27-02–A27-06, A27-10,
+    A27-11].
+12. Python: run (27.2) for R1 from 4 March 2019 on the lab's per-date targets with the shared cost rates, and
+    reproduce the lab's R1 net wealth path to $10^{-12}$; print the 1 April 2026 trade (X3); then R1's risk shares in
+    the 92 windows (X7) [A27-20, A27-24].
 
 **Lab parts** (`build/make_lab27.py`; reads only its `data/`): the five E5 price files, the 0050 and 00679B
 distributions and the split file (copied from `data/raw/vol5/` by `data/make_lab_data.py`), `taiex_tr.csv` (TR23's
-calendar), the derived wealth frame and R1/R2 per-date targets (shared decision "Labs"; from `make_lab_data.py`, no
-copy of `vol5_rules.py`), and `sectors_close_raw.csv`, `sectors_close_repairs.csv` (U28 and the TAIEX price index, as
-LM23's lab builds them). Parts: 1 frames from raw files and their checks (P11); 2 the span and the drift (E1, X2); 3
-the recursion: E2, E3, X3, R1 and R2 re-implemented and checked against the derived weights (P12); 4 asynchronous
-closes (E5, X4) with both SEs; 5 $\hat\Sigma$, $s_p$, (10.6) and the ratio (E6, X5); 6 risk splits, the slope check and
-the switch (E7, E8, X6); 7 the 92 windows (E9, X7); 8 U28's factor split (E10, X8); 9 Problems 10–12. Extension
-(*descriptive*, stability check): R2's risk shares in the 92 windows: 0050's runs from 55.3% to 72.1% and exceeds 70%
-in 13 windows, against its 40% of the money [A27-45]; a closing sentence says that turning shares into targets is
-LM31's subject. Labs write plain "LM30", "LM31" and "LM34", never `[[…]]`.
+calendar), the derived files of the shared decision "Labs" (E5's estimation frame and its wealth frame with the traded
+flags, as the decision "Labs" of the first revision writes them, R1's and R2's per-date targets, and R1's and R2's net
+wealth paths; from `make_lab_data.py`, no copy of `vol5_rules.py`), and `sectors_close_raw.csv`,
+`sectors_close_repairs.csv` (U28 and the TAIEX price index, as LM23's lab builds them). Parts: 1 both frames from raw
+files and their checks, against the derived frames (P11); 2 the span and the drift (E1, X2); 3 the recursion: E2, E3,
+X3, R1 and R2 re-implemented from their per-date targets and checked against their net wealth paths (P12); 4
+asynchronous closes (E5, X4) with both SEs and the funds' kurtosis; 5 $\hat\Sigma$, $s_p$, (10.6) and the ratio (E6,
+X5); 6 risk splits, the slope check and the switch (E7, E8, X6); 7 the 92 windows (E9, X7); 8 U28's factor split (E10,
+X8); 9 Problems 10–12. Extension (*descriptive*, stability check): R2's risk shares in the 92 windows: 0050's runs from
+55.3% to 72.1% and exceeds 70% in 13 windows, against its 40% of the money [A27-45]; a closing sentence says that
+turning shares into targets is LM31's subject. Labs write plain "LM30", "LM31" and "LM34", never `[[…]]`.
 
-**Cross-module tags** (the later modules that use each, from their briefs of 2026-10-24; decision C8):
+**Cross-module tags** (the later modules that cite each, from the cross-check's tag table of the revised briefs, Y1;
+decision C8):
 
 - (27.1) $R_{p,t}=\mathbf w_{t-1}^{\top}\mathbf R_t+(1-\mathbf 1^{\top}\mathbf w_{t-1})\,r_f/A_{\mathrm w}$ and
   $w^{\mathrm{drift}}_{t,i}=w_{t-1,i}(1+R_{i,t})/(1+R_{p,t})$, with $\mathbf w_{t-1}$ the weights held after $t-1$'s close;
   cash earns $r_f$ when $\mathbf 1^{\top}\mathbf w_{t-1}<1$, and a negative cash balance ($\mathbf 1^{\top}\mathbf w_{t-1}>1$)
   pays [[LM31]]'s financing rate in place of $r_f$ (as `vol5_rules.wealth_path` does); for weights summing to 1 the
-  cash term vanishes and this is (8.3); needs $1+R_{p,t}>0$, otherwise the book is ruined at $t$ (LM29, LM31, LM32,
-  LM34, LM35).
+  cash term vanishes and this is (8.3); needs $1+R_{p,t}>0$, otherwise the book is ruined at $t$ (LM29, LM30, LM31,
+  LM32, LM33, LM34, LM35).
 - (27.2) $W^{\mathrm{pre}}_t=W_{t-1}(1+R_{p,t})$; on a trade date $W_t=W^{\mathrm{pre}}_t-\operatorname{cost}\big(W_t\mathbf f_t
   -W^{\mathrm{pre}}_t\mathbf w^{\mathrm{drift}}_t\big)$ and $\mathbf w_t=\mathbf f_t$, otherwise $W_t=W^{\mathrm{pre}}_t$ and
   $\mathbf w_t=\mathbf w^{\mathrm{drift}}_t$; $\operatorname{cost}(\mathbf x)=0.1425\%\lVert\mathbf x\rVert_1+\sum_i\text{tax}_i
@@ -1641,18 +1690,20 @@ LM31's subject. Labs write plain "LM30", "LM31" and "LM34", never `[[…]]`.
 - (27.3) $\mathrm{TO}_t=\tfrac12\lVert\mathbf f_t-\mathbf w^{\mathrm{drift}}_t\rVert_1$ and
   $\operatorname{cost}/W^{\mathrm{pre}}_t\approx0.285\%\,\mathrm{TO}_t+\sum_i\text{tax}_i\max(0,w^{\mathrm{drift}}_{t,i}-f_{t,i})$,
   error at most $(\operatorname{cost}/W^{\mathrm{pre}}_t)(0.1425\%+\max_i\text{tax}_i)\lVert\mathbf f_t\rVert_1$ (LM29, LM31,
-  LM34).
+  LM34, LM35).
 - (27.4) $\mu_p=\mathbf w^{\top}\boldsymbol\mu$, $\sigma_p^2=\mathbf w^{\top}\Sigma\mathbf w$ for $R_p=\mathbf w^{\top}\mathbf R$ with
-  constant $\mathbf w$; annual $A\mu_p$ and $\sqrt A\,\sigma_p$ under (19.9)'s conditions (LM28, LM29, LM32).
+  constant $\mathbf w$; annual $A\mu_p$ and $\sqrt A\,\sigma_p$ under (19.9)'s conditions (LM28, LM29, LM30, LM32).
 - (27.5) $\Cov(R_i,R_p)=(\Sigma\mathbf w)_i$, $\beta_{i,p}=(\Sigma\mathbf w)_i/\sigma_p^2$, $\sum_iw_i\beta_{i,p}=1$
-  ($\sigma_p>0$) (LM28, LM29, LM31, LM35).
-- (27.6) $\mathrm{MRC}_i=\partial\sigma_p/\partial w_i=(\Sigma\mathbf w)_i/\sigma_p$, $\mathrm{RC}_i=w_i\mathrm{MRC}_i$,
-  $\sum_i\mathrm{RC}_i=\sigma_p$, $\mathrm{RC}_i/\sigma_p=w_i\beta_{i,p}$ (LM28, LM31: decision A6).
+  ($\sigma_p>0$) (LM28, LM29, LM30, LM31, LM35).
+- (27.6) for $\sigma_p>0$: $\mathrm{MRC}_i=\partial\sigma_p/\partial w_i=(\Sigma\mathbf w)_i/\sigma_p$,
+  $\mathrm{RC}_i=w_i\mathrm{MRC}_i$, $\sum_i\mathrm{RC}_i=\sigma_p$, $\mathrm{RC}_i/\sigma_p=w_i\beta_{i,p}$ (LM28, LM31:
+  decision A6).
 - (27.7) $\mathbf w^{\top}\mathbf s/s_p\ge1$ for $\mathbf w\ge\mathbf 0$, equal to 1 only when every correlation among held
-  assets is 1 ((8.11)) (used within LM27; no later brief cites it).
+  assets is 1 ((8.11)); the ratio is Choueifaty and Coignard's diversification ratio (2008, eq. (1), p. 41), which
+  exceeds 1 for a long-only book not equivalent to a single asset (used within LM27; no later brief cites it).
 - (27.8) $\sigma_p^2=(\mathbf w^{\top}\boldsymbol\beta)^2\sigma_{\text{mkt}}^2+\mathbf w^{\top}\Sigma_{\mathrm{res}}\mathbf w$ and
   $\mathrm{RC}_i=\big[w_i\beta_i(\mathbf w^{\top}\boldsymbol\beta)\sigma_{\text{mkt}}^2+w_i(\Sigma_{\mathrm{res}}\mathbf w)_i\big]/\sigma_p$,
-  when residuals are uncorrelated with the factor (exact in sample for OLS with an intercept) (LM35).
+  when residuals are uncorrelated with the factor (exact in sample for OLS with an intercept) (LM30, LM35).
 
 **Pitfalls to pre-empt.**
 
@@ -1666,18 +1717,24 @@ LM31's subject. Labs write plain "LM30", "LM31" and "LM34", never `[[…]]`.
   post-trade wealth is $W_t$ (AUTHORING §6).
 - A gradient entry is not a share (lm10.md:425): $2(\Sigma\mathbf w)_i$ prices a marginal change; the share needs $w_i$.
   Volatilities do not add (lm10.md:220); Euler's contributions add to $\sigma_p$ because $\sigma_p$ is homogeneous of
-  degree 1.
+  degree 1 (and differentiable where $\sigma_p>0$).
 - A negative contribution is a hedge only at the margin; its $\mathrm{MRC}$ grows with its weight (Problem 5).
 - Risk shares are plug-in estimates: 00642U's 45.9% ranges from 32.7% to 54.3% across windows (X7); the module never
   calls a share a forecast.
-- Daily correlations of funds priced on different sessions (E5): compare frequencies with their standard errors, and
-  do not name a cause the data do not show (the shared decision's "Unexplained extremes" rule).
+- Daily correlations of funds priced on different sessions (E5): compare frequencies with their standard errors, state
+  what each error assumes (independent periods; finite fourth moments for the plug-in one), and do not name a cause the
+  data do not show (the shared decision's "Unexplained extremes" rule).
 - Printed parts and products: every column of X3, the end weights of X2 and the variance shares of E7 and X8 sum as
-  printed; E3's weights carry the digit that its turnover needs; E7's MRC and RC say "from unrounded inputs".
+  printed; E3's weights carry the digit that its turnover needs; E7's MRC and RC say "from unrounded inputs"; E5's
+  00679B–00642U gap says "from the unrounded correlations" (the printed −0.18 and −0.36 give 0.18), and its multiples
+  of the standard errors follow from the printed gap and errors.
+- Statements about "the largest" or "only one" gap hold for the five pairs E5 shows, and E5 says so: over all ten pairs
+  00646–00679B has a larger daily–weekly gap and 00635U–00642U a second daily–monthly gap of two monthly normal-theory
+  errors [A27-11], as a reader who computes the full matrix in Lab Part 4 would find.
 - R1's own results: the module prints R1's trades, never its net wealth, growth, turnover total or costs total (LM34);
   E3 is scaled to a NT\$10 million book so that R1's wealth level stays unprinted.
 - Price indices in U28: only their covariances are used; the dividend gap affects intercepts ((23.8)), not the split.
-- Weekly and monthly statistics drop the first and last periods; the caption says so (AUTHORING §7).
+- Weekly and monthly statistics drop the first and last periods, complete or not; the caption says so (AUTHORING §7).
 
 **Curriculum guidance carried** (plans/vol-5.md's table):
 
@@ -1694,118 +1751,161 @@ LM31's subject. Labs write plain "LM30", "LM31" and "LM34", never `[[…]]`.
 - Not carried here: drawdown definitions (LM32), checkpoints (LM33, LM35), volatility targeting (LM31).
 
 **Stage 4 for earlier modules.** `leads` gain 27 in lm01.md:6 ((1.12)–(1.14)), lm03.md:6 (the working rule,
-lm03.md:266–271), lm19.md:6 (weekly and monthly returns, (19.9)) and lm20.md:6 (Problem 6's standard error), as
-decision G lists; lm07, lm08, lm09, lm10, lm11, lm12, lm16 and lm23 already list 27. No wording change in published
+lm03.md:266–271), lm19.md:6 (weekly and monthly returns, (19.3), (19.9)) and lm20.md:6 (Problem 6's standard error),
+as decision G lists; lm07, lm08, lm09, lm10, lm11, lm12, lm16 and lm23 already list 27. No wording change in published
 modules.
 
-**Sources** (each checked 2026-10-24; paraphrased; none quoted beyond a phrase):
+**Sources** (as the source checks and the SOURCES drafts of 2026-10-24 record them, with the version read and the
+location; paraphrased, none quoted beyond a phrase; bibliographic data from Crossref unless another record is named):
 
 - Maillard, S., T. Roncalli and J. Teïletche (2010). "The Properties of Equally Weighted Risk Contribution Portfolios."
-  *Journal of Portfolio Management* 36(4): 60–70. DOI 10.3905/jpm.2010.36.4.060. Crossref (authors, title, volume,
-  issue, pages); abstract via OpenAlex; the working paper (May 2009, thierry-roncalli.com/download/erc.pdf, read by
-  local text extraction): §2.1 defines the marginal risk contribution as $\partial\sigma/\partial x_i$ and the total
-  contribution as $x_i\,\partial\sigma/\partial x_i$, and its footnote 1 obtains $\sum_i\sigma_i(x)=\sigma(x)$ from
-  Euler's theorem for a function homogeneous of degree 1. Used for (27.6) and the Deep Dive. Its equation numbers are
-  the working paper's; cite the journal article at article level.
+  *Journal of Portfolio Management* 36(4): 60–70 (Crossref: print and online 31 July 2010). DOI
+  10.3905/jpm.2010.36.4.060. The journal text is not openly available and was not read. Read in the authors' working
+  paper "On the properties of equally-weighted risk contributions portfolios" (first version June 2008, this version
+  May 2009; thierry-roncalli.com/download/erc.pdf, 23 pages; read by the LM27 drafter and verified by the second source
+  hunt): §2.1, p. 4, defines the marginal risk contribution as $\partial\sigma/\partial x_i$ and the total contribution
+  as $x_i\,\partial\sigma/\partial x_i$, the contributions summing to $\sigma$; footnote 1 on p. 4 (the second note so
+  numbered) says that $\sigma$ is homogeneous of degree 1 and so satisfies Euler's theorem. Used for (27.6) and the
+  Deep Dive. The text cites the journal article at article level with the working paper's section and page, and
+  prints no JPM page or equation number.
 - Qian, E. (2006). "On the Financial Interpretation of Risk Contribution: Risk Budgets Do Add Up." *Journal of
-  Investment Management* 4(4): 41–51. Issue verified on joim.com (Vol. 4, No. 4, Fourth Quarter 2006, its contents
-  list); pages and text from PanAgora's copy (first page prints the volume, issue and pages 41–51; read by local text
-  extraction). Fact used: under normality a component's expected share of a portfolio loss is its percentage risk
-  contribution plus a term that shrinks as the loss grows (his equation (3) and the paragraph after it), for standard
-  deviation and, with a Cornish–Fisher expansion, VaR. SSRN 684221 (DOI 10.2139/ssrn.684221, Crossref, posted 2005) is
-  the working paper. Used in §6 and the Leaves sentence on VaR contributions.
+  Investment Management* 4(4): 41–51, Fourth Quarter 2006; no DOI. joim.com's 2006 listing places it in Vol. 4, No. 4
+  (the listing prints no pages, and the text needs a login). The pages are printed on the first page of PanAgora's
+  copy (read by the LM27 drafter, by local text extraction) and, a secondary source, in the reference list of Haugh,
+  Iyengar and Song, *Journal of Computational Finance* 21(2): 29–60 and DOI 10.21314/JCF.2017.329 as the copy at
+  columbia.edu prints them (that DOI is not registered: Crossref and doi.org, not found, 2026-10-25). Fact used, from
+  PanAgora's copy: under normality a component's expected share of a portfolio loss is its percentage risk
+  contribution plus a term that shrinks as the loss grows (his equation (3) and the paragraph after it), for the
+  standard deviation and, with a Cornish–Fisher expansion, for VaR. The working paper is SSRN 684221, DOI
+  10.2139/ssrn.684221 (Crossref: posted content, 2005). Used in §6 and in the Leaves sentence on VaR contributions.
 - Choueifaty, Y. and Y. Coignard (2008). "Toward Maximum Diversification." *Journal of Portfolio Management* 35(1):
-  40–51. DOI 10.3905/jpm.2008.35.1.40. Crossref; the abstract (OpenAlex) says the authors introduce a measure they term
-  the diversification ratio. In decision F's list: a separate checker reads the original. Until its report, the text
-  neither names the ratio (27.7) after the paper nor cites it; (27.7) is derived from (8.11) and described in words
-  (Open, item 1).
+  40–51, Fall 2008. DOI 10.3905/jpm.2008.35.1.40. Read by the source check in the JPM layout (hosted by TOBAM).
+  Equation (1), p. 41, defines the diversification ratio: in words (paraphrased, not their wording), the weighted
+  average of the volatilities divided by the portfolio volatility (their $\Sigma$ there is the vector of volatilities,
+  not a covariance matrix). Also on p. 41: a long-only portfolio's ratio is strictly above 1 unless the portfolio is
+  equivalent to a single asset, when it equals 1. Used in §5 for (27.7)'s name and that condition (decision on the
+  first revision, "Sources"). (27.7) is written in the book's notation, $\mathbf w^{\top}\mathbf s/s_p$, and derived
+  from (8.11); their symbols are not copied, and the gloss above is not printed as a quotation.
 - Burns, P., R. F. Engle and J. J. Mezrich (1998). "Correlations and Volatilities of Asynchronous Data." *Journal of
-  Derivatives* 5(4): 7–18. DOI 10.3905/jod.1998.408000. Crossref; abstract (OpenAlex): when markets close at different
-  times, returns look predictable and correlations are understated; the authors synchronize prices. Text not read; used
-  for that one sentence in §4 only, as the abstract states it.
-- Yuanta fund pages, read 2026-10-24: [0050](https://www.yuantaetfs.com/product/detail/0050/Basic_information)
-  (臺灣50指數, FTSE TWSE Taiwan 50 Index; listed 2003-06-30),
-  [00646](https://www.yuantaetfs.com/product/detail/00646/Basic_information) (標普500指數, S&P 500 Index; listed
-  2015-12-14), [00635U](https://www.yuantaetfs.com/product/detail/00635U/Basic_information) (元大標普高盛黃金ER指數股票型
-  期貨信託基金; 標普高盛黃金超額回報指數, S&P GSCI Gold Excess Return Index, COMEX gold futures; listed 2015-04-15),
-  [00642U](https://www.yuantaetfs.com/product/detail/00642U/Basic_information) (元大標普高盛原油ER指數股票型期貨信託基金;
-  標普高盛原油增強超額回報指數, S&P GSCI Crude Oil Enhanced Excess Return, NYMEX WTI futures; listed 2015-09-07). 00679B is
-  in SOURCES. None of the pages states a currency hedge for 00646, 00635U or 00642U; the text says nothing about hedging.
-- TWSE trading system page (SOURCES): the 09:00–13:30 session, for "the funds close at 13:30".
-- NYSE, [hours and calendars](https://www.nyse.com/markets/hours-calendars), read 2026-10-24: the core trading
-  session runs 9:30 a.m. to 4:00 p.m. ET. With Taipei at UTC+8 and New York at UTC−4 in US summer time (UTC−5
-  otherwise), the session ends at 04:00 or 05:00 Taipei time. Used in §4; to be recorded in SOURCES at Stage 1.
-- The cost model: plans/vol-5.md's "Cost model" decision; LM34 owns and prints its official sources (TWSE Operating
-  Rules Art. 94, the Securities Transaction Tax Act Arts. 2 and 2-1, the Ministry of Finance's 財政統計通報 No. 21, TWSE's
-  ETF rules page; the last two are in decision F's list). LM27 cites them by pointer only.
-- Checked and not used (bibliographic data only, Crossref): Litterman, R. (1996), "Hot Spots and Hedges," *Journal of
-  Portfolio Management* 23(5): 52–75, DOI 10.3905/jpm.1996.052 (text not read); Sharpe, W. F. (1963), "A Simplified
-  Model for Portfolio Analysis," *Management Science* 9(2): 277–293, DOI 10.1287/mnsc.9.2.277 (abstract only; the
-  single-index model is LM30's to cite); Scholes, M. and J. Williams (1977), "Estimating Betas from Nonsynchronous Data,"
-  *Journal of Financial Economics* 5(3): 309–327, DOI 10.1016/0304-405X(77)90041-1 (text not read).
+  Derivatives* 5(4): 7–18. DOI 10.3905/jod.1998.408000. Abstract only (OpenAlex's copy): when markets close at
+  different times, returns look predictable and correlations are understated; the authors synchronize the returns by
+  estimating asset values while markets are closed. Text not read; used for that one sentence in §4, as the abstract
+  states it.
+- Yuanta fund pages, `https://www.yuantaetfs.com/product/detail/<code>/Basic_information`, read 2026-10-24 by the LM27
+  drafter and again by the SOURCES draft (HTTP 200; the fields are in the server-rendered HTML): 0050 臺灣50指數, FTSE
+  TWSE Taiwan 50 Index, 50 constituents, listed 2003-06-30; 00646 標普500指數, S&P 500 Index, listed 2015-12-14; 00635U
+  標普高盛黃金超額回報指數, S&P GSCI Gold Excess Return Index, on COMEX gold futures, no distribution, listed
+  2015-04-15; 00642U 標普高盛原油增強超額回報指數, S&P GSCI Crude Oil Enhanced Excess Return, on NYMEX WTI futures, no
+  distribution, listed 2015-09-07. 00679B (ICE US Treasury 20+ Year) is in SOURCES. The visible text of none of these
+  pages mentions a currency hedge, an exchange rate or a fund currency (their other tabs were not read), so the text
+  says nothing about hedging. TWSE's ETF e添富 fund pages (read 2026-10-24) give the same indices and classify 0050 as
+  台股ETF, 00646 as 國外股票ETF and 00635U and 00642U as 期貨ETF.
+- TWSE, for 0050, 00646, 00635U and 00642U (TWSE-listed: TWSE's ISIN page and `STOCK_DAY_ALL`, SOURCES): the trading
+  system page (SOURCES: the 09:00–13:30 session, closing call auction from 13:25) and the Operating Rules (營業細則,
+  version 115.09.24), Art. 3, trading time 09:00–13:30 (read 2026-10-24), for "the funds close at 13:30".
+- TPEx, for 00679B (TPEx-listed from 2017-01-17: TPEx's listing notice 證櫃債字第10600009612號 of 2017-01-13, its ETF
+  list and TWSE's ISIN page, SOURCES; read 2026-10-25 by the TPEx source check and its verifier, anonymous requests):
+  the Business Rules (證券商營業處所買賣有價證券業務規則), Art. 40 item 一, trading time 09:00–13:30 for stocks on the
+  等價成交系統 (last amended 2014-09-23, in item 二 only, so the hour held over E5's span), applied to ETFs by the ETF
+  rules (指數股票型基金及主動式交易所交易基金受益憑證買賣辦法) Art. 4 ¶2; TPEx's trading system page (交易系統簡介,
+  `Last-Modified` 26 March 2026): matching 09:00–13:30, a call auction from 13:25 to the 13:30 close. Used in §4 for
+  "both markets close at 13:30".
+- TWSE's ETF overview page (ETF 總覽, `Last-Modified` 22 October 2026, read 2026-10-24): a futures-trust ETF on
+  a foreign futures index is valued on European and US futures, so the time difference is a risk; used in §4 for that
+  sentence only.
+- NYSE, [Holidays & Trading Hours](https://www.nyse.com/markets/hours-calendars), read 2026-10-24 by the LM27 drafter
+  and again by the SOURCES draft: the core trading session runs 9:30 a.m. to 4:00 p.m. ET (the page lists early closes
+  at 1:00 p.m. on named days). The page says nothing about Taipei time: the offsets come from the IANA time-zone data
+  (Python `zoneinfo`, tzdata 2026.5, run 2026-10-24), with Taipei at UTC+8 without daylight saving, so 4:00 p.m. in
+  New York is 04:00 in Taipei in US summer time and 05:00 otherwise. Used in §4.
+- The cost model: plans/vol-5.md's "Cost model" decision, each fund under its own market's rules; LM34 owns and
+  prints its official sources (TWSE Operating Rules Art. 94 for the four TWSE funds; for 00679B, TPEx's Business Rules
+  Art. 64, ¶1–¶3 unchanged since 2008-02-12, applied to ETFs by its ETF rules' Art. 15 ¶1; the Securities Transaction
+  Tax Act Art. 2 item 2 and Art. 2-1, whose 上市及上櫃 covers a TPEx bond ETF; the Ministry of Finance's ruling
+  台財稅字第09700161260號 of 2008-08-11 on futures-trust fund certificates; TWSE's ETF rules page; the Ministry's 財政統計通報
+  No. 21). LM27 cites them by pointer only.
+- Checked and not used (bibliographic data only, Crossref): Litterman, R. (1997), "Hot Spots™ and Hedges," *Journal of
+  Portfolio Management* 23(5): 52–75, DOI 10.3905/jpm.1996.052 (Crossref dates the print issue 1997-08-31 and the
+  online version 1996-12-31; text not read); Sharpe, W. F. (1963), "A Simplified Model for Portfolio Analysis,"
+  *Management Science* 9(2): 277–293, January 1963, DOI 10.1287/mnsc.9.2.277 (abstract only; the single-index model is
+  LM30's to cite, and SOURCES lists it there); Scholes, M. and J. Williams (1977), "Estimating Betas from Nonsynchronous
+  Data," *Journal of Financial Economics* 5(3): 309–327, December 1977, DOI 10.1016/0304-405X(77)90041-1 (text not
+  read).
+- Kept out, as the source checks require: Choueifaty and Coignard's symbols (their $\Sigma$); any JPM page or equation
+  number of Maillard et al.; Burns et al. beyond their abstract; a fixing time for the futures funds' indices; any
+  statement on currency hedging; SPY's correlations (decision on LM27).
 
 **Chinese terms.** From plans/vol-5.md's list: 投資組合 (portfolio), 共變異數矩陣 (covariance matrix), 交易成本
-(transaction cost), 週轉率 (turnover), 無風險利率 (risk-free rate). Already printed by the book: 再平衡 (rebalancing,
-lm08.md:403), 買進持有 (buy-and-hold) and 漂移 (drift, lm09.md:473), 等權重 (equal weights, lm10.md:391), 市場模型
-(market model, LM23), 殘差 (residual, LM23). New, 樂詞網 searched 2026-10-24 with curl (the Volume III URL pattern, all
-listings, 47 query strings):
+(transaction cost), 週轉率 (turnover; 管理學名詞 writes 周轉率 for "turnover rate", 會計學 and 電子計算機名詞 週轉率), 無風險利率
+(risk-free rate). Already printed by the book: 再平衡 (rebalancing, lm08.md:403), 買進持有 (buy-and-hold) and 漂移 (drift,
+lm09.md:473), 等權重 (equal weights, lm10.md:391), 權重 (weights, Volume IV; 統計學名詞 lists 權數), 峰態 (kurtosis, LM14,
+LM19), 市場模型 (market model, LM23), 殘差 (residual, LM23). New terms, as the LM27 drafter recorded them and the fresh
+樂詞網 pass of 2026-10-24 confirmed them (481 query strings in all listings, 統計學名詞 and 數學名詞, 374 of them also in
+管理學名詞; 1,817 searches, anonymous requests), with that pass's additions:
 
 | English | 樂詞網 (listing) | Book |
 |:--|:--|:--|
-| rebalancing | 重新平衡 (管理學名詞-會計學); rebalance 再平衡；重新平衡 (一般性常見術語) | 再平衡 (as lm08.md:403) |
+| rebalancing; rebalance | 重新平衡 (管理學名詞-會計學, "rebalancing"); 再平衡 (電子計算機名詞, "rebalance"); 再平衡；重新平衡 (一般性常見術語) | 再平衡 (as lm08.md:403) |
 | systematic risk | 系統性風險 (統計學名詞); 系統風險 (管理學名詞) | 系統性風險 |
 | idiosyncratic risk; unsystematic risk | 特質風險; 非系統風險 (管理學名詞) | not used: the module says 殘差 (residual) |
 | single index model | 單一指標模型 (統計學名詞) | 單一指標模型 |
-| factor model | 因子模型 (統計學名詞) | 因子模型 |
+| factor model | 因子模型 (統計學名詞, 管理學名詞) | 因子模型 |
 | variance decomposition | 變異數分解 (統計學名詞) | 變異數分解 |
 | homogeneous function; positively homogeneous | 齊性函數; 正齊次的 (數學名詞) | 一次齊性函數 (homogeneous function of degree 1), composed |
-| Euler's theorem | 歐拉定理 (測繪學辭典 only); 數學名詞 keeps "Euler" in compounds (Euler 數, Euler 常數) | Euler 定理, as the mathematics listing's compounds |
-| diversification | 多樣化 (統計學名詞); 多角化 (管理學名詞); limit of diversification 風險分散極限原則, well-diversified portfolio 充分分散風險的投資組合 (管理學名詞) | 風險分散, the management listing's compounds (多角化 is a firm's business lines) |
+| Euler's theorem | no entry in 統計學名詞, 數學名詞 or 管理學名詞 (數學名詞 writes Euler數, Euler常數); 歐拉定理 in 測量學, 測繪學辭典, 地理學名詞-測繪學名詞, 海洋地質學 and 電子計算機名詞; 物理學名詞 歐拉勒定理 | Euler 定理, with the space the book puts between a Latin name and Chinese (Mahalanobis 距離, LM16) |
+| diversification | 多樣化 (統計學名詞); 多角化 (管理學名詞, also 市場學); 風險分散極限原則 ("limit of diversification"), 充分分散風險的投資組合 ("well-diversified portfolio") and 完全分散風險的投資組合 ("completely diversified portfolio") (管理學名詞); 風險分化 (經濟學) | 風險分散, the management listing's compounds (多角化 is a firm's business lines) |
 | risk contribution; marginal contribution; risk decomposition; risk attribution | no entry; contribution rate 貢獻率 (統計學名詞) | 風險貢獻, 邊際風險貢獻: the book's own forms, English in every box |
-| commission | 佣金 (管理學名詞); 傭金，手續費 (會計學) | 手續費 (commission), the brokers' word |
-| securities transaction tax | 證券交易稅 (管理學名詞) | 證券交易稅 |
+| commission | 佣金 (管理學名詞, 管理學名詞-會計學); 傭金，手續費 (會計學) | 手續費 (commission), the brokers' word |
+| securities transaction tax | 證券交易稅 (管理學名詞, for four English headwords; 會計學, for "transfer tax (on stock)") | 證券交易稅 |
 | exchange traded fund | 指數股票型基金 (統計學名詞, 管理學名詞) | 指數股票型基金 |
 | self-financing | 自籌資金 (管理學名詞, a firm's own funds) | 自我融資 (self-financing), composed: the listing's sense differs |
 | asynchronous | 非同步的；異步的 (數學名詞) | 非同步 |
 | hedge | 避險 (管理學名詞) | 避險 |
 
-**Open before Stage 2** (each with a recommendation):
+**Open before Stage 2.** None: items 1 and 2 closed in the second revision, item 3 in the third.
 
-1. **The ratio (27.7)'s name** (decision F). Choueifaty and Coignard's original is being read by a separate checker.
-   Until its report, the fallback holds: the text describes (27.7) in words ("the weighted average volatility over the
-   book's volatility") and cites no paper for it. Recommendation: if the original defines the diversification ratio as
-   $\mathbf w^{\top}\mathbf s/\sigma_p$, name it so in §5 with the citation; otherwise keep the words.
-2. **The last ISO week.** The weekly rule drops the first and last week, in which the sample starts and ends. The last,
-   5–8 October 2026, holds all its sessions (TX's settlement file has no session on 9 October), so the shared
-   decision's "complete weeks" is exact only for the first. Keeping it gives 501 weeks and moves 0050–00679B's weekly
-   correlation from −0.023 (printed in the shared decision "Timing of E5") to −0.024; 0050–00646's stays 0.588
-   [A27-10]. Recommendation: keep the rule, which needs no holiday calendar, and word it as above in the text and in
-   the shared decision ("the first and last week and month dropped").
+1. **The ratio (27.7)'s name.** Closed by the decision on the first revision ("Sources"): §5 names the ratio the
+   diversification ratio and cites Choueifaty and Coignard (2008, eq. (1), p. 41) in the book's notation; "the ratio
+   exceeds 1" carries their condition, a long-only book not equivalent to a single asset (E6, (27.7), Sources).
+2. **The last ISO week.** Closed by the decision "Weeks and months": the first and last week and month are dropped,
+   complete or not. The Data role, X4, the Pitfalls and A27-10 word the rule so, and the Departures no longer list it.
+3. **The shared decision's parenthesis.** Closed by the decisions on the third revision: the shared decision "Timing
+   of E5" quotes A27-11's figures (simple returns, the first and last period dropped), and its note on the superseded
+   first figures is dropped. A27-46, which checked that note, is withdrawn; its ID stays so that later IDs do not move.
 
-Settled by the decisions of 2026-10-24 (closed): the recursion's notation ($W^{\mathrm{pre}}_t$, $A_{\mathrm w}$
-book-wide, B2; the shared "Costs" sentence rewritten); what LM27 prints of R1 (two trades and the June 2025 span; the
+Settled by the decisions of 2026-10-24 and 2026-10-25 (closed): the recursion's notation ($W^{\mathrm{pre}}_t$,
+$A_{\mathrm w}$ book-wide, B2; the shared "Costs" sentence rewritten); what LM27 prints of R1 (two trades and the June 2025 span; the
 annual totals are LM34's, A2 and A5); the full-sample $\hat\Sigma$ on the estimation frame with the 92 windows as a
-stability check, and weekly $A=51.56$ by LM19's count (D); the timing correlations (C1: the shared decision now quotes
-A27-11; A27-46 stays as the check of its "first figures" parenthesis); the timing evidence (per-module decision:
-sessions and frequencies, no SPY figure); the widget's three matrices (E; now anchored, A27-33, A27-48, A27-49); the
-retrieval date of E5's files (`data/README.md`: 2026-10-24). Kept as this brief proposed, since no decision changed
-them: 風險分散 and Euler 定理 (the Chinese terms table), and the factor split's depth (the exact in-sample (27.8) with
-the full residual covariance, the per-asset split of $\mathrm{RC}_i$, the diagonal-residual shortcut once; no factor
-model of E5). The survivorship pointer that LM34's brief left to this brief (its O11) is taken: §4's "Uses before
-taught" sentence.
+stability check, and weekly $A=51.56$ by LM19's count (D); the timing correlations (C1: the shared decision quotes
+A27-11, without its former note; A27-46 withdrawn, item 3); the timing evidence (per-module decision: sessions and
+frequencies, no SPY figure; both listing markets named, "Listing markets"); the widget's three matrices (E; anchored,
+A27-33, A27-48, A27-49); the retrieval date of E5's files (`data/README.md`: 2026-10-24); the split day's return
+without a symbol (B6); R1's first-window shares as LM27's (A4); the year count from the close before the first return
+(C7); the monthly-gap sentence of E5 and the "adds up" sentence of E7 (decisions on LM27, second recomputation); E5's
+two gap sentences scoped to the five pairs shown, the 00679B–00642U gap "from the unrounded correlations",
+Choueifaty and Coignard's gloss marked as a paraphrase, and R1's and R2's net wealth paths in the lab's files
+(decisions on LM27, third revision); NEAR flags in the anchors table only (C11); echoes
+at the owner's ID and precision (C12: A30-12, A30-24, A30-42); both E5 frames in the lab ("Labs"); the tag users and
+Leads (Y1); the Chinese terms (the fresh pass). Kept as this brief proposed, since no decision changed them: 風險分散
+and Euler 定理, and the factor split's depth (the exact in-sample (27.8) with the full residual covariance, the
+per-asset split of $\mathrm{RC}_i$, the diagonal-residual shortcut once; no factor model of E5). The survivorship
+pointer that LM34's brief left to this brief (its O11) is taken: §4's "Uses before taught" sentence.
 
 Departures from the spine or the shared decisions, with evidence: the spine's equity-tax-only proviso is superseded by
 the cost model; the prerequisite list (the spine's (11.2) is not used; LM1, LM3 and LM20 are added: LM20's Problem 6
-supplies the correlation's standard error); the widget's three matrices (decision E); the week rule's wording (Open,
-item 2).
+supplies the correlation's standard error); the widget's three matrices (decision E); one statistic beyond the spine,
+the funds' raw kurtosis [A27-50], which states the plug-in standard error's condition (the second recomputation's
+Minor 6). R1's first-window risk shares stay with LM27 under decision A4 as amended, so they are no departure.
 
 ## LM28 Mean–Variance Optimization
 
 Stage 1 brief, drafted 2026-10-24 from the editor's spine (`plans/vol-5.md`, "### LM28 Mean–Variance Optimization",
-commit d05750b) and the shared decisions above it; revised the same day to the editor's decisions on the briefs
-(`plans/vol-5.md`, "Editor's decisions on the briefs (2026-10-24)") and to the independent recomputation of its
-anchors. Every number carries its anchor ID at first appearance; `data/vol5_anchors_lm28.py` prints them all (45
-rows, `## LM28` of `plans/vol-5-anchors.md`). Numbers quoted from published modules carry their file:line instead.
+commit d05750b) and the shared decisions above it; revised the same day to the editor's decisions on the briefs, on
+the first revision and on the second recomputation and cross-check (`plans/vol-5.md`), and to the two independent
+recomputations of its anchors; finished on 2026-10-25 to the third revision's verifier and the decisions on the third
+revision. Every number carries its anchor ID at first appearance; `data/vol5_anchors_lm28.py`
+prints them all (46 rows, `## LM28` of `plans/vol-5-anchors.md`). Numbers quoted from published modules carry their
+file:line instead; a number another brief owns carries the owner's anchor ID (decision C12).
 The script imports `vol5_series.frames`, `vol5_rules.schedule`, `WINDOW`, `RF`, `cov0`, `minvar` (only to compare
 it with LM28's closed form) and the solver options; it recomputes no rule of R1–R8 and prints no rule statistic.
 
@@ -1837,18 +1937,19 @@ it with LM28's closed form) and the solver options; it recomputes no rule of R1�
   lm20.md:376), for §5's standard errors of means and §6's realized volatilities.
 - LM23: the CAPM's equation $\E[R_i]-r_f=\beta_i(\E[R_{\text{mkt}}]-r_f)$ (lm23.md:285, unnumbered), which §4 meets as
   (28.6)'s beta identity (A28-45).
-- LM27 (brief, by tag): E5, its funds and its two frames; (27.4) $\mu_p$, $\sigma_p^2$ and annualization with $A$;
-  (27.5) $\operatorname{Cov}(R_i,R_p)=(\Sigma\mathbf w)_i$ and $\beta_{i,p}$; (27.6) $\mathrm{RC}_i/\sigma_p=w_i\beta_{i,p}$.
+- LM27 (brief, by tag): E5, its funds and its two frames (their counts are LM27's A27-01 to A27-03, which A28-01
+  echoes); (27.4) $\mu_p$, $\sigma_p^2$ and annualization with $A$; (27.5)
+  $\operatorname{Cov}(R_i,R_p)=(\Sigma\mathbf w)_i$ and $\beta_{i,p}$; (27.6) $\mathrm{RC}_i/\sigma_p=w_i\beta_{i,p}$.
   E1 applies (27.5)–(27.6) at $\mathbf w^{\mathrm{mv}}$ (every $\beta_{i,p}=1$, every risk share equals its weight)
   and §4 applies (27.5) at $\mathbf w^{\mathrm{tan}}$ (decision C8).
 
-**Leads:** `[29, 30, 31, 32, 33, 34, 35, 43]` (each of LM29–LM35 lists 28 among its prerequisites): LM29 ((28.1),
-(28.2), (28.4)–(28.8); the long-only forms of R3 and R4), LM30 ((28.2), (28.6), (28.8) inverted for Black–Litterman's
-$\mathbf e_{\mathrm{eq}}=\delta\Sigma\mathbf w_{\mathrm{ref}}$, (28.9); the first window's estimates as its simulation's
-model), LM31 (the minimum-variance portfolio as one end of its ordering; it cites no LM28 tag), LM32–LM35 (the shared
-rule "Leads and tags": they cite the rules R3 and R4, which LM28 defines in unconstrained form), LM43 (§4's forward
-pointer: the N-asset Kelly identity is LM43's). Only the tags that LM29's and LM30's briefs cite are listed as cited
-(decision C8); LM43's and LM45's briefs add themselves when they cite one.
+**Leads:** `[29, 30, 31, 32, 33, 34, 35, 43]` (each of LM29–LM35 lists 28 among its prerequisites). The tag users
+are the cross-check's table (decisions C8 and Y1): LM29 cites (28.1), (28.2) and (28.4)–(28.8), for the long-only
+forms of R3 and R4; LM30 cites (28.2), (28.3), (28.6), (28.8) (inverted for Black–Litterman's
+$\mathbf e_{\mathrm{eq}}=\delta\Sigma\mathbf w_{\mathrm{ref}}$) and (28.9), and takes the first window's estimates as
+its simulation's model; LM31 cites (28.2), the minimum-variance end of its ordering; LM35 cites (28.1), for its
+reverse stress test. LM32–LM34 cite the rules R3 and R4, which LM28 defines in unconstrained form (shared rule "Leads
+and tags"). LM43 is a lead by §4's forward pointer: the N-asset Kelly identity is LM43's.
 
 **Forward links honoured.**
 
@@ -1868,7 +1969,7 @@ and the CML"). The plans' tag lists promise LM28 (8.3), (8.11), (9.4), (9.5), (1
 
 **Outcomes** ("After this module you should be able to:"; levels as `plans/vol-5.md`, "Outcome levels"):
 
-1. [D] derive the $N$-asset minimum-variance portfolio from the Lagrangian, and state when it exists and is unique
+1. [D] derive the minimum-variance portfolio of $N$ assets from the Lagrangian, and state when it exists and is unique
 2. [D] derive the frontier as a parabola in variance and mean, and explain two-fund separation
 3. [D] derive the tangency portfolio and the capital market line, and state when the tangency portfolio exists
 4. [C] compute a risk-averse investor's exposures beside a riskless asset, and relate them to the tangency portfolio
@@ -1877,7 +1978,8 @@ and the CML"). The plans' tag lists promise LM28 (8.3), (8.11), (9.4), (9.5), (1
 7. [C] compute frontier portfolios in NumPy from linear systems, and check them and their multipliers with cvxpy
 8. [U] explain why unconstrained mean–variance weights are in-sample estimates, not recommendations
 
-(§1 count, formulas as one token: 16, 14, 16, 16, 17, 16, 16, 10; average 15.1.) Taught, practised, assessed
+(`build/qa/style.py`'s count, formulas as one token: 18, 14, 16, 16, 17, 16, 16, 10; average 15.4; outcome 1 reads "of
+$N$ assets", decision on Y6.) Taught, practised, assessed
 (REVIEW_PROMPT item 10): 1 — §2, E1, E2, KC §2, problems 1, 2, 7, 9; 2 — §3, E3, KC §3, problems 3, 8; 3 — §4, E4,
 KC §4, problems 4, 6, 8; 4 — §4, E5, problem 5; 5 — §5, E6, X3, KC §5, problem 10; 6 — §6, E7, E8, X4, KC §6,
 problem 12; 7 — §7, E9, KC §7, problem 11; 8 — §5's and §6's pitfalls, the summary, problems 6 and 10(c).
@@ -1920,11 +2022,16 @@ problem 12; 7 — §7, E9, KC §7, problem 11; 8 — §5's and §6's pitfalls, t
   tangency portfolio exists exactly when $r_f<\mu_{\mathrm{mv}}$; $\mu_{\tan}-r_f=\mathrm{SR}^{*2}\sigma^2_{\min}/
   (\mu_{\mathrm{mv}}-r_f)$ and $\sigma_{\tan}=\mathrm{SR}^*\sigma^2_{\min}/(\mu_{\mathrm{mv}}-r_f)$; (28.7)
   $\mathrm{SR}^{*2}=\mathrm{SR}_\infty^2+(\mu_{\mathrm{mv}}-r_f)^2/\sigma^2_{\min}$ and the CML $\mu_p=r_f+\mathrm{SR}^*
-  \sigma_p$; separation with a riskless asset, derived from (28.6) and printed without an attribution (Tobin 1958
-  waits for decision F's reading; Open item 1); what the formula returns when $r_f\ge\mu_{\mathrm{mv}}$ (the fully
-  invested portfolio with the lowest Sharpe ratio, $-\mathrm{SR}^*$; the upper branch's Sharpe ratio then rises toward
-  $\mathrm{SR}_\infty$ without reaching it). The beta identity: (28.6) gives $\Sigma\mathbf w^{\mathrm{tan}}=\mathbf e/
-  (\mathbf 1^{\top}\Sigma^{-1}\mathbf e)$, so by (27.5) every fund's beta to the tangency portfolio is proportional to
+  \sigma_p$; separation with a riskless asset, derived from (28.6): the mix of risky funds does not depend on how
+  much of the book they take. §4 credits Tobin (1958), read in Cowles Foundation Discussion Paper No. 14 (1956), §3.6
+  (decision on the first revision), with his limits: the riskless asset is cash at zero yield, there is no borrowing,
+  and non-negativity is assumed but not binding. (28.6) allows any $r_f<\mu_{\mathrm{mv}}$ and borrowing at $r_f$; on
+  the first window the tangency portfolio shorts oil, which his non-negativity assumption excludes (binding
+  constraints are LM29's). What the formula returns when $r_f\ge\mu_{\mathrm{mv}}$: the fully invested portfolio with
+  the lowest Sharpe ratio, $-\mathrm{SR}^*$; the upper branch's Sharpe ratio then rises toward $\mathrm{SR}_\infty$
+  without reaching it (§4's pitfall prints the window of 2024-04-30, A28-24). The beta identity: (28.6) gives
+  $\Sigma\mathbf w^{\mathrm{tan}}=\mathbf e/(\mathbf 1^{\top}\Sigma^{-1}\mathbf e)$, so by (27.5) every fund's beta to
+  the tangency portfolio is proportional to
   its excess return, $\beta_{i,\tan}=e_i/(\mu_{\tan}-r_f)$: the tangency's counterpart of the minimum's "each asset
   has the same covariance with the portfolio" (lm07.md:388–390). That is the CAPM's equation (lm23.md:285) with
   $\mathbf w^{\mathrm{tan}}$ in the market's place; conversely, a fully invested portfolio with $\mu_p\ne r_f$ that
@@ -1943,22 +2050,29 @@ problem 12; 7 — §7, E9, KC §7, problem 11; 8 — §5's and §6's pitfalls, t
   constant weights to 2026-10-08; predicted against realized volatility and mean with their standard errors; the exact
   split of the realized variance by (28.3) with the test period's own moments.
 - U28 at $N=28$: the in-sample $\mathbf w^{\mathrm{mv}}$ (12 shorts, gross 2.24), LM11's halves re-read: their shorts,
-  gross exposures and cosine (decision A5; the halves' $\sigma_{\min}$ and 1/N are LM30's, A30-19).
-- The scan of the 92 windows' unconstrained solutions (Descriptive): the range of $\sigma_{\min}$ (LM28's, decision
-  A5), no negative $\mathbf w^{\mathrm{mv}}$ weight in any window, the 22 windows with $r_f\ge\mu_{\mathrm{mv}}$.
+  gross exposures and cosine (decision A5; the halves' minimum variance and 1/N are LM30's, A30-19).
+- The scan of the 92 windows' unconstrained solutions (Descriptive): the range of $\sigma_{\min}$ and the first
+  window's rank (LM28's, decision A5), the 22 windows with $r_f\ge\mu_{\mathrm{mv}}$. That no window's
+  $\mathbf w^{\mathrm{mv}}$ has a negative weight, so that R3's long-only bounds never bind, is LM29's statement
+  (A29-09, its single owner by decision A5 and Y12): A28-12's zero count, smallest weight (0.13%) and gap to R3 echo
+  it.
 - Python: the closed forms with `np.linalg.solve`, the KKT linear system, one cvxpy check under the solver-output rule,
   and the sign of cvxpy's equality duals.
 - Values owned: every A28 anchor except the echoes of LM7, LM10 and LM11 (cited to their lines) and E5's frame counts
-  (printed by `vol5_series.py`; LM27 introduces them). LM28 owns every statistic of the first window (decision A4):
-  the funds' means, volatilities and correlations, $\mathbf w^{\mathrm{mv}}$, $\sigma_{\min}$, the frontier and the
-  tangency, and equal weights' first-window mean and volatility (3.91%, 7.38%; R1's target in sample, not R1's
-  realized volatility, which is LM30's). R2's first-window risk shares are LM31's.
+  (A28-01 and A28-03's six dates echo LM27's A27-01 to A27-03, printed at most at LM27's precision; decision C12) and
+  A28-12's check of R3 (its zero count, smallest weight and gap), which echoes LM29's A29-09.
+  LM28 owns every statistic of the first window (decision A4): the funds' means, volatilities and correlations,
+  $\mathbf w^{\mathrm{mv}}$, $\sigma_{\min}$, the frontier and the tangency, and equal weights' first-window mean and
+  volatility (3.91%, 7.38%; R1's target in sample, not R1's realized volatility, which is LM30's). A4's exceptions,
+  none of which LM28 prints: the risk shares (R1's are LM27's, A27-21; R2's are LM31's) and R2's mean excess return
+  and volatility (Black–Litterman's calibration, LM30's A30-24). LM28 also owns the 92 windows' $\sigma_{\min}$ range
+  and the U28 halves' gross exposure (decision A5).
 
 **Leaves.** Long-only, caps, leverage and turnover limits, costs in the objective, KKT for inequalities, active sets,
-the long-only frontier and the through-case forms of R3 and R4 → LM29 (including why R3's constraint never binds on E5:
-the unconstrained $\mathbf w^{\mathrm{mv}}$ has no negative weight in any of the 92 windows, A28-12). Financing at a
-rate above $r_f$ → LM29 ("financed leverage"). Estimation error by simulation, the 1/N result, shrinkage, constraints as
-shrinkage, Black–Litterman (whose implied returns invert (28.8)), resampled frontiers and U28's halves out of sample
+the long-only frontier and the through-case forms of R3 and R4 → LM29 (including the statement that R3's bounds never
+bind on E5, A29-09: the unconstrained $\mathbf w^{\mathrm{mv}}$ has no negative weight in any of the 92 windows, which
+A28-12 echoes). Financing at a rate above $r_f$ → LM29 ("financed leverage"). Estimation error by simulation, the 1/N
+result, shrinkage, constraints as shrinkage, Black–Litterman (whose implied returns invert (28.8)), resampled frontiers and U28's halves out of sample
 → LM30. Risk budgets and ERC against minimum variance → LM31. The statistics of a realized Sharpe ratio → LM33. Net
 results of R1–R8 → LM34. Equilibrium: §4 shows only that the CAPM's equation (lm23.md:285) is (28.6)'s beta identity
 with the market in the tangency portfolio's place; why the market should be that portfolio is equilibrium theory,
@@ -1981,23 +2095,24 @@ LM7 (problem 9).
 
 - **E5's estimation frame** (`data/vol5_series.py`, `frames("E5")`; FinMind `TaiwanStockPrice`,
   `TaiwanStockDividendResult`, `TaiwanStockSplitPrice`, registered 2026-10-24 in d05750b): $T=2{,}362$
-  joint returns 2017-01-18 → 2026-10-08, $A=242.95$; wealth frame 2,368 sessions, $A_{\mathrm w}=243.57$ [A28-01]. LM27
-  describes the funds and why the frames differ; LM28 cites it.
+  joint returns 2017-01-18 → 2026-10-08, $A=242.95$; wealth frame 2,368 sessions, $A_{\mathrm w}=243.57$ [A28-01;
+  LM27's A27-02, A27-03]. LM27 describes the funds and why the frames differ; LM28 cites it.
 - **The first window**: the through case's, the 504 estimation rows through the first signal, 2017-02-13 → 2019-02-27,
-  2.05 calendar years from the close of 2017-02-10 (flagged; rounded from 2.04517); the trade is at the close of
-  2019-03-04 [A28-02] (`vol5_rules.schedule`). Inputs:
+  2.05 calendar years from the close of 2017-02-10; the trade is at the close of 2019-03-04 [A28-02]
+  (`vol5_rules.schedule`). Inputs:
   $\boldsymbol\mu:=A\bar{\mathbf R}$ and $\Sigma:=A\hat\Sigma$ (divisor $T$), the plug-in estimates treated as known,
   as the rules' signals annualize them (solver scaling, shared decision "Solver output"). $r_f=1.5\%$ a year, simple,
   $r_f/A=0.617$ bp a day [A28-04].
 - **The test period**: the 1,851 wealth-frame returns 2019-03-05 → 2026-10-08, 7.60 calendar years from the trade
-  close; the estimation frame has 1,845 rows there, without 2025-06-11 → 06-18 [A28-03]. Held portfolios earn
-  $\mathbf w^{\top}\mathbf R_t$ on the wealth frame (0050 earns 0 from 11 to 17 June 2025 and its six-session return on
-  18 June), constant weights, rebalanced every session, no costs; $1+\mathbf w^{\top}\mathbf R_t>0$ on every date
+  close; the estimation frame has 1,845 rows there, without 2025-06-11 → 06-18 (LM27's A27-03) [A28-03]. Held
+  portfolios earn $\mathbf w^{\top}\mathbf R_t$ on the wealth frame (0050 earns 0 from 11 to 17 June 2025 and its
+  six-session return on 18 June), constant weights, rebalanced every session, no costs; $1+\mathbf w^{\top}\mathbf R_t>0$ on every date
   (smallest 0.949 and 0.929, [A28-29, A28-30]). The test period's covariance matrix, ex-post frontier and (28.3) split
   use the estimation frame, "on the 1,845 joint test dates" (joint statistics). X1's fund volatilities use each fund's
   own one-session dates, annualized by its own sessions per year over E5 (decision C2): $A_{\mathrm w}=243.57$ for the
-  four funds that trade on every session and $A=242.95$ for 0050, whose own dates are the estimation frame's. On a
-  common $A$ they differ from the joint matrix's diagonal by at most 0.07 points (00642U) [A28-08].
+  four funds that trade on every session and $A=242.95$ for 0050, whose own dates are the estimation frame's
+  [LM27's A27-02, A27-03]. On a common $A$ they differ from the joint matrix's diagonal by at most 0.07 points (00642U)
+  [A28-08].
 - **The 92 windows** (Descriptive scan): every signal's 504-row window, unconstrained solutions only [A28-12, A28-23].
 - **U28** (Volume II; `data/lm10_series.py`'s `u28()`): 28 sector price indices, 4,382 returns 2008-12-02 →
   2026-10-08, $A=245.48$; halves of 2,191 (LM11's) [A28-13, A28-14]. Covariance only: no mean of U28 is used, and every
@@ -2005,7 +2120,10 @@ LM7 (problem 9).
 - **Conventions.** Weights in percent; "shorts" are weights below $-10^{-6}$; gross exposure $\lVert\mathbf w\rVert_1$.
   Volatilities annualized by $\sqrt A$ (estimation frame), $\sqrt{A_{\mathrm w}}$ (wealth frame) or the fund's own
   sessions per year (a fund described alone), said in each caption. Years are calendar days ÷ 365.25 from the close
-  before the first return (AUTHORING §8), "a year" in a growth rate likewise. Standard errors: (20.2) for means;
+  before the first return (AUTHORING §8, decision C7), "a year" in a growth rate likewise. A vector printed at one
+  decimal whose entries do not add as printed says "rounded separately; sums to …" (decision on LM28, A28-46); no
+  digit is added for it. The text prints rounded values without flag marks (decision C11). Standard errors: (20.2)
+  for means;
   lm20.md:362 with the raw sample kurtosis for volatilities, labelled iid. Every linear system is solved, never
   inverted; the Jacobian of (28.9) needs $\Sigma^{-1}$ itself, which the script solves for column by column. A residual
   at machine precision is printed as a bound ("below 1e-15"), since its digits depend on the order of operations. No
@@ -2046,7 +2164,7 @@ note (accepted as declared, decision B5):
 | $\mu_{\mathrm{mv}}$ | the minimum-variance portfolio's mean, $\boldsymbol\mu^{\top}\mathbf w^{\mathrm{mv}}$ | subscripted $\mu$, as $\mu_p$ |
 | $\mu_{\tan}$, $\sigma_{\tan}$ | the tangency portfolio's mean and volatility | subscripted, as $\mu_p$, $\sigma_p$ |
 | $\mathrm{SR}_\infty$ | slope of the frontier's asymptotes, $\mathrm{SR}_\infty^2=(\boldsymbol\mu-\mu_{\mathrm{mv}}\mathbf 1)^{\top}\Sigma^{-1}(\boldsymbol\mu-\mu_{\mathrm{mv}}\mathbf 1)$: the Sharpe ratio, measured from $\mu_{\mathrm{mv}}$, that a frontier portfolio approaches as $\sigma_p$ grows | new; no star (not an optimum), not LM33's $\mathrm{SR}_0$ or LM7's asset ratio $\mathrm{SR}_i$ (integer subscript); replaces Merton's $D/C$ (accepted, decision B5) |
-| $K$ ($k\times N$), $\mathbf b$, $k$ | equality constraints $K\mathbf w=\mathbf b$; their number | the Volume V row (LM28, LM29); $k$ an integer count, LM28 has no $k$ standard deviations or lag |
+| $K$ ($k\times N$), $\mathbf b$, $k$ | equality constraints $K\mathbf w=\mathbf b$; their number | the Volume V row (LM28, LM29, LM35); $k$ an integer count, LM28 has no $k$ standard deviations or lag |
 | $\boldsymbol\lambda$ | the vector of the $k$ equality multipliers in (28.1); in §3 its entries are $\lambda$ (budget) and $\lambda_\mu$ (target mean) | bold $\lambda$ is new; its entries are never written with an integer subscript, so $\lambda_1$, $\lambda_N$ stay eigenvalues (KC §2 only) |
 | $\boldsymbol\Delta$; $\Delta\mu_i$, $\Delta\mathbf e$ | a weight change with $\mathbf 1^{\top}\boldsymbol\Delta=0$ (LM10's (10.9)); a change of a mean | §6's common $\Delta$ |
 | $\partial\mathbf w^{\mathrm{tan}}/\partial\mathbf e^{\top}$ | the $N\times N$ Jacobian, entry $(i,j)=\partial w^{\mathrm{tan}}_i/\partial e_j$ | introduced in one sentence (Uses before taught) |
@@ -2058,8 +2176,9 @@ days; LM28 sums no days); $\mathbf h$ (no holdings). The examples set $\boldsymb
 $\Sigma:=A\hat\Sigma$ and say once that LM28 treats these plug-in estimates as the model's inputs; the theory keeps
 $\boldsymbol\mu$ and $\Sigma$ unhatted, as LM7 did.
 
-**Motivating case: "Five funds, two years, one optimizer"** (box; §1 count, formulas and anchors aside: 165 words, 11
-sentences, average 15.0, longest 25, which binds the condition to its conclusion)
+**Motivating case: "Five funds, two years, one optimizer"** (box; `build/qa/style.py`'s count with the anchor tags
+removed: 160 words, 11 sentences, average 14.5, longest 24; three paragraphs of 60, 42 and 58 words, within decision
+C10's 80)
 
 > At the end of February 2019 a TWD investor holds five Taiwan-listed funds. They track Taiwan stocks (0050), US stocks
 > (00646), long US Treasuries (00679B), gold futures (00635U) and crude-oil futures (00642U). The investor has 504 days
@@ -2091,12 +2210,12 @@ anywhere.)
 | 1 | Introduction | which layer LM28 adds (LM27's bookkeeping → an optimum and its sensitivity); case + X1; typicality; roadmap; notation and hygiene notes | 380 |
 | 2 | The Minimum-Variance Portfolio {1} | the problem with $\Sigma$ PD and its feasible set; the Lagrangian (LM7's signs) and (10.8); (28.1) with proof by (10.9), existence and uniqueness, the PD condition; (28.2), $\lambda^*=2\sigma^2_{\min}$, $\Sigma\mathbf w^{\mathrm{mv}}=\sigma^2_{\min}\mathbf 1$; (28.3); E1; E2 (U28, 12 shorts; LM11's halves); one sentence that R3 is this problem kept long-only ([[LM29]]) and that on E5 no window's $\mathbf w^{\mathrm{mv}}$ shorts; pitfall: solve, never invert, and check positive definiteness first; 導讀; KC | 750 |
 | 3 | The Frontier and Two-Fund Separation {2} | two constraints, $K=(\mathbf 1\ \boldsymbol\mu)^{\top}$, the 2×2 system by (9.5); (28.4), (28.5); parabola and hyperbola, vertex, asymptotes, $\mathrm{SR}_\infty$; the efficient branch; $\lambda_\mu$ as a shadow price (7.6); two-fund separation (Merton 1972); X2; E3 (equal weights inside the frontier); pitfall: $\boldsymbol\mu$ proportional to $\mathbf 1$; 導讀; KC | 650 |
-| 4 | The Tangency Portfolio and the Capital Market Line {3,4} | the riskless asset and exposures (8.4); (28.1) with $K=\mathbf e^{\top}$; (28.6) and the existence condition $r_f<\mu_{\mathrm{mv}}$; (28.7) and the CML on X2; separation with a riskless asset (no attribution yet, decision F); the beta identity by (27.5) and the CAPM's equation (lm23.md:285), two sentences; E4 ($r_f$ = 0, 1.5%, 2%); risk aversion (28.8), $\sigma_p=\mathrm{SR}^*/\delta$; E5; LM7's two-asset Kelly result cited, [[LM43]]; pitfall: $r_f\ge\mu_{\mathrm{mv}}$ (22 of 92 windows); 導讀; KC | 840 |
+| 4 | The Tangency Portfolio and the Capital Market Line {3,4} | the riskless asset and exposures (8.4); (28.1) with $K=\mathbf e^{\top}$; (28.6) and the existence condition $r_f<\mu_{\mathrm{mv}}$; (28.7) and the CML on X2; separation with a riskless asset, credited to Tobin (1958) as read in Cowles Foundation Discussion Paper No. 14 (1956), §3.6, with his limits (cash at zero yield, no borrowing, non-negativity not binding), one sentence; the beta identity by (27.5) and the CAPM's equation (lm23.md:285), two sentences; E4 ($r_f$ = 0, 1.5%, 2%); risk aversion (28.8), $\sigma_p=\mathrm{SR}^*/\delta$; E5; LM7's two-asset Kelly result cited, [[LM43]]; pitfall: $r_f\ge\mu_{\mathrm{mv}}$ (22 of 92 windows; the window of 2024-04-30); 導讀; KC | 880 |
 | 5 | How Tangency Weights React to the Means {5} | $\Delta\mathbf f^*=\Sigma^{-1}\Delta\mathbf e/\delta$ exactly; (11.8)'s $1/\lambda_k$ weights in words; the Jacobian (28.9); X3; E6 (gold +1 point); each mean's SE by (20.2); Best and Grauer (1991) in one sentence, Chopra and Ziemba as [[LM7]] cites them; pitfall: a derivative is local (11.2 against 10.3 points); [[LM30]]; 導讀; KC | 600 |
 | 6 | The First Window Held to the End {6} | the split fixed in advance; constant weights on the wealth frame, no costs; X4; E7 (the split by (28.3) with (10.4)); E8 (means and volatilities with SEs); the case resolved; the unconstrained solutions are not R3 and R4 ([[LM29]]); pitfall: a frontier fitted to the past is not an opportunity set; [[LM30]], [[LM33]]; 導讀; KC | 700 |
 | 7 | Mean–Variance in Python {7} | `np.linalg.solve` for (28.2), (28.4), (28.6); the KKT system of (28.1); E9: one cvxpy problem under the solver-output rule (annualized inputs, tolerances, status, residuals) and the sign of its duals; [[LM29]] for solvers; lab box | 250 |
 | — | Summary (7) / Problems (12) / Solutions | | 150 / 450 / 600 |
-| | **Total** | | **5,370** |
+| | **Total** | | **5,410** |
 
 **Elements.** 9 examples (E1, E2 §2; E3 §3; E4, E5 §4; E6 §5; E7, E8 §6; E9 §7). Knowledge checks:
 
@@ -2104,8 +2223,8 @@ anywhere.)
   $\mathbf 1^{\top}\mathbf w=1$; on the first window $3.18\%\le5.02\%\le$ (equal weights) $7.38\%\le10.69\%$ [A28-44].
 - §3: Why does the frontier not exist when $\boldsymbol\mu=c\mathbf 1$? ($K$ has rank 1; every portfolio has mean $c$;
   $\mathrm{SR}_\infty=0$ and (28.5) divides by 0.) And why is equal weighting inefficient on the first window? (Its mean,
-  3.913% (flagged; rounded from 3.913458), lies 0.42 points below $\mu_{\mathrm{mv}}=4.335\%$, so $\mathbf w^{\mathrm{mv}}$
-  has both the higher mean and the lower volatility) [A28-15].
+  3.913%, lies 0.42 points below $\mu_{\mathrm{mv}}=4.335\%$, so $\mathbf w^{\mathrm{mv}}$ has both the higher mean and
+  the lower volatility) [A28-15].
 - §4: In 22 of the 92 windows $r_f\ge\mu_{\mathrm{mv}}$ [A28-23]. What does $\Sigma^{-1}\mathbf e/(\mathbf 1^{\top}
   \Sigma^{-1}\mathbf e)$ give there? (The fully invested portfolio with the lowest Sharpe ratio, $-\mathrm{SR}^*$:
   −1.20 on 2024-04-30, gross 86.0 [A28-24].)
@@ -2136,9 +2255,10 @@ multipliers explicitly; the main text uses the shorter route through $\mathbf w^
   / 10.79% [A28-29, A28-30]. Note: daily total returns in NT\$; the window's rows are the optimizer's inputs, on the
   window's 504 joint dates, annualized by $A=242.95$; the test volatilities are each fund's own one-session dates,
   annualized by its own sessions per year over E5 ($A_{\mathrm w}=243.57$, and $A=242.95$ for 0050; decision C2;
-  [A28-01, A28-08]); the realized columns are the wealth frame, $A_{\mathrm w}=243.57$ (shared decision "E5's two
-  frames"); $r_f=1.5\%$; in-sample weights from plug-in moments; held at constant weights, no costs. Source: FinMind
-  `TaiwanStockPrice`,
+  [A28-01, A28-08; LM27's A27-02, A27-03]); the realized columns are the wealth frame, $A_{\mathrm w}=243.57$
+  (shared decision "E5's two frames"); $r_f=1.5\%$; in-sample weights from plug-in moments, the
+  $\mathbf w^{\mathrm{tan}}$ row rounded separately (it sums to 100.1) [A28-46]; held at constant weights, no costs.
+  Source: FinMind `TaiwanStockPrice`,
   `TaiwanStockDividendResult`, `TaiwanStockSplitPrice`, registered 2026-10-24; `data/vol5_series.py`; Computations:
   `data/lm28_numbers.py`.
 - X2 `frontier` (`scatter` with `curves`, §3–§4): x volatility 0–25% (`fmt: "n1"`), y mean −2 to 12%. Series "funds"
@@ -2152,7 +2272,8 @@ multipliers explicitly; the main text uses the shorter route through $\mathbf w^
   change of $\mathbf w^{\mathrm{tan}}$ in points (`fmt: "n1"`, min −12, max 12, `valueName` "change, points"); diagonal
   +6.6, +4.7, +7.6, +10.3, +1.9; 0050's column +6.6 / −6.4 / +0.8 / −1.6 / +0.5 [A28-25]. Note: in-sample, first window,
   $r_f=1.5\%$; each mean's standard error 9.4 / 8.2 / 5.9 / 6.5 / 16.1 points [A28-27]; exact recomputation, not (28.9)'s
-  linear prediction (which gives 11.2 for gold's own weight [A28-26]).
+  linear prediction (which gives 11.2 for gold's own weight [A28-26]); cells rounded separately, so 0050's and
+  00646's columns sum to −0.1, not 0 [A28-46].
 - X4 `heldout` (`scatter` with `curves` and `vectors`, §6): the first window's efficient branch (solid, color 2) and the
   test period's ex-post efficient branch (dashed, color 4); arrows from predicted to realized (volatility, mean) for
   $\mathbf w^{\mathrm{mv}}$ (5.02, 4.34) → (10.05, 9.14) and $\mathbf w^{\mathrm{tan}}$ (7.81, 8.38) → (14.15, 10.79)
@@ -2172,9 +2293,8 @@ doubles as the positive-definiteness check, two triangular solves, then (28.2), 
 (funds, both branches, CML, $\mathbf w^{\mathrm{mv}}$ and tangency points); bars of $\mathbf w^{\mathrm{tan}}$ against
 the first window's (two series). Readouts: $\mathbf w^{\mathrm{mv}}$, $\sigma_{\min}$, $\mu_{\mathrm{mv}}$,
 $\mathbf w^{\mathrm{tan}}$, $\mathrm{SR}^*$, gross exposure. Messages: "$\Sigma$ is not positive definite: no frontier"
-when the Cholesky fails (the window's matrix stays PD for the correlation strictly between −0.736 (flagged; the edge is
-−0.736473) and 0.969 [A28-42], so the slider, in steps of 0.01, reaches both failures); "$r_f\ge\mu_{\mathrm{mv}}$: no
-tangency portfolio" when $\mathbf 1^{\top}\Sigma^{-1}\mathbf e\le0$ (the frontier is still drawn). Initial state
+when the Cholesky fails (the window's matrix stays PD for the correlation strictly between −0.736 and 0.969 [A28-42],
+so the slider, in steps of 0.01, reaches both failures); "$r_f\ge\mu_{\mathrm{mv}}$: no tangency portfolio" when $\mathbf 1^{\top}\Sigma^{-1}\mathbf e\le0$ (the frontier is still drawn). Initial state
 (decision on LM28): the first draw, and so the PDF, uses the data block's exact $\boldsymbol\mu$ and $\Sigma$, and
 equals X2. The sliders start at the rounded values 10.0%, 0.8% and 0.54, and an entry switches to its slider's value
 only when that slider moves. With all three moved back to their starting values the readouts are
@@ -2188,37 +2308,40 @@ $r_f\ge\mu_{\mathrm{mv}}$ case) in NumPy and stores the expected readouts for `b
 **Examples** (results recomputed from the printed inputs):
 
 - E1 §2 `mv5`, the first window: solve $\Sigma\mathbf x=\mathbf 1$ and rescale: $\mathbf w^{\mathrm{mv}}=(10.7, 22.5,
-  41.4, 25.0, 0.4)\%$, $\sigma^2_{\min}=0.002515$, $\sigma_{\min}=5.02\%$, $\mu_{\mathrm{mv}}=4.34\%$,
-  $\lambda^*=2\sigma^2_{\min}=0.00503$ [A28-10]; every fund's covariance with the mix is 0.0025152 (so by (27.5)–(27.6)
-  every $\beta_{i,p}=1$ and the risk shares equal the weights) [A28-11]. The 5.02% lies below every fund's volatility, the lowest being
-  00679B's 8.5% [A28-06]. The smallest weight is 0.36% (oil); in none of the 92 windows does an unconstrained weight turn
-  negative (the smallest is 0.13%) [A28-10, A28-12].
+  41.4, 25.0, 0.4)\%$, $\sigma^2_{\min}=0.0025152$, $\sigma_{\min}=5.02\%$, $\mu_{\mathrm{mv}}=4.34\%$,
+  $\lambda^*=2\sigma^2_{\min}=0.00503$ [A28-10] ($\sigma^2_{\min}$ carries seven decimals because $\sqrt{0.002515}$
+  would give 5.01%); every fund's covariance with the mix equals $\sigma^2_{\min}$, 0.0025152 (so by (27.5)–(27.6)
+  every $\beta_{i,p}=1$ and the risk shares equal the weights) [A28-11]. The 5.02% lies below every fund's volatility,
+  the lowest being 00679B's 8.5% [A28-06]. The smallest weight is 0.36% (oil) [A28-10]; in none of the 92 windows
+  does an unconstrained weight turn negative (the smallest is 0.13%) [A28-12, an echo of LM29's A29-09], which is why
+  R3's bounds never bind on E5 ([[LM29]]'s statement).
 - E2 §2 `u28mv`, $N=28$: $\mathbf w^{\mathrm{mv}}$ shorts 12 sectors, gross 2.24, $\sigma_{\min}=10.98\%$ against 15.75%
   for equal weights (lm10.md:36) and 13.67% for the least volatile sector, CommunicationsInternet (53.6% of the
   weight); Optoelectronic −10.8%; $\kappa=108.1$ [A28-13]. The halves give 10 and 13 shorts, gross 2.44 and 2.06, and
   the cosine 0.690 of LM11's solutions (lm11.md:467) [A28-14]: rescaling leaves a cosine unchanged. In-sample on each
   half; how such weights fare on the other half is LM30's.
-- E3 §3 `inside`, equal weights on the first window: mean 3.913% (flagged; rounded from 3.913458), 0.42 points below
-  $\mu_{\mathrm{mv}}=4.335\%$, volatility 7.38%; by (28.5) the frontier portfolio with that mean has
-  $\sqrt{0.002515+0.0042^2/0.4554}=5.05\%$, and the efficient portfolio with 7.38% has mean 7.99%, weights (11.7,
-  58.8, 38.1, 4.7, −13.3)% [A28-10, A28-15, A28-19]; at that point $\lambda=-0.00193$ and $\lambda_\mu=d\sigma_p^2/d\mu_p=
+- E3 §3 `inside`, equal weights on the first window: mean 3.913%, 0.42 points below $\mu_{\mathrm{mv}}=4.335\%$,
+  volatility 7.38%; by (28.5) the frontier portfolio with that mean has $\sqrt{0.0025152+0.0042^2/0.4554}=5.05\%$,
+  and the efficient portfolio with 7.38% has mean 7.99%, weights (11.7, 58.8, 38.1, 4.7, −13.3)% [A28-10, A28-15,
+  A28-19]; at that point $\lambda=-0.00193$ and $\lambda_\mu=d\sigma_p^2/d\mu_p=
   2\times3.6565\%/0.4554=0.161$ [A28-16]. Each extra point of target mean moves 00646's weight by +9.9 points and gold's
   by −5.6 [A28-17].
 - E4 §4 `tan5`: $\mu_{\mathrm{mv}}=4.335\%>r_f$, so $\mathbf 1^{\top}\Sigma^{-1}\mathbf e=(\mu_{\mathrm{mv}}-r_f)/
-  \sigma^2_{\min}=0.02835/0.002515=11.27>0$; $\mathbf w^{\mathrm{tan}}=(11.8, 62.6, 37.8, 2.6, -14.7)\%$, gross 1.29,
-  mean 8.376% (flagged; rounded from 8.375582), volatility 7.810%, so $\mathrm{SR}^*=(8.376-1.5)/7.810=0.880$, against
-  0.72 for the best single fund, 00646 [A28-10, A28-18]; (28.7): $0.7750=0.4554+0.5653^2$ [A28-15, A28-19]. By (27.5) each
-  fund's beta to $\mathbf w^{\mathrm{tan}}$ is $e_i/(\mu_{\tan}-r_f)$, checked to below 1e-15; no beta is printed
-  [A28-45]. With $r_f=0$: $(11.4, 48.7, 39.1, 10.3, -9.5)\%$, $\mathrm{SR}^*=1.10$; with 2%: $(12.0, 71.1, 37.0, -2.2,
-  -18.0)\%$, 0.82 [A28-20]: the illustrative rate moves 00646's weight by 22 points (shared decision "Risk-free rate").
+  \sigma^2_{\min}=0.02835/0.0025152=11.27>0$; $\mathbf w^{\mathrm{tan}}=(11.8, 62.6, 37.8, 2.6, -14.7)\%$ (rounded
+  separately; sums to 100.1), gross 1.29, mean 8.376%, volatility 7.810%, so $\mathrm{SR}^*=(8.376-1.5)/7.810=0.880$,
+  against 0.72 for the best single fund, 00646 [A28-10, A28-18, A28-46]; (28.7): $0.7750=0.4554+0.5653^2$ [A28-15,
+  A28-19]. By (27.5) each fund's beta to $\mathbf w^{\mathrm{tan}}$ is $e_i/(\mu_{\tan}-r_f)$, checked to below 1e-15;
+  no beta is printed [A28-45]. With $r_f=0$: $(11.4, 48.7, 39.1, 10.3, -9.5)\%$, $\mathrm{SR}^*=1.10$; with 2%: $(12.0, 71.1, 37.0, -2.2,
+  -18.0)\%$ (rounded separately; sums to 99.9), 0.82 [A28-20, A28-46]: the illustrative rate moves 00646's weight by
+  22 points (shared decision "Risk-free rate").
 - E5 §4 `cml10`, a 10% volatility on the CML (hypothetical target): mean $1.5\%+0.880\times10\%=10.30\%$; it needs
   $\delta=\mathrm{SR}^*/0.10=8.80$ and $L=11.27/8.80=1.28$, borrowing 0.28 of capital; exposures
   $\Sigma^{-1}\mathbf e/\delta=(15.1, 80.1, 48.4, 3.3, -18.9)\%$ from unrounded inputs (the last is −18.860, so
   $1.28\times(-14.7)$ would print −18.8) [A28-18, A28-21]. The investor with $\delta=11.27$ holds the tangency portfolio and no
   cash [A28-22].
-- E6 §5 `bump`, gold's mean up 1 point (0.78% → 1.78%, both flagged at 2 dp, rounded from 0.78448 and 1.78448; a
-  hypothetical change of 0.15 standard errors, the SE being 6.5 points [A28-27]): gold's weight 2.576% → 12.845%,
-  +10.3 points; 00679B −5.7, 00646 −2.8 points [A28-25, A28-27]; the exposures at $\delta=8.80$ change exactly by
+- E6 §5 `bump`, gold's mean up 1 point (0.78% → 1.78%, a hypothetical change of 0.15 standard errors, the SE being
+  6.5 points [A28-27]): gold's weight 2.576% → 12.845%, +10.3 points; 00679B −5.7, 00646 −2.8 points [A28-25,
+  A28-27]; the exposures at $\delta=8.80$ change exactly by
   column 4 of $\Sigma^{-1}$ times 0.01/δ: (−2.0, +3.2, −3.6, +14.6, −0.9) points [A28-28]; (28.9) predicts 11.2 for
   gold's own weight against the exact 10.3 [A28-26].
 - E7 §6 `held`, the split by (28.3) on the test rows: $\sigma^2_{\min}=0.00927$, $\sigma_{\min}=9.63\%$ (against 5.02%);
@@ -2226,11 +2349,13 @@ $r_f\ge\mu_{\mathrm{mv}}$ case) in NumPy and stores the expected readouts for `b
   $\mathbf w^{\mathrm{tan}}$: $0.00927+0.01071=0.01998$, 14.14%, adding 4.51 [A28-31] (five decimals, so that the parts
   add as printed). The wealth frame's 10.05% and 14.15% differ in the second decimal (six more dates) [A28-31]. The ex-post optimum itself moved:
   $\mathbf w^{\mathrm{mv}}=(8.0, 22.4, 46.1, 17.0, 6.5)\%$, $\mathbf w^{\mathrm{tan}}=(69.7, 8.8, -11.9, 27.6, 5.9)\%$
-  [A28-32].
+  (rounded separately; sums to 100.1) [A28-32, A28-46].
 - E8 §6 `realized`: $\mathbf w^{\mathrm{mv}}$ realized 10.05% (SE 0.40; iid, raw kurtosis 12.6), mean 9.14% (SE 3.6),
   log growth 8.63% a year [A28-29]; $\mathbf w^{\mathrm{tan}}$ 14.15% (SE 0.53), mean 10.79% (SE 5.1), 9.79% a year
-  [A28-30]. The volatilities moved by 13 and 12 of their own SEs ((10.05 − 5.02)/0.40 and (14.15 − 7.81)/0.53; whole
-  numbers, which the rounded inputs also give); the means by 1.3 and 0.5 [A28-29, A28-30]. Resolution: the
+  [A28-30]. The first SE follows from the printed 10.05%, 12.6 and $T=1{,}851$; the second prints no kurtosis, since
+  the rounded 14.15% and 11.6 would give 0.54, not 0.53 [A28-30]. The volatilities moved by 13 and 12 of their own
+  SEs ((10.05 − 5.02)/0.40 and (14.15 − 7.81)/0.53; whole numbers, which the rounded inputs also give); the means by
+  1.3 and 0.5 [A28-29, A28-30]. Resolution: the
   calculus and the weights were right in sample; the inputs changed, and most of all the volatilities (every fund's
   rose, X1); the bond fund's negative correlations shrank too, 0050–00679B from −0.30 to −0.09 and 00646–00679B from
   −0.26 to −0.06 [A28-07, A28-09] (joint, estimation frame).
@@ -2239,15 +2364,16 @@ $r_f\ge\mu_{\mathrm{mv}}$ case) in NumPy and stores the expected readouts for `b
   closed form and (28.4) to below 1e-15. cvxpy 1.9.3 on the annualized inputs, a fresh `Problem` per solver: OSQP 1.1.3
   (`eps_abs` and `eps_rel` 1e-10, polishing) and CLARABEL 0.11.1 (`tol_gap_abs`, `tol_gap_rel`, `tol_feas` 1e-12), as
   the shared decision "Solver output" sets them; status `optimal` for both; weight gaps to the closed form below 1e-15
-  (OSQP) and 1.0e-12 (CLARABEL); KKT residuals (stationarity with cvxpy's duals in place of $-\boldsymbol\lambda$, and
-  feasibility) below 1e-13; `dual_value` +0.00193 and −0.161, the negatives of LM7's $\lambda$ and $\lambda_\mu$
+  (OSQP) and below 1e-11 (CLARABEL, whose interior-point gap is printed as a bound); KKT residuals (stationarity
+  with cvxpy's duals in place of $-\boldsymbol\lambda$, and feasibility) below 1e-13; `dual_value` +0.00193 and −0.161, the negatives of LM7's $\lambda$ and $\lambda_\mu$
   [A28-33]. The sign is the installed package's behaviour, so the text tells the reader to check it against a closed
   form rather than citing a convention.
 
 **Problems plan** (12; MC keys B, A, C, B, A, C; the lab solves 10–12). Stems state the sample (E5's first window,
-504 estimation-frame returns 2017-02-13 → 2019-02-27, $A=242.95$, divisor $T$, $r_f=1.5\%$ simple a year) or the
-hypothetical inputs, the feasible set (fully invested, otherwise unconstrained; problem 5 with a riskless asset), the
-rounding and, in problem 11, the solvers and their tolerances (shared decision "Problems").
+504 estimation-frame returns 2017-02-13 → 2019-02-27, $A=242.95$ [A28-01; LM27's A27-02], divisor $T$,
+$r_f=1.5\%$ simple a year) or the hypothetical inputs, the feasible set (fully invested, otherwise unconstrained;
+problem 5 with a riskless asset), the rounding and, in problem 11, the solvers and their tolerances (shared decision
+"Problems").
 
 1. MC: three uncorrelated assets, volatilities 10%, 20%, 20%: the first asset's minimum-variance weight. A 50.0%
    (inverse volatility). **B** 66.7%. C 33.3% (equal) [A28-34]. The solution adds $\sigma_{\min}=8.16\%$.
@@ -2283,34 +2409,33 @@ rounding and, in problem 11, the solvers and their tolerances (shared decision "
     A28-31].
 
 **Lab parts** (`build/make_lab28.py`; reads only its `data/`, built locally by `make_lab_data.py` and never committed
-(shared decision "Labs", decision C6): the wealth frame with each fund's traded flags, from which the lab rebuilds the
-estimation frame as `vol5_series.build_frames` does (Open item 3), and the rules' per-date targets; `sectors_close_raw.csv`
+(shared decision "Labs", decision C6): E5's estimation frame and its wealth frame with the traded flags, both written by
+`make_lab_data.py` (decision on the first revision), and the rules' per-date targets; `sectors_close_raw.csv`
 and `sectors_close_repairs.csv` for U28, built as LM23's lab builds them): 1 data, the first window, $A$, $A_{\mathrm w}$;
 2 E1 by hand, $\Sigma\mathbf w^{\mathrm{mv}}=\sigma^2_{\min}\mathbf 1$, risk shares; 3 X2, E3, two-fund separation (any
 two frontier portfolios rebuild a third); 4 E4, E5, $r_f$ = 0, 1.5%, 2%, the tangency betas against $e_i/(\mu_{\tan}-r_f)$;
 5 X3, E6, (28.9) against exact; 6 X4, E7, E8;
 7 E2 (U28, halves); 8 E9 (KKT system, cvxpy, dual signs); 9 problems 10–12; 10 the 92-window scan: recompute
 $\mathbf w^{\mathrm{mv}}$ at every signal and check it against R3's target weights from the derived file (the
-anchor script finds `vol5_rules.minvar` equal to it to below 1e-15 at all 92 signals [A28-12], because no weight is negative;
-LM29 explains), and mark the 22 windows with $r_f\ge\mu_{\mathrm{mv}}$
+anchor script finds `vol5_rules.minvar` equal to it to below 1e-15 at all 92 signals, because no weight is negative:
+A28-12, which echoes LM29's A29-09, the owner of that statement), and mark the 22 windows with $r_f\ge\mu_{\mathrm{mv}}$
 (the lab re-implements only LM28's forms, shared decision "Labs"). Extension (*In-sample*): add the funds one at a time
 (0050, then 00646, …) and plot $\mathrm{SR}^*$ and $\sigma_{\min}$ against $N$ on the first window; a closing sentence
 says that a gain in sample promises nothing out of sample (§6) and that LM30 tests it. Labs write plain "LM29",
 never `[[LM29]]`.
 
-**Cross-module tags** (each with the briefs that cite it by number, decision C8; a tag no later brief cites is
-numbered because LM28 itself refers to it).
+**Cross-module tags** (each with the briefs that cite it by number: the cross-check's table, decisions C8 and Y1).
 
 - (28.1) For $\Sigma$ positive definite and $K$ ($k\times N$) of full row rank, $\min\mathbf w^{\top}\Sigma\mathbf w$
   subject to $K\mathbf w=\mathbf b$ has the unique solution $\mathbf w^*=\Sigma^{-1}K^{\top}(K\Sigma^{-1}K^{\top})^{-1}
   \mathbf b$, value $\mathbf b^{\top}(K\Sigma^{-1}K^{\top})^{-1}\mathbf b$, multipliers $\boldsymbol\lambda=2(K\Sigma^{-1}
   K^{\top})^{-1}\mathbf b$, and $\mathbf w^{\top}\Sigma\mathbf w=\mathbf w^{*\top}\Sigma\mathbf w^*+(\mathbf w-\mathbf w^*)^{\top}
-  \Sigma(\mathbf w-\mathbf w^*)$ on the feasible set (LM29).
+  \Sigma(\mathbf w-\mathbf w^*)$ on the feasible set (LM29, LM35).
 - (28.2) $\mathbf w^{\mathrm{mv}}=\Sigma^{-1}\mathbf 1/(\mathbf 1^{\top}\Sigma^{-1}\mathbf 1)$, $\sigma^2_{\min}=
-  1/(\mathbf 1^{\top}\Sigma^{-1}\mathbf 1)$, $\Sigma\mathbf w^{\mathrm{mv}}=\sigma^2_{\min}\mathbf 1$ (LM29, LM30).
+  1/(\mathbf 1^{\top}\Sigma^{-1}\mathbf 1)$, $\Sigma\mathbf w^{\mathrm{mv}}=\sigma^2_{\min}\mathbf 1$ (LM29, LM30, LM31).
 - (28.3) $\mathbf w^{\top}\Sigma\mathbf w=\sigma^2_{\min}+(\mathbf w-\mathbf w^{\mathrm{mv}})^{\top}\Sigma(\mathbf w-
   \mathbf w^{\mathrm{mv}})$ for $\mathbf 1^{\top}\mathbf w=1$; with a sample $\hat\Sigma$ and (10.4) it splits a realized
-  variance exactly (cited by no later brief; E7 and problem 12 use it).
+  variance exactly (LM30; in LM28, E7 and problem 12).
 - (28.4) $\mathbf w(\mu_p)=\mathbf w^{\mathrm{mv}}+\frac{\mu_p-\mu_{\mathrm{mv}}}{\mathrm{SR}_\infty^2}\Sigma^{-1}
   (\boldsymbol\mu-\mu_{\mathrm{mv}}\mathbf 1)$, $\boldsymbol\mu$ not proportional to $\mathbf 1$ (LM29).
 - (28.5) $\sigma_p^2=\sigma^2_{\min}+(\mu_p-\mu_{\mathrm{mv}})^2/\mathrm{SR}_\infty^2$ (LM29).
@@ -2329,9 +2454,12 @@ numbered because LM28 itself refers to it).
 
 - The existence condition. $r_f\ge\mu_{\mathrm{mv}}$ in 22 of the 92 windows (every month-end from 2022-06-30 to
   2024-04-30 except 2024-03-29, where $\mathbf 1^{\top}\Sigma^{-1}\mathbf e=0.614$ and the gross exposure is 29.1)
-  [A28-23]. There the formula returns the worst portfolio, not the best (−1.20 on 2024-04-30, gross 86.0) [A28-24]. The
-  through case's R4 survives because it is long-only (LM29); a script that normalizes $\Sigma^{-1}\mathbf e$ without the
-  sign test is wrong.
+  [A28-23]. There the formula returns the worst portfolio, not the best. On 2024-04-30, $\mu_{\mathrm{mv}}=1.34\%$ and
+  $\mathbf 1^{\top}\Sigma^{-1}\mathbf e=-0.185$; the normalized $\Sigma^{-1}\mathbf e$ has Sharpe ratio −1.20 with
+  gross 86.0, while the upper branch's Sharpe ratio rises toward $\mathrm{SR}_\infty=1.2023$ without reaching it
+  (0.7864, 1.1928 and 1.2020 at 10, 100 and 1,000 points above $\mu_{\mathrm{mv}}$) [A28-24]. The through case's R4
+  survives because it is long-only (LM29); a script that normalizes $\Sigma^{-1}\mathbf e$ without the sign test is
+  wrong.
 - Units. $\mathbf w^{\mathrm{mv}}$ does not change when $\Sigma$ is rescaled; $\mathbf w^{\mathrm{tan}}$ needs
   $\boldsymbol\mu$, $\Sigma$ and $r_f$ in the same units (annual here, $r_f/A$ a day). $\mathrm{SR}^*$ is annual because
   $\boldsymbol\mu$ and $\Sigma$ are. Solvers get the annualized inputs (shared decision "Solver output").
@@ -2347,7 +2475,7 @@ numbered because LM28 itself refers to it).
 - Causes (PITFALLS §7). The text says "the volatilities rose" (X1, an observation) and that the means' miss is within
   noise (E8); it does not name a market cause for 2020–2026 without a dated source.
 - Standard errors: the realized volatility's iid SE (0.40) understates its error under clustering (lm20.md:376); the
-  normal-days SE is 0.17 (flagged; rounded from 0.16514) [A28-29]. A gap of 13 standard errors [A28-29] survives any
+  normal-days SE is 0.17 [A28-29]. A gap of 13 standard errors [A28-29] survives any
   reasonable inflation of the SE, which is the point made.
 - A derivative is local: (28.9) gives 11.2 points where the exact change is 10.3 (X3 uses exact changes) [A28-26].
 - cvxpy's equality duals carry the opposite sign to LM7's $\lambda$ (E9); check signs against a closed form.
@@ -2373,109 +2501,158 @@ numbered because LM28 itself refers to it).
 
 **Stage 4 for earlier modules.**
 
-- `leads` gain 28 in lm08.md:6 and lm20.md:6 ((20.2) and the volatility SE, lm20.md:362), both on decision G's list,
-  and in lm23.md:6 (new with this revision: §4 cites the CAPM's equation, lm23.md:285).
-- lm07.md:511–512: 切點組合 → 切點投資組合 (on the plan's list).
+- `leads` gain 28 in lm08.md:6, lm20.md:6 ((20.2) and the volatility SE, lm20.md:362) and lm23.md:6 (§4 cites the
+  CAPM's equation, lm23.md:285), all three on decision G's list.
+- lm07.md:511–512: 切點組合 → 切點投資組合, three times (the plan's Stage 4 list; the Chinese-terms decision of the second
+  recomputation extends it to line 512).
+- lm07.md:786 (Chopra and Ziemba's issue number, 19(2)) goes to LM30's list, since LM30 cites the paper (decision on
+  Y14); LM28 cites it only as lm07.md:509 does.
 - No wording change: lm07.md:457's "where a line from the risk-free rate touches the set of risky portfolios" is a
   two-asset sentence about LM7's windows; LM28 adds the general condition ($r_f<\mu_{\mathrm{mv}}$) without
   rewording LM7.
 
-**Sources** (each checked 2026-10-24; paraphrased, no quotation over one sentence):
+**Sources** (the verified readings of 2026-10-24: bibliographic data from Crossref, re-read for the SOURCES draft
+"Papers and books (Volume V)", unless another source is named; Tobin as the source check of decision F read him;
+paraphrased, no quotation over one sentence; section, equation and page numbers are those of the version named):
 
-- Markowitz, H. (1952). "Portfolio Selection." *Journal of Finance* 7(1): 77–91. DOI 10.1111/j.1540-6261.1952.tb01525.x.
-  Crossref (title, volume, issue, pages). Already in SOURCES and lm07.md:777. Used for the origin of mean–variance only.
+- Markowitz, H. (1952). "Portfolio Selection." *Journal of Finance* 7(1): 77–91, March 1952. DOI
+  10.1111/j.1540-6261.1952.tb01525.x. Already in SOURCES and lm07.md:777. Used for the origin of mean–variance only.
 - Merton, R. C. (1972). "An Analytic Derivation of the Efficient Portfolio Frontier." *Journal of Financial and
-  Quantitative Analysis* 7(4): 1851–1872. DOI 10.2307/2329621. Crossref (title, volume, issue, first page 1851) and
-  RePEc (ideas.repec.org/a/cup/jfinqa/v7y1972i04p1851-1872_01.html: pages 1851–1872; abstract: explicit frontiers for
-  more than three assets, the separation theorem proved as a mutual-fund theorem, the graphical method wrong under some
-  conditions). The Cambridge-style DOI 10.1017/S0022109000017798 is not a Crossref DOI (the survey's 404). Used for the
-  closed-form frontier and two-fund separation; his notation is not used (not read in the original).
-- Tobin, J. (1958). "Liquidity Preference as Behavior Towards Risk." *Review of Economic Studies* 25(2): 65–86. DOI
-  10.2307/2296205. Crossref (first page 65) and RePEc (ideas.repec.org/a/oup/restud/v25y1958i2p65-86..html: 65–86).
-  The text was not read. On decision F's list: until the checker's report says it was read, the text prints no
-  attribution for separation with a riskless asset (F's fallback; Open item 1).
-- Sharpe, W. F. (1990). "Capital Asset Prices with and without Negative Holdings." Nobel Lecture, 7 December 1990
-  (nobelprize.org PDF); published in *Journal of Finance* 46(2): 489–509, 1991, DOI 10.1111/j.1540-6261.1991.tb02671.x
-  (Crossref). Read in the survey's text copy of the nobelprize.org PDF (the first drafter's own request returned HTTP
-  403): the section "The Two-fund Separation Theorem" calls the result two-fund separation "following Tobin", and with
-  a riskless asset every investor holds it and the market portfolio; "Fund Separation" says non-negativity makes the
-  frontier piecewise linear (citing Markowitz 1959), so two-fund separation need not hold (for LM29). The lecture's
-  reference list misdates Tobin as 1969 with 25: 65–86, the 1958 paper. Not cited by LM28's text after this revision:
-  the Tobin attribution waits for F, and §4's equilibrium sentence now rests on lm23.md:285 and a derivation.
-- LM23's statement of the CAPM (lm23.md:285; its sources, Campbell, Lo and MacKinlay 1997, ch. 5, Sharpe 1964 and
-  Lintner 1965, are LM23's): cited by line for the equation only.
+  Quantitative Analysis* 7(4): 1851–1872. DOI 10.2307/2329621. Crossref holds the first page only; the pages
+  1851–1872 come from RePEc and fit Crossref's issue listing (the next article starts at p. 1873). Abstract (RePEc):
+  explicit frontiers for more than three assets, the separation theorem stated and proved as a mutual-fund theorem,
+  and the graphical method incorrect under some conditions. Text not read. Used, at the abstract's level, for the
+  closed-form frontier and two-fund separation; his notation is not used. The Cambridge-style DOI
+  10.1017/S0022109000017798 is not registered (Crossref and doi.org return 404): cite 10.2307/2329621.
+- Tobin, J. (1958). "Liquidity Preference as Behavior Towards Risk." *Review of Economic Studies* 25(2): 65–86,
+  February 1958. DOI 10.2307/2296205. Crossref holds the first page only; the end page 86 comes from RePEc and fits
+  Crossref's issue listing (the next article starts at p. 87). The RES text is on JSTOR only and was not compared.
+  Read by the source check in Cowles Foundation Discussion Paper No. 14, dated 17 July 1956, an image-only typescript
+  (cowles.yale.edu/sites/default/files/2022-08/d0014.pdf; RePEc lists it as Cowles Foundation Discussion Papers 14,
+  1956), §3.6 "Multiple alternatives to cash", typescript pp. 31–36.
+  With cash riskless, the dominant combinations of the non-cash assets lie on one ray from the origin (pp. 34–35); so
+  their proportionate mix does not depend on their total share, and the investor behaves as if there were one
+  composite asset (pp. 35–36); the opportunity locus is a line, (3.25); the result holds only while cash is riskless
+  (p. 36). Limits: the riskless asset is cash at zero yield; no borrowing (the total stays at most the investor's
+  balance); non-negativity is assumed but not treated as binding (the proof solves the linear system (3.22)); the mix
+  depends on the investor's own estimates. §4 cites "Tobin (1958), read in Cowles Foundation Discussion Paper No. 14
+  (1956), §3.6" with those limits, beside Merton (1972); it prints no page or section number of the RES text, and the
+  typescript's pages and equation numbers stay in SOURCES.
 - Best, M. J., and R. R. Grauer (1991). "On the Sensitivity of Mean-Variance-Efficient Portfolios to Changes in Asset
-  Means: Some Analytical and Computational Results." *Review of Financial Studies* 4(2): 315–342. DOI 10.1093/rfs/4.2.315.
-  Crossref; abstract on RePEc (ideas.repec.org/a/oup/rfinst/v4y1991i2p315-42.html): with only the budget constraint
-  the weights, mean and variance can change dramatically with one mean; with non-negativity the weights stay very
-  unstable while the mean and standard deviation barely move; a small rise in one mean can drop about half the assets.
-  Used in §5 (one sentence).
+  Means: Some Analytical and Computational Results." *Review of Financial Studies* 4(2): 315–342. DOI
+  10.1093/rfs/4.2.315. Abstract (OpenAlex's copy, re-read for SOURCES; the first drafter read RePEc's): with only a
+  budget constraint, an efficient portfolio's weights, mean and variance can be extremely sensitive to changes in the
+  asset means; with non-negativity added, the weights stay extremely sensitive while the portfolio's return and
+  standard deviation barely move; a surprisingly small rise in one asset's mean drives half the securities out. Text
+  not read. Used in §5 for one sentence at the abstract's level (the first clause).
 - Chopra, V. K., and W. T. Ziemba (1993). "The Effect of Errors in Means, Variances, and Covariances on Optimal Portfolio
-  Choice." *Journal of Portfolio Management* 19(2): 6–11. DOI 10.3905/jpm.1993.409440. Crossref. Cited only as
-  lm07.md:509 states its finding; its ratios are not printed (shared decision "References").
+  Choice." *Journal of Portfolio Management* 19(2): 6–11. DOI 10.3905/jpm.1993.409440. Cited only as lm07.md:509 states
+  its finding; no ratio of theirs is printed (shared decision "References"). lm07.md:786's missing issue number is
+  LM30's Stage 4 item (decision on Y14).
 - Boyd, S., and L. Vandenberghe (2004). *Convex Optimization*. Cambridge University Press. DOI
-  10.1017/CBO9780511804441 (Crossref). §4.4.1 "Examples", "Markowitz portfolio optimization", p. 155, and §4.7.6, "Risk-
-  return trade-off in portfolio optimization", pp. 185–186, read in the survey's text copy of the Stanford PDF
-  (web.stanford.edu/~boyd/cvxbook/). Used as the pointer for the QP form ([[LM29]]).
-- Sharpe, W. F. (1964). "Capital Asset Prices: A Theory of Market Equilibrium under Conditions of Risk." *Journal of
-  Finance* 19(3): 425–442. DOI 10.1111/j.1540-6261.1964.tb02865.x. Crossref only; text not read. UNVERIFIED as the
-  source of the term "capital market line": not cited for it.
-- cvxpy 1.9.3 documentation, "Advanced Features", section "Dual variables" (cvxpy.org/tutorial/advanced/, read
-  2026-10-24 by the first drafter): duals live in `dual_value`. The text makes no claim about the documentation's sign
-  convention (the recomputation did not check it); E9 reports the installed package's behaviour [A28-33].
-- NumPy 2.5 `linalg.solve`, `linalg.cholesky` and SciPy 1.18 (SOURCES, the Volume II entries); cvxpy, OSQP 1.1.3,
-  CLARABEL 0.11.1 versions as `data/processed/vol5_rules.txt` prints them.
-- FinMind `TaiwanStockPrice`, `TaiwanStockDividendResult`, `TaiwanStockSplitPrice` (E5, via `vol5_series.py`; LM27 owns
-  the data description) and `TaiwanStockPrice` sector indices with the Volume II repairs (U28). No FinMind call was
-  made for this brief.
-- Not cited: Michaud (1989), Kan and Zhou (2007), DeMiguel et al. (2009), Jagannathan and Ma (2003) — LM30's.
+  10.1017/CBO9780511804441 (Crossref: monograph issued 2004-03-08). Read in the authors' PDF
+  (web.stanford.edu/~boyd/cvxbook/bv_cvxbook.pdf, seventh printing with corrections, 2009; pages re-checked in a
+  fresh download for SOURCES): §4.4.1 "Examples", subsection "Markowitz portfolio optimization", p. 155, and §4.7.6
+  "Examples", subsection "Risk-return trade-off in portfolio optimization", pp. 185–186. Used as the pointer for the
+  QP form ([[LM29]]).
+- LM23's statement of the CAPM (lm23.md:285): cited by line for the equation only; its sources (Campbell, Lo and
+  MacKinlay 1997, ch. 5; Sharpe 1964; Lintner 1965) are LM23's. Sharpe (1964) is bibliographic data only in SOURCES, so
+  LM28 does not cite it as the source of the term "capital market line".
+- cvxpy 1.9.3 with OSQP 1.1.3 and CLARABEL 0.11.1 (the locked environment; SOURCES draft, "Python packages"). The
+  documentation's "Advanced Features" page (cvxpy.org/tutorial/advanced/, the site's latest documentation, not pinned
+  to 1.9.3) says that a constraint's `dual_value` holds its optimal dual variable (Lagrange multiplier) and prints no
+  sign convention for equalities. The installed package returns, for the budget equality of a variance minimization,
+  the negative of LM7's $\lambda$ (the SOURCES draft's toy run, and A28-33 on the first window). E9 reports that
+  behaviour and tells the reader to check signs against a closed form. The tolerances are `vol5_rules.py`'s
+  `OSQP_OPTS` and `CLARABEL_OPTS` (shared decision "Solver output").
+- NumPy 2.5.3 (`linalg.solve`, `linalg.cholesky`, `linalg.eigvalsh`) and SciPy 1.18.1, the locked versions (SOURCES,
+  Python entries).
+- FinMind `TaiwanStockPrice`, `TaiwanStockDividendResult` and `TaiwanStockSplitPrice` (E5, registered and retrieved
+  2026-10-24, through `vol5_series.py`; LM27 owns the data description) and `TaiwanStockPrice` sector indices with the
+  Volume II repairs (U28). No FinMind call was made for this brief.
+- Checked, not cited: Sharpe (1990), Nobel Lecture "Capital Asset Prices with and without Negative Holdings",
+  7 December 1990 (the date on nobelprize.org's lecture page), published in *Journal of Finance* 46(2): 489–509, June
+  1991, DOI 10.1111/j.1540-6261.1991.tb02671.x (its reference list misdates Tobin's paper as 1969). With Tobin read
+  directly the lecture is no longer the go-between (its "Fund Separation" section serves LM29); Markowitz (1959),
+  named only inside the lecture, is unverified and not cited. Michaud (1989), Kan and Zhou (2007), DeMiguel et al.
+  (2009) and Jagannathan and Ma (2003) are LM30's.
 
-**Chinese terms** (樂詞網, searched 2026-10-24 with the URL pattern of SOURCES' Volume III entry, all listings; on the
-plan's list unless marked new):
+**Chinese terms** (樂詞網, searched 2026-10-24 with the URL pattern of SOURCES' Volume III entry, all listings, and
+rechecked the same day by the fresh pass of 1,817 searches recorded in the SOURCES draft "Chinese terms (Volumes V and
+VI)", whose corrections are applied here; on the plan's list unless marked new):
 
 | English | 樂詞網 (listing) | LM28 |
 |:--|:--|:--|
 | efficient frontier | 效率前緣 (管理學名詞) | 效率前緣 |
 | efficient portfolio | 效率投資組合 (管理學名詞) — new | 效率投資組合 |
-| minimum variance portfolio | 最低變異數資產組合 (經濟學) | 最小變異數投資組合 (the plan's and LM7's Glossary form, lm07.md:770) |
-| capital market line | 資本市場線 (管理學名詞, 經濟學) | 資本市場線 |
-| risk-free asset | 無風險資產 (管理學名詞, 經濟學) — new | 無風險資產 |
+| minimum-variance portfolio | 最小變異數投資組合 (管理學名詞, found only with the hyphen); 最低變異數資產組合 (經濟學) | 最小變異數投資組合 (the management listing's form and LM7's Glossary, lm07.md:770) |
+| capital market line | 資本市場線 (管理學名詞, headword "capital market line、 CML"; 經濟學) | 資本市場線 |
+| risk-free asset | 無風險資產 (管理學名詞; 經濟學, also for "riskless asset") — new | 無風險資產 |
 | risk aversion | 風險規避 (管理學名詞); 風險袪避 (經濟學) | 風險規避 |
-| separation theorem | 分離定理 (統計學名詞, 經濟學) — new | 分離定理 |
-| two-fund separation | no entry (also none for "mutual fund theorem", "two-fund") — new | 兩基金分離 (composed from 分離定理; printed with its English in every box) |
+| separation theorem | 分離定理 (統計學名詞, 經濟學, 電子計算機名詞) — new | 分離定理 |
+| two-fund separation | no entry for "two-fund separation" or "two-fund"; the query `two fund` finds 管理學名詞's "two fund monetary separation" 兩基金的貨幣分離 — new | 兩基金分離 (composed from 分離定理, a form that entry supports; printed with its English in every box) |
 | tangency portfolio | no entry | 切點投資組合 (the book's form, lm07.md:771) |
-| parabola | 拋物線 (數學名詞) — new | 拋物線 |
-| hyperbola | 雙曲線 (數學名詞) — new | 雙曲線 |
-| asymptote | 漸近線 (數學名詞, 統計學名詞) — new | 漸近線 |
-| mean–variance | 平均數-變異數分析 / 準則 (管理學名詞) — new | 平均數-變異數 (only if a box needs it) |
+| parabola; hyperbola; asymptote | 拋物線, 雙曲線 (數學名詞); 漸近線 (數學名詞, headword "asymptote ; asymptotic line"; 統計學名詞) — new | 拋物線, 雙曲線, 漸近線 |
+| mean–variance | compounds only: 平均數-變異數分析, 平均數-變異數準則 (管理學名詞); 平均報酬與風險為抵換分析法 (經濟學) — new | 平均數-變異數 (only if a box needs it) |
 | sensitivity | 敏感度 (數學名詞, 統計學名詞) | 敏感度 |
-| Jacobian matrix | Jacobi矩陣 (數學名詞) — new | not in a box (English in the text) |
+| Jacobian matrix | Jacobi矩陣 (數學名詞; "Jacobian" is Jacobi行列式) — new | not in a box (English in the text); a box would write Jacobi 矩陣, with the space that the Chinese-terms decision puts after a Latin name |
 
-The raw result pages are in the drafter's scratch folder; SOURCES gains the table at Stage 1's source pass.
+The boxes also use, from the shared list or the published modules: 拉格朗日乘數 (the engineering listings' form, printed
+at lm04.md:282, lm07.md:353 and lm11.md:312), 共變異數矩陣, 凸函數, 無風險利率 (lm23.md:340), 估計誤差 (the statistics
+listing's headwords "error of estimation" and "estimate error") and 樣本內／樣本外 (lm07.md:773). SOURCES records the
+table from the fresh pass.
 
-**Open before Stage 2** (each with a recommendation):
+**Open before Stage 2:** none. The second revision's three open items are closed (next list), and the decisions leave
+nothing else open for LM28.
 
-1. **Tobin (1958)**, on decision F's list. Until the checker's report says the paper was read, separation with a
-   riskless asset is derived from (28.6) and printed without an attribution (F's fallback), and Sources keeps the
-   entry as not cited. Recommendation: if the report confirms that the 1958 paper states the result, cite Tobin
-   (1958) in §4 beside Merton (1972); if it was not read, keep the text as it is now. The per-module decision also
-   allows "Sharpe (1990) credits Tobin"; that rests on a lecture read only in the survey's copy, so the brief does not
-   use it.
-2. **The CAPM sentence and LM23's lead.** §4 now shows that the CAPM's equation (lm23.md:285) is (28.6)'s beta
-   identity with the market in the tangency portfolio's place (A28-45). It replaces the first draft's equilibrium
-   sentence, which rested on Sharpe's lecture, and it uses LM27's (27.5) as LM27's brief says LM28 does. It makes LM23
-   a prerequisite, so lm23.md:6's leads gain 28 at Stage 4 (not on decision G's list). Recommendation: accept.
-   Alternative: drop the two sentences, the prerequisite 23 and A28-45, and say nothing about equilibrium.
-3. **Lab data.** LM28's lab needs both frames. The shared decision "Labs" lists the wealth frame; the estimation frame
-   follows from it only if the derived file carries each fund's traded flags (a date is joint when every fund traded
-   on it and on the session before). Recommendation: `make_lab_data.py` writes the traded flags with the wealth frame
-   (or the estimation frame itself), for LM27's and LM28's labs alike.
+**Closed by the editor's decisions (2026-10-24 and 2026-10-25)**, with how:
 
-**Closed by the editor's decisions (2026-10-24)**, with how:
-
-- R3 equals the unconstrained $\mathbf w^{\mathrm{mv}}$ at every signal (A28-12): LM28 states it once (E1, §2) and LM29
-  owns the consequence; LM29's brief builds its active-set example on U28 and R4, not on R3 (decision D: the briefs'
-  proposals accepted).
+- Tobin (1958), the second revision's open item 1: cited directly in §4, "read in Cowles Foundation Discussion Paper
+  No. 14 (1956), §3.6", with his limits and no RES page (decision on the first revision; Y4). Sharpe's lecture is no
+  longer cited.
+- The CAPM sentence and LM23's lead, open item 2: accepted. The beta identity puts $\mathbf w^{\mathrm{tan}}$ in the
+  market's place in lm23.md:285 (A28-45); prerequisite 23 stays, and lm23 +28 is on decision G's list.
+- Lab data, open item 3: `make_lab_data.py` writes both E5 frames, the wealth frame with its traded flags (shared
+  decision "Labs"), so the lab reads the estimation frame directly.
+- Tag users and leads (Y1): (28.1) gains LM35, (28.2) LM31 and (28.3) LM30, as the cross-check's table gives them; the
+  Leads paragraph is rewritten from it, and the speculative mention of LM43's and LM45's future citations goes. LM43
+  stays in `leads` by §4's forward pointer and must not re-derive (28.6)–(28.8) (shared decision "LM28 and Kelly").
+  LM27's lists name LM28 for (27.4)–(27.6), so the second revision's note for the cross-check closes.
+- Owners (A4, A5; Y12, Y17): R1's first-window risk shares are LM27's (A27-21), R2's are LM31's, and R2's mean excess
+  return and volatility are LM30's (A30-24); LM28 prints none of them. "R3's bounds never bind" is LM29's (A29-09),
+  so A28-12's zero count, smallest weight and gap to R3 are echoes of A29-09 (LM29's third revision asks the same);
+  A28-12 keeps the $\sigma_{\min}$ range and the first window's rank, LM28's by A5. E1, the Leaves and the lab point
+  to LM29.
+- Echoes (C12): E5's frame counts cite LM27's A27-01 to A27-03 (A28-01, A28-03), at most at LM27's precision, and
+  $A=242.95$ and $A_{\mathrm w}=243.57$ cite A27-02 and A27-03 wherever they print (data role, X1's note, problem
+  stems; the third revision's verifier). For the briefs that echo LM28 (Y11): the first window's means and
+  volatilities print at one decimal (X1; 00635U's mean at two in E6), their standard errors at one (X3's note) and
+  $\mathbf w^{\mathrm{tan}}$ at one (A28-18); the Printed-as column names each form's place. LM30's E2 alone prints
+  $T/A=2.0745$ and the volatilities 13.50, 11.87, 8.54, 9.39 and 23.17% beside (20.2)'s computation, under A28-02 and
+  A28-06, whose Printed-as cells record them (decisions on the third revision).
+- Listing markets (decisions on the third revision): 00679B trades on TPEx and the other four funds on TWSE. LM28
+  calls them "Taiwan-listed", true of both, and prints no session, cost or price-limit rule, so nothing changes;
+  LM27 (sessions), LM34 (costs) and LM35 (limits) print the markets' rules.
+- The year count (C7, AUTHORING §8; Y3): years run from the close before a sample's first return, so the first
+  window is 2.05 calendar years from the close of 2017-02-10 (A28-02), and LM30 echoes that value.
+- NEAR flags (C11, Y18): the brief's text prints rounded values without flag marks; the flags stay in the anchors
+  table, whose Printed-as column now repeats every flag of a printed form.
+- Rounded vectors (the decision on LM28; the recomputation's major 1): $\mathbf w^{\mathrm{tan}}$ in X1 and E4, E4's
+  $r_f=2\%$ weights and E7's ex-post $\mathbf w^{\mathrm{tan}}$ say "rounded separately; sums to 100.1" (or 99.9), and
+  X3's note names the two columns that sum to −0.1, all from A28-46.
+- The recomputation's minor items: A28-24's numbers print in §4's pitfall, and every other Printed-as entry names
+  where it prints or says "not printed" (2); the missing printed forms and repeated flags are added (3); A28-16 states
+  $\mathbf b=(1,\mu_p)$ with A28-15's unrounded $\mu_p$ (4); the case box is recounted with `build/qa/style.py` (5);
+  CLARABEL's weight gap prints as "below 1e-11" (6); the year rule cites AUTHORING §8 and decision C7 (7); the
+  annualizer of A28-08 over all of E5 stays, as the report proposes ("no change needed") and the cross-check
+  recommends, since no printed value changes (8).
+- One more derived result: E1, E3 and E4 print $\sigma^2_{\min}=0.0025152$, since $\sqrt{0.002515}$ gives 5.01%, not
+  the printed 5.02% (A28-10).
+- Outcome 1 reads "of $N$ assets" (Y6). The split-ratio rule (B6): LM28 writes no split symbol; the data role describes
+  0050's 18 June 2025 return in words.
+- R3 equals the unconstrained $\mathbf w^{\mathrm{mv}}$ at every signal (A29-09, echoed by A28-12): LM28 states the
+  unconstrained fact once (E1, §2) with LM29's anchor, and LM29 owns it and builds its active-set example on U28 and R4, not on R3
+  (decision D: the briefs' proposals accepted).
 - No unconstrained tangency in 22 of the 92 windows (A28-23): §4's pitfall and KC use it, and LM29 says that R4's
   long-only QP is defined there (decision D).
 - $\mathrm{SR}_\infty$ and the bold $\boldsymbol\lambda$ with its rule (entries $\lambda$ and $\lambda_\mu$ only, so
@@ -2486,9 +2663,6 @@ The raw result pages are in the drafter's scratch folder; SOURCES gains the tabl
   and is not added (decision D).
 - LM27's tags: cited by number, (27.4)–(27.6) (decision C8). The funds' underlying indices are LM27's to verify on the
   issuers' pages; LM28's case names asset classes only (shared decision "Data").
-- Leads beyond Volume V: the tag list names only LM29 and LM30, which cite LM28's tags; LM43 stays in `leads` by §4's
-  forward pointer, and LM43's and LM45's briefs add themselves when they cite a tag (decision C8). LM43 must not
-  re-derive (28.6)–(28.8) (shared decision "LM28 and Kelly").
 - The spine's **Data** line: held portfolios earn their returns on the wealth frame (1,851 returns), and only the test
   period's joint statistics use its 1,845 estimation rows [A28-03]. The two frames give 10.05% against 10.04% and
   14.15% against 14.14% [A28-31], so nothing in §6 turns on the choice (decision E accepts the departure).
@@ -2497,29 +2671,33 @@ The raw result pages are in the drafter's scratch folder; SOURCES gains the tabl
 - The first window is the third calmest of 92 [A28-12], so §6's miss is partly the luck of the split. The text says
   so; a second split would be a second test and is not added (g:111).
 
-**For the cross-check** (other briefs' lists, not LM28's to edit): LM27's (27.6) is cited by LM28's E1, so its user
-list gains LM28; LM31 cites no LM28 tag (if its revision cites (28.2), add LM31 to that tag's list here).
-
 ## LM29 Convex Optimization in Practice
 
 Stage 1 brief, drafted 2026-10-24 from the editor's spine (`plans/vol-5.md`, "### LM29 Convex Optimization in
-Practice", commit d05750b) and the shared decisions above it; revised the same day to the editor's decisions on the
-briefs (`plans/vol-5.md`, "Editor's decisions on the briefs (2026-10-24)"), after the independent recomputation (34 of
-34 anchors reproduced) and the cross-module check (X2, X3, X9, X13, X17, X19, X20, X25 and X26 name LM29). Every
-number carries its anchor ID at first appearance; `data/vol5_anchors_lm29.py` prints them all (34 rows, `## LM29` of
-`plans/vol-5-anchors.md`). Numbers quoted from published modules carry their file:line, and numbers that LM28 or LM30
-own carry their anchor IDs. The script imports `vol5_series.frames`, `vol5_rules` (`schedule`, `WINDOW`, `RF`,
-`SPREAD`, the cost model, `cov0`, `minvar`, `maxsharpe` and the solver options) and `lm10_series.u28`; it
-re-implements no rule and prints no statistic of a rule's wealth path. The anchors that this revision changed are
-listed in the anchors' Status and await their own recomputation.
+Practice", commit d05750b) and the shared decisions above it. Revised the same day, first to the editor's decisions on
+the briefs (`plans/vol-5.md`, "Editor's decisions on the briefs (2026-10-24)"), after the independent recomputation (34
+of 34 anchors reproduced) and the cross-module check (X2, X3, X8, X9, X13, X16, X17, X19, X20, X25 and X26 name LM29);
+then a second time to "Decisions on the first revision" and "Decisions on the second recomputation and cross-check"
+(commit ef66607), after the second recomputation (12 of 12 changed anchors reproduced, about 450 printed numbers
+audited; three major and ten minor findings, all applied below) and the second cross-check (Y1, Y4, Y5 and Y12 name
+LM29, and Y18's book-wide rule (C11) applies). A last pass (2026-10-25) applies the third verifier's five minor
+findings and "Decisions on the third revision", whose listing-market item does not name LM29; no number changes.
+Every number carries its anchor ID at first appearance; `data/vol5_anchors_lm29.py` prints them all (34
+rows, `## LM29` of `plans/vol-5-anchors.md`). Numbers quoted from published modules carry their file:line, and a
+number another module owns carries the owner's anchor ID where it is printed, at no more than the owner's precision
+unless a computation beside it needs more (decision C12). The script imports `vol5_series.frames`, `vol5_rules`
+(`schedule`, `WINDOW`, `RF`, `SPREAD`, the cost model, `cov0`, `minvar`, `maxsharpe` and the solver options) and
+`lm10_series.u28`; it re-implements no rule and prints no statistic of a rule's wealth path. The anchors that the
+third revision changed are listed in the anchors' Status; its verifier recomputed them, and the last pass changes
+none.
 
 **Prereq:** `[4, 7, 8, 9, 10, 11, 12, 27, 28]`. What each supplies (tags rechecked in `src/lmNN.md`, 2026-10-24):
 
 - LM4: convexity in one variable (the definition box, lm04.md:152–155, mixing weight $w\in[0,1]$); the
   second-derivative test, stated without proof there (lm04.md:157); "a critical point of a differentiable concave
   function is a global maximum" (lm04.md:159); corner solutions on an interval and the derivative at a binding corner
-  as a shadow price (lm04.md:222–229; outcome lm04.md:12); the envelope result (4.16) (lm04.md:518). §2 reduces
-  convexity in $\mathbb R^N$ to LM4's one-variable test along segments.
+  as a shadow price (lm04.md:222–237, the reading at lm04.md:237; outcome lm04.md:12); the envelope result (4.16)
+  (lm04.md:518). §2 reduces convexity in $\mathbb R^N$ to LM4's one-variable test along segments.
 - LM7: the Lagrangian with its signs, $\mathcal L=h-\lambda(\psi-b)$ (Glossary lm07.md:765); (7.5) and the shadow
   price (7.6) $J'(b)=\lambda^*$ (lm07.md:309, 323); the global-optimum remark LM29 develops (lm07.md:268); the KKT
   theorem (7.13) for a maximization under linearly independent binding gradients, stated without proof, "for a
@@ -2545,18 +2723,21 @@ listed in the anchors' Status and await their own recomputation.
 - LM28 (brief): (28.1) the equality-constrained minimum and its multipliers; (28.2) $\mathbf w^{\mathrm{mv}}$
   and $\Sigma\mathbf w^{\mathrm{mv}}=\sigma^2_{\min}\mathbf 1$; (28.4)–(28.5) the frontier with $\mathrm{SR}_\infty$;
   (28.6) $\mathbf w^{\mathrm{tan}}$ and its existence condition; (28.7) the CML; (28.8) the exposure form with $\delta$;
-  E9's sign of cvxpy's equality duals (A28-33). LM28's numbers that LM29 quotes: the first window's inputs and
-  $\mathbf w^{\mathrm{mv}}$ (A28-05 to A28-07, A28-10), $\mathbf w^{\mathrm{tan}}$ and $\mathrm{SR}^*=0.880$ (A28-18), R3
-  $=\mathbf w^{\mathrm{mv}}$ at every signal (A28-12), the 22 windows with $r_f\ge\mu_{\mathrm{mv}}$ (A28-23, A28-24),
-  U28's unconstrained $\mathbf w^{\mathrm{mv}}$ (A28-13).
+  E9's sign of cvxpy's equality duals (A28-33). LM28's numbers that LM29 quotes, each cited to its anchor where it
+  is printed (decisions A4, C12): the 92 signals and the first window's dates (A28-02), the first window's inputs,
+  $\mathbf w^{\mathrm{mv}}$ and $\sigma^2_{\min}$ (A28-05 to A28-07, A28-10), $\mathbf w^{\mathrm{tan}}$ and
+  $\mathrm{SR}^*=0.880$ (A28-18), the 22 windows with $r_f\ge\mu_{\mathrm{mv}}$ (A28-23, A28-24), U28's unconstrained
+  $\mathbf w^{\mathrm{mv}}$ (A28-13). That R3's bounds never bind on E5 is LM29's own result (A29-09, decision A5),
+  which LM28's A28-12 and LM30's A30-16 echo.
 
-**Leads:** `[30, 31, 32, 33, 34, 35]`: LM30 cites (29.4) and (29.5) for constraints as implicit shrinkage, its (30.4),
-whose multipliers are half of (29.5)'s (LM30 says so once; decision B4). LM31 cites LM29's convexity and KKT results
-for the ERC problem, LM32 its linear programs and convexity for problem 12's expected-shortfall minimization, and LM35
-KKT sufficiency for its bounded reverse stress test; their Stage 1 briefs cite these results in words, and from Stage 2
-they cite the tag numbers (decision C8). LM33 and LM34 cite R3 and R4, whose through-case form LM29 defines. Each of
-LM30–LM35 lists 29 among its prerequisites (their briefs, 2026-10-24), so the leads hold both ways (decision C9). LM43
-is not listed.
+**Leads:** `[30, 31, 32, 33, 34, 35]`, from the second cross-check's tag-user table (Y1; decision "Tags and leads").
+LM30 cites (29.3) for the uniqueness of its long-only minimizer, (29.4) and (29.5) for constraints as implicit
+shrinkage, its (30.4), whose multipliers are half of (29.5)'s (LM30 says so once; decision B4), and (29.6) for the
+homogenized QP of its resampling experiment. LM31 cites (29.2), (29.3) and (29.5) for the ERC problem's strict
+convexity, its unique minimizer and the equal $(\Sigma\mathbf w)_i$ of held funds. LM32 cites (29.1) and (29.3) for
+problem 12's expected-shortfall minimization, and LM35 cites (29.4) for its bounded reverse stress test. LM33 and LM34
+cite no tag; they use R3 and R4 in the long-only form LM29 defines. Each of LM30–LM35 lists 29 among its prerequisites
+(their briefs, 2026-10-24), so the leads hold both ways (decision C9). LM43 is not listed.
 
 **Forward links honoured.**
 
@@ -2606,18 +2787,19 @@ against LM28's; costs as a term in the objective (29.9), the no-trade band and i
 units, the turnover–risk trade-off on R3's path (planned figures, relative to $\theta=0$); modelling in cvxpy,
 default solvers, scaling, tolerances, statuses, dual signs and the shared "Solver output" rule; checking an answer
 (feasibility, KKT residuals, a second solver, a closed form on the active set). Values owned: every A29 anchor except
-the echoes of LM28 (A28-05 to A28-07, A28-10, A28-12, A28-13, A28-23, A28-24) and of LM30 (A30-22, U28's first
-half), printed for consistency and cited to their owners, and E5's frame counts (printed by `vol5_series.py`; LM27
-introduces them).
+the echoes inside them, which are cited to their owners where printed (decision C12): LM27's E5 frame counts (A27-02,
+A27-03, in A29-01), LM28's first-window figures (A28-02 in A29-02; A28-05 to A28-07 in A29-27; A28-10 in A29-23 and
+A29-29), A28-13, A28-23 and A28-24, and LM30's A30-22 (U28's first half). LM29 is the single owner of "R3's bounds
+never bind on E5" (A29-09; decision A5, Y12).
 
 **Leaves.** Shrunk and robust inputs, and constraints as implicit shrinkage (Jagannathan and Ma 2003) → LM30. Realized
 out-of-sample volatility: R3 → LM30, R4 → LM33 (decision A3); R3's and R4's Sharpe statistics and every standard error
 → LM33; their executed turnover, annual turnover, costs and net results → LM34 (decision A2). U28's halves (their
 long-only portfolios, 1/N and minimum variance) → LM30 (decision A5). Risk-parity formulations (the log-barrier ERC
 problem, risk budgets) → LM31. Expected-shortfall minimization (Rockafellar–Uryasev, a linear program) → a problem in
-LM32, citing (29.3). The wealth recursion and the cost function → LM27, cited. Duality beyond shadow prices, the dual
-problem, Slater's condition in general, second-order cone theory and the algorithms (active-set, operator splitting,
-interior point) → named, not developed (out of scope). Integer limits (a number of funds, round lots) → one sentence:
+LM32, citing (29.1) and (29.3). The wealth recursion and the cost function → LM27, cited. Duality beyond shadow
+prices, the dual problem, Slater's condition in general, second-order cone theory and the algorithms (active-set,
+operator splitting, interior point) → named, not developed (out of scope). Integer limits (a number of funds, round lots) → one sentence:
 not convex, out of scope. Multi-period trading by convex optimization (Boyd et al. 2017) → one sentence. To the lab
 and problems (density, spine): the turnover limit (problem 10), financed leverage (problem 11), the 92-signal solver
 audit (problem 12 and the lab), infeasible and unbounded problems (§3's pitfall, problem 4).
@@ -2625,7 +2807,8 @@ audit (problem 12 and the lab), infeasible and unbounded problems (§3's pitfall
 **Uses before taught** (one sentence each in the text):
 
 - §3: "A limit on volatility, $\mathbf w^{\top}\Sigma\mathbf w\le\sigma^2$, is a second-order cone constraint; cvxpy
-  sends such problems to a conic solver, and this module does not develop cone programming."
+  sends such problems to a conic solver, and this module does not develop cone programming." (The solver is the
+  installed cvxpy's choice, CLARABEL [A29-22]; Agrawal et al. 2018 describe the rewriting, not this case.)
 - §4: "Constraining weights also acts as a shrinkage of $\hat\Sigma$, which [[LM30]] studies (Jagannathan and Ma 2003)."
 - §5: "How R3 and R4 fare after their windows is the question of [[LM30]], [[LM33]] and [[LM34]]."
 - §6: "Minimizing expected shortfall is a linear program ([[LM32]])."
@@ -2638,28 +2821,35 @@ audit (problem 12 and the lab), infeasible and unbounded problems (§3's pitfall
 
 - **E5's estimation frame** (the through case): `vol5_series.frames("E5")` (`data/processed/vol5_frames.parquet`, built
   and checked by `data/vol5_series.py`), $T=2{,}362$ joint one-session total returns 2017-01-18 → 2026-10-08,
-  $A=242.95$ [A29-01]. Windows: the trailing 504 joint dates (rows of the estimation frame) through each month-end
-  signal, 92 signals, the first 2019-02-27 (window 2017-02-13 → 2019-02-27, traded 2019-03-04), the last 2026-09-30
-  (window 2024-08-23 → 2026-09-30, traded 2026-10-01) [A29-02]. Inputs: $\Sigma=A\hat\Sigma$ (divisor $T$, `cov0`),
+  $A=242.95$, the years counted in calendar days ÷ 365.25 from the close of 2017-01-17, the close before the first
+  return (LM27's A27-02; decision C7, AUTHORING §8) [A29-01]. Windows: the trailing 504 joint dates (rows of the
+  estimation frame) through each month-end signal, 92 signals, the first 2019-02-27 (window 2017-02-13 → 2019-02-27,
+  traded 2019-03-04; LM28's A28-02), the last 2026-09-30 (window 2024-08-23 → 2026-09-30, traded 2026-10-01)
+  [A29-02]. Inputs: $\Sigma=A\hat\Sigma$ (divisor $T$, `cov0`),
   $\boldsymbol\mu=A\bar{\mathbf R}$, $\mathbf e=\boldsymbol\mu-r_f\mathbf 1$ with $r_f=1.5\%$, annual, treated as known
   (*In-sample*). $A\hat\Sigma$ is positive definite at all 92 windows, smallest eigenvalue 0.0050 a year, $\kappa$ from
   9.72 to 20.46 [A29-03]. The case and §5–§6 use the last window; problem 9 and the widget the first. Every caption
-  says "on the 504 joint dates" of its window (decision C2).
-- **E5's wealth frame** (2,368 sessions [A29-01]): only for drift, in §7 and problem 10 (each fund's own close-to-close
-  return, a halted fund earning 0, LM27's (27.1)): the target of the 2025-03-31 signal, traded at the close of
-  2025-04-01, drifts to the close of the 2025-04-30 signal [A29-19]; the cost sweep drifts each penalized target the
-  same way [A29-21].
+  and note says "on the 504 joint dates" of its window, or "on each window's 504 joint dates" for the 92 signals
+  (decision C2): X1–X4 and X6 the first form, X5 and X7 the second.
+- **E5's wealth frame** (2,368 sessions; LM27's A27-03 [A29-01]): only for drift (each fund's own close-to-close
+  return, a halted fund earning 0, LM27's (27.1)), in §7's E8 and X6, X5's cost sweep and problems 7 and 10: the
+  target of the 2025-03-31 signal, traded at the close of 2025-04-01, drifts to the close of the 2025-04-30 signal
+  [A29-19], which E8, X6 and problems 7 and 10 use [A29-20, A29-30, A29-32]; the cost sweep drifts each penalized
+  target the same way [A29-21].
 - **U28** (Volume II): `lm10_series.u28()` (`data/processed/vol2_closes.parquet`; FinMind `TaiwanStockPrice`, retrieved
-  11 October 2026, repaired closes), $T=4{,}382$ daily price returns, $A=245.4794$ [A29-13]. Covariance only (shared
+  2026-10-11, with each flagged close replaced by the 13:30:00 value of `TaiwanStockEvery5SecondsIndex`, the Volume II
+  repair, `data/README.md:114–130`), $T=4{,}382$ daily price returns, $A=245.4794$ [A29-13]. Covariance only (shared
   decision "Data"); price indices, said so in every caption. The halves (LM11's, lm11.md:387) are LM30's (decision A5):
   LM29 echoes the first half's held set (A30-22) in one sentence.
 - **Conventions.** Solvers get the annual inputs, with the book's tolerances (`OSQP_OPTS`: `eps_abs` = `eps_rel` =
   1e-10, polishing; `CLARABEL_OPTS`: `tol_gap_abs` = `tol_gap_rel` = `tol_feas` = 1e-12 for quadratic and linear
   programs) unless a line says "default"; problem 11's cone problem uses 1e-10, as the shared decision "Solver output"
-  now says, and the text states it. A fresh `Problem` each time; status `optimal` required; a weight with
-  $\lvert w_i\rvert<10^{-6}$ prints as 0; a constraint is active when its slack is below $10^{-6}$. Every printed
-  solution is checked against `vol5_rules`' exact solution (Cholesky factor and SciPy's `nnls`), a closed form or a
-  second solver, and by its KKT residuals; the script stops if a check fails. A residual or gap at rounding level
+  now says, and its second solver, SCS, `eps` 1e-9 with 200,000 iterations (`SCS_OPTS` in the anchor script; the
+  defaults cvxpy gives SCS are looser, 1e-5, `scs_conif.py:210–212`); the text states both. A fresh `Problem` each
+  time; status `optimal` required; a weight with $\lvert w_i\rvert<10^{-6}$ prints as 0; a constraint is active when
+  its slack is below $10^{-6}$. Every printed solution is checked against `vol5_rules`' exact solution (Cholesky
+  factor and SciPy's `nnls`), a closed form or a second solver, and by its KKT residuals; the script stops if a check
+  fails. A residual or gap at rounding level
   prints as a bound ("below 1e-15"), because its digits depend on the exact reference's own rounding. Multipliers
   follow (29.4); cvxpy's duals are printed as cvxpy reports them. Planned turnover and cost are fractions of pre-trade
   wealth at the signal close, $\tfrac12\lVert\mathbf w-\mathbf w^{\mathrm{drift}}\rVert_1$ and LM27's
@@ -2667,11 +2857,16 @@ audit (problem 12 and the lab), infeasible and unbounded problems (§3's pitfall
   pointer); X5 prints its planned totals relative to $\theta=0$, so it uses no count of years. The cost-penalized
   problem goes to cvxpy as LM27's formula, `COMMISSION * cp.norm1(w - w_drift) + tax @ cp.pos(w_drift - w)`; the KKT
   derivation splits buys and sells, and solver gaps depend on the formulation (decision D). Weights print in percent;
-  the max-Sharpe weights at two decimals (so that each portfolio sums to 100.00 as printed), the others at one.
+  the max-Sharpe weights at two decimals (so that each portfolio sums to 100.00 as printed), the others at one. A
+  derived result follows from the inputs printed beside it: X1's footer and X2 print the volatilities at two decimals,
+  so that each Sharpe ratio recomputes from the printed weights, excess returns and volatility (R4's 2.11 from 18.85%;
+  decision on the second recomputation), and problem 11 prints its exposures at two decimals with the three-decimal
+  $\mathbf e$ of X4.
 - **Seeds.** None: LM29 simulates nothing, and the widget draws nothing.
 - **Published files.** No daily series (decision X37): the chart JSON holds weights, frontier points computed on a
   grid of target means by `data/lm29_charts.py` (each a QP, checked as above), KKT quantities and the band; the widget
-  embeds five numbers of the first window (echo of A28-05 to A28-07).
+  embeds five numbers of the first window (echo of A28-05 to A28-07, unrounded in the data block, since the widget
+  computes from them).
 - **Scripts.** `data/lm29_numbers.py` (every printed value, asserted against `src/lm29.md`; compares with the anchors;
   flags rounding boundaries, e-notation included) and `data/lm29_charts.py` (X2–X4, X6 and the widget block), after
   `data/vol5_series.py`, `data/vol5_rules.py` (imported) and `data/lm10_series.py`.
@@ -2698,8 +2893,8 @@ U28), $i$, $j$, $\mathbf 1$, $I$, $\Sigma$ (here $A\hat\Sigma$ of a window, trea
 $\boldsymbol\mu$, $\mathbf e$, $r_f$, $\mu_p$, $\sigma_p$, $\sigma_p^2$, $s_p$ (a sample portfolio volatility, §4's
 U28 example), $\mathrm{SR}$, $\mathrm{SR}^*$, $\mathbf w^{\mathrm{mv}}$, $\sigma^2_{\min}$, $\mathbf w^{\mathrm{tan}}$,
 $\mathbf f$, $L$ (problem 11's total exposure $\mathbf 1^{\top}\mathbf f$), $\delta$ (LM28's; §6's $\delta$ row names
-LM29), $\lVert\mathbf x\rVert_1$, $\mathbf y$ (§6's scoped row for LM29, decision B3), $K$, $\mathbf b$, $k$ (rows of
-$K$), $\lambda$, $\nu_i$, $\mathcal L$, $h$ (an objective), $\psi_i$ (a constraint function, LM7's), $J$ (LM7's
+LM29), $\lVert\mathbf x\rVert_1$, $\mathbf y$ (§6's scoped row for LM29, decision B3), $K$, $\mathbf b$,
+$\lambda$, $\nu_i$, $\mathcal L$, $h$ (an objective), $\psi_i$ (a constraint function, LM7's), $J$ (LM7's
 optimal value as a function of a limit), $H$ (a Hessian), $\nabla$, $\beta_{i,p}$, $\mathrm{TO}_t$, $\text{tax}_i$,
 $\mathbf w^{\mathrm{drift}}_t$, $\mathbf w_{t-1}$, $\boldsymbol\Delta$ (a trade, LM27's cost argument),
 $W^{\mathrm{pre}}_t$ (LM27's, cited in §7), $A$, $T$, $t$, $\tau$ (a holding period in years, §7), $\kappa$,
@@ -2724,18 +2919,20 @@ the borrowing spread (problem 11 writes it in words, $\text{spread}$; decision B
 for an optimal value (LM7's $J$ instead); $L$ as a Cholesky factor (LM29 names the factor in words); a star except on
 an optimum ($\mathbf w^*$, $\mathbf y^*$, $\mathrm{SR}^*$).
 
-**Motivating case: "Why does the long-only portfolio drop two funds?"** (box, about 150 words; every sentence within
-30 words, decision C10)
+**Motivating case: "Why does the long-only portfolio drop two funds?"** (box, about 160 words in three paragraphs of
+at most 80 words; every sentence within 30 words, decision C10)
 
 > On 30 September 2026 the through case re-estimates its inputs from its last 504 joint trading days, 23 August 2024
 > to 30 September 2026 [A29-02]. Fed those means and that covariance matrix, LM28's tangency formula puts 114.24% in
 > 0050 [A29-05]. It sells short 27.75% of 00646 and 48.48% of 00679B, and it buys 31.07% of 00635U and 30.92% of
-> 00642U. Its gross exposure is 252%, for an in-sample Sharpe ratio of 2.18. The formula shorts at every one of the
-> through case's 92 month-ends [A29-07]. A reader with a cash account can neither short nor borrow. Forbid both, and
-> the best Sharpe ratio falls only to 2.11 [A29-06]. That portfolio holds 62.77% in 0050, 18.37% in 00635U and 18.86%
-> in 00642U, and nothing in the other two. Three questions follow. Why is 00646's weight zero, when it earns 16.44
-> points a year above cash [A29-04]? What does each limit cost? And when a solver prints these weights, how can the
-> reader tell they are right?
+> 00642U. Its gross exposure is 252%, for an in-sample Sharpe ratio of 2.18.
+>
+> The formula shorts at every one of the through case's 92 month-ends [A29-07]. A reader with a cash account can
+> neither short nor borrow. Forbid both, and the best Sharpe ratio falls only to 2.11 [A29-06]. That portfolio holds
+> 62.77% in 0050, 18.37% in 00635U and 18.86% in 00642U, and nothing in the other two.
+>
+> Three questions follow. Why is 00646's weight zero, when it earns 16.44 points a year above cash [A29-04]? What does
+> each limit cost? And when a solver prints these weights, how can the reader tell they are right?
 
 Resolved: (a) §5, X4: at R4, a fund is held only if its excess return pays for its beta to the portfolio; 00646 earns
 16.437 points, but its beta to the portfolio, 0.54436, asks for $\beta_{i,p}(\mu_p-r_f)=0.54436\times39.722=21.623$, so
@@ -2752,11 +2949,11 @@ tangency formula applied to the three held funds reproduces R4 to rounding level
 | 1 | Introduction | the layer LM29 adds (LM28 solved equalities in closed form; LM29 adds inequalities, a solver and the checks that the solver is right); case + X1; roadmap; notation and hygiene notes | 340 |
 | 2 | Convex Sets and Convex Functions {1} | segments and convex sets; the portfolio sets (budget hyperplane, long-only orthant, a cap's half-space, the gross ball, the risk ellipsoid) and two that are not convex (a volatility floor; at most three funds); E1; (29.1), with LM10's (10.10) as the quadratic case; (29.2) by restriction to segments and LM4's test (honours lm07.md:268, lm10.md:446); the gradient inequality (Deep Dive); sums and maxima: $\lvert x\rvert$, $\max(0,-x)$, $\lVert\cdot\rVert_1$ and LM27's cost are convex; (29.3): local ⇒ global (proof, Boyd and Vandenberghe §4.2.2), critical point ⇒ global, strictly convex ⇒ unique; no existence theorem (decision F); 導讀; KC | 520 |
 | 3 | Quadratic and Linear Programs {2} | the QP standard form (Boyd and Vandenberghe (4.34), p. 152) with $K\mathbf w=\mathbf b$ and inequality rows; long-only, caps, the gross limit by splitting $\mathbf w=\mathbf w^{+}-\mathbf w^{-}$ (LM8's gross exposure), a turnover limit; the volatility limit as a cone constraint, one sentence; the LP as the linear case: E2, its optimum proved by a direct comparison (no general vertex theorem; decision F); E3: infeasible, unbounded, not convex; pitfall: the status is part of the answer; KC | 400 |
-| 4 | KKT Conditions for Long-Only Portfolios {3, 8} | (7.13) for a minimization, (29.4); derived for long-only minimum variance, (29.5): $\lambda=2\sigma_p^2$, held funds $\beta_{i,p}=1$, excluded $\beta_{i,p}\ge1$; sufficiency theorem and its two-line proof by the gradient inequality, general statement cited (Boyd and Vandenberghe §5.5.3, p. 244); necessity stated: a constraint qualification, which linear constraints satisfy (p. 227 with p. 244), LM7's independent gradients another; an optimum is proved by exhibiting a KKT point; E2's comparison read as a KKT point; on E5 R3's bounds never bind (A29-09, A28-12); E4 on U28; the first half's held set in one sentence (LM30's A30-22, [[LM30]]); $2^{28}$ active sets and why solvers do not enumerate (SciPy's `nnls` is an active-set method, Lawson and Hanson 1995); 導讀; KC | 660 |
+| 4 | KKT Conditions for Long-Only Portfolios {3, 8} | (7.13) for a minimization, (29.4); derived for long-only minimum variance, (29.5): $\lambda=2\sigma_p^2$, held funds $\beta_{i,p}=1$, excluded $\beta_{i,p}\ge1$; sufficiency theorem and its two-line proof by the gradient inequality, general statement cited (Boyd and Vandenberghe §5.5.3, p. 244); necessity stated: a constraint qualification, which linear constraints satisfy (p. 227 with p. 244), LM7's independent gradients another; an optimum is proved by exhibiting a KKT point; E2's comparison read as a KKT point; on E5 R3's bounds never bind, its smallest weight over the 92 signals 0.13% (0050, 2024-11-29) [A29-09] (LM29 owns this; LM28 and LM30 echo it, decision A5); E4 on U28; the first half's held set in one sentence (LM30's A30-22, [[LM30]]); $2^{28}$ active sets and why solvers do not enumerate (SciPy's `nnls` is an active-set method, Lawson and Hanson 1995); 導讀; KC | 660 |
 | 5 | R3 and R4 in the Through Case {4, 5} | R3 is (29.5) on each window; R4: scale invariance of the Sharpe ratio and the homogenized QP (29.6) derived (the change of variables of Boyd and Vandenberghe §4.3.2, p. 151, as the model), defined when some $e_i>0$; (29.7): held funds earn $\beta_{i,p}(\mu_p-r_f)$, excluded funds earn less; X4 and E5 at the last signal; the 92 signals: active sets, exclusions with $e_i>0$, hedges with $e_i\le0$ (A29-07, A29-08); R4 exists in LM28's 22 windows (A28-23); shadow prices (29.8), local (Boyd and Vandenberghe §5.6.3, p. 251, stated) and checked by E6; the case resolved (a); 導讀; KC | 680 |
 | 6 | Caps, Gross Limits and the Long-Only Frontier {5, 2} | E7 (R3 with a 40% cap): $\lambda=2V+0.40\,\nu^{\mathrm{cap}}$, betas, the price of one point of cap, the linear prediction a lower bound ((5.57), p. 250, stated); the cap binds at 63 of 92 signals; X2: the cost of each limit in Sharpe ratio, the case resolved (b); X3: the frontiers with and without long-only limits; financed leverage in one paragraph (problem 11: the long-only tangency at the borrowing rate, scaled); pitfall: a shadow price is a rate, not a total gain; KC | 470 |
 | 7 | Costs in the Objective {6} | the cost model (LM27's (27.2), the cost decision); (29.9); $\theta$'s units and $\theta=2/(\delta\tau)$ with LM28's $\delta$; convexity (§2); buys and sells split for the KKT conditions (Boyd and Vandenberghe p. 156), so they need no subgradients, while cvxpy receives the cost as written; the band; E8 on 2025-04-30 with X6; the no-trade threshold (Deep Dive); X5 on R3's path, relative to $\theta=0$; a turnover limit is a penalty at the right $\theta$ (problem 10); hygiene: planned figures, illustrations; [[LM34]] for executed turnover and costs; 導讀; KC | 620 |
-| 8 | Solvers and How to Check Them {7, 8} | cvxpy in one paragraph (Diamond and Boyd 2016; problems built from convex atoms; the rewriting for a solver cites Agrawal et al. 2018 only after the source pass, Open item 2); the default solvers (A29-22); scaling: absolute tolerances against the objective's size, E9 part 1 and X7; tolerances, polishing and the shared rule; statuses; the checking procedure on R4 (E9 part 2): feasibility, stationarity, signs, complementarity, a second solver, a closed form on the active set; cvxpy's dual signs; which tool when: a closed form (no inequality binds), an exact active-set solution (small long-only QPs), a general solver (caps, costs, cones); pitfall: "optimal" on badly scaled inputs; KC | 540 |
+| 8 | Solvers and How to Check Them {7, 8} | cvxpy in one paragraph (Diamond and Boyd 2016; problems built from convex atoms; "cvxpy rewrites (canonicalizes) a problem into the standard form of a solver it selects", Agrawal et al. 2018, read in arXiv v2: abstract, §1.3, §4); the default solvers, their names and defaults resting on the installed cvxpy 1.9.3 (A29-22), not on the paper; scaling: absolute tolerances against the objective's size, E9 part 1 and X7; tolerances, polishing and the shared rule; statuses; the checking procedure on R4 (E9 part 2): feasibility, stationarity, signs, complementarity, a second solver, a closed form on the active set; cvxpy's dual signs; which tool when: a closed form (no inequality binds), an exact active-set solution (small long-only QPs), a general solver (caps, costs, cones); pitfall: "optimal" on badly scaled inputs; KC | 540 |
 | 9 | Convex Optimization in Python {7} | code: R3 and R4 in cvxpy with the book's options; `nnls` for the exact answer; a KKT check of a few lines; lab box | 180 |
 | — | Summary (8) / Problems (12) / Solutions | | 140 / 400 / 520 |
 | | **Total** | | **5,470** |
@@ -2784,18 +2981,21 @@ derivation, E4 / P8, P2; 4 §5 / E5 / KC §5, P5, P9; 5 §5–§6 / E6, E7 / KC 
 - §7: At $\theta=1$ on 2025-04-30, 0050's gradient is 0.017684, while the band runs from 0.015235 (buy) to 0.019085
   (sell) [A29-20]. Why is 0050 left untouched?
 - §8: CLARABEL's default absolute tolerance is 1e-8 [A29-22]. At the first signal R3's optimal variance is 1.035e-5 in
-  daily units and 2.515e-3 in annual units, $A$ times larger [A29-23]. Why does the daily problem miss the weights by
-  8.6e-4 and the annual one by only 1.6e-5?
+  daily units and 2.515e-3 in annual units (LM28's $\sigma^2_{\min}$, A28-10), $A$ times larger [A29-23]. Why does
+  the daily problem miss the weights by 8.6e-4 and the annual one by only 1.6e-5?
 - §9: In cvxpy 1.9.3, which solver does `cp.Problem(cp.Maximize(mu @ w), [cp.sum(w) == 1, w >= 0, w <= 0.4]).solve()`
   call [A29-17]? Why should a script name its solver anyway?
 
 中文導讀 in §2 (凸集 (convex set), 凸函數 (convex function), 凸組合 (convex combination), 半正定 (positive
 semidefinite), 嚴格凸函數 (strictly convex function); LM10's PSD sentence restated), §4 (KKT 條件, 互補鬆弛性
-(complementary slackness), 影子價格 (shadow price), 約束規範 (constraint qualification); LM7's 緊 and 鬆弛; "active set"
-kept in English), §5 (切點投資組合 (tangency portfolio), 夏普比率 (Sharpe ratio); why a positive excess return is not
-enough), §7 (交易成本 (transaction cost), 週轉率 (turnover), 懲罰函數 (penalty function); "no-trade band" kept in
-English), §8 (目標函數 (objective function), 限制條件 (constraint), 對偶變量 (dual variable); a solver's status
-read before its weights). Terms and sources under "Chinese terms" below.
+(complementary slackness), 影子價格 (shadow price), 約束規範 (constraint qualification); LM7's 緊 and 鬆弛, and the
+active constraints called 有效限制 (active constraint), as LM7's Glossary does; "active set" kept in English), §5
+(切點投資組合 (tangency portfolio), 夏普比率 (Sharpe ratio); why a positive excess return is not enough), §7 (交易成本
+(transaction cost), 週轉率 (turnover), 懲罰函數 (penalty function); "no-trade band" kept in English), §8 (目標函數
+(objective function), 限制條件 (constraint), 對偶變量 (dual variable) with its English at first use, and one sentence
+that a solver's dual variables are the KKT multipliers, LM7's 乘數; 內點法 (interior-point method) if the box names
+the method; a solver's status read before its weights). The box writes 對偶變量, never LM18's 對偶變數 (antithetic
+variates). Terms and sources under "Chinese terms" below.
 
 Deep Dives: §2 "The gradient inequality": for a differentiable convex $h$, (29.1) with $\mathbf u+\omega(\mathbf
 v-\mathbf u)$ gives $[h(\mathbf u+\omega(\mathbf v-\mathbf u))-h(\mathbf u)]/\omega\le h(\mathbf v)-h(\mathbf u)$, and
@@ -2809,51 +3009,56 @@ ask for one $\lambda$ with $(2\Sigma\mathbf w^{\mathrm{drift}})_i-\theta(0.1425\
 **Exhibits.**
 
 - X1 `case` (table, §1): the last window, 2024-08-23 → 2026-09-30 (504 joint daily total returns, annualized with
-  $A=242.95$ [A29-01]). Rows: the five funds. Columns: mean, volatility, excess return $e_i$ (% a year); unconstrained
-  tangency and R4 weights (%, two decimals). Values: means 48.78, 17.94, −5.78, 20.68, 36.10; volatilities 26.32,
+  $A=242.95$ (LM27's A27-02) [A29-01]). Rows: the five funds. Columns: mean, volatility, excess return $e_i$ (% a
+  year); unconstrained tangency and R4 weights (%, two decimals). Values: means 48.78, 17.94, −5.78, 20.68, 36.10;
+  volatilities 26.32,
   17.89, 13.11, 24.30, 49.71; $e_i$ 47.28, 16.44, −7.28, 19.18, 34.60 [A29-04]; tangency 114.24, −27.75, −48.48, 31.07,
   30.92 [A29-05]; R4 62.77, 0, 0, 18.37, 18.86 [A29-06]. Footer rows: Sharpe ratio 2.18 against 2.11, gross 252%
-  against 100%, volatility 31.9% against 18.9% [A29-05, A29-06]. Note: in-sample, on the 504 joint dates; $r_f=1.5\%$;
-  the tangency is LM28's (28.6), not a rule. Source: FinMind `TaiwanStockPrice`, `TaiwanStockDividendResult`,
+  against 100%, volatility 31.94% against 18.85% [A29-05, A29-06], two decimals so that each ratio recomputes from the
+  printed weights and $e_i$ (decision on the second recomputation). Note: in-sample, on the 504 joint dates;
+  $r_f=1.5\%$; the tangency is LM28's (28.6), not a rule. Source: FinMind `TaiwanStockPrice`, `TaiwanStockDividendResult`,
   `TaiwanStockSplitPrice` (E5, retrieved 2026-10-24, `data/README.md`); Computations: `data/lm29_numbers.py`.
 - X2 `limits` (`bar`, grouped, §6): categories the five funds; series the four maximum-Sharpe portfolios
   "unconstrained", "gross ≤ 150%", "long-only (R4)", "long-only, cap 40%" (four colour tokens; portfolios as series,
   funds as categories, shared decision "Charts"); `y` weight in % (`fmt: "n2"`), `hline` at 0. Values: (114.24, −27.75,
   −48.48, 31.07, 30.92), (78.82, −7.59, −17.41, 23.36, 22.82), (62.77, 0, 0, 18.37, 18.86), (40.00, 14.37, 0, 27.48,
-  18.15); Sharpe ratios 2.18, 2.16, 2.11, 2.00; volatilities 31.9%, 23.0%, 18.9%, 16.4% [A29-15], given in the
-  legend names or the note. Note: in-sample, last window; the limits are constructed.
+  18.15); Sharpe ratios 2.18, 2.16, 2.11, 2.00; volatilities 31.94%, 23.01%, 18.85%, 16.40% [A29-15], given in the
+  legend names or the note, two decimals so that each ratio recomputes from the printed weights and X1's $e_i$.
+  Note: in-sample, on the last window's 504 joint dates; the limits are constructed.
 - X3 `frontier` (`scatter` with `curves`, approved C2, §6): $x$ volatility, $y$ mean (% a year), last window. Curves:
   the unconstrained frontier (dashed) and the long-only frontier (solid) on a grid of target means, the two capital
   market lines from $r_f$ (dashed, thin; slopes 2.18 and 2.11). Points: the five funds (one named series, labels);
   `points` for R3 = global minimum variance (mean 8.46%, volatility 10.10%), R4 (41.22%, 18.85%) and the unconstrained
   tangency (71.13%, 31.94%), two decimals so that each slope recomputes from its point [A29-05, A29-06, A29-16]. Values
   cited: the curves coincide for target means from 4.12% to 30.44%; at a target of 40% the volatility is 18.29%
-  unconstrained and 18.32% long-only; the long-only frontier ends at 0050 (48.8%, 26.3%) [A29-16]. Note: in-sample;
-  the long-only frontier lies on or to the right of the unconstrained one.
+  unconstrained and 18.32% long-only; the long-only frontier ends at 0050 (48.8%, 26.3%) [A29-16]. Note: in-sample,
+  on the last window's 504 joint dates; the long-only frontier lies on or to the right of the unconstrained one.
 - X4 `kktR4` (`bar`, §5): categories the five funds; series "excess return $e_i$" and "beta × (μ_p − r_f)" (% a year,
   `fmt: "n3"`, three decimals so that the gaps recompute from the bars): 0050 47.275 and 47.275, 00646 16.437 and
   21.623, 00679B −7.276 and −0.797, 00635U 19.178 and 19.178, 00642U 34.596 and 34.596 [A29-04, A29-10]. Note: R4 at the
   last signal; equal bars mark held funds, (29.7); the two gaps are 5.19 and 6.48 points ($\nu_i/\lambda$) [A29-10];
-  in-sample.
+  in-sample, on the last window's 504 joint dates.
 - X5 `costsweep` (table, §7): R3's path with the cost penalty, 91 rebalancing signals, planned at each signal close.
   Rows $\theta$ = 0, 0.25, 0.5, 1, 2, 5, 10. Columns: planned turnover and planned cost, each summed over the 91
   signals as a percentage of $\theta=0$'s (decision A2); signals without a trade; in-sample volatility given up (bp,
   mean and largest). Values: 100.0, 100.0, 0, 0.0, 0.0; 58.4, 59.0, 11, 0.4, 1.5; 44.7, 45.5, 18, 1.5, 3.8; 31.5,
   31.8, 31, 4.9, 10.8; 22.3, 22.5, 40, 15.3, 27.7; 9.4, 9.7, 74, 47.9, 112.8; 4.7, 4.9, 85, 71.0, 283.0 [A29-21]. Note:
-  in-sample illustration, not a rule; *planned* at the signal close, relative to R3 itself ($\theta=0$); R3's own
-  turnover and costs, executed a session later, are [[LM34]]'s; $\theta=2/(\delta\tau)$, so $\delta=4$ with monthly
-  rebalancing ($\tau=1/12$) is $\theta=6$ [A29-21].
+  in-sample illustration, not a rule, on each window's 504 joint dates; *planned* at the signal close, relative to R3
+  itself ($\theta=0$); R3's own turnover and costs, executed a session later, are [[LM34]]'s; $\theta=2/(\delta\tau)$,
+  so $\delta=4$ with monthly rebalancing (a holding period of $\tau=1/12$ year) is $\theta=6$ [A29-21].
 - X6 `band` (`bar`, §7): 2025-04-30 at $\theta=1$: bars of $(2\Sigma\mathbf w)_i$ at the penalized solution (0.017684,
   0.019085, 0.015235, 0.015235, 0.019085; `fmt: "n6"`); dashed `hline`s at the buy edge 0.015235, the taxed sell edge
   0.019085 and 00679B's sell edge 0.018085 [A29-20]. Note: bought funds sit on the buy edge, sold funds on their sell
-  edge, 0050 inside the band, untouched; in-sample.
+  edge, 0050 inside the band, untouched; in-sample, on the 2025-04-30 window's 504 joint dates.
 - X7 `solvers` (table, §8): R3, largest weight gap to the exact solution, by units (daily, annual), solver (OSQP,
   CLARABEL) and tolerances (default, the book's). Columns: first signal; worst of the 92 signals. Values: daily OSQP
   default 8.3e-9 / 1.1e-8; daily CLARABEL default 8.6e-4 / 2.1e-3; daily CLARABEL book 3.2e-8 / 3.2e-7; annual OSQP
   default below 1e-15 / below 1e-15; annual CLARABEL default 1.6e-5 / 3.4e-5; annual CLARABEL book 2.0e-11 / 8.9e-9
-  [A29-23, A29-24]; R4's worst row (annual CLARABEL default 9.5e-7) in the note. Note: cvxpy 1.9.3, OSQP 1.1.3,
-  CLARABEL 0.11.1; the defaults are CLARABEL's 1e-8 gaps and cvxpy's OSQP 1e-5 with polishing [A29-22]; a cell at
-  rounding level is printed as a bound; the lab prints all 16 cells of A29-24.
+  [A29-23, A29-24]; R4's worst row (annual CLARABEL default 9.5e-7) in the note. Note: on each window's 504 joint
+  dates; cvxpy 1.9.3, OSQP 1.1.3, CLARABEL 0.11.1; the defaults are CLARABEL's 1e-8 gaps and cvxpy's OSQP 1e-5 with
+  polishing [A29-22]; OSQP at the book's tolerances gives the same gaps as at its defaults in both units (8.3e-9 /
+  1.1e-8 daily, below 1e-15 annual), so its two rows are left out and the note says so; a cell at rounding level is
+  printed as a bound; the lab prints all 16 cells of A29-24.
 
 **Widget `kktPair` — "Active sets with two funds and cash."** `Book.controls`: a slider for the cap on net exposure
 $f_1+f_2\le$ cap (0.2 to 2.0, step 0.05), a slider for $\delta$ (1 to 10, step 0.5). Problem: maximize
@@ -2864,14 +3069,19 @@ about the unconstrained optimum $\Sigma^{-1}\mathbf e/\delta$), and the candidat
 the optimum, the only candidate passing both feasibility and signs, in colour 1 and labelled; the others in muted
 grey). Readouts: a table of the seven solvable binding sets ($f_1$, $f_2$, multipliers, feasible?, signs?, utility);
 the binding set at the optimum; one line saying how many candidates pass each test and that only the optimum passes
-both. Initial state (PDF): cap 1, $\delta=4$, first window, 0050 and 00646: unconstrained $(0.16, 1.42)$ breaks the
+both. Caption: "first window, 2017-02-13 → 2019-02-27, on its 504 joint dates; in-sample" (A28-02), naming the sample
+of $\mathbf e$, $\sigma$ and $\rho$ (shared decision "Data"). Initial state (PDF): cap 1, $\delta=4$, first window,
+0050 and 00646: unconstrained $(0.16, 1.42)$ breaks the
 cap; the optimum binds the cap and $f_1\ge0$ at $(0,1)$ with multipliers 0.0289 and 0.0031 and utility 0.0571; of the
 7 solvable binding sets 4 pass feasibility and 3 the signs, but only the optimum passes both: the unconstrained point
 and the cap-only point pass the signs and are infeasible [A29-27]. Data block `chart-lm29-kktPair`: $e_1$, $e_2$,
-$\sigma_1$, $\sigma_2$, $\rho$ of the first window (6.04%, 8.53%, 13.50%, 11.87%, 0.539; echo of A28-05 to A28-07),
-from `data/lm29_charts.py`. Each candidate solves a system of at most 5×5 (two exposures and up to three binding
-constraints) with a determinant check, module-local code under 30 lines, tested against the anchor script's
-`pair_kkt` as `data/lm15_charts.py` does (shared decision "Widgets"); no optimizer in the browser.
+$\sigma_1$, $\sigma_2$, $\rho$ of the first window, unrounded, from `data/lm29_charts.py`; the readout prints them as
+6.04%, 8.53%, 13.50%, 11.87% and 0.539 (echo of A28-05 to A28-07). That is one digit more than LM28 prints, because the
+readout's unconstrained point (0.16, 1.42) is computed from them and LM28's printed inputs (one decimal, the
+correlation two) do not reproduce it (decision C12's exception). Each candidate solves a system of at most 5×5
+(two exposures and up to three binding constraints) with a determinant check, module-local code under 30 lines,
+tested against the anchor script's `pair_kkt` as `data/lm15_charts.py` does (shared decision "Widgets"); no optimizer
+in the browser.
 
 **Examples** (results recomputed from the printed inputs):
 
@@ -2926,8 +3136,8 @@ constraints) with a determinant check, module-local code under 30 lines, tested 
   for R4; the bound duals are the $\nu_i$: 0.0234 and 0.0292 [A29-26, A29-12].
 
 **Problems plan** (12; MC keys C, A, B, C, A, B; the lab solves 9–12). Stems state the window (dates, 504 joint daily
-total returns), $A=242.95$, the divisor $T$, annual inputs, $r_f=1.5\%$, the solver and its tolerances, the zero
-threshold $10^{-6}$, weights in % to the printed decimals, and for costs 0.1425% on each side and tax 0.1% on sales
+total returns), $A=242.95$ (A27-02), the divisor $T$, annual inputs, $r_f=1.5\%$, the solver and its tolerances, the
+zero threshold $10^{-6}$, weights in % to the printed decimals, and for costs 0.1425% on each side and tax 0.1% on sales
 (0 for 00679B), planned at the signal close.
 
 1. MC: the set $\{\mathbf w:\mathbf 1^{\top}\mathbf w=1,\ \mathbf w^{\top}\Sigma\mathbf w\ge0.01\}$, $\Sigma$ PD, is: A
@@ -2954,30 +3164,35 @@ threshold $10^{-6}$, weights in % to the printed decimals, and for costs 0.1425%
    $K\mathbf w=\mathbf b$ and $\mathbf w\ge\mathbf 0$; (b) with the budget and caps $w_i\le b_i$, show that $\lambda=
    2V+\sum_ib_i\nu^{\mathrm{cap}}_i$ at $h=\mathbf w^{\top}\Sigma\mathbf w$, and check it on E7: $0.026350=2\times
    0.0110665+0.40\times0.010543$ [A29-14].
-9. First window (2017-02-13 → 2019-02-27): R3 equals LM28's $\mathbf w^{\mathrm{mv}}$, (10.7, 22.5, 41.4, 25.0, 0.4)%,
-   because no bound binds (A28-10) [A29-29]. Compute R4: 10.57% 0050, 52.44% 00646, 36.99% 00679B, in-sample Sharpe
-   ratio 0.802 against LM28's unconstrained 0.880 (A28-18), with $\nu_i/\lambda$ of 0.25 points (00635U) and 8.01
-   (00642U) [A29-29]; check R4 by LM28's (28.6) on the three held funds. Python part: the closed form against `nnls`.
+9. First window (2017-02-13 → 2019-02-27; A28-02): R3 equals LM28's $\mathbf w^{\mathrm{mv}}$, (10.7, 22.5, 41.4,
+   25.0, 0.4)% (A28-10), because no bound binds [A29-09]. Compute R4: 10.57% 0050, 52.44% 00646, 36.99% 00679B,
+   in-sample Sharpe ratio 0.802 against LM28's unconstrained 0.880 (A28-18), with $\nu_i/\lambda$ of 0.25 points
+   (00635U) and 8.01 (00642U) [A29-29]; check R4 by LM28's (28.6) on the three held funds. Python part: the closed form
+   against `nnls`.
 10. Python: 2025-04-30, R3 with planned turnover at most 5% (CLARABEL, the book's tolerances): (2.2, 27.4, 36.9, 27.7,
     5.8)%, volatility 9.24%, multiplier 0.00825 [A29-30]. Show that the penalty $\theta\,\mathrm{TO}$ with $\theta$ equal
     to that multiplier gives the same weights (gap below 1e-9), and explain by the KKT conditions of both problems.
 11. Python: financed leverage on the last window: maximize
     $\mathbf f^{\top}\mathbf e-\text{spread}\times\max(0,\mathbf 1^{\top}\mathbf f-1)$ subject to
     $\mathbf f^{\top}\Sigma\mathbf f\le25\%^2$, $\mathbf f\ge\mathbf 0$, $\lVert\mathbf f\rVert_1\le1.5$, for a spread of
-    0 and of 2 points over $r_f$ (R8's financing rate, shared decision), CLARABEL at 1e-10 (a cone problem; at 1e-12 it
-    returns `optimal_inaccurate`), checked against the exact solution below. With no spread: R4 scaled by
-    $25/18.85=1.326$, (83.2, 0, 0, 24.4, 25.0)%, $L=132.6\%$, excess return 52.67%. With 2 points the borrowed part
-    costs $r_f$ plus 2 points, so the optimum is the long-only tangency at 3.5%, (64.40, 0, 0, 16.67, 18.93)%, scaled by
-    $25/19.08=1.310$: (84.4, 0, 0, 21.8, 24.8)%, $L=131.0\%$, excess return 52.65% before financing and 52.03% after
-    it ($2\times0.310=0.62$ points). CLARABEL and SCS agree with these to within 1e-6 [A29-31]. Explain both, and why
-    the volatility limit binds and the gross limit does not.
+    0 and of 2 points over $r_f$ (R8's financing rate, shared decision), with $\mathbf e$ at X4's three decimals. Solve
+    it with CLARABEL at 1e-10 (a cone problem; at 1e-12 it returns `optimal_inaccurate`) and with SCS (eps 1e-9,
+    200,000 iterations; SCS 3.3.1 [A29-22]), and check both against the exact solution below. With no spread: R4
+    scaled by $25/18.85=1.326$, $\mathbf f=(83.23, 0, 0, 24.36, 25.00)\%$, $L=132.6\%$, excess return 52.67%. With 2
+    points the borrowed part costs $r_f$ plus 2 points, so the optimum is the long-only tangency at 3.5%, (64.40, 0, 0,
+    16.67, 18.93)%, scaled by $25/19.08=1.310$: $\mathbf f=(84.36, 0, 0, 21.83, 24.81)\%$, $L=131.0\%$, excess return
+    52.65% before financing and 52.03% after it ($2\times0.310=0.62$ points). Each exposure is the scale times the
+    unrounded weight, so it can differ in its last digit from the product of the printed numbers; the excess returns
+    recompute from the printed exposures. CLARABEL and SCS agree with these to within 1e-6 [A29-31]. Explain both,
+    and why the volatility limit binds and the gross limit does not.
 12. Python: (a) solve R3 at the first signal in daily and in annual units with OSQP and CLARABEL, at default and the
     book's tolerances, and report the weight gaps to `nnls` [A29-23]; (b) repeat over the 92 signals and for R4
-    [A29-24]; (c) explain the pattern from the size of the objective (1.035e-5 against 2.515e-3) and CLARABEL's absolute
-    tolerance 1e-8, and why OSQP's polishing hides it [A29-22, A29-23].
+    [A29-24]; (c) explain the pattern from the size of the objective (1.035e-5 against 2.515e-3, LM28's $\sigma^2_{\min}$,
+    A28-10) and CLARABEL's absolute tolerance 1e-8, and why OSQP's polishing hides it [A29-22, A29-23].
 
 **Lab parts** (`build/make_lab29.py`; reads only its `data/`: E5's estimation and wealth frames and R3's and R4's
-per-signal target weights, derived by `make_lab_data.py` (shared decision "Labs"; Open item 1);
+per-signal target weights, derived by `make_lab_data.py`, which writes both frames (shared decision "Labs";
+decisions on the first revision);
 `sectors_close_raw.csv` and `sectors_close_repairs.csv` for U28, built as LM23's lab builds them): 1 data, $A$, the 92
 windows, eigenvalues [A29-01 to A29-03]; 2 convexity checked numerically on random chords (the variance and the cost;
 no claim beyond the check), E1; 3 R3 and R4 by `scipy.optimize.nnls` on the Cholesky factor and by cvxpy, checked
@@ -2988,39 +3203,42 @@ A29-24; 9 problems 9–12. Extension (*In-sample*): enumerate R4's 31 non-empty 
 that exactly one survives and equals `nnls`'s, time the loop, and extrapolate to U28's $2^{28}$ sets; a closing
 sentence says that the surviving active set is itself an estimate (LM30). Labs write plain "LM30", never `[[LM30]]`.
 
-**Cross-module tags.** Only LM30 cites LM29's tags by number ((29.4), (29.5)); LM31, LM32 and LM35 cite the results of
-(29.1)–(29.4) in words, and from Stage 2 they cite the numbers (decision C8). A tag lists only the modules that cite it.
+**Cross-module tags.** The users are the second cross-check's table (Y1, taken by grep of the revised briefs, the
+"tags I cite" notes excluded) and are cited by number (decision C8); a tag lists only the modules that cite it, and
+speculative users are not listed.
 
 - (29.1) $\mathcal C$ convex: $\omega\mathbf u+(1-\omega)\mathbf v\in\mathcal C$ for $\mathbf u,\mathbf v\in\mathcal C$,
   $\omega\in[0,1]$; $h$ convex on convex $\mathcal C$: $h(\omega\mathbf u+(1-\omega)\mathbf v)\le\omega h(\mathbf u)+
-  (1-\omega)h(\mathbf v)$; strictly, with $<$ for $\mathbf u\ne\mathbf v$ and $0<\omega<1$.
+  (1-\omega)h(\mathbf v)$; strictly, with $<$ for $\mathbf u\ne\mathbf v$ and $0<\omega<1$ (LM32).
 - (29.2) for $h$ twice differentiable on a convex open set: convex ⇔ $H(\mathbf u)$ PSD everywhere; $H$ PD everywhere ⇒
   strictly convex; and, for differentiable convex $h$, $h(\mathbf v)\ge h(\mathbf u)+\nabla h(\mathbf u)^{\top}(\mathbf
-  v-\mathbf u)$.
+  v-\mathbf u)$ (LM31).
 - (29.3) a convex problem, $\min h(\mathbf w)$ subject to $\psi_i(\mathbf w)\le b_i$ ($h$, $\psi_i$ convex) and $K\mathbf
-  w=\mathbf b$: every local minimum is global; a strictly convex $h$ has at most one minimizer.
+  w=\mathbf b$: every local minimum is global; a strictly convex $h$ has at most one minimizer (LM30, LM31, LM32).
 - (29.4) KKT for a minimization with LM7's signs: $\nabla h(\mathbf w^*)=K^{\top}\boldsymbol\lambda-\sum_i\nu_i\nabla
   \psi_i(\mathbf w^*)$, $\psi_i(\mathbf w^*)\le b_i$, $\nu_i\ge0$, $\nu_i\big(b_i-\psi_i(\mathbf w^*)\big)=0$, $K\mathbf
   w^*=\mathbf b$; sufficient for a convex problem (proved for linear $\psi_i$); necessary under a constraint
   qualification, which linear constraints satisfy (stated); for $\mathbf w\ge\mathbf 0$ the term is $+\boldsymbol\nu$,
-  for a cap $-\nu^{\mathrm{cap}}_i$ (LM30).
+  for a cap $-\nu^{\mathrm{cap}}_i$ (LM30, LM35).
 - (29.5) long-only minimum variance: $2\Sigma\mathbf w^*=\lambda\mathbf 1+\boldsymbol\nu$, $\boldsymbol\nu\ge\mathbf 0$,
   $\nu_iw^*_i=0$; $\lambda=2\sigma_p^2$; $\nu_i=2[\operatorname{Cov}(R_i,R_p)-\sigma_p^2]$, so $\beta_{i,p}=1$ for held
-  and $\beta_{i,p}\ge1$ for excluded funds (LM30, whose multipliers are half of these).
+  and $\beta_{i,p}\ge1$ for excluded funds (LM30, whose multipliers are half of these; LM31).
 - (29.6) when some $e_i>0$: $\max\mathbf e^{\top}\mathbf w/\sqrt{\mathbf w^{\top}\Sigma\mathbf w}$ over $\mathbf w\ge
   \mathbf 0$, $\mathbf 1^{\top}\mathbf w=1$ is solved by $\mathbf w^*=\mathbf y^*/\mathbf 1^{\top}\mathbf y^*$, $\mathbf
   y^*$ minimizing $\mathbf y^{\top}\Sigma\mathbf y$ subject to $\mathbf e^{\top}\mathbf y=1$, $\mathbf y\ge\mathbf 0$;
-  $\mathrm{SR}^*=(\mathbf y^{*\top}\Sigma\mathbf y^*)^{-1/2}$ and $\lambda=2/\mathrm{SR}^{*2}$.
-- (29.7) at R4: $\nu_i/\lambda=\beta_{i,p}(\mu_p-r_f)-e_i\ge0$, with equality for held funds.
+  $\mathrm{SR}^*=(\mathbf y^{*\top}\Sigma\mathbf y^*)^{-1/2}$ and $\lambda=2/\mathrm{SR}^{*2}$ (LM30).
+- (29.7) at R4: $\nu_i/\lambda=\beta_{i,p}(\mu_p-r_f)-e_i\ge0$, with equality for held funds (cited by no later brief;
+  §5 and X4 use it).
 - (29.8) shadow prices: $\partial J/\partial b_i=-\nu_i$ where $J$ is differentiable (stated, Boyd and Vandenberghe
   §5.6.3), and $J(\mathbf b+\mathbf u)\ge J(\mathbf b)-\boldsymbol\nu^{\top}\mathbf u$ for a convex problem with linear
   constraints (stated, their (5.57), which needs strong duality; the refined Slater condition gives it for linear
-  constraints, p. 227).
+  constraints, p. 227) (cited by no later brief).
 - (29.9) cost-penalized rebalancing: $\min\mathbf w^{\top}\Sigma\mathbf w+\theta\operatorname{cost}(\mathbf w-\mathbf
   w^{\mathrm{drift}})$ subject to $\mathbf 1^{\top}\mathbf w=1$, $\mathbf w\ge\mathbf 0$; at the optimum
   $(2\Sigma\mathbf w)_i=\lambda-\theta\,0.1425\%$ for a bought fund, $\lambda+\theta(0.1425\%+\text{tax}_i)$ for a sold
   fund still held, in between for an untouched one; with every drifted weight positive, no trade iff $\theta\ge\max_{i
-  \ne j}[(2\Sigma\mathbf w^{\mathrm{drift}})_i-(2\Sigma\mathbf w^{\mathrm{drift}})_j]/(2\times0.1425\%+\text{tax}_i)$.
+  \ne j}[(2\Sigma\mathbf w^{\mathrm{drift}})_i-(2\Sigma\mathbf w^{\mathrm{drift}})_j]/(2\times0.1425\%+\text{tax}_i)$
+  (cited by no later brief).
 
 **Pitfalls to pre-empt.**
 
@@ -3029,7 +3247,7 @@ sentence says that the surviving active set is itself an estimate (LM30). Labs w
   solvers annual inputs (shared decision "Solver output").
 - Status first. `infeasible`, `unbounded` and `optimal_inaccurate` are answers; a `DCPError` means the problem as
   written is not convex (E3). Read the status before the weights; `Variable.value` is `None` when there is no solution.
-- Near-zeros. An interior-point solution leaves weights and trades of 1e-13 to 1e-6 where the exact answer has zeros
+- Near-zeros. An interior-point solution leaves weights and trades of 1e-13 to a few 1e-6 where the exact answer has zeros
   (CLARABEL's $\min y=2.0\text{e-}13$ [A29-25]; on the cost sweep, with the cost given to cvxpy as `norm1` and `pos`,
   its weights differ from OSQP's by a few 1e-6 [A29-21]); print $\lvert w_i\rvert<10^{-6}$ as 0 and count active
   constraints by the stated slack.
@@ -3039,10 +3257,10 @@ sentence says that the surviving active set is itself an estimate (LM30). Labs w
   and the first-order estimate is always on the optimistic side for a convex problem (E7).
 - Homogenization needs some $e_i>0$, and $\mathbf w=\mathbf y/\mathbf 1^{\top}\mathbf y$ needs $\mathbf 1^{\top}\mathbf
   y>0$; with no positive excess mean R4 falls back to R3 (shared decision; never on E5).
-- The active-set example: R3's bounds never bind on E5 (A29-09; LM28's A28-12), so §4 uses U28 and §5 R4 (LM28's Open
-  item 1, accepted).
-- Enumeration: a problem with $k$ inequalities has $2^k$ binding sets; list them all, as LM7 and the widget do
-  (PITFALLS §7: an enumeration once missed two cases).
+- The active-set example: R3's bounds never bind on E5 [A29-09] (LM29 owns this; LM28's A28-12 and LM30's A30-16 echo
+  it, decision A5), so §4 uses U28 and §5 R4 (LM28's Open item 1, accepted).
+- Enumeration: each inequality doubles the number of binding sets (8 for the widget's three, $2^{28}$ for U28's
+  bounds); list them all, as LM7 and the widget do (PITFALLS §7: an enumeration once missed two cases).
 - $\theta$ has units: a one-time cost against an annual variance. Changing the rebalancing interval changes the
   $\theta$ that a given risk aversion implies ($\theta=2/(\delta\tau)$).
 - Planned against executed: §7's turnover and costs are planned at the signal close and printed relative to
@@ -3070,84 +3288,121 @@ sentence says that the surviving active set is itself an estimate (LM30). Labs w
 plan's merged list (decision G) has them; lm07.md:6 and lm10.md:6 already list 29. No wording change: lm07.md:268,
 522 and 531 and lm10.md:446 and 449 read correctly against the plan.
 
-**Sources** (full citations; how each was verified; paraphrase only).
+**Sources** (full citations; the version read and the locations, as the source checks verified them: decision F's
+check, the second hunt (`plans/vol-5.md`, "Sources read by the second hunt") and the SOURCES drafts of 2026-10-24,
+whose Crossref records were re-read anonymously; paraphrase only).
 
 - Boyd, S., and L. Vandenberghe (2004). *Convex Optimization*. Cambridge University Press. DOI
-  10.1017/CBO9780511804441 (Crossref, 2026-10-24); already in SOURCES (line 243, without sections). Read in the
-  authors' PDF (`web.stanford.edu/~boyd/cvxbook/bv_cvxbook.pdf`, seventh printing 2009, downloaded by the drafter):
-  first-order conditions §3.1.3, p. 69; second-order conditions §3.1.4, p. 71; pointwise maximum §3.2.3, p. 80; local
-  and global optima §4.2.2, p. 138; linear-fractional programs and their change of variables §4.3.2, p. 151; the QP form
-  (4.34) §4.4, p. 152; the Markowitz example p. 155 and its linear transaction costs with buy and sell variables, p.
-  156; the refined Slater condition reducing to feasibility for linear constraints, §5.2.3, p. 227; KKT conditions
-  sufficient for convex problems, and necessary and sufficient under Slater's condition, §5.5.3, p. 244; the global
-  inequality (5.57), §5.6.2, p. 250; local sensitivity §5.6.3, p. 251. SOURCES gains the sections.
+  10.1017/CBO9780511804441 (Crossref: monograph issued 2004-03-08; print ISBN 978-0-521-83378-3, online ISBN
+  978-0-511-80444-1); already in SOURCES (line 243, without sections). Read in the authors' PDF
+  (`web.stanford.edu/~boyd/cvxbook/bv_cvxbook.pdf`, whose copyright page reads "First published 2004" and "Seventh
+  printing with corrections 2009"); every page below was re-checked in a fresh download of that PDF and by the second
+  recomputation: first-order conditions §3.1.3, p. 69; second-order conditions §3.1.4, p. 71; pointwise maximum §3.2.3,
+  p. 80; local and global optima §4.2.2, p. 138; linear-fractional programs and their change of variables §4.3.2, p.
+  151; the QP form (4.34), §4.4, p. 152; §4.4.1, subsection "Markowitz portfolio optimization", p. 155, and its linear
+  transaction costs with buy and sell variables, p. 156; the refined Slater condition (5.27), which reduces to
+  feasibility for linear constraints, §5.2.3, p. 227; KKT conditions sufficient for convex problems, and necessary and
+  sufficient under Slater's condition, §5.5.3, p. 244; the global inequality (5.57), §5.6.2, p. 250; local
+  sensitivity, §5.6.3, p. 251. The text cites sections and pages of this printing. SOURCES gains the sections.
 - Diamond, S., and S. Boyd (2016). "CVXPY: A Python-Embedded Modeling Language for Convex Optimization." *Journal of
-  Machine Learning Research* 17(83): 1–5. Verified on the JMLR page (`jmlr.org/papers/v17/15-408.html`, read
-  2026-10-24: authors, volume, pages, abstract). No DOI. Its solver list (CVXOPT, ECOS, SCS) is outdated (survey);
-  the text names the solvers from A29-22, not from the paper.
+  Machine Learning Research* 17(83): 1–5. No DOI. Abstract only (the JMLR page, `jmlr.org/papers/v17/15-408.html`,
+  re-read: authors, volume, pages): a modelling language embedded in Python, in which a problem is written in natural
+  syntax instead of a solver's standard form. Text not read; cited for the language only. Its solver list is outdated
+  (survey), so the text names the solvers from A29-22.
 - Agrawal, A., R. Verschueren, S. Diamond and S. Boyd (2018). "A Rewriting System for Convex Optimization Problems."
-  *Journal of Control and Decision* 5(1): 42–60. DOI 10.1080/23307706.2017.1397554 (Crossref, 2026-10-24). The content
-  claim (cvxpy rewrites a problem into a solver's standard form) rests on the survey's reading of arXiv:1709.04494;
-  the sentence stays out of the text until the source pass reads it (Open item 2).
+  *Journal of Control and Decision* 5(1): 42–60 (Crossref: issued 2018-01-02, online 2018-01-19). DOI
+  10.1080/23307706.2017.1397554. Read in full by the second hunt in arXiv:1709.04494v2 (22 January 2019; v1 13
+  September 2017), which describes CVXPY 1.0: the abstract (p. 1), §1.3 (pp. 4–5) and §4 (p. 15) say that cvxpy
+  finds a suitable solver and rewrites (the paper's word is "canonicalizes") the problem into that solver's standard
+  form. §8 prints that sentence (decision "Sources read by the second hunt"). The locations are arXiv v2's; the text
+  cites no journal page. Kept out: where cvxpy 1.9.3 sends a volatility limit, and every solver name and default,
+  which rest on A29-22 (the paper does not treat that case).
 - Stellato, B., G. Banjac, P. Goulart, A. Bemporad and S. Boyd (2020). "OSQP: An Operator Splitting Solver for
-  Quadratic Programs." *Mathematical Programming Computation* 12(4): 637–672. DOI 10.1007/s12532-020-00179-2
-  (Crossref, 2026-10-24). Cited only for the method's name, which the title states.
+  Quadratic Programs." *Mathematical Programming Computation* 12(4): 637–672 (Crossref: online 2020-02-20, print
+  December 2020). DOI 10.1007/s12532-020-00179-2. Cited only for the method's name, which the title states; text not
+  read.
 - Goulart, P. J., and Y. Chen (2024). "Clarabel: An Interior-Point Solver for Conic Programs with Quadratic
-  Objectives." arXiv:2405.12762 (v1, 21 May 2024; arXiv API record and abstract read by the drafter, 2026-10-24:
-  interior point, homogeneous embedding, a standard solver of CVXPY). A preprint; cited for the method's name.
+  Objectives." arXiv:2405.12762 (v1, 21 May 2024; the arXiv API record and abstract, re-read: a general-purpose
+  interior-point solver for conic problems, based on a homogeneous embedding and distributed as a standard solver of
+  the Python CVXPY suite). A preprint; no journal version checked. Cited for the method's name.
 - Boyd, S., E. Busseti, S. Diamond, R. N. Kahn, K. Koh, P. Nystrup and J. Speth (2017). "Multi-Period Trading via
-  Convex Optimization." *Foundations and Trends in Optimization* 3(1): 1–76. DOI 10.1561/2400000023 (Crossref,
-  2026-10-24); the author order, journal, issue and abstract checked on Boyd's page
-  (`web.stanford.edu/~boyd/papers/cvx_portfolio.html`, read 2026-10-24) and on arXiv:1705.00109. Crossref lists the
-  same seven authors in another order; cite the paper's. Used for one sentence: single-period trading as a convex
-  problem trading off return, risk, transaction and holding costs (the abstract).
-- Lawson, C. L., and R. J. Hanson (1995). *Solving Least Squares Problems*. SIAM (Classics in Applied Mathematics).
-  DOI 10.1137/1.9781611971217 (Crossref, 2026-10-24). SciPy 1.18.1's `scipy.optimize.nnls` docstring (read in the
-  project environment) cites it and calls its algorithm an active-set method that solves the KKT conditions of
-  non-negative least squares. Cited through SciPy only.
-- Kuhn and Tucker (1951), Karush (1939) and Kjeldsen (2000): through LM7 (lm07.md:522), by pointer; no new claim.
-- Jagannathan, R., and T. Ma (2003), *Journal of Finance* 58(4): 1651–1683, with the 2019 note: LM30's entry
-  (shared decision "References"); LM29 points to LM30 only.
-- Software facts (installed environment, `uv.lock`): cvxpy 1.9.3, OSQP 1.1.3, CLARABEL 0.11.1 [A29-22]; CLARABEL's
-  `DefaultSettings()` (gaps and feasibility 1e-8, 200 iterations) and cvxpy's OSQP defaults read from
-  `cvxpy/reductions/solvers/qp_solvers/osqp_qpif.py` (`eps_abs` = `eps_rel` = 1e-5, `max_iter` 10,000, polishing on a
-  fresh solve) [A29-22]; the default solver of each problem class observed by `Problem.solver_stats.solver_name`
-  [A29-17, A29-22]. cvxpy's "Solver Features" page (quoted by the survey) is not relied on.
-- The cost model's rates (commission 0.1425%, tax 0.1% on sales, 0 for 00679B) come from the shared decision "Cost
-  model", cited by pointer (LM34 owns its sources); decision F's reading list holds no source that LM29 cites itself
-  (Open item 3).
-- Not relied on: Nocedal and Wright (2006), Theorem 12.1, as the KKT necessity theorem (secondary only, survey; LM7
-  cites it); Cornuéjols, Peña and Tütüncü (2018) and Kolm, Tütüncü and Fabozzi (2014) (survey: Crossref and publisher
-  pages; texts not read): further reading only if Stage 2 wants it. Dropped (decision F): the general extreme-value
-  theorem in $N$ variables and the vertex theorem of linear programming, for which no verified source was found;
-  LM29 proves each optimum by exhibiting a KKT point, and E2 by a direct comparison.
+  Convex Optimization." *Foundations and Trends in Optimization* 3(1): 1–76, August 2017. DOI 10.1561/2400000023.
+  Crossref lists the seven authors as Boyd, Diamond, Koh, Nystrup, Busseti, Kahn, Speth; Boyd's page
+  (`web.stanford.edu/~boyd/papers/cvx_portfolio.html`) and arXiv:1705.00109, both re-read, give the order printed
+  here, which is cited. Abstract only (all three agree): in single-period optimization the trades solve a convex
+  problem that trades off expected return, risk, transaction cost and holding cost. Text not read; used for that one
+  sentence.
+- Lawson, C. L., and R. J. Hanson (1995). *Solving Least Squares Problems*. SIAM. DOI 10.1137/1.9781611971217
+  (Crossref: monograph issued 1995-01-01; print ISBN 978-0-89871-356-5, online ISBN 978-1-61197-121-7). The series
+  name is not printed: no record checked confirms it. Cited through SciPy 1.18.1's `scipy.optimize.nnls` docstring
+  (re-read in the project environment), which cites the book as "SIAM, 1995" and says the function uses an active-set
+  method that solves the KKT conditions of non-negative least squares. The book was not read.
+- Kuhn and Tucker (1951), Karush (1939) and Kjeldsen (2000): through LM7's reference list (lm07.md:780–782), by
+  pointer, with no new claim; SOURCES holds no reading of Karush's thesis.
+- Jagannathan, R., and T. Ma (2003), *Journal of Finance* 58(4): 1651–1683: LM30's entry (shared decision
+  "References"); LM29 points to LM30 only.
+- Software facts (the installed environment and `uv.lock`; the SOURCES draft's cvxpy entries, read in the installed
+  source): cvxpy 1.9.3, OSQP 1.1.3, CLARABEL 0.11.1 and SCS 3.3.1 [A29-22]; the default solver of each problem class,
+  observed by `Problem.solver_stats.solver_name` [A29-17, A29-22] and read in `cvxpy/problems/problem_form.py:373–387`;
+  cvxpy's OSQP defaults (`eps_abs` = `eps_rel` = 1e-5, `max_iter` 10,000, polishing on a fresh solve;
+  `reductions/solvers/qp_solvers/osqp_qpif.py:111–114, 147–148`) and CLARABEL's `DefaultSettings()` (gaps and
+  feasibility 1e-8, 200 iterations) [A29-22]; for SCS, cvxpy turns `eps` into `eps_abs` and `eps_rel` and sets both
+  when neither is given (`reductions/solvers/conic_solvers/scs_conif.py:206–212`), so problem 11 states its settings;
+  `psd_wrap` asserts that a matrix is PSD without testing it (`atoms/affine/wraps.py:83–96`), and every matrix the
+  anchor script wraps is a window's $A\hat\Sigma$ or its daily version, positive definite at all 92 windows (A29-03);
+  the statuses of A29-18;
+  cvxpy's dual signs as the installed version reports them [A29-26]. cvxpy's "Advanced Features" page (re-read; not
+  pinned to 1.9.3) says that a constraint's `dual_value` holds its optimal dual variable and states no sign for
+  equalities, so the text checks the sign against a closed form, as LM28's E9 does. cvxpy's "Solver Features" page is
+  not relied on.
+- The cost model's rates (commission 0.1425%, tax 0.1% on sales, 0 for 00679B): the shared decision "Cost model",
+  cited by pointer; LM34 owns and prints the sources. Each fund follows its own market's rules (00679B on TPEx, the
+  other four on TWSE; the shared decision as amended on 2026-10-25), and the commission is 0.1425% on both: TWSE's
+  Art. 94, and TPEx's 業務規則 Art. 64 ¶1–¶3 (unchanged since 2008-02-12), applied to ETFs by its ETF rules' Art. 15
+  ¶1. No rate of LM29's changes. The 0.1% on the futures ETFs 00635U and 00642U rests on the
+  Ministry of Finance's ruling 台財稅字第09700161260號 (2008-08-11), with TWSE's ETF page and 財政統計通報 No. 21 in
+  support; the decisions on the first revision keep the rate, so A29-19 to A29-21, A29-30 and A29-32 stand.
+- Bibliographic data only (checked, not relied on): Nocedal, J., and S. J. Wright (2006). *Numerical Optimization*,
+  2nd ed. Springer Series in Operations Research and Financial Engineering. New York: Springer. DOI
+  10.1007/978-0-387-40065-5; LM7's source for KKT necessity (its Theorem 12.1, text not read). Further reading only, if
+  Stage 2 wants it: Cornuéjols, Peña and Tütüncü (2018), *Optimization Methods in Finance*, 2nd ed., Cambridge
+  University Press, DOI 10.1017/9781107297340; Kolm, Tütüncü and Fabozzi (2014), "60 Years of Portfolio Optimization:
+  Practical Challenges and Current Trends", *European Journal of Operational Research* 234(2): 356–371, DOI
+  10.1016/j.ejor.2013.10.060 (Crossref; texts not read).
+- Dropped (decision F): the general extreme-value theorem in $N$ variables and the vertex theorem of linear
+  programming, for which no verified source was found; LM29 proves each optimum by exhibiting a KKT point, and E2 by a
+  direct comparison.
 
-**Chinese terms** (樂詞網, terms.naer.edu.tw, queried 2026-10-24 by the drafter, phrase match; the mathematics listing
-first, AUTHORING §1):
+**Chinese terms** (樂詞網, terms.naer.edu.tw: the drafter's queries and the fresh pass of 2026-10-24, 1,817 searches,
+whose readings this table follows; phrase match; AUTHORING §1; the shared decision "Chinese terms" and the decisions on
+the second recomputation):
 
 | English | 中文 | Listing |
 |:--|:--|:--|
-| convex set | 凸集 | 數學名詞, 統計學名詞 (工業工程: 凸集合) |
-| convex function; strictly convex function | 凸函數; 嚴格凸函數 | 數學名詞, 統計學名詞; 數學名詞, 經濟學 |
+| convex set | 凸集 | 數學名詞, 統計學名詞 (工業工程名詞: 凸集合) |
+| convex function; strictly convex function | 凸函數; 嚴格凸函數 | 數學名詞, 統計學名詞 (統計學名詞 also 狹義凸函數) |
 | convex combination | 凸組合 | 數學名詞, 統計學名詞 |
 | half space; hyperplane; convex polyhedron | 半空間; 超平面; 凸多面體 | 數學名詞 |
-| convex programming | 凸規劃 | 數學名詞, 統計學名詞 (on the plan's list) |
-| quadratic programming | 二次規劃 | 統計學名詞, 工業工程 (數學名詞: 二次型規劃; the plan keeps 二次規劃) |
+| convex programming | 凸規劃 | 數學名詞, 統計學名詞 (the plan's list; "convex optimization" has only 電子工程名詞's 凸形最佳化) |
+| quadratic programming | 二次規劃 | 統計學名詞 (數學名詞: 二次型規劃; the plan keeps 二次規劃) |
 | linear programming | 線性規劃 | 數學名詞, 統計學名詞 |
-| feasible region | 可行解區域 | 數學名詞 (工業工程: 可行區域) |
-| complementary slackness | 互補鬆弛性 | 數學名詞 (LM7's box) |
-| shadow price | 影子價格 | 數學名詞 (LM4, LM7 Glossary) |
+| feasible region | 可行解區域 | 數學名詞 (工業工程名詞: 可行區域) |
+| complementary slackness | 互補鬆弛性 | 數學名詞 (LM7's box, lm07.md:572) |
+| shadow price | 影子價格 | 數學名詞, also 經濟學 (lm04.md:734; LM7's Glossary, lm07.md:766) |
 | constraint qualification | 約束規範 | 數學名詞 |
 | sufficient condition; necessary condition | 充分條件; 必要條件 | 數學名詞 |
-| positive semidefinite | 半正定 | 數學名詞 (LM10) |
+| positive semidefinite | 半正定 | 數學名詞 (lm10.md:302) |
 | penalty function | 懲罰函數 | 數學名詞 |
-| dual variable | 對偶變量 | 數學名詞 |
-| objective function; constraint; transaction cost; turnover; Lagrange multiplier | 目標函數; 限制條件; 交易成本; 週轉率; 拉格朗日乘數 | the plan's list |
+| multiplier; dual variable | 乘數; 對偶變量 | 數學名詞 (乘數 as LM7). 對偶變量 carries "dual variable" at first use; it is not LM18's 對偶變數 (antithetic variates, lm18.md:570), and 電子計算機名詞 gives 對偶變量 to antithetic variates |
+| active constraint | 有效限制 | 經濟學 (數學名詞: 起作用的約束); LM7's Glossary 緊限制式（有效限制） (lm07.md:769); "active set" has no entry and stays English |
+| interior-point method | 內點法 | 統計學名詞 (數學名詞: interior point 內點); used only if a box names the method |
+| slack; binding | 鬆弛; 緊 | LM7's box (lm07.md:571–572) |
+| objective function; constraint | 目標函數; 限制條件 | 統計學名詞, 數學名詞 目標函數; 統計學名詞 限制條件 (LM7 also prints 限制式, lm07.md:353) |
+| transaction cost; turnover | 交易成本; 週轉率 | 交易成本 管理學名詞 (also 經濟學, 管理學名詞-會計學); 週轉率 會計學 and 電子計算機名詞 (管理學名詞 writes 周轉率 for "turnover rate"); the LM27, LM31 and LM34 briefs plan 週轉率 too |
+| Lagrange multiplier | 拉格朗日乘數 | engineering listings only; printed at lm04.md:282, lm07.md:353, lm11.md:312 |
 
-Not in 樂詞網, kept in English in the boxes: active set (only 有效集管理, an unrelated electronics term), no-trade band,
-operator splitting, solver; interior-point method appears only as the economics listing's 內在點法, not adopted. LM7's
-own 緊 (binding) and 鬆弛 (slack) are kept. The raw query results are in the drafter's scratch folder; SOURCES gains
-the table at Stage 1's source pass.
+Kept in English in the boxes: active set, no-trade band, operator splitting, solver (no entries). LM7's own 緊
+(binding) and 鬆弛 (slack) are kept. SOURCES gains this table from the Chinese-terms draft at Stage 1's source pass.
 
 **Open before Stage 2** (each with a recommendation and its evidence).
 
@@ -3164,34 +3419,48 @@ echoes the first half's (A30-22); 8, the two unsourced theorems (F, X26): droppe
 it; 11, the constructed limits (D): accepted, labelled *constructed* and counted in the hygiene note, which now also
 counts E6's bounds, E1's and E3's settings, X3's target mean and the widget's state (recomputation, minor 8).
 
-1. **The lab's estimation frame.** LM29's lab needs E5's estimation frame (the 2,362 joint returns and their dates) to
-   rebuild the 92 windows; the shared "Labs" list names the wealth frame and the rules' targets, not the estimation
-   frame. Recommendation: `make_lab_data.py` writes both frames of E5 (the estimation frame is the wealth frame's
-   joint dates with one-session returns, a few columns); alternative: the lab reads only the rules' targets and the
-   windows' inputs, and part 3's recomputation of R3 and R4 goes.
-2. **Agrawal et al. (2018).** The sentence that cvxpy rewrites a problem into a solver's standard form rests on the
-   survey's reading of arXiv:1709.04494, not on the drafter's. Recommendation: the Stage 2 source pass reads its
-   introduction and records the page in SOURCES; until then §8 cites Diamond and Boyd (2016) for the modelling
-   language only, and the sentence stays out (decision F's rule).
-3. **The futures-ETF tax rate.** LM29's cost numbers (A29-19 to A29-21, A29-30, A29-32) use the cost model's 0.1% on
-   sales of 00635U and 00642U. The editor read 財政統計通報 No. 21 and the rate stands; TWSE's ETF rules page is being
-   re-read by the source checker (decision F). Recommendation: no change unless the check overturns the rate; then the
-   band edges, the no-trade threshold, X5 and problem 10 are recomputed. LM29 cites the rate by pointer only.
-4. **LM29's own count beside LM30's echo.** E4 says that U28's first half holds 9 sectors (LM30's A30-22), "7 of them
-   among the full sample's 9", a comparison of the first half with LM29's own full sample. Recommendation: keep, one
-   sentence with a pointer to LM30, because it shows that the active set is an estimate on LM29's own example;
-   alternative: point to LM30 without numbers.
+Closed by the decisions on the first revision and on the second recomputation (the first revision's four items, by
+number): 1, the lab's estimation frame: `make_lab_data.py` writes both E5 frames, the wealth frame with its traded
+flags (shared decision "Labs"; decisions on the first revision), so lab part 3 recomputes R3 and R4 at all 92
+signals; 2, Agrawal et al. (2018): read in arXiv v2 by the second hunt, so §8 prints the canonicalization sentence
+with its locations (abstract, §1.3, §4) and the solver names and defaults rest on A29-22 (decision "Sources read by
+the second hunt"; Sources above); 3, the futures-ETF tax: kept at 0.1% (decisions on the first revision, "Kept"),
+now resting on the Ministry of Finance's ruling (shared decision "Cost model"), so A29-19 to A29-21, A29-30 and
+A29-32 stand and nothing is recomputed; 4, LM29's own count beside LM30's echo: "7 of the 9" is kept (decisions on the
+first revision, "Kept"), in E4 beside A30-22.
+
+Also settled in this revision, with no item left behind: the tag users and the Leads sentences (Y1, "Tags and
+leads"); the single owner of "R3's bounds never bind" (A29-09; A5, Y12); the case box's paragraphs (C10, Y5); SCS's
+settings, R4's volatility at 18.85% and problem 11's exposures at two decimals (the LM29 decision on the second
+recomputation); echoes at the owner's precision, with the widget's inputs as the computation exception (C12); and
+the Chinese terms 對偶變量 and 有效限制 (the decision's "Chinese terms").
+
+Closed by the last pass (2026-10-25): the third verifier's five minor findings (the closing paragraph, the echoes of
+$A$, the widget's caption, the header's Y list, the Notation list's unused symbol), and "Decisions on the third revision", whose
+listing-market item names LM27, LM34 and LM35, not LM29; the cost model's amended market split changes none of LM29's
+rates (Sources).
+
+Nothing remains open for LM29. LM28's brief and anchors table (A28-12) and LM30's A30-16 cite A29-09 as the owner
+(decision A5); nothing remains for the cross-check. No brief cites (29.7)–(29.9), so their tag lines name no user.
 
 ## LM30 Estimation Error and Robust Portfolios
 
 Stage 1 brief, drafted 2026-10-24 from the editor's spine (`plans/vol-5.md`, "### LM30 Estimation Error and Robust
 Portfolios"), the shared decisions, the capability check and the decisions on the survey and the fresh check; revised
 the same day to the editor's decisions on the briefs (`plans/vol-5.md`, "Editor's decisions on the briefs", A–G and
-"Per module"), the independent recomputation and the cross-module check. Every number carries its anchor ID at first
-appearance; `data/vol5_anchors_lm30.py` prints them all (42 rows, A30-41 withdrawn; the anchors section `## LM30`).
-Numbers quoted from published modules carry their file:line instead. The through case's rules are imported from
-`data/vol5_rules.py` and never recomputed; LM30 prints only the statistics the "Owners" bullet gives it (the realized
-out-of-sample volatility of R1, R3 and R5, and the U28 halves' statistics) and R5's own weights.
+"Per module"), the independent recomputation and the cross-module check; revised again the same day to the "Decisions
+on the first revision", the "Decisions on the second recomputation and cross-check", the second recomputation and the
+cross-check's Y items; finished on 2026-10-25 to the "Decisions on the third revision". Every number carries its
+anchor ID at first appearance; an echo cites its owner's anchor at the owner's precision, unless a computation shown
+beside it needs more (decision C12; E2's $\tau$ and volatilities), and the anchors table names the LM30 row that
+recomputes it.
+`data/vol5_anchors_lm30.py` prints them all (43 rows, A30-41 withdrawn; the anchors section `## LM30`). Numbers quoted
+from published modules carry their file:line instead. The through case's rules are imported from `data/vol5_rules.py`
+and never recomputed. LM30 prints the statistics that the "Owners" bullet and decisions A4–A5 give it (the realized
+out-of-sample volatility of R1, R3 and R5; the U28 halves' statistics; R2's first-window mean excess return and
+volatility, the Black–Litterman calibration), every result of its own experiments, repairs and Black–Litterman
+portfolios, and these statistics of the rules' targets: R5's intensity $\hat c$ at the 92 signals, R3's and R5's
+weights at 2026-03-31 and their gaps, and the mean of R3's predicted volatility over its 92 windows.
 
 **Prereq:** `[7, 9, 10, 11, 12, 14, 15, 16, 18, 20, 22, 23, 24, 26, 27, 28, 29]`. What each supplies (tags rechecked in
 `src/lmNN.md` on 2026-10-24; LM27–LM29's from their Stage 1 briefs, to recheck at Stage 3):
@@ -3199,7 +3468,7 @@ out-of-sample volatility of R1, R3 and R5, and the U28 halves' statistics) and R
 - LM7: the two-asset tangency weights (7.10) and Kelly fractions (7.12) with their window-to-window swings (the
   exhibit {#kelly}, lm07.md:497–502); the pitfall that a mean's error is about $\sigma/\sqrt{\text{years}}$ (7.36
   points for 0050 over 2017–2021, lm07.md:507) and the Chopra–Ziemba sentence that hands the repair to LM30
-  (lm07.md:509).
+  (lm07.md:509), which §2 cites as LM7 does.
 - LM9: (9.5), the $2\times2$ inverse (problem 5; the variance-inflation reading of $\Sigma^{-1}$).
 - LM10: (10.2) $\hat\Sigma$ with divisor $T$; (10.3) $C\leftrightarrow\hat\Sigma$; (10.5) $\mathbf w^{\top}\hat\Sigma\mathbf w\ge0$; (10.6) the variance of
   the 1/N portfolio, $\overline{\operatorname{var}}/N+(1-1/N)\overline{\operatorname{cov}}$ (§3, once: what 1/N's risk
@@ -3232,21 +3501,25 @@ out-of-sample volatility of R1, R3 and R5, and the U28 halves' statistics) and R
 - LM26: (26.2), named once as the recursion LM31 uses to forecast a covariance matrix (lm26.md:409's hand-over).
 - LM27: R1 and R2, E5's two frames; (27.1)–(27.2), the wealth recursion behind a rule's realized volatility; (27.4)
   $\sigma_p^2=\mathbf w^{\top}\Sigma\mathbf w$; (27.5) $\Cov(R_i,R_p)=(\Sigma\mathbf w)_i$ (the reading of (30.4)'s
-  multipliers); (27.8), the single-index split, whose diagonal-residual form is §7's matrix; R1's first-window risk
-  shares (A27-21), the truth of A30-42.
+  multipliers); (27.8), the single-index split, whose diagonal-residual form is §7's matrix, with its $\Sigma_{\mathrm{res}}$;
+  R1's first-window risk shares (A27-21, LM27's by decision A4), the truth of A30-42; R1's full-sample fixed-weight
+  volatility 11.49% (A27-13), named beside the out-of-sample 12.48% (decision C7).
 - LM28: (28.2) $\mathbf w^{\mathrm{mv}}$ and $\Sigma\mathbf w^{\mathrm{mv}}=\sigma^2_{\min}\mathbf 1$; (28.3) the split of
   a fully invested portfolio's variance into $\sigma^2_{\min}$ and its weight error (the optimism of §2); (28.6)
   $\mathbf w^{\mathrm{tan}}$ and $\mathrm{SR}^{*2}=\mathbf e^{\top}\Sigma^{-1}\mathbf e$; (28.8) the exposure form
   $\mathbf f^*=\Sigma^{-1}\mathbf e/\delta$ (inverted in §6 as $\mathbf e_{\mathrm{eq}}=\delta\hat\Sigma\mathbf w_{\mathrm{ref}}$);
   (28.9) $\Delta\mathbf f^*=\Sigma^{-1}\Delta\mathbf e/\delta$ (why errors in means move exposures); every statistic of
-  the first window (decision A4), which LM30 echoes as its simulation's model: A28-02 ($\tau$ and the calendar span),
-  A28-05 to A28-07, A28-10, A28-15 (equal weights' mean and volatility), A28-18, A28-22, A28-27 (the SEs of the
-  means); A28-12 (the 92 windows' $\sigma_{\min}$ range) and A28-14 (the halves' gross exposure), decision A5.
+  the first window (decision A4), which LM30 echoes as its simulation's model at LM28's precision (decision C12):
+  A28-02 (the window's dates and its calendar span, 2.05 years from the close of 2017-02-10; it computes $T/A$ and does
+  not print it, and LM30's E2 prints it beside (20.2)), A28-05 to A28-07 (means and volatilities at one decimal, correlations at two; E2 prints the volatilities at two beside (20.2)), A28-10 ($\sigma_{\min}$),
+  A28-15 (equal weights' mean and volatility), A28-18 ($\mathbf w^{\mathrm{tan}}$, $\mathrm{SR}^*$), A28-22 ($\delta$),
+  A28-27 (the SEs of the means, one decimal); A28-12 (the 92 windows' $\sigma_{\min}$ range) and A28-14 (the halves'
+  gross exposure), decision A5.
 - LM29: (29.3), a strictly convex objective has at most one minimizer (so $\mathbf w^{\mathrm{lo}}$ is unique when
   $\hat\Sigma$ is PD); (29.4) and (29.5), the KKT conditions of the long-only minimum-variance problem in LM29's
   scaling $2\Sigma\mathbf w^*=\lambda\mathbf 1+\boldsymbol\nu$; (29.6), R4's homogenized QP (experiment 4); R3 and R4 in
-  their through-case form; R3 never binds on E5 (A29-09); cvxpy and the solver-output rule (multipliers as dual
-  values).
+  their through-case form; R3 never binds on E5 (A29-09, the single owner by decision A5); cvxpy and the
+  solver-output rule (multipliers as dual values).
 
 **Leads:** `[31, 32, 33, 34, 35, 45]`: LM31 (R1's, R3's and R5's realized volatility and minimum variance on U28's
 halves, cited beside R6–R8), LM32 (R5's VaR, ES and drawdowns), LM33 (R5's Sharpe ratio and the volatilities LM30
@@ -3257,12 +3530,12 @@ the checkpoint's "how constraints change the allocation"; R5's scenario losses),
 
 | Earlier text | Promise | Kept in |
 |:--|:--|:--|
-| lm07.md:509 | "[[LM30]] (estimation error and shrinkage) … take up the repair" after Chopra and Ziemba (1993) | §2 (experiment 1 measures the share of the loss due to means on E5's model), §4, §5 |
+| lm07.md:509 | "[[LM30]] (estimation error and shrinkage) … take up the repair" after Chopra and Ziemba (1993) | §2 (Chopra and Ziemba cited as LM7 does; experiment 1 measures the share of the loss due to means on E5's model), §4, §5 |
 | lm10.md:55 | "[[LM30]] treats estimation error" | §2 ($\hat\Sigma$'s error by (18.4)), §4 |
 | lm10.md:386 | repairing a non-PSD correlation matrix, "for example with the nearest valid one (Rousseeuw and Molenberghs 1993; Higham 2002b)" | §7, E9: three repairs of LM10's $C_{\text{pw}}$ (shrinkage toward $I$, clipping, the nearest correlation matrix); the lab's code |
 | lm11.md:480, 486 | pulling small eigenvalues up lowers $\kappa$; "covariance shrinkage, the subject of [[LM30]], does this" | §4, (30.1): eigenvalues $c\lambda_k+(1-c)\bar\lambda$, $\kappa$ 126.05 → 121.38 on the halves, 438 → 68.1 on 60 returns; X4; widget |
 | lm16.md:225 | "how far $\hat\Sigma$ lies from $\Sigma$ is [[LM30]]'s" | §2 (relative error 8.5% at $T=504$ by (18.4)), §4 (the noise $\sigma^2_{\hat\Sigma}$ in (30.2), its estimate in (30.3)) |
-| lm22.md:390 | "Resampled portfolios are [[LM30]]'s" | §7, experiment 4 (one paragraph and one number), lab part 8 (the bootstrap) |
+| lm22.md:390 | "Resampled portfolios are [[LM30]]'s" | §7, experiment 4 (one paragraph: Michaud's resampled efficiency as Michaud and Michaud (2008) describe it, experiment 4 a variant), lab part 8 (the bootstrap) |
 | lm23.md:416 | factor risk is [[LM30]]'s "estimation problem" | §7: the single-index matrix (Sharpe 1963), (27.8)'s diagonal-residual form with (23.1)'s betas, 57 parameters against 406 [A30-29], judged on U28's second half (X8) |
 | lm24.md:44 | "Shrinking a covariance matrix, the subject of [[LM30]], follows the same idea" | §4: (30.2) has (24.3)'s shape; §6: Black–Litterman's weight on a data view is (24.3)'s $c$ |
 | lm24.md:291 | Jorion (1986) "carried an empirical-Bayes estimate of means into portfolio choice ([[LM30]])" | §6, one sentence, the abstract's claim only (SOURCES: the target is unconfirmed) |
@@ -3289,17 +3562,20 @@ shares" and "factor-model covariances as estimators": §2 measures the error of 
 7. [U] choose a repair (shrinkage, constraints, a reference portfolio, a factor model or resampling) for a given ratio of observations to assets
 8. [C] compare out-of-sample volatilities of sample, shrunk and constrained portfolios, labelling each result
 
-Taught, practised, assessed (REVIEW_PROMPT item 10): 1 §2, E1–E2, KC §2, P1, P11; 2 §3, E3, KC §3, P3; 3 §4 (derived),
-Deep Dive, P7; 4 §4, §8, E4–E6, KC §4, KC §8, P2, P10; 5 §5 (derived), E7, KC §5, P6, P8; 6 §6 (derived), E8, KC §6,
-P4, P9; 7 §7 and the Summary's table, E9, KC §7, P5; 8 §3–§5, §7, X5, X8, E5–E7, P12.
+Taught, practised, assessed (REVIEW_PROMPT item 10): 1 §2, E1–E2, KC §2, P1, P11; 2 §3, E3, KC §3, P1 (a mean's
+error falls only with years), P11 (how often 1/N wins); 3 §4 (derived), Deep Dive, P3 (the oracle when the target is
+the truth), P7; 4 §4, §8, E4–E6, KC §4, KC §8, P2, P5 (the inverse's entry through the VIF and the small eigenvalue),
+P10; 5 §5 (derived), E7, KC §5, P6, P8; 6 §6 (derived), E8, KC §6, P4, P9; 7 §7 and the Summary's table, E5, E9, KC
+§7, P12 (which repair each ratio of observations to assets favours); 8 §3–§5, §7, X5, X8, E5–E7, P12.
 
 **Owns.** Which layer LM30 adds: LM28 and LM29 solved for weights as if $\boldsymbol\mu$ and $\Sigma$ were known; LM30
 measures the error in the inputs and tests repairs. The error in plug-in weights by simulation from a known model
 (the first window's estimates), split into the part from $\hat{\boldsymbol\mu}$ and the part from $\hat\Sigma$, in the
 exposure form, and the error of R1's risk shares in the same draws (LM27's hand-over); why the error of a mean
 depends on years ((20.2)) while $\hat\Sigma$'s falls with the number of days ((18.4)); the optimism of an in-sample
-minimum variance ((28.3)); the 1/N benchmark and DeMiguel, Garlappi and Uppal (2009) stated with the conditions
-their abstract gives, and what decides the window an optimizer needs (experiment 2); covariance shrinkage toward
+minimum variance ((28.3)); the 1/N benchmark and DeMiguel, Garlappi and Uppal (2009) as their article states it (the
+certainty-equivalent criterion, the US calibration, the conditions for optimizing to win), and what decides the
+window an optimizer needs (experiment 2); covariance shrinkage toward
 $\bar\lambda I$ (30.1), with its eigenvalues, $\kappa_c$ and the 1/N end at $c=0$; the oracle weight (30.2) derived as
 (20.1)'s bias–variance split in the Frobenius norm and read as (24.3)'s weight; Ledoit and Wolf's (2004) estimate
 (30.3) and its consistency *stated without proof*; by hand and by scikit-learn; the ratio of observations to assets
@@ -3307,16 +3583,25 @@ $\bar\lambda I$ (30.1), with its eigenvalues, $\kappa_c$ and the 1/N end at $c=0
 shrinkage (30.4), derived from LM29's KKT conditions, with Jagannathan and Ma's (2003) Proposition 1 for its positive
 semidefiniteness; Black–Litterman with R2 as the reference (reverse optimization, one view on excess returns, the
 posterior (30.5) from (16.8), its weights along the view portfolio); Jorion's Bayes–Stein means in one sentence;
-resampled weights (one paragraph); the single-index matrix as the estimation of factor risk; the repair of a
-correlation matrix that is not PSD (one paragraph). Values owned: every A30 anchor except the echoes, which belong to
-`vol5_series.py`, `vol5_rules.py`, LM27, LM28 and LM11: A30-01, A30-02; A30-03's $\tau$ and calendar span (A28-02);
-A30-04; in A30-05 $\mathbf w^{\mathrm{tan}}$, $\mathrm{SR}^*$, $\delta$, $\mathbf w^{\mathrm{mv}}$, $\sigma_{\min}$
-and equal weights' mean and volatility (A28-18, A28-22, A28-10, A28-15); the SEs of A30-06 (A28-27); A30-12's range of
-R3's predicted volatility (A28-12); A30-17; $\kappa=126.05$ in A30-18 (LM11); the gross exposure at $T=2{,}191$ in
-A30-19 and A30-20 (A28-14); the true shares in A30-42 (A27-21). The model's $\mathrm{SR}(1/N)=0.327$ is LM30's,
-computed from A28-15's mean and volatility, which LM28 prints without the ratio. By decision A5 LM30 owns the U28
-halves' statistics: 1/N and minimum variance (sample, shrunk, long-only and single index, A30-19) and the first half's
-long-only portfolio, its binding set and multipliers (A30-22, A30-23); LM29 and LM31 cite them.
+resampled weights as a variant of Michaud's (1998) resampled efficiency, as Michaud and Michaud (2008) describe it
+(one paragraph); the single-index matrix as the estimation of factor risk; the repair of a correlation matrix that is
+not PSD (one paragraph). Values owned: every A30 anchor except the echoes, which belong to `vol5_series.py`,
+`vol5_rules.py`, LM27, LM28, LM29 and LM11, and which the text cites by their owners' IDs: A30-01, A30-02; A30-03's
+dates, calendar span and $\tau$ (A28-02); A30-04 (A28-05 to A28-07); in A30-05 $\mathbf w^{\mathrm{tan}}$, $\mathrm{SR}^*$,
+$\delta$, $\mathbf w^{\mathrm{mv}}$, $\sigma_{\min}$ and equal weights' mean and volatility (A28-18, A28-22, A28-10,
+A28-15); the SEs of A30-06 and A30-39 (A28-27); A30-12's range of R3's predicted volatility (A28-12); A30-16's count
+of R3's zero weights (A29-09); A30-17; $\kappa=126.05$ in A30-18 (LM11); the gross exposure at $T=2{,}191$ in A30-19
+and A30-20 (A28-14); the true shares in A30-42 (A27-21). A28-02 computes $\tau=T/A$ without printing it; only in E2
+does LM30 print it, to four decimals, and A28-06's volatilities to two, beside (20.2)'s computation of A28-27's SEs
+(decision C12's exception). That computation needs the volatilities' second decimal and three decimals of $\tau$
+(2.07 gives 8.3 for 00646, not 8.2); the fourth keeps $\tau$ off a rounding boundary (2.0744888 is flagged at 3 dp).
+A28-02's and A28-06's rows record these prints (decisions on the third revision). The model's
+$\mathrm{SR}(1/N)=0.327$ is LM30's, computed from A28-15's mean and volatility, which LM28 prints without the ratio,
+and so is its ratio to $\mathrm{SR}^*$ (A30-43). By decision A5
+LM30 owns the U28 halves' statistics: 1/N and minimum variance (sample, shrunk, long-only and single index, A30-19)
+and the first half's long-only portfolio, its binding set and multipliers (A30-22, A30-23); LM29 and LM31 cite them.
+By decision A4 LM30 owns R2's first-window mean excess return and volatility (A30-24), and LM31 echoes the volatility
+(A31-16).
 
 **Leaves.** Shrinkage of means beyond LM24's (24.3)–(24.4) and Jorion's sentence → LM24, cited. Forecasting a
 covariance matrix day by day (the EWMA matrix $\Sigma_{t+1\mid t}$ with (26.2)'s recursion) → LM31; multivariate
@@ -3325,7 +3610,8 @@ and every standard error of the rules' statistics → LM33 (decision A3; LM30 te
 turnover and costs of every rule, R5 included → LM34. R5's tails and drawdowns → LM32; scenario losses → LM35. Kelly
 sizing under parameter uncertainty → LM45. Not in the book (one sentence each): nonlinear shrinkage of eigenvalues, the
 constant-correlation target (Ledoit and Wolf 2004, JPM) beyond a sentence, shrinkage toward the single-index matrix
-(Ledoit and Wolf 2003) beyond a sentence, Michaud's patented resampled frontier. To the lab and problems (density, the
+(Ledoit and Wolf 2003) beyond a sentence, the full resampled-efficiency frontier (Michaud and Michaud 2008 average
+matched portfolios along it; experiment 4 averages one kind). To the lab and problems (density, the
 spine's list): the repair of $C_{\text{pw}}$ in code (clipping and Higham's alternating projections), the bootstrap of
 resampled weights, the make_lab07 exercise, R5 re-implemented and checked, and the Deep Dive's depth of the
 Ledoit–Wolf argument (problems 7 and 10).
@@ -3346,12 +3632,14 @@ Ledoit–Wolf argument (problems 7 and 10).
 - **E5** (shared decision "Data"): `vol5_series.frames("E5")`. Estimation frame $T=2{,}362$ returns, 2017-01-18 →
   2026-10-08, $A=242.95$; wealth frame 2,368 sessions, $A_{\mathrm w}=243.57$ [A30-01]. The through case's schedule:
   92 signals, 2019-02-27 (trade 2019-03-04) to 2026-09-30 (trade 2026-10-01), windows of 504 estimation rows [A30-02].
-  **The first window** (LM28's): 504 returns on the joint dates of the estimation frame, 2017-02-13 → 2019-02-27,
-  $\tau=T/A=2.0745$ years (504 sessions at E5's $A$; its calendar span is 2.04 years) [A30-03]. Its annual means 7.54%,
-  10.03%, 2.61%, 0.78%, −1.39% and volatilities 13.50%, 11.87%, 8.54%, 9.39%, 23.17% (0050, 00646, 00679B, 00635U,
-  00642U), correlations from −0.30 to 0.54 [A30-04]: LM28 prints them; LM30 takes them as the model of experiments 1,
-  2 and 4. A fund's kurtosis or volatility inside a window is computed on that window's joint dates, because each enters
-  a joint computation (Ledoit and Wolf's noise, the shrinkage target; decision C2).
+  **The first window** (LM28's): 504 returns on the joint dates of the estimation frame, 2017-02-13 → 2019-02-27, a
+  calendar span of 2.05 years from the close of 2017-02-10 [A28-02]; $\tau=T/A$, a count of 504 sessions over E5's
+  $A$, which A28-02 computes and E2 prints beside (20.2)'s computation (LM30's A30-03 recomputes both). Its annual means 7.5, 10.0, 2.6, 0.8, −1.4% [A28-05] and volatilities 13.5, 11.9, 8.5, 9.4,
+  23.2% [A28-06] (0050, 00646, 00679B, 00635U, 00642U), correlations from −0.30 to 0.54 [A28-07]: LM28 prints them
+  (LM30's A30-04 recomputes them), and E2 prints the volatilities to two decimals beside (20.2)'s computation (13.50,
+  11.87, 8.54, 9.39, 23.17%; decision C12); LM30 takes them as the model of experiments 1, 2 and 4. A fund's kurtosis or
+  volatility inside a window is computed on that window's joint dates, because each enters a joint computation (Ledoit
+  and Wolf's noise, the shrinkage target; decision C2).
 - **U28** (Volume II): `lm10_series.u28()`. $T=4{,}382$ price returns 2008-12-02 → 2026-10-08, $A=245.4794$; LM11's
   halves 2008-12-02 → 2017-10-06 and 2017-10-11 → 2026-10-08, 2,191 each [A30-17]. The window lengths of
   [[ex:windows]] are the last $T$ returns of the first half, all ending 2017-10-06 [A30-20]. Price indices, no
@@ -3367,7 +3655,8 @@ Ledoit–Wolf argument (problems 7 and 10).
 - **Conventions.** Divisor $T$ everywhere (`cov0`, scikit-learn's empirical covariance; `ddof=0` passed in every
   NumPy call); annual inputs are $A$ times the daily ones with the sample's own $A$; excess returns over $r_f=1.5\%$
   ($r_f/A$ a day), as the through case. Years: $\tau=T/A$ with E5's $A$, LM20's form of (20.2), for the first window and
-  for every simulated length; a dated span also gives its calendar years (days ÷ 365.25). Volatility is
+  for every simulated length, a count of sessions over $A$ that the text names as such; a dated span's calendar years
+  run from the close before its first return to its last close, in days ÷ 365.25 (AUTHORING §8, decision C7). Volatility is
   $\sqrt{A\,\mathbf w^{\top}\Sigma\mathbf w}$ ((27.4)): "predicted" with the estimation sample's matrix, "realized"
   with U28's second half, "true" with a simulation's model; a rule's realized volatility is `summary()`'s (daily net
   returns from the session after the first trade, $\sqrt{A_{\mathrm w}}$). Each optimization states its feasible set,
@@ -3383,10 +3672,14 @@ Ledoit–Wolf argument (problems 7 and 10).
   seven lengths from 126 to 8,064 days, in that order [A30-11]; $e=3$ `default_rng([3, 20261011])`, U28's first-half
   matrix as the truth (mean 0), 1,000 samples at each of seven lengths from 20 to 2,191 days [A30-21]; $e=4$
   `default_rng([4, 20261011])`, 1,000 iid bootstrap resamples of the first window's rows [A30-27]. Every printed Monte
-  Carlo result carries its standard error and only the digits it supports: a mean's SE is its SD (divisor $n$) over
+  Carlo result carries its standard error, printed to one significant digit, and the result's last printed digit sits
+  at that digit (decision on the second recomputation; so experiment 4's mean weights print one decimal, 3.8% to 35.2%,
+  and experiment 1's covariances-only mean five, 0.87686 with SE 0.00002). A mean's SE is its SD (divisor $n$) over
   $\sqrt n$, a paired difference's the same on the per-sample differences, a proportion's $\sqrt{p(1-p)/n}$; a median,
-  an SD or a ratio of SDs of experiment 1 gets a batch SE (20 consecutive batches of 500 samples). Experiment 4's
-  weights print as whole percentages, since their SEs are 0.4 to 0.9 points (decision "Per module").
+  an SD or a ratio of SDs of experiment 1 gets a batch SE (20 consecutive batches of 500 samples). Several SEs print
+  as their rounded range ("SEs 0.008 to 0.001") or their common rounded value ("SEs 0.003"). An exact tie at the
+  printed digit prints the coarser safe form, as Volume IV (A30-09's 21.15% prints 21%, beside the exact count 2,115
+  of 10,000; Open 1).
 - **Published files.** X2 stores 2 × 1,000 simulated points (no dates); X6 the 92 intensities by signal date; the
   widget's block holds per-window eigenvalues and eigenvectors of U28 and the second half's matrix (derived statistics,
   about 45 KB). No file carries a daily series in date order, or anything from which one can be rebuilt (X37, shared
@@ -3423,7 +3716,7 @@ halves), $C_{\text{pw}}$ (LM10's). Local symbols, declared in the notation note 
 | Symbol | Meaning | Check |
 |:--|:--|:--|
 | $\hat{\mathbf e}$ | the window's sample excess means: $\bar{\mathbf R}-(r_f/A)\mathbf 1$ a day, or $A\bar{\mathbf R}-r_f\mathbf 1$ a year | a hat for an estimate of LM7's $\mathbf e$ |
-| $\hat{\mathbf f}$ | plug-in exposures $\hat\Sigma^{-1}\hat{\mathbf e}/\delta$, with the model's $\delta=\mathbf 1^{\top}\Sigma^{-1}\mathbf e=11.27$ [A30-05] so that the truth's optimum is $\mathbf w^{\mathrm{tan}}$ | the vector form of LM20's scalar $\hat f$ (one asset at $\delta=1$; decision B4); LM30 has no Kelly fraction and writes no $\mathbf f^*$ |
+| $\hat{\mathbf f}$ | plug-in exposures $\hat\Sigma^{-1}\hat{\mathbf e}/\delta$, with the model's $\delta=\mathbf 1^{\top}\Sigma^{-1}\mathbf e=11.27$ [A28-22] so that the truth's optimum is $\mathbf w^{\mathrm{tan}}$ | the vector form of LM20's scalar $\hat f$ (one asset at $\delta=1$; decision B4); LM30 has no Kelly fraction and writes no $\mathbf f^*$ |
 | $\mathrm{SR}(\mathbf f)$ | the model's Sharpe ratio of exposures $\mathbf f$, $\sqrt A\,\mathbf f^{\top}\mathbf e/\sqrt{\mathbf f^{\top}\Sigma\mathbf f}$ | SR as a function, declared |
 | $\bar\lambda$; $\Sigma_{\mathrm{tgt}}$ | $\operatorname{tr}\hat\Sigma/N$, so $\hat\Sigma_{\mathrm{tgt}}=\bar\lambda I$; the model's target $(\operatorname{tr}\Sigma/N)I$ in (30.2) | §6 (LM30 scope); the unhatted target belongs to the model |
 | $\hat c$, $c^*$, $\kappa_c$ | Ledoit and Wolf's estimate of $c$; the oracle (an optimum, so a star); the condition number of $\hat\Sigma_c$ | §6's $c$ row; scikit-learn's `shrinkage_` is $1-\hat c$, said once |
@@ -3434,32 +3727,33 @@ halves), $C_{\text{pw}}$ (LM10's). Local symbols, declared in the notation note 
 | $\mathbf w^{\mathrm{lo}}$ | long-only minimum-variance weights (R3's form) | local (decision B5) |
 | $b$, $\varepsilon$ | the one view's value and its error, $K\mathbf e=b+\varepsilon$, $\Var\varepsilon=\Xi$ ($1\times1$) | §6's $K\mathbf e=\mathbf b+\boldsymbol\varepsilon$ with one view, so scalars; LM30 has no bets |
 | $\mathbf e_{\mathrm{BL}}$, $\mathbf f_{\mathrm{BL}}$ | posterior mean of $\mathbf e$; exposures $\hat\Sigma^{-1}\mathbf e_{\mathrm{BL}}/\delta$ | new, subscripted |
-| $\hat\Sigma_{\mathrm F}$, $\hat\beta_i$, $\sigma_{\mathrm{mkt}}^2$, $\hat\sigma^2_{\varepsilon,i}$ | single-index matrix $\sigma_{\mathrm{mkt}}^2\hat{\boldsymbol\beta}\hat{\boldsymbol\beta}^{\top}+\operatorname{diag}(\hat\sigma^2_{\varepsilon,1},\dots,\hat\sigma^2_{\varepsilon,N})$, (27.8) with diagonal residuals; (23.1)'s market betas; the TAIEX price index's variance (divisor $T$); residual variances | $\sigma^2_{\mathrm{mkt}}$ as LM27 writes it (decision B6); divisor $T$, so not LM23's $s_\varepsilon$ ($T-d$); no $D$ (a dividend) for the diagonal |
+| $\hat\Sigma_{\mathrm F}$, $\hat\beta_i$, $\sigma_{\mathrm{mkt}}^2$, $\hat\sigma^2_{\mathrm{res},i}$ | single-index matrix $\sigma_{\mathrm{mkt}}^2\hat{\boldsymbol\beta}\hat{\boldsymbol\beta}^{\top}+\operatorname{diag}(\hat\sigma^2_{\mathrm{res},1},\dots,\hat\sigma^2_{\mathrm{res},N})$, (27.8) with diagonal residuals; (23.1)'s market betas; the TAIEX price index's variance (divisor $T$); residual variances, the diagonal of LM27's $\Sigma_{\mathrm{res}}$ | $\sigma^2_{\mathrm{mkt}}$ as LM27 writes it (decision B6); the "res" subscript as LM27's, since $\varepsilon$ is the view's error (decision on notation, Y8); divisor $T$, so not LM23's $s_\varepsilon$ ($T-d$); no $D$ (a dividend) for the diagonal |
 
 Not used: $\alpha$ (any meaning; a shrinkage intensity is never $\alpha$), $\lambda$ as a multiplier, $\lambda$ for risk
 aversion, a Cholesky $L$ in the main text (the simulations colour normals "with $\Sigma$'s Cholesky factor, [[LM12]]"
 in words), $\tilde S$, $P$, $Q$ (a matrix of views; $Q$ is the eigenvector matrix), $\Omega$, $\pi$, $\tau$ for
 Black–Litterman (the literature's scalar is written $1/n_0$ and named in words once, since $\tau$ is LM30's span in
-years), $d^2$ (no Mahalanobis distance), $D$ for a diagonal matrix, $\mathbf e_i$, a hat on an EWMA forecast.
+years), $d^2$ (no Mahalanobis distance), $D$ for a diagonal matrix, $\mathbf e_i$, a hat on an EWMA forecast,
+$\varepsilon$ for a regression residual, a split ratio as a symbol (decision B6; LM30 restates no split).
 
 **Motivating case: "Five funds, two years, and positions nobody should hold"** (box, three paragraphs, about 160 words)
 
-> On 27 February 2019 the through case reads its first window: 504 daily returns of five funds [A30-03]. Fed the
-> window's means and covariances, the tangency formula of [[LM28]] puts 62.6% in 00646 and shorts 14.7% of 00642U. Its
-> in-sample Sharpe ratio is 0.88, against 0.33 for equal weights [A30-05].
+> On 27 February 2019 the through case reads its first window: 504 daily returns of five funds [A28-02]. Fed the
+> window's means and covariances, the tangency formula of [[LM28]] puts 62.6% in 00646 and shorts 14.7% of 00642U.
+> Its in-sample Sharpe ratio is 0.88 [A28-18], against 0.33 for equal weights [A30-05].
 >
 > Now suppose those estimates were the truth, and draw another 504 days from them, 10,000 times. Re-estimated on the
-> new days, the position in 00646 has a standard deviation of 67 points [A30-08]. The portfolio's true Sharpe ratio
-> averages 0.42 [A30-07]. If only the covariances had to be estimated, it would average 0.877 of the possible 0.880.
-> The simulation's standard errors are 0.5 points, 0.003 and below 0.0001 [A30-07, A30-08].
+> new days, the position in 00646 has a standard deviation of 67.1 points [A30-08]. The portfolio's true Sharpe ratio
+> averages 0.423 [A30-07]. If only the covariances had to be estimated, it would average 0.87686, close to the
+> possible 0.880. The simulation's standard errors are 0.5 points, 0.003 and 0.00002 [A30-07, A30-08].
 >
 > Out of sample the through case agrees. From March 2019 to October 2026, minimum variance, which uses no means,
 > realized 9.96% volatility net of costs, against 12.48% for equal weights [A30-12]. Shrinking its covariance matrix
 > changed that by 0.01 points [A30-12]. Which errors matter, and which repairs work?
 
 (`build/qa/style.py --strict` on the box alone as a `[!case]` callout, 2026-10-24: 160 words without the anchor
-tags (168 with them), 12 sentences, average 13.3 (14.0), no FAIL and no sentence of 25 words or more; the three
-paragraphs keep each under 80 words. The outcomes as sentences: 115 words, 8 sentences, average 14.4, none over 30.)
+tags (169 with them), 12 sentences, average 13.3 (14.1), no FAIL and no sentence of 25 words or more; the three
+paragraphs have 48, 66 and 46 words (decision C10). The outcomes as sentences: 115 words, 8 sentences, average 14.4, none over 30.)
 Resolved: (a) the means: §2, X2, E1–E2 (almost all of the loss; a mean's
 error shrinks only with years); (b) why shrinkage changed nothing: §4, X5, E5–E6 (504 days for five funds is a high
 ratio of observations to assets; at 30 returns for 28 sectors shrinkage cuts the realized volatility from 43.1% to
@@ -3470,22 +3764,22 @@ ratio of observations to assets; at 30 returns for 28 sectors shrinkage cuts the
 | § | Title {lo} | Content | Words |
 |:--|:--|:--|--:|
 | 1 | Introduction | the layer LM30 adds (LM28–LM29 treat inputs as known); case + X1; roadmap; notation and hygiene notes | 400 |
-| 2 | How Far Plug-in Weights Fall from the Truth {1} | the model (first window as truth, normal iid, $T=504$, experiment 1); three plug-ins (both, means only, covariances only); why exposures, not weights summing to 1 (2,115 of 10,000 samples have $\mathbf 1^{\top}\hat{\mathbf f}\le0$); X2; E1, with the error of R1's risk shares (LM27's hand-over); (20.2) against (18.4): E2; the in-sample minimum variance's optimism by (28.3) (4.990% predicted, 5.035% true, 5.015% possible); pitfall: a fixed model is a lower bound (its truth is an in-sample estimate and real means move, LM24's halves); 導讀; KC | 720 |
-| 3 | Equal Weights as a Benchmark {2} | DeMiguel, Garlappi and Uppal (2009) stated with the conditions their abstract gives (14 models, seven datasets, a calibration to US equities, 3,000 and 6,000 months); experiment 2, X3, E3: against 1/N's 0.327 the plug-in's mean true Sharpe ratio is about equal at 1.04 years (0.322, SE 0.008) and well above at 2.07 (0.422, SE 0.007); why this model's answer is short (its optimum is the window's in-sample 0.88, far above 1/N, and its means do not move); Kan and Zhou (2007) in one sentence; the through case: R1 12.48%, R3 9.96%; 1/N is the $c=0$ end of (30.1) (pointer to §4); pointers to LM33, LM34; KC | 440 |
-| 4 | Shrinking the Covariance Matrix {3,4} | definition (30.1); eigenvectors kept, eigenvalues $c\lambda_k+(1-c)\bar\lambda$ by (11.3), $\kappa_c$, the 1/N end; the oracle theorem (30.2) with its conditions, derived; its (24.3) reading; (18.4) for normal returns; Ledoit and Wolf's (30.3) with consistency stated, and what "large" means there ($N/T$ bounded as both grow; here $N/T$ runs from 5/504 to 28/20, and experiment 3's mean $\hat c$ from 0.810 at 20 returns to 0.998 at 2,191, SEs at most 0.002 [A30-21]); E4 (by hand, scikit-learn, the normal oracle, where the excess noise comes from); X4; X5 and E5 (window lengths; at $T=20$ the sample problem has no unique minimum and the pseudoinverse gives the minimum within the column space); experiment 3 in two sentences; X6 and E6 (R5 against R3; the target's scale); widget; Deep Dive; pitfall: the moment conditions and fat tails; 導讀; KC | 1,000 |
-| 5 | Constraints as Implicit Shrinkage {5} | LM29's KKT conditions for $\mathbf w\ge\mathbf 0$ and the multiplier scale against (29.5), said once; the problem is convex and, with $\hat\Sigma$ PD, has one minimizer ((29.3)); (30.4) derived; positive semidefiniteness stated (Jagannathan and Ma 2003, Proposition 1); the reading by (27.5) (excluded assets' covariances lowered by $\nu_i+\nu_j$, variances by $2\nu_i$); E7 on U28's first half; out of sample the constraint raises the realized volatility from 11.78% to 12.14% at 2,191 returns, and in experiment 3 it helps at 30 or 60 returns and costs from 120 on (paired differences); E5's through case: R3 never hits a zero weight (0 of 92 signals); 導讀; KC | 460 |
+| 2 | How Far Plug-in Weights Fall from the Truth {1} | the model (first window as truth, normal iid, $T=504$, experiment 1); Chopra and Ziemba (1993) as [[LM7]] cites them (errors in means far more damaging than errors in covariances, lm07.md:509), which experiment 1 measures on E5's model; three plug-ins (both, means only, covariances only); why exposures, not weights summing to 1 (2,115 of 10,000 samples have $\mathbf 1^{\top}\hat{\mathbf f}\le0$, 21%, SE 0.4 points); X2; E1, with the error of R1's risk shares (LM27's hand-over); (20.2) against (18.4): E2; the in-sample minimum variance's optimism by (28.3) (4.990% predicted and 5.0353% true, SEs 0.002 and 0.0001, against the possible 5.02%); pitfall: a fixed model is a lower bound (its truth is an in-sample estimate and real means move, LM24's halves); 導讀; KC | 720 |
+| 3 | Equal Weights as a Benchmark {2} | DeMiguel, Garlappi and Uppal (2009), read in the published article: 14 models, seven datasets; their criterion is the certainty-equivalent return; in the calibration of their Figure 1, panel E (US stocks), 1/N's monthly Sharpe ratio is 0.12 against the tangency's 0.15, and the sample-based rule needs more than 3,000 months with 25 assets (§4, pp. 1939–1941); their conditions for optimizing to win (a long window, a best Sharpe ratio well above 1/N's, few assets; p. 1919); experiment 2, X3, E3: against 1/N's 0.327 the plug-in's mean true Sharpe ratio is about equal at 1.04 years of sessions (0.322, SE 0.008) and well above at 2.07 (0.422, SE 0.007); why this model's answer is short (1/N reaches 0.37 of the best here against their 0.8, and the model's means do not move); Kan and Zhou (2007) in one sentence; the through case out of sample: R1 12.48%, R3 9.96%; 1/N is the $c=0$ end of (30.1) (pointer to §4); pointers to LM33, LM34; KC | 470 |
+| 4 | Shrinking the Covariance Matrix {3,4} | definition (30.1); eigenvectors kept, eigenvalues $c\lambda_k+(1-c)\bar\lambda$ by (11.3), $\kappa_c$, the 1/N end; the oracle theorem (30.2) with its conditions, derived; its (24.3) reading; (18.4) for normal returns; Ledoit and Wolf's (30.3) with consistency stated, and what "large" means there ($N/T$ bounded as both grow; here $N/T$ runs from 5/504 to 28/20, and experiment 3's mean $\hat c$ from 0.810 (SE 0.002) at 20 returns to 0.997963 (SE 0.000002) at 2,191 [A30-21]); E4 (by hand, scikit-learn, the normal oracle, where the excess noise comes from); X4; X5 and E5 (window lengths; at $T=20$ the sample problem has no unique minimum and the pseudoinverse gives the minimum within the column space); experiment 3 in two sentences; X6 and E6 (R5 against R3; the target's scale); widget; Deep Dive; pitfall: the moment conditions and fat tails; 導讀; KC | 1,000 |
+| 5 | Constraints as Implicit Shrinkage {5} | LM29's KKT conditions for $\mathbf w\ge\mathbf 0$ and the multiplier scale against (29.5), said once; the problem is convex and, with $\hat\Sigma$ PD, has one minimizer ((29.3)); (30.4) derived; positive semidefiniteness stated (Jagannathan and Ma 2003, Proposition 1); the reading by (27.5) (excluded assets' covariances lowered by $\nu_i+\nu_j$, variances by $2\nu_i$); E7 on U28's first half; out of sample the constraint raises the realized volatility from 11.78% to 12.14% at 2,191 returns, and in experiment 3 it helps at 30 or 60 returns and costs from 120 on (paired differences); E5's through case: R3 never hits a zero weight (0 of 92 signals, LM29's A29-09); 導讀; KC | 460 |
 | 6 | Starting from a Reference Portfolio: Black–Litterman {6} | reverse optimization $\mathbf e_{\mathrm{eq}}=\delta\hat\Sigma\mathbf w_{\mathrm{ref}}$ with R2 (constructed) and $\delta$ calibrated to R2's window mean (decision D); the prior worth $n_0$ observations (the literature's scalar $1/n_0$, no consensus value); one view on excess returns, $K=(-1,1,0,0,0)$, $\Xi=K\hat\Sigma K^{\top}/T$; (30.5) derived from (16.8); a data view gives $c=T/(T+n_0)$, (24.3); weights move along $K^{\top}$ only (He and Litterman's statement); several views stated; X7; E8; Jorion one sentence; pitfall: the reference carries the prior; 導讀; KC | 680 |
-| 7 | Resampling, Factor Structure and Repair {7} | resampled weights: experiment 4, one paragraph (error maximization, Michaud 1989): the average of 1,000 bootstrap long-only maximum-Sharpe portfolios ((29.6)) holds every fund (4% to 35%, SEs 0.4 and 0.9 points), though each fund is excluded in 18% to 72% of the resamples (SEs 1.2 and 1.4 points) [A30-27]; the single-index matrix ((27.8) with diagonal residuals), 57 against 406 parameters [A30-29], realized 12.67% against 11.78% [A30-19] (a wrong structure costs); X8, the five estimators on U28's halves; the repair of $C_{\text{pw}}$, E9; choosing a repair by $T/N$ (the Summary's table previewed); 導讀; KC | 470 |
+| 7 | Resampling, Factor Structure and Repair {7} | resampled weights, one paragraph: error maximization at the level of Michaud's (1989) abstract; resampled efficiency, which Michaud (1998) proposed, as Michaud and Michaud (2008) describe it, paraphrased (draw means and covariances around the estimates, compute the frontier for each draw, average the weights of matched portfolios); experiment 4 is a variant that averages 1,000 bootstrap long-only maximum-Sharpe portfolios ((29.6)): it holds every fund (3.8% to 35.2%, SEs 0.4 and 0.9 points), though each fund is excluded in 18% to 72% of the resamples (SEs 1 to 2 points) [A30-27]; the single-index matrix ((27.8) with diagonal residuals), 57 against 406 parameters [A30-29], realized 12.67% against 11.78% [A30-19] (a wrong structure costs); X8, the five estimators on U28's halves; the repair of $C_{\text{pw}}$, E9; choosing a repair by $T/N$ (the Summary's table previewed); 導讀; KC | 480 |
 | 8 | Estimation-Robust Portfolios in Python {4,8} | `LedoitWolf(assume_centered=False)`: divisor $T$, target $\bar\lambda I$ only, `shrinkage_` $=1-\hat c$, scale-free; `OAS` (Chen et al. 2010) differs and drops a $2/p$ factor; cvxpy's long-only problem with annual inputs, tolerances, status and dual values as $\boldsymbol\nu$; lab box | 200 |
 | — | Summary (7) / Problems (12) / Solutions | the Summary ends with a table: repair, what it fixes, when it helps ($T/N$), its cost | 140 / 400 / 520 |
-| | **Total** | | **5,430** |
+| | **Total** | | **5,470** |
 
 **Elements.** 9 examples (E1, E2 §2; E3 §3; E4, E5, E6 §4; E7 §5; E8 §6; E9 §7). Knowledge checks:
 
-- §2: twice as many days in the same two years leave the error of 00646's annual mean at 8.24 points; twice the years
-  cut it to 5.83 [A30-39], by (20.2).
-- §3: 1/N, with a true Sharpe ratio of 0.33 against the best 0.88, beats the plug-in in 31% of samples (Monte Carlo
-  SE 0.005) [A30-07]: why can the worse portfolio win so often?
+- §2: twice as many days over the same span leave the error of 00646's annual mean at 8.2 points; twice the span cuts
+  it to 5.8 [A28-27, A30-39], by (20.2).
+- §3: 1/N, with a true Sharpe ratio of 0.33 against the best 0.88, beats the plug-in in 31.4% of samples (Monte Carlo
+  SE 0.5 points) [A30-07]: why can the worse portfolio win so often?
 - §4: a $2\times2$ correlation matrix with $\rho=0.9$ shrunk with $c=0.5$ toward $I$: eigenvalues 1.9 and 0.1 become
   1.45 and 0.55, and $\kappa$ falls from 19 to 2.64 [A30-40]; and show that $c=0$ gives the 1/N portfolio.
 - §5: on U28's first half 19 constraints bind [A30-22]: which way did the constraint move those sectors'
@@ -3499,7 +3793,8 @@ ratio of observations to assets; at 30 returns for 28 sectors shrinkage cuts the
 中文導讀 in §2 (估計誤差 (estimation error), 抽樣誤差 (sampling error), 代入原則 (plug-in principle), 超額報酬 (excess
 return)), §4 (收縮 (shrinkage), 收縮估計量 (shrinkage estimator), 均方誤差 (mean squared error), 偏誤及變異數之抵換
 (bias–variance tradeoff), 特徵值 (eigenvalue), 條件數 (condition number)), §5 (限制條件 (constraint), 非負性條件
-(nonnegativity condition), 最小變異數投資組合 (minimum-variance portfolio)), §6 (事前分布 (prior distribution), 事後分布
+(nonnegativity condition), 有效限制 (active constraint, LM7's Glossary), 最小變異數投資組合 (minimum-variance
+portfolio)), §6 (事前分布 (prior distribution), 事後分布
 (posterior distribution), 參考投資組合 (reference portfolio, the book's own), 隱含超額報酬 (implied excess returns, the
 book's own), 觀點 (view, the book's own)), §7 (重抽樣 (resampling), 單一指標模型 (single index model), 相關矩陣
 (correlation matrix)). Deep Dive in §4, "Why Ledoit and Wolf's noise estimate works": $\hat\Sigma$ is an average of the
@@ -3511,35 +3806,41 @@ consistency *stated without proof* with its three assumptions.
 **Exhibits.**
 
 - X1 `case` (table, §1): E5, first window (504 returns on the joint dates, 2017-02-13 → 2019-02-27) and the through
-  case. Rows: the tangency weights 11.8 / 62.6 / 37.8 / 2.6 / −14.7%, $\mathrm{SR}^*=0.880$, 1/N's 0.327 [A30-05];
-  experiment 1 mean true Sharpe ratios 0.42 (both estimated), 0.42 (means only), 0.877 (covariances only), SEs at most
-  0.003 [A30-07]; SD of the 00646 exposure 67 against 4.7 points (batch SEs 0.5 and 0.03) [A30-08]; through case
+  case. Rows: the tangency weights 11.8 / 62.6 / 37.8 / 2.6 / −14.7% (rounded separately; they sum to 100.1) and
+  $\mathrm{SR}^*=0.880$ [A28-18], 1/N's 0.327 [A30-05]; experiment 1 mean true Sharpe ratios 0.423 (both estimated)
+  and 0.425 (means only), SEs 0.003, and 0.87686 (covariances only, SE 0.00002) [A30-07]; SD of the 00646 exposure
+  67.1 against 4.73 points (batch SEs 0.5 and 0.03) [A30-08]; through case
   realized volatility, out of sample from 2019-03-05 to 2026-10-08, net of costs: R1 12.48%, R3 9.96%, R5 9.97%
   [A30-12]. Note: the first two blocks are *In-sample* and *Model*; the last *Out-of-sample*. Source: FinMind
   `TaiwanStockPrice`, `TaiwanStockDividendResult`, `TaiwanStockSplitPrice` (registered 2026-10-24;
   `data/vol5_series.py`); Computations: `data/lm30_numbers.py`, `data/vol5_rules.py`.
 - X2 `scatter` (`scatter`, §2): experiment 1's first 1,000 samples; $x$ the 00646 exposure, $y$ the 00679B exposure
   (in %, `fmt: "n1"`); two named series "means and covariances estimated" and "covariances only (means known)"; a
-  marked point "truth (62.6, 37.8)". Values cited: SDs 67 and 81 against 4.7 and 4.8 points, batch SEs at most 0.7
-  and 0.04 [A30-08]. Note: *Model*; exposures scaled by the model's $\delta$, so the truth's sum to 1.
-- X3 `years` (`line`, log $x$, §3): experiment 2; $x$ years of daily data ($T/A$ at E5's $A$, 0.52 to 33.2), $y$ mean
-  true Sharpe ratio; series "means and covariances estimated" and "covariances only"; dashed `hline`s at 0.880
-  ("best") and 0.327 ("equal weights"). Values cited: 0.32 at 1.04 years (within one SE of 0.327), 0.42 at 2.07, 0.82 at
-  33.2; covariances only 0.866 to 0.880 [A30-11]. Note: *Model*; SEs at most 0.008 (covariances only, at most
-  0.0003).
+  marked point "truth (62.6, 37.8)" [A28-18]. Values cited: SDs 67.1 and 80.7 against 4.73 and 4.79 points (batch
+  SEs 0.5, 0.6, 0.03 and 0.04) [A30-08]. Note: *Model*; exposures scaled by the model's $\delta$, so the truth's sum
+  to 1.
+- X3 `years` (`line`, log $x$, §3): experiment 2; $x$ years of sessions ($T/A$ at E5's $A$, a count of sessions,
+  0.52 to 33.2), $y$ mean true Sharpe ratio; series "means and covariances estimated" and "covariances only"; dashed
+  `hline`s at 0.880 ("best") and 0.327 ("equal weights"). Values cited: 0.322 at 1.04 years of sessions (within one
+  SE of 0.327), 0.422 at 2.07, 0.816 at 33.2; covariances only 0.8660 at 0.52 years of sessions (SE 0.0002) [A30-11].
+  Note: *Model*; SEs 0.008 to 0.001 for the first series; years of sessions are sessions over $A$.
 - X4 `spectrum` (`line`, log $y$, §4): U28; $x$ the index $k=1,\dots,28$; series "sample, last 60 returns of the
   first half", "shrunk ($\hat c=0.874$)", "sample, whole first half"; annual eigenvalues. Values cited: $\kappa$ 438 →
   68.1 and 126.05 [A30-20, A30-18]. Note: price indices; *In-sample*; shrinkage keeps the eigenvectors.
 - X5 `windows` (table, §4; five columns, so that no PDF page shrinks): U28, fitted on the last $T$ returns of the first
-  half (to 2017-10-06), judged on the second half. Rows $T$ = 20, 30, 60, 120, 250, 504, 2,191; columns $T$, $\hat c$,
-  $\kappa$ sample → shrunk, sample predicted / realized volatility, shrunk realized volatility [A30-20]. Values cited:
-  $T=30$ sample 1.34 / 43.12% (gross exposure 13.48), shrunk 12.46%; $T=60$ 3.96 / 13.85% against 12.04%; $T=2{,}191$
-  11.40 / 11.78% against 11.78% [A30-20]; $T=20$ singular (rank 19; the note gives the pseudoinverse's 1.78 / 17.03%),
-  shrunk 12.59% [A30-20]. Note: price indices, no dividends; *Out-of-sample*, one split per row, the grid chosen after
-  the halves' result (an illustration, not evidence).
+  half (to 2017-10-06), judged on the second half. Rows $T$ = 20, 30, 60, 120, 250, 504, 2,191; columns, each at one
+  precision: $T$; $\hat c$ (three decimals); $\kappa$ sample → shrunk (whole numbers → one decimal); sample predicted
+  / realized volatility (two decimals); shrunk realized volatility (two decimals) [A30-20]. Values cited: $T=30$:
+  0.823, 116,097 → 59.9, 1.34 / 43.12% (gross exposure 13.48), shrunk 12.46%; $T=60$: 0.874, 438 → 68.1, 3.96 /
+  13.85% against 12.04%; $T=2{,}191$: 0.995, 126 → 121.4, 11.40 / 11.78% against 11.78%; $T=20$: 0.790, singular
+  (rank 19, so no sample $\kappa$ or volatility; the note gives the pseudoinverse's 1.78 / 17.03%), shrunk $\kappa_c$
+  49.5 and 12.59% [A30-20]; the other rows at the same precisions (A30-20's Printed-as lists every cell). Note: price
+  indices, no dividends; *Out-of-sample*, one split per row, the grid chosen after the halves' result (an
+  illustration, not evidence).
 - X6 `chat` (`line`, date $x$, §4): $\hat c$ at each of the 92 signals (R5's windows); a marked point at 2026-03-31
   (0.781). Values cited: first 0.968, median 0.962, maximum 0.979 (2024-04-30), minimum 0.781, 19 signals below 0.9,
-  the first 2020-03-31 [A30-14]. Note: *Descriptive*; the windows are 504 daily returns of E5 on joint dates.
+  the first 2020-03-31 [A30-14]. Note: *In-sample* (each intensity is fitted to its own window, as the hygiene
+  declaration says); the windows are 504 daily returns of E5 on joint dates.
 - X7 `bl` (`bar`, §6): five funds as categories; series "R2 ($c=0$)", "$c=0.5$", "$c=1$", "plug-in" (four colours;
   portfolios as series, shared decision "Charts"). Values cited: $c=0.5$ 22.5 / 37.5 / 30 / 10 / 0%, $c=1$ 4.9 / 55.1 /
   30 / 10 / 0%, plug-in 13.6 / 72.4 / 43.8 / 3.0 / −17.1% [A30-25]. Note: *In-sample*, first window; R2 is
@@ -3565,36 +3866,42 @@ lowest point is hindsight.
 
 **Examples** (results recomputed from the printed inputs):
 
-- E1 §2 `split`, experiment 1: the model is the first window's mean and matrix ($\mathrm{SR}^*=0.880$,
-  $\delta=11.27$ [A30-05]); 10,000 samples of 504 days. Mean true Sharpe ratio of $\hat{\mathbf f}$: 0.423 (SE 0.003)
-  with means and covariances estimated, 0.425 (SE 0.003) with the means alone estimated, 0.877 (SE
-  $2.5\times10^{-5}$) with the covariances alone [A30-07]. Exposure SDs run from 29 to 81 points against 1.8 to 4.8
-  points, 14 to 18 times larger (batch SEs at most 0.7 and 0.04 points, and 0.15 for the two ratios) [A30-08]. In 2,115
-  samples the exposures sum to zero or less [A30-09], so weights normalized to sum to 1 would flip sign: hence the
-  exposure form. The median true Sharpe ratio is 0.49 (batch SE 0.004) [A30-07]: the mean is pulled down by a long
-  left tail. The same draws measure the error in [[LM27]]'s risk shares: R1's true shares, 1.1% to 50.2% (A27-21),
-  are estimated with SDs of 1.0 to 1.7 points (batch SEs at most 0.02) [A30-42].
+- E1 §2 `split`, experiment 1: the model is the first window's mean and matrix ($\mathrm{SR}^*=0.880$ [A28-18],
+  $\delta=11.27$ [A28-22]); 10,000 samples of 504 days. Mean true Sharpe ratio of $\hat{\mathbf f}$: 0.423 (SE 0.003)
+  with means and covariances estimated, 0.425 (SE 0.003) with the means alone estimated, 0.87686 (SE 0.00002) with
+  the covariances alone [A30-07]. Exposure SDs run from 28.8 to 80.7 points against 1.75 to 4.79 points (batch SEs
+  0.2 to 0.6 and 0.01 to 0.04); fund by fund the ratio runs from 14.2 (00646: 67.1 against 4.73) to 18.0 (00635U:
+  72.0 against 3.99), batch SEs 0.1 [A30-08]. In 2,115 samples (21%, SE 0.4 points) the exposures sum to zero or
+  less [A30-09], so weights normalized to sum to 1 would flip sign: hence the exposure form. The median true Sharpe
+  ratio is 0.489 (batch SE 0.004) [A30-07]: the mean is pulled down by a long left tail. The same draws measure the
+  error in [[LM27]]'s risk shares: R1's true shares, 1.1% to 50.2% [A27-21], are estimated with SDs of 1.031 to 1.67
+  points (batch SEs 0.007 and 0.01) [A30-42].
 - E2 §2 `years`, why the means: by (20.2) the SE of an annual mean is $\sqrt A s/\sqrt\tau$, with $\tau=T/A=2.0745$
-  years: 9.37, 8.24, 5.93, 6.52, 16.09 points against means of 7.54, 10.03, 2.61, 0.78, −1.39%; four of five means
-  lie within one SE of zero [A30-06, A30-04] (LM28 prints the same SEs). By (18.4) the matrix's root-mean-square
-  relative error at $T=504$ is 8.5% [A30-06]. More days in the same years shrink the second, not the first (KC). The
-  plug-in minimum variance, which needs no mean, predicts 4.990% (SE 0.002) and delivers 5.035% (SE 0.0001) against
-  the possible 5.015% [A30-10]. By (28.3) its true variance exceeds $\sigma^2_{\min}$ by its weight error's quadratic
-  form, so no estimated portfolio can deliver less than 5.015%.
+  years, a count of sessions [A28-02]. The annual volatilities $\sqrt A s$, 13.50, 11.87, 8.54, 9.39 and 23.17%
+  [A28-06], give SEs of 9.4, 8.2, 5.9, 6.5, 16.1 points [A28-27] against means of 7.5, 10.0, 2.6, 0.8, −1.4% [A28-05];
+  four of five means lie within one SE of zero [A30-06]. By (18.4) the matrix's root-mean-square
+  relative error at $T=504$ is 8.5% [A30-06]. More days over the same span shrink the second, not the first (KC). The
+  plug-in minimum variance, which needs no mean, predicts 4.990% (SE 0.002) and delivers 5.0353% (SE 0.0001) against
+  the possible 5.02% [A30-10, A28-10]. By (28.3) its true variance exceeds $\sigma^2_{\min}$ by its weight error's
+  quadratic form, so no estimated portfolio can deliver less than $\sigma_{\min}$.
 - E3 §3 `critical`, experiment 2: mean true Sharpe ratio 0.230, 0.322, 0.422, 0.546, 0.672, 0.759, 0.816 at 0.52 to
-  33.2 years ($T/A$; SEs 0.008 to 0.001); covariances only 0.866 to 0.880 (SEs at most 0.0003) [A30-11]. Against
-  1/N's 0.327, the plug-in is about equal at 1.04 years (0.322, SE 0.008) and well above at 2.07 (0.422, SE 0.007)
-  [A30-11]. DeMiguel, Garlappi and Uppal's calibration needs about 3,000 months for 25 assets (their abstract). This
-  model's optimum is the window's own in-sample 0.88, far above 1/N's 0.33, so the plug-in has much to gain. The
-  through case's realized volatilities, R1 12.48% against R3 9.96% [A30-12], are the evidence on E5; LM33 compares
-  the rules' Sharpe ratios.
+  33.2 years of sessions ($T/A$, sessions over $A$; SEs 0.008 to 0.001); with the covariances alone estimated, already
+  0.8660 (SE 0.0002) at 0.52 years of sessions [A30-11]. Against 1/N's 0.327, the plug-in is about equal at 1.04 years
+  of sessions (0.322, SE 0.008) and
+  well above at 2.07 (0.422, SE 0.007) [A30-11]. DeMiguel, Garlappi and Uppal judge a rule by its certainty-equivalent
+  return, not by experiment 2's mean true Sharpe ratio. In their Figure 1's panel E, calibrated to US stocks, 1/N's
+  monthly Sharpe ratio is 0.12 against the tangency's 0.15, and the sample-based rule needs more than 3,000 months
+  with 25 assets to beat 1/N (§4, pp. 1939–1941). There 1/N reaches 0.8 of the best; in this model only 0.37 (0.327
+  against 0.880) [A30-43], so the plug-in has much to gain, and the model's means do not move. The through case's
+  out-of-sample volatilities, net of costs from March 2019, R1 12.48% against R3 9.96% [A30-12], are the evidence on E5; LM33 compares the rules' Sharpe
+  ratios.
 - E4 §4 `lwhand`, the first window by hand: $\bar\lambda=0.0204$ a year (a volatility of 14.3%),
   $\lVert\hat\Sigma-\bar\lambda I\rVert_F^2=1.885\times10^{-3}$, $\hat\sigma^2_{\hat\Sigma}=6.12\times10^{-5}$, so
   $\hat c=1-6.12\times10^{-5}/1.885\times10^{-3}=0.9675$; scikit-learn's `shrinkage_` 0.0325 agrees to $10^{-17}$
   [A30-13]. With (18.4) for normal returns the oracle is $c^*=0.9851$; the data's noise estimate is 2.14 times the
   normal value [A30-13]. The excess comes from fat tails, chiefly 0050's (raw kurtosis 13.3 [A30-15]; its rows carry
-  36% of the excess), on top of 00642U's large variance (volatility 23.17%, the largest [A30-04]; 39% of the excess)
-  [A30-13].
+  36% of the excess), and from 00642U's milder tails (raw kurtosis 4.5 [A30-15]) weighted by the largest variance
+  (volatility 23.2% [A28-06]; 39% of the excess) [A30-13].
 - E5 §4 `shortT`, U28's window lengths ([[ex:windows]]): on the last 30 returns of the first half the sample matrix has
   $\kappa=116{,}097$; its minimum-variance portfolio predicts 1.34% and realizes 43.12% on the second half, with gross
   exposure 13.48; shrunk with $\hat c=0.823$ it realizes 12.46% [A30-20]. On 20 returns the sample matrix is singular
@@ -3603,11 +3910,12 @@ lowest point is hindsight.
   minimum-variance portfolio within the column space; it predicts 1.78% and realizes 17.03%, the shrunk matrix 12.59%
   [A30-20]. On the whole first half, $\hat c=0.9951$, $\kappa$ 126.05 → 121.38 and both realize 11.78% [A30-18,
   A30-19]. Experiment 3 confirms the pattern on average (mean true volatility at 60 returns 15.51% sample (SE 0.04),
-  13.46% shrunk (SE 0.02); at 2,191 both 11.47% (SE 0.001) against the possible 11.40%) [A30-21].
+  13.46% shrunk (SE 0.02); at 2,191, 11.4659% sample and 11.4651% shrunk (SEs 0.0006) against the possible 11.40%)
+  [A30-21].
 - E6 §4 `r5`, the through case: $\hat c$ ranged from 0.781 (2026-03-31) to 0.979 (2024-04-30), median 0.962 [A30-14].
-  R5 and R3 differ by at most 13.1 points in a weight, at 2026-03-31 (00679B 55.1% → 42.0%), median 1.6 points
-  [A30-16]. In that window 00642U's raw kurtosis is 48.9, its rows carry 84% of the excess noise, and the noise
-  estimate is 13.1 times the normal value [A30-15]. With the normal value in its place, $\hat c$ would be 0.983, not
+  The largest gap between R5's and R3's weights is 13.1 points, at 2026-03-31 (00679B 55.1% → 42.0%); the median
+  gap is 1.6 points [A30-16]. In that window 00642U's raw kurtosis is 48.9, its rows carry 84% of the excess noise,
+  and the noise estimate is 13.1 times the normal value [A30-15]. With the normal value in its place, $\hat c$ would be 0.983, not
   0.781 [A30-15]: fat tails, not a short window, drove the shrinkage. The scaled-identity target raises the bond
   fund's variance (volatility 13.4%) toward the average and lowers 00642U's (43.0%), so weight leaves the bond fund
   [A30-16]. Realized volatility: R5 9.97%, R3 9.96% [A30-12].
@@ -3617,8 +3925,8 @@ lowest point is hindsight.
   (PSD), and Optoelectronic's variance falls by 20.7% [A30-22]; cvxpy's dual values give the same $\boldsymbol\nu$ to
   $3.7\times10^{-10}$ of the largest $\nu_i$ [A30-23]. Second half: 12.14% against the unconstrained 11.78% [A30-19].
   In experiment 3, paired on the same samples, the constraint lowers the true volatility against the shrunk
-  portfolio by 0.385 points (SE 0.026) at 30 returns and 0.055 (SE 0.017) at 60, and raises it from 120 on (0.49
-  points, SE 0.01, at 120; 1.30 at 2,191) [A30-21].
+  portfolio by 0.38 points (SE 0.03) at 30 returns and 0.06 (SE 0.02) at 60, and raises it from 120 on (0.49
+  points, SE 0.01, at 120; 1.2981, SE 0.0005, at 2,191) [A30-21].
 - E8 §6 `bl`, R2 on the first window: mean excess 4.383%, volatility 6.709%, so $\delta=9.74$ and
   $\mathbf e_{\mathrm{eq}}=$ 7.79, 5.14, 0.46, 1.02, 3.71% [A30-24]. View $K=(-1,1,0,0,0)$, "00646 beats 0050": the
   window says $b=2.491$ points, the reference implies −2.649, $\sqrt{K\hat\Sigma K^{\top}}=12.264\%$ [A30-25]. With
@@ -3644,7 +3952,9 @@ the units (a day or a year), the label and the rounding; problem 11 gives the se
 4. MC: one data view with $T=504$ and a prior worth $n_0=1{,}512$ observations; the view says 4%, the reference
    implies 0%; the posterior along the view. A 3.0% (weights swapped). B 2.0% (equal weights). **C** 1.0% [A30-33].
 5. MC: two funds, $\sigma_1=20\%$, $\rho=0.9$; the $(1,1)$ entry of $\Sigma^{-1}$ (a year). **A** 131.6 ($\operatorname{VIF}/\sigma_1^2$).
-   B 25.0 (ignores $\rho$). C 250.0 ($1-\rho$ for $1-\rho^2$) [A30-34].
+   B 25.0 (ignores $\rho$). C 250.0 ($1-\rho$ for $1-\rho^2$) [A30-34]. The solution adds that $1-\rho^2$ is the
+   product of the correlation matrix's eigenvalues 1.9 and 0.1 (KC §4's matrix [A30-40]), so the small one drives the
+   inverse that plug-in weights use, and shrinkage lifts it.
 6. MC: long-only minimum variance; $w_3\ge0$ binds with $\nu_3=0.0002$ (daily units, the stem's scaling); in
    $\hat\Sigma_\nu$ asset 3's variance is lowered by. A $\nu_3$. **B** $2\nu_3=0.0004$. C 0 (only covariances change)
    [A30-35].
@@ -3660,20 +3970,25 @@ the units (a day or a year), the label and the rounding; problem 11 gives the se
 10. Python: Ledoit–Wolf on E5's first window by hand and with scikit-learn ($\hat c=0.9675$); the normal oracle 0.9851;
     the ratio 2.14, each fund's share of the excess, and what they say about the tails [A30-13, A30-15].
 11. Python: experiment 1 (`default_rng([1, 20261011])`, 10,000 samples): the mean true Sharpe ratios 0.423, 0.425 and
-    0.877 with their SEs, and the 2,115 samples with $\mathbf 1^{\top}\hat{\mathbf f}\le0$ [A30-07, A30-09].
-12. Python: U28's windows of 30 and 2,191 returns ([[ex:windows]]'s rows) and the check of (30.4) on the first half
+    0.87686 with their SEs, the share of samples in which 1/N's true Sharpe ratio is higher (31.4%, SE 0.5 points),
+    and the 2,115 samples with $\mathbf 1^{\top}\hat{\mathbf f}\le0$; why 1/N wins so often [A30-07, A30-09].
+12. Python: U28's windows of 30 and 2,191 returns ([[ex:windows]]'s rows), each result labelled *Out-of-sample*, and
+    which repair the ratio of observations to assets favours at each length; the check of (30.4) on the first half
     (19 binding constraints; the weights agree to $10^{-15}$) [A30-20, A30-22].
 
-**Lab parts** (`build/make_lab30.py`; reads only its `data/`, built by `data/make_lab_data.py` as the shared "Labs"
-decision lists: E5's estimation and wealth frames, derived from `data/raw/vol5/`; the rules' per-date targets and the
-eight rules' net wealth paths, derived from `vol5_rules.py`; U28's closes with LM16's repair cell; $C_{\text{pw}}$'s
-three printed entries typed in; file names as `make_lab_data.py` sets them at Stage 3): 1 data, the first window, $T$,
+**Lab parts** (`build/make_lab30.py`; reads only its `data/`, built locally by `data/make_lab_data.py` from
+`data/raw/` and never committed, as the shared "Labs" decision lists: E5's estimation frame and its wealth frame with
+the traded flags (both frames, decision on the first revision); the rules' per-date targets and exposures; the eight
+rules' net and gross wealth paths, of which LM30 uses R1's, R3's and R5's net paths; U28's closes with LM16's repair
+cell; $C_{\text{pw}}$'s three printed entries typed in; file names as `make_lab_data.py` sets them at Stage 3): 1 data, the first window, $T$,
 $A$, U28's halves; 2 experiment 1 (E1, E2, X2, the sign flips, R1's risk shares), experiment 2 (E3, X3); 3 Ledoit–Wolf
 by hand and scikit-learn (E4), (30.1)'s spectrum and $\kappa_c$ (X4), the path from 1/N at $c=0$; 4 U28's windows (X5,
 E5), experiment 3, the pseudoinverse at $T=20$; 5 R5 re-implemented with scikit-learn's matrix and R3's exact solver,
 checked against the targets at all 92 signals, X6, E6, the realized volatilities of R1, R3 and R5 from the wealth
 paths; 6 (30.4) on U28 (E7) with cvxpy's dual values; 7 Black–Litterman (E8, X7, KC §6); 8 experiment 4 (resampled
-weights with LM22's iid bootstrap; a block bootstrap as a variant), the single-index matrix (X8), the repairs of
+weights with LM22's iid bootstrap; as a variant, LM22's stationary bootstrap in `stationary_idx`'s draw order, its
+block length by LM22's rule (lm22.md:254) on the five funds' returns, the largest of the five, as the shared
+"Counting" decision says), the single-index matrix (X8), the repairs of
 $C_{\text{pw}}$ with Higham's alternating projections (E9); 9 problems 10–12. Extension (*Out-of-sample*, versions
 declared, X40-style): LM7's question (make_lab07.py:601) answered on E5's estimation frame: the 0050/00679B
 minimum-variance weight re-estimated each month on 6, 12, 24 and 36 calendar months, with the sample and the shrunk
@@ -3681,7 +3996,7 @@ $2\times2$ matrix (eight versions, all reported); a closing sentence says that c
 Labs write plain "LM7" and "LM34", never `[[LM7]]`.
 
 **Cross-module tags.** Only LM35's brief cites an LM30 tag ((30.4)); the other modules cite R5 and LM30's results by
-anchor (decision C8).
+anchor (decision C8; the cross-check confirms the list, Y1).
 
 - (30.1) $\hat\Sigma_c:=c\hat\Sigma+(1-c)\bar\lambda I$, $\bar\lambda=\operatorname{tr}\hat\Sigma/N$, $0\le c\le1$: the
   eigenvectors of $\hat\Sigma$, eigenvalues $c\lambda_k+(1-c)\bar\lambda$, $\kappa_c=(c\lambda_1+(1-c)\bar\lambda)/(c\lambda_N+(1-c)\bar\lambda)$;
@@ -3705,13 +4020,14 @@ anchor (decision C8).
 **Pitfalls to pre-empt.**
 
 - Normalizing plug-in tangency weights to sum to 1 divides by $\mathbf 1^{\top}\hat{\mathbf f}$, which is zero or
-  negative in 2,115 of 10,000 samples [A30-09]: §2 works with exposures at the model's fixed $\delta$, and says so.
+  negative in 2,115 of 10,000 samples (21%, SE 0.4 points) [A30-09]: §2 works with exposures at the model's fixed
+  $\delta$, and says so.
 - A simulation from a fixed model is a lower bound on the damage. Its truth is an in-sample estimate
   ($\mathrm{SR}^*=0.880$ is the first window's own optimum), and real means move (LM24: the second half's sector means
-  spread almost twice as widely, lm24.md:283). Experiment 2's result (about equal to 1/N at 1.04 years, well above at
-  2.07) is no recommendation; R1's and R3's realized volatilities are the evidence.
+  spread almost twice as widely, lm24.md:283). Experiment 2's result (about equal to 1/N at 1.04 years of sessions,
+  well above at 2.07) is no recommendation; R1's and R3's realized volatilities are the evidence.
 - Predicted against realized: an optimized in-sample variance is biased down (U28, $T=30$: 1.34% against 43.12%; E5:
-  R3's windows predicted 8.84% on average [A30-12], 4.97% to 10.42% (LM28's A28-12), against 9.96% realized). Inputs
+  R3's windows predicted 8.84% on average [A30-12], 4.97% to 10.42% [A28-12], against 9.96% realized). Inputs
   that moved add to the gap, as in LM7.
 - scikit-learn: `shrinkage_` is the target's weight $1-\hat c$; the divisor is $T$; `assume_centered=False` removes the
   mean; the target is $\bar\lambda I$ only; `OAS` is another estimator and omits Chen et al.'s $2/p$ factor (its
@@ -3729,21 +4045,25 @@ anchor (decision C8).
   eigenvectors of LM11's (11.7); it only moves eigenvalues.
 - A singular $\hat\Sigma$ has no unique minimum-variance portfolio (U28, $T=20$: zero-variance portfolios exist
   [A30-20]); the pseudoinverse picks one, and shrinkage with $c<1$ restores a unique one.
-- Constraints are not free: wrong constraints cost when data are long (U28's second half 12.14% against 11.78%;
-  experiment 3, 12.76% against 11.47% at 2,191 returns) [A30-19, A30-21]. In E5 the long-only constraint of R3 never
-  binds (0 of 92 signals) [A30-16], so (30.4) is shown on U28.
+- Constraints are not free: wrong constraints cost when data are long (U28's second half 12.14% against 11.78%
+  [A30-19]; in experiment 3 at 2,191 returns the long-only portfolio's true volatility is 1.2981 points above the
+  shrunk one's, paired SE 0.0005 [A30-21]). In E5 the long-only constraint of R3 never binds (0 of 92 signals)
+  [A29-09], so (30.4) is shown on U28.
 - "Best $c$ in hindsight" is fitted on the judging half: *In-sample*, never an achievable result.
 - Black–Litterman: the reference carries the prior, and R2 is *constructed* (no Taiwan market portfolio of these
   funds exists; `TaiwanStockMarketValueWeight` starts 2024-10-30, ROADMAP); $\delta$ is calibrated to R2's own window
-  mean; the literature's scalar has no consensus value (Idzorek 2007, reporting values near 0.01–0.05, 1, and one over
-  the number of observations, all secondary); the optimizer here uses $\hat\Sigma$, not the posterior covariance (said
-  once).
+  mean; the literature's scalar has no consensus value (Idzorek 2007 reports values near zero, 0.01–0.05, 1, and about
+  one over the number of observations, each attributed there to other authors); the optimizer here uses $\hat\Sigma$,
+  not the posterior covariance (said once).
 - Counting: U28's split compares five estimators and seven window lengths; LM30 names no winner and points to LM34.
 - Notation: a tilde means centred (so $\hat\Sigma_\nu$, not $\tilde S$); no $\alpha$ for an intensity; multipliers
   $\nu$, at half of LM29's scale; $\tau$ is years.
-- Ownership: the first window's statistics, $\mathbf w^{\mathrm{tan}}$ and $\mathbf w^{\mathrm{mv}}$ are LM28's
-  (echoed); the U28 halves' statistics are LM30's; R1–R8's Sharpe ratios and standard errors, VaR, net results and
-  scenario losses are LM33's, LM32's, LM34's and LM35's.
+- Ownership: the first window's statistics, $\mathbf w^{\mathrm{tan}}$ and $\mathbf w^{\mathrm{mv}}$ are LM28's,
+  echoed with LM28's IDs at LM28's precision, except E2's $\tau$ and volatilities beside (20.2)'s computation
+  (decision C12); R1's first-window risk shares are LM27's (A27-21) and
+  "R3 never binds" LM29's (A29-09); the U28 halves' statistics and R2's first-window mean excess return and
+  volatility are LM30's; R1–R8's Sharpe ratios and standard errors, VaR, net results and scenario losses are LM33's,
+  LM32's, LM34's and LM35's.
 
 **Curriculum guidance carried** (`plans/vol-5.md`, table "Curriculum guidance"):
 
@@ -3757,92 +4077,128 @@ anchor (decision C8).
 - Fix windows, frequency, costs and criteria before evaluation (g:111): R5's settings are the through case's; U28's
   split is LM11's; the window grid is declared as chosen after the halves' result.
 - "Data too thin to support more" (g:116): §2–§3 conclude that two years of daily data cannot support weights built on
-  sample means (the plug-in keeps 0.42 of 0.88 on average, SE 0.003, and 1/N wins in 31% of samples).
+  sample means (the plug-in keeps 0.423 of 0.880 on average, SE 0.003, and 1/N wins in 31.4% of samples, SE 0.5
+  points).
 - The checkpoint after Volume VI (g:44): LM30 practises "explain how constraints change the allocation" ((30.4), E7)
   and an out-of-sample comparison (X5, X8).
 - Taught, practised, assessed (g:124): the map under the outcomes.
 
 **Stage 4 for earlier modules.** `leads` gain 30 in lm07.md:6, lm09.md:6 ((9.5)), lm14.md:6 ((14.5)) and lm15.md:6
 ($\nu=3.065$), all on decision G's list; lm10, lm11, lm12, lm16, lm18, lm20, lm22, lm23, lm24 and lm26 already list 30.
-No wording change in the published text: every hand-over above is kept as written (lm11.md:480's "pulling the small
-sample eigenvalues up" is what (30.1) does; it also pulls the large ones down, which §4 says).
+lm07.md:786: Chopra and Ziemba (1993) gains its issue number, 19(2): 6–11 (on the plan's Stage 4 list; LM30 carries
+it because §2 cites the paper as lm07.md:509 does, decision "Tags and leads"). No other wording change in the
+published text: every hand-over above is kept as written (lm11.md:480's "pulling the small sample eigenvalues up" is
+what (30.1) does; it also pulls the large ones down, which §4 says).
 
-**Sources** (every reference LM30 cites; checked 2026-10-24; none is in SOURCES yet unless said; paraphrased, no
-quotation over one sentence):
+**Sources** (every reference LM30 cites, with the version read and the locations used; bibliographic data from
+Crossref as the Stage 1 SOURCES draft records them, which overrides the earlier brief where the two differ; none is in
+SOURCES yet unless said; paraphrased, no quotation over one sentence):
 
-- Ledoit, O. and M. Wolf (2004). "A well-conditioned estimator for large-dimensional covariance matrices." *Journal of
-  Multivariate Analysis* 88(2): 365–411. DOI 10.1016/S0047-259X(03)00096-4. Crossref (works/10.1016/S0047-259X(03)00096-4:
-  title, authors, 88(2), 365–411, 2004-02). Content read in the authors' working paper of February 2001 (ledoit.net,
-  saved by the survey in the scratch folder): §2 (the oracle, Lemma 2.1 and Theorem 2.1, mean-zero data, finite fourth
-  moments), §3 (Assumptions 1–3: $p/n$ bounded, bounded eighth moments, a condition on products; Lemmas 3.2–3.5;
-  estimator (14); Theorem 3.2, consistency; Theorem 3.4, asymptotic optimality; Theorem 3.5, a bounded condition
-  number). Lemma and theorem numbers are the working paper's; cite them as such or at section level.
-- Ledoit, O. and M. Wolf (2003). "Improved estimation of the covariance matrix of stock returns with an application to
-  portfolio selection." *Journal of Empirical Finance* 10(5): 603–621. DOI 10.1016/S0927-5398(03)00007-0. Crossref.
-  The single-index target: from the survey's reading of the working paper (abstract and §1), not re-read; one sentence
-  only ("shrinks toward a single-index matrix").
-- Ledoit, O. and M. Wolf (2004). "Honey, I shrunk the sample covariance matrix." *Journal of Portfolio Management* 30(4):
-  110–119. DOI 10.3905/jpm.2004.110. Crossref. The constant-correlation target: survey's reading of the working paper
-  (§3.2); one sentence only.
-- DeMiguel, V., L. Garlappi and R. Uppal (2009). "Optimal versus naive diversification: how inefficient is the 1/N
-  portfolio strategy?" *Review of Financial Studies* 22(5): 1915–1953. DOI 10.1093/rfs/hhm075. Crossref (print 2009-05,
-  online 2007-12-03: cite 2009). Abstract read (OpenAlex): 14 models, seven datasets, none consistently better than 1/N
-  in Sharpe ratio, certainty-equivalent return or turnover; with parameters calibrated to the US equity market, about
-  3,000 months for 25 assets and 6,000 for 50. Text not read: the module prints only the abstract's claims; the paper
-  is on decision F's reading list, and any sentence about its setting beyond the abstract waits for that reading (Open
-  1).
-- Jagannathan, R. and T. Ma (2003). "Risk reduction in large portfolios: why imposing the wrong constraints helps."
-  *Journal of Finance* 58(4): 1651–1683. DOI 10.1111/1540-6261.00580. Crossref (with the abstract: nonnegativity can
-  reduce risk even when wrong). Proposition 1 read in NBER Working Paper 8922 (survey's copy): with only the
-  nonnegativity constraint the adjusted matrix is $S-(\lambda\mathbf 1^{\top}+\mathbf 1\lambda^{\top})$ in their letters,
-  symmetric and PSD, and the constrained portfolio is one of its minimum-variance portfolios; the 2019 note places it on
-  p. 1655. Note: Jagannathan, R., T. Ma and J. Zhang (2019). "A note on 'Risk reduction in large portfolios: why
-  imposing the wrong constraints helps'." *Journal of Finance* 74(5): 2689–2696. DOI 10.1111/jofi.12824. Crossref
-  (abstract: corrects the proof of Proposition 2, not Proposition 1). Cite both.
-- Black, F. and R. Litterman (1992). "Global portfolio optimization." *Financial Analysts Journal* 48(5): 28–43. DOI
-  10.2469/faj.v48.n5.28. Crossref. Text not read (image-only scan): cited as the model's origin only, no claim of its own.
-- He, G. and R. Litterman (1999). "The intuition behind Black–Litterman model portfolios." Goldman Sachs Investment
-  Management Research (December 1999, per Idzorek's reference list); SSRN 334304, DOI 10.2139/ssrn.334304 (Crossref
-  dates the posting 2002, type posted-content). Abstract read (Crossref): the unconstrained optimal portfolio is the
-  scaled equilibrium portfolio plus a weighted sum of view portfolios. §6 derives this for one view and cites the note
-  for the general statement.
-- Idzorek, T. (2007). "A step-by-step guide to the Black–Litterman model." In S. Satchell (ed.), *Forecasting Expected
-  Returns in the Financial Markets*, Elsevier, pp. 17–38. ISBN 9780750683210, DOI 10.1016/B978-075068321-0.50003-0.
-  Crossref (book chapter, 2007). Formulas read in the author's draft of 2004-07-20 (survey's copy): reverse
-  optimization (1), the posterior mean (3), the scarce guidance on the scalar (values near zero, 0.01–0.05, 1, and about
-  one over the number of observations, each attributed to other authors). Formula numbers are the draft's.
-- Jorion, P. (1986). "Bayes-Stein estimation for portfolio analysis." *JFQA* 21(3): 279–292. DOI 10.2307/2331042.
-  Already in SOURCES (LM24): abstract only; its shrinkage target unconfirmed, so §6's sentence states only that an
-  empirical Bayes estimator of the means is meant to outperform the sample mean in a portfolio (abstract, OpenAlex).
-- Chopra, V. K. and W. T. Ziemba (1993). *JPM* 19(2): 6–11. DOI 10.3905/jpm.1993.409440. In SOURCES (LM7); cited as
-  LM7 does, no ratio printed.
-- Michaud, R. O. (1989). "The Markowitz optimization enigma: is 'optimized' optimal?" *Financial Analysts Journal*
-  45(1): 31–42. DOI 10.2469/faj.v45.n1.31. Crossref; abstract read on the journal's article page
-  (rpc.cfainstitute.org, 2026-10-24): optimization tends to maximize the effect of errors in its inputs, and
-  unconstrained results can be worse than equal weighting. Text not read. The resampled-efficiency method itself
-  (Michaud's later book) is on decision F's reading list; until it is read, the method is not attributed and §7
-  describes averaging over resamples in its own words (Open 2).
-- Sharpe, W. F. (1963). "A simplified model for portfolio analysis." *Management Science* 9(2): 277–293. DOI
-  10.1287/mnsc.9.2.277. Crossref (with the abstract: a model with few parameters, 2,000 securities, nearly the same
-  results). The single-index model's origin.
-- Higham, N. J. (2002b) and Rousseeuw, P. J. and G. Molenberghs (1993): in SOURCES (Volume II). Abstracts read
-  (OpenAlex): Higham, the nearest correlation matrix in weighted Frobenius norms by modified alternating projections;
-  Rousseeuw and Molenberghs, shrinking methods, an eigenvalue method and a new geometric method. §7 attributes only
-  these.
-- Chen, Y., A. Wiesel, Y. C. Eldar and A. O. Hero (2010). "Shrinkage algorithms for MMSE covariance estimation." *IEEE
-  Transactions on Signal Processing* 58(10): 5016–5029. DOI 10.1109/TSP.2010.2053029. Crossref. OAS's source, named in
-  §8; scikit-learn's omission of the $2/p$ factor read in its installed source (1.9.1, `_oas`).
+- Ledoit, O. and M. Wolf (2004). "A Well-Conditioned Estimator for Large-Dimensional Covariance Matrices." *Journal of
+  Multivariate Analysis* 88(2): 365–411, February 2004 (Crossref's issue date; OpenAlex dates it 2003, the online
+  year). DOI 10.1016/S0047-259X(03)00096-4. Read in the authors' working paper of February 2001 (ledoit.net, the
+  survey's copy): §2 (the oracle, Lemma 2.1 and Theorem 2.1, mean-zero data, finite fourth moments), §3 (Assumptions
+  1–3: $p/n$ bounded, bounded eighth moments, a condition on products; Lemmas 3.2–3.5; the estimator (14); Theorem 3.2,
+  consistency; Theorem 3.4, asymptotic optimality; Theorem 3.5, a bounded condition number). Lemma and theorem numbers
+  are the working paper's: the text cites them as such or at section level. The journal text was not compared.
+- Ledoit, O. and M. Wolf (2003). "Improved Estimation of the Covariance Matrix of Stock Returns with an Application to
+  Portfolio Selection." *Journal of Empirical Finance* 10(5): 603–621, December 2003. DOI
+  10.1016/S0927-5398(03)00007-0. The single-index target, from the abstract of the working paper of October 2001 (an
+  optimally weighted average of the sample covariance matrix and the single-index covariance matrix). One sentence
+  only.
+- Ledoit, O. and M. Wolf (2004). "Honey, I Shrunk the Sample Covariance Matrix." *Journal of Portfolio Management*
+  30(4): 110–119. DOI 10.3905/jpm.2004.110. The constant-correlation target, from the survey's reading of the working
+  paper of November 2003 (§3.2, not re-read); abstract (OpenAlex): shrinkage pulls the most extreme coefficients toward
+  the centre, and the challenge is the intensity. One sentence only.
+- DeMiguel, V., L. Garlappi and R. Uppal (2009). "Optimal Versus Naive Diversification: How Inefficient is the 1/N
+  Portfolio Strategy?" *Review of Financial Studies* 22(5): 1915–1953, May 2009 (online 2007-12-03; cite 2009). DOI
+  10.1093/rfs/hhm075. Read by the source check in the published article (the copy on Garlappi's site). Printed, at
+  these locations: the abstract (14 models, seven datasets, none consistently better than 1/N in Sharpe ratio,
+  certainty-equivalent return or turnover); the criterion (§4, pp. 1937–1938: the expected mean-variance utility loss,
+  that is the certainty equivalent, eqs. (18)–(22) and Proposition 1, for the sample-based rule under iid normal
+  returns); the calibration of Figure 1's panel E to US stocks (p. 1939: monthly Sharpe ratios 0.15 for the tangency
+  and 0.12 for 1/N); "more than 3000" months for 25 assets and more than 6000 for 50 (p. 1941; "around 3000" in the
+  abstract, p. 1919 and the Conclusions, p. 1947); the conditions under which optimizing wins (p. 1919: a long
+  estimation window, an ex ante Sharpe ratio well above 1/N's, few assets). Kept out: "1/N lies close to the tangency
+  portfolio" (not in the paper), and Table 6's monthly values (p. 1943): the paper says that panel E's 0.12 comes from
+  Table 6, whose 1/N values are 0.1356–0.1466, so only panel E's calibration is quoted, labelled as such.
+- Jagannathan, R. and T. Ma (2003). "Risk Reduction in Large Portfolios: Why Imposing the Wrong Constraints Helps."
+  *Journal of Finance* 58(4): 1651–1683, August 2003. DOI 10.1111/1540-6261.00580. Abstract (Crossref): non-negativity
+  can reduce the risk of estimated optimal portfolios even when the constraints are wrong, and with it the sample
+  covariance matrix does as well as factor models, shrinkage and daily data. Proposition 1 read in NBER Working Paper
+  8922 (May 2002; the survey's copy): with only the non-negativity constraint the adjusted matrix is
+  $S-(\lambda\mathbf 1^{\top}+\mathbf 1\lambda^{\top})$ in their letters, symmetric and PSD, and the constrained
+  portfolio is one of its minimum-variance portfolios; the 2019 note places it on p. 1655 of the article. Cited with
+  Jagannathan, R., T. Ma and J. Zhang (2019). "A Note on 'Risk Reduction in Large Portfolios: Why Imposing the Wrong
+  Constraints Helps'." *Journal of Finance* 74(5): 2689–2696, October 2019. DOI 10.1111/jofi.12824 (its abstract: it
+  corrects the proof of Proposition 2, not Proposition 1).
+- Black, F. and R. Litterman (1992). "Global Portfolio Optimization." *Financial Analysts Journal* 48(5): 28–43. DOI
+  10.2469/faj.v48.n5.28. Text not read (image-only scan): cited as the model's origin only, with no claim of its own.
+- He, G. and R. Litterman (1999). "The Intuition Behind Black-Litterman Model Portfolios." Goldman Sachs Investment
+  Management Research, December 1999 (date and series as Idzorek's reference list prints them; single-sourced); SSRN
+  334304, DOI 10.2139/ssrn.334304 (Crossref: posted content, 2002). Abstract (Crossref): the unconstrained optimal
+  portfolio is the scaled market equilibrium portfolio plus a weighted sum of view portfolios. Text not read; §6
+  derives the statement for one view and cites the note for the general case.
+- Idzorek, T. (2007). "A Step-by-Step Guide to the Black-Litterman Model." In S. Satchell (ed.), *Forecasting Expected
+  Returns in the Financial Markets*, Elsevier (Academic Press), pp. 17–38. ISBN 978-0-7506-8321-0, DOI
+  10.1016/B978-075068321-0.50003-0 (Crossref: book chapter, 2007, with no editor recorded; the editor from Open
+  Library's record of the book). Read in the author's draft of 20 July 2004 (the survey's copy): reverse optimization,
+  Formula (1); the posterior mean, (3); the scarce guidance on the scalar (values near zero, 0.01–0.05, 1, and about
+  one over the number of observations, each attributed there to other authors). Formula numbers are the draft's.
+- Jorion, P. (1986). "Bayes-Stein Estimation for Portfolio Analysis." *JFQA* 21(3): 279–292. DOI 10.2307/2331042.
+  Already in SOURCES (LM24): abstract only; §6 states only that an empirical Bayes estimator of the means should
+  outperform the sample mean in a portfolio; the shrinkage target stays unconfirmed.
+- Chopra, V. K. and W. T. Ziemba (1993). "The Effect of Errors in Means, Variances, and Covariances on Optimal
+  Portfolio Choice." *Journal of Portfolio Management* 19(2): 6–11. DOI 10.3905/jpm.1993.409440. In SOURCES (LM7).
+  §2 cites it as lm07.md:509 states its finding; its ratios are not printed (shared decision "References");
+  lm07.md:786 gains the issue number at Stage 4.
+- Michaud, R. O. (1989). "The Markowitz Optimization Enigma: Is 'Optimized' Optimal?" *Financial Analysts Journal*
+  45(1): 31–42. DOI 10.2469/faj.v45.n1.31. Abstract (the journal's own article page, saved 2026-10-24): mean–variance
+  optimization tends to maximize the effects of errors in its inputs, and unconstrained optimization can give results
+  inferior to equal weighting. Text not read (403); §7 cites it at this level only.
+- Michaud, R. O. and R. O. Michaud (2008). "Estimation Error and Portfolio Optimization: A Resampling Solution."
+  *Journal of Investment Management* 6(1), First Quarter 2008; no DOI; pages unverified (joim.com lists the issue, not
+  the pages). Read by the source check in the New Frontier Advisors pre-publication copy (©2007, marked not to be
+  quoted or reproduced without the authors' permission, so paraphrase only; its page numbers are the copy's). Printed,
+  paraphrased: resampled efficiency was first proposed in Michaud (1998), chs. 6–7 (p. 3); its steps (p. 5): draw a
+  mean vector and a covariance matrix around the point estimates (from an assumed distribution, or by the bootstrap),
+  compute the efficient frontier of each draw, repeat, and average the weights of matched efficient portfolios, such
+  as all the minimum-variance or all the maximum-return portfolios, or portfolios matched by utility (pp. 5–7);
+  constraints are optional. Kept out: any quotation, the journal's pages, the authors' illustration (footnote 14) and
+  the method's trademark and patent status. Experiment 4, which averages maximum-Sharpe portfolios, is named a variant.
+- Michaud, R. O. (1998). *Efficient Asset Management*. Harvard Business School Press (publisher and year as the
+  pre-publication copy's reference list prints them; Open Library: Boston, 152 pp., ISBN 0-87584-743-9). Not read;
+  cited only as Michaud and Michaud (2008) describe it. The 2008 second edition (Oxford University Press) is not cited.
+- Sharpe, W. F. (1963). "A Simplified Model for Portfolio Analysis." *Management Science* 9(2): 277–293, January 1963.
+  DOI 10.1287/mnsc.9.2.277. Abstract (Crossref): a model with few parameters for the Markowitz analysis, 2,000
+  securities analysed at a small fraction of the cost, with very nearly the same results. The single-index model's
+  origin; text not read.
+- Higham, N. J. (2002b), *IMA J. Numer. Anal.* 22(3): 329–343, and Rousseeuw, P. J. and G. Molenberghs (1993), *Comm.
+  Stat. Theory Methods* 22(4): 965–984: in SOURCES (Volume II), data as Crossref holds them. Abstracts (OpenAlex):
+  Higham, the nearest correlation matrix in two weighted Frobenius norms by modified alternating projections;
+  Rousseeuw and Molenberghs, methods based on shrinking, a method based on eigenvalues and a new geometric method. §7
+  attributes only these.
+- Chen, Y., A. Wiesel, Y. C. Eldar and A. O. Hero (2010). "Shrinkage Algorithms for MMSE Covariance Estimation." *IEEE
+  Transactions on Signal Processing* 58(10): 5016–5029, October 2010. DOI 10.1109/TSP.2010.2053029. Abstract
+  (OpenAlex): for Gaussian samples, an improvement on Ledoit–Wolf and the oracle approximating shrinkage (OAS)
+  estimator as the limit of an iterative approximation. Named in §8 as OAS's source; text not read.
 - Kan, R. and G. Zhou (2007). *JFQA* 42(3): 621–656. DOI 10.1017/S0022109000004129. In SOURCES (LM24); Crossref's
-  abstract: the plug-in performs poorly; a three-fund rule with the minimum-variance portfolio dominates. One sentence.
-- Best, M. J. and R. R. Grauer (1991). *RFS* 4(2): 315–342. DOI 10.1093/rfs/4.2.315. Crossref only; not cited unless
-  LM28 cites it (weight sensitivity is LM28's).
-- Software: scikit-learn 1.9.1 `LedoitWolf` and `OAS` (installed source read 2026-10-24: the shrinkage formula of
-  `ledoit_wolf_shrinkage` matches (30.3) term by term, and the hand computation agrees to $10^{-17}$ [A30-13]); cvxpy
-  1.9.3 with CLARABEL 0.11.1 (dual values of `y >= 0`, [A30-23]; the nearest correlation matrix as a cone program,
-  [A30-28]).
+  abstract: the plug-in portfolio can perform very poorly out of sample, and a portfolio of the riskless asset, the
+  sample tangency portfolio and the sample global minimum-variance portfolio dominates one of the first two alone. One
+  sentence.
+- Best, M. J. and R. R. Grauer (1991): not cited by LM30 (LM28's §5 cites it).
+- Software: scikit-learn 1.9.1, installed source read 2026-10-24 (file:line as the SOURCES draft records them):
+  `LedoitWolf.fit` centres the columns (`covariance/_shrunk_covariance.py:603-606`), divides by $T$, and returns
+  $(1-\text{shrinkage})S+\text{shrinkage}\,\bar\lambda I$ (`:38-41`); `shrinkage_` is the target's weight (`:506-508`,
+  set at `:610`), so $\hat c=1-$`shrinkage_`; `ledoit_wolf_shrinkage` (`:297-400`) is (30.3) term by term with a
+  common factor $1/N$, and the hand computation agrees to $10^{-17}$ [A30-13]; `OAS`'s `_oas` (`:46-106`) omits Chen
+  et al.'s $2/p$ factor and says so (`:66-71`). cvxpy 1.9.3 with CLARABEL 0.11.1: dual values of `y >= 0` [A30-23]; the
+  nearest correlation matrix as a cone program [A30-28]; `psd_wrap` asserts positive semidefiniteness without testing
+  it (`atoms/affine/wraps.py:83-96`), so the script wraps only a matrix it has built as one.
 
 **Chinese terms** (`plans/vol-5.md`'s list, and 樂詞網 searched 2026-10-24 with the survey's script, all listings, 16
-queries; results kept in the scratch folder):
+queries; rechecked the same day by the fresh pass of 1,817 searches that the decisions on the second recomputation
+cite, whose minor additions are entered below; a Latin name before Chinese takes a space, as Frobenius 範數):
 
 | English | 樂詞網 | Book |
 |:--|:--|:--|
@@ -3850,16 +4206,17 @@ queries; results kept in the scratch folder):
 | covariance matrix; estimation error; condition number | 共變異數矩陣; 估計誤差 (統計學名詞 "error of estimation"); 條件數 (統計學名詞, 數學名詞) | as listed (plan's list) |
 | mean squared error | 均方誤差 (統計學名詞, "mean squared error (MSE)") | 均方誤差 |
 | bias–variance tradeoff | 偏誤及變異數之抵換 (統計學名詞) | 偏誤及變異數之抵換 |
-| sampling error | 抽樣誤差 (統計學名詞, 數學名詞) | 抽樣誤差 |
+| sampling error | 抽樣誤差 (統計學名詞, 數學名詞, 管理學名詞) | 抽樣誤差 |
 | Monte Carlo simulation | 蒙地卡羅模擬 (統計學名詞, 管理學名詞) | 蒙地卡羅模擬 |
 | plug-in | plug-in principle 代入原則 (統計學名詞); no bare entry | 代入 (代入原則's form); 代入投資組合 the book's own |
 | out-of-sample | out-of-sample forecasting 樣本外預測 (統計學名詞); no bare entry | 樣本外 (LM11's 樣本外檢定) |
-| excess return | 超額報酬 (統計學名詞) | 超額報酬 (LM23) |
-| eigenvalue | 特徵值；固有值 (統計學名詞); 固有值 (數學名詞) | 特徵值 (LM11) |
+| excess return | 超額報酬 (統計學名詞; 經濟學 "Excess returns"; 管理學名詞's 超額報酬 is its "abnormal return") | 超額報酬 (LM23) |
+| eigenvalue | 特徵值；固有值 (統計學名詞); 固有值 (數學名詞, whose 特徵值 is "characteristic value; proper value") | 特徵值 (LM11) |
 | Frobenius norm | Frobenius範數 (數學名詞) | Frobenius 範數 (LM18's Glossary) |
 | ill-conditioned matrix | 病態矩陣 (統計學名詞, 數學名詞) | 病態矩陣 |
 | correlation matrix | 相關矩陣 (統計學名詞, 數學名詞) | 相關矩陣 |
 | nonnegativity | nonnegativity condition 非負性條件 (數學名詞) | 非負性條件 |
+| active constraint | — (經濟學 有效限制; 數學名詞 起作用的約束) | 有效限制, as LM7's Glossary 緊限制式（有效限制） (lm07.md:769; decision on the Chinese terms) |
 | weighted average | 加權平均(數) (統計學名詞) | 加權平均 |
 | prior, posterior distribution | 事前分布; 事後分布 (SOURCES, Volume IV) | as LM24 |
 | resampling; bootstrap | 重抽樣; 自助重抽法 (SOURCES, Volume IV) | as LM22 |
@@ -3869,46 +4226,65 @@ queries; results kept in the scratch folder):
 | reference portfolio; view; equal weights | no entry ("reference portfolio" 0 results; "views" none in these listings; "equally weighted index" 等權指數, 管理學名詞) | 參考投資組合, 觀點 (the book's own); 等權重 (LM10's) |
 | Black–Litterman; Ledoit–Wolf; James–Stein | none for the first two; James-Stein估計量 (統計學名詞) | English kept; James–Stein 估計量 |
 
-**Open before Stage 2** (questions for the editor, each with a recommendation; the first two wait for decision F's
-reading, now under way):
+**Open before Stage 2** (one question for the editor, with a recommendation):
 
-1. **DeMiguel, Garlappi and Uppal (2009) beyond the abstract.** The draft's E3 said that in their calibration 1/N lies
-   close to the tangency portfolio, which the abstract does not state. Applied fallback (decision F): the sentence is
-   out; E3 keeps the abstract's 3,000 months for 25 assets and states this model's own contrast (0.88 against 0.33).
-   Recommendation: if the reading confirms how their calibration places 1/N against the tangency, E3 may add that one
-   sentence with its page; otherwise E3 stays as now.
-2. **Michaud's resampled efficiency.** The method's own source (a book) was not verified. Applied fallback: §7
-   describes the average of resampled weights in its own words, cites Michaud (1989) only for error maximization (its
-   abstract), and names no procedure. Recommendation: keep that wording even if the book is read, and add the name
-   with its source only if the reading confirms that the book defines the average this way.
-3. **Owner of R2's first-window mean excess and volatility** (A30-24: 4.38%, 6.71%). LM31's A31-16 prints the same
-   6.71%, and decision A4 gives LM28 every first-window statistic, but LM28 prints neither number. Recommendation: LM30
-   owns both, as the Black–Litterman calibration that only LM30 uses, and LM31 echoes A30-24.
-4. **Tags LM30 cites, for the cross-check of the providers' lists** (decision C8). LM30 now cites (27.1)–(27.2),
-   (27.4), (27.5), (27.8), (28.2), (28.3), (28.6), (28.8), (28.9), (29.3), (29.4), (29.5) and (29.6). It does not cite
-   (27.7), (28.1), (28.5), (29.1), (29.2), (29.7) or (29.8), which LM27–LM29's drafts list for LM30. Recommendation:
-   those three briefs drop LM30 from the second group.
+1. **A30-09's exact tie.** The share of samples with $\mathbf 1^{\top}\hat{\mathbf f}\le0$ is exactly 21.15% (2,115 of
+   10,000), and its SE of 0.4 points puts the last printed digit at one decimal, where 21.15 is a tie. The decision on
+   the second recomputation ("the last printed digit sits at the standard error's first significant digit") gives no
+   rule for a tie; Volume IV prints a tie with more digits or with a coarser form whose rounding is safe
+   (`plans/vol-4.md`, LM23's 0.69645 printed as 0.696). Applied: "2,115 of 10,000 (21%, SE 0.4 points)" in the §2
+   row, E1 and the first pitfall (problem 11 prints the count). Recommendation: keep this form, since the count carries
+   the exact value and 21% keeps no digit that the SE does not support; the alternative is "21.15%", named as the exact
+   share of these samples.
+
+Closed in this revision (2026-10-24, to the decisions on the first revision and on the second recomputation):
+
+- The first revision's Open 1, DeMiguel, Garlappi and Uppal (2009) beyond the abstract: the source check read the
+  published article. E3 prints panel E's calibration (monthly Sharpe ratios 0.12 for 1/N and 0.15 for the tangency, p. 1939) and
+  "more than 3,000 months" for 25 assets (§4, pp. 1939–1941), and it names their criterion, the certainty equivalent.
+  It compares their ratio, 0.8, with this model's 0.37 (A30-43). "1/N lies close to the tangency portfolio" and
+  Table 6's values stay out (Sources).
+- The first revision's Open 2, Michaud: §7 attributes resampled efficiency to Michaud (1998) as Michaud and Michaud
+  (2008) describe it, paraphrased; experiment 4 is named a variant, and Michaud (1989) stays at the level of its
+  abstract (decisions on the first revision).
+- The first revision's Open 3, the owner of R2's first-window mean excess return and volatility: LM30, by decision
+  A4's exception; LM31 echoes the volatility as A31-16 prints it (6.709%).
+- The first revision's Open 4, the tags LM30 cites: settled by the cross-check's tag table (Y1). The revised briefs of
+  LM27–LM29 name LM30 as the user of (27.1), (27.2), (27.4), (27.5), (27.8), (28.2), (28.3), (28.6), (28.8), (28.9), (29.3), (29.4),
+  (29.5) and (29.6), which are exactly the tags LM30 cites; only LM35 cites an LM30 tag, (30.4).
+- The first window's span (the second recomputation's finding 1, Y3): A30-03 now measures from the close before the
+  first return and echoes A28-02's 2.05 calendar years; $\tau=T/A$ is A28-02's as well, and LM30 prints it only in E2
+  (decision C12's exception for a computation shown beside it). The verifier's check (2026-10-25) found that the
+  computation also needs the volatilities' second decimal (11.9 over $\sqrt{2.0745}$ gives 8.26, which prints 8.3, not
+  A28-27's 8.2), so E2 prints them at two decimals, 13.50, 11.87, 8.54, 9.39 and 23.17%, and all five SEs reproduce
+  (A30-04, A30-06). The re-check found three decimals of $\tau$ enough (2.074 gives the same five SEs); $\tau$ stays
+  2.0745, its fourth decimal keeping it off a rounding boundary, and A28-02's and A28-06's rows record both prints
+  (decisions on the third revision).
 
 Closed by the decisions on the briefs (2026-10-24): the first window's statistics are LM28's and LM30 echoes them
 (A4; draft Open 1); the simulation's model is kept, with experiment 2 worded as "about equal at 1.04 years, well
-above at 2.07" (D and "Per module"; draft Open 2); Black–Litterman uses one relative view, $\Xi=K\hat\Sigma K^{\top}/T$ and
+above at 2.07" (D and "Per module"; draft Open 2; its lengths read "years of sessions" by the decisions on the third
+revision); Black–Litterman uses one relative view, $\Xi=K\hat\Sigma K^{\top}/T$ and
 $\delta=9.74$ (D; draft Open 3, so A30-41's alternative $\delta$ is withdrawn); no QLIKE loss (D, the brief's proposal
 accepted; draft Open 4); the U28 window grid stays, labelled as chosen after the halves' result (D; draft Open 5); R5 is unchanged,
 since no recorded decision changed the rules fixed in advance (shared "Through case"; draft Open 6); the first half's
 long-only portfolio and the U28 halves' minimum variance are LM30's, LM29 cites them (A5; draft Open 7); (30.4)'s identity is
 derived and its positive semidefiniteness stated (D, accepted; draft Open 8); the notation proposals and the multiplier
-scale, said once in §5 (B4, B5; draft Open 9). Michaud (draft Open 10) is Open 2 above.
+scale, said once in §5 (B4, B5; draft Open 9). Michaud (draft Open 10) became the first revision's Open 2, closed above.
 
 ## LM31 Risk Parity, HRP and Volatility Targeting
 
 Stage 1 brief, drafted 2026-10-24 from the editor's spine (`plans/vol-5.md`, "### LM31 Risk Parity, HRP and Volatility
 Targeting") and the shared decisions above it; revised the same day to the editor's decisions on the briefs
 (`plans/vol-5.md`, "Editor's decisions on the briefs", A–G and "Per module", and "Decisions on the first revision")
-and to the source check's report (decision F). Every number carries its anchor ID at
-first appearance; `data/vol5_anchors_lm31.py` prints them all (46 rows, `## LM31` of `plans/vol-5-anchors.md`; A31-46
-is a source check). Numbers quoted from published modules carry their file:line; statistics another module owns
-("Owners", shared decision "Through case"; decisions A1–A6) are echoed with that module's name and anchor ID and are
-not LM31's to print.
+and to the source check's report (decision F); revised a third time to "Decisions on the second recomputation and
+cross-check" (the round-2 recomputation's findings, the cross-check's Y1, Y11, Y17–Y19, and the second hunt's
+readings of LM31's sources); given a last pass on 2026-10-25 to the third revision's check and "Decisions on the
+third revision". Every number carries its anchor ID at first appearance; `data/vol5_anchors_lm31.py`
+prints them all (46 rows, `## LM31` of `plans/vol-5-anchors.md`; A31-46 is a source check). Numbers quoted from
+published modules carry their file:line; statistics another module owns ("Owners", shared decision "Through case";
+decisions A1–A6) are echoed with that module's name and anchor ID, at most at the owner's precision unless a
+computation shown beside them needs more (decision C12), and are not LM31's to print.
 
 **Prereq:** `[7, 8, 10, 11, 16, 26, 27, 28, 29, 30]`. What each supplies (tags rechecked in `src/`; LM27–LM30's tags
 as their briefs number them, cited by number, decision C8):
@@ -3935,23 +4311,26 @@ as their briefs number them, cited by number, decision C8):
 - LM27 (brief): E5's two frames; (27.1)–(27.3), the wealth recursion with drift, cash and borrowing, costs and
   $\mathrm{TO}_t$, for R8; R1 and R2; (27.5) $\operatorname{Cov}(R_i,R_p)=(\Sigma\mathbf w)_i$ and $\beta_{i,p}$, and
   (27.6) $\mathrm{MRC}_i$, $\mathrm{RC}_i$ and Euler's $\sum_i\mathrm{RC}_i=\sigma_p$, derived there only (decision A6)
-  and cited by §2; R1's first-window risk shares (A27-21), which X2 echoes.
-- LM28 (brief): (28.2), the global minimum-variance portfolio, the lower end of §2's ordering; the first window's
-  statistics (decision A4): the funds' volatilities and correlations (A28-06, A28-07), R1's volatility (A28-15) and
-  $\mathbf w^{\mathrm{mv}}$, equal to R3 on that window (A28-10), echoed in E1–E4 and KC §2.
+  and cited by §2; R1's first-window risk shares (A27-21; decision A4 excepts them from LM28's first-window
+  statistics), which X2 echoes.
+- LM28 (brief): (28.2), the global minimum-variance portfolio, equal to R3 on the first window because every weight
+  is positive there (A28-10), so that it gives the lower end of §2's ordering on that window; the first window's
+  statistics (decision A4): the funds' volatilities and correlations (A28-06, A28-07, printed by LM28 to one and two
+  decimals, and here at that precision unless a computation beside them needs more, decision C12), R1's volatility
+  (A28-15) and $\mathbf w^{\mathrm{mv}}$ (A28-10), echoed in E1–E4 and KC §2.
 - LM29 (brief): (29.2)–(29.3), convexity (a positive definite Hessian makes a function strictly convex; a strictly
   convex function has at most one minimizer; a local minimum of a convex function is global), for theorem (31.2);
   (29.5), KKT for long-only minimum variance (every held fund has the same $(\Sigma\mathbf w)_i$), for KC §2; R3 in its
-  through-case form; cvxpy, CLARABEL, tolerances and the solver-output rule.
+  through-case form, the long-only minimum variance that is the lower end of Maillard et al.'s ordering; cvxpy,
+  CLARABEL, tolerances and the solver-output rule.
 - LM30 (brief): the realized out-of-sample volatility of R1, R3 and R5 (A30-12), 1/N and minimum variance on U28's
-  halves (A30-19) and R2's first-window volatility (A30-24), echoed in §5 and E4.
+  halves (A30-19) and R2's first-window volatility (A30-24; decision A4's exception), echoed in §5 and E4.
 
 **Leads:** `[32, 33, 34, 35]`, each of which lists 31 among its prerequisites (decision C9): LM32 (VaR, ES and
 drawdowns of R6–R8; (31.7) for R8's exposure), LM33 (R6–R8's Sharpe ratios and tests; their realized volatilities,
 A31-27, echoed), LM34 (its own net results, costs, annual turnover and financing sensitivity for R6–R8; it cites (31.7) and
 echoes R8's exposure path, A31-29), LM35 (R6 by (31.1), R7, R8 by (31.7); R8's leverage into the 2020 and 2025 scenarios and its
-caps against the ruin line). Volume VIII's briefs may add modules that compare volatility targeting with Kelly-type
-sizing.
+caps against the ruin line).
 
 **Forward links honoured.**
 
@@ -3959,7 +4338,7 @@ sizing.
 |:--|:--|:--|
 | lm07.md:94 | the marginal variance is twice the covariance with the portfolio, "a fact [[LM31]] builds into risk budgeting" | §2: LM27 turns it into (27.6), $\mathrm{MRC}_i=(\Sigma\mathbf w)_i/\sigma_p$ (decision A6); the budget conditions (31.1) are built on (27.6) and so on this fact |
 | lm08.md:290 | "[[LM31]] groups assets by this distance" ($\sqrt{2(1-\rho)}$) | §4: HRP's $d_{ij}$ is half of it; single linkage on LM8's distance gives the same tree with doubled heights [A31-21]; HRP then clusters on the column distance of $d$ (Stage 4 note below) |
-| lm10.md:225 | splitting $s_p^2$ into one share per asset, "and judging which split is meaningful", is [[LM27]]'s and [[LM31]]'s | LM27 owns the split; §2 uses it as a target and §5 judges it after the fact (ex-post shares, negative shares in 29 of 91 holding months) |
+| lm10.md:225 | splitting $s_p^2$ into one share per asset, "and judging which split is meaningful", is [[LM27]]'s and [[LM31]]'s | LM27 owns the split; §2 uses it as a target and §5 judges it after the fact (R6's ex-post shares; each holding month's own target weights, on that holding month's covariance, give some fund a negative share in 29 of 91 holding months [A31-26]) |
 | lm10.md:425 | entry $i$ of $2\hat\Sigma\mathbf w$ is a rate of change, not asset $i$'s share ([[LM27]], [[LM31]]) | §2: minimum variance equalizes the rates $(\Sigma\mathbf w)_i$ of held funds ((29.5)), ERC equalizes the products $w_i(\Sigma\mathbf w)_i$; KC §2 |
 | lm16.md:225 | splitting $\sigma_p^2$ among assets is [[LM27]]'s and [[LM31]]'s | as lm10.md:225; LM27 derives (27.5)–(27.6) from (16.4), which §2 cites |
 | lm26.md:183 | "[[LM31]] scales a position by such a forecast" | §6: R8 scales R6 by the EWMA (26.2); the lab's extension uses (26.4)'s GARCH forecast instead |
@@ -3991,7 +4370,8 @@ part; 7 §7 / E9, E10 / P10, KC §7; 8 §6 / §6's evidence paragraph against R8
 ERC as $b_i=1/N$; inverse-volatility weights and the two cases in
 which they are ERC (two assets for any $\rho$; equal correlations) (31.3), derived; ERC against minimum variance
 (rates against products) and the ordering $\sigma_{\mathrm{mv}}\le\sigma_{\mathrm{erc}}\le\sigma_{1/N}$ (Maillard,
-Roncalli and Teïletche 2010, *stated without proof*), with Bruder and Roncalli's (2012, §2.3.4, p. 10) ordering for
+Roncalli and Teïletche 2010, *stated without proof*; their $\sigma_{\mathrm{mv}}$ is the long-only minimum variance,
+Appendix A.3 of their 2009 working paper), with Bruder and Roncalli's (2012, §2.3.4, p. 10) ordering for
 unequal budgets stated; existence and uniqueness of the long-only budget portfolio for positive definite $\Sigma$ and
 positive budgets (31.2), *derived in full* (the minimizer's existence in a Deep Dive), with Bruder and Roncalli (2012,
 §2.3.3, pp. 9–10) as the source for unequal budgets, whose argument there is a sketch (source check, decision F); why
@@ -4002,8 +4382,8 @@ property of the solution, Bruder and Roncalli's eq. (7), p. 9) and its failure a
 check; HRP as published (López de Prado 2016): $d_{ij}$ and the factor 2 to
 LM8's distance, the column distance, single linkage, the quasi-diagonal order, recursive bisection (31.5)–(31.6); why
 implementations differ (the author's code against linking on $d$); that the bisection cuts the ordered list, not the
-tree; R6's and R7's weights and risk shares across the 92 signals, their ex-post risk shares and realized volatility;
-R2's first-window risk shares (decision A4); U28's tree, its heatmap, and the out-of-sample volatility of
+tree; R6's and R7's weights and ex-ante risk shares across the 92 signals, R6's ex-post risk shares, and the realized
+volatility of R6, R7 and R8; R2's first-window risk shares (decision A4's exception); U28's tree, its heatmap, and the out-of-sample volatility of
 inverse-volatility, ERC and HRP on U28's halves (1/N and minimum variance there are LM30's, decision A5); R8 (31.7): the
 EWMA forecast of R6's book, $L_t$, the cap, cash and financing, the exposure path, the per-trade statistics of R8's
 exposure (decision A2), the domain check; the EWMA covariance matrix in one paragraph and its identity with R8's
@@ -4017,10 +4397,12 @@ row). VaR, ES and drawdowns of R6–R8 → LM32. Their Sharpe ratios, intervals 
 growth, costs, gross against net, the annual turnover of every rule (A34-06; decision A2) and R8's financing
 sensitivity at spreads of 0 and 5 points → LM34. Each rule's loss on 7 April 2025, R8's crash behaviour and its caps
 against the ruin line → LM35 (decision A1). The first window's fund statistics, R1's first-window volatility and R3's
-first-window weights → LM28 (decision A4). 1/N, minimum variance and shrinkage on U28's halves, R1's, R3's and R5's
-realized volatility, R2's first-window volatility → LM30 (decision A5). Multivariate GARCH → out of scope (one
+first-window weights → LM28 (decision A4); R1's first-window risk shares → LM27 (A4's carve-out, A27-21). 1/N,
+minimum variance and shrinkage on U28's halves, R1's, R3's and R5's realized volatility (decision A5), and R2's
+first-window volatility (A4's exception, A30-24) → LM30. Multivariate GARCH → out of scope (one
 sentence). Choosing $\lambda$, the cap or a trigger threshold by backtest → LM34's search. Other linkages and
-tree-following bisections → not in the book, one sentence. To the lab (density): R7 re-implemented at all 92 signals,
+tree-following splits → not in the book, one sentence (López de Prado notes that stage 3 could split along the tree's
+clusters instead, p. 11 of the SSRN version). To the lab (density): R7 re-implemented at all 92 signals,
 the risk-triggered variant of R8, the GARCH-scaled variant.
 
 **Uses before taught** (one sentence each in the text):
@@ -4036,8 +4418,9 @@ the risk-triggered variant of R8, the GARCH-scaled variant.
 - **E5** (shared decision "Data"; `data/vol5_series.py` → `data/processed/vol5_frames.parquet`, through
   `vol5_series.frames("E5")`; FinMind `TaiwanStockPrice`, `TaiwanStockDividendResult`, `TaiwanStockSplitPrice`,
   retrieved 24 October 2026). Estimation frame $T=2{,}362$ joint one-session returns, 2017-01-18 → 2026-10-08,
-  $A=242.95$ [A31-01]; wealth frame 2,368 sessions, $A_{\mathrm w}=243.57$, 9.7221 years (calendar days ÷ 365.25,
-  AUTHORING §8) [A31-02] (LM27 describes both). Schedule: 92 signals, 27 February 2019 (traded 4 March 2019) to 30
+  $A=242.95$ [A31-01]; wealth frame 2,368 sessions, $A_{\mathrm w}=243.57$, 9.7221 years (calendar days ÷ 365.25
+  from the close before the first return, 17 January 2017, to 8 October 2026; AUTHORING §8, decision C7) [A31-02]
+  (LM27 describes both, A27-01–A27-03, and prints $A$ and $A_{\mathrm w}$ to three decimals; here to two decimals). Schedule: 92 signals, 27 February 2019 (traded 4 March 2019) to 30
   September 2026 (traded 1 October 2026); the first window is the 504 estimation rows 13 February 2017 → 27 February 2019
   [A31-03]. Out-of-sample returns: 1,851 sessions from 5 March 2019; 91 complete holding months of 12–23 sessions, the
   5-session tail to 8 October 2026 left out [A31-04]. A holding month runs from the session after a trade through the
@@ -4052,25 +4435,31 @@ the risk-triggered variant of R8, the GARCH-scaled variant.
 - **U28** (Volume II; `data/lm10_series.py`'s `u28()`, FinMind `TaiwanStockPrice`, retrieved 11 October 2026, closes
   repaired by `data/vol2_series.py`): $T=4{,}382$, $A=245.48$; halves of 2,191 (LM11's) [A31-05]. Price indices,
   covariance only: every caption says so, and no mean of U28 is used.
-- **Echoes** (other modules' statistics, printed only with their owner and anchor named; decisions A4, A5): the first
-  window's fund volatilities and correlations (LM28's A28-06, A28-07) [A31-06]; R1's first-window risk shares (LM27's
-  A27-21) and volatility (LM28's A28-15), R3's first-window weights and volatility (LM28's A28-10) [A31-12, A31-13];
-  R2's first-window volatility (LM30's A30-24) [A31-16]; 1/N and minimum variance on U28's halves (LM30's A30-19)
-  [A31-23]; the realized volatility of R1, R3 and R5 (LM30's A30-12) [A31-27]. R2's first-window risk shares are LM31's
-  (decision A4) [A31-16]. A31-36 holds only R8's per-trade statistics (decision A2); annual turnover is LM34's A34-06,
-  not printed here.
+- **Echoes** (other modules' statistics, printed only with their owner and anchor named, at most at the owner's
+  precision unless a computation beside them needs more; decisions A4, A5, C12): the first window's fund volatilities
+  and correlations (LM28's A28-06, A28-07; one and two decimals, except E1's volatilities, whose weights need two, and
+  E5's variances, taken from the unrounded $\hat\Sigma$) [A31-06]; R1's first-window risk shares (LM27's A27-21, A4's
+  carve-out) and volatility (LM28's A28-15), R3's first-window weights and volatility (LM28's A28-10) [A31-12,
+  A31-13]; R2's first-window volatility (LM30's A30-24, A4's exception; LM30 prints 6.709% beside its $\delta$)
+  [A31-16]; 1/N and minimum variance on U28's halves (LM30's A30-19) [A31-23]; the realized volatility of R1, R3 and R5
+  (LM30's A30-12) [A31-27]. R2's first-window risk shares are LM31's (A4's exception) [A31-16]. A31-36 holds only R8's
+  per-trade statistics (decision A2); annual turnover is LM34's A34-06, not printed here.
 - **Conventions.** Covariances divide by $T$ (`cov0`). Annualized volatilities: $\sqrt A$ with the estimation frame's
   $A$ for window quantities, U28's $A$ for U28, $\sqrt{A_{\mathrm w}}$ for a rule's realized volatility over the
   out-of-sample period. Risk shares $\mathrm{RC}_i/\sigma_p$ ((27.6)). Weights and risk shares are scale-free: ERC on
   the daily or the annualized covariance agrees to rounding (below $10^{-15}$) [A31-15]. Realized volatility of a rule:
   `summary()`'s centred standard deviation of daily net returns. A holding month's realized volatility: the uncentred
   root mean square of its daily net returns (as $\bar\sigma_t$ is uncentred), divided by $\bar\sigma_t$ at its signal,
-  in daily units; where an annual figure is printed beside such a ratio, the month's figure and its target are both
-  annualized with the target's $A=242.95$, so that the ratio reads off the printed figures [A31-34]. The SD of the log
-  ratio divides by the 91 holding months (the book's divisor $T$). QLIKE is (26.8), with the month's mean squared daily return
-  as $V$. Quantiles `inverted_cdf`; counts with the 1e-12 guard. A gap at machine precision prints as a bound ("to
-  rounding"), since its digits depend on the order of the operations. Values within a tenth of a unit of a rounding
-  boundary at the precision printed here are flagged in the anchor's Printed column (the Volume IV rule).
+  in daily units; where an annual figure is printed beside such a ratio, the holding month's figure and its target are both
+  annualized with the target's $A=242.95$, so that the ratio reads off the printed figures [A31-34] (decision on the
+  first revision, LM31). The SD of the log ratio divides by the 91 holding months (the book's divisor $T$). QLIKE is
+  (26.8), with the holding month's mean squared daily return as $V$; the EWMA wins a holding month when its QLIKE is the lower,
+  and a win's gain or a loss's cost is the gap between the two QLIKE values [A31-35]. Quantiles `inverted_cdf`;
+  counts with the 1e-12 guard. A gap at machine precision prints as a bound ("to rounding"), since its digits depend on
+  the order of the operations. Weights and shares are rounded separately from unrounded values that sum to 1; where
+  the printed parts do not sum to the total, the text says "rounded separately" and gives their printed sum
+  (PITFALLS). Values within a tenth of a unit of a rounding boundary at the precision printed here are flagged in the
+  anchor's Printed column only; the text prints the rounded value without a mark (decision C11).
 - **No simulation in the text.** The widget's test in `data/lm31_charts.py` draws 500 random positive definite
   $3\times3$ matrices with `default_rng([1, 20261011])` (experiment 1) to compare the widget's code with `erc()`; it
   prints no statistic.
@@ -4084,15 +4473,17 @@ the risk-triggered variant of R8, the GARCH-scaled variant.
 full-sample tree, heatmap and in-sample volatilities (X3, X4, X6's in-sample column). *Out-of-sample* (fixed in advance
 on 2026-10-24): R6, R7 and R8 in the through case (weights at each signal, exposure path, realized volatility, ex-post
 risk shares, holding-month ratios), three of the through case's eight rules; the two variance forecasts made at each signal
-and scored by QLIKE; U28's halves, one fixed split in LM7's pattern, four portfolios. *In-sample illustrations*, not
+and scored by QLIKE; U28's halves, one fixed split in LM7's pattern, LM31's three portfolios (inverse volatility, ERC,
+HRP) beside LM30's 1/N and minimum variance (A30-19). *In-sample illustrations*, not
 candidates: inverse-volatility weights on E5, the budget portfolio of E4, the tree linked on $d$, Jacobi's fixed point,
 and the lab's risk-triggered variant (its threshold, 0.5, fixed by the editor on 2026-10-24 before any lab result,
 decision D) and GARCH-scaled variant. *Constructed:* the widget's and the problems' inputs. Local
 note: "R6, R7 and R8 are three of the eight rules fixed on 24 October 2026, before any result was computed. Their
-weights use only the 504 sessions before each month-end, and they trade at the next session's close, so every
-through-case result is out of sample; whether one rule beats another is [[LM33]]'s test, across eight rules. Weights,
-risk shares and trees on one window are descriptive. On U28 one split was fixed in advance and four portfolios are
-compared. Other variants are illustrations, not candidates."
+weights use only the 504 sessions up to and including each month-end, and they trade at the next session's close, so
+every through-case result is out of sample; whether one rule beats another is [[LM33]]'s test, across eight rules.
+Weights, risk shares and trees on one window are descriptive. On U28 one split was fixed in advance, and three
+risk-based portfolios are compared with [[LM30]]'s 1/N and minimum variance. Other variants are illustrations, not
+candidates."
 
 **Notation.** AUTHORING §6 with the Portfolios table. Used: $R$, $\mathbf R_t$, $T$, $t$, $A$, $A_{\mathrm w}$ (the
 through case's), $N$ ($N=5$ on E5, 28 on U28), $i$, $j$, $\mathbf w$, $w_i$, $\mathbf 1$, $\Sigma$, $\hat\Sigma$,
@@ -4117,76 +4508,80 @@ update writes $(\Sigma\mathbf y)_i-\sigma_i^2y_i$), $\alpha$ (the paper's split 
 cluster variance, $\sigma_{\mathrm{tgt}}$ (§6's fixed volatility target; R8 has none), $K\mathbf w=\mathbf b$,
 $\mathbf e_i$, $\kappa$.
 
-**Motivating case: "Equal risk, then a forecast"** (box; 160 words in three paragraphs of 56, 72 and 32; 11 sentences,
-average 14.5 words, the longest 24, which carries one chain of reasoning to its "so"; decision C10)
+**Motivating case: "Equal risk, then a forecast"** (box; 162 words in three paragraphs of 56, 74 and 32; 11 sentences,
+average 14.7 words, the longest 24, which carries one chain of reasoning to its "so"; decision C10)
 
 > A fund that cannot trust estimated means can still share risk evenly. On 31 March 2025 rule R6 did that for E5's
 > five funds. It put 30.7% in the bond fund 00679B and 12.0% in the oil fund 00642U, so each fund carried a fifth of the
 > risk [A31-32]. Rule R8 then scales R6 by a forecast.
 >
-> R6's book had been calm: its EWMA forecast was 5.89% a year, against 7.84% over two years. So on 1 April R8 held 1.33
-> times its equity in the funds, borrowing the extra 0.33 at 3.5% a year [A31-32, A31-37]. On 7 April, the first
-> session after the Qingming holiday, the forecast jumped to 23.58%, an implied exposure of 0.33. R8 trades only after a
-> month-end, so it kept its leverage until 2 May.
+> R6's book had been calm: its EWMA forecast was 5.89% a year, against 7.84% over the last 504 sessions. So on 1
+> April R8 held 1.33 times its equity in the funds, borrowing the extra 0.33 at 3.5% a year [A31-32, A31-37]. On 7
+> April, the first session after the Qingming holiday, the forecast jumped to 23.58%, an implied exposure of 0.33. R8
+> trades only after a month-end, so it kept its leverage until 2 May.
 >
 > Over that holding month its realized volatility was 5.78 times its target, the worst of all 91 [A31-34]. Does a
 > forecast keep risk steady? And what does an equal share of risk buy?
 
 Resolved: (a) the forecast: §7, E9, E10: over 91 holding months R8's realized-to-target ratio has median 0.98 against
 R6's 0.83, but the same spread (SD of its logarithm 0.421 for both) [A31-34]; as a forecast of R6's next holding month
-the EWMA's mean QLIKE is 0.791 against the window's 0.691 [A31-35], because a one-day forecast stands for a whole month
-(lm26.md:142) and a month-end rule cannot meet a gap. (b) equal risk: §2, §5, E7: the shares are equal on the window by
-construction; on the covariance of the 1,845 joint dates that followed (5 March 2019 → 8 October 2026), R6's average
-weights carried 20.5, 19.2, 19.2, 23.1 and 18.0% of the risk, while holding month by holding month a fund's share ranged widely and some share was negative in 29
-of 91 [A31-26]. The qualifying date (the "first session after the Qingming holiday") is PITFALLS §7's; no cause of the
-fall is printed.
+the EWMA's mean QLIKE is 0.791 against the window's 0.691, and without the one holding month 2 April → 2 May 2025 the
+order reverses [A31-35], because a one-day forecast stands for a whole holding month (lm26.md:142) and a month-end rule
+cannot meet a gap. (b) equal risk: §2, §5, E7: the shares are equal on the window by construction; on the covariance
+of the 1,845 joint dates that followed (5 March 2019 → 8 October 2026), the mean of R6's 92 target weights carried
+20.5, 19.2, 19.2, 23.1 and 18.0% of the risk, while each holding month's own target weights, on that holding month's
+covariance, gave shares that ranged widely, and some share was negative in 29 of 91 holding months [A31-26]. The
+qualifying date (the "first session after the Qingming holiday") is PITFALLS §7's; no cause of the fall is printed.
 
 **Sections** (prose words, AUTHORING §1 count):
 
 | § | Title {lo} | Content | Words |
 |:--|:--|:--|--:|
 | 1 | Introduction | capability layer: allocate by risk alone, then scale the book by a forecast; case + X1; roadmap; notation and hygiene notes | 380 |
-| 2 | Risk Contributions as Targets {1,5} | R1's first-window shares (LM27's A27-21) as the picture; (27.5)–(27.6) cited, not re-derived (decision A6; lm07.md:94's fact is in (27.6)); budgets and (31.1), derived from (27.6); ERC; E1 (two funds: inverse volatility for any $\rho$); equal correlations → inverse volatility, derived, with LM11's condition; minimum variance equalizes rates, ERC products (lm10.md:425; (29.5)); the ordering stated (Maillard et al.), its lower end (28.2); E2, X2; pitfall: a risk share is not a weight and not a loss share; 導讀; KC | 590 |
+| 2 | Risk Contributions as Targets {1,5} | R1's first-window shares (LM27's A27-21) as the picture; (27.5)–(27.6) cited, not re-derived (decision A6; lm07.md:94's fact is in (27.6)); budgets and (31.1), derived from (27.6); ERC; E1 (two funds: inverse volatility for any $\rho$); equal correlations → inverse volatility, derived, with LM11's condition; minimum variance equalizes rates, ERC products (lm10.md:425; (29.5)); the ordering stated (Maillard et al.; its lower end is the long-only minimum variance, R3, which equals (28.2)'s $\mathbf w^{\mathrm{mv}}$ on the first window); E2, X2; pitfall: a risk share is not a weight and not a loss share; 導讀 (its 風險預算 is a budget per asset, where LM7's capped the total volatility); KC | 590 |
 | 3 | Budgets: Existence, Uniqueness and Computation {2,3} | theorem (31.2), three hypotheses listed, proof in the text by (29.2)–(29.3), existence of the minimizer in a Deep Dive; why long-only and positive budgets (Bruder and Roncalli 2012, §2.2); Newton (gradient $\Sigma\mathbf y-\mathbf b/\mathbf y$, Hessian $\Sigma+\operatorname{diag}(\mathbf b/\mathbf y^2)$); CCD (31.4) and its convergence stated; Jacobi's fixed point; cvxpy's log form as the check, with its tolerance (decision C5); E3, E4; pitfall: a fixed point that is not a descent; 導讀; KC | 650 |
-| 4 | Hierarchical Risk Parity {4} | X3, X4 (U28); $d_{ij}$ (31.5) as half of (8.10)'s per-date distance, a metric by (8.8); the column distance; single linkage; scaling leaves the tree (LM8's promise); quasi-diagonal order; bisection (31.6); no inverse needed; E5 (three funds by hand), E6 (R7's first weights; the cut separates 0050 from 00646); pitfall: two codes, two trees (the author's code reads the square matrix as observations; linking on $d$ changes 17 of 92 orders); 導讀; KC | 660 |
-| 5 | R6 and R7 Out of Sample {5} | X5: weights and shares across 92 signals; E7: ex-post shares; realized volatility 10.32% and 10.14%, beside LM30's R1, R3 and R5 (A30-12; R1's 12.48% named as out of sample, decision C7); X6: U28's halves, HRP the lowest of the four LM31 computes (1/N, IV, ERC, HRP) out of sample, and above LM30's long-only minimum variance (A30-19); López de Prado's Monte Carlo stated with its design; whether one rule beats another is [[LM33]]'s (the hygiene note); KC | 480 |
-| 6 | Volatility Targeting: R8 {6,8} | (31.7): $\bar\sigma_t$, (26.2) on R6's book (simple returns, uncentred), the cap, cash at 1.5%, borrowing at 3.5%, drift, cash and borrowing in the wealth recursion by (27.1)–(27.3); domain check; E8 (first signal by hand); X7 (exposure path); the EWMA matrix (31.8) and its identity; evidence: Moreira and Muir (design and sample), Harvey et al. (which assets gain); pointers to [[LM32]], [[LM34]]; pitfall: R8's target moves with R6's own past; 導讀; KC | 640 |
-| 7 | Judging the Target Out of Sample {7} | X8: 91 holding months' ratios, R6 against R8; E10: QLIKE of the window and the EWMA, the two crash holding months; why (lm26.md:142; (26.4) reverts); E9: April 2025, periodic re-estimation against a risk trigger (guidance); the trigger as a lab illustration, its threshold 0.5 fixed by decision D; the size of R8's trades (mean 9.2% one-way over the 91 trades after the first purchase, the largest 45.2%; annual turnover is [[LM34]]'s, decision A2); the data do not support R8's leverage on E5 (guidance g:116); case resolved; pitfall: a month-end rule cannot meet a gap; 導讀; KC | 570 |
+| 4 | Hierarchical Risk Parity {4} | X3, X4 (U28); $d_{ij}$ (31.5) as half of (8.10)'s per-date distance, a metric by (8.8); the column distance; single linkage; scaling leaves the tree (LM8's promise); quasi-diagonal order; bisection (31.6); no inverse needed; U28's full-sample weights and in-sample volatilities (X4's note, A31-22); E5 (three funds by hand), E6 (R7's first weights; the cut separates 0050 from 00646); pitfall: two codes, two trees (the author's code reads the square matrix as observations and gives the column-distance tree at all 92 windows and on U28, A31-19; linking on $d$ changes 17 of 92 orders, A31-20); 導讀; KC | 670 |
+| 5 | R6 and R7 Out of Sample {5} | X5: weights and ex-ante shares across 92 signals; E7: R6's ex-post shares; realized volatility 10.32% and 10.14% (A31-27), beside LM30's R1, R3 and R5 (A30-12; R1's 12.48% named as out of sample, decision C7); X6: U28's halves, HRP the lowest out of sample of 1/N (LM30's) and LM31's three (IV, ERC, HRP), and above LM30's long-only minimum variance (A30-19); López de Prado's Monte Carlo stated with its design; whether one rule beats another is [[LM33]]'s (the hygiene note); KC | 480 |
+| 6 | Volatility Targeting: R8 {6,8} | (31.7): $\bar\sigma_t$, (26.2) on R6's book (simple returns, uncentred), the cap, cash at 1.5%, borrowing at 3.5%, drift, cash and borrowing in the wealth recursion by (27.1)–(27.3); domain check; E8 (first signal by hand); X7 (exposure path; the ranges of $\bar\sigma_t$ and the forecast over the 92 signals, A31-30; the largest uncapped ratio, A31-29); the EWMA matrix (31.8) and its identity; evidence: Moreira and Muir (design and sample), Harvey et al. (where the Sharpe ratio improves, where only the vol of vol and the left tail do); pointers to [[LM32]], [[LM34]]; pitfall: R8's target moves with R6's own past; 導讀 (指數加權移動平均模型, as LM26); KC | 650 |
+| 7 | Judging the Target Out of Sample {7} | X8: 91 holding months' ratios, R6 against R8; E10: QLIKE of the window and the EWMA, the EWMA's wins against its losses, the one holding month that decides the comparison, the two crash holding months; R8's realized volatility over the whole period (A31-27); why (lm26.md:142; (26.4) reverts); E9: April 2025, periodic re-estimation against a risk trigger (guidance); the trigger as a lab illustration, its threshold 0.5 fixed by decision D; the size of R8's trades (mean 9.2% one-way over the 91 trades after the first purchase, the largest 45.2%, A31-36; annual turnover is [[LM34]]'s, decision A2); the data do not support R8's leverage on E5 (guidance g:116); case resolved; pitfall: a month-end rule cannot meet a gap; 導讀; KC | 590 |
 | 8 | Risk-Based Allocation in Python {3,4} | NumPy CCD and Newton; cvxpy `Minimize(0.5*quad_form(y, psd_wrap(S)) - b @ log(y))` with CLARABEL and the status check; SciPy `linkage(squareform(D2, checks=False), "single")`, `leaves_list`, the symmetrize-and-zero-diagonal rule, the `ClusterWarning` a square matrix triggers; lab box | 200 |
 | — | Summary (8) / Problems (12) / Solutions | | 150 / 420 / 540 |
-| | **Total** | | **5,280** |
+| | **Total** | | **5,320** |
 
 **Elements.** 10 examples (E1, E2 §2; E3, E4 §3; E5, E6 §4; E7 §5; E8 §6; E9, E10 §7). Knowledge checks:
 
 - §2: On the first window R3 holds 41.4% in 00679B, and 41.4% of its risk is there (LM28's A28-10, A28-11: a
   minimum-variance share equals its weight) [A31-13]. R6 holds 33.9% in 00679B, yet that fund carries only 20% of R6's
-  risk [A31-10]. Why less than its weight? Minimum variance equalizes the rates $(\Sigma\mathbf w)_i$ of held funds
+  risk [A31-10, A31-13]. Why less than its weight? Minimum variance equalizes the rates $(\Sigma\mathbf w)_i$ of held funds
   ((29.5)); ERC equalizes the products $w_i(\Sigma\mathbf w)_i$. 00679B's rate is low, since it is the calmest fund
-  (8.54%) and moves against the equity funds, so a large weight buys only a fifth of the risk.
+  (8.5%, LM28's A28-06) and moves against the equity funds, so a large weight buys only a fifth of the risk.
 - §3: R2 holds no 00642U. Can its weights serve as risk budgets for all five funds? No: a budget of 0 removes that
   fund's log term, the conditions (31.1) can then have several solutions (Bruder and Roncalli 2012, §2.2, pp. 4–5),
   and CCD's update is undefined; drop the fund and budget the other four (E4).
 - §4: Build the tree with LM8's $\sqrt{2(1-\rho)}$ instead of $d_{ij}$: every distance doubles, single linkage
   compares distances only, so the merges are the same and the heights double [A31-21].
-- §5: R6's average weights took 23.1% of the realized risk from 00635U, not 20% [A31-26]. Why can equal ex-ante
-  shares end unequal? The shares are set on the trailing window's $\hat\Sigma$; the covariances moved.
+- §5: The mean of R6's 92 target weights took 23.1% of the realized risk from 00635U, not 20% [A31-26]. Why can
+  equal ex-ante shares end unequal? The shares are set on the trailing window's $\hat\Sigma$; the covariances moved.
 - §6: (a) At the first signal $\bar\sigma_t=5.45\%$ and the EWMA forecast 6.42% a year; find $L$ and the cash
   [A31-28]: 0.849 and 15.1%. (b) Name two ways in which Moreira and Muir's managed portfolio differs from R8: it scales
-  by the inverse of the previous month's realized variance, not by a ratio of volatilities; its constant is set so that
-  its full-sample volatility matches the unmanaged portfolio's, which uses the whole sample; its main results have no
-  cap.
+  by the inverse of the previous calendar month's realized variance, not by a ratio of volatilities; its constant is
+  set so that its full-sample volatility matches the unmanaged portfolio's, which uses the whole sample; its main
+  results have no cap.
 - §7: The EWMA forecast had the lower QLIKE in 56 of 91 holding months, yet its mean QLIKE is the higher [A31-35].
-  How? QLIKE punishes a forecast that is far too low: in the holding months 2 April → 2 May 2025 and 3 March → 1 April
-  2020 the EWMA's losses were 27.50 and 20.33, which outweigh its many small wins.
+  How? Its 56 wins gain 17.25 in all, 0.308 each on average; its 35 losses cost 26.37, 0.753 each. The net cost,
+  9.12, spread over 91 holding months, is the gap in means, 0.100. One holding month, 2 April → 2 May 2025, costs
+  13.3 by itself: the EWMA scored 27.50 against the window's 14.17. Without it the EWMA's mean is the lower, 0.494
+  against 0.541. QLIKE punishes a forecast that is far too low, so one such holding month can decide the average.
 - §8: Why does SciPy reject `squareform(D)` for a correlation distance built with `np.corrcoef`? The matrix is
   asymmetric at about $10^{-16}$ and its diagonal is not exactly 0 (shared decision "Python"): symmetrize it and set the
   diagonal to 0 first.
 
 中文導讀 in §2 (風險貢獻 (risk contribution), 風險預算 (risk budget), 風險平價 (risk parity), 等風險貢獻 (equal risk
-contribution)), §3 (嚴格凸函數 (strictly convex function), 唯一性 (uniqueness), 牛頓法 (Newton's method), 座標下降法
+contribution); one sentence says that this 風險預算 is a budget per asset, while LM7's 風險預算 (lm07.md:354) capped the
+total volatility of two strategies), §3 (嚴格凸函數 (strictly convex function), 唯一性 (uniqueness), 牛頓法 (Newton's method), 座標下降法
 (coordinate descent), 不動點 (fixed point)), §4 (層次叢集法 (hierarchical clustering), 樹形圖 (dendrogram), 單一連接叢集法
 (single linkage clustering), 歐氏距離 (Euclidean distance), 層次風險平價 (hierarchical risk parity)), §6 (波動率目標
-(volatility targeting), 指數加權移動平均 (EWMA), 槓桿 (leverage), 曝險 (exposure)), §7 (再平衡 (rebalancing), the
+(volatility targeting), 指數加權移動平均模型 (EWMA; LM26's form, lm26.md:132), 槓桿 (leverage), 曝險 (exposure)), §7 (再平衡 (rebalancing), the
 difference between 定期再估計 (periodic re-estimation) and 風險觸發 (risk trigger), 門檻 (threshold)). Terms and listings
 below, "Chinese terms". Deep Dive (§3): "Why the
 minimizer exists": on $\mathbf y>\mathbf 0$, $\mathbf y^{\top}\Sigma\mathbf y$ is at least the smallest eigenvalue of
@@ -4198,8 +4593,8 @@ function attains its minimum on it (stated, as LM7 states the extreme value theo
 
 **Exhibits.**
 
-- X1 `case` (table, §1): R6 on 31 March 2025: weights 13.51, 21.60, 30.69, 22.18, 12.03% (0050, 00646, 00679B, 00635U,
-  00642U); $\bar\sigma_t$ 7.84%; EWMA 5.89%; $L$ 1.33 from 1 April; EWMA on 7 April 23.58%, implied exposure 0.33; next
+- X1 `case` (table, §1): R6 on 31 March 2025: weights 13.5, 21.6, 30.7, 22.2, 12.0% (0050, 00646, 00679B, 00635U,
+  00642U; one decimal, so that they sum to 100.0 as printed); $\bar\sigma_t$ 7.84%; EWMA 5.89%; $L$ 1.33 from 1 April; EWMA on 7 April 23.58%, implied exposure 0.33; next
   trade 2 May at 0.45 [A31-32]; R8's realized volatility over the holding month 45.3% against its 7.84% target, ratio
   5.78, the largest of 91 holding months; the median ratio over the 91 holding months 0.98 for R8, 0.83 for R6
   [A31-34]. Note: out of sample (fixed in advance on 24 October 2026); window volatilities and the holding month's
@@ -4210,33 +4605,43 @@ function attains its minimum on it (stated, as LM7 states the extreme value theo
 - X2 `shares` (`bar`, `stack: true`, approved C1, §2): eight categories, "R1 weights", "R1 risk", "IV weights", "IV
   risk", "R6 weights", "R6 risk", "R7 weights", "R7 risk"; five series, the funds: 0050 colour 1, 00646 colour 2,
   00679B colour 3, 00642U colour 4, 00635U `"var(--muted)"`, named in the caption; `y.fmt` `pct1`, `valueLabels`
-  false (every bar totals 100%). Values cited: R1's 00642U share 50.2% (LM27's A27-21) [A31-12]; IV's shares 23.8, 23.0, 9.8,
-  18.7, 24.8% [A31-09]; R6 20% each [A31-10]; R7 13.0, 24.0, 26.3, 30.0, 6.6% [A31-11]. Note: first window, 504
-  estimation rows, 13 February 2017 → 27 February 2019; ex-ante shares on that window's $\hat\Sigma$; descriptive.
+  false (every bar totals 100% before rounding). Values cited: R1's 00642U share 50.2% (LM27's A27-21) [A31-12]; IV's
+  shares 23.8, 23.0, 9.8, 18.7, 24.8% [A31-09]; R6 20% each [A31-10]; R7 13.0, 24.0, 26.3, 30.0, 6.6% [A31-11]. The
+  caption says that the cited shares are rounded separately: IV's sum to 100.1 and R7's to 99.9 as printed. Note:
+  first window, 504 estimation rows, 13 February 2017 → 27 February 2019; ex-ante shares on that window's
+  $\hat\Sigma$; descriptive.
 - X3 `u28corr` (`heatmap`, §4): U28's 28×28 correlation matrix in HRP's order, `min` 0, `max` 1 (all 378 correlations
   lie between 0.217 and 0.755 [A31-22]), `fmt` `n2`; the note lists the 28 sectors in order (labels drop out on a
   phone). Values cited: the first merge, ComputerPeripheralEquipment with ElectronicPartsComponents. Note: daily price
   returns, 2 December 2008 → 8 October 2026, $T=4{,}382$; descriptive; price indices, no dividends.
 - X4 `u28tree` (`scatter`, dendrogram, §4): 27 merges as `lines` (three per merge), $y$ ticks 1–28 with `tickLabels` in
   HRP order, $x$ the column distance at each merge (0.501 to 0.743 [A31-22]); `equal` false; height about 420 px.
-  Values cited: first merge 0.5012, root 0.7426. Note: single linkage on $\lVert\mathbf d_i-\mathbf d_j\rVert$;
-  descriptive.
+  Values cited: first merge 0.5012, root 0.7426; on the full sample HRP's weights run from 12.87%
+  (CommunicationsInternet) to 1.29% (GlassCeramic) and ERC's from 6.06% to 2.43% (the same two sectors); in-sample
+  volatilities ($A=245.48$) 1/N 15.75% (lm10.md:36), inverse volatility 15.28%, ERC 15.18%, HRP 14.48% [A31-22]. Note:
+  single linkage on $\lVert\mathbf d_i-\mathbf d_j\rVert$; descriptive (in sample).
 - X5 `rules` (table, §5): per fund, R6's and R7's mean (min–max) weight across the 92 signals [A31-24, A31-25]; R7's mean
-  ex-ante share [A31-25]; R6's ex-post share (mean weights on the out-of-sample covariance) and its 10–90% range over
-  the holding months [A31-26]; last row, realized volatility 10.32% (R6), 10.14% (R7) [A31-27], beside LM30's R1
+  ex-ante share [A31-25]; R6's ex-post share (the mean of its 92 target weights on the out-of-sample covariance) and,
+  over the holding months, the 10–90% range of the share that each holding month's own target weights carry on that
+  holding month's covariance [A31-26]; the caption says that the columns are rounded separately (R7's mean
+  shares sum to 1.001 as printed); last row, realized volatility 10.32% (R6), 10.14% (R7) [A31-27], beside LM30's R1
   12.48%, R3 9.96% and R5 9.97% (A30-12, echoed in A31-27). Note: out of sample, net of costs, daily returns 5 March
   2019 → 8 October 2026 annualized with $A_{\mathrm w}$ (R1's 12.48% is this window's, not LM27's full-sample 11.49%
   for fixed weights, A27-13; decision C7); the 1,845 joint estimation rows of the same span for the ex-post shares.
 - X6 `u28halves` (table, §5): inverse volatility, ERC, HRP: weights from the first half held constant, volatility in
   the first half and the second: 15.70/15.20, 15.57/15.11, 15.22/14.96% [A31-23]; beside them LM30's rows (A30-19,
   echoed in A31-23): 1/N 15.98/15.51, long-only minimum variance 12.74/12.14, sample minimum variance 11.40/11.78%.
-  Values cited: HRP the lowest of LM31's four on the second half, above both minimum-variance portfolios. Note: U28's
+  Values cited: on the second half HRP is the lowest of 1/N (LM30's) and LM31's three, and above both
+  minimum-variance portfolios. Note: U28's
   halves (2,191 returns each, LM11's); one split fixed in advance; out of sample in the second column; price indices,
   covariance only.
 - X7 `exposure` (`line`, dates, §6): $L_t$ at the 92 trade dates, `step: true`, `fmt` `n2`; dashed `hline`s at 1 and
   1.5 ("cap"); labelled points 4 March 2019 (0.85), 1 April 2020 (0.295, the minimum), 1 April 2025 (1.33)
-  [A31-28, A31-29, A31-32]. Values cited: mean 1.14; at the cap at 14 of the 92 trades, above 1 at 62, below at 30 [A31-29]. Note: out of
-  sample; $L_t$ is set at each trade and drifts between trades.
+  [A31-28, A31-29, A31-32]. Values cited: mean 1.14; at the cap at 14 of the 92 trades, above 1 at 62, below at 30;
+  the uncapped ratio $\bar\sigma_t/\sigma_{t+1\mid t}$ reached 2.14 [A31-29]. Over the 92 signals $\bar\sigma_t$ ran
+  from 5.37% to 11.24% a year (mean 9.42%) and the forecast from 3.66% (31 May 2019) to 31.48% (31 March 2020, whose
+  trade set the minimum 0.295) [A31-30, A31-33]. Note: out of sample; $L_t$ is set at each trade and drifts between
+  trades.
 - X8 `target` (`line`, log $y$, §7): realized ÷ target volatility for R6 (colour 1) and R8 (colour 2) at the starts
   of the 91 holding months; dashed `hline` at 1; labelled points 3 March 2020 (R6 5.60, R8 4.90) and 2 April 2025 (R6
   4.25, R8 5.78) [A31-34]. Values cited: medians 0.83 and 0.98, SD of the logarithm 0.421 for both, 11 holding months
@@ -4249,56 +4654,65 @@ step 0.5), three correlation sliders (−0.9 to 0.9, step 0.05), and fund 1's bu
 other two share $1-b_1$ equally). Code under 30 lines: a positive-definiteness check (Cholesky of the $3\times3$
 matrix; if it fails, the chart says so and shows no solution), CCD (31.4) to $10^{-12}$ with at most 1,000 sweeps.
 CCD rather than the spine's fixed-point iteration: at the widget's own initial state Jacobi's fixed point from 1/3
-settles at $(-32.5,54.5,-20.9)$, every share a third but two weights negative [A31-39] (accepted, decisions D and E).
-Chart: X2's stacked bars for 1/N, inverse volatility and the budget portfolio (weights and risk shares, six categories,
-three series). Readouts: weights, risk shares, $\sigma_p$ of each, sweeps. Initial state (PDF): the first window's
-0050, 00679B and 00642U (volatilities 13.50, 8.54, 23.17%; correlations −0.30, 0.20, −0.08), $b_1=1/3$: ERC 0.3061,
-0.5400, 0.1539 in 9 sweeps, $\sigma_p$ 6.55%; inverse volatility's shares 34.1, 23.6, 42.3%; 1/N's 25.7, 2.8, 71.5%
-[A31-39]. Data block: the initial values only, unrounded; the first draw uses them until a slider moves (the sliders
-show the nearest step), so that the PDF's readouts are the anchor's (as LM28's widget, per-module decision on LM28). Test: `data/lm31_charts.py` runs the widget's function in Node (as
+settles at $(-32.5,54.5,-20.9)$ (rounded separately; the printed entries sum to 1.1), every share a third but two
+weights negative [A31-39] (accepted, decisions D and E). Chart: X2's stacked bars for 1/N, inverse volatility and the
+budget portfolio (weights and risk shares, six categories, three series). Readouts: weights, risk shares, $\sigma_p$
+of each, sweeps. Initial state (PDF): the first window's 0050, 00679B and 00642U (volatilities 13.5, 8.5, 23.2%,
+LM28's A28-06; correlations −0.30, 0.20, −0.08, from A28-07's matrix; both at LM28's precision, decision C12),
+$b_1=1/3$: ERC 0.3061, 0.5400, 0.1539 in 9 sweeps, $\sigma_p$ 6.55%; inverse volatility's shares 34.1, 23.6, 42.3%;
+1/N's 25.7, 2.8, 71.5% [A31-39]. These readouts follow from the unrounded inputs, which the text says. Data block:
+the initial values only, unrounded; the first draw uses them until a slider moves (the sliders show the nearest
+step), so that the PDF's readouts are the anchor's (as LM28's widget, per-module decision on LM28). Test: `data/lm31_charts.py` runs the widget's function in Node (as
 `data/lm15_charts.py` does) against `erc()` and the CCD of the anchors on the initial state and 500 random positive
 definite matrices (experiment 1, `default_rng([1, 20261011])`), stopping on a difference above $10^{-9}$. No
 optimizer, no simulation, no Student $t$ in the browser (shared decision "Widgets").
 
 **Examples** (results recomputed from the printed inputs):
 
-- E1 §2 `twofunds`: 0050 and 00679B on the first window, volatilities 13.50% and 8.54%, $\rho=-0.298$ (LM28's A28-06,
-  A28-07) [A31-07]. Equal contributions (31.1) mean $w_1^2\sigma_1^2+w_1w_2\sigma_{12}=w_2^2\sigma_2^2+w_1w_2\sigma_{12}$,
-  so $w_1\sigma_1=w_2\sigma_2$ whatever $\rho$: weights 0.3875 and 0.6125, risk 50/50. (7.7)'s minimum variance puts
+- E1 §2 `twofunds`: 0050 and 00679B on the first window, volatilities 13.50% and 8.54% (LM28's A28-06, which prints
+  one decimal; the weights below need two, decision C12), $\rho=-0.30$ (A28-07) [A31-07]. Equal contributions (31.1)
+  mean $w_1^2\sigma_1^2+w_1w_2\sigma_{12}=w_2^2\sigma_2^2+w_1w_2\sigma_{12}$, so $w_1\sigma_1=w_2\sigma_2$ whatever
+  $\rho$: weights 0.3875 and 0.6125, risk 50/50. (7.7)'s minimum variance puts
   0.331 in 0050, at 6.1% against ERC's 6.2% [A31-07]. With two funds ERC ignores the correlation; with five it does
   not (E2).
 - E2 §2 `firstshares`: five funds, first window (volatilities and correlations LM28's A28-06, A28-07) [A31-06].
   Inverse-volatility weights 0.174, 0.198, 0.275, 0.251, 0.102 leave 00679B only 9.8% of the risk and 00642U 24.8%,
-  because 00679B correlates −0.298 and −0.260 with the equity funds [A31-09]. R6 (0.1561, 0.1828, 0.3386, 0.2372,
-  0.0854) gives each 20% [A31-10]. Volatilities 5.02% (R3, here equal to (28.2)'s $\mathbf w^{\mathrm{mv}}$; LM28's
-  A28-10) $\le$ 5.45% (R6) $\le$ 7.38% (R1; LM28's A28-15) [A31-12], as Maillard et al.'s ordering says. With every
+  because 00679B correlates −0.30 and −0.26 with the equity funds (A28-07) [A31-09]. R6 (0.1561, 0.1828, 0.3386,
+  0.2372, 0.0854; rounded separately, these sum to 1.0001 as printed) gives each 20% [A31-10]. Volatilities 5.02% (R3,
+  the long-only minimum variance, here equal to (28.2)'s $\mathbf w^{\mathrm{mv}}$ because every weight is positive;
+  LM28's A28-10) $\le$ 5.45% (R6) $\le$ 7.38% (R1; LM28's A28-15) [A31-12], as Maillard et al.'s ordering says. With every
   correlation set to the mean 0.0533, ERC equals inverse volatility [A31-08].
 - E3 §3 `solvers`: R6's first weights four ways [A31-14]. Newton from $y_i\propto1/\sigma_i$: 6 steps. CCD: 12 sweeps,
   within $3.5\times10^{-13}$ of Newton. cvxpy's log form (CLARABEL with `tol_gap_abs`, `tol_gap_rel`, `tol_feas`
   $10^{-10}$, a cone program): within $1.2\times10^{-6}$ over the 92 windows, inside the conic cross-check's stated
-  tolerance $10^{-5}$ (decision C5).
-  Jacobi's fixed point from 1/N settles after 220 steps at $(-1.307,-1.306,2.132,2.408,-0.927)$: every share is 20%,
-  yet three weights are negative, so it solves (31.1) outside the long-only set; at 45 of 92 windows it does not settle
-  in 10,000 steps. The weights are the same on daily or annualized $\hat\Sigma$ [A31-15].
+  tolerance $10^{-5}$ (decision C5). Jacobi's fixed point from 1/N, stopped when no weight moves by $10^{-12}$ or more
+  in a step, settles after 220 steps at $(-1.307,-1.306,2.132,2.408,-0.927)$: every share is 20%, yet three weights
+  are negative, so it solves (31.1) outside the long-only set; at 45 of 92 windows it does not settle in 10,000
+  steps. The weights are the same on daily or annualized $\hat\Sigma$ [A31-15].
 - E4 §3 `budgets`: R2's mix as risk budgets on the four funds it holds (0.4, 0.2, 0.3, 0.1; 00642U's zero weight cannot
   be a budget). CCD gives weights 0.2466, 0.1773, 0.4190, 0.1571 in 12 sweeps (cvxpy within $4.4\times10^{-7}$)
-  [A31-16]. R2 itself puts 71.1% of its risk in 0050 (LM31's, decision A4). Volatilities: the four funds' minimum
-  variance 5.016% (not R3's 5.02%, which holds all five) $\le$ budgets 5.326% $\le$ R2 6.709% (LM30's A30-24) (Bruder
-  and Roncalli's ordering, §2.3.4). A 40% risk budget for 0050 is a 24.7% weight.
-- E5 §4 `hrp3`: three funds by hand [A31-17], three decimals throughout so that each step follows from the one
-  printed before it. $\rho$ 0.539, −0.298, −0.260 give $d$ 0.480, 0.806, 0.794 and column distances 0.679 (0050,
-  00646), 1.182, 1.169. 0050 and 00646 merge at 0.679; 00679B joins at $\min(1.182,1.169)=1.169$. Order (00679B,
-  0050, 00646). First cut [00679B] | [0050, 00646]: inverse-variance
+  [A31-16]. R2 itself puts 71.1% of its risk in 0050 (LM31's, decision A4's exception). Volatilities: the four funds'
+  long-only minimum variance 5.016% (not R3's 5.02%, LM28's A28-10, which holds all five) $\le$ budgets 5.326% $\le$
+  R2 6.709% (LM30's A30-24, printed there to three decimals) (Bruder and Roncalli's ordering, §2.3.4). A 40% risk
+  budget for 0050 is a 24.7% weight.
+- E5 §4 `hrp3`: three funds by hand [A31-17]. $\rho$ 0.54, −0.30, −0.26 (LM28's A28-07, two decimals) give $d$
+  0.480, 0.806, 0.794; from there three decimals throughout, so that each step follows from the one printed before
+  it: column distances 0.679 (0050, 00646), 1.182, 1.169. 0050 and 00646 merge at 0.679; 00679B joins at
+  $\min(1.182,1.169)=1.169$. Order (00679B, 0050, 00646). First cut [00679B] | [0050, 00646]: inverse-variance
   variances 72.96 and 121.95 (%² a year), so 00679B takes $121.95/(72.96+121.95)=0.6257$. Second cut: 0050's 182.29
-  against 00646's 140.88, so 0050 takes 0.4359 of 0.3743. Weights 0.1632, 0.2111, 0.6257.
+  against 00646's 140.88, so 0050 takes 0.4359 of 0.3743. Weights 0.1632, 0.2111, 0.6257. The variances come from the
+  window's unrounded $\hat\Sigma$ (squaring E1's 13.50% and 8.54% would give 182.25 and 72.93), and the text says
+  so.
 - E6 §4 `hrp5`: R7's first weights [A31-18]. Merges: 0050 + 00646 at 0.6835, then 00642U at 0.8576, 00679B + 00635U at
   0.8861, root 0.9822. Order (00642U, 0050, 00646, 00679B, 00635U). The first cut takes the first two items,
   [00642U, 0050] | [00646, 00679B, 00635U], with left share 0.1516: it separates 0050 from 00646, the tree's first
-  pair. Weights 0.1131, 0.2189, 0.3443, 0.2852, 0.0384, risk shares 13.0, 24.0, 26.3, 30.0, 6.6% [A31-11, A31-18].
-- E7 §5 `expost`: what R6's equal shares became [A31-26]. R6's mean weights on the covariance of the 1,845 joint
-  out-of-sample dates carry 20.5, 19.2, 19.2, 23.1 and 18.0% of the risk. Holding month by holding month, on each
-  month's own covariance, 00635U's share runs from 8.7% to 47.0% (10% and 90% quantiles) and 00679B's from −0.9% to
-  41.1%; some share is negative in 29 of 91 holding months. Equal risk is an ex-ante statement about $\hat\Sigma$.
+  pair. Weights 0.1131, 0.2189, 0.3443, 0.2852, 0.0384, risk shares 13.0, 24.0, 26.3, 30.0, 6.6% (each list rounded
+  separately; they sum to 0.9999 and 99.9 as printed); volatility on the window 5.13% [A31-11, A31-18].
+- E7 §5 `expost`: what R6's equal shares became [A31-26]. The mean of R6's 92 target weights (A31-24), on the
+  covariance of the 1,845 joint out-of-sample dates, carries 20.5, 19.2, 19.2, 23.1 and 18.0% of the risk. Holding
+  month by holding month, each holding month's own target weights, on that holding month's covariance, give 00635U
+  a share from 8.7% to 47.0% (10% and 90% quantiles) and 00679B one from −0.9% to 41.1%; some share is negative in
+  29 of 91 holding months. Equal risk is an ex-ante statement about $\hat\Sigma$.
 - E8 §6 `r8first`: R8 at the first signal by hand [A31-28]. $\bar\sigma_t=0.0034991$ a day (5.45% a year), the EWMA
   0.0041204 (6.42%), so $L=0.0034991/0.0041204=0.8492$; exposures 0.8492 × R6 = 0.1326, 0.1552, 0.2875, 0.2014, 0.0725;
   cash 0.151 at 1.5%. The start value's weight after 504 days is $0.94^{504}=2.9\times10^{-14}$ [A31-38].
@@ -4311,10 +4725,13 @@ optimizer, no simulation, no Student $t$ in the browser (shared decision "Widget
   trade moved R8's exposures by 9.2% one way on average over the 91 trades after the first purchase; the largest,
   45.2%, was the 2 May 2025 cut to 0.452 [A31-36]. R8's annual turnover is LM34's (A34-06), not printed here.
 - E10 §7 `judge`: the 91 holding months [A31-34, A31-35]. Ratios: median 0.83 (R6) and 0.98 (R8); SD of the logarithm
-  0.421 and 0.421; above 1.5: 11 and 11; below 2/3: 21 and 13. QLIKE of R6's holding month: the window 0.691, the EWMA
-  0.791; medians 0.165 and 0.087; the EWMA is lower in 56 of them; its losses in the two crash holding months are
-  27.50 and 20.33; without them the means are 0.244 and 0.271. R8 moved the typical holding month to its target; it
-  did not narrow the spread.
+  0.421 and 0.421; above 1.5: 11 and 11; below 2/3: 21 and 13. Over the whole period R8's realized volatility was
+  11.52% against R6's 10.32% [A31-27]. QLIKE of R6's holding month: mean 0.691 for the window and 0.791 for the EWMA;
+  medians 0.165 and 0.087. The EWMA is lower in 56 holding months, which gain 17.25 in all, and higher in 35, which cost
+  26.37. Its two largest QLIKE values are 27.50 (2 April → 2 May 2025; the window's 14.17), its largest loss, by
+  13.3, and 20.33 (3 March → 1 April 2020; the window's 26.96), its largest win, by 6.63. Without the 2025 holding
+  month the means are 0.541 (window) and 0.494 (EWMA); without both crash holding months 0.244 and 0.271. R8 moved the
+  typical holding month to its target; it did not narrow the spread.
 
 **Problems plan** (12; MC keys B, A, C, A, B; the lab solves 6, 8, 11, 12). Stems state long-only weights, risk shares
 as $\mathrm{RC}_i/\sigma_p$, annual volatilities, the rounding; backtest stems (10) state E5's first signal, the
@@ -4338,8 +4755,8 @@ problem 4 (X5).
    $w_1=0.4330$ and check the shares; show that CCD reaches it in one sweep when $\rho=0$ [A31-43].
 6. HRP by hand (constructed): $\rho_{12}=0.8$, $\rho_{13}=0.1$, $\rho_{23}=0.2$, volatilities 20, 25, 10%: $d$ 0.3162,
    0.6708, 0.6325; column distances (from the unrounded $d$, which the stem's exact $\rho$ give) 0.4489, 1.0000,
-   0.9622; merges 0.4489, 0.9622; order (3, 1, 2); weights 0.1141, 0.0730, 0.8128 [A31-44]. Python part: check with
-   SciPy.
+   0.9622; merges 0.4489, 0.9622; order (3, 1, 2); weights 0.1141, 0.0730, 0.8128 (rounded separately; they sum to
+   0.9999 as printed, and the solution says so) [A31-44]. Python part: check with SciPy.
 7. MC: single linkage on LM8's $\sqrt{2(1-\rho)}$ instead of $d_{ij}$ gives: **A** the same tree, heights doubled. B
    a different tree. C the same tree and heights [A31-21].
 8. R8 by hand: $\bar\sigma_t=8\%$, forecasts 5% and 16% a year: $L$ 1.5 (uncapped 1.6) and 0.5; the next day the funds'
@@ -4384,7 +4801,7 @@ LM31 itself refers to them).
   LM32–LM34 cite R6 by name).
 - (31.2) Theorem: for positive definite $\Sigma$ and positive budgets, $h(\mathbf y)=\tfrac12\mathbf y^{\top}\Sigma\mathbf y-
   \sum_ib_i\ln y_i$ has one minimizer on $\mathbf y>\mathbf 0$, and $\mathbf y^*/\mathbf 1^{\top}\mathbf y^*$ is the only
-  long-only solution of (31.1) (in-module; Volume VIII may cite).
+  long-only solution of (31.1) (in-module).
 - (31.3) $w_i=\sigma_i^{-1}/\sum_j\sigma_j^{-1}$ is ERC for two assets (any $\rho$) and for equal correlations
   $-1/(N-1)<\rho<1$ (in-module).
 - (31.4) CCD: $y_i\leftarrow\big(-a_i+\sqrt{a_i^2+4\sigma_i^2b_i}\big)/(2\sigma_i^2)$ with $a_i:=(\Sigma\mathbf y)_i-
@@ -4400,46 +4817,55 @@ LM31 itself refers to them).
   $\mathbf w^{\top}\Sigma_{t+1\mid t}\mathbf w$ equals the EWMA of $(\mathbf w^{\top}\mathbf R_t)^2$ from matching starts
   (in-module; LM30 points to it in words; no later brief cites it).
 
-Tags of earlier briefs that LM31 cites by number (for their lists): (27.1)–(27.3), (27.5)–(27.6) (LM27's list already
-names LM31); (28.2) (LM28's brief asks to add LM31 if its revision cites it: it does); (29.2), (29.3), (29.5) (LM29's
-list should name LM31 for these).
+Tags of earlier briefs that LM31 cites by number: (27.1)–(27.3), (27.5)–(27.6), whose lists in LM27's brief name
+LM31; (28.2), (29.2), (29.3) and (29.5), which the cross-check's tag-user table (Y1) adds LM31 to, and which LM28's and
+LM29's briefs take from that table (decision "Tags and leads"). LM31's own lists were checked against the revised
+LM32–LM35 briefs and the same table: (31.1) is cited by LM35, (31.7) by LM32, LM33, LM34 and LM35, (31.8) by none.
 
 **Pitfalls to pre-empt.**
 
 - A risk share is not a weight (E2, E4) and not a share of losses; the gradient entry $(\Sigma\mathbf w)_i$ is a rate,
-  the share is $w_i$ times it over $\sigma_p^2$ (lm10.md:425). Ex post a share can be negative (29 of 91 holding
-  months).
+  the share is $w_i$ times it over $\sigma_p^2$ (lm10.md:425). Ex post a share can be negative: each holding month's
+  own target weights, on that holding month's covariance, give some fund a negative share in 29 of 91 holding months.
 - Uniqueness holds only for long-only weights and positive budgets: Jacobi's point satisfies (31.1) with negative
   weights; a zero budget is not allowed (drop the fund).
 - A fixed point is not an algorithm: $w_i\propto b_i/\beta_{i,p}$ need not settle (45 of 92 windows). CCD and Newton
   descend a strictly convex $h$. Check any answer by its risk shares, not by the solver's status alone.
 - ERC and HRP weights are scale-free, but solvers are not: annualize for cvxpy (shared decision "Solver output").
 - HRP: the column distance, not $d$ itself; the author's code gets it by passing the square matrix to SciPy, which
-  reads rows as observations and warns; symmetrize `np.corrcoef` and zero the diagonal before `squareform`; the
+  reads rows as observations and warns, and so builds the column-distance tree at all 92 windows and on U28
+  [A31-19]; symmetrize `np.corrcoef` and zero the diagonal before `squareform`; the
   bisection halves the ordered list and can split the tree's closest pair (E6); single-linkage trees change with small
   changes in correlations.
 - The factor 2 to LM8's distance changes no tree (A31-21); say so where (8.10) is cited.
 - (26.2) in LM26 is written for log returns; R8 applies it to the book's simple daily returns in decimals, uncentred,
   from the start $\bar\sigma_t^2$. Say so once.
-- R8 targets R6's own two-year volatility, not a fixed level; the cap binds at 14 of 92 signals; cash earns 1.5% and
-  borrowing costs 3.5%; check $1+R_t>0$ on every date (A31-37), and leave the worst day to LM35.
+- R8 targets R6's own volatility over the trailing 504 sessions, not a fixed level; the cap binds at 14 of 92 signals
+  [A31-29]; cash earns 1.5% and borrowing costs 3.5%; check $1+R_t>0$ on every date [A31-37], and leave the worst day
+  to LM35.
 - A one-day EWMA forecast is also its forecast for every later day (lm26.md:142); a month-end rule meets a gap with
   the exposure set at the last month-end (E9). A risk trigger reacts after the day's loss, not before it.
 - Holding-month ratios: uncentred RMS against the uncentred $\bar\sigma_t$; daily units on both sides (an annual
   figure printed beside a ratio uses the target's $A$ for both); the partial last holding month left out; 91 holding
   months is a short record for comparing spreads.
-- Ownership (decisions A1–A6): R1's first-window shares are LM27's; the first window's fund statistics, R1's
-  first-window volatility and R3's weights LM28's; R2's first-window shares LM31's; R1/R3/R5's realized volatility,
-  R2's first-window volatility, and 1/N and minimum variance on U28's halves LM30's; Sharpe ratios LM33's; VaR and
-  drawdowns LM32's; annual turnover and costs LM34's; each rule's loss on 7 April 2025 and crash losses LM35's.
-- The evidence: Moreira and Muir scale US factor returns monthly by the inverse of last month's realized variance with
-  a constant set on the full sample (1926–2015 for the market, size, value and momentum, later starts for the others;
-  caps of 1 and 1.5 only as robustness checks); Harvey et al. find gains for equities and credit and negligible ones
-  for bonds, currencies and commodities. Neither tests E5's funds; do not carry their Sharpe ratios over.
-- References: Maillard et al. read in their 2009 working paper; López de Prado in the SSRN version; Bruder and Roncalli
-  in their March 2012 working paper, with section, equation and page numbers; Moreira and Muir cited as the JF article,
-  its design read in NBER WP 22208 and the authors' 25 October 2016 draft, so the text prints no JF page or equation
-  number (see "Sources"; decision F).
+- Ownership (decisions A1–A6): R1's first-window shares are LM27's (A4's carve-out); the first window's fund
+  statistics, R1's first-window volatility and R3's weights LM28's, echoed at LM28's precision unless a computation
+  beside them needs more (C12); R2's first-window shares LM31's and its first-window volatility LM30's (A4's
+  exceptions); R1/R3/R5's realized volatility and 1/N and minimum variance on U28's halves LM30's; Sharpe ratios
+  LM33's; VaR and drawdowns LM32's; annual turnover and costs LM34's; each rule's loss on 7 April 2025 and crash losses
+  LM35's.
+- The evidence: Moreira and Muir scale US factor returns monthly by the inverse of the previous calendar month's
+  realized variance, with a constant set on the full sample (1926–2015 for the market, size, value and momentum,
+  later starts for the others; caps of 1 and 1.5 only as robustness checks). Harvey et al., on more than 60 assets,
+  find that the Sharpe ratio improves slightly for equity indexes and credit and hardly changes for bonds, currencies
+  and commodities, while the vol of vol and the left tail improve for almost all of their 50 futures, forwards and
+  credit (for US Treasury futures the left tail is similar). Neither tests E5's funds; do not carry their Sharpe
+  ratios over.
+- References: Maillard et al. read in their May 2009 working paper and López de Prado in SSRN 2708678 (23 May 2016),
+  so the text cites both JPM articles without a JPM page or equation number; Bruder and Roncalli in their March 2012
+  working paper, with its section, equation and page numbers; Harvey et al. in the complete journal reprint, with its
+  pages; Moreira and Muir cited as the JF article, its design read in NBER WP 22208 and the authors' 25 October 2016
+  draft, so the text prints no JF page or equation number (see "Sources"; decision F and the second hunt).
 
 **Curriculum guidance carried** (`plans/vol-5.md`'s table; `plans/curriculum-guidance.md`):
 
@@ -4474,147 +4900,210 @@ list should name LM31 for these).
   tree, and volatility targeting."
 - No other wording change: lm26.md:183's "such a forecast" covers the EWMA as well as GARCH.
 
-**Sources** (verified 2026-10-24 unless marked; paraphrased, nothing quoted beyond a phrase):
+**Sources** (each read on 2026-10-24 in the version named; bibliographic data from Crossref, queried anonymously,
+unless another record is named; paraphrased, nothing quoted beyond a phrase; the text prints only the claims listed
+here, at these locations, and keeps out what an entry says to keep out):
 
 - Maillard, S., T. Roncalli and J. Teïletche (2010). "The Properties of Equally Weighted Risk Contribution Portfolios."
-  *Journal of Portfolio Management* 36 (4): 60–70. DOI 10.3905/jpm.2010.36.4.060. Crossref (authors, title, 36(4),
-  60–70, 2010). Content read in the working paper "On the properties of equally-weighted risk contributions portfolios"
-  (May 2009, author-hosted, by the survey and rechecked here): Euler's split, the ERC conditions, uniqueness for a
-  positive definite covariance, inverse-volatility weights under a constant correlation, the two-asset solution,
-  $\sigma_{\mathrm{mv}}\le\sigma_{\mathrm{erc}}\le\sigma_{1/n}$. The JPM text was not compared (UNVERIFIED for equation
-  numbers; the brief cites none).
+  *Journal of Portfolio Management* 36 (4): 60–70. DOI 10.3905/jpm.2010.36.4.060 (Crossref: print and online 31 July
+  2010). The JPM text could not be obtained (OpenAlex marks it closed; SSRN 1271972 refuses automated access), so the
+  text cites the article as a whole and prints no JPM page or equation number. Read by the survey, the drafter and the
+  second hunt in the authors' working paper "On the properties of equally-weighted risk contributions portfolios"
+  (first version June 2008, this version May 2009; thierry-roncalli.com/download/erc.pdf, 23 pages; its title differs
+  from the journal's). Locations in that version: §2.1, p. 4, the marginal contribution $\partial\sigma/\partial x_i$
+  and the total contribution $x_i\,\partial\sigma/\partial x_i$, which sum to $\sigma$ by Euler's theorem for a
+  function homogeneous of degree 1 (the second footnote numbered 1 on p. 4); (1)–(2), pp. 4–5, the ERC conditions with
+  weights in $[0,1]^n$; §3.1, p. 5, the two-asset solution $\sigma_1^{-1}/(\sigma_1^{-1}+\sigma_2^{-1})$, which does
+  not depend on $\rho$; §3.2, p. 5, inverse volatility under a constant correlation (footnote 3 allows
+  $\rho\ge-1/(n-1)$; (31.3)'s strict bounds are the positive definite case); §3.3, p. 7, uniqueness for a positive
+  definite covariance (an informal argument, so LM31 derives (31.2) in full) and several solutions once long-only is
+  dropped; §3.4, p. 8, minimum variance equalizes the marginal contributions and ERC the total ones (credited there to
+  Scherer 2007b); p. 9 and Appendix A.3, p. 22, $\sigma_{\mathrm{mv}}\le\sigma_{\mathrm{erc}}\le\sigma_{1/n}$, proved
+  with program (8) under a budget constraint and non-negative weights, so their minimum variance is the long-only one
+  (the text says so). Not used: Appendix A.1 (ERC equals minimum variance at the lowest constant correlation).
 - Bruder, B. and T. Roncalli (2012). "Managing Risk Exposures Using the Risk Budgeting Approach." SSRN working paper
-  2009778, DOI 10.2139/ssrn.2009778 (Crossref: posted content, 2012). Read: the author-hosted version of March 2012
-  (thierry-roncalli.com, `download/risk-budgeting.pdf`), and verified by the source check (decision F, 2026-10-24) in
-  the SSRN version of March 2012: Definition (3), p. 5 (weights in $[0,1]^n$, budgets strictly positive and summing
-  to 1); §2.2, pp. 4–5 (a zero budget can give several solutions: budgets (50%, 50%, 0%) give both (33.33%, 66.67%,
-  0%) and (20%, 20%, 40%); hence $b_i>0$); eq. (7), p. 9 (weights proportional to $b_i/\beta_i$); §2.3.3, pp. 9–10
-  (existence and uniqueness for a positive definite covariance from the log-barrier program (9), footnote 13 on
-  $b_i>0$; a short argument, not a formal theorem, so LM31 derives (31.2) in full); §2.3.4, p. 10
-  ($\sigma_{\mathrm{mv}}\le\sigma_{\mathrm{rb}}\le\sigma_{\mathrm{wb}}$, proved in Appendix A.3). Unpublished working
-  paper, so the SSRN version is the original.
-- Griveau-Billion, T., J.-C. Richard and T. Roncalli (2013). "A Fast Algorithm for Computing High-dimensional Risk Parity
-  Portfolios." SSRN 2325255, DOI 10.2139/ssrn.2325255 (Crossref); arXiv:1311.4057 (16 November 2013; the PDF is dated
-  September 2013). Read (arXiv): the budget definition (citing Roncalli 2013), the CCD update, eq. (4), convergence by
-  Tseng (2001, Theorem 5.1; their Remark 2), positive budgets (Remark 3), and the appendix's account of Chaves et al.'s
-  fixed point and Newton method and of Spinu's Newton method.
+  2009778, DOI 10.2139/ssrn.2009778 (Crossref: posted content, 2012; the title page writes "using" in lower case).
+  Read by the drafter in the author-hosted copy (thierry-roncalli.com, `download/risk-budgeting.pdf`) and by the
+  source check in the version whose title page reads "First version: January 2012 – This version: March 2012" (the
+  source check calls it the SSRN version; its saved file bears the author-hosted copy's name). Locations in that
+  version: Definition (3), p. 5 (weights in $[0,1]^n$; budgets strictly positive, summing to 1); §2.2, pp. 4–5 (a zero
+  budget can give several solutions: budgets (50%, 50%, 0%) give both (33.33%, 66.67%, 0%) and (20%, 20%, 40%), hence
+  $b_i>0$); eq. (7), p. 9 (weights proportional to $b_i/\beta_i$); §2.3.3, pp. 9–10 (existence and uniqueness for a
+  positive definite covariance from the log-barrier program (9), footnote 13 on $b_i>0$; a short argument, not a
+  formal theorem, so LM31 derives (31.2) in full); §2.3.4, p. 10 ($\sigma_{\mathrm{mv}}\le\sigma_{\mathrm{rb}}\le
+  \sigma_{\mathrm{wb}}$, proved in Appendix A.3). LM31's source for unequal budgets (shared decision "References").
+  Whether a journal version exists was not checked; the text cites the working paper.
+- Griveau-Billion, T., J.-C. Richard and T. Roncalli (2013). "A Fast Algorithm for Computing High-dimensional Risk
+  Parity Portfolios." arXiv:1311.4057 (v1, 16 November 2013, the arXiv record; the PDF is dated September 2013); also
+  SSRN 2325255, DOI 10.2139/ssrn.2325255 (Crossref types it as a 2013 article in "SSRN Electronic Journal", writes
+  "High-Dimensional" and misspells the first author's given name). Read in the arXiv version: the budget definition
+  (citing Roncalli 2013), the CCD update, eq. (4), convergence by Tseng (2001, Theorem 5.1; their Remark 2), positive
+  budgets (Remark 3), and the appendix's account of Chaves et al.'s fixed point and Newton method and of Spinu's
+  Newton method. A preprint; no journal version was checked. Used for (31.4) and the widget, and as the route to
+  Chaves et al. and Tseng.
 - Chaves, D., J. Hsu, F. Li and O. Shakernia (2012). "Efficient Algorithms for Computing Risk Parity Portfolio
-  Weights." *Journal of Investing* 21 (3): 150–163. DOI 10.3905/joi.2012.21.3.150. Crossref only; the fixed point is
-  described as Griveau-Billion et al. describe it. Text UNVERIFIED.
+  Weights." *Journal of Investing* 21 (3): 150–163. DOI 10.3905/joi.2012.21.3.150 (Crossref: print and online 31
+  August 2012; Crossref's title runs "RiskParity" together). Text not read: the text names the fixed point as
+  Griveau-Billion et al. describe it.
 - Tseng, P. (2001). "Convergence of a Block Coordinate Descent Method for Nondifferentiable Minimization." *Journal of
-  Optimization Theory and Applications* 109 (3): 475–494. DOI 10.1023/A:1017501703105. Crossref only; cited as
-  Griveau-Billion et al. cite it; the convergence of CCD is *stated without proof*. Text UNVERIFIED.
+  Optimization Theory and Applications* 109 (3): 475–494, June 2001. DOI 10.1023/A:1017501703105. Text not read:
+  cited as Griveau-Billion et al. cite it (Theorem 5.1), so CCD's convergence is *stated without proof*.
 - López de Prado, M. (2016). "Building Diversified Portfolios that Outperform Out of Sample." *Journal of Portfolio
-  Management* 42 (4): 59–69. DOI 10.3905/jpm.2016.42.4.059. Crossref and OpenAlex give 42(4): 59–69 (2016-05-31); the
-  JPM abstract (OpenAlex, from the publisher's metadata) matches the SSRN abstract. Content read in SSRN 2708678
-  (version of 23 May 2016, third-party copy, `scratchpad/s1/dl_paper`) and the author's `HRP.py` (2015-12-27): the
-  distance and its metric proof (Appendix A.1), the column distance (the paper's Examples 1–2, which the script and SciPy
-  on the square matrix reproduce: 0.5659, 0.9747, 1.1225 [A31-46]), single linkage, quasi-diagonalization, bisection with inverse-variance weights,
-  the Monte Carlo design (10 series of 520 observations, a 260-observation window, rebalancing every 22, 10,000 runs).
-  The JPM body was not read (the publisher's page redirects to a login): the plan's "published JPM text and pages are
-  the LM31 brief's to confirm" is met for the pages and the abstract only (UNVERIFIED: the JPM body text).
-- Moreira, A. and T. Muir (2017). "Volatility-Managed Portfolios." *Journal of Finance* 72 (4): 1611–1644. DOI
-  10.1111/jofi.12513. Crossref (with the abstract: volatility timing raises Sharpe ratios because changes in volatility
-  are not offset by proportional changes in expected returns). The JF text could not be read (the publisher's site
-  refuses every client; source check, decision F, 2026-10-24). Design read by the drafter in NBER Working Paper 22208
-  (April 2016) and by the source check in that paper (revised June 2016) and in the authors' draft of 25 October 2016,
-  which thanks the editor and two referees; the two agree on every design fact: the managed return scales the factor
-  by $c/\hat\sigma_t^2$, with $\hat\sigma_t^2$ the previous month's realized variance from daily returns (22 days); $c$
-  is set so that the managed portfolio's unconditional standard deviation equals the buy-and-hold one's, computed on
-  the full sample (it does not change the Sharpe ratio); samples (Table I's note) 1926–2015 for the market, SMB, HML
-  and momentum, 1963–2015 for RMW and CMA, 1967–2015 for ROE and IA, 1983–2015 for the FX carry factor; leverage caps of
-  1 and 1.5 only as robustness checks, none in the main results. The text cites the JF article, says that the design
-  was read in these two versions, and prints no JF page or equation number.
+  Management* 42 (4): 59–69. DOI 10.3905/jpm.2016.42.4.059 (Crossref: print 31 May 2016, online 31 July 2016). The JPM
+  body was not read (the publisher's page asks for a login), so the text cites the article as a whole and prints no
+  JPM page. Abstract (OpenAlex's copy): HRP addresses the instability, concentration and underperformance of quadratic
+  optimizers, needs no invertible covariance matrix, and in Monte Carlo experiments gives a lower out-of-sample
+  variance than the critical line algorithm. Read in SSRN 2708678, "This version: May 23, 2016" (SSRN's own file,
+  stamped on every page, from a third-party mirror because SSRN refuses automated access; byte-identical to the
+  drafter's copy; Crossref records DOI 10.2139/ssrn.2708678 as posted content dated 2019, titled "… Out-of-Sample"),
+  and in the author's `HRP.py` (header 2015-12-27). Locations in the SSRN version: the distance
+  $\sqrt{\tfrac12(1-\rho)}$, Stage 1, p. 5, a proper metric by Appendix A.1, p. 13; the column distance, the Euclidean
+  distance between columns of the distance matrix, p. 5, with Examples 1–2 (0.5659, 0.9747, 1.1225, which the script
+  reproduces [A31-46]); single linkage, the nearest point algorithm of Example 4, p. 6; quasi-diagonalization, Stage
+  2, p. 7; recursive bisection, Stage 3, p. 8 (the ordered list is halved, the first half taking the integer part of
+  half its length; each half's variance uses inverse-variance weights; the first half's weights are scaled by the
+  second half's share of the two variances); inverse variance optimal for a diagonal covariance, Appendix A.2, pp.
+  13–14; p. 11, stage 3 could instead split top-down along the clusters of stage 1 (the source for leaving
+  tree-following splits out); no inverse needed, the abstract (p. 2) and p. 5; the Monte Carlo design, p. 10 (10
+  series of Gaussian returns with 520 observations, a 260-observation look-back, re-estimated and rebalanced every 22
+  observations, 10,000 runs); the author's code passes the square distance matrix to SciPy's `linkage`, Appendix A.3
+  and `HRP.py` lines 90–91.
+- Moreira, A. and T. Muir (2017). "Volatility-Managed Portfolios." *Journal of Finance* 72 (4): 1611–1644, August 2017
+  (online 15 May 2017). DOI 10.1111/jofi.12513. Abstract (Crossref's copy): managed portfolios that take less risk
+  when volatility is high raise Sharpe ratios, because changes in volatility are not offset by proportional changes in
+  expected returns. The JF text could not be read (the publisher answers every client with a challenge page). Read:
+  NBER Working Paper 22208, by the drafter (April 2016) and by the source check (the revision of June 2016), DOI
+  10.3386/w22208 (Crossref: report, April 2016, titled "Volatility Managed Portfolios"); and, by the source check, the
+  authors' draft of 25 October 2016, which thanks the editor and two referees. The two agree on every design fact:
+  eq. (1) scales the factor's next-month return by $c$ over the previous calendar month's realized variance, which eq. (2)
+  computes from that month's daily returns (22 days); $c$ makes the managed portfolio's unconditional standard
+  deviation equal buy-and-hold's, is computed on the full sample and does not change the Sharpe ratio (footnote 5);
+  samples (Table I's note) 1926–2015 for the market, SMB, HML and momentum, 1963–2015 for RMW and CMA, 1967–2015 for
+  ROE and IA, 1983–2015 for the FX carry factor; leverage caps of 1 and 1.5 only as robustness checks, none in the
+  main results. Equation, footnote and table numbers are those versions'; the text cites the JF article, names the
+  two versions read, calls the month a calendar month (decision C7), and prints no JF page or equation number.
 - Harvey, C. R., E. Hoyle, R. Korgaonkar, S. Rattray, M. Sargaison and O. Van Hemert (2018). "The Impact of Volatility
-  Targeting." *Journal of Portfolio Management* 45 (1): 14–33. DOI 10.3905/jpm.2018.45.1.014. Crossref; author-hosted
-  PDF (people.duke.edu/~charvey), read in the pages that the saved copy yields (the file is damaged; rechecked
-  2026-10-24): exponentially weighted volatility with 20- and 90-day half-lives; US equities from 1926, US bonds from
-  1963, 50 futures and forwards and credit for 1988–2017; the Sharpe ratio improves slightly for equities and credit,
-  and the effect is negligible for fixed income, currencies and commodities; the vol of vol and the left tail improve
-  for almost all assets; for a 60–40 balanced portfolio the cumulative return and the vol of vol improve. The count
-  "more than 60 assets" comes from the survey report and is not in the pages read (UNVERIFIED; not for the text).
-- Already in `project/SOURCES.md`: *RiskMetrics — Technical Document* (1996) for $\lambda=0.94$ (via LM26); Boyd and
-  Vandenberghe (2004) via LM29.
-- Software: SciPy 1.18 `scipy.cluster.hierarchy.linkage` (docs page v1.18.0, read 2026-10-24: `y` is a condensed
-  distance matrix or an $m\times n$ array of observations; "single" is the nearest-point rule); SciPy 1.18.1 in the
-  project raises `ClusterWarning` for a square, symmetric, zero-diagonal input and treats its rows as observations
-  (run 2026-10-24). cvxpy 1.9.3 and CLARABEL as `vol5_rules.py` logs them.
-- Checked and not used: Roncalli, T., *Introduction to Risk Parity and Budgeting*, Chapman & Hall/CRC (Crossref DOI
-  10.1201/b15151 dates the e-book record 2016-04-19; the print year 2013 is UNVERIFIED; not read); Spinu, F. (2013), SSRN
-  2297383 (Crossref only); Raffinot, T. (2018), "Hierarchical Clustering-Based Asset Allocation", *JPM* 44 (2): 89–99,
-  DOI 10.3905/jpm.2018.44.2.089 (Crossref, rechecked 2026-10-24: online 2017-12-22, volume 44 is 2018's; not read); Cederburg, O'Doherty, Wang and Yan (2020), *JFE* 138 (1):
-  95–117, DOI 10.1016/j.jfineco.2020.04.015 (Crossref only; findings UNVERIFIED, so not in the text, decision F).
+  Targeting." *Journal of Portfolio Management* 45 (1): 14–33. DOI 10.3905/jpm.2018.45.1.014 (Crossref: print 31
+  October 2018, online 1 November 2018; Crossref files the last author as "Hemert, Otto Van"). Read by the second hunt
+  in the complete journal reprint (cover and pp. 14–33, people.duke.edu/~charvey, the server's date 1 November 2018);
+  the drafter's saved copy was damaged. Locations (journal pages): more than 60 assets, with daily data beginning as
+  early as 1926 (p. 14; "60+ assets", pp. 14 and 31); volatility as the zero-mean, exponentially weighted standard
+  deviation of daily returns (p. 16, footnote 8), with a 20-day half-life by default and 10 to 90 days compared for US
+  equities (Exhibit 5, p. 20); returns scaled by the 10% target over the estimate from returns up to $t-2$, with a
+  constant chosen after the fact so that the target is realized over the full sample (p. 16); US equities with daily
+  data from July 1926 (p. 15) and statistics for 1927–2017 (Exhibits 1 and 5); US bonds, yields from 1962 (p. 15) and
+  statistics for 1963–2017 (Exhibits 9 and 11); 50 futures, forwards and credit (19 commodities, 9 currencies, 10
+  equity indexes, 9 bonds, 3 rate contracts, p. 16) for 1988–2017 as the results exhibits print it (Exhibits 15 and
+  18–20); the Sharpe ratio improves slightly for equity indexes and credit and is similar for the other assets (p. 25),
+  the effect negligible for fixed income, currencies and commodities (p. 31); the vol of vol and the left tail (mean
+  shortfall) improve for almost all of the 50 futures, forwards and credit (p. 25), but for US 10-year Treasury
+  futures the left tail is similar (Exhibit 13, p. 25); for a 60–40 portfolio with scaling at the asset and the
+  portfolio level, 1988–2017, the cumulative return and the vol of vol improve (pp. 27–28, Exhibits 16–17); footnote
+  7, p. 16, says that Moreira and Muir scaled by variance for most of their analysis. Kept out of the text: their
+  Sharpe ratios and any statement that their results apply to E5's funds.
+- Already in `project/SOURCES.md`: *RiskMetrics — Technical Document* (1996) for $\lambda=0.94$ (through LM26); Boyd and
+  Vandenberghe (2004) through LM29, with no section of its own.
+- Software: SciPy 1.18.1 (the v1.18.0 docs read and the installed 1.18.1 run on 2026-10-24).
+  `scipy.cluster.hierarchy.linkage` reads a 1-D input as a condensed distance matrix and a 2-D one as observation
+  vectors (`cluster/hierarchy/_hierarchy_impl.py:727-731`), so a square, symmetric, non-negative, hollow input is read
+  as observations and raises `ClusterWarning` (`:934-944`); `method="single"` is the nearest-point rule (`:773-778`).
+  `scipy.spatial.distance.squareform` with `checks=True` requires exact symmetry and an exactly zero diagonal
+  (`spatial/distance.py:2283-2284`, `:2399-2409`; on 200 toy correlation matrices `np.corrcoef` was asymmetric in all
+  200, and the symmetrized matrix with its diagonal set to 0 passed in all). cvxpy 1.9.3 with CLARABEL 0.11.1, as
+  `vol5_rules.py` logs them; the solver settings rest on the shared decision "Solver output".
+- Checked and not used: Roncalli, T. (2014), *Introduction to Risk Parity and Budgeting*, Chapman & Hall/CRC, DOI
+  10.1201/b15151 (the publisher's record: 1st edition, ©2014, 440 pp., hardback ISBN 978-1-4822-0715-6; the Library of
+  Congress record gives [2014], Open Library's own date 2013 and Crossref's e-book record 19 April 2016; not read;
+  Griveau-Billion et al. cite it as
+  Roncalli 2013); Spinu, F. (2013), "An Algorithm for Computing Risk Parity Weights", SSRN 2297383, DOI
+  10.2139/ssrn.2297383 (Crossref only; its abstract describes a provably convergent Newton method for risk parity and
+  risk budgets; not read); Raffinot, T. (2017), "Hierarchical Clustering-Based Asset Allocation", *Journal of
+  Portfolio Management* 44 (2): 89–99, DOI 10.3905/jpm.2018.44.2.089 (Crossref: online 22 December 2017, print 31
+  December 2017; not read); Cederburg, O'Doherty, Wang and Yan (2020), "On the performance of volatility-managed
+  portfolios", *Journal of Financial Economics* 138 (1): 95–117, October 2020, DOI 10.1016/j.jfineco.2020.04.015
+  (bibliographic data only; its findings stay out of the text, decision F).
 
-**Chinese terms** (AUTHORING §1; English in parentheses at first use in each box):
+**Chinese terms** (AUTHORING §1; English in parentheses at first use in each box; 樂詞網 searched on 2026-10-24 by the
+drafter and again in the fresh pass of 1,817 searches the same day, whose corrections are applied here):
 
-- From `plans/vol-5.md`'s list: 風險平價 (risk parity), 風險預算 (risk budget), 層次叢集法 (hierarchical clustering),
-  樹形圖 (dendrogram), 共變異數矩陣, 槓桿 (leverage), 週轉率 (turnover), 交易成本, 無風險利率, 估計誤差, 凸函數,
-  目標函數, 限制條件; the book's forms 層次風險平價 (hierarchical risk parity), 波動率目標 (volatility targeting).
-- Looked up on 樂詞網 on 2026-10-24 (all-listings phrase search, the survey's method):
+- From `plans/vol-5.md`'s list: 風險平價 (risk parity; 統計學名詞 lists only "risk-parity portfolio" 風險平價投資組合),
+  風險預算 (risk budget; an entry only in 電子工程名詞 and 電機工程名詞, so another field's entry, AUTHORING §1),
+  層次叢集法 (hierarchical clustering), 樹形圖 (dendrogram), 共變異數矩陣, 槓桿 (leverage), 週轉率 (turnover),
+  交易成本, 無風險利率, 估計誤差, 凸函數, 目標函數, 限制條件; the book's forms 層次風險平價 (hierarchical risk parity),
+  波動率目標 (volatility targeting). The §2 box says once that LM31's 風險預算 is a budget per asset, while LM7's
+  風險預算 (lm07.md:354) capped the total volatility of two strategies (decision on Chinese terms).
+- Looked up on 樂詞網 (all-listings phrase search, the survey's method):
   - single linkage clustering: 單一連接叢集法；最近連接叢集法 (統計學名詞) → 單一連接叢集法.
   - Euclidean distance: 歐氏距離 (數學名詞, 統計學名詞).
   - correlation matrix: 相關矩陣 (數學名詞, 統計學名詞), as LM10 and LM11 print it.
   - strictly convex function: 嚴格凸函數 (數學名詞; 統計學名詞 adds 狹義凸函數) → 嚴格凸函數.
   - uniqueness: 唯一性 (數學名詞, 統計學名詞).
-  - positive definite: 正定的 (數學名詞, 統計學名詞); positive definite matrix 正定方陣 (數學名詞); LM10 prints 正定.
+  - positive definite: 正定的 (數學名詞, 統計學名詞); positive definite matrix 正定方陣 (數學名詞); LM10 prints 正定
+    (lm10.md:302).
   - Newton's method: 牛頓法 (數學名詞), as LM4.
   - fixed point: 不動點；定點 (數學名詞) → 不動點.
   - coordinate: 坐標 (數學名詞); descent method: 下降法 (數學名詞); "coordinate descent" has no entry → 座標下降法,
     composed with the book's 座標 (LM1, LM11, LM12 print 座標; one term per concept keeps it).
-  - rebalancing: 重新平衡 (管理學名詞-會計學); the book keeps 再平衡 (LM3, LM8, LM9, LM10).
-  - EWMA: 指數加權移動平均模型 (統計學名詞); LM26 prints 指數加權移動平均.
-  - leverage: 槓桿；槓桿作用 (統計學名詞); exposure: the book's 曝險 (LM7, LM8).
+  - rebalancing: 重新平衡 (管理學名詞-會計學); "rebalance" 再平衡 (電子計算機名詞) and 再平衡；重新平衡 (一般性常見術語);
+    the book keeps 再平衡 (lm08.md:403; also LM3, LM9, LM10).
+  - EWMA: "EWMA model" 指數加權移動平均模型 (統計學名詞 and 管理學名詞; 管理學名詞 also 指數加權移動平均數). The §6 box
+    names the model 指數加權移動平均模型（EWMA）, as LM26 prints it (lm26.md:132; Glossary lm26.md:550).
+  - leverage: 槓桿；槓桿作用 (統計學名詞); exposure: the book's 曝險 (LM8's Glossary, lm08.md:597).
   - no entry: risk contribution, marginal contribution (→ 風險貢獻, 邊際風險貢獻, LM27's choice to follow), coordinate
-    descent, inverse variance, quasi-diagonal, risk budgeting (→ 風險預算, the list's), volatility targeting (→
-    波動率目標). Composed forms kept with their English: 等風險貢獻 (ERC), 反波動率權重 (inverse-volatility weights),
-    準對角化 (quasi-diagonalization), 遞迴二分 (recursive bisection; not 二分法, which 樂詞網 gives for the root-finding
-    bisection method).
-  - Looked up in the revision (2026-10-24, the same phrase search): reestimation 再估計 (統計學名詞); periodic 定期的
-    (動物學名詞), 定期 (國防部新編國軍簡明美華軍語辭典), otherwise 週期的; trigger 觸發；觸發點 (一般性常見術語), 觸發；觸發器
-    (電子計算機名詞), no statistics or management entry ("trigger point" 記錄點 in 管理學名詞-會計學 is another idea);
-    threshold 閾值；門檻 (數學名詞). Composed forms, kept with their English: 定期再估計 (periodic re-estimation; 再估計
-    is the statistics listing's), 風險觸發 (risk trigger); 門檻 (threshold) as the mathematics listing gives it. The
-    draft's 定期重估 is replaced, since 樂詞網 has 再估計.
+    descent, inverse variance or volatility, quasi-diagonalization, equal risk contribution, recursive bisection,
+    volatility targeting (→ 波動率目標). Composed forms kept with their English: 等風險貢獻 (ERC), 反波動率權重
+    (inverse-volatility weights), 準對角化 (quasi-diagonalization), 遞迴二分 (recursive bisection; not 二分法, which
+    樂詞網 gives for the root-finding bisection method).
+  - reestimation: 再估計 (統計學名詞). periodic: no entry in the statistics, mathematics or management listings
+    (動物學名詞 周期性；定期的; 國防部新編國軍簡明美華軍語辭典 定期，週期的) → 定期. trigger: no bare entry in those
+    listings (管理學名詞 has only the compound "trigger price" 觸發價格; 一般性常見術語 觸發；觸發點; 電子計算機名詞
+    觸發；觸發器; "trigger point" 記錄點 in 管理學名詞-會計學 is another idea). threshold: 閾值；門檻 (數學名詞). Composed
+    forms, kept with their English: 定期再估計 (periodic re-estimation; 再估計 is the statistics listing's), 風險觸發
+    (risk trigger); 門檻 (threshold) as the mathematics listing gives it.
 
-**Open before Stage 2.** The editor's decisions of 2026-10-24 settle the draft's eleven items:
+**Open before Stage 2.** The editor's decisions of 2026-10-24 settle every item of the draft, the first revision and
+the second; none is left open before Stage 2.
 
-- *Closed.* O1 (turnover): decision A2; LM31 prints only R8's per-trade statistics over the 91 trades after the
-  first purchase (A31-36, redefined), and annual turnover is LM34's A34-06. O2 (other modules' numbers): decisions A4
-  and A5; every echo names its owner's anchor (A27-21, A28-06, A28-07, A28-10, A28-15, A30-12, A30-19, A30-24), and
-  LM30's A30-19 prints both long-only and sample minimum variance on U28's halves, which X6 now shows. O3 (lab data):
-  the shared decision "Labs" lists the eight rules' net and gross wealth paths (C6). O4 (notation): AUTHORING §6 as
-  amended (no hat on $\sigma_{t+1\mid t}$, $\Sigma_{t+1\mid t}$ on $\mathbf R_t$, the scoped $\mathbf y$ row; decisions
-  B1, B3, B5); the Deep Dive writes no eigenvalue symbol. O5 (the trigger threshold): fixed at 0.5 by decision D. O7
-  (HRP on E5 in the text) and O11 (the CCD widget): accepted, decisions D and E. O8 (the funds' indices): LM27's brief
-  records them from the issuers, and LM31 uses LM27's wording. O9 (prerequisites): confirmed both ways (decision C9;
-  every listed module lists 31 among its leads or gains it at Stage 4). O10 (lm08.md:290): optional at Stage 4,
-  decision G. O6 (sources): decision F; see the remaining item below. The forward promise "whether R6's and R7's
-  realized volatilities differ by more than chance" is dropped (per-module decision on LM33).
-- *Also settled in this revision* (the recomputation's findings): A31-34's SD of the log ratio divides by 91; holding
-  months are named by their first and last dates; gaps at machine precision print as bounds (A31-07, A31-08, A31-10,
-  A31-13, A31-15, A31-31); A31-09's and A31-28's precisions are flagged as printed; A31-14's Newton count follows
-  `erc()`'s line search; A31-39's Jacobi count names the annualized $\Sigma$; E5 prints three decimals throughout and E8
-  prints $L$ to four, so that each step follows from the numbers printed before it.
+- *Closed in the first revision.* O1 (turnover): decision A2; LM31 prints only R8's per-trade statistics over the 91
+  trades after the first purchase (A31-36), and annual turnover is LM34's A34-06. O2 (other modules' numbers):
+  decisions A4 and A5; every echo names its owner's anchor (A27-21, A28-06, A28-07, A28-10, A28-15, A30-12, A30-19,
+  A30-24), and LM30's A30-19 prints both long-only and sample minimum variance on U28's halves, which X6 shows. O3 (lab
+  data): the shared decision "Labs" lists the eight rules' net and gross wealth paths (C6). O4 (notation): AUTHORING §6
+  as amended (no hat on $\sigma_{t+1\mid t}$, $\Sigma_{t+1\mid t}$ on $\mathbf R_t$, the scoped $\mathbf y$ row;
+  decisions B1, B3, B5); the Deep Dive writes no eigenvalue symbol. O5 (the trigger threshold): fixed at 0.5 by decision
+  D. O7 (HRP on E5 in the text) and O11 (the CCD widget): accepted, decisions D and E. O8 (the funds' indices): LM27's
+  brief records them from the issuers, and LM31 uses LM27's wording. O9 (prerequisites): confirmed both ways (decision
+  C9). O10 (lm08.md:290): optional at Stage 4, decision G (below). O6 (sources): decision F, then R3 below. The forward
+  promise "whether R6's and R7's realized volatilities differ by more than chance" is dropped (per-module decision on
+  LM33). The first recomputation's findings were applied then (A31-34's divisor 91, holding months named by their
+  dates, gaps at machine precision as bounds, Newton's count following `erc()`, A31-39's annualized $\Sigma$, E8's $L$
+  to four decimals).
+- *Closed in this revision.* R1 (annualizing a holding month beside its ratio): decided as the brief proposed
+  ("Decisions on the first revision", LM31): the realized and target volatilities both use the estimation frame's
+  $A$, so their ratio is the daily one (45.3% against 7.84%, 5.78), and the Data role, X1 and E9 say so. R2 (tag lists
+  of earlier briefs): the cross-check's table (Y1) adds LM31 to (28.2), (29.2), (29.3) and (29.5), and LM27–LM29 take
+  it (decision "Tags and leads"); LM31's own lists stand ("Cross-module tags"). R3 (sources): the second hunt read
+  Maillard et al. in their May 2009 working paper, López de Prado in SSRN 2708678 (23 May 2016) and Harvey et al. in
+  the complete journal reprint; the decision prints their claims with the hunt's wording and no JPM page of the first
+  two, whose JPM texts are closed ("Sources" now gives every location); Chaves et al. and Tseng stay cited as
+  Griveau-Billion et al. describe them, the source the text actually read (decision F). The round-2 recomputation's
+  findings are applied: KC §7 and E10 rest on the EWMA's wins and losses (A31-35 extended and relabelled); A31-26 reads
+  "the mean of R6's 92 target weights"; printed parts that do not sum say "rounded separately" with their sum, and
+  X1 prints one decimal; E5's variances are named as the unrounded $\hat\Sigma$'s; every value in a Printed column is
+  in the text or marked "not in the brief's text"; U28's halves compare 1/N (LM30's) with LM31's three; Jacobi's
+  stopping rule is named; "month" and "years" carry their labels (C7); "Owns" names R6's ex-post shares only; the
+  anchors' status lists every changed definition. Of the cross-check's items, Y11 (LM31 prints A31-29's 2.14, which
+  LM35 echoes), Y17 (A4's carve-out for R1's shares), Y18 (no flag marks in the text) and Y19 (A31-19 and A31-30 cited
+  in §4, §6 and X7) are applied, and the echoes print at their owners' precision (C12): the first window's
+  volatilities to one decimal and correlations to two, except E1's volatilities, whose weights need two decimals.
+- *Repaired after the third revision's check.* The holding-month shares name their weights, each holding month's own
+  target weights on that holding month's covariance (A31-26's definition), in Resolved (b), the forward-links row for
+  lm10.md:225, X5, E7 and the Pitfalls; E4 cites R3's 5.02% as LM28's A28-10 (C12); (31.2) lists no speculative user
+  (C8); KC §7's month is a holding month (C7); E5 prints the squares of E1's 13.50% and 8.54% beside the variances
+  (A31-17).
 
-Remaining (each with the reviser's recommendation):
+Left to a later stage by the decisions (not before Stage 2):
 
-- **R1. Annualizing a holding month beside its ratio.** The ratio of A31-34 is taken in daily units. Printed beside
-  it, the realized figure annualized with $A_{\mathrm w}$ and the target with $A$ gave 45.4% against 7.84%, whose
-  quotient is 5.79, not the printed 5.78 (the two $A$ differ by 0.3%). The revision annualizes both with the target's
-  $A=242.95$ (45.3%), so that the ratio reads off the printed figures; a rule's realized volatility over the whole
-  out-of-sample period keeps $A_{\mathrm w}$ (A31-27). Recommendation: confirm; the alternative is to print the
-  holding month's figures in daily units.
-- **R2. Tag lists of earlier briefs.** LM31 now cites (28.2), (29.2), (29.3) and (29.5) by number (decision C8). The
-  revised LM28 brief lists (28.2) for LM29 and LM30 only, and LM29's lists name no user for (29.2) and (29.3) and only
-  LM30 for (29.5). Recommendation, for the cross-check of the nine revised briefs (decision "Across briefs"): those four
-  lists gain LM31; (27.1)–(27.3) and (27.5)–(27.6) already name it. LM31's own lists were checked against the revised
-  LM32–LM35 briefs: (31.1) is cited by LM35, (31.7) by LM32, LM33, LM34 and LM35 (LM33 added here), (31.8) by none.
-- **R3. Sources (decision F).** The source check settles LM31's two items. Bruder and Roncalli (2012) is verified in
-  the March 2012 working paper, its only version: the brief now prints its locations (§2.2, pp. 4–5; eq. (7), p. 9;
-  §2.3.3, pp. 9–10; §2.3.4, p. 10), and because §2.3.3 is a sketch, (31.2) stays derived in full. Moreira and Muir's
-  design and samples by factor may be printed; the JF text could not be read, so the text cites the article, names the
-  two versions read and prints no JF page or equation number. Outside decision F's list, and read only by the drafter:
-  Maillard et al. (the 2009 working paper), López de Prado (the SSRN version) and Harvey et al. (the pages of a damaged
-  copy); Chaves et al. and Tseng are cited only as Griveau-Billion et al. cite them, and Cederburg et al. stay out of
-  the text. Recommendation: Stage 2's source pass reads the JPM texts of Maillard et al. and López de Prado and a clean
-  copy of Harvey et al.; until then the text keeps to the claims listed under "Sources".
+- **lm08.md:290's rewording** (optional, decision G). Recommendation: make it at Stage 4 as "Stage 4 for earlier
+  modules" words it. The present sentence is not wrong, since the factor 2 changes no tree (A31-21), but HRP builds its
+  tree on the column distance of half that distance, and the new wording says so.

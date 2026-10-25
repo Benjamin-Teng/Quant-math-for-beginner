@@ -1,10 +1,13 @@
 """LM29 anchors (Convex Optimization in Practice): every number the Stage 1 brief quotes (drafted 2026-10-24; revised
-the same day to the editor's decisions on the briefs, plans/vol-5.md).
+the same day to the editor's decisions on the briefs, and again to the decisions on the first revision and on the
+second recomputation and cross-check, plans/vol-5.md).
 
 Reads only data/processed/*.parquet, through the shared builders (run them first; this script runs neither):
   * E5 (plans/vol-5.md, "Data"): data/vol5_series.py's frames("E5"), which reads data/processed/vol5_frames.parquet:
     the estimation frame (dates on which every fund has a one-session total return; T = 2,362, A = T / years) and the
-    wealth frame (every TR23 session after the base close 2017-01-17; a halted fund earns 0; A_w = sessions / years).
+    wealth frame (every TR23 session after the base close 2017-01-17; a halted fund earns 0; A_w = sessions / years);
+    years are calendar days / 365.25 from the close before the first return (2017-01-17) to the last close (AUTHORING
+    section 8). LM27 owns these counts (A27-02, A27-03); A29-01 reprints them.
     The funds, in this order: 0050, 00646, 00679B, 00635U, 00642U.
   * The through case: data/vol5_rules.py's schedule(), WINDOW (504 estimation rows through each month-end signal), RF
     (1.5% a year), the cost model (COMMISSION 0.1425% on both sides, TAX on sales: 0.1%, 0 for 00679B), and the exact
@@ -25,7 +28,7 @@ second solver, and the script stops if a check fails. Multipliers follow LM7's s
 (the brief's (29.4)): grad h = lambda (budget) + nu (lower bounds) - nu_cap (caps), nu >= 0; cvxpy's dual of the
 budget constraint is printed as cvxpy reports it. Drifted weights at a signal: the previous target set at its trade's
 close, grown by each fund's wealth-frame returns through the signal's close, normalized. Planned turnover at a signal
-is 1/2 |f - w_drift| and planned cost 0.1425% |f - w_drift|_1 + sum tax_i max(0, w_drift,i - f_i), both as fractions
+is 1/2 |f - w_drift|_1 and planned cost 0.1425% |f - w_drift|_1 + sum tax_i max(0, w_drift,i - f_i), both as fractions
 of pre-trade wealth at the signal close (the through case trades a session later; LM34 owns the executed figures and
 every rule's annual turnover, so the cost sweep prints its planned totals relative to theta = 0). The cost-penalized
 QP is given to cvxpy as LM27's cost function, COMMISSION * norm1(w - w_drift) + tax' pos(w_drift - w) (its KKT check
@@ -33,7 +36,8 @@ splits buys and sells; solver gaps depend on the formulation).
 
 Rounding flags. Every number the brief prints passes through f(x, k1, k2, ...), which shows x with max(k) + 3 decimals
 and flags it "NEAR" for each printed precision k at which x lies within a tenth of a last-digit unit of a rounding
-boundary (|frac(10^k |x|) - 0.5| < 0.1), or through ef(x, k...), the same for the mantissa of e-notation. The brief
+boundary (|frac(10^k |x|) - 0.5| < 0.1), or through ef(x, k...), the same for the mantissa of e-notation; f's keyword
+also=(k, ...) flags further precisions without showing more digits (A29-21 flags its shown fourth decimal). The brief
 prints a flagged value as rounded from the unrounded value here; a cell at rounding level is printed as a bound.
 Weights pass through pc() (percent). Numbers printed by earlier modules are echoed with file:line or their anchor ID.
 
@@ -91,10 +95,11 @@ def put(value: str) -> None:
     NEAR.clear()
 
 
-def f(x: SupportsFloat, *ks: int, plus: bool = False) -> str:
-    """x with max(ks) + 3 decimals; flagged for each printed precision k within 0.1 of a last-digit unit of a boundary."""
+def f(x: SupportsFloat, *ks: int, plus: bool = False, also: tuple[int, ...] = ()) -> str:
+    """x with max(ks) + 3 decimals; flagged for each printed precision k (and each k in also) within 0.1 of a
+    last-digit unit of a boundary."""
     x = float(x)
-    for k in ks:
+    for k in (*ks, *also):
         u = abs(x) * 10**k
         if abs(u - floor(u) - 0.5) < 0.1:
             NEAR.append(f"{x:.{k + 3}f} at {k} dp")
@@ -178,6 +183,7 @@ def must(v: Vec | None, label: str) -> Vec:
 
 
 BOOK = {"OSQP": (cp.OSQP, OSQP_OPTS), "CLARABEL": (cp.CLARABEL, CLARABEL_OPTS)}
+SCS_OPTS = {"eps": 1e-9, "max_iters": 200000}      # problem 11's second solver; cvxpy's own SCS default is eps 1e-5
 
 
 def homog(S: Mat, e: Vec, extra: str = "", solver: str = "CLARABEL", lb: Vec | None = None,
@@ -200,12 +206,12 @@ def homog(S: Mat, e: Vec, extra: str = "", solver: str = "CLARABEL", lb: Vec | N
 
 
 # ---------------------------------------------------------------------------------------------------- data and windows
-put(f"E5 estimation frame T = {len(fr.est_dates)} ({fr.est_dates[0]} -> {fr.est_dates[-1]}), A = {f(A, 2, 3)}; "
-    f"wealth frame {len(WD)} sessions, A_w = {f(fr.A_wealth, 2)}")
+put(f"echo of A27-02 and A27-03 (LM27's): E5 estimation frame T = {len(fr.est_dates)} ({fr.est_dates[0]} -> "
+    f"{fr.est_dates[-1]}), A = {f(A, 2, 3)}; wealth frame {len(WD)} sessions, A_w = {f(fr.A_wealth, 2)}")
 sg0, tr0, x0, d0 = window(0)
 sgL, trL, xL, dL = window(len(SCH) - 1)
-put(f"{len(SCH)} signals; first {sg0} (trade {tr0}), window {d0[0]} -> {d0[-1]} ({len(d0)} rows); last {sgL} "
-    f"(trade {trL}), window {dL[0]} -> {dL[-1]} ({len(dL)} rows)")
+put(f"{len(SCH)} signals; first {sg0} (trade {tr0}), window {d0[0]} -> {d0[-1]} ({len(d0)} rows) (the count and the "
+    f"first window echo A28-02, LM28's); last {sgL} (trade {trL}), window {dL[0]} -> {dL[-1]} ({len(dL)} rows)")
 
 lo_eig, kap = [], []
 for k in range(len(SCH)):
@@ -276,10 +282,10 @@ put(f"92-signal backing: the unconstrained tangency (LM28's formula) has a negat
 put("R4 zero weights across the 92 signals: " + ", ".join(f"{s} {int(c)}" for s, c in zip(FUNDS, r4z, strict=True))
     + f"; fund-signals with e_i > 0 but w_i = 0: {pos_out}; with e_i <= 0 but w_i > 0: {neg_in} (of {N * len(SCH)}): "
     + "; ".join(f"{s} {sg} ({f(100 * wi, 1)}%, e {f(100 * ei, 2)}%)" for s, sg, wi, ei in hedges))
-put(f"R3 zero weights across the 92 signals: {r3zero}; largest |beta_ip - 1| over all signals and funds "
-    f"{ef(beta_dev, 1)} (rounding level: the exact NNLS reference's own rounding); echo of A28-12 (LM28's): smallest "
-    f"weight {f(100 * r3min[0], 2)}% ({r3min[1]}, {r3min[2]}), largest gap between R3 and the unconstrained "
-    f"minimum-variance weights {ef(mv_gap, 1)}")
+put(f"R3's bounds never bind on E5 (LM29 owns this, decision A5; LM28's A28-12 and LM30's A30-16 echo it): R3 zero "
+    f"weights across the 92 signals: {r3zero}; smallest R3 weight {f(100 * r3min[0], 2)}% ({r3min[1]}, {r3min[2]}); "
+    f"largest |beta_ip - 1| over all signals and funds {ef(beta_dev, 1)} (rounding level: the exact NNLS reference's "
+    f"own rounding); largest gap between R3 and LM28's unconstrained minimum-variance weights (28.2) {ef(mv_gap, 1)}")
 
 # ---------------------------------------------------------------------------------------------------- KKT at the last signal
 xr = w4L / float(eL @ w4L)
@@ -396,7 +402,7 @@ if np.abs(lims["long-only, cap 40%"] - homog(SL, eL, "cap", solver="OSQP", cap=0
     stop("cap limit: solvers differ")
 put("maximum Sharpe ratio under limits, last window: " + "; ".join(
     f"{k}: {pc(w, 1, 2)}, Sharpe ratio {f(sr(w, SL, eL), 2, 3)}, gross {f(100 * np.abs(w).sum(), 1)}%, volatility "
-    f"{f(100 * vol(w, SL), 1)}%" for k, w in lims.items()))
+    f"{f(100 * vol(w, SL), 1, 2)}%" for k, w in lims.items()))
 
 # frontier: the unconstrained frontier's weights are linear in the target mean m; long-only by CLARABEL
 Kf = np.vstack([np.ones(N), muL])
@@ -575,8 +581,8 @@ for th in (0.0, 0.25, 0.5, 1.0, 2.0, 5.0, 10.0):
         prev, iprev = fk, WD.index(tr)
     if th == 0:
         to0, cs0 = to, cs
-    rows_sweep.append(f"theta {th:g}: planned turnover {f(100 * to / to0, 1)}% of theta 0's, planned cost "
-                      f"{f(100 * cs / cs0, 1)}% of theta 0's, no trade at {quiet} of {len(SCH) - 1}, in-sample "
+    rows_sweep.append(f"theta {th:g}: planned turnover {f(100 * to / to0, 1, also=(4,))}% of theta 0's, planned cost "
+                      f"{f(100 * cs / cs0, 1, also=(4,))}% of theta 0's, no trade at {quiet} of {len(SCH) - 1}, in-sample "
                       f"volatility given up mean {f(1e4 * float(np.mean(gap)), 1)} bp, largest "
                       f"{f(1e4 * float(np.max(gap)), 1)} bp")
 if sweep_gap > 1e-5:
@@ -609,7 +615,8 @@ osqp_def = {k: re.search(rf"solver_opts\.get\('{k}', ([^)]+)\)", osqp_src) for k
 if any(m is None for m in osqp_def.values()) or "solver_opts.get(polish_param, True)" not in osqp_src:
     stop("cvxpy's OSQP defaults: source pattern not found")
 put("cvxpy's default solver: " + ", ".join(f"{k} {v}" for k, v in names.items()) + f" (LP: {pdef.solver_stats.solver_name})"
-    f"; versions cvxpy {version('cvxpy')}, OSQP {version('osqp')}, CLARABEL {version('clarabel')}; CLARABEL defaults "
+    f"; versions cvxpy {version('cvxpy')}, OSQP {version('osqp')}, CLARABEL {version('clarabel')}, SCS {version('scs')} "
+    f"(problem 11's second solver); CLARABEL defaults "
     f"tol_gap_abs {dflt.tol_gap_abs:g}, tol_gap_rel {dflt.tol_gap_rel:g}, tol_feas {dflt.tol_feas:g}, max_iter "
     f"{dflt.max_iter}; cvxpy's OSQP defaults (osqp_qpif.py) " + ", ".join(
     f"{k} {m.group(1)}" for k, m in osqp_def.items() if m is not None) + ", polishing True on a fresh solve")
@@ -638,8 +645,8 @@ for unit in ("daily", "annual"):
         first.append(f"{unit} {sv} {lab} {ef(gap_run(x0, 'R3', unit, sv, op), 1)}")
 w30d = minvar(cov0(x0), "R3 first daily")
 put("R3 at the first signal, largest weight gap to the exact solution: " + "; ".join(first)
-    + f"; the optimal variance in daily units {ef(float(w30d @ cov0(x0) @ w30d), 3)}, in annual units (A times it) "
-    f"{ef(float(w30d @ (A * cov0(x0)) @ w30d), 3)}")
+    + f"; the optimal variance in daily units {ef(float(w30d @ cov0(x0) @ w30d), 3)}, in annual units (A times it; "
+    f"echo of LM28's first-window sigma_min^2, A28-10) {ef(float(w30d @ (A * cov0(x0)) @ w30d), 3)}")
 worst = {}
 for k in range(len(SCH)):
     x = window(k)[2]
@@ -789,13 +796,13 @@ for spread in (0.0, SPREAD):
     cons11 = [cp.quad_form(fl, cp.psd_wrap(SL)) <= 0.25**2, fl >= 0, cp.norm1(fl) <= 1.5]
     _, v11 = solve(obj, cons11, "CLARABEL", ERC_OPTS, sense="max")     # 1e-12 stops at "optimal_inaccurate"
     v11 = must(v11, "problem 11")
-    _, s11 = solve(obj, cons11, "SCS", {"eps": 1e-9, "max_iters": 200000}, sense="max")
+    _, s11 = solve(obj, cons11, "SCS", SCS_OPTS, sense="max")
     s11 = must(s11, "problem 11 SCS")
     if np.abs(v11 - fx).max() > 1e-5 or np.abs(s11 - fx).max() > 1e-5:
         stop("problem 11: CLARABEL or SCS differs from the exact solution")
     gross_ret = float(eL @ fx)
     res11.append(f"spread {spread:.2f}: the long-only tangency at r_f + spread {pc(wb, 2)}, scaled by 25% / "
-                 f"{f(100 * vol(wb, SL), 2)}% = {f(kb, 3)}: f {pc(fx, 1)}, net exposure L {f(100 * fx.sum(), 1)}%, "
+                 f"{f(100 * vol(wb, SL), 2)}% = {f(kb, 3)}: f {pc(fx, 2)}, net exposure L {f(100 * fx.sum(), 1)}%, "
                  f"volatility {f(100 * vol(fx, SL), 2)}%, excess return before financing {f(100 * gross_ret, 2)}%, "
                  f"financing spread x (L - 1) {f(100 * spread * (fx.sum() - 1), 2)}%, excess return after financing "
                  f"{f(100 * (gross_ret - spread * max(0.0, fx.sum() - 1)), 2)}%; CLARABEL against it "
@@ -803,8 +810,10 @@ for spread in (0.0, SPREAD):
     if spread == 0.0 and np.abs(wb - w4L).max() > 1e-12:
         stop("problem 11: spread 0 is not R4")
 put("problem 11 (last window; maximize f'e - spread max(0, 1'f - 1), f'Sf <= 25%^2, f >= 0, |f|_1 <= 1.5; exact "
-    f"solution by vol5_rules.maxsharpe, checked by CLARABEL at 1e-10 and SCS to 1e-5; at the book's 1e-12 CLARABEL "
-    f"returns '{st12}'; spread 0 gives R4 itself): " + "; ".join(res11))
+    f"solution by vol5_rules.maxsharpe, checked to 1e-5 by CLARABEL at 1e-10 and by SCS (eps "
+    f"{str(SCS_OPTS['eps']).replace('e-0', 'e-')}, "
+    f"max_iters {SCS_OPTS['max_iters']:,}); at the book's 1e-12 CLARABEL returns '{st12}'; spread 0 gives R4 "
+    f"itself): " + "; ".join(res11))
 
 g5 = np.round(Gd, 5)
 bar5 = max((g5[i] - g5[j]) / (2 * COMMISSION + TAXV[i]) for i in range(N) for j in range(N) if i != j)

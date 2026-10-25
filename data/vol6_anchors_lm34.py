@@ -1,4 +1,5 @@
-"""LM34 anchors (Backtesting Without Fooling Yourself): every number the Stage 1 brief quotes (2026-10-24, revised).
+"""LM34 anchors (Backtesting Without Fooling Yourself): every number the Stage 1 brief quotes (2026-10-24, third revision;
+last pass 2026-10-25).
 
 Reads only data/processed/*.parquet through the shared builders, plus the registered raw files named here (run the
 builders first):
@@ -19,7 +20,8 @@ Conventions (plans/vol-5.md, shared decisions and the editor's decisions on the 
 are vol5_rules.py's (window WINDOW = 504 estimation rows, month-end signals, trade at the next session's close on which
 every fund trades, costs COMMISSION and TAX, cash at RF = 1.5% a year, borrowing at RF + SPREAD, valuation to
 2026-10-08 with no terminal liquidation). "Growth" is ln(final wealth) / years from the cash of 1 at the first trade's
-close (years = calendar days / 365.25); "gross" is the same path with cost_mult = 0 (trading costs removed, financing
+close (years = calendar days / 365.25 from the close before a sample's first return to its last close, AUTHORING
+section 8); "gross" is the same path with cost_mult = 0 (trading costs removed, financing
 kept); "costs" are the sum over trades of cost / pre-trade wealth; "turnover" is the sum of one-way turnovers after the
 first purchase per year (summary()). A rule's Sharpe ratio, volatility, VaR and drawdown are other modules' statistics
 (LM33, LM30-LM31, LM32) and are not printed; the cost arithmetic of a single trade is LM27's and is echoed. The PBO
@@ -32,10 +34,14 @@ demeaned series the statistic involves, rounded; for a comparison with R1, the d
 Quantiles and medians: inverted_cdf. Counts against a threshold use the guard EPS = 1e-12.
 Simulation (AUTHORING section 8): one generator per experiment, np.random.default_rng([e, 20261011]):
   e = 1  the reality check on Experiment 10 (stationary bootstrap, mean block length 145 by LM22's rule on the 10,000
-         rules' returns, as LM22's TR23 length, drawn by LM22's stationary_idx, lm22.md:371-379; B_RC resamples in
+         rules' returns, as LM22's TR23 length, drawn by LM22's stationary_idx, lm22.md:372-380; B_RC resamples in
          batches of 1,000);
-  e = 2  noise strategies under CSCV (Model): N_NOISE panels of 60 iid normal strategies on the grid's evaluation days;
-  e = 3  the widget's grid (Model): N_STATE panels per state, states in the order printed;
+  e = 2  noise strategies under CSCV (Model): N_NOISE panels of 60 iid normal strategies on the grid's evaluation days,
+         each panel one draw standard_normal((1851, 60)) x 0.01 (rows days, columns strategies), the panels in
+         sequence on the one generator;
+  e = 3  the widget's grid (Model): N_STATE panels per state, each one draw standard_normal((1851, n)) x 0.01 (rows
+         days) with strategy 1 (column 0) given its drift, the panels in sequence and the states in the order
+         printed, all on the one generator;
   e = 4  the reality check on the PBO grid against R1 monthly (stationary bootstrap, mean block length by LM22's rule
          on the 59 differences from R1);
   e = 5  the same at ELL_SENS = 17, R1 monthly's own Politis-White length, rounded (the editor's sensitivity).
@@ -46,7 +52,8 @@ Rounding flags. Every number the brief prints passes through f(x, k1, k2, ...), 
 and flags it "NEAR" for each printed precision k at which x lies within a tenth of a last-digit unit of a rounding
 boundary (|frac(10^k |x|) - 0.5| < 0.1). The brief prints a flagged value as rounded from the unrounded value here.
 
-Prints one line per anchor, "A34-NN <value>", in ID order (A34-21 is withdrawn and keeps its ID), and writes nothing.
+Prints one line per anchor, "A34-NN <value>", in ID order (A34-21 is withdrawn and keeps its ID; A34-37, problem 10's
+means of X5's printed factors, was added by the third revision and prints last), and writes nothing.
 
 Run:  PYTHONUTF8=1 uv run python data/vol6_anchors_lm34.py
 """
@@ -84,6 +91,7 @@ BLOCKS = 16            # CSCV blocks
 ELL_TR23 = 145         # LM22's mean block length for TR23 (lm22.md:427); checked against the rule in reality_check()
 ELL_SENS = 17          # the grid's block-length sensitivity (editor's decision D): R1 monthly's own estimate, rounded
 BORROW = V.RF + V.SPREAD   # 3.5% a year, the through case's illustrative borrowing rate, for the Kelly lab's sensitivity
+F_LM22 = 4.14          # TR23's full-sample Kelly root as lm22.md:125 prints it (LM17's), which problem 9 prints
 BASE, END = "2017-01-17", "2026-10-08"
 # The six ETFs on the 2017-01-17 list whose names (FinMind TaiwanStockInfo, retrieved 2026-10-24, not registered) name
 # an S&P gold or oil index or the VIX; 00672L's and 00677U's names are also in the registered delisting file.
@@ -128,7 +136,7 @@ def rng(e: int) -> np.random.Generator:
 
 
 def stationary_idx(g: np.random.Generator, T: int, ell: float) -> NDArray[np.int64]:
-    """LM22's stationary bootstrap indices (lm22.md:371-379), drawn in arch's order."""
+    """LM22's stationary bootstrap indices (lm22.md:372-380), drawn in arch's order."""
     start = g.integers(T, size=T)
     new = g.random(T) <= 1 / ell
     new[0] = True
@@ -159,9 +167,9 @@ SPLITS = [(r["stock_id"], r["date"], Decimal(r["before_price"]), Decimal(r["afte
 
 
 def split_factor(sym: str) -> dict[str, float]:
-    """Date -> s_t, new units per old unit (k for a k-for-1 split, 1/k for a k-to-1 reverse split), from SPLITS. The
-    ratio is the registered before / after price (or its inverse) rounded to an integer; it must lie within 0.01 of
-    one."""
+    """Date -> new units per old unit (k for a k-for-1 split, 1/k for a k-to-1 reverse split), from SPLITS: on that
+    day the previous close is restated per current share, divided by this ratio (Volume I's total return). The ratio
+    is the registered before / after price (or its inverse) rounded to an integer; it must lie within 0.01 of one."""
     out = {}
     for s, d, b, a in SPLITS:
         if s == sym:
@@ -172,10 +180,14 @@ def split_factor(sym: str) -> dict[str, float]:
     return out
 
 
+def split_ratios(sym: str) -> list[Decimal]:
+    """The registered before / after price ratios (or their inverses, for a reverse split) of sym's splits."""
+    return [b / a if b >= a else a / b for s, _, b, a in SPLITS if s == sym]
+
+
 def split_ratio_gap(sym: str) -> float:
     """Largest |registered price ratio - integer ratio| over sym's splits."""
-    gaps = [abs((b / a if b >= a else a / b) - (b / a if b >= a else a / b).to_integral_value())
-            for s, _, b, a in SPLITS if s == sym]
+    gaps = [abs(q - q.to_integral_value()) for q in split_ratios(sym)]
     return float(max(gaps)) if gaps else 0.0
 
 
@@ -202,14 +214,14 @@ def through_case() -> Case:
     put(f"signals {len(sigs)}: first {sigs[0].signal} (trade {sigs[0].trade}; window rows "
         f"{fr.est_dates[first_w[2] - V.WINDOW]} .. {fr.est_dates[first_w[2] - 1]}), last {sigs[-1].signal} (trade "
         f"{sigs[-1].trade}); valuation to {fr.wealth_dates[-1]}; {n_days} daily returns after the first trade "
-        f"({paths['R1'].dates[1]} .. {paths['R1'].dates[-1]}); evaluation years (calendar days / 365.25) "
-        f"{f(ev_years, 2, 4)}")                                                                             # 02
+        f"({paths['R1'].dates[1]} .. {paths['R1'].dates[-1]}); evaluation years (calendar days / 365.25 from the "
+        f"close of {sigs[0].trade}, the close before the first return) {f(ev_years, 2, 4)}")               # 02
     gross = {k: V.wealth_path(fr, sigs, k, cost_mult=0.0) for k in rules}
     summ = {k: V.summary(fr, paths[k]) for k in rules}
     gsum = {k: V.summary(fr, gross[k]) for k in rules}
     for k in rules:
         assert "ruin" not in summ[k] and "ruin" not in gsum[k]
-    put("net final wealth: " + ", ".join(f"{k} {f(paths[k].wealth[-1], 2, 3)}" for k in rules))           # 03
+    put("net final wealth: " + ", ".join(f"{k} {f(paths[k].wealth[-1], 3, 4)}" for k in rules))           # 03
     put("net growth a year: " + ", ".join(f"{k} {f(num(summ[k], 'growth'), 3, 4)}" for k in rules))        # 04
     put("gross growth a year (trading costs 0, financing kept): "
         + ", ".join(f"{k} {f(num(gsum[k], 'growth'), 3, 4)}" for k in rules)
@@ -218,13 +230,15 @@ def through_case() -> Case:
     put("turnover a year (one-way, after the first purchase): "
         + ", ".join(f"{k} {f(num(summ[k], 'turnover'), 2, 3)}" for k in rules)
         + f"; trades {len(paths['R1'].trades)} each")                                                      # 06
+    ident = max(abs(log(gross[k].wealth[-1] / paths[k].wealth[-1]) + sum(log(1 - t.cost) for t in paths[k].trades))
+                for k in rules)
+    assert ident < 2e-14, ident                   # (34.1) holds to rounding noise on every rule
     put("costs (sum of cost / pre-trade wealth): " + ", ".join(f"{k} {f(num(summ[k], 'costs'), 4, 7)}" for k in rules)
         + "; per year: " + ", ".join(f"{k} {f(num(summ[k], 'costs') / ev_years, 4, 5)}" for k in rules)
         + "; ln(gross / net final wealth): "
         + ", ".join(f"{k} {f(log(gross[k].wealth[-1] / paths[k].wealth[-1]), 7)}" for k in rules)
-        + "; the identity -sum ln(1 - cost / pre-trade wealth) against it, largest difference over the rules "
-        + f"{max(abs(log(gross[k].wealth[-1] / paths[k].wealth[-1]) + sum(log(1 - t.cost) for t in paths[k].trades))
-                 for k in rules):.1e}")                                                                     # 07
+        + "; the identity -sum ln(1 - cost / pre-trade wealth) against it, largest difference over the rules below "
+        + f"2e-14 (floating-point noise, {ident:.1e} in this run)")                                         # 07
     rank_net = sorted(rules, key=lambda k: -num(summ[k], "growth"))
     rank_gross = sorted(rules, key=lambda k: -num(gsum[k], "growth"))
     put(f"ranked by net growth: {' > '.join(rank_net)}; by gross growth: {' > '.join(rank_gross)}")        # 08
@@ -292,11 +306,13 @@ def adjusted_prices() -> None:
         return float(c50[j] / (cum[j] / cum[i]))
 
     i17 = d50.index(BASE)
+    (q50,) = split_ratios("0050")
     put(f"0050 close {BASE} {c50[i17]:.2f}; adjusted close of that day in a series built on 2020-01-02 "
         f"{f(adj(BASE, '2020-01-02'), 2)}, on 2024-12-31 {f(adj(BASE, '2024-12-31'), 2)}, on {END} "
         f"{f(adj(BASE, END), 2)}; close {END} {c50[-1]:.2f}; distributions after {BASE}: "
-        f"{sum(1 for d in div50 if BASE < d <= END)}, split 2025-06-18 (4 for 1, s_t = 4; registered prices within "
-        f"{split_ratio_gap('0050'):.4f} of the integer ratio); growth factor {BASE} -> {END} "
+        f"{sum(1 for d in div50 if BASE < d <= END)}, split 2025-06-18 (4 for 1: the registered before / after "
+        f"price ratio {f(float(q50), 5)}, {f(split_ratio_gap('0050'), 5)} from the integer 4, so the previous close "
+        f"is restated per current share, divided by 4, as Volume I's total return); growth factor {BASE} -> {END} "
         f"{f(float(cum[-1] / cum[i17]), 4)}")                                                               # 14
     ex17 = sorted(d for d in div50 if d.startswith("2017"))
     y_act = [div50[d] / c50[d50.index(d) - 1] for d in ex17]
@@ -351,9 +367,10 @@ def vol_scale(R: Vec, TD: list[str]) -> None:
     i7 = TD.index("2025-04-07")
     gh, vh, mh = run(honest)
     gp, vp, mp = run(peek)
-    put(f"TR23 (total-return index) volatility scale, as R8: 504-return uncentred window, (26.2) with lambda 0.94 run "
-        f"through each window from its sigma_bar^2, cap 1.5, cash and borrowing at 0: "
-        f"{int(ok.sum())} days {TD[W]} .. {TD[-1]} ({f(yrs, 2)} years, calendar days / 365.25, A {f(A, 2)}); set at "
+    put(f"TR23 (total-return index) volatility scale, as R8: daily simple returns in decimals, 504-return uncentred "
+        f"window, (26.2) with lambda 0.94 run through each window from its sigma_bar^2, cap 1.5, cash and borrowing "
+        f"at 0: {int(ok.sum())} days {TD[W]} .. {TD[-1]} ({f(yrs, 2)} years, calendar days / 365.25 from the close of "
+        f"{TD[W - 1]}, the close before the first return; A {f(A, 2)} sessions a year); set at "
         f"the previous close: growth {f(gh, 3, 4)}, volatility {f(vh, 3, 4)}, worst day {f(mh, 4)}; using the same "
         f"day's close: growth {f(gp, 3, 4)}, volatility {f(vp, 3, 4)}, worst day {f(mp, 4)}; 2025-04-07 (R "
         f"{f(R[i7], 4)}): scale {f(honest[i7], 3)} against {f(peek[i7], 3)}, the scaled return "
@@ -393,13 +410,16 @@ def kelly_walk(R: Vec, TD: list[str]) -> None:
 
     put(f"Kelly walk-forward on TR23 (total-return index): {len(ends)} calendar month-ends {TD[ends[0]]} .. "
         f"{TD[ends[-1]]}, window {W} returns, root of (4.5) capped to [0, 3]; {int(mk.sum())} days ({f(yk, 2)} years, "
-        f"calendar days / 365.25); mean of the {len(fs)} month-end leverages {f(float(np.mean(fs)), 2)}, at the cap "
+        f"calendar days / 365.25 from the close of {TD[ends[0]]}, the close before the first return); mean of the "
+        f"{len(fs)} month-end leverages {f(float(np.mean(fs)), 2)}, at the cap "
         f"{sum(v >= 3 - EPS for v in fs)} month-ends, at 0 "
         f"{sum(v <= EPS for v in fs)}; growth {f(grow(lev[mk] * R[mk]), 3, 4)}; f = 1: {f(grow(R[mk]), 3, 4)}; the "
         f"full-sample root {f(full, 2, 3)} held: {f(grow(full * R[mk]), 3, 4)}; half of it: "
         f"{f(grow(full / 2 * R[mk]), 3, 4)}; with borrowing at {BORROW:.3f} a year on the exposure above 1 "
         f"(accrued over A_k = {f(ak, 2)} sessions a year; cash at 0): walk-forward {f(grow(fin(lev[mk])), 3, 4)}, "
-        f"full-sample root {f(grow(fin(np.full(int(mk.sum()), full))), 3, 4)}")                          # 17
+        f"full-sample root {f(grow(fin(np.full(int(mk.sum()), full))), 3, 4)}; at the root as lm22.md:125 prints "
+        f"it, {F_LM22:.2f}: held {f(grow(F_LM22 * R[mk]), 3, 4)}, with borrowing "
+        f"{f(grow(fin(np.full(int(mk.sum()), F_LM22))), 3, 4)}")                                          # 17
 
 
 # ================================================================ survivorship (registered: data/raw/vol6/)
@@ -475,19 +495,36 @@ def survivorship() -> list[str]:
                  + "; every other close equals the previous traded close plus the spread; splits: "
                  + ", ".join(f"{s} {d} ({'1 for ' + str(round(1 / k)) if k < 1 else str(round(k)) + ' for 1'})"
                              for s in FUTURES6 for d, k in split_factor(s).items())
-                 + ", registered prices within "
-                 f"{max(split_ratio_gap(s) for s in FUTURES6):.4f} of the integer ratios"))                    # 19
+                 + (", the registered prices exactly the integer ratios" if max(split_ratio_gap(s) for s in FUTURES6)
+                    == 0 else f", registered prices within {max(split_ratio_gap(s) for s in FUTURES6):.6f} of the "
+                    "integer ratios")))                                                                       # 19
     all6 = float(np.mean([g6[s][0] for s in FUTURES6]))
     sur6 = float(np.mean([g6[s][0] for s in FUTURES6 if s not in dld]))
     y = years(BASE, END)
     lines.append(flagged(f"equal amounts on {BASE}, held (a delisted fund's last close kept as cash at 0): all six "
                  f"{f(all6, 3, 4)} ({f(all6 - 1, 3, 4, plus=True)}), log growth {f(log(all6) / y, 3, 4)} a year; "
                  f"the four survivors {f(sur6, 3, 4)} ({f(sur6 - 1, 3, 4, plus=True)}), {f(log(sur6) / y, 3, 4)} a "
-                 f"year; gap {f(log(sur6) / y - log(all6) / y, 3, 4)} a year; years (calendar days / 365.25) "
-                 f"{f(y, 4)}"))                                                                               # 20
+                 f"year; gap {f(log(sur6) / y - log(all6) / y, 3, 4)} a year; years (calendar days / 365.25 from the "
+                 f"close of {BASE}) {f(y, 4)}"))                                                              # 20
     lines.append("withdrawn (editor's decision 2026-10-24: the 33-fund L/R/U cohort is not registered; the ID is "
                  "kept so that later IDs do not move)")                                                      # 21
+    PRINTED6.update({s: (g6[s][0], s in dld) for s in FUTURES6})
     return lines
+
+
+PRINTED6: dict[str, tuple[float, bool]] = {}    # the six growth factors and whether delisted, for A34-37
+
+
+def printed_factors() -> None:
+    """Problem 10 as a reader solves it: the means of X5's six growth factors as printed (three decimals), and the gap
+    in log growth they give (A34-37; A34-20 is the same from the unrounded factors)."""
+    r3 = {s: Decimal(repr(g)).quantize(Decimal("0.001")) for s, (g, _) in PRINTED6.items()}
+    a6 = float(sum(r3.values()) / 6)
+    s4 = float(sum(v for s, v in r3.items() if not PRINTED6[s][1]) / 4)
+    y = years(BASE, END)
+    put("problem 10 from X5's factors as printed (" + ", ".join(f"{s} {v}" for s, v in r3.items())
+        + f"): mean of all six {f(a6, 3, 4)}, of the four survivors {f(s4, 3, 4)}; gap in log growth "
+        f"ln({f(s4, 4)} / {f(a6, 4)}) / {f(y, 4)} = {f(log(s4 / a6) / y, 3, 4)} a year")                    # 37
 
 
 # ================================================================ LM21's Experiment 10 and the reality check
@@ -502,12 +539,14 @@ def reality_check(R: Vec) -> None:
         s_u[c:c + 500] = x.std(axis=1, ddof=1)
     tt = dbar / (s_u / sqrt(T))
     best = int(np.argmax(tt))
-    put(f"Experiment 10 (LM21, default_rng([10, 20261011])): best t-stat {f(tt[best], 2)} (rule {best + 1}); t >= 3: "
+    put(f"Experiment 10 (LM21, default_rng([10, 20261011])): best t-stat {f(tt[best], 2, 4)} (rule {best + 1}); t >= 3: "
         f"{int((tt >= 3 - EPS).sum())}; mean {f(float(tt.mean()), 2)}, s {f(float(tt.std(ddof=0)), 3)}; s_u of the "
         f"rules' daily returns {f(float(s_u.min()), 6)} .. {f(float(s_u.max()), 6)}")                       # 22
     p1 = float(stats.norm.sf(tt[best]))
-    put(f"the best rule's one-sided normal p-value {p1:.3e}; times 10,000 (Bonferroni) {f(min(1.0, M * p1), 3)}; "
-        f"(21.9) for 10,000 independent rules: Pr(max >= {tt[best]:.4f}) = {f(1 - stats.norm.cdf(tt[best]) ** M, 3)}; "
+    put(f"the best rule's one-sided normal p-value {f(p1 * 1e5, 2)}e-05; times 10,000 (Bonferroni) "
+        f"{f(min(1.0, M * p1), 3)}; "
+        f"(21.9) for 10,000 independent rules: Pr(max >= the best t-stat {tt[best]:.7f}) = "
+        f"{f(1 - stats.norm.cdf(tt[best]) ** M, 3)}; "
         f"(21.9)'s 95% quantile of the max {f(float(stats.norm.ppf(0.95 ** (1 / M))), 2)}; one-sided Bonferroni level "
         f"for 10,000 tests at 5% {f(float(stats.norm.isf(0.05 / M)), 2)}")                                 # 23
     # LM22's rule on the series the statistic involves, the 10,000 rules' returns (the benchmark is no position)
@@ -712,7 +751,7 @@ def pbo_grid(case: Case) -> int:
     p1 = float(stats.norm.sf(tg[jb]))
     put(f"reality check on the grid against R1 monthly (experiment 4, B = {B_RC}, mean block {ell:.0f}, LM22's rule on "
         f"the {len(oth)} differences from R1 monthly (squared demeaned): largest {f(pwd[jpw], 2)} ({name[oth[jpw]]} "
-        f"minus R1), smallest {f(min(pwd), 2)}): best t-stat {name[oth[jb]]} {f(tg[jb], 2)}; "
+        f"minus R1), smallest {f(min(pwd), 2)}): best t-stat {name[oth[jb]]} {f(tg[jb], 2, 3)}; "
         f"one-sided normal p {f(p1, 4)}, Bonferroni x {len(oth)} {f(min(1.0, len(oth) * p1), 3)}; reality-check p "
         f"{f(pg, 3)} (MC SE {f(sqrt(pg * (1 - pg) / B_RC), 3, 4)}); bootstrap 95% quantile of the max t-stat "
         f"{f(float(np.quantile(mx, 0.95, method='inverted_cdf')), 2)} against Bonferroni's "
@@ -793,6 +832,7 @@ def main() -> None:
     Tg = pbo_grid(case)
     noise(Tg, case.fr.A_wealth)
     same_close(case)
+    printed_factors()
     for line in OUT:
         print(line)
 

@@ -1,7 +1,12 @@
 """LM33 anchors (The Statistics of the Sharpe Ratio): every number the Stage 1 brief quotes (drafted 2026-10-24,
 revised the same day to the editor's decisions on the briefs in plans/vol-5.md: b = 22, Bartlett HAC with the book's
 lag, sqrt(T - 1), n = 8 with n_eff beside it, the shared last-block handling; and to the source check of decision F,
-which read Ledoit and Wolf's JEF text and the authors' versions of Bailey and Lopez de Prado 2012 and 2014).
+which read Ledoit and Wolf's JEF text and the authors' versions of Bailey and Lopez de Prado 2012 and 2014; revised a
+third time to the second recomputation and the decisions on it: Harvey and Liu cited by section and equation, the
+digits each derived result needs passed to f(), the MC range of n_eff's MinTRL, A33-65, and A33-66 for the shared
+decision "Risk-free rate": how much r_f = 0 or 2% would change the results; revised a fourth time on 2026-10-25 to
+the third verifier's items and the editor's answers: A33-66 states that the rules' paths keep 1.5% and only the rate in
+the Sharpe ratio changes).
 
 Reads only data/processed/*.parquet, through the shared builders (run them first; this script runs neither):
   * E5, the through case (plans/vol-5.md): data/vol5_series.py's frames("E5") reads vol5_frames.parquet; the eight
@@ -13,7 +18,8 @@ Reads only data/processed/*.parquet, through the shared builders (run them first
     months March 2019 and October 2026 are left out), each the log change of net wealth between month-end sessions
     minus the month's accrued log interest (sessions x ln(1 + RF / A_w)).
   * TR23 (Volume III): data/processed/vol3_taiex.parquet (columns date, tr, price, R, Rp), the simple returns R,
-    T = 5,849, A = T / years = 246.12, r_f = 0 (Volume IV's convention).
+    T = 5,849, A = T / years = 246.12, r_f = 0 (Volume IV's convention); its years run from the close before the
+    first return (2003-01-02) to the last close, as E5's from the first trade's close (decision C7, AUTHORING 8).
 
 Conventions. Sharpe ratios are per observation in every formula and annualized by sqrt(A) only for printing (A_w for
 E5's days, 12 for months, A for TR23). Means and moments divide by T (ddof=0): s, the sample skewness and the raw
@@ -24,7 +30,8 @@ long-run covariance of y_t = (x_t - mean, (x_t - mean)^2 - s^2), lag L by the bo
 no small-sample factor; at L = 0 it equals the plug-in (20.9). The two-Sharpe statistics follow Ledoit and Wolf
 (2008, JEF, section 3, pp. 851-855): v = (mu_j, mu_1, gamma_j, gamma_1) with uncentred second moments,
 f = a/sqrt(c - a^2) - b/sqrt(d - b^2), s(Delta) = sqrt(grad' Psi grad / T); Psi by (23.7) with the book's lag (the
-book's choice: their prewhitened QS kernel and T/(T-4) factor, section 3.1, are not used); their studentized circular
+book's choice: their kernel estimate with a T/(T-4) factor, section 3.1, and, for the bootstrap's original-data error,
+the prewhitened QS kernel, section 3.2.2, p. 854, are not used); their studentized circular
 block bootstrap of the return pairs (section 3.2.2, p. 854) with block size b (the book's rule, below; theirs is
 calibrated by Algorithm 3.1). T = 1,851 is not a multiple of b, and the paper does not say how a resample is cut (the
 book's convention, shared decision "Counting", plans/vol-5.md): a resample draws ceil(T/b) block starts, its blocks
@@ -41,9 +48,10 @@ version, p. 7), (1 - g) Phi^-1(1 - 1/n) + g Phi^-1(1 - 1/(n e)), g = 0.577215664
 number of independent trials is eq. (9) there (p. 14), rho_bar + (1 - rho_bar) M. The deflated
 benchmark is SR_0 = E Z_(n) / sqrt(T - 1) per observation (the null standard deviation of (20.9) at SR = 0, on PSR's
 T - 1). Haircuts as Harvey and Liu (2015): the two-sided normal p-value of t = SR sqrt(T), adjusted for n tests
-(Bonferroni (21.6), Holm (21.7), or independent tests 1 - (1 - p)^n, their eqs. (1)-(5), pp. 13-14), back to SR via
-Phi^-1(1 - p_adj / 2) / sqrt(T); their t has T - 1 degrees of freedom (eq. (1)); Holm on the eight rules' own
-p-values is the book's adaptation (Harvey and Liu take the other p-values from a model of 300+ factors, p. 16).
+(Bonferroni (21.6), Holm (21.7), or independent tests 1 - (1 - p)^n, their section "Method", eqs. (1)-(5)), back to
+SR via Phi^-1(1 - p_adj / 2) / sqrt(T); their t has T - 1 degrees of freedom (eq. (1)); Holm on the eight rules' own
+p-values is the book's adaptation (in their section "Multiple Testing Framework", Harvey and Liu take the other
+p-values from Harvey, Liu and Zhu's model of more than 300 factors).
 
 Experiments (one generator each, created once at the start, np.random.default_rng([e, 20261011])):
   e = 1: the seven Ledoit-Wolf tests R2..R8 against R1, B = 9,999 circular-block resamples of the 1,851 dates
@@ -305,12 +313,12 @@ put("rho_1 (19.5) of daily excess returns: " + ", ".join(f"{k} {f(rho1(X[k]), 3)
     + "; of R1's squared deviations (x - mean)^2 " + f(rho1((X['R1'] - X['R1'].mean()) ** 2), 3))
 vr = {k: se_vol_hac(X[k], L) / (mom[k][1] * sqrt((mom[k][3] - 1) / (4 * T))) for k in RULES}
 put("vol SE HAC/iid at L=" + str(L) + ": " + ", ".join(f"{k} {f(vr[k], 2)}" for k in RULES)
-    + "; R1 vol SE a year iid " + pc(mom['R1'][1] * sqrt((mom['R1'][3] - 1) / (4 * T)) * sqA, 2)
-    + ", HAC " + pc(se_vol_hac(X['R1'], L) * sqA, 2) + ", HAC L=20 " + pc(se_vol_hac(X['R1'], 20) * sqA, 2)
-    + ", HAC L=60 " + pc(se_vol_hac(X['R1'], 60) * sqA, 2))
+    + "; R1 vol SE a year iid " + pc(mom['R1'][1] * sqrt((mom['R1'][3] - 1) / (4 * T)) * sqA, 3)
+    + ", HAC " + pc(se_vol_hac(X['R1'], L) * sqA, 3) + ", HAC L=20 " + pc(se_vol_hac(X['R1'], 20) * sqA, 3)
+    + ", HAC L=60 " + pc(se_vol_hac(X['R1'], 60) * sqA, 3))
 mt, st, skt, kut = moments(Rt)
 srt = mt / st
-put(f"TR23: SR daily {f(srt, 4)}, a year {f(srt * sqrt(At), 2, 4)}; skew {f(skt, 2)}, raw kurt {f(kut, 2)}; SE a "
+put(f"TR23: SR daily {f(srt, 4, 5)}, a year {f(srt * sqrt(At), 2, 4)}; skew {f(skt, 2)}, raw kurt {f(kut, 2)}; SE a "
     f"year (20.9) {f(sqrt(v209(srt, skt, kut) / Tt) * sqrt(At), 3)} (lm20.md:401, 0.207), HAC L={Lt} "
     f"{f(se_sr_hac(Rt, Lt) * sqrt(At), 3)}, HAC L=145 {f(se_sr_hac(Rt, 145) * sqrt(At), 3)}; LM22 blocks of 145: "
     f"stationary 0.233, circular 0.244, moving 0.247 (lm22.md:216-219)")
@@ -355,7 +363,7 @@ zt = (SR["R2"]) * sqrt(T - 1) / sqrt(v209(SR["R2"], sk2, ku2))
 put(f"R2 PSR z with sqrt(T-1) {f(zt, 3)}, with sqrt(T) {f(zt * sqrt(T / (T - 1)), 3)}; factor sqrt(T/(T-1)) - 1 "
     f"= {pc(sqrt(T / (T - 1)) - 1, 3)}")
 n_tr = mintrl(srt, 0, skt, kut)
-put(f"TR23 PSR(0) {f(psr(srt, 0, Tt, skt, kut), 5)}; MinTRL(0) {f(n_tr, 0, 1)} sessions = {f(n_tr / At, 2)} years; "
+put(f"TR23 PSR(0) {f(psr(srt, 0, Tt, skt, kut), 5)}; MinTRL(0) {f(n_tr, 0)} sessions = {f(n_tr / At, 2)} years; "
     f"(21.4) one-sided at power 1/2, (1.645/SR)^2 = {f((stats.norm.ppf(0.95) / (srt * sqrt(At))) ** 2, 2)} "
     f"years; (21.4) two-sided 80% power 11.9 years (lm21.md:177, 183)")
 put("X4 normal returns, A_w: MinTRL(0) years at annual SR " + ", ".join(
@@ -381,7 +389,7 @@ dif_ = [float(optimal_block_length((X[k] - X["R1"] - (X[k] - X["R1"]).mean()) **
 b_rule = round(max(stat_))
 assert b_rule == 22                                   # the editor's decision D fixed b = 22 before this run
 put("optimal_block_length on squared demeaned excess returns, stationary: " + ", ".join(
-    f"{k} {f(c, 2)}" for k, c in zip(RULES, stat_, strict=True)) + f"; largest {f(max(stat_), 2)} -> b = {b_rule} "
+    f"{k} {f(c, 2)}" for k, c in zip(RULES, stat_, strict=True)) + f"; largest {f(max(stat_), 0, 2)} -> b = {b_rule} "
     f"(T = {T} = {T // b_rule} x {b_rule} + {T % b_rule}: {ceil(T / b_rule)} blocks drawn, {T // b_rule} complete); "
     f"circular estimates {f(min(circ), 2)} to {f(max(circ), 2)}; on the squared demeaned differences x_j - x_1 "
     f"(not the series the statistic involves) the largest stationary estimate is {f(max(dif_), 2)} "
@@ -506,7 +514,7 @@ neff = optimize.brentq(lambda n: emax(n) - emc, 1.000001, 8, xtol=1e-12)
 d_lo = optimize.brentq(lambda n: emax(n) - (emc - 2 * emc_se), 1.000001, 8, xtol=1e-12)
 d_hi = optimize.brentq(lambda n: emax(n) - (emc + 2 * emc_se), 1.000001, 8, xtol=1e-12)
 put(f"experiment 2: E max of N_8(0, C) {f(emc, 3)} (MC SE {f(emc_se, 4)}, 10^6 draws); n_eff {f(neff, 2)} "
-    f"(+-2 MC SE: {f(d_lo, 3)} to {f(d_hi, 3)}); Bailey-LdP (2014) eq. (9) rho_bar + (1 - rho_bar) 8 = {f(float(off.mean()) + (1 - float(off.mean())) * 8, 2)}; "
+    f"(+-2 MC SE: {f(d_lo, 2)} to {f(d_hi, 2)}); Bailey-LdP (2014) eq. (9) rho_bar + (1 - rho_bar) 8 = {f(float(off.mean()) + (1 - float(off.mean())) * 8, 2)}; "
     f"DSR of R2 at n_eff {f(psr(SR['R2'], emc * s0, T, sk2, ku2), 3)}; deflated SR_0 a year {f(emc * s0 * sqA, 2)}")
 sv2 = sqrt(v209(SR["R2"], sk2, ku2))
 
@@ -517,7 +525,8 @@ def mintrl_n(ez: float) -> float:
 
 
 put(f"R2 MinTRL after n trials, 1 + ((1.645 sqrt(V) + E Z_(n)) / SR)^2: n=1 {f(mintrl_n(0) / Aw, 2)} years; n=8 "
-    f"{f(mintrl_n(emax(8)), 0)} sessions = {f(mintrl_n(emax(8)) / Aw, 2)} years; n_eff {f(mintrl_n(emc) / Aw, 2)} years; "
+    f"{f(mintrl_n(emax(8)), 0)} sessions = {f(mintrl_n(emax(8)) / Aw, 2)} years; n_eff {f(mintrl_n(emc) / Aw, 1)} years "
+    f"(+-2 MC SE of E max: {mintrl_n(emc - 2 * emc_se) / Aw:.5f} to {mintrl_n(emc + 2 * emc_se) / Aw:.5f}); "
     f"n=100 {f(mintrl_n(emax(100)) / Aw, 1)} years; sqrt(V) {f(sv2, 5)} (observed {T} sessions)")
 srs = np.array([SR[k] for k in RULES])
 cs_sd = float(srs.std())
@@ -599,4 +608,29 @@ put(f"P7 haircut: t 2.5, n 10 independent: p {f(two_sided(2.5), 4, 5)}, p_M {f(1
 put(f"KC 9: scipy.stats.kurtosis(R2's excess returns) with its defaults (fisher=True, bias=True) "
     f"{f(float(stats.kurtosis(X['R2'])), 2)} (excess); fisher=False {f(float(stats.kurtosis(X['R2'], fisher=False)), 2)}; "
     f"skew {f(float(stats.skew(X['R2'])), 3)}")
+
+# ---------------------------------------------------------------- added in the third revision (IDs continue)
+put(f"mean excess return SE, HAC(L={L}) / iid (KC 3; as A33-06, both a year): " + ", ".join(
+    f"{k} {f(se_mean_hac(X[k], L) / (mom[k][1] / sqrt(T)), 2)}" for k in RULES))
+# the illustrative r_f (shared decision "Risk-free rate": the text says how much 0% or 2% would change the result);
+# only the rate in the Sharpe ratio changes: the wealth paths are those run at RF = 1.5% (R4's signal, R8's cash and
+# financing; the editor's answer of 2026-10-25), so R stays and only the subtracted rate moves;
+# a constant shift leaves s, the skewness and the kurtosis unchanged, so each Sharpe ratio moves by (RF - rate) / vol
+rf_lines = []
+for rate in (0.0, 0.02):
+    mo = {k: moments(R[k] - rate / Aw) for k in RULES}
+    sr_r = {k: mo[k][0] / mo[k][1] for k in RULES}
+    chg = [abs(sr_r[k] - SR[k]) * sqA for k in RULES]
+    p1 = {k: psr(sr_r[k], 0, T, mo[k][2], mo[k][3]) for k in RULES}
+    adj = holm([1 - p1[k] for k in RULES])
+    lowest = min(RULES, key=lambda k: p1[k])
+    rf_lines.append(
+        f"r_f {100 * rate:g}%: SR a year " + ", ".join(f"{k} {f(sr_r[k] * sqA, 2)}" for k in RULES)
+        + f"; change from 1.5% {f(min(chg), 2)} to {f(max(chg), 2)}; best {max(RULES, key=lambda k: sr_r[k])}, worst "
+        f"{min(RULES, key=lambda k: sr_r[k])}; R2 - R1 {f((sr_r['R2'] - sr_r['R1']) * sqA, 2)}; smallest PSR(0) "
+        f"{lowest} {f(p1[lowest], 3)}; Holm (21.7) on the 8 one-sided p: rejections at 5% "
+        f"{sum(1 for a in adj if a <= 0.05 + 1e-12)}, largest adjusted p {f(max(adj), 3)}")
+put("the illustrative r_f (only the rate in the Sharpe ratio changes: each rule's path keeps 1.5%, R4's signal and "
+    "R8's cash and financing included; its returns in excess of another rate; each rule's s, skewness and kurtosis "
+    "unchanged): " + "; ".join(rf_lines))
 print("\n".join(OUT))

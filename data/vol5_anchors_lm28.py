@@ -1,5 +1,6 @@
 """LM28 anchors (Mean-Variance Optimization): every number the Stage 1 brief quotes (drafted 2026-10-24; revised
-the same day to the editor's decisions on the briefs, plans/vol-5.md).
+the same day to the editor's decisions on the briefs, on the first revision and on the second recomputation, and
+on 2026-10-25 to the decisions on the third revision, plans/vol-5.md).
 
 Reads only data/processed/*.parquet, through the shared builders (run them first; this script runs neither):
   * E5 (plans/vol-5.md, "Data"): data/vol5_series.py's frames("E5"), which reads data/processed/vol5_frames.parquet:
@@ -26,7 +27,10 @@ sessions per year over E5: its one-session returns from the base close to 2026-1
 (shared decision "E5's two frames"; decision C2). Horizons in years are calendar days / 365.25 from the close before
 the first return. Weights print in percent; a weight with |w| < 1e-6 would print as 0 (none occurs). "Shorts" count
 weights below -1e-6. Gross exposure is the 1-norm of the weights. A residual at machine precision prints as "below
-1e-15" (its digits depend on the order of operations); a larger one prints with two significant digits.
+1e-15" (its digits depend on the order of operations); a larger one prints with two significant digits, except an
+interior-point solver's weight gap, which prints as a bound ("below 1e-11") that a platform change cannot cross.
+A28-46 adds, for every vector the brief prints at one decimal, the exact sum of its entries as printed (each rounded
+separately), so that the brief can say where the rounded parts do not add to the whole.
 
 Rounding flags. Every number the brief prints passes through f(x, k1, k2, ...), which shows x with max(k) + 3 decimals
 and flags it "NEAR" for each printed precision k at which x lies within a tenth of a last-digit unit of a rounding
@@ -39,6 +43,7 @@ Run:  PYTHONUTF8=1 uv run python data/vol5_anchors_lm28.py
 """
 import sys
 from datetime import date
+from decimal import Decimal
 from importlib.metadata import version
 from math import floor, sqrt
 from pathlib import Path
@@ -84,6 +89,11 @@ def tiny(x: float, bound: float = 1e-15) -> str:
 
 def pct(v: Vec, *ks: int, plus: bool = False) -> str:
     return "(" + ", ".join(f(100 * float(x), *(ks or (1,)), plus=plus) for x in v) + ")"
+
+
+def sum1(v: Vec, scale: float = 100.0) -> str:
+    """The exact sum of scale * v's entries as printed at one decimal, each rounded separately."""
+    return f"{sum((Decimal(f'{scale * float(x):.1f}') for x in v), Decimal(0)):.1f}"
 
 
 def years(a: str, b: str) -> float:
@@ -194,7 +204,7 @@ put("test correlations (estimation frame) "
 # ---------------------------------------------------------------- section 2: minimum variance
 o = Opt(mu, S)
 assert np.linalg.eigvalsh(S).min() > 0
-put(f"w_mv {pct(o.wmv)}%; sigma_min {f(100 * sqrt(o.s2min), 2)}%; sigma_min^2 {f(o.s2min, 6)}; mu_mv "
+put(f"w_mv {pct(o.wmv)}%; sigma_min {f(100 * sqrt(o.s2min), 2)}%; sigma_min^2 {f(o.s2min, 6, 7)}; mu_mv "
     f"{f(100 * o.mumv, 2)}%; lambda* = 2 sigma_min^2 {f(2 * o.s2min, 5)}; gross {f(np.abs(o.wmv).sum(), 4)}; "
     f"smallest weight {f(100 * o.wmv.min(), 2)}% ({F[int(o.wmv.argmin())]})")                          # 10
 cov_mv = S @ o.wmv
@@ -224,7 +234,7 @@ ou = Opt(u.A * u.X.mean(axis=0), Su)
 evu = np.linalg.eigvalsh(Su)
 sdu = np.sqrt(np.diag(Su))
 ew = np.full(28, 1 / 28)
-put(f"U28 T {u.X.shape[0]}, A {f(u.A, 4)}; w_mv shorts {int((ou.wmv < -1e-6).sum())} of 28; gross "
+put(f"U28 T {u.X.shape[0]} ({u.dates[0]} .. {u.dates[-1]}), A {f(u.A, 2, 4)}; w_mv shorts {int((ou.wmv < -1e-6).sum())} of 28; gross "
     f"{f(np.abs(ou.wmv).sum(), 2)}; sigma_min {f(100 * sqrt(ou.s2min), 2)}%; largest {u.names[int(ou.wmv.argmax())]} "
     f"{f(100 * ou.wmv.max(), 1)}%; most negative {u.names[int(ou.wmv.argmin())]} {f(100 * ou.wmv.min(), 1)}%; least "
     f"volatile sector {u.names[int(sdu.argmin())]} {f(100 * sdu.min(), 2)}%; equal weights {f(100 * sqrt(ew @ Su @ ew), 2)}% "
@@ -270,16 +280,18 @@ put(f"(28.7): SR*^2 {f(o.sr2, 4)}; SR_inf^2 + ((mu_mv - r_f)/sigma_min)^2 {f(o.s
     f"{f((o.mumv - RF) / sqrt(o.s2min), 3, 4)}")                                                          # 18 -> 19
 rfs = []
 w646 = []
+wtan_rf: list[Vec] = []
 for r in (0.0, 0.02):
     orr = Opt(mu, S, r)
     w646.append(float(orr.wtan[1]))
+    wtan_rf.append(orr.wtan)
     rfs.append(f"r_f {100 * r:.1f}%: w_tan {pct(orr.wtan)}%, SR* {f(sqrt(orr.sr2), 2, 3)}, 1'Sigma^-1 e {f(orr.den, 2)}")
 put("; ".join(rfs) + f"; 00646's weight moves by {f(100 * (w646[1] - w646[0]), 0)} points from r_f 0 to 2%")  # 20
 s10 = 0.10
 dlt = sr / s10
 fx = o.y / dlt
 put(f"CML at vol 10%: mean r_f + SR* x 10% = {f(100 * (RF + sr * s10), 2)}%; delta = SR*/0.10 {f(dlt, 2)}; L = "
-    f"1'Sigma^-1 e / delta {f(o.den / dlt, 2, 3)}; cash 1 - L {f(1 - o.den / dlt, 2)}; exposures {pct(fx)}%; check "
+    f"1'Sigma^-1 e / delta {f(o.den / dlt, 2, 3)}; cash 1 - L {f(1 - o.den / dlt, 2)}; exposures {pct(fx, 1, 3)}%; check "
     f"vol of f {f(100 * sqrt(float(fx @ S @ fx)), 3)}%; L x sigma_tan {f(100 * o.den / dlt * st, 3)}%")    # 21
 put(f"delta that holds w_tan with no cash: 1'Sigma^-1 e {f(o.den, 2)}; at delta = 1 the exposures would be "
     f"{pct(o.y, 2)}%, L {f(o.den, 2)}; lm07.md:484 prints f* = L* w_tan for two assets")              # 22
@@ -373,7 +385,9 @@ for solver, opts in ((cp.OSQP, OSQP_OPTS), (cp.CLARABEL, CLARABEL_OPTS)):
     d0, d1 = float(np.asarray(cons[0].dual_value)), float(np.asarray(cons[1].dual_value))
     stat = np.abs(2 * S @ vv + K.T @ np.array([d0, d1])).max()     # KKT stationarity with cvxpy's duals: 2 S w + K' nu
     prim = np.abs(K @ vv - np.array([1.0, me])).max()              # primal feasibility
-    duals.append(f"{solver} {opts} status {prob.status}, max weight gap {tiny(np.abs(vv - wl).max())}, objective gap "
+    wbound = 1e-11 if solver == cp.CLARABEL else 1e-15      # an interior-point gap prints as a bound
+    duals.append(f"{solver} {opts} status {prob.status}, max weight gap {tiny(np.abs(vv - wl).max(), wbound)}, "
+                 f"objective gap "
                  f"{tiny((float(prob.value) - val) / val)}, KKT residuals: stationarity {tiny(stat)}, feasibility "
                  f"{tiny(prim)}; dual values {f(d0, 5, plus=True)} and {f(d1, 3, 4, plus=True)}")
 put(f"KKT system [2 Sigma, K'; K, 0][w; -lambda] = [0; b]: max |w - (28.1)| {tiny(np.abs(sol[:5] - wl).max())}, "
@@ -453,5 +467,14 @@ put("tangency betas, first window: (Sigma w_tan)_i / sigma_tan^2 (" + ", ".join(
     + f"); mu_tan - r_f {f(100 * (mu_tan - RF), 2)} points; "
     f"max |beta_i - e_i / (mu_tan - r_f)| {tiny(np.abs(beta_tan - o.e / (mu_tan - RF)).max())}; "
     f"max |Sigma w_tan - e / 1'Sigma^-1 e| {tiny(np.abs(Sw_tan - o.e / o.den).max())}")                 # 45
+
+dE6 = 0.01 * col / dlt                                          # A28-28's exposure change, a fraction of capital
+put("sums of the vectors printed at one decimal, each entry rounded separately, added exactly (exact sums: weights 100, "
+    f"weight changes 0): w_mv {sum1(o.wmv)}; w_tan {sum1(o.wtan)}; E3's efficient weights {sum1(wme)}; w_tan at r_f 0 "
+    f"{sum1(wtan_rf[0])} and at 2% {sum1(wtan_rf[1])}; ex-post w_mv {sum1(ot.wmv)} and w_tan {sum1(ot.wtan)}; the "
+    f"widget's rounded-state w_tan {sum1(o_s.wtan)}; X3's columns "
+    + ", ".join(f"{F[i]} {sum1(dW[:, i])}" for i in range(5))
+    + f"; E5's exposures {sum1(fx)} (100 L {f(100 * o.den / dlt, 1)}); E6's exposure change {sum1(dE6)} (its exact "
+    f"sum, the change in 100 L, {f(100 * float(dE6.sum()), 1)})")                                         # 46
 
 print("\n".join(OUT))

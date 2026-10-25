@@ -1,14 +1,22 @@
 """LM27 anchors (Portfolio Return and Risk): every number the Stage 1 brief quotes (drafted 2026-10-24; revised the
 same day to the editor's decisions on the briefs, plans/vol-5.md: printed precisions that let each derived figure
-follow from its printed inputs, R1's and R2's mu_p, the widget's monthly and window matrices, Problem 6's stem).
+follow from its printed inputs, R1's and R2's mu_p, the widget's monthly and window matrices, Problem 6's stem; and
+again to the second recomputation and cross-check: the daily-monthly gaps of A27-11, the weekly year count of A27-12
+from closes (decision C7), Problem 1's flag, A27-46's comparison and the funds' raw kurtosis, A27-50; and a third time
+on 2026-10-25 to the last verification and plans/vol-5.md, "Decisions on the third revision": A27-11's two gap
+statements are scoped to the five pairs the brief shows, with the figures over all ten pairs beside them, and its
+00679B-00642U gap is marked as computed from the unrounded correlations; A27-46 is withdrawn, since the shared
+decision's note that it checked is dropped; its ID is kept so that later IDs do not move).
 
 Reads only data/processed/*.parquet, through the shared builders (run them first; this script runs neither):
   * E5 (plans/vol-5.md, "Data"): vol5_series.frames("E5"), which reads data/processed/vol5_frames.parquet (built and
     checked by data/vol5_series.py from FinMind's TaiwanStockPrice, TaiwanStockDividendResult and
-    TaiwanStockSplitPrice): 0050, 00646, 00679B, 00635U and 00642U, daily total returns (P_t + D_t) / (P_prev / s_t) - 1
-    from the base close 2017-01-17 to 2026-10-08. The estimation frame keeps the dates on which every fund has a
-    one-session return (T = 2,362); the wealth frame keeps every TR23 session after the base (2,368), a halted fund
-    earning 0 and its spanning return booked on the day it trades again. vol5_series.ohlc() gives the checked closes.
+    TaiwanStockSplitPrice): 0050, 00646, 00679B, 00635U and 00642U, daily total returns (P_t + D_t) / P_prev - 1, with
+    the previous close restated per current share on a split day (P_prev / 4 for 0050 on 2025-06-18; no split-ratio
+    symbol, decision B6), from the base close 2017-01-17 to 2026-10-08. The estimation frame keeps the dates on which
+    every fund has a one-session return (T = 2,362); the wealth frame keeps every TR23 session after the base (2,368),
+    a halted fund earning 0 and its spanning return booked on the day it trades again. vol5_series.ohlc() gives the
+    checked closes.
   * The through case: vol5_rules.schedule() (the 92 month-end signals and their trade dates), vol5_rules.signals()
     and vol5_rules.wealth_path() (R1 and R2, costs, the wealth recursion), vol5_rules.cov0() (divisor T). No rule is
     re-implemented; the trade of 2026-04-01 is replayed from the shared path only to show the recursion's parts.
@@ -19,22 +27,26 @@ Reads only data/processed/*.parquet, through the shared builders (run them first
 Conventions. Simple returns throughout (portfolio returns aggregate them; plans/vol-5.md, "Return type"). Means,
 variances, covariances and correlations divide by T (ddof=0, passed explicitly; cov0). Annualization: A times a mean
 or a covariance, sqrt(A) times a standard deviation, with E5's estimation-frame A = 2,362 / years = 242.951422 (years
-= calendar days / 365.25 from the base close 2017-01-17, so A = 2,362 x 365.25 / 3,551 as lm10.md:41 writes it),
-U28's A = 245.4794; weekly and monthly statistics use the periods a year as LM19 counts them (lm19.md:39): the weeks
-with a session over the years their calendar weeks span (500 of 506 ISO weeks; six Lunar New Year weeks have no
-session) and 12 months. Weekly and monthly returns compound the estimation frame's daily returns inside ISO weeks
-(Monday to Sunday; keys (ISO year, ISO week)) and calendar months; the first and last period, in which the sample
-starts (Wednesday 2017-01-18) and ends (Thursday 2026-10-08), are dropped, because the sample alone cannot show them
-complete (the first lacks two sessions; whether the last lacks one depends on 2026-10-09, after the sample's end).
-A27-10 prints what keeping the last week would change.
+= calendar days / 365.25 from the base close 2017-01-17, the close before the first return, to the last close, so
+A = 2,362 x 365.25 / 3,551 as lm10.md:41 writes it; decision C7), U28's A = 245.4794; weekly statistics use the
+periods a year as LM19 counts them (lm19.md:39): the 500 weeks with a session over the years from the close before
+the first weekly return to the last weekly close (the same 3,542 days as the 506 calendar weeks they span; six Lunar
+New Year weeks have no session); monthly ones A = 12 (plans/vol-5.md, "Sharpe ratio"). Weekly and monthly returns
+compound the estimation frame's daily returns inside ISO weeks (Monday to Sunday; keys (ISO year, ISO week)) and
+calendar months; the first and last period, in which the sample starts (Wednesday 2017-01-18) and ends (Thursday
+2026-10-08), are dropped, complete or not (plans/vol-5.md, "Weeks and months"; the last week, 2026-W41, holds all
+four of its sessions). A27-10 prints what keeping the last week would change.
 Risk decomposition of weights w under a covariance matrix S: Cov(R_i, R_p) = (S w)_i, beta_{i,p} = (S w)_i / w'S w,
 MRC_i = (S w)_i / sqrt(w'S w), RC_i = w_i MRC_i, share_i = RC_i / sqrt(w'S w) = w_i beta_{i,p}; annualized volatility
 units multiply MRC_i, RC_i and sqrt(w'S w) by sqrt(A). "Full sample" is the estimation frame, 2,362 dates; a "window"
 is the trailing 504 rows of the estimation frame through a signal (vol5_rules.schedule). A correlation's normal-theory
 standard error is (1 - rho^2) / sqrt(T) (LM20, Practice Problem 6, lm20.md:558); the plug-in one is sd(L_t) / sqrt(T)
-with L_t = x_t y_t - (rho / 2)(x_t^2 + y_t^2) on standardized returns (divisor T), as that problem defines it.
-Costs (plans/vol-5.md, "Cost model"): commission 0.1425% of the value traded on each side, tax 0.1% on sales of every
-E5 fund except 00679B (0); the post-trade wealth solves W_post = W_pre - cost(W_post f - W_pre w_drift). The factor split on U28: OLS
+with L_t = x_t y_t - (rho / 2)(x_t^2 + y_t^2) on standardized returns (divisor T), as that problem defines it. Both
+assume independent periods; the plug-in one needs finite fourth moments, so A27-50 prints each fund's raw kurtosis
+(LM19's (19.3), divisor T).
+Costs (plans/vol-5.md, "Cost model"): commission 0.1425% of the value traded on each side (the posted reference on
+both markets: TWSE's rules for 0050, 00646, 00635U and 00642U, TPEx's for 00679B; LM34 prints the sources), tax 0.1%
+on sales of every E5 fund except 00679B (0); the post-trade wealth solves W_post = W_pre - cost(W_post f - W_pre w_drift). The factor split on U28: OLS
 of each sector on the TAIEX price index with an intercept (LM23's (23.1)); the book's market beta is w'beta; the
 residual covariance matrix S_res divides by T; sigma_p^2 = (w'beta)^2 var(R_mkt) + w'S_res w holds exactly in sample.
 Numbers printed by published modules are echoed with their file:line and recomputed here.
@@ -105,14 +117,17 @@ def split(S: Mat, w: Vec) -> tuple[float, Vec, Vec, Vec, Vec]:
     return sp, Sw / v, Sw / sp, w * Sw / sp, w * Sw / v
 
 
+def wkey(d: str) -> str:
+    """The ISO week of a date, keyed (ISO year, ISO week)."""
+    y, wk, _ = date.fromisoformat(d).isocalendar()
+    return f"{y}-W{wk:02d}"
+
+
 def periods(dates: list[str], R: Mat, key: str, drop: bool = True) -> tuple[list[str], Mat]:
     """Compound daily returns within ISO weeks ("week") or calendar months ("month"); drop the first and last period
-    (the partial ones) unless drop is False."""
+    (complete or not) unless drop is False."""
     def k(d: str) -> str:
-        if key == "month":
-            return d[:7]
-        y, wk, _ = date.fromisoformat(d).isocalendar()
-        return f"{y}-W{wk:02d}"
+        return d[:7] if key == "month" else wkey(d)
     keys: list[str] = []
     rows: list[Vec] = []
     for d, r in zip(dates, R, strict=True):
@@ -225,8 +240,7 @@ put("daily correlations " + "; ".join(f"{F[a]}-{F[b]} {f(Cd[a, b], 2, 3, 4)}" fo
 kw, Xw = periods(fr.est_dates, X, "week")
 km, Xm = periods(fr.est_dates, X, "month")
 kw_all, Xw_all = periods(fr.est_dates, X, "week", drop=False)
-last_wk = [d for d in fr.est_dates if kw_all[-1] == f"{date.fromisoformat(d).isocalendar()[0]}-W"
-           f"{date.fromisoformat(d).isocalendar()[1]:02d}"]
+last_wk = [d for d in fr.est_dates if wkey(d) == kw_all[-1]]
 Ck = corr_mat(Xw_all[1:])
 put(f"weekly: {len(kw)} ISO weeks {kw[0]} .. {kw[-1]}; monthly: {len(km)} calendar months {km[0]} .. {km[-1]} (the "
     f"first and last period, in which the sample starts and ends, dropped); keeping the last week ({kw_all[-1]}: "
@@ -252,18 +266,63 @@ gap = {(a, b): abs(se[a, b, "daily"][0] - se[a, b, "weekly"][0]) for a, b in pai
 g_n = {k: gap[k] / se[k[0], k[1], "weekly"][1] for k in pairs}
 g_p = {k: gap[k] / se[k[0], k[1], "weekly"][2] for k in pairs}
 kg = max(g_n, key=g_n.__getitem__)
-assert kg == max(g_p, key=g_p.__getitem__)
+assert kg == max(g_p, key=g_p.__getitem__) and g_n[kg] < 2 and g_p[kg] < 2
+# daily-monthly gaps, in monthly standard errors of each kind (the round-2 recomputation's Major 1)
+gap_m = {k: abs(se[k[0], k[1], "daily"][0] - se[k[0], k[1], "monthly"][0]) for k in pairs}
+gap_wm = {k: abs(se[k[0], k[1], "weekly"][0] - se[k[0], k[1], "monthly"][0]) for k in pairs}
+m_n = {k: gap_m[k] / se[k[0], k[1], "monthly"][1] for k in pairs}
+m_p = {k: gap_m[k] / se[k[0], k[1], "monthly"][2] for k in pairs}
+two = [k for k in pairs if m_n[k] >= 2]
+km2 = max(m_n, key=m_n.__getitem__)
+assert two == [km2] and km2 == max(m_p, key=m_p.__getitem__) and km2 == (a9, b9)
+kp = max(pairs, key=lambda k: se[k[0], k[1], "monthly"][2])
+dm_list = "; ".join(f"{F[a]}-{F[b]} {m_n[a, b]:.4f}, {m_p[a, b]:.4f}" for a, b in pairs)
+# the printed two-decimal correlations of 00679B-00642U do not give the four-decimal gap: the brief says that the gap
+# is computed from the unrounded correlations (plans/vol-5.md, "Decisions on the third revision")
+gap_2dp = abs(round(se[a9, b9, "daily"][0], 2) - round(se[a9, b9, "monthly"][0], 2))
+# the same two statements over all ten pairs, which the brief does not print: it scopes both to the five pairs above
+pairs10 = [(a, b) for a in range(N) for b in range(a + 1, N)]
+for a, b in pairs10:
+    for nm, x in frq.items():
+        se.setdefault((a, b, nm), se_rho(x[:, a], x[:, b]))
+dw10 = {k: abs(se[k[0], k[1], "daily"][0] - se[k[0], k[1], "weekly"][0]) / se[k[0], k[1], "weekly"][1]
+        for k in pairs10}
+kw10 = max(dw10, key=dw10.__getitem__)
+dm10 = {k: abs(se[k[0], k[1], "daily"][0] - se[k[0], k[1], "monthly"][0]) for k in pairs10}
+two10 = [k for k in pairs10 if dm10[k] / se[k[0], k[1], "monthly"][1] >= 2]
+assert kw10 not in pairs and set(two10) - set(pairs)          # both statements need the five-pair scope
+ten = (f"over all ten pairs (not printed; the brief scopes both statements to the five pairs): largest daily-weekly "
+       f"gap {F[kw10[0]]}-{F[kw10[1]]} {abs(se[kw10[0], kw10[1], 'daily'][0] - se[kw10[0], kw10[1], 'weekly'][0]):.6f}"
+       f" = {dw10[kw10]:.4f} weekly normal-theory SEs; daily-monthly gaps at 2 or more monthly normal-theory SEs: "
+       + "; ".join(f"{F[a]}-{F[b]} {dm10[a, b]:.6f} = {dm10[a, b] / se[a, b, 'monthly'][1]:.4f} normal-theory, "
+                   f"{dm10[a, b] / se[a, b, 'monthly'][2]:.4f} plug-in SEs" for a, b in two10)
+       + "; largest monthly plug-in SE {:.6f} ({}-{})".format(
+           *max((se[a, b, "monthly"][2], F[a], F[b]) for a, b in pairs10)))
 put("; ".join(rows) + f"; 00679B-00642U daily, weekly, monthly {', '.join(c79)} (SE normal, plug-in: "
     f"{'; '.join(s79)}); daily plug-in over normal-theory SE, five pairs: {f(ratio[lo_p], 1, 2)} "
-    f"({F[lo_p[0]]}-{F[lo_p[1]]}) to {f(ratio[hi_p], 1, 2)} ({F[hi_p[0]]}-{F[hi_p[1]]}); largest daily-weekly gap "
-    f"{F[kg[0]]}-{F[kg[1]]} {f(gap[kg], 3)} = {f(g_n[kg], 1)} weekly normal-theory SEs, {f(g_p[kg], 1)} plug-in SEs")  # 11
+    f"({F[lo_p[0]]}-{F[lo_p[1]]}) to {f(ratio[hi_p], 1, 2)} ({F[hi_p[0]]}-{F[hi_p[1]]}); of the five pairs, largest "
+    f"daily-weekly gap {F[kg[0]]}-{F[kg[1]]} {f(gap[kg], 3)} = {f(g_n[kg], 1)} weekly normal-theory SEs, "
+    f"{f(g_p[kg], 1)} plug-in SEs (of the five pairs, no daily-weekly gap reaches 2 weekly SEs of either kind); "
+    f"daily-monthly gaps in monthly normal-theory and plug-in SEs: {dm_list}; of the five pairs, at 2 or more "
+    f"normal-theory SEs only {F[a9]}-{F[b9]}: gap {f(gap_m[a9, b9], 4)} from the unrounded correlations (the "
+    f"two-decimal ones give {gap_2dp:.2f}) = {f(m_n[a9, b9], 1)} normal-theory SEs ({f(se[a9, b9, 'monthly'][1], 4)}),"
+    f" {f(m_p[a9, b9], 1)} plug-in SEs ({f(se[a9, b9, 'monthly'][2], 4)}); its weekly-monthly gap "
+    f"{gap_wm[a9, b9]:.6f} = {gap_wm[a9, b9] / se[a9, b9, 'monthly'][1]:.4f} and "
+    f"{gap_wm[a9, b9] / se[a9, b9, 'monthly'][2]:.4f}; largest monthly plug-in SE "
+    f"{f(se[kp[0], kp[1], 'monthly'][2], 2)} ({F[kp[0]]}-{F[kp[1]]}); " + ten)                           # 11
 w1 = np.full(N, 1 / N)
-# periods a year as LM19 counts them (lm19.md:39: periods with data over the years they span): the complete ISO weeks
-# run from the Monday of kw[0] to the Sunday of kw[-1]; weeks without a session (Lunar New Year) are not periods
+# periods a year as LM19 counts them (lm19.md:39: periods with data over the years they span); the years run from the
+# close before the first weekly return (the last session of the dropped first week) to the last kept week's last close
+# (decision C7), which here equals the span of the calendar weeks, Monday of kw[0] to Sunday of kw[-1]; weeks without
+# a session (Lunar New Year) are not periods
 wk_first = date.fromisocalendar(int(kw[0][:4]), int(kw[0][6:]), 1)
 wk_last = date.fromisocalendar(int(kw[-1][:4]), int(kw[-1][6:]), 7)
 n_cal_weeks = ((wk_last - wk_first).days + 1) // 7
-years_wk = ((wk_last - wk_first).days + 1) / 365.25
+c_before = max(d for d in fr.est_dates if wkey(d) == kw_all[0])
+c_last = max(d for d in fr.est_dates if wkey(d) == kw[-1])
+days_wk = (date.fromisoformat(c_last) - date.fromisoformat(c_before)).days
+assert days_wk == (wk_last - wk_first).days + 1
+years_wk = days_wk / 365.25
 A_week = len(kw) / years_wk
 assert len(km) == 116 and km[0] == "2017-02" and km[-1] == "2026-09"     # 116 months over 116 / 12 years: A = 12
 Afreq = {"daily": A, "weekly": A_week, "monthly": 12.0}
@@ -274,9 +333,10 @@ for nm, x in frq.items():
                  f"0050 share {f(100 * sh[0], 1)}%")
     if nm == "weekly":
         cells[-1] += f" (vol {f(100 * sp * sqrt(365.25 / 7), 2)}% with A = 365.25 / 7)"
-put(f"R1's weights by frequency (A = {f(A, 2)}, {f(A_week, 2)}, 12; weekly A = {len(kw)} weeks with a session of "
-    f"the {n_cal_weeks} calendar weeks {wk_first} .. {wk_last} over {f(years_wk, 4)} years = {len(kw)} x 365.25 / "
-    f"{(wk_last - wk_first).days + 1}): " + "; ".join(cells))                                              # 12
+put(f"R1's weights by frequency (A = {f(A, 2)}, {f(A_week, 2)}, 12; weekly A = {len(kw)} weeks with a session over "
+    f"{f(years_wk, 4)} years from the close of {c_before}, before the first weekly return, to that of {c_last} "
+    f"({days_wk} days, the span of the {n_cal_weeks} calendar weeks {wk_first} .. {wk_last}) = {len(kw)} x 365.25 / "
+    f"{days_wk}): " + "; ".join(cells))                                                                    # 12
 
 # ---------------------------------------------------------------- R1 and R2 on the full-sample covariance
 sp1, b1, m1, rc1, sh1 = split(SA, w1)
@@ -388,8 +448,8 @@ g0 = np.prod(1 + fr.W, axis=0)
 # X2's thinned points (X37): the last session of each ISO week from the purchase date, the purchase date itself and
 # every fund's lowest and highest weight (dbh starts the session after the purchase, so its index i is point i + 1)
 d_all = fr.wealth_dates[ifirst:]
-wkey = [date.fromisoformat(d).isocalendar()[:2] for d in d_all]
-pts = {i for i in range(len(d_all)) if i == len(d_all) - 1 or wkey[i + 1] != wkey[i]} | {0}
+wk_of = [wkey(d) for d in d_all]
+pts = {i for i in range(len(d_all)) if i == len(d_all) - 1 or wk_of[i + 1] != wk_of[i]} | {0}
 n_week = len(pts) - 1
 for j in range(N):
     pts |= {int(wbh[:, j].argmin()) + 1, int(wbh[:, j].argmax()) + 1}
@@ -459,7 +519,7 @@ put(f"np.cov's default divisor T - 1: volatility ratio sqrt(T/(T-1)) = {f(sqrt(T
     f"R1's s_p {f(100 * sp1, 3, 4)}% -> {f(100 * sp1 * sqrt(Tu / (Tu - 1)), 3, 4)}%")                      # 34
 
 # ---------------------------------------------------------------- problems (hypothetical inputs unless stated)
-put(f"P1: 50/50, returns +10% and -5%: R_p {f(2.5, 2)}%; drifted weight 0.55 / 1.025 = {f(0.55 / 1.025, 4)}")  # 35
+put(f"P1: 50/50, returns +10% and -5%: R_p {f(2.5, 2)}%; drifted weight 0.55 / 1.025 = {f(0.55 / 1.025, 3, 4)}")  # 35
 pre = np.array([0.30, 0.20, 0.15, 0.15, 0.20])
 tgt = np.full(5, 0.2)
 Wq = 1.0
@@ -524,16 +584,10 @@ put("R2's shares in the 92 windows: "
     + "; ".join(f"{s} {f(100 * SH2[:, j].min(), 1)}% ({sch[int(SH2[:, j].argmin())][0]}) to "
                 f"{f(100 * SH2[:, j].max(), 1)}% ({sch[int(SH2[:, j].argmax())][0]})" for j, s in enumerate(F[:4]))
     + f"; 00642U 0 (weight 0); 0050 above 70% in {len(over)} windows ({over[0]} .. {over[-1]})")             # 45
-cells = []
-for drop in (True, False):
-    for jj in (J["00646"], J["00679B"]):
-        z = [float(corr_mat(np.log1p(X[:, [0, jj]]))[0, 1])]
-        for key in ("week", "month"):
-            z.append(float(corr_mat(np.log1p(periods(fr.est_dates, X[:, [0, jj]], key, drop)[1]))[0, 1]))
-        cells.append(f"0050-{F[jj]} {'complete periods' if drop else 'partial periods kept'} daily, weekly, monthly "
-                     f"{fl(z, 3, 4)}")
-put("log returns ln(1 + R), estimation frame (a check of plans/vol-5.md, 'Timing of E5': 0.601, 0.592, 0.567; "
-    "-0.105, -0.020, -0.014): " + "; ".join(cells))                                                       # 46
+# A27-46 checked a parenthesis of the shared decision "Timing of E5" (its first figures, log returns with partial end
+# periods); the decisions on the third revision dropped that note, so the check has no object
+put("withdrawn (it checked the shared decision's note on its first figures, which the decisions on the third "
+    "revision dropped; the ID is kept so that later IDs do not move)")                                    # 46
 put(f"mu_p = w'mu (A x mean, estimation frame): R1 {f(100 * float(w1 @ mu), 2)}%, R2 {f(100 * float(w2 @ mu), 2)}%")  # 47
 SM = 12 * cov0(Xm)
 spm, _, _, _, shm = split(SM, w1)
@@ -543,5 +597,17 @@ put(f"widget matrix 12 S (monthly, {len(km)} calendar months, decimals): "
 put(f"widget matrix A S (daily, window {fr.est_dates[sch[kmin][2] - WINDOW]} .. {fr.est_dates[sch[kmin][2] - 1]}, "
     f"A = {f(A, 2)}, decimals): " + "; ".join(" ".join(f"{Sn[a, b]:.10f}" for b in range(N)) for a in range(N))
     + f"; R1: s_p {f(100 * spn, 2)}%, shares {fl(100 * shn, 1)}%")                                        # 49
+# raw kurtosis (LM19's (19.3), divisor T) of each fund at each frequency: the plug-in SE of A27-11 needs finite
+# fourth moments (the round-2 recomputation's Minor 6)
+kurt = {nm: ((x - x.mean(axis=0)) ** 4).mean(axis=0) / x.var(axis=0, ddof=0) ** 2 for nm, x in frq.items()}
+k_hi = {nm: F[int(np.argmax(kurt[nm]))] for nm in frq}
+assert k_hi["daily"] == k_hi["monthly"] == "00642U"
+ko = [j for j in range(N) if F[j] != "00642U"]
+k_d, k_m = kurt["daily"], kurt["monthly"]
+put("raw kurtosis (19.3), divisor T, estimation frame: "
+    + "; ".join(f"{nm} " + ", ".join(f"{F[j]} {kurt[nm][j]:.4f}" for j in range(N)) for nm in frq)
+    + f"; largest daily and monthly 00642U ({f(float(k_d[J['00642U']]), 1)}, {f(float(k_m[J['00642U']]), 1)}), "
+    f"largest weekly {k_hi['weekly']}; the other four daily {f(float(k_d[ko].min()), 1)} to "
+    f"{f(float(k_d[ko].max()), 1)}, monthly {f(float(k_m[ko].min()), 1)} to {f(float(k_m[ko].max()), 1)}")  # 50
 
 print("\n".join(OUT))
