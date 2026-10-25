@@ -8,7 +8,10 @@ unless stated.
 - **Intellectual property** (CLAUDE.md, "Owner's standing rules"). Edition 0.1 had to be cleaned on 2026-10-10;
   the module format of SPEC §4 stays. On 2026-10-11 a verifier widened the rule to anything an exam body owns, LM1's
   citation of the GIPS standards was deleted, and the owner had it restored: whether new material falls in the rule's
-  scope is a question for the owner, not a finding to fix.
+  scope is a question for the owner, not a finding to fix. On 2026-10-25 the banned-terms gate failed on a citation
+  trail in `plans/vol-5.md` (it named the organization that publishes a cited journal, a tripwire term):
+  `check_terms.py` scans the whole repository, so run it before every commit that touches `plans/`, `project/`,
+  `reviews/` or `src/`, and name such a page neutrally ("the journal's own article page").
 - **Shioaji for historical data.** The syllabus once planned LM26's realized volatility "from Shioaji ticks". The
   owner's rule: all historical data come from FinMind, which has intraday history too
   (`TaiwanVariousIndicators5Seconds` for TAIEX every 5 seconds, free; minute bars and ticks on paid plans).
@@ -130,6 +133,15 @@ unless stated.
   where FinMind has them (the Taiwan funds); register an adjusted column with `--adjusted`, keeping its close; scale
   any tolerance to the price level; and print a number computed from an adjusted column only to digits that a cent
   per value cannot move, never quoting its levels without their retrieval date.
+- **FinMind's US closes are already split-adjusted** (2026-10-24). `USStockPrice`'s `Close` carries splits and
+  reverse splits (USO's 1-for-8 of 2020-04-28 shows no jump), while `TaiwanStockPrice` closes are raw (0050's 4-for-1
+  of 2025-06-18 is a jump that `TaiwanStockSplitPrice` explains). `data/README.md` once called USO's split a
+  registered ex-date. Rule: before applying a split to any series, look at the closes around its date.
+- **A fund follows its own market's rules** (2026-10-25). The batch-4 plans cited TWSE's limit and commission rules
+  for every E5 fund, but the bond ETFs 00679B and 00720B trade on TPEx, whose ETF rules (Art. 7) and 業務規則
+  (Arts. 40, 64) apply to them; the numbers did not change, the citations did. Rule: establish each instrument's
+  listing market from both exchanges' own lists (TPEx's daily quotes, TWSE's `STOCK_DAY_ALL`) before citing a rule,
+  page or calendar for it.
 
 ## 4. Build system and rendering
 
@@ -211,6 +223,11 @@ unless stated.
 
 ## 6. Working with agents
 
+- **No personal data to any web service.** On 2026-10-24 three agents (a survey, a drafter and a source checker)
+  wrote Crossref helpers that put the owner's e-mail address in the User-Agent as a "polite pool" contact; two did
+  not say so. Every prompt that may send an agent to the web says: no e-mail in headers, parameters or `mailto:`,
+  anonymous requests only, and check any reused helper script; before a batch closes, grep the scratch folder for
+  `mailto`.
 - **One module per writer; shared files belong to the editor** (`build/`, `src/assets/`, `src/syllabus.yaml`,
   `AUTHORING.md`, `README.md`, `build.sh`, `data/README.md`, `reviews/`, `project/`, `TODO.md`, `CLAUDE.md`).
 - **Reviews must be independent and read-only**: a fresh agent that did not write the module, recomputing from raw data,

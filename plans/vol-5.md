@@ -182,13 +182,17 @@ fact a decision rests on is stated here with its evidence.
   leverage), which use $r_f=1.5\%$ a year, LM7's illustrative rate, accrued as $r_f/A$ a day (simple accrual). The
   text says it is illustrative and how much 0% or 2% would change the result.
 - **Cost model** (official sources read 2026-10-24; LM34 owns the sources and prints them, every other module cites
-  LM34 or this decision before LM34 by a pointer). Commission 0.1425% of the value traded on each side: TWSE's
-  Operating Rules Art. 94 lets brokers set their rates and requires notice above 1.425‰, so it is the posted
+  LM34 or this decision before LM34 by a pointer). Each fund follows the rules of its own market: 00679B (E5) and
+  00720B (checkpoint) trade on TPEx, the other funds on TWSE. Commission 0.1425% of the value traded on each side:
+  TWSE's Operating Rules Art. 94 and, for the TPEx funds, TPEx's 證券商營業處所買賣有價證券業務規則 Art. 64 (¶1–¶3
+  unchanged since 2008-02-12), applied to ETFs by TPEx's ETF rules Art. 15 ¶1, let brokers set their rates and
+  require notice above 1.425‰, so it is the posted
   reference, not a cap, and brokers' discounts are not modelled. Securities transaction tax on sales: 0.1% for ETFs
   (Securities Transaction Tax Act Art. 2 item 2, 千分之一 on "other securities approved by the government"; Art. 2 last
   amended 1993-01-30, the Act last on 2025-01-02, Arts. 2-2 and 12), 0 for bond ETFs to 2026-12-31 (Art. 2-1, last
-  amended 2016-12-30, which suspends it from 2017-01-01 for securities-investment-trust bond ETFs, leveraged and
-  inverse ones excluded; 00679B was exempt throughout E5). The futures ETFs 00635U and 00642U pay the same 0.1%: the
+  amended 2016-12-30, which suspends it from 2017-01-01 for listed and OTC-listed (上市及上櫃) securities-investment-trust
+  bond ETFs, leveraged and inverse ones excluded; 00679B was exempt throughout E5, 00720B from its listing on
+  2018-02-01). The futures ETFs 00635U and 00642U pay the same 0.1%: the
   Ministry of Finance's ruling 台財稅字第09700161260號 (2008-08-11) taxes a transfer of futures-trust fund certificates
   at 1‰ under Art. 2 item 2. TWSE's ETF rules page gives 0.1% on every ETF sale with bond ETFs exempt through 2026,
   and the Ministry's 財政統計通報 No. 21 (2024-11-14) states the ETF rate 千分之1 and lists 原型期貨 ETFs' turnover and
@@ -449,8 +453,13 @@ the constructed reference), and any Taiwan interest-rate history from outside Fi
   no daily limit for index ETFs with foreign constituents (bonds included), futures-trust ETFs tracking a foreign
   futures index, offshore ETFs and foreign-constituent active ETFs; ¶2 gives a leveraged or inverse ETF on an
   all-domestic index 10% times its multiple. Art. 8 was last amended on 2024-12-31 (the rules' version date,
-  2025-09-30, changed other articles), and items 1–3 read the same since 2016-06-03, so the rule covers E5's whole span.
-  Among the funds used only 0050 and 0056 have the 10% limit (the data agree: 00646 fell 12.59% on 2025-04-07). A locked day is shown by the daily open, high, low and close: on 2025-04-07 0050 traded 29.6 million shares,
+  2025-09-30, changed other articles), and items 1–3 read the same since 2016-06-03, so the rule covers E5's whole
+  span for the TWSE funds. The TPEx funds 00679B and 00720B follow TPEx's 指數股票型基金及主動式交易所交易基金受益憑證買賣辦法
+  Art. 7 ¶1 item 一 (Art. 7 as amended 2024-12-31; foreign bonds defined in Art. 2-1): no daily limit for an index ETF
+  with foreign constituent securities; that text has stood since 2017-03-01, and TPEx's listing notices (00679B
+  2017-01-13, 00720B 2018-01-25) state 無漲跌幅度限制. Among the funds used only 0050 and 0056 have the 10% limit (the
+  data agree: 00646 fell 12.59% on 2025-04-07, 00720B closed −11.25% on 2020-03-19). A locked day is shown by the
+  daily open, high, low and close: on 2025-04-07 0050 traded 29.6 million shares,
   all at 158.4 (fresh check), so sales executed at the limit, none below it, queued orders were not guaranteed to
   fill, and the next open was 151.2.
 - **Unexplained extremes.** 2026-07-17 (TR23 −6.46%) and 2026-07-31 (+7.98%) are real in the data (T5S 13:30:00
@@ -497,7 +506,8 @@ limits).
   $L_{\mathrm{ruin}}$, $t^{\mathrm{US}}$). B6: LM29 writes the borrowing spread in words (its $s$ clashed with $s_p$);
   no module writes a split ratio as a symbol ($s_i$ are standard deviations, AUTHORING §6): LM27's §4 writes the split
   day's return as $(P_t+D_t)/(P_{t-1}/4)-1$, and LM34's (34.2) compounds Volume I's total returns,
-  $G_{t,t'}=\prod_{j=t+1}^{t'}(1+R_j)$ (LM35 cites it); one TAIEX variance symbol,
+  $G_{t,t'}=(1+R_{t+1})(1+R_{t+2})\cdots(1+R_{t'})$, written out because LM34's $j$ is a rank (LM35 cites it); one
+  TAIEX variance symbol,
   $\sigma^2_{\mathrm{mkt}}$ (LM27, LM30); LM35's adjusted price carries its retrieval date as LM34's
   $P^{\mathrm{adj}}_{t\mid t'}$.
 - **C. Text conventions.** C1: the shared corrections are made (timing correlations, solver numbers, limits, 劣可加性,
@@ -691,6 +701,41 @@ brief text. These choices settle the open alternatives:
   constraint 有效限制 (LM7's Glossary); ruin is 權益歸零 in captions and §8; the Stage 4 change to lm07.md covers lines
   511–512.
 
+### Decisions on the third revision (2026-10-25)
+
+The nine briefs were revised to the decisions above and each revision was checked by a fresh verifier (with one
+repair and re-check for LM30, LM31, LM34 and LM35). No critical or major item is left; the minor ones are fixed in a
+last pass, with these answers to the verifiers' questions:
+
+- **LM27.** E5's two gap sentences are scoped to the five pairs shown; the 00679B–00642U gap is "from the unrounded
+  correlations"; Choueifaty and Coignard's gloss is marked as a paraphrase; the lab's file list adds R1's and R2's net
+  wealth paths. The timing decision's note on the superseded first figures is dropped.
+- **LM28.** Its A28-02 and A28-06 rows record the forms LM30's E2 prints under their IDs ($T/A=2.0745$, the
+  volatilities to two decimals).
+- **LM30.** $\tau$ stays 2.0745, its reason reworded (three decimals suffice for (20.2); the fourth keeps it off a
+  rounding boundary); experiment 2's lengths read "years of sessions".
+- **LM31.** The Leads sentence guessing at Volume VIII's modules goes.
+- **LM32.** Christoffersen's indicator is relabelled in the lab only; §7 names the papers in words.
+- **LM33.** A33-66 stays: the risk-free-rate sensitivity changes only the rate in the Sharpe ratio, the rules' paths
+  keeping 1.5%, and E2 says so. lm19.md:359's "as much as 65%" becomes a required Stage 4 rewording ("for a hedge
+  fund in his illustrative example").
+- **LM34.** (34.2) is written out (B6). The lab's extension trades every 12 month-end signals at the through case's
+  targets ($n=68$, declared before it is run and after the grid's results were seen, which the declaration says);
+  rebuilding (27.2) with cash, borrowing and costs from the shared files is LM34's own procedure under "Labs". Problem
+  9 prints 4.14 as lm22.md:125 does. SOURCES records the `TaiwanStockInfo` query (2026-10-24, the six codes and names);
+  no extract is registered.
+- **LM35.** The short names of 0056, 00662 and 00720B print once SOURCES records them, which this pass does.
+- **Listing markets** (a SOURCES verifier's finding, then a fresh read of TPEx's rules; shared "Costs" and "Limits and
+  locks" now say which market's rule applies). LM27's timing names both markets: 0050, 00646, 00635U and 00642U on
+  TWSE and 00679B on TPEx, both matching 09:00–13:30 with a closing call from 13:25 (TPEx 業務規則 Art. 40, applied to
+  ETFs by its ETF rules' Art. 4 ¶2). LM34 prints TPEx's Art. 64 (applied to ETFs by its ETF rules' Art. 15 ¶1) beside
+  TWSE's Art. 94 and quotes Art. 2-1's 上市及上櫃, and a universe of funds is "listed on TWSE or TPEx" (its six
+  survivorship funds are all on TWSE). LM35 splits by market its limit paragraph, outcome 6 and its §7 row (TWSE Art. 8
+  for 00646, 00662, 00635U and 00642U; TPEx Art. 7 for 00679B and 00720B), may cite 00720B's −11.25% of 2020-03-19 as
+  consistent with no limit, and names 00720B 元大投資級公司債 (TPEx's short name). Since 2025-09-30 both markets let an
+  issuer request a suspension during a long foreign closure (TWSE Arts. 5-1 and 5-2, TPEx Arts. 4-2 and 4-3), so a
+  "no halt" statement rests on the frames. No number changes.
+
 ## Stage 4 changes to earlier modules
 
 Collected here as the briefs add them; applied at publication with the edition note.
@@ -699,6 +744,8 @@ Collected here as the briefs add them; applied at publication with the edition n
   for earlier modules" names the files and lines.
 - lm07.md:511–512: 切點組合 → 切點投資組合 (the Glossary's form, lm07.md:771).
 - lm07.md:786: Chopra and Ziemba (1993) gains its issue number, 19(2): 6–11.
+- lm19.md:359: Lo's "as much as 65%" is stated for a hedge fund in his illustrative example (Lo 2002, p. 36); the
+  sentence says so (LM33's Sources).
 - lm21.md:373: White (2000) and Romano–Wolf (2005) correct a search on the same data; testing the best rule on later
   data is the other half of LM34. Reword so the sentence says both.
 - `src/syllabus.yaml`: LM31's line ("Euler risk contributions and risk-based allocation") becomes risk budgeting with
