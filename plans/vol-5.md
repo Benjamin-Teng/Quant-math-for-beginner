@@ -87,8 +87,8 @@ fact a decision rests on is stated here with its evidence.
     00646's daily correlation with SPY's previous session 0.681, with the same-dated session 0.118; not printed,
     since it mixes E5 with US data and needs LM35's pairing rule). 0050 at the same close also reflects that US
     session, so a same-day correlation is not simply biased in one direction (LM27's A27-11, simple returns, ISO weeks
-    and calendar months without the sample's first and last: 0050 with 00646 0.599 daily, 0.588 weekly, 0.552 monthly; with 00679B −0.105, −0.023, −0.013;
-    the first figures here were log returns with partial end periods). LM27 shows daily, weekly and monthly
+    and calendar months without the sample's first and last: 0050 with 00646 0.599 daily, 0.588 weekly, 0.552
+    monthly; with 00679B −0.105, −0.023, −0.013). LM27 shows daily, weekly and monthly
     correlations once and says the daily figure can differ either way; other modules state the frequency they use.
     The rules estimate $\hat\Sigma$ from daily returns.
   - **U28** (Volume II): the 28 TWSE sector price indices, 2008-12-02 → 2026-10-08, $T=4{,}382$, $A=245.4794$, for
@@ -672,7 +672,7 @@ brief text. These choices settle the open alternatives:
     anchors); LM21's exact-count check stays the book's own.
   - LM29 cites Agrawal et al. (2018) for cvxpy's canonicalization (arXiv v2, abstract, §1.3 and §4); solver names and
     defaults rest on A29-22.
-  - LM33: Lo (2002) read in the journal's layout (a copy posted by a student group; the abstract on the CFA Institute
+  - LM33: Lo (2002) read in the journal's layout (a copy posted by a student group; the abstract on the journal's own article
     page): its locations stand, written "Lo's IID formula (9)". Andrews and Monahan (1992) is pp. 953–966.
   - LM31: Maillard, Roncalli and Teïletche in their 2009 working paper, López de Prado in SSRN 2708678 (23 May 2016)
     and Harvey et al. (2018) in the journal reprint, with the hunt's wording corrections; no JPM page of the first two.
