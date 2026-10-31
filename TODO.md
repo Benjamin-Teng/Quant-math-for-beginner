@@ -98,7 +98,13 @@ LM32–LM35 (Measuring True Risk and Return); the two can be written in parallel
     each brief's lab list, LM01–LM26 unchanged): raw copies, and CSVs from `data/processed/` with floats by `repr`,
     running a missing builder itself. LM34's `lm34_grid.csv` is skipped with a message until Stage 2's
     `data/lm34_numbers.py` writes `data/processed/lm34_grid.parquet` (LM34's writer does that).
-- [ ] Stage 2: drafts of LM27–LM35.
+- [ ] Stage 2: drafts of LM27–LM35. The owner (2026-10-31): Volume V first, then Volume VI only on his go-ahead.
+  - [x] Volume V (LM27–LM31), 2026-10-31 (`50380c4`): five writers in place; the editor re-ran every gate on `main`
+    (all passed; 5,472–5,499 prose words, PDFs of 30–31 pages at scale 1.0, labs executed with 0 errors). The record
+    and the editor's answers are in `plans/vol-5.md` ("Stage 2 of Volume V"); each writer's departures from its brief
+    open `reviews/lm27.md` … `lm31.md`. The published site is not rebuilt for drafts: a rebuild of `docs/` marks them
+    "In review" on the front page, so `docs/` is restored and changes only at publication.
+  - [ ] **Next, on the owner's command only:** Volume VI (LM32–LM35) drafts, or Stage 3 of Volume V.
 - [ ] Stage 3: review rounds, closing check, final check.
 - [ ] Stage 4: publish edition 0.6.
 
