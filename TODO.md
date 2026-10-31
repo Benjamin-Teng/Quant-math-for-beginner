@@ -92,14 +92,12 @@ LM32–LM35 (Measuring True Risk and Return); the two can be written in parallel
     verifiers recomputed every changed anchor (all reproduced) and their minor findings were fixed. Record: `plans/vol-5.md`,
     "Decisions on the fresh check of the whole of Stage 1". The last verifiers' minor items listed here before were
     all part of it (LM30's "years of sessions" note stays, decision C7).
-  - [ ] **Waiting for the owner (technical, asked 2026-10-31):** (1) 0050's 2007–2008 files (`data/raw/vol6/`,
-    registered 2026-10-24 as an extension of B1, with no approval of the wider range recorded); LM35's interim wording
-    stands until he answers, and if he declines, the 2008 replay takes TR23 for 0050 (A35-27, A35-28, A35-41 change).
-    (2) How `data/make_lab_data.py` gets the Volume V–VI derived files (capability B3).
+  - [x] The owner's answers (2026-10-31): 0050's 2007–2008 files approved (the 2008 replay keeps 0050's own data);
+    `make_lab_data.py` runs the missing data builders itself, so the labs keep AUTHORING §9's two commands.
   - [ ] Before Stage 2's labs: `data/make_lab_data.py` writes what the shared "Labs" decision lists (both E5 frames,
     the rules' targets and wealth paths, LM34's grid, the T5S days, the checkpoint and proxy frames, LM35's OHLC rows
-    of 0050, 0056 and 00720B and TX23's limit-day rows), once the owner answers (2); a fresh agent reviews it against
-    each brief's lab list.
+    of 0050, 0056 and 00720B and TX23's limit-day rows), running the missing builders itself; a fresh agent reviews it
+    against each brief's lab list.
 - [ ] Stage 2: drafts of LM27–LM35.
 - [ ] Stage 3: review rounds, closing check, final check.
 - [ ] Stage 4: publish edition 0.6.

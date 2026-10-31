@@ -170,4 +170,6 @@ Volume VII results it uses.
   entries (option (i)): `fetch_finmind.py` verifies an entry marked as back-adjusted (LM3's QQQ) by its returns to a
   stated tolerance instead of byte for byte (after the review: day by day against the close, with each day's
   cent-rounding allowance, off the registered ex-dates; the manifest stores the ex-dates and the window's
-  distribution yield, never a price).
+  distribution yield, never a price). On 2026-10-31 he approved 0050's own 2007–2008 closes and distributions for
+  LM35's 2008 replay, and `make_lab_data.py` running the missing data builders itself to write the Volume V–VI
+  labs' derived files.

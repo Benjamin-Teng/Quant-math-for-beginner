@@ -369,8 +369,7 @@ Chromium, `build/`, `data/`, `pyproject.toml`). **The owner approved every item 
 agent (0 differences on the published pages) before any writer starts. On the same day the owner also approved DBO as a second oil proxy for
   LM35 (00642U tracks an enhanced crude-oil index; in 2020 it lost 46.4% against USO's 60.7% and DBO's about 46%).
   0050's own 2007–2008 closes and distributions extend an E5 fund's data for LM35's replay on "the funds that existed"
-  (B1's E5 data, registered the same way; the editor's reading of B1, which covers 0050 only over E5's span,
-  awaits the owner's confirmation).
+  (registered the same way as B1's E5 data; approved by the owner on 2026-10-31).
 
 - **(A) Packages: approved 2026-10-11; added 2026-10-24 (`40e1876`).** cvxpy 1.9.3 (Apache-2.0) and scikit-learn
   1.9.1 (BSD-3-Clause) with 10 more packages, about 78 MB unpacked, cp313 Windows wheels for all, no existing pin
@@ -814,10 +813,11 @@ The editor's choices where a verifier offered options (each the verifier's recom
   and the note says that 00635U traded from 15 April 2015 (0050 uses its own data in both years, as the spine asks).
   E7's 48-day tail correlation carries its standard error and a conclusion its 1.3 standard errors support.
   Checkpoint task (e) is replaced, so no cap-3 variant of R8 is introduced.
-- **Questions for the owner** (technical; sent 2026-10-31): 0050's 2007–2008 files were registered on 2026-10-24 as
-  an extension of B1, which approved one OHLC file over E5's span, and no approval of the wider range is recorded; and
-  how `make_lab_data.py` should obtain the Volume V–VI derived files (B3). The brief's interim wording stands until he
-  answers.
+- **The owner's answers** (technical questions, 2026-10-31): he approved 0050's 2007–2008 files (registered on
+  2026-10-24 as an extension of B1), so the 2008 replay keeps 0050's own data; and `make_lab_data.py` builds the
+  Volume V–VI derived files by running the missing builders itself (`vol3_series.py`, `vol5_series.py`,
+  `vol5_rules.py` and the scripts that write the other processed inputs), so the labs keep AUTHORING §9's two
+  commands.
 - **Refuted** (12): the five spines found stale (LM27, LM28, LM31, LM32, LM34) stay the first plan, their departures
   recorded as decision E; LM30's X3 note "years of sessions are sessions over $A$" stays (decision C7); three numbers
   of LM30 said to lack a tag are not first appearances; LM32's case box "2.3 to 3.6" follows from its printed inputs;

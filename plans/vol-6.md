@@ -2833,7 +2833,7 @@ sentence in §9.
 - **TR23** (`vol3_taiex.parquet`): 5,849 returns 2003-01-03 → 2026-10-08 [A35-03], for the windows, the holiday spans,
   the betas' factor and the 2022 illustration.
 - **0050 in 2007–2008** (registered, `data/raw/vol6/0050__2007-07-02__2008-12-31.csv` and its distributions,
-  registered on 2026-10-24 under the editor's reading of capability B1, which the owner is asked to confirm): the script checks every close against the spread in exact arithmetic,
+  registered on 2026-10-24 and approved by the owner on 2026-10-31): the script checks every close against the spread in exact arithmetic,
   the two ex-dates (2007-10-24, 2008-10-24) against `before_price`, and the dates against TR23's, and stops on a
   mismatch. For 2015, LM2's sample (`etf_daily_returns.parquet`, all 82 TR23 dates of the window present) [A35-22].
 - **US proxies** (registered, capability B5; DBO approved by the owner on 2026-10-24): `USStockPrice` `adj_close` and
@@ -3642,10 +3642,8 @@ Closed:
 
 Still open:
 
-1. **0050's 2007–2008 files (owner's confirmation).** They were registered on 2026-10-24 under the editor's reading
-   of capability B1, which covers 0050 only over E5's span; the owner is asked to confirm, and the interim wording
-   stays until he answers. Recommendation: if he declines, the 2008 replay takes TR23 itself in place of 0050, and
-   A35-27, A35-28 and A35-41's 2008 values are recomputed.
+1. **0050's 2007–2008 files:** closed. The owner approved them on 2026-10-31, so the 2008 replay keeps 0050's own
+   data and no number changes.
 2. **00662's split after the sample (watch item).** TWSE suspends 00662's trading 2026-11-11 → 11-16 for a 5-for-1 split; trading resumes 2026-11-17.
    No LM35 number changes, since the data end on 2026-10-08. Recommendation: none now; if the checkpoint's data are
    ever extended past that date, `vol5_series.py`'s split check (FinMind `TaiwanStockSplitPrice`) must see the event
