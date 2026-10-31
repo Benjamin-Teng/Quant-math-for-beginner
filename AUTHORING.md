@@ -250,7 +250,7 @@ notation note):
 | $\mathbf e$ | excess returns $\boldsymbol\mu-r_f\mathbf 1$ (LM7); LM27–LM31 write no basis vector $\mathbf e_i$ |
 | $\mu_p$; $\mathbf w_{t-1}$, $\mathbf w^{\mathrm{drift}}_t$ | portfolio mean; weights set at the previous close; weights after a period's returns, before trading (each fund's value over wealth, summing to the book's exposure, 1 when fully invested; LM27's (27.1)) |
 | $W^{\mathrm{pre}}_t$, $A_{\mathrm w}$ | wealth before the day's trade (the post-trade wealth is $W_t$); sessions per year of a wealth frame, which counts every session (a joint estimation frame's $A$ can be smaller) |
-| $\mathbf y$ | in LM29 the homogenized variable of the maximum-Sharpe QP, in LM31 the ERC variable before normalizing (modules without least squares) |
+| $\mathbf y$ | in LM29 the homogenized variable of the maximum-Sharpe QP, in LM30 the vector $\mathbf x-(\mathbf 1^{\top}\mathbf x)\mathbf w^{\mathrm{lo}}$ in the proof of (30.4), in LM31 the ERC variable before normalizing (modules without least squares) |
 | $\lVert\mathbf x\rVert_1$ | the 1-norm $\sum_i\lvert x_i\rvert$; gross exposure $\lVert\mathbf f\rVert_1$ (LM8) |
 | $\mathbf w^{\mathrm{mv}}$, $\sigma^2_{\min}$, $\mathbf w^{\mathrm{tan}}$, $\mathrm{SR}^*$ | minimum-variance weights and variance; tangency weights; the best Sharpe ratio |
 | $K$, $\mathbf b$ | constraint matrix and right-hand side, $K\mathbf w=\mathbf b$ (LM28, LM29, LM35); in LM31 $\mathbf b$ is the risk budgets, and LM31 writes its constraints out |

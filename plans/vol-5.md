@@ -824,6 +824,37 @@ The editor's choices where a verifier offered options (each the verifier's recom
   no rule asks a brief for a page plan (the 36 pages are a Stage 2–3 gate); LM27's third-revision decisions are all
   applied.
 
+## Stage 2 of Volume V (2026-10-31)
+
+Five writers drafted LM27–LM31 at the same time, each in place on its own files, from these briefs (the owner chose
+to write Volume V first and Volume VI after his go-ahead). Each numbers script starts from its anchor script, rebuilds
+every anchor row (all reproduced) and asserts every printed number; the drafts run 5,472 to 5,499 words of prose. Each
+writer's departures from its brief are listed in the module's review record (`reviews/lm27.md` … `lm31.md`) for Stage
+3. The editor's answers to the writers' questions:
+
+- **Length.** The first drafts sit just under 5,500 words; Stage 3's fixes may use the room up to AUTHORING §1's
+  6,000, and each record states the count.
+- **Labels.** Where a brief gave an exhibit and an example the same label, the writer renamed one (LM27's E10
+  `u28book`, LM28's X5 `u28w`), since `build.py` keys labels by name; kept.
+- **LM27.** Solution 10 prints the three risk contributions at three decimals (7.461, 1.324, 4.512, summing to 13.297)
+  beside the shares, as the brief's "all three contributions" asks; applied at the first revision.
+- **LM28.** The units pitfall stays in §7's code comment until a review asks for prose; the widget needs no
+  expected-readout file beyond its Node-against-NumPy assertions.
+- **LM29.** The 25–30-word sentences style.py lists are left to the reviewers; Lab part 5 checks U28's numbers only
+  when every repair value is present, as Lab 23 does, and says so; SOURCES records the two documentation pages its
+  References link.
+- **LM30.** The two numbers printed without an anchor (65.7 points, 00646's means-only exposure SD; 26.5%, the
+  2026-03-31 window's average variance as a volatility) stand: the numbers script computes and asserts them, and from
+  Stage 3 the module and its scripts are authoritative. AUTHORING §6 scopes $\mathbf y$ for LM30's proof of (30.4).
+- **LM31.** The widget's slider steps are 0.1 and 0.01, so that the first draw shows the printed inputs; the tags keep
+  the brief's numbering. Lab part 8's risk-triggered variant is recorded as the lab's reading of the rule fixed on 24
+  October: it restarts at each signal, uses the book's fund returns, trades at the next close at the exposure the
+  triggering close implies, and a month-end signal takes precedence; it is a lab-only variant outside $n=8$.
+- **Shared code.** Each module's `lm2N_common.py` carries its anchor script's arithmetic under the same names (Volume
+  IV's pattern); `build.sh`'s `DATA_STEPS` and `data/README.md` list the ten scripts.
+- **Preview PDFs** keep `file:///` links to the other preview pages: `render_pdf.py` rewrites links only under
+  `docs/` (its `CNAME`), so the published PDFs are checked at Stage 4 (`grep -ac 'file:///'` gives 0).
+
 ## Stage 4 changes to earlier modules
 
 Collected here as the briefs add them; applied at publication with the edition note.

@@ -2492,7 +2492,9 @@ one of the twelve has in `uv.lock` a Windows wheel that installs on CPython 3.13
   code "the classical algorithm of [1]", an active-set method that "solves the KKT (Karush-Kuhn-Tucker) conditions for
   the non-negative least squares problem", citing Lawson and Hanson, *Solving Least Squares Problems*, SIAM, 1995,
   doi 10.1137/1.9781611971217 (`optimize/_nnls.py:38-46`); `maxiter` defaults to 3·n (`:86-87`), and the rules pass
-  `maxiter=1000` (`vol5_rules.py:96`).
+  `maxiter=1000` (`vol5_rules.py:96`). LM29's References link the online page,
+  `https://docs.scipy.org/doc/scipy/reference/generated/scipy.optimize.nnls.html` (HTTP 200 on 2026-10-31, "nnls —
+  SciPy v1.18.0 Manual"; the locked SciPy is 1.18.1), and cvxpy's page above as `…/tutorial/advanced/index.html`.
 - **`scipy.cluster.hierarchy.linkage`** (brief: LM31, docs v1.18.0 read and the installed 1.18.1 run on 2026-10-24;
   read; run). A 1-D `y` is a condensed distance matrix and a 2-D `y` an array of observation vectors
   (`cluster/hierarchy/_hierarchy_impl.py:727-731`); a square, symmetric, non-negative, hollow 2-D input is read as
