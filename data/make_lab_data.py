@@ -20,18 +20,63 @@ the TX regular-session monthly rows (raw/vol4/), from which it builds TX23 (data
 gets vol4_rv.csv, the committed per-day realized variances (data/derived/, built by data/vol4_rv.py from the
 5-second download, which no lab needs).
 
+Volumes V and VI's labs (LM27-LM35) get the files their briefs list (plans/vol-5.md and plans/vol-6.md, "Lab parts";
+plans/vol-5.md, the shared decision "Labs"). Raw copies keep their raw names (data/raw/vol5/, raw/vol6/; the
+distribution files gain the fetch window, since vol5/0050_dividends.csv differs from Volume I's 0050_dividends.csv);
+the T5S days a brief names are copied as taiex5s_<date>.csv when data/raw/intraday/taiex5s/ is present and skipped
+with a message otherwise. Derived files are rows of data/processed/*.parquet written as CSV, floats by repr (they
+round-trip exactly, so a lab can check its own results to 1e-12), booleans as true/false:
+  - e5_estimation.csv (base, date, fund, R) and e5_wealth.csv (base, date, fund, R, traded): E5's two frames, one row
+    per date and fund (data/vol5_series.py); e5_checkpoint_estimation.csv and e5_checkpoint_wealth.csv: the same for
+    the checkpoint universe (sample E5+checkpoint, LM35);
+  - rule_targets.csv: each rule's trades (rule, signal, trade, the five target exposures, exposure, turnover, cost);
+    rule_wealth.csv (rule, date, wealth, wealth_gross) and rule_wealth_net.csv (rule, date, wealth): the eight rules'
+    paths from the first trade's close (data/vol5_rules.py); a lab whose brief names some rules only gets
+    rule_targets_R1_R2.csv, rule_targets_R3_R4.csv or rule_wealth_net_R1_R2.csv;
+  - ohlc_0050_0056_00720B.csv: the checked daily rows of those funds (data/vol5_series.py's vol5_ohlc.parquet);
+  - tx23_limit_days.csv: TX23's rows (data/vol4_series.py) whose settlement moved 9.95% or more since 2015-06-01, with
+    2025-04-08 and 2026-10-08 (LM35);
+  - lm34_grid.csv: the 60 configurations' daily net returns, once data/lm34_numbers.py writes
+    data/processed/lm34_grid.parquet (skipped with a message until then).
+A missing processed file is built first by its script (vol3_series.py first, then vol4_series.py, and vol5_series.py
+before vol5_rules.py), which writes only data/processed/; a missing raw input stops the script.
+
     uv run python data/make_lab_data.py            # write labs/LMNN_lab/data/*
-    uv run python data/make_lab_data.py --check    # compare with existing files, write nothing
+    uv run python data/make_lab_data.py --check    # compare with existing files; writes no lab file (a missing
+                                                   # data/processed/ input is still built)
 """
 import csv
 import io
 import json
+import os
+import subprocess
 import sys
 from pathlib import Path
+
+import polars as pl
 
 ROOT = Path(__file__).resolve().parents[1]
 RAW = ROOT / "data" / "raw"
 DERIVED = ROOT / "data" / "derived"
+PROC = ROOT / "data" / "processed"
+T5S = RAW / "intraday" / "taiex5s"
+V5 = "2016-12-01__2026-10-08"                     # the fetch window of data/raw/vol5/ and the vol6/ fund files
+E5 = ["0050", "00646", "00679B", "00635U", "00642U"]
+FUTURES = ["vol6/00672L", "vol6/00673R", "vol6/00674R", "vol6/00677U", "vol5/00635U", "vol5/00642U"]
+PROXIES = ["SPY__us_", "TLT__us_", "GLD__us_", "USO__us_", "DBO__us_", "USD_TWD__"]   # + the fetch window
+# a processed file -> (the script that writes it, the processed files that script reads, the raw files it reads)
+BUILDERS: dict[str, tuple[str, tuple[str, ...], tuple[str, ...]]] = {
+    "vol3_taiex": ("vol3_series.py", (), ("vol3/TAIEX_TR__*.csv", "vol3/TAIEX__*.csv", "sectors/TAIEX__*.csv",
+                                          "taiex_close/TAIEX__*.csv")),
+    "vol4_tx23": ("vol4_series.py", ("vol3_taiex",), ("vol4/TX__*.csv",)),
+    "vol5_frames": ("vol5_series.py", ("vol3_taiex",),
+                    (*(f"vol5/{s}__{V5}.csv" for s in [*E5, "0056", "00662", "00720B", "splits"]),
+                     *(f"vol5/{s}_dividends.csv" for s in ["0050", "00679B", "0056", "00720B"]),
+                     "0050__*.csv", "00679B__*.csv", "0050_dividends.csv", "00679B_dividends.csv")),
+    "vol5_rules": ("vol5_rules.py", ("vol5_frames",), ()),
+}
+BUILDERS["vol5_ohlc"] = BUILDERS["vol5_frames"]
+BUILDERS["vol5_trades"] = BUILDERS["vol5_rules"]
 
 def read(path):
     with open(path, newline="", encoding="utf-8") as f:
@@ -65,7 +110,62 @@ def text(header, rows):
     return buf.getvalue()
 
 def copy(name):
+    if not (RAW / name).exists():
+        raise SystemExit(f"missing data/raw/{name}: run uv run python data/fetch_finmind.py first")
     return (RAW / name).read_text(encoding="utf-8")
+
+def cell(v):
+    """A parquet value as CSV text: floats by repr (round-trip exact), booleans as true/false, dates in ISO form."""
+    if isinstance(v, bool):
+        return "true" if v else "false"
+    if isinstance(v, float):
+        return repr(v)
+    return "" if v is None else str(v)
+
+def table(df):
+    if df.is_empty():
+        raise SystemExit("a derived lab file would be empty: rerun the data/ script that writes its processed input")
+    return text(df.columns, [[cell(v) for v in r] for r in df.iter_rows()])
+
+def processed(name):
+    """data/processed/<name>.parquet, after running its builder (and theirs first) when the file is missing."""
+    f = PROC / f"{name}.parquet"
+    if not f.exists():
+        script, needs, raws = BUILDERS[name]
+        for n in needs:
+            processed(n)
+        for p in raws:
+            if not any(RAW.glob(p)):
+                raise SystemExit(f"missing data/raw/{p}: run uv run python data/fetch_finmind.py first")
+        print(f"data/processed/{f.name} is missing: running data/{script}", flush=True)
+        try:
+            subprocess.run([sys.executable, str(ROOT / "data" / script)], check=True, cwd=ROOT,
+                           env={**os.environ, "PYTHONUTF8": "1"})
+        except subprocess.CalledProcessError:
+            raise SystemExit(f"data/{script} failed (see its message above)") from None
+        if not f.exists():
+            raise SystemExit(f"data/{script} did not write data/processed/{f.name}")
+    return pl.read_parquet(f)
+
+def frame(sample, kind):
+    """One frame of vol5_frames.parquet, one row per date and fund (the estimation frame has no halted fund-day)."""
+    df = processed("vol5_frames").filter((pl.col("sample") == sample) & (pl.col("frame") == kind))
+    return table(df.drop("sample", "frame", *(("traded",) if kind == "estimation" else ())))
+
+def t5s_days(days):
+    """The raw T5S days a brief names, or none (with a message) when the intraday download is absent."""
+    if not T5S.is_dir():
+        print(f"skipped T5S days {', '.join(days)}: no data/raw/intraday/taiex5s/ "
+              "(uv run python data/fetch_intraday.py --series taiex5s)")
+        return {}
+    out = {}
+    for d in days:
+        f = T5S / d[:4] / f"{d}.csv"
+        if not f.exists():
+            raise SystemExit(f"missing data/raw/intraday/taiex5s/{d[:4]}/{d}.csv: run uv run python "
+                             "data/fetch_intraday.py --series taiex5s first")
+        out[f"taiex5s_{d}.csv"] = f.read_text(encoding="utf-8")
+    return out
 
 def qqq_tqqq():
     hq, q = read(RAW / "QQQ__us_2022.csv"); ht, t = read(RAW / "TQQQ__us_2022.csv")
@@ -137,6 +237,32 @@ def build():
     rv = {"vol4_rv.csv": (DERIVED / "vol4_rv.csv").read_text(encoding="utf-8")}
     etfs = {**common, "00631L_daily_raw.csv": p631,
             "00679B_daily_raw.csv": p679, "00679B_dividends.csv": copy("00679B_dividends.csv")}
+    # Volumes V and VI: raw copies under their raw names, derived files from data/processed/ (module docstring)
+    e5_raw = {**{f"{s}__{V5}.csv": copy(f"vol5/{s}__{V5}.csv") for s in E5},
+              **{f"{s}_dividends__{V5}.csv": copy(f"vol5/{s}_dividends.csv") for s in ("0050", "00679B")}}
+    splits = {f"splits__{V5}.csv": copy(f"vol5/splits__{V5}.csv")}
+    e5 = {"e5_estimation.csv": frame("E5", "estimation"), "e5_wealth.csv": frame("E5", "wealth")}
+    checkpoint = {"e5_checkpoint_estimation.csv": frame("E5+checkpoint", "estimation"),
+                  "e5_checkpoint_wealth.csv": frame("E5+checkpoint", "wealth")}
+    trades, paths = processed("vol5_trades"), processed("vol5_rules")
+    targets = {"rule_targets.csv": table(trades)}
+    wealth = {"rule_wealth.csv": table(paths)}
+    net = {"rule_wealth_net.csv": table(paths.drop("wealth_gross"))}
+    ohlc = processed("vol5_ohlc").filter(pl.col("fund").is_in(["0050", "0056", "00720B"]))
+    tx23 = processed("vol4_tx23")
+    day = pl.col("date").cast(pl.Utf8)
+    limit = (day >= "2015-06-01") & ((pl.col("rF").exp() - 1).abs() >= 0.0995)   # the anchors' 9.95%, simple move
+    tx_limit = {"tx23_limit_days.csv": table(tx23.filter(limit | day.is_in(["2025-04-08", "2026-10-08"])).sort("date"))}
+    grid = {}
+    if (PROC / "lm34_grid.parquet").exists():
+        grid = {"lm34_grid.csv": table(pl.read_parquet(PROC / "lm34_grid.parquet"))}
+    else:
+        print("skipped labs/LM34_lab/data/lm34_grid.csv until data/lm34_numbers.py writes "
+              "data/processed/lm34_grid.parquet")
+    futures = {f"{Path(p).name}__{V5}.csv": copy(f"{p}__{V5}.csv") for p in FUTURES}
+    proxies = {f"{p}2007-07-02__2026-10-08.csv": copy(f"vol6/{p}2007-07-02__2026-10-08.csv") for p in PROXIES}
+    y2008 = {n: copy(f"vol6/{n}") for n in ("0050__2007-07-02__2008-12-31.csv",
+                                             "0050_dividends__2007-07-02__2008-12-31.csv")}
     return {
         "LM01_lab": {**common, "00631L_daily_raw.csv": p631},
         "LM02_lab": {**common, "00631L_daily_raw.csv": p631,
@@ -167,6 +293,25 @@ def build():
         "LM24_lab": {**tr23, **sectors},
         "LM25_lab": {**tr23, **taiex_price, **tx_daily},
         "LM26_lab": {**tr23, **rv},
+        "LM27_lab": {**e5_raw, **splits, **tr23, **e5,
+                     "rule_targets_R1_R2.csv": table(trades.filter(pl.col("rule").is_in(["R1", "R2"]))),
+                     "rule_wealth_net_R1_R2.csv": table(paths.filter(pl.col("rule").is_in(["R1", "R2"]))
+                                                        .drop("wealth_gross")),
+                     **sectors},
+        "LM28_lab": {**e5, **targets, **sectors},
+        "LM29_lab": {**e5, "rule_targets_R3_R4.csv": table(trades.filter(pl.col("rule").is_in(["R3", "R4"]))),
+                     **sectors},
+        "LM30_lab": {**e5, **targets, **wealth, **sectors},
+        "LM31_lab": {**e5, **targets, **wealth, **sectors},
+        "LM32_lab": {**tr23, **e5, **targets, **net, **t5s_days(["2025-04-07", "2024-08-05", "2020-03-19"])},
+        "LM33_lab": {**net, **tr23},              # the paths lie on the wealth frame's dates
+        "LM34_lab": {**targets, "e5_wealth.csv": e5["e5_wealth.csv"], **wealth, **grid, **tr23, **common,
+                     **splits, "delisting__2000-01-01__2026-10-08.csv": copy("vol6/delisting__2000-01-01__2026-10-08.csv"),
+                     **futures},
+        "LM35_lab": {**e5, **targets, **net, **tr23,
+                     **t5s_days(["2008-01-22", "2015-08-24", "2020-01-30", "2024-08-05", "2025-04-07"]),
+                     **tx_limit, **common, "00631L_daily_raw.csv": p631,
+                     "ohlc_0050_0056_00720B.csv": table(ohlc), **proxies, **y2008, **checkpoint},
     }
 
 if __name__ == "__main__":

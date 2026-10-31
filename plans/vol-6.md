@@ -854,7 +854,7 @@ Closed by the decisions:
   order (decision D); A32-20 and A32-37 were recomputed in that order and reproduced by the second recomputation.
   A32-28 and A32-55 state their draw layouts.
 - **O4, the lab's data:** the shared decision "Labs" lists both E5 frames (the wealth frame with its traded flags),
-  the rules' net and gross wealth paths and the T5S raw days, all from
+  the rules' net wealth paths and the T5S raw days, all from
   `make_lab_data.py` (decision C6), and the lab refits LM26's GARCH laws on `taiex_tr.csv` as Lab 26 does; the lab list now names the estimation frame, Problem 12's window (the second
   recomputation's minor 4).
 - **O5, the new and revised anchors:** accepted (decision D). This revision adds A32-56 (the lab's likelihood ratios)

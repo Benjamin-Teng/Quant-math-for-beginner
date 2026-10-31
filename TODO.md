@@ -66,7 +66,7 @@ and changes to code, site and repository). Volume V is LM27–LM31 (Portfolio Op
 LM32–LM35 (Measuring True Risk and Return); the two can be written in parallel (ROADMAP). The Volume V packages
 `cvxpy` and `scikit-learn` are approved (ROADMAP, "Decided by the owner").
 
-- [ ] Stage 1: survey, spines and shared decisions (`plans/vol-5.md`, `plans/vol-6.md`), capability check (owner),
+- [x] Stage 1: survey, spines and shared decisions (`plans/vol-5.md`, `plans/vol-6.md`), capability check (owner),
   data, briefs and anchors (`plans/vol-5-anchors.md`, `plans/vol-6-anchors.md`), a fresh check of the whole.
   - [x] Survey (eight surveyors and a critic, 2026-10-24); spines and shared decisions in `plans/vol-5.md`, revised
     after a fresh adversarial check; `ROADMAP.md` and `reviews/REVIEW_PROMPT.md` (item 10) amended.
@@ -94,10 +94,10 @@ LM32–LM35 (Measuring True Risk and Return); the two can be written in parallel
     all part of it (LM30's "years of sessions" note stays, decision C7).
   - [x] The owner's answers (2026-10-31): 0050's 2007–2008 files approved (the 2008 replay keeps 0050's own data);
     `make_lab_data.py` runs the missing data builders itself, so the labs keep AUTHORING §9's two commands.
-  - [ ] Before Stage 2's labs: `data/make_lab_data.py` writes what the shared "Labs" decision lists (both E5 frames,
-    the rules' targets and wealth paths, LM34's grid, the T5S days, the checkpoint and proxy frames, LM35's OHLC rows
-    of 0050, 0056 and 00720B and TX23's limit-day rows), running the missing builders itself; a fresh agent reviews it
-    against each brief's lab list.
+  - [x] `data/make_lab_data.py` writes LM27_lab … LM35_lab (2026-10-31; 86 files, reviewed by a fresh agent against
+    each brief's lab list, LM01–LM26 unchanged): raw copies, and CSVs from `data/processed/` with floats by `repr`,
+    running a missing builder itself. LM34's `lm34_grid.csv` is skipped with a message until Stage 2's
+    `data/lm34_numbers.py` writes `data/processed/lm34_grid.parquet` (LM34's writer does that).
 - [ ] Stage 2: drafts of LM27–LM35.
 - [ ] Stage 3: review rounds, closing check, final check.
 - [ ] Stage 4: publish edition 0.6.
