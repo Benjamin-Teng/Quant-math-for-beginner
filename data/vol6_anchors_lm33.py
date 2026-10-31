@@ -6,7 +6,9 @@ third time to the second recomputation and the decisions on it: Harvey and Liu c
 digits each derived result needs passed to f(), the MC range of n_eff's MinTRL, A33-65, and A33-66 for the shared
 decision "Risk-free rate": how much r_f = 0 or 2% would change the results; revised a fourth time on 2026-10-25 to
 the third verifier's items and the editor's answers: A33-66 states that the rules' paths keep 1.5% and only the rate in
-the Sharpe ratio changes).
+the Sharpe ratio changes; revised a fifth time on 2026-10-31 to the fresh check of the whole of Stage 1: A33-21 cites
+lm22.md:216-221; A33-33 to A33-39 add the batch-means Monte Carlo SE of z*(0.95) and of the interval ends; A33-40 adds
+the ratio at L = 0; A33-66 says that R8 borrows at 3.5%; A33-67 is added for problem 8 (b)).
 
 Reads only data/processed/*.parquet, through the shared builders (run them first; this script runs neither):
   * E5, the through case (plans/vol-5.md): data/vol5_series.py's frames("E5") reads vol5_frames.parquet; the eight
@@ -321,7 +323,7 @@ srt = mt / st
 put(f"TR23: SR daily {f(srt, 4, 5)}, a year {f(srt * sqrt(At), 2, 4)}; skew {f(skt, 2)}, raw kurt {f(kut, 2)}; SE a "
     f"year (20.9) {f(sqrt(v209(srt, skt, kut) / Tt) * sqrt(At), 3)} (lm20.md:401, 0.207), HAC L={Lt} "
     f"{f(se_sr_hac(Rt, Lt) * sqrt(At), 3)}, HAC L=145 {f(se_sr_hac(Rt, 145) * sqrt(At), 3)}; LM22 blocks of 145: "
-    f"stationary 0.233, circular 0.244, moving 0.247 (lm22.md:216-219)")
+    f"stationary 0.233, circular 0.244, moving 0.247 (lm22.md:216-221)")
 
 # ---------------------------------------------------------------- annualization
 line = []
@@ -446,13 +448,18 @@ for jj, (j, o) in enumerate(pairs):
     p_boot.append(pb)
     p_hac.append(two_sided(t))
     zq = float(np.quantile(dstar[:, jj], 0.95, method="inverted_cdf"))
-    rows.append((k, dl, sd, t, pb, zq, float(np.corrcoef(XM[:, j], XM[:, o])[0, 1])))
+    # Monte Carlo SE of z*(0.95) by batch means (AUTHORING 8): the 9,999 resamples in drawing order as 99 batches of
+    # 101, each batch's inverted_cdf 0.95 quantile, SD (ddof = 1) / sqrt(99); an interval end's SE is it x s(Delta)
+    bq = np.quantile(dstar[:, jj].reshape(99, 101), 0.95, axis=1, method="inverted_cdf")
+    zse = float(bq.std(ddof=1) / sqrt(99))
+    rows.append((k, dl, sd, t, pb, zq, zse, float(np.corrcoef(XM[:, j], XM[:, o])[0, 1])))
 hb = holm(p_boot)
 hh = holm(p_hac)
-for (k, dl, sd, t, pb, zq, rr), a1, a2, ph in zip(rows, hb, hh, p_hac, strict=True):
+for (k, dl, sd, t, pb, zq, zse, rr), a1, a2, ph in zip(rows, hb, hh, p_hac, strict=True):
     put(f"{k} - R1: Delta a year {f(dl * sqA, 2, 3, 4, plus=True)}; corr {f(rr, 3, 2)}; s(Delta) HAC(L={L}) a year "
         f"{f(sd * sqA, 3, 4)}; t-stat {f(t, 2, plus=True)}; HAC p {f(ph, 3, 2)} (Holm {f(a2, 2)}); boot p {f(pb, 3, 2)} "
-        f"(Holm {f(a1, 2)}; MC SE {f(sqrt(pb * (1 - pb) / B), 3)}); z*(0.95) {f(zq, 2)}; 95% interval "
+        f"(Holm {f(a1, 2)}; MC SE {f(sqrt(pb * (1 - pb) / B), 3)}); z*(0.95) {f(zq, 1, 2)} (MC SE {f(zse, 2)}; "
+        f"interval ends' MC SE {f(zse * sd * sqA, 3)}); 95% interval "
         f"{f((dl - zq * sd) * sqA, 2, plus=True)} to {f((dl + zq * sd) * sqA, 2, plus=True)}; HAC normal 95% "
         f"{f((dl - 1.959964 * sd) * sqA, 2, plus=True)} to {f((dl + 1.959964 * sd) * sqA, 2, plus=True)}")
 
@@ -461,7 +468,8 @@ dl21, sd21 = lw_parts(X["R2"], X["R1"], L)
 r21 = float(np.corrcoef(X["R2"], X["R1"])[0, 1])
 naive = sqrt(SE9["R2"] ** 2 + SE9["R1"] ** 2)
 put(f"R2 vs R1: independent-samples SE a year (as (21.3)) {f(naive * sqA, 3)} against LW HAC {f(sd21 * sqA, 3)}; "
-    f"ratio {f(sd21 / naive, 2)} (sqrt(1 - rho) {f(sqrt(1 - r21), 2)}); s(Delta) a year by lag: "
+    f"ratio {f(sd21 / naive, 2)} (sqrt(1 - rho) {f(sqrt(1 - r21), 2)}); at L=0 "
+    f"{f(lw_parts(X['R2'], X['R1'], 0)[1] / naive, 2)}; s(Delta) a year by lag: "
     + ", ".join(f"L={lg} {f(lw_parts(X['R2'], X['R1'], lg)[1] * sqA, 3)}" for lg in (0, L, b_rule, 60))
     + f"; one-sided Phi(t-stat) {f(float(stats.norm.cdf(dl21 / sd21)), 2, 3)}")
 c21 = sd21 * sqrt(tau)                        # s(Delta) per sqrt(year), annual units: SE = c / sqrt(years)
@@ -613,8 +621,8 @@ put(f"KC 9: scipy.stats.kurtosis(R2's excess returns) with its defaults (fisher=
 put(f"mean excess return SE, HAC(L={L}) / iid (KC 3; as A33-06, both a year): " + ", ".join(
     f"{k} {f(se_mean_hac(X[k], L) / (mom[k][1] / sqrt(T)), 2)}" for k in RULES))
 # the illustrative r_f (shared decision "Risk-free rate": the text says how much 0% or 2% would change the result);
-# only the rate in the Sharpe ratio changes: the wealth paths are those run at RF = 1.5% (R4's signal, R8's cash and
-# financing; the editor's answer of 2026-10-25), so R stays and only the subtracted rate moves;
+# only the rate in the Sharpe ratio changes: the wealth paths are those run at RF = 1.5% (R4's signal and R8's cash;
+# R8 borrows at 3.5%; the editor's answer of 2026-10-25), so R stays and only the subtracted rate moves;
 # a constant shift leaves s, the skewness and the kurtosis unchanged, so each Sharpe ratio moves by (RF - rate) / vol
 rf_lines = []
 for rate in (0.0, 0.02):
@@ -630,7 +638,15 @@ for rate in (0.0, 0.02):
         f"{min(RULES, key=lambda k: sr_r[k])}; R2 - R1 {f((sr_r['R2'] - sr_r['R1']) * sqA, 2)}; smallest PSR(0) "
         f"{lowest} {f(p1[lowest], 3)}; Holm (21.7) on the 8 one-sided p: rejections at 5% "
         f"{sum(1 for a in adj if a <= 0.05 + 1e-12)}, largest adjusted p {f(max(adj), 3)}")
-put("the illustrative r_f (only the rate in the Sharpe ratio changes: each rule's path keeps 1.5%, R4's signal and "
-    "R8's cash and financing included; its returns in excess of another rate; each rule's s, skewness and kurtosis "
+put("the illustrative r_f (only the rate in the Sharpe ratio changes: each rule's path keeps 1.5% (R4's signal and "
+    "R8's cash; R8 borrows at 3.5%); its returns in excess of another rate; each rule's s, skewness and kurtosis "
     "unchanged): " + "; ".join(rf_lines))
+
+# ---------------------------------------------------------------- added by the fresh check of Stage 1 (2026-10-31)
+# P8 (b): two standard normals with correlation rho = 0.5 have E max = sqrt((1 - rho) / pi) (P8 (a) applied to
+# Z1 - Z2, whose SD is sqrt(2 (1 - rho))); the real n at which (33.4)'s integral equals it; Bailey-LdP eq. (9)
+em05 = sqrt(0.5 / np.pi)
+n05 = optimize.brentq(lambda n: emax(n) - em05, 1.000001, 2, xtol=1e-12)
+put(f"P8 (b) corr 0.5: E max(Z1, Z2) = sqrt(0.5/pi) {f(em05, 4)}; n with E Z_(n) = it by (33.4) {f(n05, 3)}; "
+    f"Bailey-LdP (2014) eq. (9) 0.5 + 0.5 x 2 = {f(0.5 + 0.5 * 2, 1)}")
 print("\n".join(OUT))

@@ -48,7 +48,11 @@ Garlappi and Uppal's calibration. Repaired 2026-10-25 after the verifier's check
 the volatilities at 2 dp and tau at 4 dp (decision C12's exception), so A30-04 flags the volatilities at 1 and 2 dp
 and A30-06 recomputes the SEs from those printed inputs. Revised 2026-10-25 to the decisions on the third
 revision: A30-03 also flags tau at 3 dp (three decimals suffice for (20.2)'s computation; the fourth keeps tau
-off a rounding boundary).
+off a rounding boundary). Revised 2026-10-31 to the fresh check of the whole of Stage 1: identities that hold to
+rounding error (A30-05's R3 against w_mv, A30-13's c_hat against scikit-learn's shrinkage_ and covariance_, A30-22's
+S_nu weights and stationarity gap, A30-26's average) are asserted below BOUND = 1e-15 and printed as that bound, not
+as their rounding noise (another implementation gets other noise); A30-12 adds R1's full-sample fixed-weight
+volatility (echo of A27-13), which X1's note names beside the out-of-sample 12.48% (decision C7).
 
 Rounding flags. Every number the brief prints passes through f(x, k1, k2, ...), which shows x with max(k) + 3 decimals
 and flags it "NEAR" for each printed precision k at which x lies within a tenth of a last-digit unit of a rounding
@@ -96,6 +100,7 @@ from vol5_series import frames
 SEED = 20261011
 EPS = 1e-12
 ZERO = 1e-6
+BOUND = 1e-15               # an identity that holds to rounding error is asserted below this and printed as the bound
 NB = 20                     # batches for the batch SE of experiment 1's non-mean statistics
 CONE_OPTS = ERC_OPTS        # CLARABEL at 1e-10, the shared tolerance for cone programs
 Vec = NDArray[np.float64]
@@ -269,10 +274,11 @@ def sr_true(fx: Vec) -> float:
 sr_1n = sr_true(w1)
 w_mv = gmv(S_d)
 r3_first = minvar(S_a, "R3 first window")
+assert np.abs(r3_first - w_mv).max() < BOUND      # a rounding-level agreement prints as the bound, not its noise
 put(f"model = first window: w_tan {pct(w_tan, 1)}%; delta = 1'S^-1 e {f(delta_m, 2)}; SR* {f(sr_star, 2, 3)}; "
     f"SR(1/N) {f(sr_1n, 2, 3)} (equal weights' mean {f(100 * A * float(w1 @ mu_d), 2)}% and volatility "
     f"{f(100 * vol(w1, S_d, A), 2)}%, as A28-15); w_mv {pct(w_mv, 1)}%, sigma_min {f(100 * vol(w_mv, S_d, A), 2, 3)}%; "
-    f"long-only R3 equals w_mv to {np.abs(r3_first - w_mv).max():.1e}")                                 # 05
+    f"long-only R3 equals w_mv below {BOUND:.0e}")                                                      # 05
 put(f"SR(1/N) / SR* in the model {f(sr_1n / sr_star, 2)} ({f(sr_1n, 3)} / {f(sr_star, 3)}); DeMiguel, Garlappi and "
     f"Uppal's panel E calibration (monthly Sharpe ratios 0.12 for 1/N and 0.15 for the tangency, their p. 1939) "
     f"{f(0.12 / 0.15, 1)}", num=43)                                                                       # 43
@@ -375,7 +381,8 @@ put(f"through case, realized volatility net of costs, daily returns {pd1[1]} .. 
     f"the session after the first trade to the end): R1 {f(100 * vols['R1'], 2, 4)}%, R3 {f(100 * vols['R3'], 2, 4)}%, "
     f"R5 {f(100 * vols['R5'], 2, 4)}% (R5 - R3 {f(100 * (vols['R5'] - vols['R3']), 2, 3, 4)} points; equal to "
     f"vol5_rules.parquet); R3 predicted in its windows: mean {f(100 * pred3.mean(), 2)}%, "
-    f"{f(100 * pred3.min(), 2)}% to {f(100 * pred3.max(), 2)}%")                                         # 12
+    f"{f(100 * pred3.min(), 2)}% to {f(100 * pred3.max(), 2)}%; R1 with fixed weights 1/5 over the whole "
+    f"estimation frame ({fr.X.shape[0]} returns) {f(100 * vol(w1, cov0(fr.X), A), 2)}% (echo of A27-13's s_p)")  # 12
 
 lam0, d20, b20, ch0 = lw_by_hand(x0)
 ck0 = c_lw(x0)
@@ -385,12 +392,16 @@ for xs in (x0, sqrt(A) * x0):                     # daily units and annual units
     sk = float(LedoitWolf(assume_centered=False).fit(xs).shrinkage_)
     ch_x = lw_by_hand(xs)[3]
     gaps += [abs(ch_x - (1 - sk)), abs(sk - (1 - ch_x))]
+assert max(gaps) < BOUND, gaps                    # the gaps are rounding noise: assert the bound, print the bound
+assert cov_ok < BOUND * lam0, cov_ok
+assert abs(ck0 - c_lw(sqrt(A) * x0)) < BOUND
 share0, _ = noise_split(x0)
 put(f"Ledoit-Wolf on the first window, annual units: lam_bar {f(A * lam0, 4, 5)} (a volatility of "
     f"{f(100 * sqrt(A * lam0), 1)}%); |S - lam_bar I|_F^2 {A**2 * d20:.4e}; noise estimate {A**2 * b20:.4e}; "
-    f"c_hat {f(ch0, 3, 4)}; scikit-learn shrinkage_ {f(1 - ck0, 3, 4)} (largest gap of c_hat to 1 - shrinkage_ "
-    f"and of shrinkage_ to 1 - c_hat, daily and annual units, {max(gaps):.1e}; covariance_ to {cov_ok:.1e}; c_hat "
-    f"daily against annual {abs(ck0 - c_lw(sqrt(A) * x0)):.1e}); normal-model oracle c* "
+    f"c_hat {f(ch0, 3, 4)}; scikit-learn shrinkage_ {f(1 - ck0, 3, 4)} (c_hat equals 1 - shrinkage_ to rounding "
+    f"error: the largest gap of c_hat to 1 - shrinkage_ and of shrinkage_ to 1 - c_hat, daily and annual units, is "
+    f"below {BOUND:.0e}; covariance_ equals c_hat S + (1 - c_hat) lam_bar I below {BOUND:.0e} of lam_bar; c_hat "
+    f"daily against annual below {BOUND:.0e}); normal-model oracle c* "
     f"{f(oracle_c(S_d, WINDOW), 3, 4)}; noise estimate / normal value {f(b20 / normal_noise(S_d, WINDOW), 2)}; "
     f"each fund's share of the excess over the normal value (entry by entry, by row) {pct(share0, 0)}%")  # 13
 cs = np.array([c_lw(fr.X[r_ - WINDOW:r_]) for _, _, r_ in sch])
@@ -530,10 +541,12 @@ nu[act] = 0.0
 assert nu.min() > -1e-12 * abs(nu0), "a multiplier is negative"
 S_nu = S1 - (np.outer(nu, np.ones(NU)) + np.outer(np.ones(NU), nu))
 w_nu = gmv(S_nu)
+assert np.abs(w_nu - w_lo).max() < BOUND          # rounding noise: assert the bound, print the bound
+assert gap_act < BOUND * abs(nu0), gap_act
 red = 2 * nu / np.diag(S1)
 put(f"long-only minimum variance on the first half: {int(act.sum())} sectors held ("
     + ", ".join(nm for nm, a_ in zip(s.names, act, strict=True) if a_) + f"), {int((~act).sum())} constraints bind; "
-    f"S_nu's minimum-variance weights equal them to {np.abs(w_nu - w_lo).max():.1e} (stationarity gap {gap_act:.1e}); "
+    f"S_nu's minimum-variance weights equal them below {BOUND:.0e} (stationarity gap below {BOUND:.0e} of nu_0); "
     f"smallest eigenvalue of A S_nu {f(AU * float(np.linalg.eigvalsh(S_nu)[0]), 4, 5)}; largest variance reduction "
     f"2 nu_i / s_i^2 {f(100 * float(red.max()), 1)}% ({s.names[int(np.argmax(red))]})")                # 22
 
@@ -575,8 +588,9 @@ put(f"view K = (-1, 1, 0, 0, 0): b = K e_hat {f(100 * b, 2, 3)} points, K e_eq {
     f"sqrt(K S K') {f(100 * sqrt(KSK), 2, 3)}%; c = T/(T + n0), n0 = {WINDOW} gives c 0.5; f_BL " + "; ".join(bl)
     + f"; plug-in S^-1 e_hat / delta {pct(fp, 1)}% (sum {f(100 * float(fp.sum()), 1)}%)")                 # 25
 f_all = np.linalg.solve(S_a, 0.5 * e_a + 0.5 * e_eq) / dl
+assert np.abs(f_all - (0.5 * fp + 0.5 * wref)).max() < BOUND
 put(f"all five window means as views, c 0.5: f {pct(f_all, 1)}% (sum {f(100 * float(f_all.sum()), 1)}%), the average "
-    f"of the plug-in and w_ref to {np.abs(f_all - (0.5 * fp + 0.5 * wref)).max():.1e}")                  # 26
+    f"of the plug-in and w_ref below {BOUND:.0e}")                                                      # 26
 
 # experiment 4: resampled long-only maximum-Sharpe weights
 rng4 = np.random.default_rng([4, SEED])

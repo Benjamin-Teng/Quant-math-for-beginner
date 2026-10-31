@@ -1,6 +1,10 @@
 """LM32 anchors (VaR, Expected Shortfall and Drawdown): every number the Stage 1 brief quotes (drafted 2026-10-24;
 revised the same day to the editor's decisions on the briefs, on the first revision and on the second recomputation
-and cross-check, and on 2026-10-25 to the decisions on the third revision, plans/vol-5.md).
+and cross-check, and on 2026-10-25 to the decisions on the third revision, plans/vol-5.md). The fresh check of the
+whole of Stage 1 (2026-10-31) changed four lines: A32-17 flag-checks alpha_hat at 3 dp too (Problem 11 prints 3.634);
+A32-24 solves the explicit epigraph LP, prints its KKT residuals (CLARABEL's duals), solves HiGHS on a fresh problem
+and probes each weight's range near the minimum (scipy's HiGHS), each asserted and printed as a bound; A32-53 prints
+the importance-sampling estimate to its SE's digit (3 sf, flag-checked) with the SE at 1 sf. A32-21 cites BCBS 1996a.
 
 Reads only checked, git-ignored outputs and the raw files the plan names (run their builders first):
   * TR23 (Volume III) and LM26's out-of-sample forecasts: data/lm26_common.py, which reads
@@ -34,7 +38,7 @@ Conventions (the brief's "Data role").
     EWMA and GARCH as LM26. An exceedance is R_t < -VaR - 1e-12 (the guard; the smallest margin is printed).
     Coverage: one-sided upper exact binomial tail Pr(X >= x), X ~ Bin(n, u). Independence (LM21's exact form):
     of the exceedance days that have a next forecast day, how many are followed by another; null law
-    Bin(trials, x/n), one-sided upper tail. Basel zones (BCBS 1996): yellow from the smallest count with
+    Bin(trials, x/n), one-sided upper tail. Basel zones (BCBS 1996a): yellow from the smallest count with
     Pr(X <= count) >= 0.95, red from the smallest with >= 0.9999. Rolling 250-day windows: the most exceedances in
     one window, the first window that reaches it, and how many windows tie at it (their runs of consecutive ends).
   * Likelihood ratios (the lab, A32-56): Kupiec's (1995, FEDS 95-24) LR_uc on the n days, asymptotically chi2(1);
@@ -48,7 +52,8 @@ Conventions (the brief's "Data role").
     form for a normal log return (e^(g + s^2/2) Phi(Phi^-1(u) - s), checked by quadrature) and by quadrature for the
     scaled t.
   * Drawdowns: DD_t = 1 - W_t / max(W_0..W_t) with W_0 = 1 (LM1); MDD = max DD_t; DD0_t = max(0, 1 - W_t/W_0); a
-    spell under water runs from a peak to the first session with W at or above that peak; durations in sessions.
+    spell under water runs from a peak to the first session with W at or above that peak, and its length counts the
+    sessions below the peak (the recovery session not counted); durations in sessions.
     Resampled MDDs: medians and 5-95% points by inverted_cdf; a block bootstrap reproduces a short episode that fits
     in one block exactly, so its MDDs have atoms: the largest is printed with its count and the realized
     peak -> trough it equals, and a median that sits on an atom (over 1% of the resamples) gets no batch SE; the
@@ -95,7 +100,7 @@ import numpy as np
 import polars as pl
 from arch.bootstrap import StationaryBootstrap, optimal_block_length
 from numpy.typing import NDArray
-from scipy import integrate, stats
+from scipy import integrate, optimize, stats
 from scipy.special import xlogy
 from vol5_rules import RULES, WINDOW, cov0, minvar, schedule, signals, wealth_path
 from vol5_series import frames
@@ -460,7 +465,7 @@ for u in (0.01, 0.001):
     vq = x0 * (kh / (T * u)) ** (1 / ah)
     rows.append(f"u {u}: VaR {f(100 * vq, 2)}% (historical {f(100 * var_h(R, u), 2)}), ES {f(100 * vq * ah / (ah - 1), 2)}%"
                 f" (historical {f(100 * es_h(R, u), 2)})")
-put(f"Hill tail (Problem 11): x0 3%, k {kh}, alpha_hat {f(ah, 2)} (lm20.md:441: 3.63, k = 108); "
+put(f"Hill tail (Problem 11): x0 3%, k {kh}, alpha_hat {f(ah, 2, 3)} (lm20.md:441: 3.63, k = 108); "
     + "; ".join(rows))                                                                                   # 17
 
 # ================================================================ section 4: precision of a quantile
@@ -499,7 +504,7 @@ put(f"bootstrap SE of TR23's 1% quantile (B 10,000 each, 20 consecutive batches 
 last250 = R[-250:]
 j1, j2, cov = binom_interval(250, U)
 p0 = 0.99**250
-put(f"250 returns: Pr(no return below the 1% quantile) = 0.99^250 = {f(p0, 4)} (BCBS 1996 Table 2: 8.11%); "
+put(f"250 returns: Pr(no return below the 1% quantile) = 0.99^250 = {f(p0, 4)} (BCBS 1996a Table 2: 8.11%); "
     f"ranks j1 {j1} (no lower end), j2 {j2}, coverage {f(cov, 4)}; TR23's last 250 returns ({dates[-250]} -> "
     f"{dates[-1]}): VaR -R_(3) {f(-100 * float(np.sort(last250)[2]), 2)}%, interval upper end R_({j2}) "
     f"{f(100 * float(np.sort(last250)[j2 - 1]), 2)}%, worst {f(100 * float(last250.min()), 2)}% on "
@@ -525,22 +530,63 @@ put(f"normal: ES_0.025 / sigma {f(k_n, 4)} against VaR_0.01 / sigma {f(-z01, 4)}
 sig0, trade0, rows0 = schedule(fr)[0]
 xw = fr.X[rows0 - WINDOW:rows0]
 nw_ = xw.shape[0]
-wv, th = cp.Variable(5), cp.Variable()
-lp = cp.Problem(cp.Minimize(th + cp.sum(cp.pos(-100 * xw @ wv - th)) / (U2 * nw_)), [cp.sum(wv) == 1, wv >= 0])
+# The explicit epigraph LP: min theta + sum(s)/(uT) s.t. s + 100 X w + theta >= 0, s >= 0, w >= 0, 1'w = 1.
+X100 = 100 * xw
+wv, th, sv = cp.Variable(5), cp.Variable(), cp.Variable(nw_)
+c_tail, c_s, c_w, c_sum = sv + X100 @ wv + th >= 0, sv >= 0, wv >= 0, cp.sum(wv) == 1
+lp = cp.Problem(cp.Minimize(th + cp.sum(sv) / (U2 * nw_)), [c_tail, c_s, c_w, c_sum])
 lp.solve(solver=cp.CLARABEL, tol_gap_abs=1e-12, tol_gap_rel=1e-12, tol_feas=1e-12)
-assert lp.status == "optimal" and wv.value is not None and th.value is not None
-w_es = np.where(np.abs(np.asarray(wv.value)) < 1e-6, 0.0, np.asarray(wv.value))
-lp2 = cp.Problem(cp.Minimize(th + cp.sum(cp.pos(-100 * xw @ wv - th)) / (U2 * nw_)), [cp.sum(wv) == 1, wv >= 0])
+assert lp.status == "optimal" and lp.value is not None
+assert wv.value is not None and th.value is not None and sv.value is not None
+w_c, th_c, s_c = np.asarray(wv.value), float(th.value), np.asarray(sv.value)
+w_es = np.where(np.abs(w_c) < 1e-6, 0.0, w_c)
+# KKT of the explicit LP from CLARABEL's duals (cvxpy: L = f - lam'(tail) - mu's - nu'w + gam (1'w - 1)).
+lam, mu_s, nu_w = (np.asarray(c.dual_value) for c in (c_tail, c_s, c_w))
+gam = float(np.asarray(c_sum.dual_value))
+kkt = max(abs(1 - float(lam.sum())),                                         # stationarity in theta
+          float(np.max(np.abs(1 / (U2 * nw_) - lam - mu_s))),                # in s
+          float(np.max(np.abs(-X100.T @ lam - nu_w + gam))),                 # in w
+          float(np.max(np.maximum(0, -(s_c + X100 @ w_c + th_c)))),          # primal infeasibility
+          float(np.max(np.maximum(0, -s_c))), float(np.max(np.maximum(0, -w_c))), abs(float(w_c.sum()) - 1),
+          float(np.max(np.maximum(0, -np.concatenate([lam, mu_s, nu_w])))),  # dual infeasibility
+          float(np.max(np.abs(lam * (s_c + X100 @ w_c + th_c)))),            # complementary slackness
+          float(np.max(np.abs(mu_s * s_c))), float(np.max(np.abs(nu_w * w_c))))
+assert kkt < 1e-12, kkt
+# HiGHS on a fresh problem with fresh variables, in the (x)^+ form of the definition.
+wh, thh = cp.Variable(5), cp.Variable()
+lp2 = cp.Problem(cp.Minimize(thh + cp.sum(cp.pos(-X100 @ wh - thh)) / (U2 * nw_)), [cp.sum(wh) == 1, wh >= 0])
 lp2.solve(solver=cp.HIGHS)
-assert lp2.status == "optimal" and lp.value is not None and lp2.value is not None
+assert lp2.status == "optimal" and lp2.value is not None and wh.value is not None and thh.value is not None
+gaps = (abs(float(lp2.value) - float(lp.value)), float(np.max(np.abs(np.asarray(wh.value) - w_c))),
+        abs(float(thh.value) - th_c))
+assert max(gaps) < 1e-12, gaps
+# Uniqueness: over {objective <= minimum + 1e-9}, minimize and maximize each weight (scipy's HiGHS, the same LP).
+c_lp = np.concatenate([np.zeros(5), [1.0], np.full(nw_, 1 / (U2 * nw_))])
+A_ub = np.hstack([-X100, -np.ones((nw_, 1)), -np.eye(nw_)])
+A_eq = np.concatenate([np.ones(5), np.zeros(1 + nw_)])[None, :]
+bnds = [(0, None)] * 5 + [(None, None)] + [(0, None)] * nw_
+r0 = optimize.linprog(c_lp, A_ub=A_ub, b_ub=np.zeros(nw_), A_eq=A_eq, b_eq=[1.0], bounds=bnds, method="highs")
+assert r0.status == 0 and abs(float(r0.fun) - float(lp.value)) < 1e-12
+width = 0.0
+for i in range(5):
+    ends = []
+    for sgn in (1.0, -1.0):
+        ci = np.zeros(len(c_lp))
+        ci[i] = sgn
+        ri = optimize.linprog(ci, A_ub=np.vstack([A_ub, c_lp[None, :]]), b_ub=np.append(np.zeros(nw_), r0.fun + 1e-9),
+                              A_eq=A_eq, b_eq=[1.0], bounds=bnds, method="highs")
+        assert ri.status == 0
+        ends.append(float(ri.x[i]))
+    width = max(width, ends[1] - ends[0])
+assert width < 1e-7, width
 es_lp = float(lp.value) / 100
 w3 = minvar(fr.A * cov0(xw), "R3 first window")
 put(f"ES minimization (Problem 12; Rockafellar-Uryasev LP): first window {fr.est_dates[rows0 - WINDOW]} -> "
     f"{fr.est_dates[rows0 - 1]} ({nw_} rows; signal {sig0}, trade {trade0}), u 2.5% (uT {f(U2 * nw_, 1)}); weights "
     + ", ".join(f"{s_} {f(v, 3)}" for s_, v in zip(fr.funds, w_es, strict=True))
-    + f"; ES {f(100 * es_lp, 3, 4)}%, theta* {f(float(th.value), 3, 4)}% = VaR {f(100 * var_h(xw @ w_es, U2), 3, 4)}%; "
-    f"(32.2) at "
-    f"the solution {f(100 * es_h(xw @ w_es, U2), 3, 4)}%; HiGHS objective gap {abs(float(lp2.value) - float(lp.value)):.1e}; "
+    + f"; ES {f(100 * es_lp, 3, 4)}%, theta* {f(th_c, 3, 4)}% = VaR {f(100 * var_h(xw @ w_es, U2), 3, 4)}%; "
+    f"(32.2) at the solution {f(100 * es_h(xw @ w_es, U2), 3, 4)}%; HiGHS agrees to 1e-12 (objective, weights); KKT "
+    f"residuals below 1e-12; each weight's range within 1e-9 of the minimum below 1e-7; "
     f"R3's ES {f(100 * es_h(xw @ w3, U2), 3, 4)}%, R1's {f(100 * es_h(xw @ np.full(5, 0.2), U2), 3, 4)}%")       # 24
 Ls = np.sort(-100 * R)[::-1]                           # losses in %, largest first
 csl = np.concatenate([[0.0], np.cumsum(Ls)])
@@ -604,7 +650,7 @@ def zones(n: int) -> tuple[int, int]:
 
 
 yb, rb = zones(250)
-assert (yb, rb) == (5, 10)                 # BCBS 1996 Table 2; the 250-day window shares below use 5-9 and 10+
+assert (yb, rb) == (5, 10)                 # BCBS 1996a Table 2; the 250-day window shares below use 5-9 and 10+
 y5, r5 = zones(500)
 yN, rN = zones(n_bt)
 put("Basel 1996, 250 days at 99%: Pr(X <= x) for x = 0..10 (%): " + ", ".join(f(v, 2) for v in cum250)
@@ -805,7 +851,8 @@ p_is = float(wis.mean())
 se_is = float(wis.std() / sqrt(len(wis)))
 var_one = exp(kk * kk) * float(stats.norm.cdf(-2 * kk)) - p_n**2
 put(f"P10 importance sampling (18.7), shift a = {f(kk, 4)} (7 April under GARCH-n), experiment 2, default_rng([2, "
-    f"{SEED}]), 10,000 draws: {g(p_is, 4)} +- {g(se_is, 2)} (relative SE {f(100 * se_is / p_is, 1)}%); exact Phi(-a) "
+    f"{SEED}]), 10,000 draws: {g(p_is, 3)} +- {g(se_is, 1)} to the SE's digit ({p_is:.5e} +- {se_is:.4e}; "
+    f"relative SE {f(100 * se_is / p_is, 1)}%); exact Phi(-a) "
     f"{g(p_n, 4)}; plain draws in the tail expected {f(10_000 * p_n, 6)}; variance ratio p(1-p) / (e^a^2 Phi(-2a) - p^2) "
     f"{g(p_n * (1 - p_n) / var_one, 3)}; shifted draws in the tail {int((Z <= 0).sum())}")              # 53
 

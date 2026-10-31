@@ -2,7 +2,14 @@
 the editor's decisions on the briefs, on the first revision and on the second recomputation, plans/vol-5.md; labels
 repaired on 2026-10-25 after a verifier's check, no value changed; finished the same day to the decisions on the third
 revision: A35-48 adds the checkpoint funds' extreme returns and 00720B's exact return of 2020-03-19, which TPEx's
-no-limit rule allows, "Listing markets").
+no-limit rule allows, "Listing markets"). Changed on 2026-10-31 by the fresh check of the whole of Stage 1, no row
+added or withdrawn: A35-02 prints the rebuild's largest difference as a bound (below 1e-13); A35-33 adds problem 8's
+inputs (0050's and 00679B's means and SDs, the 3x3 correlation matrix's smallest eigenvalue from A27-11's printed
+echoes, and (35.3) from the printed 4-dp inputs); A35-35 adds the tail correlation's normal-theory standard error, its
+gap to (16.10) in standard errors and its Fisher-z 95% interval; A35-40 checks and bounds complementary slackness
+beside the stationarity residual; A35-41 adds each frozen book's lowest value over each window's dates, stopping
+unless R6's falls at the window's last close. In 2015 GLD stands in for 00635U, although that fund traded from
+2015-04-15, so both hypothetical years use the same four proxies (the editor's decision on the fresh check).
 
 Reads only data/processed/*.parquet through the shared builders, plus the registered raw files the plan names (run the
 builders first: data/vol3_series.py, data/vol4_series.py, data/build_series.py, data/vol5_series.py, data/vol5_rules.py):
@@ -51,12 +58,13 @@ keys (ISO year, ISO week); the first and last week of a span, in which it starts
 not (LM27's convention; plans/vol-5.md, "Weeks and months"). Mahalanobis distances use the full estimation frame's
 mean and covariance (divisor T); the reverse stress test minimizes d^2 = (x - mu)' S^-1 (x - mu) subject to
 f'x = -l (closed form) and, bounded, with 0050's shock >= -10% (cvxpy: CLARABEL and OSQP in percent units, which the
-shared decision "Solver output" allows with the KKT residuals printed; tolerances printed, KKT residuals and the
-closed form with the active bound checked). The objective is given as cp.quad_form(x - mu, cp.psd_wrap(S^-1)): the
-solvers' statuses and an inactive multiplier depend on the form (given as cp.sum_squares of a Cholesky factor of S^-1
-times x - mu, CLARABEL's inactive multiplier for R8 is about 6e-12, and OSQP's status for R2 can fall to
-optimal_inaccurate: in 18 of 40 last-bit perturbations of S in a verifier's check, against none of 40 with quad_form),
-so the brief states it.
+shared decision "Solver output" allows with the KKT residuals printed; tolerances printed; the stationarity
+residual with CLARABEL's multipliers, complementary slackness and the closed form with the active bound checked). The
+objective is given as cp.quad_form(x - mu, cp.psd_wrap(S^-1)): the solvers' statuses and an inactive multiplier
+depend on the form (given as cp.sum_squares of a Cholesky factor of S^-1 times x - mu, CLARABEL's inactive multiplier
+for R8 is about 6e-12, and OSQP's status for R2 can fall to optimal_inaccurate: in about half of 40 last-bit
+perturbations of S in two verifiers' checks, 2026-10-25 and 2026-10-31, against none of 40 with quad_form), so the
+brief states it.
 Betas are OLS slopes with an intercept on the estimation frame (TR23's R on the same dates). The ruin leverage of a
 loss R < 0 is -1/R (1 + L R <= 0). Counts on two-decimal prices use Fraction; counts on computed values the guard
 1e-12.
@@ -81,6 +89,7 @@ from datetime import date
 from fractions import Fraction
 from math import floor, inf, log, sqrt
 from pathlib import Path
+from statistics import NormalDist
 
 import cvxpy as cp
 import numpy as np
@@ -259,9 +268,11 @@ def funds_line(names: list[str], vals: Vec, k: int = 2) -> str:
 put(f"E5: estimation frame T = {len(fr.est_dates)} ({fr.est_dates[0]} .. {fr.est_dates[-1]}), A = {f(fr.A, 2)}; "
     f"wealth frame {len(WD)} sessions, A_w = {f(fr.A_wealth, 2)}; years {f(fr.years, 4)}")
 first = TRADES.filter(pl.col("rule") == "R1").sort("trade")
+if max(BOOKERR.values()) >= 1e-13:              # printed as a bound: its digits are rounding noise
+    fail(f"rebuilt wealth differs from vol5_rules.parquet by {max(BOOKERR.values()):.1e}, not below 1e-13")
 put(f"rules' books: {first.height} trades, first {first['trade'][0]} (signal {first['signal'][0]}), last "
     f"{first['trade'][-1]}; valuation to {WD[-1]}; rebuilt wealth against vol5_rules.parquet, largest relative "
-    f"difference over the eight rules {max(BOOKERR.values()):.1e}")
+    "difference over the eight rules below 1e-13")
 put(f"TR23: {int(np.isfinite(RT).sum())} returns {TD[1]} .. {TD[-1]} (published, lm19.md:46)")
 
 # ---------------------------------------------------------------- scenario windows (TR23)
@@ -555,11 +566,33 @@ Cb[0, 2] = Cb[2, 0] = RHO_BRK
 Sb = Cb * np.outer(sd, sd)
 lam_min = float(np.linalg.eigvalsh(Cb).min())
 full, brk = cond_shock(S, MU, -0.10), cond_shock(Sb, MU, -0.10)
+# Problem 8: the 3x3 correlation matrix of 0050/00679B/00642U from A27-11's printed echoes (decision C12: -0.105 and
+# 0.092 at 3 dp, -0.18 at 2 dp), checked against the unrounded correlations; (35.3) from the printed 4-dp inputs.
+ECHO3 = {(0, 2): (-0.105, 3), (0, 4): (0.092, 3), (2, 4): (-0.18, 2)}
+for (i_, j_), (v_, k_) in ECHO3.items():
+    if round(float(S[i_, j_] / sd[i_] / sd[j_]), k_) != v_:
+        fail(f"problem 8: the correlation of {FUNDS[i_]} and {FUNDS[j_]} does not round to A27-11's {v_}")
+C3 = np.eye(3)
+C3[0, 1] = C3[1, 0] = -0.105
+C3[0, 2] = C3[2, 0] = 0.092
+C3[1, 2] = C3[2, 1] = -0.18
+lam3 = float(np.linalg.eigvalsh(C3).min())
+C3[0, 1] = C3[1, 0] = RHO_BRK
+lam3b = float(np.linalg.eigvalsh(C3).min())
+m4 = [round(100 * float(MU[j_]), 4) for j_ in (0, 2)]
+s4 = [round(100 * float(sd[j_]), 4) for j_ in (0, 2)]
+p8 = [m4[1] + rho_ * s4[1] / s4[0] * (-10.0 - m4[0]) for rho_ in (-0.105, RHO_BRK)]
+if [round(x, 2) for x in p8] != [round(100 * float(full[2]), 2), round(100 * float(brk[2]), 2)]:
+    fail("problem 8: the printed 4-dp inputs do not reproduce E7's 00679B moves at 2 dp")
 put(f"correlation break, 0050 -10% (partial scenario, the rest at their conditional means): full-sample correlation "
     f"0050/00679B {f(S[0, 2] / sd[0] / sd[2], 3)} (LM27 owns it), constructed {f(RHO_BRK, 2)} "
     f"(smallest eigenvalue of the changed correlation matrix {f(lam_min, 3)}); shocks full {funds_line(FUNDS, full)}; "
     f"constructed {funds_line(FUNDS, brk)}; rules' current books full / constructed: "
-    + ", ".join(f"{k} {pc(float(CUR[k] @ full), 2)} / {pc(float(CUR[k] @ brk), 2)}" for k in RULES))
+    + ", ".join(f"{k} {pc(float(CUR[k] @ full), 2)} / {pc(float(CUR[k] @ brk), 2)}" for k in RULES)
+    + f"; problem 8: means (percent, estimation frame) 0050 {f(100 * MU[0], 4)} 00679B {f(100 * MU[2], 4)}, SDs "
+    f"(divisor T) {f(100 * sd[0], 4)} {f(100 * sd[2], 4)}; 3x3 correlation matrix of 0050/00679B/00642U from A27-11's "
+    f"printed echoes (-0.105, 0.092, -0.18): smallest eigenvalue {f(lam3, 3)}, with -0.105 set to 0.30 {f(lam3b, 3)}; "
+    f"(35.3) from the 4-dp inputs, 00679B {f(p8[0], 2, plus=True)} / {f(p8[1], 2, plus=True)}")
 i22 = [i for i, d in enumerate(TD) if d[:4] == "2022"]
 k22 = i22[0] + int(np.argmin(LV[i22[0]:i22[-1] + 1]))
 a20 = TPOS[WIN["2020"][1]]
@@ -581,13 +614,24 @@ s0 = X[:, 0].std(ddof=0)                      # divisor T, as the book's s
 ev = X[:, 0] <= MU[0] - 2 * s0 + EPS
 vs = X[ev, 0].var(ddof=0)                     # divisor n, the number of tail days (48), as T for the full sample
 out = []
+model646 = r646 = 0.0
 for j in (1, 2):
     rho = float(np.corrcoef(X[:, 0], X[:, j])[0, 1])
     model = rho / sqrt(rho**2 + (1 - rho**2) * s0**2 / vs)
-    out.append(f"{FUNDS[j]}: data {f(np.corrcoef(X[ev, 0], X[ev, j])[0, 1], 3)}, (16.10) {f(model, 3)}, full {f(rho, 3)}")
-put(f"(16.10) on the days 0050 fell 2 standard deviations or more below its mean ({int(ev.sum())} days; variance "
-    f"ratio full / tail {f(s0**2 / vs, 3)}, both with divisor the count (T = {len(X)}, {int(ev.sum())}), so 0050's "
-    f"variance on the tail days is {f(vs / s0**2, 3)} times the full sample's): " + "; ".join(out))
+    rt_ = float(np.corrcoef(X[ev, 0], X[ev, j])[0, 1])
+    if j == 1:
+        model646, r646 = model, rt_
+    out.append(f"{FUNDS[j]}: data {f(rt_, 3)}, (16.10) {f(model, 3)}, full {f(rho, 3)}")
+nev = int(ev.sum())
+se646 = (1 - r646**2) / sqrt(nev)                # normal-theory standard error of a correlation on n days
+zq = NormalDist().inv_cdf(0.975)
+fz = (np.tanh(np.arctanh(r646) - zq / sqrt(nev - 3)), np.tanh(np.arctanh(r646) + zq / sqrt(nev - 3)))
+put(f"(16.10) on the days 0050 fell 2 standard deviations or more below its mean ({nev} days; variance "
+    f"ratio full / tail {f(s0**2 / vs, 3)}, both with divisor the count (T = {len(X)}, {nev}), so 0050's "
+    f"variance on the tail days is {f(vs / s0**2, 3)} times the full sample's): " + "; ".join(out)
+    + f"; 00646's tail correlation: normal-theory standard error (1 - r^2)/sqrt({nev}) {f(se646, 2)}, gap to (16.10) "
+    f"{f(model646 - r646, 2)} = {f((model646 - r646) / se646, 1)} standard errors; Fisher-z 95% interval "
+    f"{fz[0]:.4f} .. {fz[1]:.4f}")
 
 
 def maha(x: Vec) -> float:
@@ -635,7 +679,8 @@ SI100 = (SI100 + SI100.T) / 2
 
 def bounded(e: Vec) -> tuple[Vec, float, str]:
     """min d^2 s.t. e'x <= -10 (percent), x_0050 >= -10, by CLARABEL and OSQP with the objective
-    quad_form(x - mu, psd_wrap(S^-1)) (the form the brief states); KKT and the closed form checked."""
+    quad_form(x - mu, psd_wrap(S^-1)) (the form the brief states); stationarity (below 1e-13), complementary slackness
+    (below 1e-9, both with CLARABEL's multipliers) and the closed form checked."""
     sols = []
     duals = None
     for solver, opts in ((cp.CLARABEL, vr.CLARABEL_OPTS), (cp.OSQP, vr.OSQP_OPTS)):
@@ -664,14 +709,16 @@ def bounded(e: Vec) -> tuple[Vec, float, str]:
         cf = MU100 - (100 * LOSS + e @ MU100) * (S100 @ e) / float(e @ S100 @ e)
     gap_cf = float(np.abs(xs - cf).max())
     gap_osqp = float(np.abs(xs - sols[1]).max())
-    kkt = float(np.abs(grad).max())
-    if gap_cf > 1e-9 or gap_osqp > 1e-9 or kkt > 1e-13:     # printed as bounds: their digits are rounding noise
-        fail(f"bounded reverse stress: closed form gap {gap_cf:.1e}, OSQP gap {gap_osqp:.1e}, KKT residual {kkt:.1e}")
+    kkt = float(np.abs(grad).max())                  # stationarity, with CLARABEL's multipliers
+    cs = max(abs(duals[0] * float(e @ xs + 100 * LOSS)), abs(duals[1] * float(xs[0] + 10.0)))   # complementary slackness
+    if gap_cf > 1e-9 or gap_osqp > 1e-9 or kkt > 1e-13 or cs > 1e-9:   # printed as bounds: their digits are noise
+        fail(f"bounded reverse stress: closed form gap {gap_cf:.1e}, OSQP gap {gap_osqp:.1e}, stationarity residual "
+             f"{kkt:.1e}, complementary slackness {cs:.1e}")
     mult = [("below 1e-12" if abs(d) < 1e-12 else f(d, 1 if abs(d) >= 1 else 4))   # an inactive one is solver noise
             for d in duals]
     return xs / 100, sqrt(float((xs - MU100) @ SI100 @ (xs - MU100))), (
-        f"bound {'active' if active else 'inactive'}, multipliers {mult[0]} and {mult[1]}, KKT residual "
-        f"below 1e-13, closed-form and OSQP gaps below 1e-9")
+        f"bound {'active' if active else 'inactive'}, multipliers {mult[0]} and {mult[1]}, stationarity residual "
+        f"below 1e-13, complementary slackness below 1e-9, closed-form and OSQP gaps below 1e-9")
 
 
 lines = []
@@ -698,7 +745,20 @@ for name in ("2008", "2015"):
     uwd = book_u(FIRST["R6"], PROXY_U[name]["DBO"])
     ruin.append(f"{name} (hypothetical, first weights, USO / DBO): {pu(lw, uw)} / {pu(lwd, uwd)} -> L "
                 f"{lu(lw, uw)} / {lu(lwd, uwd)}")
-put("R6's unit book: scenario loss and ruin leverage -1/R (frozen holdings): " + "; ".join(ruin))
+lows = []                                       # (35.2) over a window: the frozen book's lowest value on its dates
+for name in ("2020", "2024-08-05", "2025-04-07"):
+    a, b, _ = WIN[name]
+    path = np.cumprod(1 + fr.W[WIDX[a] + 1:WIDX[b] + 1], axis=0) - 1
+    for k in RULES:
+        v = path @ expo(k, a)
+        j = int(np.argmin(v))
+        if v[j] < v[-1] - EPS:
+            if k == "R6":
+                fail(f"R6's frozen {name} book reaches its lowest value before the window's last close")
+            lows.append(f"{name} {k} {pc(float(v[j]), 2)} ({WD[WIDX[a] + 1 + j]}; last close {pc(float(v[-1]), 2)})")
+put("R6's unit book: scenario loss and ruin leverage -1/R (frozen holdings): " + "; ".join(ruin)
+    + "; each frozen book's lowest value over each window's dates (2020, 2024-08-05, 2025-04-07; eight rules): at the "
+    "window's last close (A35-15, A35-17, A35-19) " + (f"except {', '.join(lows)}" if lows else "for every book"))
 vars(vr)["CAP"] = inf                       # R8 uncapped, to echo its ratio (module global read by signals)
 sigs = vr.signals(fr, [])
 vars(vr)["CAP"] = 1.5

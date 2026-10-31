@@ -163,11 +163,11 @@ note says why.
 | $p$, $q$, $b$, $a$ | binary bet: win probability, $q=1-p$, gain $b$ and loss $a$ per unit staked, so $f^*=p/a-q/b$. In futures pricing $q$ is instead the continuous dividend yield; a module uses one of the two. LM21, without bets, writes $p_i$ for p-values and $q$ for a false-discovery level; LM26's auxiliary regressions write their coefficients $a$, $b$ |
 | $r_f$ | risk-free or financing rate (state the compounding) |
 | $\mathrm{SR}$ | Sharpe ratio $(\mu-r_f)/\sigma$ of a return; say the period (per day, or annualized) |
-| $w$, $\mathbf w$, $\mathbf f$, $\Sigma$, $\rho$ | portfolio weights summing to 1; vector of exposures; covariance matrix; correlation |
+| $w$, $\mathbf w$, $\mathbf f$, $\Sigma$, $\rho$ | portfolio weights summing to 1 (from Volume V, the held $\mathbf w_{t-1}$ and $\mathbf w^{\mathrm{drift}}_t$ of a book with cash or borrowing need not: table below); vector of exposures; covariance matrix; correlation |
 | $\varphi$, $\Phi$ | standard normal density and distribution function |
 | $B_t$ | standard Brownian motion ($W$ stays wealth, so $dW_t=W_t(\mu\,dt+\sigma\,dB_t)$ reads unambiguously); a module without Brownian motion may use $B$ for a balance, or (LM18) the number of bootstrap resamples, declared in its notation note |
 | $y$, $i$, $v$, $k$, $\gamma$ | yield to maturity or IRR; periodic interest rate; discount factor $1/(1+i)$; required return; growth rate of dividends or cash flows (simple, per period) |
-| $\lambda$, $\nu$, $\mathcal L$ | multiplier of an equality constraint (with a subscript, $\lambda_k$ is an eigenvalue: table below); multipliers of inequality constraints (KKT), or in a module about distributions a Student $t$'s degrees of freedom, and in LM24 a chi-square law's (a module uses one of the two); Lagrangian. In a module about distributions without constraints, $\lambda$ is a Poisson mean or an exponential rate. Volume IV has no constraints: there $\mathcal L(\theta)$ is a likelihood, and LM26's $\lambda$ is the EWMA decay. From Volume V: LM30 writes its multipliers $\nu$ ($\lambda_k$ and $\bar\lambda$ are eigenvalues there); in LM31 $\lambda$ is only LM26's decay |
+| $\lambda$, $\nu$, $\mathcal L$ | multiplier of an equality constraint (with an index subscript, as in $\lambda_1$, $\lambda_k$ or $\lambda_N$, it is an eigenvalue: table below; from Volume V a second equality multiplier takes a letter naming its constraint, $\lambda_b$ or $\lambda_\mu$); multipliers of inequality constraints (KKT), or in a module about distributions a Student $t$'s degrees of freedom, and in LM24 a chi-square law's (a module uses one of the two); Lagrangian. In a module about distributions without constraints, $\lambda$ is a Poisson mean or an exponential rate. Volume IV has no constraints: there $\mathcal L(\theta)$ is a likelihood, and LM26's $\lambda$ is the EWMA decay. From Volume V: LM30 writes its multipliers $\nu$ ($\lambda_k$ and $\bar\lambda$ are eigenvalues there); in LM31, LM32 and LM34 $\lambda$ is only LM26's decay |
 | $h$, $u$; $\psi$ | generic functions in modules where $f$ or $g$ already have their book-wide meaning ($f$, $g$, $h$ are fine in purely mathematical modules; from Volume III $u$ is instead a probability level or a uniform draw, table below); constraint functions, $\psi(x)=b$ or $\psi_i(x)\le b_i$ (there $b$ is a constraint level, not a bet's gain: a module uses one of the two) |
 
 **Vectors and matrices** (from Volume II; LM7 already writes vectors, transposes and $\Sigma$ this way):
@@ -193,7 +193,7 @@ note says why.
 
 | Symbol | Book-wide meaning |
 |:--|:--|
-| $\Omega$, $\omega$ | sample space; an outcome (sequences of trades or days as $+$/$-$ strings); LM26, without a sample space, writes $\omega$ for a GARCH constant |
+| $\Omega$, $\omega$ | sample space; an outcome (sequences of trades or days as $+$/$-$ strings); LM26, without a sample space, writes $\omega$ for a GARCH constant, LM10 and LM29 for the mixing weight of a chord ((10.10), (29.1)), and LM34 for a relative rank |
 | $\Pr(\cdot)$, $\Pr(B\mid A)$ | probability and conditional probability (`\mid`), never $P$, the price. Events are sets, $\{R\le-3\%\}$; capital letters $A$, $B$ for events only in a module that does not annualize (LM13), with $A^c$ the complement |
 | $\mathcal A$, $\mathcal B$ | an event in a general statement, in a module that annualizes, where $A$ is the annualization factor; LM13, which does not annualize, writes $A$, $B$ |
 | $\mathbf 1_{\mathcal A}$, $\mathbf 1\{\cdot\}$ | indicator of an event, always with a subscript or braces (bold $\mathbf 1$ alone is the vector of ones); $\E[\mathbf 1_{\mathcal A}]=\Pr(\mathcal A)$ is (14.1) |
@@ -248,7 +248,7 @@ notation note):
 | Symbol | Book-wide meaning |
 |:--|:--|
 | $\mathbf e$ | excess returns $\boldsymbol\mu-r_f\mathbf 1$ (LM7); LM27–LM31 write no basis vector $\mathbf e_i$ |
-| $\mu_p$; $\mathbf w_{t-1}$, $\mathbf w^{\mathrm{drift}}_t$ | portfolio mean; weights set at the previous close; weights after a period's returns, before trading |
+| $\mu_p$; $\mathbf w_{t-1}$, $\mathbf w^{\mathrm{drift}}_t$ | portfolio mean; weights set at the previous close; weights after a period's returns, before trading (each fund's value over wealth, summing to the book's exposure, 1 when fully invested; LM27's (27.1)) |
 | $W^{\mathrm{pre}}_t$, $A_{\mathrm w}$ | wealth before the day's trade (the post-trade wealth is $W_t$); sessions per year of a wealth frame, which counts every session (a joint estimation frame's $A$ can be smaller) |
 | $\mathbf y$ | in LM29 the homogenized variable of the maximum-Sharpe QP, in LM31 the ERC variable before normalizing (modules without least squares) |
 | $\lVert\mathbf x\rVert_1$ | the 1-norm $\sum_i\lvert x_i\rvert$; gross exposure $\lVert\mathbf f\rVert_1$ (LM8) |
@@ -430,7 +430,7 @@ $P$, $Q$, $\Omega$, $\tau$ for Black–Litterman, $\kappa$ for a VaR threshold.
 - Conventions: a horizon in years is calendar days ÷ 365.25 (for a return sample, from the close before its first
   return to its last close) unless an instrument has its own day count, which is the
   issuer's: name the bank or issuer whose terms you quote (DBS Taiwan accrues NTD deposits on actual/365; Bank of
-  Taiwan credits whole months and only part months by day). Quote the annualization factor $A$ of the sample in use.
+  Taiwan credits whole months and only part months by day). Quote the annualization factor $A$ of the sample in use. A count of sessions divided by $A$ is written "years of sessions" and names its $A$.
 - A motivating case built on one day says whether that day is typical or the extreme of the sample, and backs the
   claim with a multi-day figure.
 - Futures: TAIEX closes on a 13:25–13:30 call auction while the TX daily settlement is set from the last minute of

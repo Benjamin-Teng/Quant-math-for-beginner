@@ -3,7 +3,10 @@ revised the same day to the editor's decisions on the briefs, plans/vol-5.md: ow
 recomputation's findings; revised again to the decisions on the second recomputation and cross-check: A31-35 extended
 with the EWMA's QLIKE wins and losses, A31-26 worded as the mean of R6's 92 target weights, echoes at their owners'
 precision, C12; repaired after the third revision's check: A31-26 names each holding month's own target weights, and
-A31-17 prints the squares of A31-07's two-decimal volatilities beside the variances).
+A31-17 prints the squares of A31-07's two-decimal volatilities beside the variances; fresh check of the whole of
+Stage 1, 2026-10-31: A31-19 adds, over the 92 windows, np.corrcoef's largest asymmetry as a bound and true/false checks
+of squareform's rejection of sqrt((1 - C)/2) and acceptance of the symmetrized column distance (KC 8); A31-39 no longer
+prints Jacobi's step count, which depends on the order of the floating-point operations).
 
 Reads only data/processed/*.parquet, through the shared builders (run them first; this script runs neither):
   * E5 (plans/vol-5.md, "Data"): vol5_series.frames("E5"), which reads data/processed/vol5_frames.parquet (built and
@@ -28,9 +31,10 @@ minimizer of h(y) = 1/2 y'S y - sum b_i ln y_i (Newton: vol5_rules.erc for equal
 CCD, here: y_i <- (-c_i + sqrt(c_i^2 + 4 S_ii b_i)) / (2 S_ii), c_i = (S y)_i - S_ii y_i, sweeps i = 1..N, started at
 y_i = 1 / sqrt(S_ii), stopped when max |y_i (S y)_i - b_i| < 1e-12). Jacobi's fixed point (weights proportional to
 b_i / beta_{i,p}) is run on the annualized covariance from 1/N for at most 10,000 steps, stopped when no weight moves by
-1e-12 or more in a step (max_i |w_{k+1,i} - w_{k,i}| < 1e-12); its step count depends on the scale, the point it
-settles at does not. Newton's step count follows vol5_rules.erc exactly (the
-same start, Armijo backtracking while max |y_i (S y)_i - b_i| > 1e-6, stop below 1e-13). Inverse-volatility (IV) weights are
+1e-12 or more in a step (max_i |w_{k+1,i} - w_{k,i}| < 1e-12); its step count depends on the scale and on the order
+of the floating-point operations, the point it settles at does not (so A31-39 prints the point, not the count).
+Newton's step count follows vol5_rules.erc exactly (the same start, y_i = 1 / sqrt(S_ii) rescaled so that
+y'S y = 1/N; Armijo backtracking while max |y_i (S y)_i - b_i| > 1e-6, stop below 1e-13). Inverse-volatility (IV) weights are
 proportional to 1 / sqrt(S_ii); HRP's inverse-variance weights inside a cluster to 1 / S_ii. HRP (Lopez de Prado
 2016): d_ij = sqrt((1 - rho_ij) / 2); the column distance ||d_i - d_j|| (Euclidean, over the N entries of each column
 of the distance matrix); single linkage; the quasi-diagonal order; recursive bisection of the ordered list, the first
@@ -390,8 +394,28 @@ with warnings.catch_warnings():
                                link(dist(fr.X[rw - WINDOW:rw])[1]), rtol=0, atol=1e-12) for _, _, rw in sch)
     du, ddu = dist(u.X)
     same_u = np.allclose(np.asarray(linkage(du, method="single")), link(ddu), rtol=0, atol=1e-12)
+asym, asym_nz, diag_nz, rejects, accepts = 0.0, False, False, False, True
+for _, _, rw in sch:
+    xx = fr.X[rw - WINDOW:rw]
+    Cr = np.corrcoef(xx, rowvar=False)
+    asym = max(asym, float(np.abs(Cr - Cr.T).max()))
+    asym_nz = asym_nz or bool((Cr != Cr.T).any())
+    with np.errstate(invalid="ignore"):
+        Dr = np.sqrt((1 - Cr) / 2)
+    diag_nz = diag_nz or bool((np.diag(Dr) != 0).any())
+    try:
+        squareform(Dr, checks=True)
+    except ValueError:
+        rejects = True
+    try:
+        squareform(dist(xx)[1], checks=True)
+    except ValueError:
+        accepts = False
 put(f"the author's code (SciPy linkage on the square matrix d, read as observations) gives the column-distance tree: "
-    f"all {len(sch)} E5 windows {same_obs}; U28 {same_u}")                                                  # 19
+    f"all {len(sch)} E5 windows {same_obs}; U28 {same_u}; np.corrcoef over the {len(sch)} windows: largest asymmetry "
+    f"max |C - C.T| {bound(asym)} (nonzero at some window {asym_nz}); the diagonal of sqrt((1 - C)/2) not exactly 0 "
+    f"at some window {diag_nz}; squareform's checks reject sqrt((1 - C)/2) at some window {rejects} and accept the "
+    f"symmetrized column distance with a zero diagonal at all {len(sch)} {accepts}")                         # 19
 diff_order = 0
 wdiff, wdiff_at = 0.0, ""
 for k, (sg, _, rw) in enumerate(sch):
@@ -602,7 +626,7 @@ put(f"widget start (first window, 0050, 00679B, 00642U): vols {fl(100 * vw, 1)}%
     f"{fl(ivw, 4)}, shares {fl(100 * shares(ivw, Sw), 1)}%; 1/3 each: shares "
     f"{fl(100 * shares(np.full(3, 1 / 3), Sw), 1)}%; Jacobi from 1/3 (annualized S; stopped when max |w_(k+1) - w_k| "
     f"< 1e-12): "
-    + (f"settles after {jit} steps at {fl(jw, 1)} (shares {fl(shares(jw, Sw), 3)}), not ERC" if jit > 0
+    + (f"settles at {fl(jw, 1)} (shares {fl(shares(jw, Sw), 3)}), not ERC" if jit > 0
        else "does not settle in 10,000 steps"))                                                              # 39
 
 # ---------------------------------------------------------------- problems

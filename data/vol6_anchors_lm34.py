@@ -1,5 +1,12 @@
 """LM34 anchors (Backtesting Without Fooling Yourself): every number the Stage 1 brief quotes (2026-10-24, third revision;
-last pass 2026-10-25).
+last pass 2026-10-25; fresh check of the whole of Stage 1, 2026-10-31).
+
+The fresh check (2026-10-31) changed: A34-16 and A34-17 trade at the close after the signal's close (section 2's
+protocol), and A34-16 also prints E5's slip, the scale traded at its own close; A34-17 adds the held growth at 2.07,
+half of the printed root; A34-24 and A34-32 flag the block-length estimates at 0 decimals; f() tests the boundary on
+the exact decimal of repr(x); A34-26 prints the lab's every-12th-signal trades and the OSQP gap as a bound; A34-33
+prints the Monte Carlo SEs of the two means and (21.9)'s mean of the maximum; A34-38 (new) is the through case's
+growth at r_f = 0 and 2%.
 
 Reads only data/processed/*.parquet through the shared builders, plus the registered raw files named here (run the
 builders first):
@@ -27,14 +34,16 @@ first purchase per year (summary()). A rule's Sharpe ratio, volatility, VaR and 
 (LM33, LM30-LM31, LM32) and are not printed; the cost arithmetic of a single trade is LM27's and is echoed. The PBO
 grid (declared before it was computed; the brief's "PBO grid") reuses signals() with vol5_rules.WINDOW set to 126, 252
 or 504 for the call and restored after it, and keeps the through case's schedule from its first signal; a k-month
-configuration trades at signals 1, 1 + k, 1 + 2k, ... TR23's statistics use r_f = 0 (Volume IV), except one
-sensitivity of the Kelly walk-forward that charges BORROW on the exposure above 1.
+configuration trades at signals 1, 1 + k, 1 + 2k, ... A34-38 sets vol5_rules.RF to 0 and 0.02 for the call in the
+same way and restores it. TR23's statistics use r_f = 0 (Volume IV), except one sensitivity of the Kelly walk-forward
+that charges BORROW on the exposure above 1; TR23's rules follow section 2's protocol: a signal set at a close is
+traded at the next close, so it first earns the return of the session after that.
 Block lengths follow LM22's rule (lm22.md:254): the largest stationary Politis-White estimate among the squared
 demeaned series the statistic involves, rounded; for a comparison with R1, the differences from R1.
 Quantiles and medians: inverted_cdf. Counts against a threshold use the guard EPS = 1e-12.
 Simulation (AUTHORING section 8): one generator per experiment, np.random.default_rng([e, 20261011]):
   e = 1  the reality check on Experiment 10 (stationary bootstrap, mean block length 145 by LM22's rule on the 10,000
-         rules' returns, as LM22's TR23 length, drawn by LM22's stationary_idx, lm22.md:372-380; B_RC resamples in
+         rules' squared demeaned returns, as LM22's TR23 length, drawn by LM22's stationary_idx, lm22.md:372-380; B_RC resamples in
          batches of 1,000);
   e = 2  noise strategies under CSCV (Model): N_NOISE panels of 60 iid normal strategies on the grid's evaluation days,
          each panel one draw standard_normal((1851, 60)) x 0.01 (rows days, columns strategies), the panels in
@@ -46,14 +55,17 @@ Simulation (AUTHORING section 8): one generator per experiment, np.random.defaul
          on the 59 differences from R1);
   e = 5  the same at ELL_SENS = 17, R1 monthly's own Politis-White length, rounded (the editor's sensitivity).
 LM21's Experiment 10 keeps LM21's generator default_rng([10, 20261011]). A Monte Carlo proportion's standard error is
-sqrt(p (1 - p) / B).
+sqrt(p (1 - p) / B); the SE of a Monte Carlo mean is the SD of the panel values (divisor the panel count) over the
+square root of that count.
 
 Rounding flags. Every number the brief prints passes through f(x, k1, k2, ...), which shows x with max(k) + 3 decimals
 and flags it "NEAR" for each printed precision k at which x lies within a tenth of a last-digit unit of a rounding
-boundary (|frac(10^k |x|) - 0.5| < 0.1). The brief prints a flagged value as rounded from the unrounded value here.
+boundary (|frac(10^k |x|) - 0.5| < 0.1, computed on the exact decimal of repr(x), so that a value such as 0.3754 is
+not flagged by binary rounding). The brief prints a flagged value as rounded from the unrounded value here.
 
 Prints one line per anchor, "A34-NN <value>", in ID order (A34-21 is withdrawn and keeps its ID; A34-37, problem 10's
-means of X5's printed factors, was added by the third revision and prints last), and writes nothing.
+means of X5's printed factors, was added by the third revision, and A34-38, the paths at r_f = 0 and 2%, by the fresh
+check; they print last), and writes nothing.
 
 Run:  PYTHONUTF8=1 uv run python data/vol6_anchors_lm34.py
 """
@@ -64,7 +76,7 @@ from dataclasses import dataclass
 from datetime import date
 from decimal import Decimal
 from itertools import combinations
-from math import comb, floor, log, sqrt
+from math import comb, log, sqrt
 from pathlib import Path
 
 import cvxpy as cp
@@ -74,7 +86,7 @@ import vol5_rules as V
 from arch.bootstrap import optimal_block_length
 from numpy.lib.stride_tricks import sliding_window_view
 from numpy.typing import NDArray
-from scipy import stats
+from scipy import integrate, stats
 from scipy.optimize import brentq
 from vol5_series import Frames, frames, ohlc
 
@@ -121,8 +133,8 @@ def f(x: float, *ks: int, plus: bool = False) -> str:
     """x with max(ks) + 3 decimals; flagged for each printed precision k within 0.1 of a last-digit unit of a boundary."""
     x = float(x)
     for k in ks:
-        u = abs(x) * 10**k
-        if abs(u - floor(u) - 0.5) < 0.1:
+        u = abs(Decimal(repr(x))) * 10**k        # the exact decimal of the printed float, not its binary product
+        if abs(u - int(u) - Decimal("0.5")) < Decimal("0.1"):
             NEAR.append(f"{x:.{k + 3}f} at {k} dp")
     return f"{x:{'+' if plus else ''}.{max(ks) + 3}f}"
 
@@ -336,8 +348,9 @@ def tr23() -> tuple[Vec, list[str]]:
 
 
 def vol_scale(R: Vec, TD: list[str]) -> None:
-    """A daily volatility scale min(1.5, sigma_bar_t / sigma_{t+1|t}) set at the previous close or at the same close.
-    As R8 (vol5_rules.signals): sigma_bar_t^2 is the uncentred mean square of the 504 returns through t, and
+    """A daily volatility scale min(1.5, sigma_bar_t / sigma_{t+1|t}) set at the close of t and traded at the close of
+    t + 1, so that it scales R_{t+2} (section 2's protocol); against it, the same scale applied to R_t itself (peeking)
+    and traded at its own close, scaling R_{t+1} (E5's slip), all three on the honest version's days. As R8 (vol5_rules.signals): sigma_bar_t^2 is the uncentred mean square of the 504 returns through t, and
     sigma^2_{t+1|t} is (26.2) with lambda 0.94 run through those 504 returns from the start value sigma_bar_t^2."""
     T, W, lam = len(R), 504, V.LAM
     win = sliding_window_view(R**2, W)            # win[j] holds R^2 at t - W + 1 .. t, t = j + W - 1
@@ -352,11 +365,13 @@ def vol_scale(R: Vec, TD: list[str]) -> None:
         assert abs(s2 - ew[t]) <= 1e-12 * s2, (TD[t], s2, ew[t])
     scale = np.minimum(1.5, np.sqrt(sbar2 / ew))  # known at the close of t
     honest = np.full(T, np.nan)
-    honest[W:] = scale[W - 1:-1]                  # day t uses the scale set at the close of t - 1
+    honest[W + 1:] = scale[W - 1:-2]              # section 2: set at the close of t - 2, traded at t - 1, earns R_t
+    slip = np.full(T, np.nan)
+    slip[W:] = scale[W - 1:-1]                    # E5's slip: traded at the close it is set (t - 1), earns R_t
     peek = np.full(T, np.nan)
     peek[W:] = scale[W:]                          # day t uses the scale that already knows R_t
-    ok = ~np.isnan(honest)
-    yrs = years(TD[W - 1], TD[-1])
+    ok = ~np.isnan(honest)                        # all three versions on the honest version's days
+    yrs = years(TD[W], TD[-1])
     A = int(ok.sum()) / yrs
 
     def run(lv: Vec) -> tuple[float, float, float]:
@@ -367,12 +382,16 @@ def vol_scale(R: Vec, TD: list[str]) -> None:
     i7 = TD.index("2025-04-07")
     gh, vh, mh = run(honest)
     gp, vp, mp = run(peek)
+    gs = run(slip)[0]
+    first = int(np.flatnonzero(ok)[0])
+    assert first == W + 1
     put(f"TR23 (total-return index) volatility scale, as R8: daily simple returns in decimals, 504-return uncentred "
         f"window, (26.2) with lambda 0.94 run through each window from its sigma_bar^2, cap 1.5, cash and borrowing "
-        f"at 0: {int(ok.sum())} days {TD[W]} .. {TD[-1]} ({f(yrs, 2)} years, calendar days / 365.25 from the close of "
-        f"{TD[W - 1]}, the close before the first return; A {f(A, 2)} sessions a year); set at "
-        f"the previous close: growth {f(gh, 3, 4)}, volatility {f(vh, 3, 4)}, worst day {f(mh, 4)}; using the same "
-        f"day's close: growth {f(gp, 3, 4)}, volatility {f(vp, 3, 4)}, worst day {f(mp, 4)}; 2025-04-07 (R "
+        f"at 0: {int(ok.sum())} days {TD[first]} .. {TD[-1]} ({f(yrs, 2)} years, calendar days / 365.25 from the "
+        f"close of {TD[first - 1]}, the close before the first return; A {f(A, 2)} sessions a year); set at a close "
+        f"and traded at the next close (section 2): growth {f(gh, 3, 4)}, volatility {f(vh, 3, 4)}, worst day "
+        f"{f(mh, 4)}; using the same day's close: growth {f(gp, 3, 4)}, volatility {f(vp, 3, 4)}, worst day "
+        f"{f(mp, 4)}; traded at the close it is set (E5's slip): growth {f(gs, 3, 4)}; 2025-04-07 (R "
         f"{f(R[i7], 4)}): scale {f(honest[i7], 3)} against {f(peek[i7], 3)}, the scaled return "
         f"{f(honest[i7] * R[i7], 4)} against {f(peek[i7] * R[i7], 4)}; TR23 itself on these days: growth "
         f"{f(float(np.log1p(R[ok]).sum() / yrs), 3, 4)}, volatility {f(float(R[ok].std() * sqrt(A)), 3, 4)}")  # 16
@@ -384,7 +403,9 @@ def kelly_root(x: Vec) -> float:
 
 
 def kelly_walk(R: Vec, TD: list[str]) -> None:
-    """LM4's lab exercise on TR23: the root of (4.5) on the trailing 729 returns, capped to [0, 3], held a month."""
+    """LM4's lab exercise on TR23: the root of (4.5) on the trailing 729 returns at a month-end, capped to [0, 3],
+    traded at the next close (section 2's protocol, a session later than Lab 4's scaffold) and held to the close after
+    the next month-end."""
     T, W = len(R), 729
     ends = [i for i in range(T - 1) if TD[i][:7] != TD[i + 1][:7] and i >= W - 1]
     lev = np.full(T, np.nan)
@@ -392,10 +413,11 @@ def kelly_walk(R: Vec, TD: list[str]) -> None:
     for k, e in enumerate(ends):
         v = min(max(kelly_root(R[e - W + 1:e + 1]), 0.0), 3.0)
         fs.append(v)
-        nxt = ends[k + 1] if k + 1 < len(ends) else T - 1
-        lev[e + 1:nxt + 1] = v
+        stop = ends[k + 1] + 2 if k + 1 < len(ends) else T     # the last root is held to the last close
+        lev[e + 2:stop] = v
     mk = ~np.isnan(lev)
-    yk = years(TD[ends[0]], TD[-1])
+    assert int(np.flatnonzero(mk)[0]) == ends[0] + 2
+    yk = years(TD[ends[0] + 1], TD[-1])
     full = kelly_root(R)
 
     def grow(x: Vec) -> float:
@@ -409,8 +431,9 @@ def kelly_walk(R: Vec, TD: list[str]) -> None:
         return lv * R[mk] - np.maximum(lv - 1, 0.0) * BORROW / ak
 
     put(f"Kelly walk-forward on TR23 (total-return index): {len(ends)} calendar month-ends {TD[ends[0]]} .. "
-        f"{TD[ends[-1]]}, window {W} returns, root of (4.5) capped to [0, 3]; {int(mk.sum())} days ({f(yk, 2)} years, "
-        f"calendar days / 365.25 from the close of {TD[ends[0]]}, the close before the first return); mean of the "
+        f"{TD[ends[-1]]}, window {W} returns, root of (4.5) capped to [0, 3], traded at the next close (section 2); "
+        f"{int(mk.sum())} days ({f(yk, 2)} years, "
+        f"calendar days / 365.25 from the close of {TD[ends[0] + 1]}, the close before the first return); mean of the "
         f"{len(fs)} month-end leverages {f(float(np.mean(fs)), 2)}, at the cap "
         f"{sum(v >= 3 - EPS for v in fs)} month-ends, at 0 "
         f"{sum(v <= EPS for v in fs)}; growth {f(grow(lev[mk] * R[mk]), 3, 4)}; f = 1: {f(grow(R[mk]), 3, 4)}; the "
@@ -419,7 +442,8 @@ def kelly_walk(R: Vec, TD: list[str]) -> None:
         f"(accrued over A_k = {f(ak, 2)} sessions a year; cash at 0): walk-forward {f(grow(fin(lev[mk])), 3, 4)}, "
         f"full-sample root {f(grow(fin(np.full(int(mk.sum()), full))), 3, 4)}; at the root as lm22.md:125 prints "
         f"it, {F_LM22:.2f}: held {f(grow(F_LM22 * R[mk]), 3, 4)}, with borrowing "
-        f"{f(grow(fin(np.full(int(mk.sum()), F_LM22))), 3, 4)}")                                          # 17
+        f"{f(grow(fin(np.full(int(mk.sum()), F_LM22))), 3, 4)}; half of it, {F_LM22 / 2:.2f}: held "
+        f"{f(grow(F_LM22 / 2 * R[mk]), 3, 4)}")                                                          # 17
 
 
 # ================================================================ survivorship (registered: data/raw/vol6/)
@@ -527,6 +551,37 @@ def printed_factors() -> None:
         f"ln({f(s4, 4)} / {f(a6, 4)}) / {f(y, 4)} = {f(log(s4 / a6) / y, 3, 4)} a year")                    # 37
 
 
+@contextmanager
+def risk_free(r: float) -> Generator[None]:
+    """vol5_rules with RF = r and the grid's cross-check, both restored on exit (as window())."""
+    old = V.RF
+    setattr(V, "RF", r)  # noqa: B010
+    setattr(V, "cvx_check", cvx_check_grid)  # noqa: B010
+    try:
+        yield
+    finally:
+        setattr(V, "RF", old)  # noqa: B010
+        setattr(V, "cvx_check", ORIG_CHECK)  # noqa: B010
+
+
+def rf_paths(case: Case) -> None:
+    """The shared decision "Risk-free rate" for the rules' paths: the through case at r_f = 0 and 2% (A34-38). Only
+    R4's excess means and R8's cash and borrowing use r_f; the other six rules must move by less than 1e-15."""
+    fr, rules = case.fr, V.RULES
+    base = {k: num(V.summary(fr, case.paths[k]), "growth") for k in rules}
+    parts = []
+    for r in (0.0, 0.02):
+        with risk_free(r):
+            sg = V.signals(fr, [])
+            g = {k: num(V.summary(fr, V.wealth_path(fr, sg, k)), "growth") for k in rules}
+        assert all(abs(g[k] - base[k]) < 1e-15 for k in rules if k not in ("R4", "R8")), r
+        parts.append(f"r_f {r:g}: R4 {f(g['R4'], 3, 4)}, R8 {f(g['R8'], 3, 4)} (change "
+                     f"{f(g['R4'] - base['R4'], 4, plus=True)}, {f(g['R8'] - base['R8'], 4, plus=True)}), ranked "
+                     + " > ".join(sorted(rules, key=lambda k: -g[k])))
+    put("r_f in the paths, set for the call and restored (R4's excess means; R8's cash at r_f and borrowing at r_f + 2 "
+        "points; the other six rules move by less than 1e-15): " + "; ".join(parts))                      # 38
+
+
 # ================================================================ LM21's Experiment 10 and the reality check
 def reality_check(R: Vec) -> None:
     T, M = len(R), 10_000
@@ -580,7 +635,7 @@ def reality_check(R: Vec) -> None:
     pc_strict = float((np.maximum(mc, 0.0) > max(float(tt[best]), 0.0) + EPS).mean())    # Hansen's count, p. 372
     q95 = float(np.quantile(mt, 0.95, method="inverted_cdf"))
     put(f"reality check, experiment 1 (stationary bootstrap, mean block {ELL_TR23}, B = {B_RC}; LM22's rule on the "
-        f"10,000 rules' squared demeaned returns: largest {f(float(pw.max()), 2)} (rule {int(pw.argmax()) + 1}), "
+        f"10,000 rules' squared demeaned returns: largest {f(float(pw.max()), 0, 2)} (rule {int(pw.argmax()) + 1}), "
         f"smallest {f(float(pw.min()), 2)}, TR23's own {f(pw_stationary(R), 2)}): White's statistic max of sqrt(T) x "
         f"mean = {f(Vw * 100, 4)} percent, p-value {f(pw_, 3)} (MC SE {f(sqrt(pw_ * (1 - pw_) / B_RC), 3, 4)}); the "
         f"best rule by mean is the best by t-stat: {int(np.argmax(dbar)) == best}")                         # 24
@@ -609,8 +664,8 @@ def cvx_check_grid(S: Mat, a: Vec, exact: Vec, label: str) -> tuple[float, float
         assert prob.status == "optimal" and y.value is not None
         yv = np.asarray(y.value, dtype=float)
         gap = float(np.abs(yv / yv.sum() - exact).max())
-        assert gap <= V.OSQP_TOL, (label, gap)
-        SKIPPED.append(f"{label} (window {V.WINDOW}; OSQP gap {gap:.1e})")
+        assert gap <= V.OSQP_TOL and gap < 1e-15, (label, gap)
+        SKIPPED.append(f"{label} (window {V.WINDOW}; OSQP gap below 1e-15, floating-point noise, {gap:.1e} in this run)")
         return gap, float("nan")
 
 
@@ -686,7 +741,8 @@ def pbo_grid(case: Case) -> int:
     order = list(np.argsort(-np.array(growth), kind="stable"))
     put(f"grid: {n} configurations (R1, R2 x 3 frequencies; R3-R8 x windows 126, 252, 504 x frequencies 1, 3, 6 "
         f"month-end signals); {Tg} daily net returns {case.paths['R1'].dates[1]} .. {case.paths['R1'].dates[-1]}; "
-        f"trades per frequency {len(sigs)}, {len(sigs[::3])}, {len(sigs[::6])}; R4 holds R3 (no window mean above "
+        f"trades per frequency {len(sigs)}, {len(sigs[::3])}, {len(sigs[::6])} (every 12th signal, the lab's "
+        f"extension: {len(sigs[::12])}, {sigs[::12][0].signal} .. {sigs[::12][-1].signal}); R4 holds R3 (no window mean above "
         f"r_f / A) at {len(fallback)} signals (window, signal: {'; '.join(fallback)}); CLARABEL cross-checks that "
         f"failed (OSQP checked instead): {len(SKIPPED)} ({'; '.join(SKIPPED)})")                          # 26
     tcase = [name.index(f"{k} {'-' if k in ('R1', 'R2') else 504} 1m") for k in rules]
@@ -750,14 +806,14 @@ def pbo_grid(case: Case) -> int:
     iu = np.triu_indices(len(oth), 1)
     p1 = float(stats.norm.sf(tg[jb]))
     put(f"reality check on the grid against R1 monthly (experiment 4, B = {B_RC}, mean block {ell:.0f}, LM22's rule on "
-        f"the {len(oth)} differences from R1 monthly (squared demeaned): largest {f(pwd[jpw], 2)} ({name[oth[jpw]]} "
+        f"the {len(oth)} differences from R1 monthly (squared demeaned): largest {f(pwd[jpw], 0, 2)} ({name[oth[jpw]]} "
         f"minus R1), smallest {f(min(pwd), 2)}): best t-stat {name[oth[jb]]} {f(tg[jb], 2, 3)}; "
         f"one-sided normal p {f(p1, 4)}, Bonferroni x {len(oth)} {f(min(1.0, len(oth) * p1), 3)}; reality-check p "
         f"{f(pg, 3)} (MC SE {f(sqrt(pg * (1 - pg) / B_RC), 3, 4)}); bootstrap 95% quantile of the max t-stat "
         f"{f(float(np.quantile(mx, 0.95, method='inverted_cdf')), 2)} against Bonferroni's "
         f"{f(float(stats.norm.isf(0.05 / len(oth))), 2)}; correlations of the {len(oth)} differences: median "
         f"{f(median_ic(cg[iu]), 2)}, min {f(float(cg[iu].min()), 2)}; sensitivity (experiment 5, mean block "
-        f"{ELL_SENS}, R1 monthly's own estimate {f(pw_r1, 2)} rounded): reality-check p {f(pg1, 3)} (MC SE "
+        f"{ELL_SENS}, R1 monthly's own estimate {f(pw_r1, 0, 2)} rounded): reality-check p {f(pg1, 3)} (MC SE "
         f"{f(sqrt(pg1 * (1 - pg1) / B_RC), 3, 4)}), bootstrap 95% quantile "
         f"{f(float(np.quantile(mx1, 0.95, method='inverted_cdf')), 2)}")                                    # 32
     return Tg
@@ -774,12 +830,17 @@ def noise(Tg: int, aw: float) -> None:
         a_is.append(float(is_.mean()) * sqrt(aw))
         a_oos.append(float(oos.mean()) * sqrt(aw))
     mp, sp = float(np.mean(pb)), float(np.std(pb, ddof=0)) / sqrt(N_NOISE)
+    se_is, se_oos = (float(np.std(v, ddof=0)) / sqrt(N_NOISE) for v in (a_is, a_oos))
     half = (Tg // BLOCKS) * BLOCKS // 2
+    # (21.9)'s mean of the maximum of n standard normals: the integral of z n phi(z) Phi(z)^(n - 1)
+    mean_max = float(integrate.quad(lambda z: z * n * stats.norm.pdf(z) * stats.norm.cdf(z) ** (n - 1), -10, 10)[0])
     put(f"noise (experiment 2, Model): {N_NOISE} panels of {n} iid normal strategies with mean 0, {Tg} days: PBO mean "
         f"{f(mp, 3)} (SE {f(sp, 3)}), range {f(min(pb), 2, 3)} .. {f(max(pb), 2, 3)}; the in-sample best's annualized "
-        f"Sharpe ratio, mean over panels: {f(float(np.mean(a_is)), 2)} in sample, {f(float(np.mean(a_oos)), 3)} out "
+        f"Sharpe ratio, mean over panels: {f(float(np.mean(a_is)), 2)} (SE {f(se_is, 3)}) in sample, "
+        f"{f(float(np.mean(a_oos)), 3)} (SE {f(se_oos, 3)}) out "
         f"of sample; (21.9)'s median of the max of {n} standard normals times sqrt(A_w / {half}): "
-        f"{f(float(stats.norm.ppf(0.5 ** (1 / n))) * sqrt(aw / half), 2)}")                                # 33
+        f"{f(float(stats.norm.ppf(0.5 ** (1 / n))) * sqrt(aw / half), 2)}, its mean "
+        f"{f(mean_max * sqrt(aw / half), 2)}")                                                               # 33
     g3 = rng(3)
     out: dict[tuple[int, float], tuple[float, float]] = {}
     for k in (2, 5, 10, 20, 60, 100):
@@ -833,6 +894,7 @@ def main() -> None:
     noise(Tg, case.fr.A_wealth)
     same_close(case)
     printed_factors()
+    rf_paths(case)
     for line in OUT:
         print(line)
 

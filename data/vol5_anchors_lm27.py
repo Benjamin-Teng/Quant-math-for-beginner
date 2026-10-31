@@ -6,7 +6,12 @@ from closes (decision C7), Problem 1's flag, A27-46's comparison and the funds' 
 on 2026-10-25 to the last verification and plans/vol-5.md, "Decisions on the third revision": A27-11's two gap
 statements are scoped to the five pairs the brief shows, with the figures over all ten pairs beside them, and its
 00679B-00642U gap is marked as computed from the unrounded correlations; A27-46 is withdrawn, since the shared
-decision's note that it checked is dropped; its ID is kept so that later IDs do not move).
+decision's note that it checked is dropped; its ID is kept so that later IDs do not move). The fresh check of the
+whole of Stage 1 (2026-10-31) changed six rows and no earlier value: A27-05 flags exp(mean log) - 1 at four decimals;
+A27-16 adds the variance terms from the printed volatilities and 132.09 (the brief says E7's come from unrounded
+inputs); A27-20 and A27-45 count against their thresholds with the guard 1e-12 (plans/vol-5.md, "Counting") and print
+the smallest margin; A27-22 prints all five MRCs of the window (KC section 7); A27-23 says the cost is over the
+pre-trade wealth; A27-39 adds Problem 10's hypothetical means, mu_p, w's and the ratio (27.7).
 
 Reads only data/processed/*.parquet, through the shared builders (run them first; this script runs neither):
   * E5 (plans/vol-5.md, "Data"): vol5_series.frames("E5"), which reads data/processed/vol5_frames.parquet (built and
@@ -199,7 +204,7 @@ j0, j1 = p1.dates.index("2025-06-10"), p1.dates.index("2025-06-18")
 r1_span = float(p1.wealth[j1] / p1.wealth[j0] - 1)
 put("2025-06-10 -> 2025-06-18 (6 sessions of the wealth frame): fund returns "
     + ", ".join(f"{s} {f(100 * (float(g) - 1), 2, 3, plus=True)}%" for s, g in zip(F, G_span, strict=True))
-    + f"; 1/N bought at the 06-10 close {f(100 * eq_span, 2, 3)}%; exp(mean log) - 1 {f(100 * log_avg, 2)}% "
+    + f"; 1/N bought at the 06-10 close {f(100 * eq_span, 2, 3)}%; exp(mean log) - 1 {f(100 * log_avg, 2, 4)}% "
     f"(mean log {f(log_sum, 4, 5)}; exp(0.02524) - 1 = {f(100 * (np.exp(0.02524) - 1), 2, 3)}%); R1 (wealth path) "
     f"{f(100 * r1_span, 2, 1)}%")                                                                          # 05
 gw, ge = np.prod(1 + fr.W, axis=0), np.prod(1 + fr.X, axis=0)
@@ -351,9 +356,16 @@ put(f"R1 MRC {fl(100 * m1, 2)}% ; RC {fl(100 * rc1, 2)}% (sum {f(100 * rc1.sum()
     f" (sum {f(100 * sh1.sum(), 1)}%)")                                                                   # 15
 stand = w1 * vol / sw
 vterm = w1**2 * np.diag(SA) / sp1**2
+# the same terms from the printed inputs (A27-08's two-decimal volatilities, s_p^2 = 132.09 from A27-13's 11.493%):
+# they do not give E7's three-decimal digits, so the brief says those come from unrounded inputs
+vol_pr = np.round(100 * vol, 2)
+var_pr = round(round(100 * sp1, 3) ** 2, 2)
+assert var_pr == 132.09
+vterm_pr = 100 * w1**2 * vol_pr**2 / var_pr
 put(f"R1 other splits: stand-alone w_i s_i / w's {fl(100 * stand, 1)}%; variance terms w_i^2 s_i^2 / s_p^2 "
     f"{fl(100 * vterm, 1, 3)}% (sum {f(100 * vterm.sum(), 1, 3)}%; the three-decimal parts sum to "
-    f"{sum(round(100 * float(v), 3) for v in vterm):.3f})")                                                # 16
+    f"{sum(round(100 * float(v), 3) for v in vterm):.3f}); from the printed volatilities (two decimals) and "
+    f"{var_pr:.2f}: {fl(vterm_pr, 3)}% (sum {f(float(vterm_pr.sum()), 3)}%)")                                # 16
 w2 = np.array([R2[s] for s in F])
 sp2, b2, m2, rc2, sh2 = split(SA, w2)
 put(f"R2 weights {fl(100 * w2, 0)}%: s_p {f(100 * sp2, 2)}%; w's {f(100 * float(w2 @ vol), 2)}%; ratio "
@@ -380,7 +392,11 @@ for _, _, n_rows in sch:
     x = X[n_rows - WINDOW:n_rows]
     shw.append(split(cov0(x), w1)[4])
 SH = np.array(shw)
-kneg = [k for k in range(len(sch)) if SH[k, J["00679B"]] < 0]
+GUARD = 1e-12                                 # counting guard (plans/vol-5.md, "Counting"); margins printed
+kneg = [k for k in range(len(sch)) if SH[k, J["00679B"]] < -GUARD]
+k_m79 = int(np.abs(SH[:, J["00679B"]]).argmin())
+m79 = float(abs(SH[k_m79, J["00679B"]]))
+assert m79 > GUARD
 neg = [sch[k][0] for k in kneg]
 kneg_last = kneg[-1]
 span_n = kneg[-1] - kneg[0] + 1
@@ -392,7 +408,8 @@ put(f"{len(sch)} windows of {WINDOW} rows (signals {sch[0][0]} .. {sch[-1][0]});
     f"00679B negative in {len(neg)} windows ({neg[0]} .. {neg[-1]}), lowest {f(100 * SH[:, J['00679B']].min(), 2)}% "
     f"({sch[int(SH[:, J['00679B']].argmin())][0]}), highest {f(100 * SH[:, J['00679B']].max(), 1)}%; "
     f"{span_n} windows from {neg[0]} to {neg[-1]}, the last negative share {f(100 * SH[kneg_last, J['00679B']], 4)}%; "
-    f"below -0.01% in {len(neg_1bp)} windows, the last {neg_1bp[-1]}")                                    # 20
+    f"below -0.01% in {len(neg_1bp)} windows, the last {neg_1bp[-1]}; counted with the guard 1e-12, smallest "
+    f"|00679B share| {f(100 * m79, 4)}% ({sch[k_m79][0]})")                                                # 20
 first_rows = sch[0][2]
 put(f"first window {fr.est_dates[first_rows - WINDOW]} .. {fr.est_dates[first_rows - 1]}: R1 shares "
     f"{fl(100 * SH[0], 1)}%")                                                                              # 21
@@ -405,7 +422,9 @@ vn2 = sqrt(float((w1 + dlt) @ Sn @ (w1 + dlt)))
 put(f"window through {sch[kmin][0]} ({fr.est_dates[sch[kmin][2] - WINDOW]} .. {fr.est_dates[sch[kmin][2] - 1]}): "
     f"R1 s_p {f(100 * spn, 2)}%; 00679B corr with the book {f(rho_b, 3)}, beta_(i,p) {f(bn[J['00679B']], 3, 4)}, MRC "
     f"{f(100 * mn[J['00679B']], 2)}%, share {f(100 * shn[J['00679B']], 2)}%; 00642U share "
-    f"{f(100 * shn[k6], 1)}%; 5 points from 00642U to 00679B: s_p -> {f(100 * vn2, 2)}%")               # 22
+    f"{f(100 * shn[k6], 1)}%; 5 points from 00642U to 00679B: s_p -> {f(100 * vn2, 2)}%; MRC by fund "
+    f"{fl(100 * mn, 2)}% (every fund but 00679B positive)")                                              # 22
+assert all(mn[j] > 0 for j in range(N) if j != J["00679B"]) and mn[J["00679B"]] < 0
 
 # ---------------------------------------------------------------- the wealth recursion: R1's trades
 tax = np.array([TAX[s] for s in F])
@@ -413,7 +432,7 @@ t0 = p1.trades[0]
 W_first = 1 / (1 + COMMISSION)
 assert abs(p1.wealth[0] - W_first) < 1e-15 and abs(p2.wealth[0] - W_first) < 1e-15
 put(f"first purchase {t0.trade} (signal {t0.signal}): from cash 1, TO {f(t0.turnover, 2)}, W_post = 1 / (1 + 0.001425) "
-    f"{f(W_first, 6)}, cost {f(100 * t0.cost, 4, 2)}% of W; the same for R2")                             # 23
+    f"{f(W_first, 6)}, cost {f(100 * t0.cost, 4, 2)}% of W_pre; the same for R2")                             # 23
 reb = p1.trades[1:]
 to = np.array([t.turnover for t in reb])
 kbig = int(to.argmax())
@@ -549,8 +568,13 @@ put(f"P4: sigma (20%, 10%, 30%), rho12 0.2, rho13 0.6, rho23 -0.2, w (0.4, 0.4, 
 d3 = np.array([0.0, 0.05, -0.05])
 lin3 = float(d3 @ m3)
 ex3 = sqrt(float((w3 + d3) @ S3 @ (w3 + d3))) - sp3
-put(f"P10: same inputs, 5 points from asset 3 to asset 2: linear {f(100 * lin3, 2, 3)} points, exact "
-    f"{f(100 * ex3, 2, 3)} points; sigma_p -> {f(100 * (sp3 + ex3), 2)}%")                                 # 39
+mu3 = np.array([0.08, 0.04, 0.10])           # Problem 10's hypothetical annual means
+sw3 = float(w3 @ sd3)
+assert round(100 * sw3, 2) == 18.0 and round(100 * sp3, 2) == 13.30      # the printed inputs of the ratio
+put(f"P10: same inputs, with annual means (8%, 4%, 10%): mu_p {f(100 * float(w3 @ mu3), 2)}%; w's {f(100 * sw3, 2)}%; "
+    f"ratio w's / sigma_p {f(sw3 / sp3, 2)} (the printed 18 / 13.30 = {f(18 / 13.30, 2, 4)}); 5 points from asset 3 "
+    f"to asset 2: linear {f(100 * lin3, 2, 3)} points, exact {f(100 * ex3, 2, 3)} points; sigma_p -> "
+    f"{f(100 * (sp3 + ex3), 2)}%")                                                                         # 39
 r_m, se_m, _ = se_rho(Xm[:, 0], Xm[:, J["00646"]])
 r_st = round(r_m, 4)                          # the stem gives the correlation to four decimals
 put(f"P6: 0050-00646 monthly rho {f(r_m, 3, 4)} on T = {len(km)}; the stem's rho {r_st:.4f}: normal-theory SE "
@@ -579,11 +603,15 @@ sh2w = []
 for _, _, n_rows in sch:
     sh2w.append(split(cov0(X[n_rows - WINDOW:n_rows]), w2)[4])
 SH2 = np.array(sh2w)
-over = [sch[k][0] for k in range(len(sch)) if SH2[k, 0] > 0.70]
+over = [sch[k][0] for k in range(len(sch)) if SH2[k, 0] > 0.70 + GUARD]
+k_m70 = int(np.abs(SH2[:, 0] - 0.70).argmin())
+m70 = float(abs(SH2[k_m70, 0] - 0.70))
+assert m70 > GUARD
 put("R2's shares in the 92 windows: "
     + "; ".join(f"{s} {f(100 * SH2[:, j].min(), 1)}% ({sch[int(SH2[:, j].argmin())][0]}) to "
                 f"{f(100 * SH2[:, j].max(), 1)}% ({sch[int(SH2[:, j].argmax())][0]})" for j, s in enumerate(F[:4]))
-    + f"; 00642U 0 (weight 0); 0050 above 70% in {len(over)} windows ({over[0]} .. {over[-1]})")             # 45
+    + f"; 00642U 0 (weight 0); 0050 above 70% in {len(over)} windows ({over[0]} .. {over[-1]}), counted with the "
+    f"guard 1e-12, smallest |0050 share - 70%| {f(100 * m70, 3)} points ({sch[k_m70][0]})")                 # 45
 # A27-46 checked a parenthesis of the shared decision "Timing of E5" (its first figures, log returns with partial end
 # periods); the decisions on the third revision dropped that note, so the check has no object
 put("withdrawn (it checked the shared decision's note on its first figures, which the decisions on the third "

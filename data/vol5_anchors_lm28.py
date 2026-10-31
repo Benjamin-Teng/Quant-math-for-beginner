@@ -1,6 +1,10 @@
 """LM28 anchors (Mean-Variance Optimization): every number the Stage 1 brief quotes (drafted 2026-10-24; revised
 the same day to the editor's decisions on the briefs, on the first revision and on the second recomputation, and
-on 2026-10-25 to the decisions on the third revision, plans/vol-5.md).
+on 2026-10-25 to the decisions on the third revision, plans/vol-5.md). Fresh check of the whole of Stage 1
+(2026-10-31): A28-01 flags A_w at 3 dp as well; A28-18 adds mu_tan - mu_mv, two-fund separation's t for E3's
+efficient mean and the gap of E3's weights to w_mv + t (w_tan - w_mv); A28-31 adds the minimum volatility with the
+test volatilities and the window's correlations (and the reverse) and the held portfolios' wealth-frame volatilities
+on a common A; A28-33 prints CLARABEL's stationarity residual as a bound ("below 1e-13").
 
 Reads only data/processed/*.parquet, through the shared builders (run them first; this script runs neither):
   * E5 (plans/vol-5.md, "Data"): data/vol5_series.py's frames("E5"), which reads data/processed/vol5_frames.parquet:
@@ -28,7 +32,8 @@ sessions per year over E5: its one-session returns from the base close to 2026-1
 the first return. Weights print in percent; a weight with |w| < 1e-6 would print as 0 (none occurs). "Shorts" count
 weights below -1e-6. Gross exposure is the 1-norm of the weights. A residual at machine precision prints as "below
 1e-15" (its digits depend on the order of operations); a larger one prints with two significant digits, except an
-interior-point solver's weight gap, which prints as a bound ("below 1e-11") that a platform change cannot cross.
+interior-point solver's weight gap and stationarity residual, which print as bounds ("below 1e-11", "below 1e-13")
+that a platform change cannot cross.
 A28-46 adds, for every vector the brief prints at one decimal, the exact sum of its entries as printed (each rounded
 separately), so that the brief can say where the rounded parts do not add to the whole.
 
@@ -146,7 +151,7 @@ fr = frames("E5")
 F = fr.funds
 A, Aw = fr.A, fr.A_wealth
 put(f"estimation frame T {len(fr.est_dates)} ({fr.est_dates[0]} .. {fr.est_dates[-1]}), A {f(A, 2, 3)}; wealth frame "
-    f"{len(fr.wealth_dates)} sessions ({fr.wealth_dates[0]} .. {fr.wealth_dates[-1]}), A_w {f(Aw, 2)}; "
+    f"{len(fr.wealth_dates)} sessions ({fr.wealth_dates[0]} .. {fr.wealth_dates[-1]}), A_w {f(Aw, 2, 3)}; "
     f"years {f(fr.years, 4)}")                                                                           # 01
 sch = schedule(fr)
 sig, trade, rows = sch[0]
@@ -272,9 +277,14 @@ put(f"(28.4): weights move by {pct(0.01 * o.dir / o.srinf2, 1, 2, plus=True)} po
 sr = sqrt(o.sr2)
 st = sqrt(float(o.wtan @ S @ o.wtan))
 k_best = int(np.argmax((mu - RF) / sd))
+gtan = float(mu @ o.wtan) - o.mumv                              # mu_tan - mu_mv
+t_sep = (me - o.mumv) / gtan                                    # two-fund separation: E3's point on the w_mv-w_tan line
+sep_gap = float(np.abs(wme - (o.wmv + t_sep * (o.wtan - o.wmv))).max())
 put(f"1'Sigma^-1 e {f(o.den, 2, 3)} > 0 (mu_mv {f(100 * o.mumv, 2, 3)}% > r_f 1.5%); w_tan {pct(o.wtan)}%; mean "
     f"{f(100 * float(mu @ o.wtan), 2, 3)}%, vol {f(100 * st, 2, 3)}%; SR* {f(sr, 2, 3)}; gross {f(np.abs(o.wtan).sum(), 2)}; "
-    f"best single fund {F[k_best]} {f((mu[k_best] - RF) / sd[k_best], 2, 3)}")                          # 18
+    f"best single fund {F[k_best]} {f((mu[k_best] - RF) / sd[k_best], 2, 3)}; mu_tan - mu_mv {f(100 * gtan, 4)} points; "
+    f"E3's efficient weights = w_mv + t (w_tan - w_mv), t = (mu_p - mu_mv) / (mu_tan - mu_mv) {f(t_sep, 2, 3)} "
+    f"(max gap {tiny(sep_gap)})")                                                                        # 18
 put(f"(28.7): SR*^2 {f(o.sr2, 4)}; SR_inf^2 + ((mu_mv - r_f)/sigma_min)^2 {f(o.srinf2 + (o.mumv - RF) ** 2 / o.s2min, 4)}; "
     f"difference {tiny(o.sr2 - o.srinf2 - (o.mumv - RF) ** 2 / o.s2min)}; ((mu_mv - r_f)/sigma_min) "
     f"{f((o.mumv - RF) / sqrt(o.s2min), 3, 4)}")                                                          # 18 -> 19
@@ -358,15 +368,26 @@ for name, w in (("w_mv", o.wmv), ("w_tan", o.wtan)):
         f"realized vol / predicted {f(vol / pv, 2)}; (realized - predicted) / SE: vol {f((vol - pv) / se_v, 0, 1)}, "
         f"mean {f((float(r.mean()) * Aw - pm) / se_m, 1)}")                                              # 29, 30
 ot = Opt(A * Xt.mean(axis=0), St)
+
+
+def smin(S_: Mat) -> float:
+    """(28.2)'s sigma_min, by solving against 1."""
+    return 1 / sqrt(float(np.linalg.solve(S_, np.ones(len(S_))).sum()))
+
+
+cf_tv = smin(np.outer(sdt, sdt) * C)        # the test volatilities with the window's correlations
+cf_wv = smin(np.outer(sd, sd) * Ct)         # the window's volatilities with the test correlations
 parts = []
 for name, w in (("w_mv", o.wmv), ("w_tan", o.wtan)):
     dv = float((w - ot.wmv) @ St @ (w - ot.wmv))
     tot = float(w @ St @ w)
+    vol_a = float((Wt @ w).std(ddof=0)) * sqrt(A)                # wealth frame on the estimation frame's A (not printed)
     parts.append(f"{name}: weight-error term {f(dv, 5, 6)}, total {f(tot, 5, 6)} (check {tiny(ot.s2min + dv - tot)}), vol "
-                 f"{f(100 * sqrt(tot), 2)}% (wealth frame {f(100 * held[name][0], 2)}%), added by the weight error "
-                 f"{f(100 * (sqrt(tot) - sqrt(ot.s2min)), 2)} points")
+                 f"{f(100 * sqrt(tot), 2)}% (wealth frame {f(100 * held[name][0], 2)}%; on a common A {100 * vol_a:.5f}%), "
+                 f"added by the weight error {f(100 * (sqrt(tot) - sqrt(ot.s2min)), 2)} points")
 put(f"test period, estimation frame ({len(Xt)} rows): sigma_min^2 {f(ot.s2min, 5, 6)}, sigma_min {f(100 * sqrt(ot.s2min), 2)}% "
-    f"(window {f(100 * sqrt(o.s2min), 2)}%); " + "; ".join(parts))                                       # 31
+    f"(window {f(100 * sqrt(o.s2min), 2)}%; test vols with the window's correlations {f(100 * cf_tv, 2)}%, window vols "
+    f"with the test correlations {100 * cf_wv:.5f}%); " + "; ".join(parts))                              # 31
 put(f"test period ex post (in-sample on the test rows): w_mv {pct(ot.wmv)}%, mu_mv {f(100 * ot.mumv, 2)}%; w_tan "
     f"{pct(ot.wtan)}%, SR* {f(sqrt(ot.sr2), 2)}; 1'Sigma^-1 e {f(ot.den, 2)}; SR_inf {f(sqrt(ot.srinf2), 3)}")  # 32
 
@@ -386,9 +407,10 @@ for solver, opts in ((cp.OSQP, OSQP_OPTS), (cp.CLARABEL, CLARABEL_OPTS)):
     stat = np.abs(2 * S @ vv + K.T @ np.array([d0, d1])).max()     # KKT stationarity with cvxpy's duals: 2 S w + K' nu
     prim = np.abs(K @ vv - np.array([1.0, me])).max()              # primal feasibility
     wbound = 1e-11 if solver == cp.CLARABEL else 1e-15      # an interior-point gap prints as a bound
+    sbound = 1e-13 if solver == cp.CLARABEL else 1e-15      # and so does its stationarity residual
     duals.append(f"{solver} {opts} status {prob.status}, max weight gap {tiny(np.abs(vv - wl).max(), wbound)}, "
                  f"objective gap "
-                 f"{tiny((float(prob.value) - val) / val)}, KKT residuals: stationarity {tiny(stat)}, feasibility "
+                 f"{tiny((float(prob.value) - val) / val)}, KKT residuals: stationarity {tiny(stat, sbound)}, feasibility "
                  f"{tiny(prim)}; dual values {f(d0, 5, plus=True)} and {f(d1, 3, 4, plus=True)}")
 put(f"KKT system [2 Sigma, K'; K, 0][w; -lambda] = [0; b]: max |w - (28.1)| {tiny(np.abs(sol[:5] - wl).max())}, "
     f"max |w - (28.4)| {tiny(np.abs(sol[:5] - wme).max())}, -lambda {f(sol[5], 5, plus=True)}, "

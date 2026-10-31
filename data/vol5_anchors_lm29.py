@@ -1,6 +1,10 @@
 """LM29 anchors (Convex Optimization in Practice): every number the Stage 1 brief quotes (drafted 2026-10-24; revised
 the same day to the editor's decisions on the briefs, and again to the decisions on the first revision and on the
-second recomputation and cross-check, plans/vol-5.md).
+second recomputation and cross-check, plans/vol-5.md). The fresh check of the whole of Stage 1 (2026-10-31) adds A29-35
+(R4 and problem 11's 2-point optimum at r_f = 0 and 2%, the shared decision "Risk-free rate"), prints R3's variance
+lambda / 2 in A29-12, the 70 tangency windows in A29-07, both Problem.value and Variable.value in A29-18 and SciPy's
+version in A29-22, flags the volatility given up (bp) at its shown fourth decimal in A29-21, and names R4's equality
+e'y = 1 (not "the budget") in A29-25, A29-26 and A29-34 and sigma_p^2 in A29-28; no earlier value changes.
 
 Reads only data/processed/*.parquet, through the shared builders (run them first; this script runs neither):
   * E5 (plans/vol-5.md, "Data"): data/vol5_series.py's frames("E5"), which reads data/processed/vol5_frames.parquet:
@@ -18,7 +22,8 @@ Reads only data/processed/*.parquet, through the shared builders (run them first
     2008-12-02 .. 2026-10-08, A = 245.4794; halves of 2,191 returns, LM11's), covariance only.
 
 Conventions. Every optimization uses a window's annualized plug-in inputs, as the through case does: Sigma = A * cov0
-(divisor T, ddof=0) and e = A * (window mean) - r_f, with E5's estimation-frame A (U28's own A for U28). They are
+(vol5_rules.cov0: Xc' Xc / T from the window's centred daily returns Xc, in that order, LM10's (10.2); np.cov would
+change a solver gap's digits beyond the second significant one) and e = A * (window mean) - r_f, with E5's estimation-frame A (U28's own A for U28). They are
 in-sample estimates treated as known; every in-sample Sharpe ratio and volatility below is on its window's inputs, not
 a realized statistic. A weight with |w| < 1e-6 is 0 and prints as 0; a constraint is active when its slack is below
 1e-6. Solvers: cvxpy (fresh Problem every time, no warm start) with the book's tolerances (vol5_rules.OSQP_OPTS: OSQP
@@ -245,6 +250,7 @@ put(f"last signal R4 (long-only maximum Sharpe): {pc(w4L, 1, 2)}; in-sample Shar
     f"variance): {pc(w3L, 1)}; volatility {f(100 * vol(w3L, SL), 2)}%, in-sample Sharpe ratio {f(sr(w3L, SL, eL), 2)}")
 
 shorts, wrong, gross_u, held = 0, [], [], []
+tan_n, tan_short = 0, 0                               # the windows with 1'Sigma^-1 e > 0, where the formula is a tangency
 r4z = np.zeros(N, dtype=int)
 pos_out, neg_in = 0, 0
 hedges: list[tuple[str, str, float, float]] = []      # formatted after A29-07, so that f()'s flags stay on A29-08
@@ -259,6 +265,9 @@ for k in range(len(SCH)):
     shorts += int(wt.min() < -ZERO)
     if zs <= 0:
         wrong.append(sg)
+    else:
+        tan_n += 1
+        tan_short += int(wt.min() < -ZERO)
     gross_u.append(float(np.abs(wt).sum()))
     w4 = maxsharpe(S, e, f"R4 {sg}")
     assert w4 is not None
@@ -275,8 +284,9 @@ for k in range(len(SCH)):
         r3min = (float(w3[i]), FUNDS[i], sg)
     beta_dev = max(beta_dev, float(np.abs(S @ w3 / (w3 @ S @ w3) - 1).max()))
 hist = {n: held.count(n) for n in range(1, N + 1)}
-put(f"92-signal backing: the unconstrained tangency (LM28's formula) has a negative weight at {shorts} of {len(SCH)} "
-    f"signals, smallest gross exposure {f(min(gross_u), 2)}; R4 holds 1/2/3/4/5 funds at "
+put(f"92-signal backing: LM28's formula Sigma^-1 e / 1'Sigma^-1 e has a negative weight at {shorts} of {len(SCH)} "
+    f"signals (at {tan_short} of the {tan_n} where 1'Sigma^-1 e > 0 and it is the tangency; the other {len(wrong)} have "
+    f"no tangency, A28-23), smallest gross exposure {f(min(gross_u), 2)}; R4 holds 1/2/3/4/5 funds at "
     f"{hist[1]}/{hist[2]}/{hist[3]}/{hist[4]}/{hist[5]} signals; echo of A28-23 and A28-24 (LM28's): 1'Sigma^-1 e <= 0 "
     f"at {len(wrong)} ({wrong[0]} .. {wrong[-1]}), largest gross {f(max(gross_u), 1)}")
 put("R4 zero weights across the 92 signals: " + ", ".join(f"{s} {int(c)}" for s, c in zip(FUNDS, r4z, strict=True))
@@ -321,7 +331,7 @@ put("R4 bumps, last signal (y_i >= -0.01 in the homogenized QP): " + "; ".join(b
 lam3 = float(2 * w3L @ SL @ w3L)
 nu3 = 2 * SL @ w3L - lam3
 put(f"R3 KKT, last signal: lambda = 2 A s_p^2 = {f(lam3, 4, 6)}; largest |nu_i| {ef(np.abs(nu3).max(), 1)} (no bound "
-    f"active); s_p = sqrt(lambda / 2) = {f(100 * sqrt(lam3 / 2), 2)}%")
+    f"active); s_p^2 = lambda / 2 = {f(lam3 / 2, 4)}; s_p = sqrt(lambda / 2) = {f(100 * sqrt(lam3 / 2), 2)}%")
 
 # ---------------------------------------------------------------------------------------------------- U28
 u = u28()
@@ -466,8 +476,9 @@ try:
     dcp = "solved (unexpected)"
 except cp.error.DCPError as exc:
     dcp = type(exc).__name__
-put(f"statuses: a 15% cap on five funds -> '{pinf.status}', value {wv.value}; maximize the mean with the budget "
-    f"only -> '{punb.status}', objective {punb.value}; a volatility floor w'Sw >= 0.01 -> {dcp}")
+put(f"statuses: a 15% cap on five funds -> '{pinf.status}', prob.value {pinf.value}, w.value {wv.value}; maximize the "
+    f"mean with the budget only -> '{punb.status}', prob.value {punb.value}, w.value {wv2.value}; a volatility floor "
+    f"w'Sw >= 0.01 alone (no budget) -> {dcp}")
 
 # ---------------------------------------------------------------------------------------------------- costs in the objective
 
@@ -583,8 +594,8 @@ for th in (0.0, 0.25, 0.5, 1.0, 2.0, 5.0, 10.0):
         to0, cs0 = to, cs
     rows_sweep.append(f"theta {th:g}: planned turnover {f(100 * to / to0, 1, also=(4,))}% of theta 0's, planned cost "
                       f"{f(100 * cs / cs0, 1, also=(4,))}% of theta 0's, no trade at {quiet} of {len(SCH) - 1}, in-sample "
-                      f"volatility given up mean {f(1e4 * float(np.mean(gap)), 1)} bp, largest "
-                      f"{f(1e4 * float(np.max(gap)), 1)} bp")
+                      f"volatility given up mean {f(1e4 * float(np.mean(gap)), 1, also=(4,))} bp, largest "
+                      f"{f(1e4 * float(np.max(gap)), 1, also=(4,))} bp")
 if sweep_gap > 1e-5:
     stop(f"cost sweep: OSQP and CLARABEL differ by {sweep_gap:.1e}")
 put("cost-penalized R3 on its own path (planned at each signal close; 91 rebalancing signals; totals over the 91 "
@@ -616,7 +627,7 @@ if any(m is None for m in osqp_def.values()) or "solver_opts.get(polish_param, T
     stop("cvxpy's OSQP defaults: source pattern not found")
 put("cvxpy's default solver: " + ", ".join(f"{k} {v}" for k, v in names.items()) + f" (LP: {pdef.solver_stats.solver_name})"
     f"; versions cvxpy {version('cvxpy')}, OSQP {version('osqp')}, CLARABEL {version('clarabel')}, SCS {version('scs')} "
-    f"(problem 11's second solver); CLARABEL defaults "
+    f"(problem 11's second solver), SciPy {version('scipy')} (nnls); CLARABEL defaults "
     f"tol_gap_abs {dflt.tol_gap_abs:g}, tol_gap_rel {dflt.tol_gap_rel:g}, tol_feas {dflt.tol_feas:g}, max_iter "
     f"{dflt.max_iter}; cvxpy's OSQP defaults (osqp_qpif.py) " + ", ".join(
     f"{k} {m.group(1)}" for k, m in osqp_def.items() if m is not None) + ", polishing True on a fresh solve")
@@ -677,7 +688,7 @@ zS = np.linalg.solve(SL[np.ix_(act, act)], eL[act])
 wcf = np.zeros(N)
 wcf[act] = zS / zS.sum()
 put("R4 checks, last signal (each solver's y; nu = 2 Sigma y - lambda e with lambda = 2 y'Sigma y, the value that "
-    "e'y = 1 gives; cvxpy's budget dual is not used): " + "; ".join(checks)
+    "e'y = 1 gives; cvxpy's dual of e'y = 1 is not used): " + "; ".join(checks)
     + f"; closed form on the active set {{{', '.join(FUNDS[i] for i in act)}}} (LM28's tangency of the held funds) "
     f"against the exact solution {ef(np.abs(wcf - w4L).max(), 1)}")
 
@@ -697,7 +708,7 @@ duals.append(f"R3 with the 40% cap (CLARABEL): budget dual {f(float(np.asarray(c
 x = cp.Variable(N)
 c0, c1 = eL @ x == 1, x >= 0
 solve(cp.quad_form(x, cp.psd_wrap(SL)), [c0, c1], cp.CLARABEL, CLARABEL_OPTS)
-duals.append(f"R4 (CLARABEL): budget dual {f(float(np.asarray(c0.dual_value)), 4)} (lambda {f(lam4, 4)}), bound duals "
+duals.append(f"R4 (CLARABEL): dual of e'y = 1 {f(float(np.asarray(c0.dual_value)), 4)} (lambda {f(lam4, 4)}), bound duals "
              + ", ".join(f"{s} {f(float(v), 4)}" for s, v in zip(FUNDS, np.asarray(c1.dual_value), strict=True)))
 put("cvxpy's dual values (printed as cvxpy reports them): " + "; ".join(duals))
 
@@ -749,8 +760,8 @@ put(f"widget initial state (first window, 0050 and 00646, delta 4, net-exposure 
 
 # ---------------------------------------------------------------------------------------------------- problems
 s2, cv = 0.0102, 0.0150
-put(f"problem 2 (hypothetical): s_p^2 = {s2}, Cov(R_i, R_p) = {cv}: nu_i = 2 (Cov - s_p^2) = {f(2 * (cv - s2), 4)}; "
-    f"beta_ip = {f(cv / s2, 3)}; distractors {f(cv - s2, 4)} (factor 2 dropped) and {f(-2 * (cv - s2), 4)} (sign)")
+put(f"problem 2 (hypothetical): sigma_p^2 = {s2}, Cov(R_i, R_p) = {cv}: nu_i = 2 (Cov - sigma_p^2) = "
+    f"{f(2 * (cv - s2), 4)}; beta_ip = {f(cv / s2, 3)}; distractors {f(cv - s2, 4)} (factor 2 dropped) and {f(-2 * (cv - s2), 4)} (sign)")
 w30, w31 = minvar(S0, "R3 first"), maxsharpe(S0, e0, "R4 first")
 assert w31 is not None
 act0 = [i for i in range(N) if w31[i] > ZERO]
@@ -824,8 +835,42 @@ put(f"problem 6: from cvxpy's budget dual -0.020396, s_p = sqrt(0.020396 / 2) = 
     f"distractor sqrt(0.020396) = {f(100 * sqrt(0.020396), 2)}%")
 
 lam_p = 0.4506
-put(f"problem 5: from R4's budget dual -0.4506 (homogenized QP, last window), SR = sqrt(2 / 0.4506) = "
+put(f"problem 5: from the dual -0.4506 of e'y = 1 (R4's homogenized QP, last window), SR = sqrt(2 / 0.4506) = "
     f"{f(sqrt(2 / lam_p), 2, 3)}; distractors sqrt(1 / 0.4506) = {f(sqrt(1 / lam_p), 2, 3)} (factor 2 dropped) and "
     f"0.4506 (the dual read as the ratio); exact {f(sr(w4L, SL, eL), 3)}")
+
+# ---------------------------------------------------------------------------------------------------- r_f sensitivity
+# The shared decision "Risk-free rate": 1.5% is illustrative, so R4 and problem 11's 2-point optimum are recomputed at
+# r_f = 0 and 2% on the last window (e = mu - r_f; problem 11's borrowing rate r_f + SPREAD), by A29-31's method.
+heldL = [s for s, v in zip(FUNDS, w4L, strict=True) if v > ZERO]
+r4rf, chg, p11rf = [], (0.0, "", ""), []
+for rf_, lab_ in ((0.0, "0"), (0.02, "2%")):
+    e_ = muL - rf_
+    wr = maxsharpe(SL, e_, f"R4 r_f {lab_}")
+    assert wr is not None
+    held_r = [s for s, v in zip(FUNDS, wr, strict=True) if v > ZERO]
+    if held_r != heldL:
+        stop(f"r_f {lab_}: R4 holds other funds than at 1.5%")
+    i = int(np.argmax(np.abs(wr - w4L)))
+    if abs(wr[i] - w4L[i]) > chg[0]:
+        chg = (float(abs(wr[i] - w4L[i])), FUNDS[i], lab_)
+    r4rf.append(f"R4 at r_f {lab_}: {pc(wr, 2)}, in-sample Sharpe ratio {f(sr(wr, SL, e_), 2)}")
+    wb = maxsharpe(SL, e_ - SPREAD, f"problem 11 r_f {lab_}")
+    assert wb is not None
+    fx = 0.25 / vol(wb, SL) * wb
+    L_ = float(fx.sum())
+    if not (L_ > 1 and np.abs(fx).sum() <= 1.5):
+        stop(f"r_f {lab_}: the scaled tangency is not problem 11's optimum")
+    obj = e_ @ fl - SPREAD * cp.pos(cp.sum(fl) - 1)
+    cons11 = [cp.quad_form(fl, cp.psd_wrap(SL)) <= 0.25**2, fl >= 0, cp.norm1(fl) <= 1.5]
+    _, v11 = solve(obj, cons11, "CLARABEL", ERC_OPTS, sense="max")
+    if np.abs(must(v11, f"problem 11 r_f {lab_}") - fx).max() > 1e-6:
+        stop(f"r_f {lab_}: CLARABEL differs from the exact solution of problem 11 by more than 1e-6")
+    p11rf.append(f"r_f {lab_}: L {f(100 * L_, 1)}%, excess return after financing "
+                 f"{f(100 * (float(e_ @ fx) - SPREAD * (L_ - 1)), 2)}%")
+put("r_f sensitivity (shared decision \"Risk-free rate\"), last window: " + "; ".join(r4rf)
+    + f"; the same {len(heldL)} funds as at 1.5% ({', '.join(heldL)}); largest weight change against r_f 1.5% {f(100 * chg[0], 2)} points "
+    f"({chg[1]}, r_f {chg[2]}); problem 11 at a 2-point spread: " + "; ".join(p11rf)
+    + "; CLARABEL at 1e-10 within 1e-6 of each")
 
 print("\n".join(OUT))

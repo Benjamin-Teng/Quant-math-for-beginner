@@ -31,7 +31,7 @@ right page. Pages consulted for edition 0.1 that no current text cites are left 
 | FinMind `TaiwanStockPrice`, survivorship and replay files (`vol6/`) | LM34's survivorship example (§5): 00672L, 00673R, 00674R and 00677U over `vol5/`'s window and columns (00635U and 00642U come from `vol5/`); 00673R reverse-split one for four on 2025-10-22 and 00674R one for five on 2026-04-22 (the split file above), and 00674R prints a close of 0 on days without a trade (`data/README.md`); one-day snapshots of every ETF on 2017-01-17 and 2026-10-08, requested without `data_id` (FinMind serves that only above the Free plan; columns `date, stock_id, close, volume`; kept ids `^00\d{2,4}[A-Z]?$`; they hold TPEx-listed funds as well as TWSE-listed ones, 00679B in both and 00720B in 2026; a Free account fetches the rest with `--exclude vol6/etf_snapshot`, and LM34's A34-18 then prints a note instead of its value). LM35's 2008 replay: 0050's `date, close, spread` for 2007-07-02 → 2008-12-31. Retrieved 2026-10-24 |
 | FinMind `TaiwanStockDelisting` (`vol6/delisting__2000-01-01__2026-10-08.csv`, Free) | `date, stock_id, stock_name` for ids beginning "00" (63 rows): which ETFs vanished, and the names of 00672L and 00677U; LM34 §5. Retrieved 2026-10-24 |
 | FinMind `TaiwanStockInfo` (queried 2026-10-24 by LM34's drafter; no extract is registered, the editor's decision of 2026-10-25) | the query of 2026-10-24 gave the names of the six funds of LM34 §5 (its open item O12), which `data/vol6_anchors_lm34.py` fixes by code (`FUTURES6`): 00635U 期元大S&P黃金, 00642U 期元大S&P石油, 00672L 元大S&P原油正2, 00673R 期元大S&P原油反1, 00674R 期元大S&P黃金反1, 00677U 期富邦VIX. The script asserts the names of 00672L and 00677U against the registered delisting file; TWSE's ISIN page gives the other four the same short names (listing-markets row under "Taiwan exchanges"), and the second source hunt (2026-10-24) confirmed each fund's futures index and which three are daily leveraged or inverse on the issuers' and TWSE's pages (Taiwan facts, "LM34's six survivorship funds") |
-| FinMind `USStockPrice` (`vol6/`, Free): SPY, TLT, GLD, USO, DBO | `date, adj_close, close`, 2007-07-02 → 2026-10-08, retrieved 2026-10-24: the US proxies of LM35's hypothetical 2008 and 2015 replays, when 00646, 00679B, 00635U and 00642U did not exist. All five are registered with `--adjusted adj_close` (paragraph below). FinMind's US `Close` is already split-adjusted: USO's 1-for-8 reverse split of 2020-04-28 (USCF's page, under "Banks, issuers and firms") shows no jump in either column, and USO and GLD register no ex-dates (`data/raw_manifest.json`; `data/README.md`). The owner approved DBO on 2026-10-24 as a second oil proxy besides USO (`plans/vol-5.md`, capability check) |
+| FinMind `USStockPrice` (`vol6/`, Free): SPY, TLT, GLD, USO, DBO | `date, adj_close, close`, 2007-07-02 → 2026-10-08, retrieved 2026-10-24: the US proxies of LM35's hypothetical 2008 and 2015 replays, for 00646, 00679B, 00635U and 00642U (none traded in 2008; in the 2015 window, 2015-04-27 → 08-24, only 00635U did, from 2015-04-15, and GLD stands in for it too). All five are registered with `--adjusted adj_close` (paragraph below). FinMind's US `Close` is already split-adjusted: USO's 1-for-8 reverse split of 2020-04-28 (USCF's page, under "Banks, issuers and firms") shows no jump in either column, and USO and GLD register no ex-dates (`data/raw_manifest.json`; `data/README.md`). The owner approved DBO on 2026-10-24 as a second oil proxy besides USO (`plans/vol-5.md`, capability check) |
 | FinMind `TaiwanExchangeRate`, `data_id` USD (`vol6/USD_TWD__2007-07-02__2026-10-08.csv`, Free) | `date, spot_buy, spot_sell`, 2007-07-02 → 2026-10-08; FinMind's −1 rows (no quote) are filtered out at registration (`spot_buy` must start with 1–9). The USD/TWD leg of LM35's proxies, paired as the capability check fixed: the New York close of date D takes the first FX row dated after D |
 | FinMind `TaiwanStockTotalReturnIndex`, TR23 (`vol3/`, retrieved 2026-10-18) | the TAIEX total-return index, 2003-01-02 → 2026-10-08 (Volume III's file, no new retrieval): the long sample of LM32–LM35 (VaR backtests, the Sharpe-ratio statistics, the reality check, scenario windows and the replays' calendar); `data/vol3_series.py` tests it against the price index |
 | FinMind `TaiwanVariousIndicators5Seconds` and `TaiwanFuturesDaily` (T5S and TX23, Volume IV's files, no new retrieval) | LM35's five named days, through per-day statistics only (the raw day files are never published), and TX23's settlement moves; LM32's lab reads three raw T5S days |
@@ -174,7 +174,7 @@ a cent per value cannot move, and its levels carry their retrieval date.
 - The fresh check's quotes came through a summarizer; they were re-read in the pages' HTML (next item). Its URL for
   the Disclaimer is the Pricing page's link `../Disclaimer/`.
 - Read again in Stage 1 (raw HTML fetched with curl, tags stripped, 2026-10-19): each quoted phrase appears verbatim. The
-  Disclaimer is dated 版本日期：2026-07-12; its sections are numbered 一 to 五, and §3.2 and §3.3 are items 2 and 3 of
+  Disclaimer is dated 版本日期：2026-07-12 (re-read 2026-10-31: 版本日期 2026-10-30, the quoted items unchanged; it adds a restriction on broker-branch data, which the registered files do not include); its sections are numbered 一 to 五, and §3.2 and §3.3 are items 2 and 3 of
   the numbered list under 三、使用者之授權範圍. Item 2 continues "，或建置實質等同於本服務之鏡像服務。"; item 3 asks users
   who publish or redistribute the data to "自行確認並取得原資料來源機關所要求之相應授權". Section 二、來源標示 asks users
   who put the data to external use to "以適當方式標示原資料提供機關". On the Pricing page the Free row's quota cell reads
@@ -204,11 +204,11 @@ a cent per value cannot move, and its levels carry their retrieval date.
 | TWSE Holiday Schedule 2025 (JSON endpoint `twse.com.tw/rwd/en/holidaySchedule/holidaySchedule?response=json&date=20250101`; the page is rendered by JavaScript) | the English JSON labels 3 April "Adjusted Holiday" and 4 April "Children’s Day & Tomb-sweeping Day" (read 2026-10-11; the same labels on 2026-10-25); the Chinese JSON (`rwd/zh/holidaySchedule`, `date=20250101`, read 2026-10-24 by the second source hunt) names both days 兒童節及民族掃墓節 and says of 3 April 「兒童節與民族掃墓節為4月4日（星期五），依規定於前一日4月3日（星期四）放假。」 So 3 April is the observed holiday for the two holidays of Friday 4 April |
 | TWSE 中華民國109年有價證券集中交易市場開（休）市日期表 (the 2020 holiday schedule), [Wayback Machine capture of 2020-06-04](https://web.archive.org/web/20200604104858/https://www.twse.com.tw/zh/holidaySchedule/holidaySchedule) of `twse.com.tw/zh/holidaySchedule/holidaySchedule` | the last session before the Lunar New Year was 1月20日, with 「1月21日及1月22日市場無交易，僅辦理結算交割作業」; 1月23日 調整放假; 1月24日 除夕; 1月25日–29日 春節; 1月30日 農曆春節後開始交易. So the market was closed 2020-01-21 → 01-29, and 2020-01-30 comes ten calendar days after the previous session (LM35, A35-06 and A35-10). TWSE's own JSON returns no rows for 2018–2020 (Volume IV's check, and again on 2026-10-24), hence the archived copy. Read 2026-10-24 by the second source hunt; for this entry, the archive's index gives this capture's timestamp, and its digest matches the hunt's copy |
 | 全國法規資料庫: [Banking Act Art. 47-1](https://law.moj.gov.tw/LawClass/LawSingle.aspx?pcode=G0380001&flno=47-1), 信用卡業務機構管理辦法 [Art. 48](https://law.moj.gov.tw/LawClass/LawSingle.aspx?pcode=G0380055&flno=48) | 15% cap on card revolving interest from 2015-09-01; no compounding of revolving interest (Art. 48 item 1, read 2026-10-11) |
-| TWSE [ETF 專區, 交易規則](https://www.twse.com.tw/zh/products/securities/etf/overview/rules.html) (the ETF rules page) | one table for NT$ ETFs and the attached RMB and USD listings: tick 0.01 below NT$50 and 0.05 from NT$50 ("較一般股票小"); daily limit "同一般股票(10%)，但含海外股票之ETF價格無漲跌幅限制" (narrower than Art. 8, which the text cites for the limits); trading time as for stocks; tax "證交稅：ETF賣方課徵0.1% (債券ETF免徵證交稅10年至2026年)". The page prints no date (the footer reads ©2023); the server's `Last-Modified` was Thu, 22 Oct 2026 06:38:26 GMT; read 2026-10-24 by the source check and again for this entry (HTTP 200, 13,030 bytes, byte-identical to the check's copy; static HTML, no JavaScript needed) |
-| TWSE [ETF 總覽](https://www.twse.com.tw/zh/products/securities/etf/overview/introduction.html) (the ETF overview page) | the three legal types of listed ETF (證信託ETF, 期貨ETF and 境外ETF) and seven asset classes, among them 原型期貨ETF, whose index constituents are all commodities such as crude oil, precious metals, currencies and soybeans (原油、貴重金屬、貨幣及黃豆等大宗商品). Under 「三、期信託ETF另外須考慮之其他投資風險」 the roll cost reads: 「期貨轉倉成本：期信託ETF追蹤的是期貨指數，基金經理人將會依據標的指數規則定期轉倉，當近遠期期貨之間為正價差(遠期期貨較近期期貨貴)時，基金經理人即須買高(遠期期貨)賣低(近期期貨)，期貨轉倉可能產生之損失無法避免。」: the losses the roll *may* produce (可能產生), so the text keeps the "may". A futures-trust ETF on a foreign futures index is valued on Europe and US futures, so the time difference is a risk. Under §四 the multiple of a leveraged or inverse ETF holds 「僅限於單日，在每日複利計算下，ETF之長期報酬率會偏離…」 (00672L, 00673R and 00674R). The page does not call futures ETFs unsuited to long holding (LM34's O13; the issuers say so of four funds, Taiwan facts below). `Last-Modified` Thu, 22 Oct 2026 06:38:26 GMT; footer ©2023; read 2026-10-24 by LM34's reviser, for this entry and by the second source hunt (HTTP 200, static; the hunt's copy is byte-identical to this entry's) |
-| TWSE ETF e添富 fund pages, `https://www.twse.com.tw/zh/ETFortune-institute/etfInfo/<code>` (added for this entry; no brief cites them) | the exchange's own classification (證券類別) and index (標的指數) of each fund, read 2026-10-24 (HTTP 200, static): 0050 台股ETF, 富時臺灣證券交易所臺灣50指數; 0056 台股ETF, 臺灣高股息指數 (證券簡稱 元大高股息); 00646 國外股票ETF, 標普指數(S&P 500R); 00662 國外股票ETF, NASDAQ-100指數 (證券簡稱 富邦NASDAQ; both short names read in the copies re-fetched on 2026-10-25; issuer 富邦投信; with Fubon's own page below, this closes the part of LM35's open item 3 that asked for 00662's index); 00635U 期貨ETF, 標普高盛黃金ER指數(S&P GSCI Gold Excess Return Index); 00642U 期貨ETF, 標普高盛原油ER指數(S&P GSCI Crude Oil Enhanced Excess Return); 00631L 股票槓反ETF, 臺灣50指數. For LM34 the second source hunt also read 00673R and 00674R: 期貨槓反ETF, 標普高盛原油日報酬反向一倍ER指數(S&P GSCI Crude Oil 1x Inverse Index ER) and 標普高盛黃金日報酬反向一倍ER指數(S&P GSCI Gold 1x Inverse Index ER). 00679B and 00720B are TPEx-listed (listing-markets row below), and for them, as for the delisted 00672L and 00677U, the same URL pattern returned the e添富 home page instead of a fund page; TPEx's product pages (row below) classify the two bond funds. The e添富 split table (分割/反分割預告表; this entry's first draft saw the same notice on the 00662 page, the second hunt read the table) lists a split of 00662: 停止買賣日期 2026-11-11, 恢復買賣日期 2026-11-17, ratio 5.00 (units after over units before), so no trading 2026-11-11 → 11-16, after the data window of 2026-10-08 |
+| TWSE [ETF 專區, 交易規則](https://www.twse.com.tw/zh/products/securities/etf/overview/rules.html) (the ETF rules page) | one table for NT$ ETFs and the attached RMB and USD listings: tick 0.01 below NT$50 and 0.05 from NT$50 ("較一般股票小"); daily limit "同一般股票(10%)，但含海外股票之ETF價格無漲跌幅限制" (narrower than Art. 8, which the text cites for the limits); trading time as for stocks; tax "證交稅：ETF賣方課徵0.1% (債券ETF免徵證交稅10年至2026年)". The page prints no date (the footer reads ©2023); the server's `Last-Modified` was Thu, 22 Oct 2026 06:38:26 GMT; read 2026-10-24 by the source check and again for this entry (HTTP 200, 13,030 bytes, byte-identical to the check's copy; static HTML, no JavaScript needed); re-read 2026-10-31: `Last-Modified` Wed, 28 Oct 2026 06:12:16 GMT, 13,103 bytes, the tick, limit and tax rows as quoted |
+| TWSE [ETF 總覽](https://www.twse.com.tw/zh/products/securities/etf/overview/introduction.html) (the ETF overview page) | the three legal types of listed ETF (證信託ETF, 期貨ETF and 境外ETF) and seven asset classes, among them 原型期貨ETF, whose index constituents are all commodities such as crude oil, precious metals, currencies and soybeans (原油、貴重金屬、貨幣及黃豆等大宗商品). Under 「三、期信託ETF另外須考慮之其他投資風險」 the roll cost reads: 「期貨轉倉成本：期信託ETF追蹤的是期貨指數，基金經理人將會依據標的指數規則定期轉倉，當近遠期期貨之間為正價差(遠期期貨較近期期貨貴)時，基金經理人即須買高(遠期期貨)賣低(近期期貨)，期貨轉倉可能產生之損失無法避免。」: the losses the roll *may* produce (可能產生), so the text keeps the "may". A futures-trust ETF on a foreign futures index is valued on Europe and US futures, so the time difference is a risk. Under §四 the multiple of a leveraged or inverse ETF holds 「僅限於單日，在每日複利計算下，ETF之長期報酬率會偏離…」 (00672L, 00673R and 00674R). The page does not call futures ETFs unsuited to long holding (LM34's O13; the issuers say so of four funds, Taiwan facts below). `Last-Modified` Thu, 22 Oct 2026 06:38:26 GMT (Wed, 28 Oct 2026 06:12:16 GMT on 2026-10-31, the quoted sentences unchanged); footer ©2023; read 2026-10-24 by LM34's reviser, for this entry and by the second source hunt (HTTP 200, static; the hunt's copy is byte-identical to this entry's) |
+| TWSE ETF e添富 fund pages, `https://www.twse.com.tw/zh/ETFortune-institute/etfInfo/<code>` (added for this entry; the briefs of LM27, LM34 and LM35 cite them) | the exchange's own classification (證券類別) and index (標的指數) of each fund, read 2026-10-24 (HTTP 200, static): 0050 台股ETF, 富時臺灣證券交易所臺灣50指數; 0056 台股ETF, 臺灣高股息指數 (證券簡稱 元大高股息); 00646 國外股票ETF, 標普指數(S&P 500R); 00662 國外股票ETF, NASDAQ-100指數 (證券簡稱 富邦NASDAQ; both short names read in the copies re-fetched on 2026-10-25; issuer 富邦投信; with Fubon's own page below, this closes the part of LM35's open item 3 that asked for 00662's index); 00635U 期貨ETF, 標普高盛黃金ER指數(S&P GSCI Gold Excess Return Index); 00642U 期貨ETF, 標普高盛原油ER指數(S&P GSCI Crude Oil Enhanced Excess Return); 00631L 股票槓反ETF, 臺灣50指數. For LM34 the second source hunt also read 00673R and 00674R: 期貨槓反ETF, 標普高盛原油日報酬反向一倍ER指數(S&P GSCI Crude Oil 1x Inverse Index ER) and 標普高盛黃金日報酬反向一倍ER指數(S&P GSCI Gold 1x Inverse Index ER). 00679B and 00720B are TPEx-listed (listing-markets row below), and for them, as for the delisted 00672L and 00677U, the same URL pattern returned the e添富 home page instead of a fund page; TPEx's product pages (row below) classify the two bond funds. The e添富 split table (分割/反分割預告表; this entry's first draft saw the same notice on the 00662 page, the second hunt read the table) lists a split of 00662: 停止買賣日期 2026-11-11, 恢復買賣日期 2026-11-17, ratio 5.00 (units after over units before), so no trading 2026-11-11 → 11-16, after the data window of 2026-10-08 |
 | TWSE ETF e添富 announcements (重大消息) on LM34's delisted funds: 00672L of [2020-07-07](https://www.twse.com.tw/zh/ETFortune/announcement?company=A00005&date=20200707&seq=1&fund=00672L&type=all) and [2020-10-12](https://www.twse.com.tw/zh/ETFortune/announcement?company=A00005&date=20201012&seq=1&fund=00672L&type=all), 00677U of [2021-04-29](https://www.twse.com.tw/zh/ETFortune/announcement?company=A00010&date=20210429&seq=1&fund=00677U&type=all) | 00672L, 元大標普高盛原油ER單日正向2倍指數股票型期貨信託基金 ("證券代號：00672L"): on 2020-07-07 the issuer explains that it had moved the fund's holdings from the index's near-month constituent to the December 2020 WTI contract (「故將指數成分期貨契約轉至2020年12月份西德州輕原油期貨契約」), the cause of its tracking error (from the start of 2020 to 2020-06-30 the index fell 97.84% and the NAV 95.23%), and that it would roll back to the index's near-month contracts from 2020-07-08 (「自7月8日起轉倉至近月份指數成分期貨契約」); on 2020-10-12, its termination: the average NAV per unit over the last thirty business days had fallen 90% from its initial value; FSC approval 2020-10-07 (金管證期字第1090370507號); last trading day 2020-11-12, delisted from 2020-11-13, contract terminated 2020-11-16, liquidation reference date 2020-11-24. 00677U (富邦標普500波動率短期期貨ER指數股票型期貨信託基金): last trading day 2021-06-02, delisted from 2021-06-03, contract terminated 2021-06-04. Read 2026-10-24 by the second source hunt; the three URLs answered HTTP 200 as static pages on 2026-10-25 (this entry's verifier, and again for its first repair) |
-| TWSE Operating Rules (營業細則), version 115.09.24: [mobile page FL007304](https://twse-regulation.twse.com.tw/m/LawContent.aspx?FID=FL007304) | Art. 94: the commission is charged after a trade, at a rate that TWSE reports to the authority for approval; a broker may set its own rate by the value traded, with discounts and a minimum per order, filed with TWSE for the record, and must notify a client before the order, and keep a record, when the rate exceeds 千分之一點四二五 (1.425‰), so 0.1425% is a reference, not a cap. Art. 3: the market's trading time is 09:00–13:30 (上午九時至下午一時三十分). Art. 63: the daily limit is 10% for stocks and 5% for bonds, with no ETF clause. These rules are TWSE's, for the TWSE-listed funds; the TPEx-listed 00679B and 00720B follow TPEx's Business Rules (row below). Read 2026-10-24 by LM34's drafter and again for this entry (HTTP 200; the page's 法規名稱 line carries the version, 「臺灣證券交易所股份有限公司營業細則（115.09.24）」) |
+| TWSE Operating Rules (營業細則), version 115.09.24: [mobile page FL007304](https://twse-regulation.twse.com.tw/m/LawContent.aspx?FID=FL007304) | Art. 94: the commission is charged after a trade, at a rate that TWSE reports to the authority for approval; a broker may set its own rate by the value traded, with discounts and a minimum per order, filed with TWSE for the record, and must notify a client before the order, and keep a record, when the rate exceeds 千分之一點四二五 (1.425‰), so 0.1425% is a reference, not a cap. Art. 3: the market's trading time is 09:00–13:30 (上午九時至下午一時三十分). Art. 63: the daily limit is 10% for stocks and 5% for bonds, with no ETF clause. These rules are TWSE's, for the TWSE-listed funds; the TPEx-listed 00679B and 00720B follow TPEx's Business Rules (row below). Read 2026-10-24 by LM34's drafter and again for this entry (HTTP 200; the page's 法規名稱 line carries the version, 「臺灣證券交易所股份有限公司營業細則（115.09.24）」; on 2026-10-31 the page carries 115.10.19, and Arts. 3, 63 and 94 still contain the phrases quoted above) |
 | TPEx 指數股票型基金及主動式交易所交易基金受益憑證買賣辦法 (the ETF rules; English title "Taipei Exchange Rules Governing Trading of Passive Exchange-Traded Fund and Active Exchange-traded Fund Beneficial Certificates"; named 「…指數股票型基金受益憑證買賣辦法」 before 2024-12-31): [selaw LW10845400](https://www.selaw.com.tw/Chinese/RegulatoryInformationResult?sysNumber=LW10845400), tabs 所有條文, 法規沿革, 歷史法規 and 附件下載, and its English version. TPEx's [ETF rules page](https://www.tpex.org.tw/zh-tw/product/etf/regulations/rules.html) lists the rules by name and refers to that database (「相關法規請至「證券暨期貨法令判解查詢系統」網站查詢」; selaw.com.tw, run by 證券暨期貨市場發展基金會) | the rules of the TPEx-listed 00679B and 00720B, issued under the Business Rules Art. 39-7 (Art. 1). **Limit, Art. 7:** the TPEx-stock limit applies (準用上櫃股票之有關規定), but none (採無升降幅度限制) for ¶1 item 一, 國外成分證券 index ETFs and foreign-constituent active ETFs with their 加掛 listings, and item 二, futures-trust ETFs tracking a foreign futures index; ¶2: 10% times the multiple for a leveraged or inverse ETF on an all-domestic index, none if a constituent is foreign. Art. 2-1 ¶1 item 二(二) defines a foreign-constituent bond ETF as one whose index holds only bonds, at least one of them foreign (「…標的指數成分證券全部為債券者，且成分證券含一種以上國外債券者」; Art. 2-1 added 2024-12-31, its 2025-09-30 amendment only adding item 三), so foreign bonds are covered expressly. **Session, Art. 4 ¶2:** trading time, matching method and order-size limits follow the Business Rules for TPEx stocks (準用本中心業務規則有關上櫃股票之規定; the same sentence stands in the texts before 2010 and 2017; a proviso added 2010-11-29, 「但債券成分之指數股票型基金之交易時間由本中心另行公告之」, was deleted by the amendment of 2016-01-30, before E5's span). **Commission, Art. 15 ¶1:** the broker's commission and TPEx's service fee follow the rates for TPEx stocks (準用上櫃股票規定之費率辦理), i.e. the Business Rules Art. 64 (next row); the texts before 2019-04-24 and before 2023-09-15 read 「…準用上櫃股票交易規定之費率辦理」 (the amendment of 2019-04-24, in force 2019-05-01, added 「除第二項另有規定外」 and ¶2's exception for the service fee on repo trades; the history names Art. 15 in no amendment from 2017-01-17 until then), so the rule stood through E5's span. **Dates:** the current version is 2025-09-30 (證櫃交字第11400735781號; Arts. 2-1 and 13 amended, 4-2 and 4-3 added). The 法規沿革 lists 26 entries: the issuance of 2007-11-08 and 25 amendments. Art. 7 was amended 2017-02-13 (證櫃交字第10600023611號, in force 2017-03-01), 2018-08-09 (證櫃交字第10700215501號), 2023-09-15 (證櫃債字第11200696191號) and 2024-12-31 (證櫃債字第11300812731號, which renamed the rules), and by none since. The texts before each change (歷史法規) carry the exception throughout: to 2017-02-28 for an index whose 成分股 (constituent shares) include foreign securities, from 2017-03-01 成分證券 (constituent securities), from 2018-08-09 the item list, with 國外成分證券 defined in Art. 2. Under the 成分股 text TPEx's listing notice still gave 00679B no limit (notices row below), and 00679B's largest close-to-close move from 2017-01-17 to 02-28 is −1.84% (repository data), so no number turns on that wording. **Locks:** Art. 4-1 lets such ETFs keep trading while the foreign market is closed; Arts. 4-2 (SITC ETFs) and 4-3 (futures-trust ETFs), added 2025-09-30, let the issuer apply to suspend trading during a foreign closure of five or more consecutive business days (連續五個營業日(含)以上) when the NAV is at most NT$3 billion or the premium or discount reached 3% on each of the two business days before the application. Read 2026-10-25 by the TPEx source check and its verifier (anonymous requests; the verifier's re-fetch matched word for word) |
 | TPEx 證券商營業處所買賣有價證券業務規則 (the Business Rules; English title "Taipei Exchange Rules Governing Securities Trading on the TPEx"): [selaw LW10812069](https://www.selaw.com.tw/Chinese/RegulatoryInformationResult?sysNumber=LW10812069), current version 2026-10-21 (證櫃交字第11500775601號: Arts. 45-4 and 46 amended, 46-11 added) | **Art. 64**, the counterpart of TWSE's Art. 94, applied to ETFs by the ETF rules' Art. 15 ¶1: the broker charges the commission after the trade (¶1); TPEx drafts the rate and the authority approves it (¶2); a broker may set its own schedule by value traded, with discounts and a minimum per order, filed with TPEx for the record, and must notify the client before applying, and keep a record, a rate above 千分之一點四二五 of the value traded (¶3; the English version: "exceeds 0.1425 percent"), so 0.1425% is a reference, not a cap. ¶1–¶3 are unchanged since 2008-02-12 (證櫃交字第0970002700號); the article was last amended 2011-12-16 (證櫃交字第1000033483號), in ¶4 and ¶5 only (item 二 added to ¶4's exceptions to the ban on paying fees to introducers; ¶5 now refers to item 一); the hunt compared the 89 old texts that contain Art. 64. **Art. 40** item 一: the trading time is 09:00–13:30 for stocks on the 等價成交系統 (上午九時至下午一時三十分); last amended 2014-09-23 (in force 2014-12-29), in item 二 only, so the hour held over E5's span; ETFs reach it through the ETF rules' Art. 4 ¶2. **Art. 35 ¶3:** the closing price is the price of the call auction before the close, or else the day's last trade (the text before 2020 states the same rule). **Continuous trading** began on 2020-03-23: the 法規沿革's entry 53, the amendment of 2018-12-28 (證櫃交字第10700539481號; Arts. 35, 35-11, 36, 62, 63 and 72 amended, 35-12 added), 「自109年3月23日起實施」. Read 2026-10-25 by the TPEx source check and its verifier |
 | TPEx [交易系統簡介](https://www.tpex.org.tw/zh-tw/mainboard/trading/rules/system.html) and [逐筆交易](https://www.tpex.org.tw/zh-tw/mainboard/trading/rules/continuous.html) pages (`Last-Modified` Thu, 26 Mar 2026 07:55:10 GMT, both) | 「委託時間8:30至13:30，撮合成交時間為9:00至13:30」; a delayed close moves to 13:33 (「達到暫緩收盤標準之有價證券，將延後至13:33分收盤」); the first match (the 09:00 open) is a call auction, continuous matching follows to 13:25, and 13:25 to the 13:30 close is a call auction. The 逐筆交易 page says 「13:25至收巿仍維持採集合交易撮合」, so the closing call was kept, not introduced, with continuous trading; for the start date it reports only the FSC's announcement of 2018-09-03 that continuous trading was 預訂 for 2020-03-23 (the date in force is in the row above). The 交易系統簡介 page lists 國外成分證券ETF(及其加掛ETF) and 追蹤國外商品期貨指數之ETF under 無漲跌幅, and domestic-constituent ETFs under 「以漲或跌至當日參考價格10%為限」. Read 2026-10-25 by the TPEx source check (static HTML; its verifier's re-fetch matched) |
@@ -621,18 +621,31 @@ not name. "Bibliographic data only" means nothing in the text was read.
   record; SciPy's `false_discovery_control` cites its Theorem 1.3 for `'by'`.
 - Harvey & Liu, "Backtesting", *JPM* 42(1): 13–28, 2015 (Crossref: print and online 31 October 2015), DOI
   [10.3905/jpm.2015.42.1.013](https://doi.org/10.3905/jpm.2015.42.1.013). Read for LM33 by the source check and the
-  LM33 drafter in the JPM layout hosted at Duke. **Cited by section and equation, not by page:** that copy's running
-  heads number its 17 pages 12–28 (its first page prints 12, "Fall 2015"), while Crossref, whose issue listing places
-  the article after two editorials on pp. 1–4 and 5–6 and lists nothing on pp. 7–12, gives 13–28, and the journal's
-  own pages were not compared; the copy's page labels below, as the source check recorded them, only locate the
-  passages in that copy. The t-statistic `μ̂/(σ̂/√T)` with `T − 1` degrees of freedom, (1); the Sharpe ratio, (2); the
+  LM33 drafter in the JPM layout hosted at Duke; its headings re-read by Stage 1's fresh check (2026-10-31) in the
+  copy on Harvey's Duke pages (people.duke.edu/~charvey/Research/Published_Papers/P120_Backtesting.PDF; its footers
+  name the layout file "JPM-HARVEY.indd"). **Cited by section and equation, not by page:** that copy's running heads
+  number its 17 pages 12–28 (its first page prints 12, "Fall 2015"), while Crossref, whose issue listing places the
+  article after two editorials on pp. 1–4 and 5–6 and lists nothing on pp. 7–12, gives 13–28, and the journal's own
+  pages were not compared; the copy's page labels below, as the source check recorded them, only locate the passages
+  in that copy. Its headings in order, with the copy page on which each starts (sections set in capitals, subsections
+  in mixed case): an untitled introduction (p. 12); METHOD (p. 13); MULTIPLE TESTING FRAMEWORK (p. 14), with "Type I
+  Error" (p. 15), "P-value Adjustment under FWER" (p. 15), "P-value Adjustment under FDR" (p. 16), "Multiple Testing
+  and Cross-Validation" (p. 17) and "In-Sample Multiple Testing versus Out-of-Sample Validation" (p. 17);
+  APPLICATIONS (p. 18), with "Three Strategies" (p. 18), "Sharpe Ratio Adjustment for a New Strategy" (p. 19) and
+  "Minimum Profitability for Proposed Trading Strategies" (p. 21); CONCLUSIONS (p. 22); PROGRAMS (p. 23), with
+  "Haircut Sharpe Ratios" (p. 23), "Profit Hurdles" (p. 23) and "Correlation Adjustment" (p. 24), the material the
+  text calls "the appendix" (no heading in the copy's text says "Appendix"); ENDNOTES (p. 25); REFERENCES (p. 26).
+  METHOD holds the t-statistic `μ̂/(σ̂/√T)` with `T − 1` degrees of freedom, (1); the Sharpe ratio, (2); the
   single-test p-value, (3); `p^M = 1 − (1 − p^S)^N` for `N` independent tests, (4); the haircut Sharpe ratio, solving
-  (5), and the haircut `(SR − HSR)/SR` (copy pp. 13–14); the example (240 months, Sharpe ratio 0.75: `p^S = 0.0008`;
-  with `N = 200`, `p^M = 0.15`, HSR 0.32, a haircut of about 60%), reproduced with the normal reference (A33-55);
-  Bonferroni and Holm (copy p. 15); BHY (copy pp. 15–16); for Holm and BHY the other p-values come from the model of
-  300-plus factors of Harvey, Liu & Zhu (copy p. 16). LM33 uses Bonferroni and the independent-tests form directly,
-  labels Holm on the eight rules' own p-values as the book's adaptation, and cites the equations (1)–(5) and the
-  sections of the methods it uses. LM34 cites the paper by pointer.
+  (5); the haircut `(SR − HSR)/SR`, worked as `(0.75 − 0.32)/0.75` (copy pp. 13–14; in words in the introduction,
+  p. 12); and the example (240 months, Sharpe ratio 0.75: `p^S = 0.0008`; with `N = 200`, `p^M = 0.15`, HSR 0.32, a
+  haircut of about 60%), reproduced with the normal reference (A33-55). MULTIPLE TESTING FRAMEWORK holds the FWER
+  and the FDR ("Type I Error", copy p. 15); Bonferroni and Holm ("P-value Adjustment under FWER", copy p. 15, Holm's
+  comparison with Bonferroni ending on p. 16); BHY ("P-value Adjustment under FDR", copy p. 16); and, in that
+  subsection, the model of 300-plus factors of Harvey, Liu & Zhu that gives Holm and BHY the other p-values (copy
+  p. 16). LM33 uses Bonferroni and the independent-tests form directly, labels Holm on the eight rules' own p-values
+  as the book's adaptation, and cites the equations (1)–(5) and the sections of the methods it uses. LM34 cites the
+  paper by pointer.
 - Hansen, P. R., "A Test for Superior Predictive Ability", *JBES* 23(4): 365–380, October 2005, DOI
   [10.1198/073500105000000063](https://doi.org/10.1198/073500105000000063). Read for LM34 by the source check in the
   University of North Carolina repository's postprint, which carries the journal's layout without page numbers; its
@@ -1247,7 +1260,7 @@ means nothing in the text was read; "unverified" marks a field or claim that no 
 - Choueifaty & Coignard, "Toward Maximum Diversification", *JPM* 35(1): 40–51, Fall 2008, DOI
   [10.3905/jpm.2008.35.1.40](https://doi.org/10.3905/jpm.2008.35.1.40). Read by the source check in the JPM layout
   (hosted by TOBAM). Equation (1), p. 41: `D(P) = P′Σ/√(P′VP)`, where *their* Σ is the vector of volatilities, not a
-  covariance matrix; in words, the weighted average of the volatilities divided by the portfolio volatility. Also on
+  covariance matrix. The sentence below it reads "The diversification ratio is the ratio of the weighted average of volatilities divided by the portfolio volatility" (quoted; the book does not reuse it unquoted). Also on
   p. 41: a long-only portfolio has `D > 1` unless it is equivalent to a single asset (then `D = 1`); and if the
   expected excess returns are proportional to the volatilities, the Most-Diversified Portfolio is the tangency
   portfolio. LM27 writes the ratio (27.7) in the book's notation, derived from (8.11) and not copied from their Σ,
@@ -1285,7 +1298,7 @@ means nothing in the text was read; "unverified" marks a field or claim that no 
   text copy of the nobelprize.org PDF: the section "The Two-fund Separation Theorem" calls two-fund separation
   "following Tobin" and says that with a riskless asset every investor holds it and the market portfolio; "Fund
   Separation" says that non-negativity makes the frontier piecewise linear (citing Markowitz 1959), so two-fund
-  separation need not hold (for LM29). The lecture's reference list misdates Tobin as 1969 with 25: 65–86, which is
+  separation need not hold (no brief of Volumes V–VI cites this section). The lecture's reference list misdates Tobin as 1969 with 25: 65–86, which is
   the 1958 paper. Not cited by LM28's text after the revision (Tobin is cited directly, above). Markowitz (1959) is
   named only inside the lecture and was not checked: **unverified**.
 - Best & Grauer, "On the Sensitivity of Mean-Variance-Efficient Portfolios to Changes in Asset Means: Some Analytical
@@ -1474,8 +1487,8 @@ means nothing in the text was read; "unverified" marks a field or claim that no 
   `download/risk-budgeting.pdf`) and by the source check in the version whose title page reads "First version: January
   2012 – This version: March 2012" (the source check's report calls it the SSRN version; its saved file bears the
   author-hosted copy's name, `risk-budgeting.pdf`): Definition (3), p. 5 (weights in [0, 1]ⁿ; budgets strictly positive,
-  summing to 1); §2.2, pp. 4–5 (a zero budget can give several solutions: budgets (50%, 50%, 0%) give both (33.33%,
-  66.67%, 0%) and (20%, 20%, 40%), hence `b_i > 0`); eq. (7), p. 9 (weights proportional to `b_i/β_i`); §2.3.3, pp. 9–10
+  summing to 1); §2.2, pp. 4–5 (a zero budget can give several solutions: budgets (50%, 50%, 0%) admit more than one, hence `b_i > 0`; the two
+  weight vectors first recorded here do not both sum to 1 and wait for a re-read); eq. (7), p. 9 (weights proportional to `b_i/β_i`); §2.3.3, pp. 9–10
   (existence and uniqueness for a positive definite covariance from the log-barrier program (9), footnote 13 on
   `b_i > 0` — a short argument, not a formal theorem); §2.3.4, p. 10 (`σ_mv ≤ σ_rb ≤ σ_wb`, proved in Appendix A.3).
   Page and equation numbers are that version's. LM31's source for unequal budgets (the shared "References" decision
@@ -1555,7 +1568,7 @@ means nothing in the text was read; "unverified" marks a field or claim that no 
   negligible for fixed income, currencies and commodities (p. 31; the opening section, p. 14, names bonds, currencies
   and commodities); the vol of vol and the mean shortfall (the left tail) improve materially for almost all of the
   futures, forwards and credit (p. 25), but for US 10-year Treasury futures the vol of vol is much lower while the
-  Sharpe ratio and the left tail are similar (Exhibit 13, p. 25); for a 60–40 portfolio scaled at the asset and
+  Sharpe ratio and the left tail are similar (p. 25; Exhibit 13, p. 26); for a 60–40 portfolio scaled at the asset and
   portfolio levels, 1988–2017, both the cumulative return and the vol of vol improve, and so do the Sharpe ratio and
   the expected shortfall (pp. 27–28, Exhibits 16–17); footnote 7, p. 16: Moreira and Muir scaled by variance for most
   of their analysis, and volatility scaling did as well in a robustness check (for LM31's knowledge check §6(b)).
@@ -1597,7 +1610,8 @@ means nothing in the text was read; "unverified" marks a field or claim that no 
   Cambridge-style DOI 10.1017/S0022109000017798 is not registered (Crossref and doi.org both returned 404): cite
   10.2307/2329621.
 - Chopra & Ziemba (1993), same list: LM28 and LM30 cite it as lm07.md:509 does, with no ratio printed. Crossref,
-  re-read: *JPM* 19(2): 6–11, 1993.
+  re-read: *JPM* 19(2): 6–11, 1993, DOI 10.3905/jpm.1993.409440 (Crossref's record for that DOI, read 2026-10-31: the
+  title, both authors, volume, issue and pages match).
 - Boyd & Vandenberghe (2004), same list ("Stanford PDF"): LM28, LM29 and LM31. *Convex Optimization*, Cambridge
   University Press, 2004, DOI [10.1017/CBO9780511804441](https://doi.org/10.1017/CBO9780511804441). Crossref:
   monograph issued 2004-03-08, print ISBN 978-0-521-83378-3, online ISBN 978-0-511-80444-1. Read by the LM29 drafter
@@ -1607,8 +1621,8 @@ means nothing in the text was read; "unverified" marks a field or claim that no 
   agrees): first-order conditions §3.1.3, p. 69; second-order conditions §3.1.4, p. 71; pointwise maximum §3.2.3,
   p. 80; local and global optima §4.2.2, p. 138; linear-fractional programs and their change of variables §4.3.2,
   p. 151; the QP form (4.34) §4.4, p. 152; §4.4.1 "Examples", subsection "Markowitz portfolio optimization", p. 155,
-  and its linear transaction costs with buy and sell variables, p. 156; the refined Slater condition (5.27), which
-  reduces to feasibility for linear constraints, §5.2.3, p. 227; KKT conditions sufficient for convex problems, and
+  and its linear transaction costs with buy and sell variables, p. 156; the refined Slater condition (5.27), §5.2.3,
+  p. 226, which reduces to feasibility for linear constraints (p. 227); KKT conditions sufficient for convex problems, and
   necessary and sufficient under Slater's condition, §5.5.3, p. 244; the global inequality (5.57), §5.6.2, p. 250;
   local sensitivity §5.6.3, p. 251; and, for LM28, §4.7.6 "Examples", subsection "Risk-return trade-off in portfolio
   optimization", pp. 185–186 (§4.7.6 itself is titled "Examples"). LM28 uses §4.4.1 and §4.7.6; LM31 cites the book
@@ -1794,7 +1808,8 @@ nothing in the text was read; "unverified" marks a field or claim that no record
   comma before "and"). Read in the authors' version of 31 July 2014 (the survey, the LM33 drafter and the source
   check): the expected maximum Sharpe ratio of `N` independent trials with the Euler–Mascheroni constant, eq. (1),
   p. 7, derived in Appendix A.1, eqs. (3)–(6), p. 12; DSR, eq. (2), p. 8, a PSR at that threshold with `√(T − 1)` and
-  raw kurtosis, its threshold eq. (1) without the mean term; the worked example, pp. 9–10 (`N = 100`, `V = 1/2`,
+  raw kurtosis, its threshold eq. (1) without the mean term (eq. (1) scales by the standard deviation of the trials'
+  estimated Sharpe ratios, the example's `V`; LM33's DSR uses `1/√(T − 1)` instead and says so); the worked example, pp. 9–10 (`N = 100`, `V = 1/2`,
   `T = 1250`, skewness −3, kurtosis 10: threshold ≈ 0.1132 and DSR ≈ 0.9004; 0.9505 at `N = 46`; with normal
   returns 0.9505 at `N = 88`; reproduced, A33-51); eq. (9), Appendix A.3, p. 14, the implied number of independent
   trials `N̂ = ρ̂ + (1 − ρ̂)M` with `ρ̂` the average correlation of eq. (8) — not the expected maximum. LM33 prints
@@ -1847,7 +1862,7 @@ nothing in the text was read; "unverified" marks a field or claim that no record
   mass of logits at or below 0 (§3.1); §3.2 adds the degradation regression and the probability of loss. The manuscript
   prints 12,780 for `C(16, 8) = 12,870`, and its step c) calls the in-sample set the testing set and step f) drops the
   bars: §7 states the steps in the book's own words, citing the manuscript. Dropping the earliest rows to make 16 equal
-  blocks is the book's convention. Used for (34.3) and §7.
+  blocks is the book's convention. Used for (34.4) and §7.
 - Elton, Gruber & Blake, "Survivor Bias and Mutual Fund Performance", *RFS* 9(4): 1097–1120, October 1996, DOI
   [10.1093/rfs/9.4.1097](https://doi.org/10.1093/rfs/9.4.1097). Abstract (OpenAlex's copy, re-read): funds that
   disappear tend to do so after poor performance; the study tracks every fund that existed at the end of 1976 and
@@ -1939,13 +1954,37 @@ nothing in the text was read; "unverified" marks a field or claim that no record
   consistent, though the resample's own is preferred; for block bootstraps they suggest the Götze–Künsch variance,
   p. 1254. LM34's E7 names the first step with footnote 22's variant and Remark 3.4's centring; the lab codes
   Algorithms 4.1 and 4.2.
-- White (2000), "LM21": LM34's (34.4) and §6's Deep Dive. Read by the LM34 drafter (2026-10-24) in a copy of the
+- White (2000), "LM21": LM34's (34.3) and §6's Deep Dive. Read by the LM34 drafter (2026-10-24) in a copy of the
   published article in the journal's layout (30 pages, running pages 1097–1126; where the copy came from was not
   recorded), re-read for this list in the drafter's saved file: the statistic is the maximum over models of `√n`
   times the mean performance against the benchmark, its bootstrap counterpart the maximum of the recentred resampled
   means (Corollary 2.4, p. 1105), and the p-value one minus the observed statistic's rank among the sorted resampled
-  ones over their number (§3, p. 1110); the resamples use Politis and Romano's stationary bootstrap. Crossref,
-  re-read: 68(5): 1097–1126, September 2000.
+  ones over their number (§3, p. 1110); the resamples use Politis and Romano's stationary bootstrap. The corollary's
+  hypotheses were read by Stage 1's fresh check (2026-10-31) in the published article on Bruce Hansen's course page
+  at the University of Wisconsin (users.ssc.wisc.edu/~bhansen/718/White2000.pdf: the journal's layout, 30 pages,
+  running pages 1097–1126, so its numbering is the published one). Corollary 2.4 (p. 1105) holds "under the
+  conditions of Theorem 2.3": either (i) Assumptions A and B, with no estimated parameters; or (ii) Assumptions A–C
+  and either (a) `F = 0` and `q_n = c n^(−γ)`, `c > 0`, `0 < γ < 1`, with `(n^(γ+ε)/R) log log R → 0` for some
+  `ε > 0`, or (b) `(n/R) log log R → 0`, as `T → ∞` (p. 1105). Its conclusion: as `T → ∞`, the distance between the
+  law of `V*_l = max_k n^(1/2)(f̄*_k − f̄_k)` given the data and that of `max_k n^(1/2)(f̄_k − E(f*_k))`, in any metric
+  of convergence in distribution, tends to 0 in probability; likewise for the minimum `W*_l`. White's `n` counts the
+  predictions `t = R, …, T`, `T = R + n − 1`, and `l` the models; the data are a stationary strong (α-) mixing
+  sequence (§2.a, p. 1099); the stationary bootstrap's `q = 1/b = q_n` has `0 < q_n ≤ 1`, `q_n → 0` and `n q_n → ∞`
+  (p. 1104). Assumption A, West's (1996), in the Mathematical Appendix (p. 1117): A.1, `f_t(β)` measurable and twice
+  continuously differentiable near `β*`, its second derivatives bounded by `m_t` with `E m_t < D < ∞`; A.2,
+  `β̂_t − β* = B(t)H(t)` with `B(t) → B` a.s. of rank `k` and `H(t)` the mean of orthogonality conditions `h_s(β*)` of
+  mean 0; A.3, for the vector stacking `vec(f*_tβ)`, `f*_t` and `h_t`: (a) its norm has a finite moment of order
+  `4d`, uniformly in `t`, for some `d > 1`, (b) it is strong mixing (centred) with coefficients of size `−3d/(d − 1)`,
+  (c) it is covariance stationary, (d) the long-run covariance `S_ff` of `f*_t` is positive definite; A.4,
+  `R, n → ∞` and `n/R → π`, `0 ≤ π ≤ ∞`; A.5, `π = 0` or `F = 0`, or a joint matrix `S` positive definite.
+  Assumption B (p. 1119): the conditions of Theorem A.2, his version of Politis and Romano's (1994a) Theorem 2, for
+  each element of `f*_t`: strict stationarity, `E|X_1|^(6+ε) < ∞` for some `ε > 0`, and α-mixing with
+  `α(k) = O(k^(−r))` for some `r > 3(6 + ε)/ε`. Assumption C (p. 1104): a law of the iterated logarithm for `β̂_T`.
+  With no estimated parameters `F` "plays no role" (p. 1101). The number of models is fixed: the theory treats "a
+  finite number of specifications", and `l` growing with `T` gets heuristics only, a rigorous treatment being "beyond
+  our present scope" (pp. 1110–1111); §5 lists it among open topics (p. 1115). A singular `Ω` keeps the corollary
+  (pp. 1105–1106). The simple p-value `P_RC = 1 − M/N`, with `V*_(M) ≤ V_l < V*_(M+1)`, counts the resampled values
+  strictly above `V_l` (p. 1110). Crossref, re-read: 68(5): 1097–1126, September 2000.
 - Sullivan, Timmermann & White (1999), "LM21": one sentence in LM34's §6 (the reality check on technical trading
   rules). Crossref, re-read: *JF* 54(5): 1647–1691, October 1999.
 - Ledoit & Wolf (2008), "LM22": LM33's two-Sharpe test, now read in the JEF text (its LM22 entry, rewritten).
@@ -1967,7 +2006,7 @@ nothing in the text was read; "unverified" marks a field or claim that no record
 - *RiskMetrics — Technical Document* (1996) and the GARCH sources of the "LM26" section (Engle 1982; Bollerslev 1986,
   bibliographic data only): LM32's EWMA and GARCH VaR forecasts.
 - Boyer, Gibson & Loretan (1999), Theorem 1, and Wasserman (2004), the Volume III entries: LM35's (16.10) and the
-  distance `d²` of (16.8), through LM16.
+  distance `d²` of (16.7), through LM16.
 - Jagannathan & Ma (2003), Proposition 1, under LM30 (Volume V): LM35, through LM30's (30.4).
 - Bailey & López de Prado (2014), under LM33 above, and Harvey & Liu (2015): LM34 cites both by pointer.
 
@@ -2422,7 +2461,7 @@ one of the twelve has in `uv.lock` a Windows wheel that installs on CPython 3.13
 ### scikit-learn 1.9.1
 
 - **`LedoitWolf(assume_centered=False)`** (brief: LM30, "installed source read 2026-10-24"; the formula of
-  `ledoit_wolf_shrinkage` matches (30.3) term by term and the hand computation agrees to 1e-17, A30-13, reproduced
+  `ledoit_wolf_shrinkage` matches (30.3) term by term and the hand computation agrees to rounding error (below 1e-15), A30-13, reproduced
   independently in its first version and revised since; read; run). `fit` subtracts the column means
   (`covariance/_shrunk_covariance.py:603-606`) and calls `_ledoit_wolf(..., assume_centered=True)` (`:607-609`),
   whose empirical covariance divides by the number of rows (`_empirical_covariance.py:104-105`): the divisor is T.
@@ -2440,7 +2479,7 @@ one of the twelve has in `uv.lock` a Windows wheel that installs on CPython 3.13
   (`:394-399`). Both terms carry the same factor 1/N, so the ratio is the book's
   `min(σ̂², ‖S − μI‖_F²) / ‖S − μI‖_F²`. Run on 120×5 toy data (divisor-T covariance): `shrinkage_` equals
   the book's form to 7e-17 and `covariance_` equals (1 − s)·S + s·μ·I to 4e-16; multiplying the data by √243 changed
-  `shrinkage_` by 8e-17 (scale-free; A30-13 reports 0 for daily against annual units on E5's first window).
+  `shrinkage_` by 8e-17 (scale-free; A30-13 finds daily and annual units equal to rounding error, below 1e-15, on E5's first window).
 - **`OAS`** (brief: LM30, "its source comment, read in the installed 1.9.1"; read; run). `_oas`
   (`_shrunk_covariance.py:46-94`) computes min((tr(S²) + tr(S)²)/((n + 1)(tr(S²) − tr(S)²/p)), 1) and the comment says
   "The factor 2 / p is omitted since it does not impact the value of the estimator for large p" and cites Eq. 23 of
@@ -2580,8 +2619,8 @@ one of the twelve has in `uv.lock` a Windows wheel that installs on CPython 3.13
   tzdata 2026.5, run 2026-10-24) Taipei is UTC+8 with no daylight saving and 16:00 in New York is 04:00 in Taipei in
   US summer time and 05:00 otherwise (checked for dates in 2008, 2025 and 2026). On the page's early-close days (1:00
   p.m. ET) the session ends at 01:00 or 02:00 Taipei time.
-- **Not read, so not asserted:** the rule in force before 2016-06-03, so the replays of 2008 and 2015 keep "under TWSE's
-  current rules" (the source check's advice); DBO's roll rule (Invesco's page states none beyond the name "Optimum
+- **Not read, so not asserted:** TWSE's rule in force before 2016-06-03, so the replays of 2008 and 2015 keep "under each
+  market's current rules" (the source check's advice, with each fund's own market by the "Listing markets" decision); DBO's roll rule (Invesco's page states none beyond the name "Optimum
   Yield", and its fact sheet was not obtained); the index title of 00672L; the 證券交易稅條例實施注意事項 that the Ministry's ruling
   cites. For TPEx: no official reason for the 2017 change of Art. 7's 成分股 to 成分證券 was found (selaw's 附件下載 lists five
   undated files: a 修正總說明 and a 修正條文對照表 whose titles name 主動式交易所交易基金, which the rules' name took on 2024-12-31, so
@@ -3057,7 +3096,9 @@ LM29, LM30 and LM31 (new terms):
 
 No listing has an entry for no-trade band, operator splitting, risk contribution, marginal contribution, coordinate
 descent, inverse variance or volatility, quasi-diagonalization, equal risk contribution, recursive bisection,
-volatility targeting, reference portfolio, Black–Litterman or Ledoit–Wolf.
+volatility targeting, reference portfolio, Black–Litterman or Ledoit–Wolf. LM31's composed forms, printed with their
+English in every box that uses them: 等風險貢獻 (equal risk contribution, ERC), 反波動率權重 (inverse-volatility weights)
+and 準對角化 (quasi-diagonalization); the other forms are in the rows above and in the list of the book's own forms.
 
 Volume VI, LM32–LM35 (new terms):
 
@@ -3088,7 +3129,7 @@ Volume VI, LM32–LM35 (new terms):
 | Mahalanobis distance | Mahalanobis距離 | Mahalanobis距離 | — | Mahalanobis 距離 (lm16.md:429, 660) |
 | conditional expectation | 條件期望值 | 條件期望值 | — | 條件期望值 |
 | price limit | — | — | 漲跌停限制 | 漲跌幅限制 (lm04.md:212, lm12.md:527, lm13.md:342, lm17.md:450, lm22.md:355; no listing has it) |
-| worst-case scenario | — | — | — (新聞傳播學名詞 最差情況；最糟情境) | 最糟情境 |
+| worst-case scenario | — | — | — (新聞傳播學名詞 最差情況；最糟情境) | not printed in a box (LM35's brief) |
 | what-if scenario | — | — | — (土木工程名詞 假設情境) | 假設情境 (hypothetical scenario) |
 | overnight | — (overnight interbank call loan rate 隔夜拆款利率) | — | — | 隔夜 |
 | proxy | — | — | 委託書 (管理學名詞-會計學 參考值；替代; 會計學 代理，委託; 電子計算機名詞 代理伺服器) | 代理資產, composed |
