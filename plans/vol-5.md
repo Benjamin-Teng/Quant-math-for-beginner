@@ -17,7 +17,7 @@ three revisions, the Stage 4 list, one spine per module and the briefs of LM27�
 `plans/vol-6.md`, the anchors in `plans/vol-5-anchors.md` and `plans/vol-6-anchors.md`. Until Stage 3 the briefs and anchors are the
 plan; from Stage 3 the module sources and their numbers scripts are authoritative (as in `plans/vol-4.md`).
 
-Status: revised three times and given a last pass on 2026-10-24/25, each revision verified by fresh agents; revised on 2026-10-31 to the fresh check of the whole of Stage 1 ("Decisions on the fresh check of the whole of Stage 1", `plans/vol-5.md`), whose fixes and changed anchors fresh agents verified the same day.
+Status: Volume V (LM27–LM31) published in edition 0.6 (2026-11-07), after Stages 2 and 3 (records in `reviews/lm27.md` … `lm31.md`); Volume VI waits for edition 0.7. Stage 1 was revised three times and given a last pass on 2026-10-24/25, each revision verified by fresh agents; revised on 2026-10-31 to the fresh check of the whole of Stage 1 ("Decisions on the fresh check of the whole of Stage 1", `plans/vol-5.md`), whose fixes and changed anchors fresh agents verified the same day.
 
 The Stage 1 survey (2026-10-24: eight read-only surveyors and an adversarial critic) and a fresh adversarial check of
 the first spines (the same day) are summarized where each decision uses them. Their reports were working files; every
@@ -869,23 +869,32 @@ writer's departures from its brief are listed in the module's review record (`re
 Collected here as the briefs add them; applied at publication with the edition note. Each item is tagged with the
 publication it serves (decision G): *Volume V* (published before Volume VI is written, as the owner chose; Stage 2
 above), *Volume VI* (an item that rewords a pointer to LM32–LM35 or follows their protocol), or *either* (a published
-defect).
+defect). Volume V was published in edition 0.6 (2026-11-07): each item below says whether it was applied then or
+waits for edition 0.7 (Volume VI).
 
 - *Volume V and VI.* Leads: list G of "Editor's decisions on the briefs" (merged from the briefs' prerequisites); each
   brief's "Stage 4 for earlier modules" names the files and lines. Volume V adds +27…+31, Volume VI +32…+35.
+  **Volume V's +27…+31: applied in edition 0.6** (20 leads in lm01, lm03, lm04, lm07, lm08, lm09, lm11, lm12, lm14,
+  lm15, lm19, lm20, lm22 and lm23), checked both ways: every prerequisite of LM27–LM31 lists the module in its leads,
+  and every lead to LM27–LM31 is cited in that module by [[LMn]] or an equation number. **Volume VI's +32…+35: waits
+  for edition 0.7 (Volume VI).**
 - *Volume V.* lm08.md:290 (required, Stage 3 cross-check X21; LM31's brief): "[[LM31]] groups assets by this
-  distance." → "[[LM31]] builds a tree of assets from half this distance."
-- Optional, with Volume VI (LM32): lm04.md's MDD sign (46–50, 510).
-- *Volume V.* lm07.md:511–512: 切點組合 → 切點投資組合 (the Glossary's form, lm07.md:771).
-- *Volume V.* lm07.md:786: Chopra and Ziemba (1993) gains its issue number, 19(2): 6–11.
+  distance." → "[[LM31]] builds a tree of assets from half this distance." **Applied in edition 0.6.**
+- Optional, with Volume VI (LM32): lm04.md's MDD sign (46–50, 510). **Waits for edition 0.7 (Volume VI).**
+- *Volume V.* lm07.md:511–512: 切點組合 → 切點投資組合 (the Glossary's form, lm07.md:771). **Applied in edition 0.6**
+  (three times: the box title and twice in line 512).
+- *Volume V.* lm07.md:786: Chopra and Ziemba (1993) gains its issue number, 19(2): 6–11. **Applied in edition 0.6**,
+  written "19 (2): 6–11" as lm07.md's other references write volume and issue.
 - *Volume VI.* lm19.md:359: Lo's "as much as 65%" is stated for a hedge fund in his illustrative example (Lo 2002,
-  p. 36); the sentence says so (LM33's Sources).
+  p. 36); the sentence says so (LM33's Sources). **Waits for edition 0.7 (Volume VI).**
 - *Volume VI.* lm21.md:373: White (2000) and Romano–Wolf (2005) correct a search on the same data; testing rules fixed
-  in advance on later data is the other half of LM34. Reword so the sentence says both.
+  in advance on later data is the other half of LM34. Reword so the sentence says both. **Waits for edition 0.7
+  (Volume VI).**
 - *Volume V.* `src/syllabus.yaml`: LM31's line ("Euler risk contributions and risk-based allocation") becomes risk
-  budgeting with LM27's contributions.
+  budgeting with LM27's contributions. **Applied in edition 0.6**, in LM31's brief's wording: "Risk budgets from
+  LM27's contributions, HRP's tree, and volatility targeting."
 - *Volume V.* `src/syllabus.yaml`: LM27's line becomes "A book's return, drift and trading costs; Euler risk
-  contributions and factor risk."
+  contributions and factor risk." **Applied in edition 0.6.**
 - *Either publication* (a published defect; the editor deferred it to edition 0.7, Volume VI's publication, on
   2026-11-07). LM3's TQQQ example (lm03.md:34, 45, 464, 467, 469, 471, 475, 477; capability D). A re-fetch of QQQ's
   back-adjusted closes re-rounds them: the exact rebalancing effect $-0.31325$ (unrounded −0.3132492, 0.42 of a unit from the five-decimal
@@ -896,23 +905,33 @@ defect).
   31; RV and √RV in none), and `data/lm03_numbers.py:313–314` checks ln(8.27/39.55) from the literal levels and
   asserts the levels (39.55, 8.27) exactly, so `build.sh --data` would fail on a fresh checkout. Fix in LM3: quote levels with their retrieval date (2026-10-10) or from
   unadjusted closes, print each derived value only to digits a cent per value cannot move, replace the exact-level
-  assert by a ratio check, and align Lab 3 Part 6.
+  assert by a ratio check, and align Lab 3 Part 6. **Waits for edition 0.7 (Volume VI).**
 - *Volume VI.* `build/make_lab04.py`'s walk-forward extension sets each month's leverage from data through the
   month-end close and holds it from that close, E5's slip; shift it one session (trade at the next close), as LM34's
-  lab does, and say so in the scaffold (it prints no number in the module).
+  lab does, and say so in the scaffold (it prints no number in the module). **Waits for edition 0.7 (Volume VI).**
 - *Volume V.* src/pages/getting-started.md:113 ('When you combine two series, keep only the dates they share.'): a
   statistic of two series uses their shared dates; a portfolio's wealth uses every session, each asset earning its own
-  return ([[LM27]]'s wealth frame). Applied with Volume V.
+  return ([[LM27]]'s wealth frame). **Applied in edition 0.6** (the source changed with Stage 3's last fixes,
+  `5516bb4`; the site with this edition).
 - *Volume V.* src/pages/getting-started.md:88–91 (CV-13, V-1): three groups of files need a paid plan, not one:
   `data/raw/sectors_close/` (561 files that repair copied sector closes), `data/raw/vol4_settlement/` (Volume IV's
   cross-check of final settlements, which `vol4_series.py` skips when absent) and `data/raw/vol6/`'s two ETF snapshots
   (`etf_snapshot__…`, used for one count in Volume VI). The free-plan command becomes `uv run python
   data/fetch_finmind.py --exclude sectors_close/ --exclude vol4_settlement/ --exclude vol6/etf_snapshot`, as
-  `data/fetch_finmind.py`'s hint and LM31's lab README give it. Applied with Volume V.
+  `data/fetch_finmind.py`'s hint and LM31's lab README give it. **Applied in edition 0.6** (the source changed with
+  Stage 3's last fixes, `5516bb4`; the site with this edition).
+- *Volume V.* The Volume II labs' free-plan command (the last fixes' verifier; `build/make_lab08.py`,
+  `make_lab09.py` and `make_lab10.py`, each lab's README): `--exclude sectors_close/` alone becomes the command above,
+  with "(Getting Started gives the reasons)"; each lab keeps its own sentence on the sector repairs. **Applied in
+  edition 0.6**: the three labs regenerated and executed from a clean kernel (0 error outputs; every output equal to
+  the earlier run's but LM9's two timing columns).
 - *Volume V.* build/build_index.py:297 (V-4, the front page): 'later volumes add statsmodels, cvxpy and arch' →
-  'later volumes add statsmodels, cvxpy, scikit-learn and arch' (LM30's lab runs scikit-learn's Ledoit–Wolf). Applied
-  with Volume V.
-- *The brief's own volume.* Each brief's "Stage 4 for earlier modules".
+  'later volumes add statsmodels, cvxpy, scikit-learn and arch' (LM30's lab runs scikit-learn's Ledoit–Wolf).
+  **Applied in edition 0.6** (the source changed with Stage 3's last fixes, `5516bb4`; the site with this edition).
+- *The brief's own volume.* Each brief's "Stage 4 for earlier modules". **Volume V's five briefs (LM27–LM31): applied
+  in edition 0.6**; each of their items is one of those above (leads, lm07.md:511–512 and 786, lm08.md:290, LM31's
+  syllabus line), and they name no other wording change. **Volume VI's four briefs (`plans/vol-6.md`): wait for
+  edition 0.7 (Volume VI).**
 
 ## Spines
 

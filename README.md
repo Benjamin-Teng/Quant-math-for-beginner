@@ -2,7 +2,7 @@
 
 **English** | [繁體中文](README.zh-TW.md)
 
-A personal self-study project that builds from first-year calculus, statistics and linear algebra toward statistical modeling, portfolio optimization and Kelly position sizing under uncertainty. The planned curriculum spans **9 volumes and 50 Learning Modules**; **Volumes I–IV (LM1–LM26) are published**.
+A personal self-study project that builds from first-year calculus, statistics and linear algebra toward statistical modeling, portfolio optimization and Kelly position sizing under uncertainty. The planned curriculum spans **9 volumes and 50 Learning Modules**; **Volumes I–V (LM1–LM31) are published**.
 
 The textbook is written in English with Traditional Chinese reading guides. Published modules include a web chapter, an A4 PDF and a Jupyter lab with saved outputs. Examples combine Taiwan and US market data with explicitly labeled models, simulations and constructed cases.
 
@@ -10,7 +10,7 @@ The textbook is written in English with Traditional Chinese reading guides. Publ
 
 ## Current progress
 
-README updated: **2026-10-23**. Latest textbook edition: **0.5 (2026-10-20)**, as recorded in [the syllabus](src/syllabus.yaml).
+README updated: **2026-11-07**. Latest textbook edition: **0.6 (2026-11-07)**, as recorded in [the syllabus](src/syllabus.yaml).
 
 | Volume | Topic | Modules | Status |
 |:--|:--|:--|:--|
@@ -18,13 +18,13 @@ README updated: **2026-10-23**. Latest textbook edition: **0.5 (2026-10-20)**, a
 | II | Linear Algebra for Portfolios | LM8–LM12 | Published |
 | III | Probability | LM13–LM18 | Published |
 | IV | Statistical Inference and Econometrics | LM19–LM26 | Published |
-| V | Portfolio Optimization | LM27–LM31 | Planned |
+| V | Portfolio Optimization | LM27–LM31 | Published |
 | VI | Measuring True Risk and Return | LM32–LM35 | Planned |
 | VII | Stochastic Calculus | LM36–LM40 | Planned |
 | VIII | The Kelly Criterion and Optimal Leverage | LM41–LM46 | Planned |
 | IX | Capstone | LM47–LM50 | Planned |
 
-Edition 0.5 adds statistical inference, regression, Bayesian shrinkage and time-series models, including volatility modeling. The remaining portfolio, risk, stochastic-calculus, advanced Kelly and capstone modules are roadmap items, not published chapters.
+Edition 0.6 adds portfolio optimization: portfolio return and risk contributions, mean–variance optimization, convex optimization under portfolio limits, estimation error and robust portfolios, and risk parity, hierarchical risk parity and volatility targeting. The remaining risk-measurement, stochastic-calculus, advanced Kelly and capstone modules are roadmap items, not published chapters.
 
 See [TODO.md](TODO.md) for the current queue and [the roadmap](plans/ROADMAP.md) for future volumes.
 
@@ -70,6 +70,11 @@ The following links point to the repository's built chapters, PDFs and lab folde
 | LM24 Bayesian Inference and Shrinkage | published | [`docs/lm/lm24.html`](docs/lm/lm24.html) | [`docs/pdf/LM24_…pdf`](docs/pdf/LM24_Bayesian_Inference_and_Shrinkage.pdf) | [`labs/LM24_lab`](labs/LM24_lab) |
 | LM25 Time Series I: ARMA, Unit Roots and Cointegration | published | [`docs/lm/lm25.html`](docs/lm/lm25.html) | [`docs/pdf/LM25_…pdf`](docs/pdf/LM25_Time_Series_I_ARMA_Unit_Roots_and_Cointegration.pdf) | [`labs/LM25_lab`](labs/LM25_lab) |
 | LM26 Time Series II: Volatility Models | published | [`docs/lm/lm26.html`](docs/lm/lm26.html) | [`docs/pdf/LM26_…pdf`](docs/pdf/LM26_Time_Series_II_Volatility_Models.pdf) | [`labs/LM26_lab`](labs/LM26_lab) |
+| LM27 Portfolio Return and Risk | published | [`docs/lm/lm27.html`](docs/lm/lm27.html) | [`docs/pdf/LM27_…pdf`](docs/pdf/LM27_Portfolio_Return_and_Risk.pdf) | [`labs/LM27_lab`](labs/LM27_lab) |
+| LM28 Mean–Variance Optimization | published | [`docs/lm/lm28.html`](docs/lm/lm28.html) | [`docs/pdf/LM28_…pdf`](docs/pdf/LM28_Mean_Variance_Optimization.pdf) | [`labs/LM28_lab`](labs/LM28_lab) |
+| LM29 Convex Optimization in Practice | published | [`docs/lm/lm29.html`](docs/lm/lm29.html) | [`docs/pdf/LM29_…pdf`](docs/pdf/LM29_Convex_Optimization_in_Practice.pdf) | [`labs/LM29_lab`](labs/LM29_lab) |
+| LM30 Estimation Error and Robust Portfolios | published | [`docs/lm/lm30.html`](docs/lm/lm30.html) | [`docs/pdf/LM30_…pdf`](docs/pdf/LM30_Estimation_Error_and_Robust_Portfolios.pdf) | [`labs/LM30_lab`](labs/LM30_lab) |
+| LM31 Risk Parity, HRP and Volatility Targeting | published | [`docs/lm/lm31.html`](docs/lm/lm31.html) | [`docs/pdf/LM31_…pdf`](docs/pdf/LM31_Risk_Parity_HRP_and_Volatility_Targeting.pdf) | [`labs/LM31_lab`](labs/LM31_lab) |
 
 A module is published only after independent review and verified fixes under [AUTHORING.md](AUTHORING.md). The syllabus controls which modules appear in the published build; unpublished entries appear only in the preview.
 

@@ -31,7 +31,7 @@ uv run python data/fetch_finmind.py    # rebuilds and verifies data/raw/
 uv run python data/make_lab_data.py    # writes every lab's data/ folder
 ```
 
-On FinMind's free plan, fetch with `uv run python data/fetch_finmind.py --exclude sectors_close/`; the sector repair then drops the closes it cannot repair, and Part 5 says which printed numbers change.
+On FinMind's free plan, fetch with `uv run python data/fetch_finmind.py --exclude sectors_close/ --exclude vol4_settlement/ --exclude vol6/etf_snapshot` (Getting Started gives the reasons); the sector repair then drops the closes it cannot repair, and Part 5 says which printed numbers change.
 
 `fetch_finmind.py` checks every file against `data/raw_manifest.json`. The notebook reads only the files in its own `data/` folder, which then holds:
 

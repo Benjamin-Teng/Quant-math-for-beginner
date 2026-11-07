@@ -13,9 +13,9 @@ file (`plans/vol-N.md`, in the format below).
 | 1 | II Linear Algebra for Portfolios (published 2026-10-17) | 5 | I | 0.3 |
 | 2 | III Probability (published 2026-10-18) | 6 | I | 0.4 |
 | 3 | IV Statistical Inference and Econometrics (published 2026-10-20) | 8 | II, III | 0.5 |
-| 4 | V Portfolio Optimization · VI Measuring True Risk and Return | 5 + 4 | II, IV | 0.6 |
-| 5 | VII Stochastic Calculus | 5 | III, IV | 0.7 |
-| 6 | VIII The Kelly Criterion and Optimal Leverage | 6 | V, VI, VII | 0.8 |
+| 4 | V Portfolio Optimization (published 2026-11-07) · VI Measuring True Risk and Return | 5 + 4 | II, IV | 0.6 (V), 0.7 (VI) |
+| 5 | VII Stochastic Calculus | 5 | III, IV | 0.8 |
+| 6 | VIII The Kelly Criterion and Optimal Leverage | 6 | V, VI, VII | 0.9 |
 | 7 | IX Capstone | 4 | all | 1.0 |
 
 Volumes II and III were planned as one batch; on 2026-10-11 the owner started Volume II on its own. The same day,

@@ -1,4 +1,4 @@
-# TODO — handoff (2026-10-25)
+# TODO — handoff (2026-11-07)
 
 > 給接手的 Claude Code：先讀 `CLAUDE.md`，再依下列順序執行。每完成一項就 commit 並直接 push 到 `main`，並用繁體中文向 Benjamin 回報。
 
@@ -7,9 +7,11 @@
 
 ## Where things stand
 
-- **Volumes I–IV are published (edition 0.5, 2026-10-20).** LM19–LM26 joined the site with A4 PDFs and executed
-  labs; their record is under "Volume IV (edition 0.5)" below. `README.md` was refreshed and `README.zh-TW.md` added
-  on 2026-10-23 (`d0ebe25`).
+- **Volumes I–V are published (edition 0.6, 2026-11-07).** LM27–LM31 join the site with A4 PDFs and executed labs;
+  their record is under "Batch 4" below. Volume VI (LM32–LM35) follows as edition 0.7.
+- **Volume IV (edition 0.5, 2026-10-20).** LM19–LM26 joined the site with A4 PDFs and executed labs; their record is
+  under "Volume IV (edition 0.5)" below. `README.md` was refreshed and `README.zh-TW.md` added on 2026-10-23
+  (`d0ebe25`).
 - **Volume III (edition 0.4, 2026-10-18).** LM13–LM18 joined the site with A4 PDFs and executed labs. Volume III's
   record, in order:
   - Stage 1: TR23 (the TAIEX total-return index from 2003, `data/vol3_series.py`, checked against the price index on
@@ -57,7 +59,7 @@
   a revision changes in a module are not copied back. Four of the closing check's six refuted items (LM8 C1, CX1–CX3) rest on this rule; reviews/README.md gives the
   reasons for CX4 and CX5.
 
-## Batch 4: Volumes V and VI (edition 0.6) — in progress
+## Batch 4: Volumes V (edition 0.6, published) and VI (edition 0.7) — in progress
 
 The owner (2026-10-24): run batch 4 from Stage 1 to publication, as before. Only technical questions go to him. The
 textbook content follows the plan and is the editor's call, and the editor reviews it independently before anything
@@ -104,14 +106,36 @@ LM32–LM35 (Measuring True Risk and Return); the two can be written in parallel
     and the editor's answers are in `plans/vol-5.md` ("Stage 2 of Volume V"); each writer's departures from its brief
     open `reviews/lm27.md` … `lm31.md`. The published site is not rebuilt for drafts: a rebuild of `docs/` marks them
     "In review" on the front page, so `docs/` is restored and changes only at publication.
-  - [ ] **Next, on the owner's command only:** Volume VI (LM32–LM35) drafts, or Stage 3 of Volume V.
+  - [ ] **Next, on the owner's command only:** Volume VI (LM32–LM35) drafts. The owner chose to publish Volume V as
+    edition 0.6 and Volume VI the week after as edition 0.7.
 - [ ] Stage 3: review rounds, closing check, final check.
-- [ ] Stage 4: publish edition 0.6.
+  - [x] Volume V (LM27–LM31), 2026-11-07 (`2f91833` … `5516bb4`): round 1 (an independent reviewer, a blind solver
+    and a number auditor per module, a cross-module check; a fresh agent per module merged the reports into 197 items,
+    0 critical and 20 major, and re-checked every critical and major item adversarially); revisions 1 and 2, each
+    verified by fresh agents with a cross-module re-check; a closing check (46 items, all minor) with a fresh
+    adversarial second check of every item; the closing fixes; a fresh final check per module and for the volume; the
+    last fixes, verified (READY TO PUBLISH). Records: `reviews/lm27.md` … `lm31.md` (the cross-module X, re-check and
+    CV items included) and `reviews/README.md`.
+  - [ ] Volume VI (LM32–LM35), after its drafts.
+- [ ] Stage 4: publish.
+  - [x] Volume V: edition 0.6 (2026-11-07). LM27–LM31 `status: published` with the edition note
+    (`src/syllabus.yaml`, with LM27's and LM31's lines reworded); the Volume V part of `plans/vol-5.md`'s "Stage 4
+    changes to earlier modules", each item marked there: decision G's leads +27…+31 (20 leads, checked both ways),
+    lm07.md:511–512 (切點投資組合), lm07.md:786 (Chopra and Ziemba's issue), lm08.md:290 (HRP's tree), and the Volume
+    II labs' free-plan command (labs 8–10 regenerated and executed); the READMEs' status tables; then
+    `./build.sh --data --pdf` and the publication checks of "How a batch runs" below.
+  - [ ] Volume VI: edition 0.7, with the items that wait for it (`plans/vol-5.md`, "Stage 4 changes to earlier
+    modules"): decision G's leads +32…+35 (lm01 +32, +35; lm02 +35; lm04 +33, +34; lm05 +32; lm10 +32; lm11 +34;
+    lm18 +33; lm20 +34; lm21 +32; lm22 +32; lm23 +35; lm26 +35); lm19.md:359 in LM33's wording; lm21.md:373 in
+    LM34's wording; `build/make_lab04.py`'s walk-forward extension (LM34: trade at the next close); lm04.md's MDD
+    sign (optional, LM32); LM3's TQQQ example (a published defect the editor deferred to 0.7); and the Volume VI
+    briefs' own "Stage 4 for earlier modules" (`plans/vol-6.md`).
 
 ## How a batch runs
 
-Follow [`plans/ROADMAP.md`](plans/ROADMAP.md): batches 0–3 (Volumes I–IV) are published; batch 4 is Volumes V and
-VI, then VII, VIII and IX. Each batch repeats Stages 1–4 and bumps the edition. Ask the owner about code, site,
+Follow [`plans/ROADMAP.md`](plans/ROADMAP.md): batches 0–3 (Volumes I–IV) and batch 4's Volume V are published;
+batch 4 ends with Volume VI, then come VII, VIII and IX. Each batch repeats Stages 1–4 and bumps the edition (batch 4 twice: 0.6 for Volume V, 0.7 for Volume VI, by
+the owner's choice of 2026-11-07). Ask the owner about code, site,
 repository and his standing rules, and about the open decisions at the end of the roadmap before the batch that needs
 them; content is the editor's call.
 

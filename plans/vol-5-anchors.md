@@ -8,7 +8,7 @@ way in the briefs, the reviews and the numbers scripts; each module's `data/lmNN
 these rows and reports a difference rather than forcing it. A withdrawn anchor keeps its row. From Stage 3 the module
 sources are authoritative (preface of `plans/vol-5.md`).
 
-Status: revised three times and given a last pass on 2026-10-24/25, each revision verified by fresh agents; revised on 2026-10-31 to the fresh check of the whole of Stage 1 ("Decisions on the fresh check of the whole of Stage 1", `plans/vol-5.md`), whose fixes and changed anchors fresh agents verified the same day.
+Status: Volume V (LM27–LM31) published in edition 0.6 (2026-11-07), after Stages 2 and 3 (records in `reviews/lm27.md` … `lm31.md`). Stage 1 was revised three times and given a last pass on 2026-10-24/25, each revision verified by fresh agents; revised on 2026-10-31 to the fresh check of the whole of Stage 1 ("Decisions on the fresh check of the whole of Stage 1", `plans/vol-5.md`), whose fixes and changed anchors fresh agents verified the same day.
 
 ## LM27
 

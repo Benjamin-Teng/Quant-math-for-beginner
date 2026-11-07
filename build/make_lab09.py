@@ -665,7 +665,7 @@ uv run python data/fetch_finmind.py    # rebuilds and verifies data/raw/
 uv run python data/make_lab_data.py    # writes every lab's data/ folder
 ```
 
-On FinMind's free plan, run `uv run python data/fetch_finmind.py --exclude sectors_close/` instead: the repair values come from a paid dataset. The notebook then drops the listed closes and says which of its numbers change.
+On FinMind's free plan, run `uv run python data/fetch_finmind.py --exclude sectors_close/ --exclude vol4_settlement/ --exclude vol6/etf_snapshot` instead (Getting Started gives the reasons). The repair values come from a paid dataset. The notebook then drops the listed closes and says which of its numbers change.
 
 The notebook reads only the files in its own `data/` folder:
 

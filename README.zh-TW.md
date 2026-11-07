@@ -2,7 +2,7 @@
 
 [English](README.md) | **繁體中文**
 
-這是個人自學量化金融的專案，從大一微積分、統計學與線性代數出發，逐步走向統計建模、投資組合最佳化，以及考量估計誤差的凱利部位配置。完整課程規劃為 **9 卷、50 個 Learning Modules**；目前已發布 **第 I–IV 卷（LM1–LM26）**。
+這是個人自學量化金融的專案，從大一微積分、統計學與線性代數出發，逐步走向統計建模、投資組合最佳化，以及考量估計誤差的凱利部位配置。完整課程規劃為 **9 卷、50 個 Learning Modules**；目前已發布 **第 I–V 卷（LM1–LM31）**。
 
 教材以英文撰寫，搭配繁體中文導讀。已發布的每個模組均有網頁章節、A4 PDF，以及保留執行輸出的 Jupyter Lab。範例結合台股與美股市場資料，並明確標示模型、模擬及建構案例。
 
@@ -10,7 +10,7 @@
 
 ## 目前進度
 
-README 更新日期：**2026-10-24**。教材最新版本：**Edition 0.5（2026-10-20）**，以[課程目錄](src/syllabus.yaml)的版本紀錄為準。
+README 更新日期：**2026-11-07**。教材最新版本：**Edition 0.6（2026-11-07）**，以[課程目錄](src/syllabus.yaml)的版本紀錄為準。
 
 | 卷 | 主題 | 模組 | 狀態 |
 |:--|:--|:--|:--|
@@ -18,13 +18,13 @@ README 更新日期：**2026-10-24**。教材最新版本：**Edition 0.5（2026
 | II | 投資組合線性代數 | LM8–LM12 | 已發布 |
 | III | 機率 | LM13–LM18 | 已發布 |
 | IV | 統計推論與計量經濟學 | LM19–LM26 | 已發布 |
-| V | 投資組合最佳化 | LM27–LM31 | 規劃中 |
+| V | 投資組合最佳化 | LM27–LM31 | 已發布 |
 | VI | 衡量真實風險與報酬 | LM32–LM35 | 規劃中 |
 | VII | 隨機微積分 | LM36–LM40 | 規劃中 |
 | VIII | 凱利準則與最適槓桿 | LM41–LM46 | 規劃中 |
 | IX | 整合專題 | LM47–LM50 | 規劃中 |
 
-Edition 0.5 新增統計推論、迴歸、貝氏收縮與時間序列模型，涵蓋波動率建模。後續投資組合、風險、隨機微積分、進階凱利與整合專題仍屬規劃，尚未發布。
+Edition 0.6 新增投資組合最佳化：投資組合的報酬與風險貢獻、平均數-變異數最佳化、投資組合限制下的凸規劃、估計誤差與穩健投資組合，以及風險平價、層次風險平價（HRP）與波動率目標。後續風險衡量、隨機微積分、進階凱利與整合專題仍屬規劃，尚未發布。
 
 目前工作順序見 [TODO.md](TODO.md)，後續卷別見[課程路線圖](plans/ROADMAP.md)。
 
@@ -70,6 +70,11 @@ Edition 0.5 新增統計推論、迴歸、貝氏收縮與時間序列模型，�
 | LM24 Bayesian Inference and Shrinkage | 已發布 | [`docs/lm/lm24.html`](docs/lm/lm24.html) | [`docs/pdf/LM24_…pdf`](docs/pdf/LM24_Bayesian_Inference_and_Shrinkage.pdf) | [`labs/LM24_lab`](labs/LM24_lab) |
 | LM25 Time Series I: ARMA, Unit Roots and Cointegration | 已發布 | [`docs/lm/lm25.html`](docs/lm/lm25.html) | [`docs/pdf/LM25_…pdf`](docs/pdf/LM25_Time_Series_I_ARMA_Unit_Roots_and_Cointegration.pdf) | [`labs/LM25_lab`](labs/LM25_lab) |
 | LM26 Time Series II: Volatility Models | 已發布 | [`docs/lm/lm26.html`](docs/lm/lm26.html) | [`docs/pdf/LM26_…pdf`](docs/pdf/LM26_Time_Series_II_Volatility_Models.pdf) | [`labs/LM26_lab`](labs/LM26_lab) |
+| LM27 Portfolio Return and Risk | 已發布 | [`docs/lm/lm27.html`](docs/lm/lm27.html) | [`docs/pdf/LM27_…pdf`](docs/pdf/LM27_Portfolio_Return_and_Risk.pdf) | [`labs/LM27_lab`](labs/LM27_lab) |
+| LM28 Mean–Variance Optimization | 已發布 | [`docs/lm/lm28.html`](docs/lm/lm28.html) | [`docs/pdf/LM28_…pdf`](docs/pdf/LM28_Mean_Variance_Optimization.pdf) | [`labs/LM28_lab`](labs/LM28_lab) |
+| LM29 Convex Optimization in Practice | 已發布 | [`docs/lm/lm29.html`](docs/lm/lm29.html) | [`docs/pdf/LM29_…pdf`](docs/pdf/LM29_Convex_Optimization_in_Practice.pdf) | [`labs/LM29_lab`](labs/LM29_lab) |
+| LM30 Estimation Error and Robust Portfolios | 已發布 | [`docs/lm/lm30.html`](docs/lm/lm30.html) | [`docs/pdf/LM30_…pdf`](docs/pdf/LM30_Estimation_Error_and_Robust_Portfolios.pdf) | [`labs/LM30_lab`](labs/LM30_lab) |
+| LM31 Risk Parity, HRP and Volatility Targeting | 已發布 | [`docs/lm/lm31.html`](docs/lm/lm31.html) | [`docs/pdf/LM31_…pdf`](docs/pdf/LM31_Risk_Parity_HRP_and_Volatility_Targeting.pdf) | [`labs/LM31_lab`](labs/LM31_lab) |
 
 模組須依 [AUTHORING.md](AUTHORING.md)完成獨立審查與修正驗證，才能發布。課程目錄控制正式建置納入的模組；未發布的項目只會出現在預覽版。
 

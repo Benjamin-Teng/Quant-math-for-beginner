@@ -2,6 +2,9 @@ title: From Calculus to Kelly
 subtitle: A quantitative curriculum for statistical modeling, portfolio optimization and optimal leverage
 # Edition notes, newest first. A module is linked from the site only when its entry below has `status: published`.
 editions:
+  - version: "0.6"
+    date: 7 November 2026
+    notes: "Volume V complete: LM27–LM31 with their labs, from a book's drifting weights, trading costs and Euler risk contributions through mean–variance optimization with the frontier, the tangency portfolio and the capital market line, and convex programs with long-only, cap, leverage and turnover limits whose multipliers are read as prices, to estimation error with Ledoit–Wolf shrinkage, Black–Litterman and resampling, and risk parity, hierarchical risk parity and volatility targeting, on five Taiwan-listed ETFs (0050, 00646, 00679B, 00635U and 00642U) allocated by a through case of eight rules fixed in advance, and on the 28 TWSE sector indices. Each module passed an independent review, a blind solve of every question, a full audit of its numbers from the raw data and a check across the volume, then two verified revision rounds, a closing check with an adversarial second check of every item and a fresh final check. The labs add cvxpy and scikit-learn. Charts gain stacked bars, scatter curves and a check of series colours. Volumes I–IV now link forward to the Volume V modules that build on them, and LM7 writes 切點投資組合 for the tangency portfolio, as its Glossary does. Getting Started names the three groups of files that need a paid FinMind plan and the command for the free plan, and says that a portfolio's wealth uses every session."
   - version: "0.5"
     date: 20 October 2026
     notes: "Volume IV complete: LM19–LM26 with their labs, from the description of returns and the √T rule through estimation and maximum likelihood, hypothesis tests with multiple-testing corrections, the iid and block bootstraps, linear regression with heteroskedasticity- and autocorrelation-robust standard errors, and Bayesian inference with James–Stein shrinkage, to ARMA models, unit roots and the futures–spot basis, and GARCH with realized variance from intraday TAIEX data, on TAIEX's total-return index from 2003 and its price index, the TWSE sector indices, Taiwan ETFs (0050 and 00631L), TAIEX futures and the intraday TAIEX from 2005. Each module passed an independent review, a blind solve of every question, a full audit of its numbers from the raw data and a check across the volume, then three verified revision rounds, a closing check with an adversarial second check of every item and a fresh final check; each editorial decision was checked by a fresh agent before it was applied. The labs add statsmodels and arch. Charts gain a log x axis, shared x values and banded scatter plots, and an exhibit's caption keeps its paragraphs. Volumes I–III now link forward to the Volume IV modules that build on them, and a few Chinese terms follow Volume IV's forms (波動率, 作多, 波動群聚現象)."
@@ -72,11 +75,11 @@ volumes:
     title: Portfolio Optimization
     blurb: Mean–variance theory, the convex machinery to solve it, and the estimation error that breaks it.
     lms:
-      - {n: 27, title: "Portfolio Return and Risk", desc: "N-asset portfolio mathematics in matrix form."}
-      - {n: 28, title: "Mean–Variance Optimization", desc: "Lagrangian derivation, global minimum variance, the frontier, tangency and the CML."}
-      - {n: 29, title: "Convex Optimization in Practice", desc: "Quadratic programs, KKT conditions, cvxpy; long-only, leverage and turnover limits."}
-      - {n: 30, title: "Estimation Error and Robust Portfolios", desc: "The 1/N puzzle, Ledoit–Wolf shrinkage, Black–Litterman, resampling."}
-      - {n: 31, title: "Risk Parity, HRP and Volatility Targeting", desc: "Euler risk contributions and risk-based allocation."}
+      - {n: 27, title: "Portfolio Return and Risk", desc: "A book's return, drift and trading costs; Euler risk contributions and factor risk.", status: published}
+      - {n: 28, title: "Mean–Variance Optimization", desc: "Lagrangian derivation, global minimum variance, the frontier, tangency and the CML.", status: published}
+      - {n: 29, title: "Convex Optimization in Practice", desc: "Quadratic programs, KKT conditions, cvxpy; long-only, leverage and turnover limits.", status: published}
+      - {n: 30, title: "Estimation Error and Robust Portfolios", desc: "The 1/N puzzle, Ledoit–Wolf shrinkage, Black–Litterman, resampling.", status: published}
+      - {n: 31, title: "Risk Parity, HRP and Volatility Targeting", desc: "Risk budgets from LM27's contributions, HRP's tree, and volatility targeting.", status: published}
   - id: VI
     title: Measuring True Risk and Return
     blurb: What a track record really says once compounding, fat tails, costs and selection are accounted for.

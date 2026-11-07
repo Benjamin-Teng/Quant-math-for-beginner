@@ -54,11 +54,11 @@
 <li><a href="lm/lm26.html"><span class="k">LM26</span><span>Time Series II: Volatility Models</span></a></li>
 </ol>
 <h2>Vol V · Portfolio Optimization</h2><ol>
-<li><span title="Planned"><span class="k">LM27</span><span>Portfolio Return and Risk</span></span></li>
-<li><span title="Planned"><span class="k">LM28</span><span>Mean–Variance Optimization</span></span></li>
-<li><span title="Planned"><span class="k">LM29</span><span>Convex Optimization in Practice</span></span></li>
-<li><span title="Planned"><span class="k">LM30</span><span>Estimation Error and Robust Portfolios</span></span></li>
-<li><span title="Planned"><span class="k">LM31</span><span>Risk Parity, HRP and Volatility Targeting</span></span></li>
+<li><a href="lm/lm27.html"><span class="k">LM27</span><span>Portfolio Return and Risk</span></a></li>
+<li><a href="lm/lm28.html"><span class="k">LM28</span><span>Mean–Variance Optimization</span></a></li>
+<li><a href="lm/lm29.html"><span class="k">LM29</span><span>Convex Optimization in Practice</span></a></li>
+<li><a href="lm/lm30.html"><span class="k">LM30</span><span>Estimation Error and Robust Portfolios</span></a></li>
+<li><a href="lm/lm31.html"><span class="k">LM31</span><span>Risk Parity, HRP and Volatility Targeting</span></a></li>
 </ol>
 <h2>Vol VI · Measuring True Risk and Return</h2><ol>
 <li><span title="Planned"><span class="k">LM32</span><span>VaR, Expected Shortfall and Drawdown</span></span></li>
@@ -149,11 +149,15 @@ explains. The third is in the second row: a fall from 176.00 to 158.40 is exactl
 account.</p>
 </section><section class="sec unnum" id="fetch-the-data"><h2 class="plain"><span class="ttl">Fetch the data</span></h2><p>Run <code>uv run python data/fetch_finmind.py</code>, then <code>uv run python data/make_lab_data.py</code>. After that, every lab runs
 offline. The book ships no market data, because FinMind's licence does not allow the book to redistribute it.</p>
-<p>Volume I's files come from FinMind's free datasets, and so do Volume II's sector indices. One folder needs a paid
-plan: <code>data/raw/sectors_close/</code>, 561 small files that repair FinMind's copied sector closes (see &quot;Check, do not trust&quot;
-below). On the free plan, run <code>uv run python data/fetch_finmind.py --exclude sectors_close/</code>; <code>make_lab_data.py</code> does not
-need those files, and Volume II's labs say what changes without them. The fetch skips any file that it cannot get, lists it at the end and stops with
-an error code.</p>
+<p>Volume I's files come from FinMind's free datasets, and so do Volume II's sector indices. Three groups of files need a
+paid plan. <code>data/raw/sectors_close/</code> holds 561 small files that repair FinMind's copied sector closes (see &quot;Check, do
+not trust&quot; below). <code>data/raw/vol4_settlement/</code> holds TX's final settlement prices, a cross-check of Volume IV that
+<code>vol4_series.py</code> skips when the file is absent. The two ETF snapshots <code>data/raw/vol6/etf_snapshot__…</code> serve one count
+in Volume VI.</p>
+<p>On the free plan, run
+<code>uv run python data/fetch_finmind.py --exclude sectors_close/ --exclude vol4_settlement/ --exclude vol6/etf_snapshot</code>.
+<code>make_lab_data.py</code> does not need those files, and Volume II's labs say what changes without the repairs. The fetch
+skips any file that it cannot get, lists it at the end and stops with an error code.</p>
 </section><section class="sec unnum" id="data-you-will-meet"><h2 class="plain"><span class="ttl">Data you will meet</span></h2><ul>
 <li><strong>Close, adjusted close and total return.</strong> A close is the price of the day's last trade; on TWSE it comes from the
 closing auction from 13:25 to 13:30. An adjusted close is rewritten backward
@@ -171,8 +175,9 @@ the book checks its input and stops on anything it cannot explain.</li>
 </section><section class="sec unnum" id="dates-and-missing-values"><h2 class="plain"><span class="ttl">Dates and missing values</span></h2><ul>
 <li>Use the exchange's trading dates, not a Monday-to-Friday calendar. The 0050 data contain nine Saturday trading
 days, such as 2016-01-30.</li>
-<li>When you combine two series, keep only the dates they share. That changes the number of returns, so every count in
-the book says which sample it comes from.</li>
+<li>When you compute a statistic of two series together, keep only the dates they share. That changes the number of
+returns, so every count in the book says which sample it comes from. A portfolio's wealth uses every session
+instead: each asset earns its own return, 0 while it is halted (<a href="lm/lm27.html">LM27</a>'s wealth frame).</li>
 <li>A trading halt makes one return cover several days. 0050 was halted from 11 to 17 June 2025 for its split, so its
 return on 2025-06-18 covers six trading days.</li>
 <li>After a join, sort by date again. Never rely on the order of rows.</li>
@@ -189,8 +194,8 @@ number of years, and the years are the calendar days divided by 365.25.</li>
 <li>Vectors are columns. The <a href="index.html#notation">notation table on the front page</a> lists the main symbols.</li>
 </ul>
 </section><section class="sec unnum" id="reproducible-numbers"><h2 class="plain"><span class="ttl">Reproducible numbers</span></h2><ul>
-<li>From Volume III on, create the random generator once, at the start of each simulated experiment, as
-<code>rng = np.random.default_rng([e, 20261011])</code> with <code>e</code> the experiment's number, and never reseed it inside the
+<li>From Volume III on, create the random generator once, at the start of each simulated experiment:
+<code>rng = np.random.default_rng([e, 20261011])</code>, with <code>e</code> the experiment's number. Never reseed it inside the
 experiment (<a href="lm/lm18.html">LM18</a>). Every run then gives the same draws with the NumPy version that <code>uv.lock</code> pins.</li>
 <li>Never test two computed numbers with <code>x == y</code>. Compare them with a tolerance that fits their size, such as
 <code>math.isclose(x, y, rel_tol=1e-9, abs_tol=1e-12)</code>: relative for large amounts, absolute near zero.</li>
