@@ -104,7 +104,7 @@ import polars as pl
 
 DATA = Path("data")
 FUNDS = ["0050", "00646", "00679B", "00635U", "00642U"]
-RF = 0.015                                   # the illustrative riskless rate, a year, simple
+RF = 0.015                                   # the illustrative risk-free rate, a year, simple
 WINDOW = 504
 LAST = "2026-10-08"
 FIRST_CLOSE, LAST_CLOSE = "2008-12-01", "2026-10-08"
@@ -493,13 +493,24 @@ for solver, opts in OPTS.items():
 md(r"""
 ## Part 9 — Practice problems 10, 11 and 12
 
-**Problem 10.** Raise 0050's mean by 1 point: the changes are the first column of the table in Part 5. Column 1 of $\Sigma^{-1}$ (annual units) explains the two largest.
+**Problem 10.** Raise 0050's mean by 1 point: the changes are the first column of the table in Part 5. Column 1 of $\Sigma^{-1}$ (annual units) explains the two largest. The new weights divide column 1 by the new total $\mathbf 1^{\top}\Sigma^{-1}\mathbf e$, and the old weights are rescaled by the same total; the two parts add to the change.
 """)
 
 code(r"""
 show("changes for +1 point in 0050's mean", vec(dW[:, 0], plus=True), "s", "(+6.6, -6.4, +0.8, -1.6, +0.5)")
 show("column 1 of Sigma^-1", "(" + ", ".join(f"{v:.1f}" for v in Sinv[:, 0]) + ")", "s",
      "(82.8, -48.1, 25.8, -17.3, -0.7)")
+col_sum = Sinv[:, 0].sum()                       # unrounded; the rounded entries sum to 42.5
+new_den = o["den"] + 0.01 * col_sum              # 1' Sigma^-1 e after the change
+part_col = 100 * 0.01 * Sinv[:, 0] / new_den     # column 1 over the new total, points
+part_res = 100 * o["wtan"] * 0.01 * col_sum / new_den   # the old weights rescaled, points
+print("column part - rescaling - change, largest:", np.abs(part_col - part_res - 100 * dW[:, 0]).max())
+show("column 1's sum", col_sum, ".1f", "42.6")
+show("new 1' Sigma^-1 e", new_den, ".2f", "11.70")
+show("column part, 0050", part_col[0], "+.2f", "+7.08")
+show("column part, 00646", part_col[1], ".2f", "-4.11")
+show("rescaling, 0050", part_res[0], ".2f", "0.43")
+show("rescaling, 00646", part_res[1], ".2f", "2.28")
 show("corr(0050, 00646)", Cw[0, 1], ".2f", "0.54")
 show("1 point over 0050's SE", 0.01 / se[0], ".2f", "0.11")
 """)
@@ -587,7 +598,7 @@ Companion to *From Calculus to Kelly*, Learning Module 28. The notebook rebuilds
 
 - the minimum-variance portfolio by hand, with its covariances, betas and risk shares;
 - the frontier, equal weights inside it, and two-fund separation;
-- the tangency portfolio at three riskless rates, the tangency betas and the capital market line;
+- the tangency portfolio at three risk-free rates, the tangency betas and the capital market line;
 - the sensitivity of the tangency weights to the means, exact and by the Jacobian;
 - the first window's two portfolios held to October 2026 and the split of their variance;
 - minimum variance on U28's 28 sector indices and its halves;

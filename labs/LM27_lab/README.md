@@ -5,7 +5,7 @@ Companion to *From Calculus to Kelly*, Learning Module 27. The notebook rebuilds
 - E5's two frames, the estimation frame and the wealth frame, from the raw closes, distributions and split;
 - the June 2025 span and the drift of a buy-and-hold book;
 - the wealth recursion with costs, for R1 and R2 from their per-date targets, and R1's trade of 1 April 2026;
-- correlations by frequency with both standard errors and the funds' kurtosis;
+- correlations by frequency with both standard errors, the funds' kurtosis and the gaps' bootstrap standard errors;
 - means, variances, the diversification ratio, Euler's risk split, the slope check and a switch;
 - R1's risk shares in the 92 trailing windows, and the factor split of an equal-weight U28 book.
 

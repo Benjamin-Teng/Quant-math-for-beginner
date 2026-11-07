@@ -58,8 +58,8 @@
     ], draw);
     var chart = document.createElement("div"), out = document.createElement("div"), note = document.createElement("p");
     out.setAttribute("aria-live", "polite"); note.className = "w-note";
-    note.textContent = "Model: maximize f′e − (δ/2) f′Σf for 0050 (f₁) and 00646 (f₂), the rest " +
-      "in cash at r_f, subject to f₁ + f₂ ≤ cap, f₁ ≥ 0 and f₂ ≥ 0. Inputs: first window, " +
+    note.textContent = "Model: maximize fᵀe − (δ/2) fᵀΣf for 0050 (f₁) and 00646 (f₂), the rest " +
+      "in cash at the risk-free rate, subject to f₁ + f₂ ≤ cap, f₁ ≥ 0 and f₂ ≥ 0. Inputs: first window, " +
       "2017-02-13 → 2019-02-27, on its 504 joint dates; in-sample. Excess returns " + fmt(e[0], "pct2") + " and " +
       fmt(e[1], "pct2") + ", volatilities " + fmt(s[0], "pct2") + " and " + fmt(s[1], "pct2") + ", correlation " +
       fmt(rho, "n3") + ". Each binding set solves stationarity with its constraints as equalities; the set with all " +

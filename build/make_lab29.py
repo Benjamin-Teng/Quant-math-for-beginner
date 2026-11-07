@@ -140,9 +140,9 @@ def cov0(x):
 
 
 def exact(S, a):
-    # min y'Sy subject to a'y = 1, y >= 0, exactly: nnls on the Cholesky factor (S = R'R), y = z / a'z
-    R = cholesky(S, lower=False)
-    z, _ = nnls(R, solve_triangular(R, a, trans="T"), maxiter=1000)
+    # min y'Sy subject to a'y = 1, y >= 0, exactly: nnls on the Cholesky factor (S = U'U), y = z / a'z
+    U = cholesky(S, lower=False)
+    z, _ = nnls(U, solve_triangular(U, a, trans="T"), maxiter=1000)
     return z / (a @ z)
 
 
@@ -374,7 +374,7 @@ for rf, printed in ((0.0, "2.19"), (0.02, "2.08")):
 md(r"""
 ## Part 5 — U28's long-only minimum variance, [[eg:u28]]
 
-The sector closes are repaired as in Lab 23: every close listed in `sectors_close_repairs.csv` is replaced by its 13:30:00 value. On FinMind's free plan the 13:30:00 values are not available (`TaiwanStockEvery5SecondsIndex` is a paid dataset), so `close_1330` is empty and the cell **drops** those closes instead; the returns into and out of each dropped date leave the sample, and the U28 numbers then differ from the book's. Nothing is ever estimated.
+The sector closes are repaired as in Lab 23: every close listed in `sectors_close_repairs.csv` is replaced by its 13:30:00 value. On FinMind's free plan the 13:30:00 values are not available (`TaiwanStockEvery5SecondsIndex` is a paid dataset), so `close_1330` is empty and the cell **drops** those closes instead; the returns into and out of each dropped date leave the sample (4,307 returns instead of 4,382), and the U28 numbers then differ from the book's. Nothing is ever estimated.
 """)
 
 code(r"""
@@ -393,10 +393,10 @@ FULL_DATA = int(rep["close_1330"].is_not_null().sum()) == rep.height
 U28 = [c for c in raw.columns if c not in ("date", "TAIEX", *AGGREGATES)]
 cl = fixed.filter(pl.col("date").is_between(pl.lit("2008-12-01"), pl.lit("2026-10-08"))).sort("date")
 P = cl.select(U28).to_numpy()
-ok = ~np.isnan(P).any(axis=1)
-P, cd = P[ok], np.array(cl["date"].to_list())[ok]
-XU = P[1:] / P[:-1] - 1
-AU = XU.shape[0] / ((date.fromisoformat(cd[-1]) - date.fromisoformat(cd[0])).days / 365.25)
+cd = np.array(cl["date"].to_list())
+XU = P[1:] / P[:-1] - 1                    # one-session returns on the full grid of closes
+XU = XU[~np.isnan(XU).any(axis=1)]         # a dropped close removes the returns into and out of it (Lab 23)
+AU =XU.shape[0] / ((date.fromisoformat(cd[-1]) - date.fromisoformat(cd[0])).days / 365.25)
 SU = AU * cov0(XU)
 print(f"full data: {FULL_DATA}; {len(U28)} sectors, T = {XU.shape[0]}, A = {AU:.2f}   [book: T = 4,382, A = 245.48]")
 wU = minvar(SU)
@@ -576,7 +576,7 @@ ax.set_title("[[ex:band]]")
 plt.show()
 Gd = 2 * Sc @ wdc
 bar = max((Gd[i] - Gd[j]) / (2 * COMMISSION + TAX[i]) for i in range(N) for j in range(N) if i != j)
-show("no-trade threshold", bar, ".2f", "3.20")
+show("no-trade threshold", bar, ".4f", "3.2022")
 
 # [[ex:costsweep]]: R3's path with the cost penalty, planned at each signal close
 rows = []
@@ -602,7 +602,7 @@ for th in (0.0, 0.25, 0.5, 1.0, 2.0, 5.0, 10.0):
 to0, cs0 = rows[0][1], rows[0][2]
 sweep = pl.DataFrame([{"theta": th, "turnover % of theta 0": round(100 * to / to0, 1),
                        "cost % of theta 0": round(100 * cs / cs0, 1), "no trade (of 91)": q,
-                       "vol given up, mean bp": round(vm, 1) + 0.0, "largest bp": round(vx, 1) + 0.0}
+                       "vol added, mean bp": round(vm, 1) + 0.0, "largest bp": round(vx, 1) + 0.0}
                       for th, to, cs, q, vm, vx in rows])
 print(sweep)
 show("theta 1: planned turnover (% of theta 0)", 100 * rows[3][1] / to0, ".1f", "31.5")
@@ -676,12 +676,20 @@ c0, c1 = eL @ y == 1, y >= 0
 cvx(cp.quad_form(y, cp.psd_wrap(SL)), [c0, c1], "CLARABEL", CLARABEL_BOOK)
 show("R4's dual of e'y = 1", float(c0.dual_value), ".4f", "-0.4506")
 print("bound duals", np.round(np.asarray(c1.dual_value), 4), "  [book: 0.0234 (00646), 0.0292 (00679B)]")
+
+# Problem 12(d): CLARABEL's default R3 at the first signal; (29.5)'s largest stationarity residual over lambda
+for unit, S_, f_, printed in (("daily", cov0(x0), ".1f", "1.6"), ("annual", A * cov0(x0), ".2f", "0.03")):
+    w = cp.Variable(N)
+    _, v = cvx(cp.quad_form(w, cp.psd_wrap(S_)), [cp.sum(w) == 1, w >= 0], "CLARABEL")
+    lam = 2 * v @ S_ @ v
+    show(f"12(d) {unit}: largest |(2 Sigma w)_i - lambda| / lambda (%)", 100 * np.abs(2 * S_ @ v - lam).max() / lam,
+         f_, printed)
 """)
 
 md(r"""
 ## Part 9 — Practice problems 9, 10, 11 and 12
 
-Problem 12 is Part 8: the daily objective is $A$ times smaller than the annual one, CLARABEL's default gap tolerance $10^{-8}$ is absolute, and OSQP's polishing re-solves on the constraints it finds active.
+Problem 12 is Part 8. R3's daily objective is $A$ times smaller than the annual one, and CLARABEL's default gap tolerance $10^{-8}$ is absolute. R4's daily objective is $A$ times larger, so R4 shows no such pattern. OSQP's polishing re-solves on the constraints it finds active and then refines (`polish_refine_iter`, 3 by default), which reaches rounding level on annual inputs but not on daily ones.
 """)
 
 code(r"""
@@ -766,7 +774,7 @@ print(f"{len(survivors)} survivor(s): {[[FUNDS[i] for i in s] for s, _ in surviv
 print(f"31 supports in {dt * 1e3:.1f} ms; 2^28 supports of 28 assets would take about "
       f"{dt / 31 * 2**28 / 3600:.0f} hours at this rate (larger systems are slower)")
 # your code: repeat at every signal and count how often the surviving support changes from one month to the next.
-# The surviving active set is itself an estimate: LM30 studies how it moves with the window.
+# The surviving active set is itself an estimate: on U28's first half (LM30) the long-only minimum-variance portfolio holds 9 sectors, only 7 of them the full sample's.
 """)
 
 nb = nbf.v4.new_notebook()

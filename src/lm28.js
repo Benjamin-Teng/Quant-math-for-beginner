@@ -56,10 +56,11 @@
     var msg = document.createElement("p"), c1 = document.createElement("div"), c2 = document.createElement("div");
     var out = document.createElement("div"), note = document.createElement("p");
     msg.className = "w-note"; out.className = "readout"; out.setAttribute("aria-live", "polite"); note.className = "w-note";
-    note.textContent = "In-sample: the first window's plug-in moments, a riskless rate of 1.5% a year. Solid: the " +
-      "efficient frontier; dashed: its lower half and, from 1.5%, the capital market line. The first drawing uses the " +
+    note.textContent = "In-sample: the first window's plug-in moments, a risk-free rate of 1.5% a year. Solid: the " +
+      "efficient frontier. Dashed: its lower half and, from 1.5%, the capital market line. The first drawing uses the " +
       "window's exact inputs. The sliders move in rounded steps: once moved, a slider's value replaces the window's " +
-      "exact entry, so moving it back leaves the readouts slightly off the exhibit's values. Bars: tangency weights, " +
+      "exact entry, so returning it to its starting value leaves the readouts slightly off the exhibit's values. " +
+      "Bars: tangency weights, " +
       "the window's against the sliders'.";
     host.appendChild(msg); host.appendChild(c1); host.appendChild(c2); host.appendChild(out); host.appendChild(note);
 

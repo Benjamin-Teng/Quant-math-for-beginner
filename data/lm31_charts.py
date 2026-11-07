@@ -76,7 +76,7 @@ write("lm31-u28corr", {
     "alt": "Correlations of U28's 28 sector price indices, rows and columns in HRP's order: all positive, from 0.217 "
            "to 0.755, with the electronics sectors in one block near the middle",
     "labels": names, "matrix": [[rd(Cu[i, j], 3) for j in ou] for i in ou],
-    "fmt": "n2", "min": 0, "max": 1, "valueName": "correlation",
+    "fmt": "n3", "min": 0, "max": 1, "valueName": "correlation",
 })
 
 # ---------------------------------------------------------------- X4: U28's tree (three lines per merge)

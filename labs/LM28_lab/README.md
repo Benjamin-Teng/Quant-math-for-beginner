@@ -4,7 +4,7 @@ Companion to *From Calculus to Kelly*, Learning Module 28. The notebook rebuilds
 
 - the minimum-variance portfolio by hand, with its covariances, betas and risk shares;
 - the frontier, equal weights inside it, and two-fund separation;
-- the tangency portfolio at three riskless rates, the tangency betas and the capital market line;
+- the tangency portfolio at three risk-free rates, the tangency betas and the capital market line;
 - the sensitivity of the tangency weights to the means, exact and by the Jacobian;
 - the first window's two portfolios held to October 2026 and the split of their variance;
 - minimum variance on U28's 28 sector indices and its halves;

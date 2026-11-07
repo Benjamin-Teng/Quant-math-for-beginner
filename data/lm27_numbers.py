@@ -31,6 +31,7 @@ from zoneinfo import ZoneInfo
 import numpy as np
 from lm27_common import (
     A7,
+    B_BOOT,
     C3,
     ROOT,
     S3,
@@ -65,6 +66,8 @@ from lm27_common import (
     b9,
     beta,
     bn,
+    boot_m,
+    boot_w,
     bp,
     c50,
     c_before,
@@ -77,6 +80,7 @@ from lm27_common import (
     dlt,
     dm_list,
     drift,
+    drop_w,
     eq_span,
     ex3,
     first_rows,
@@ -112,6 +116,7 @@ from lm27_common import (
     ku_lo,
     kurt,
     kw,
+    kw5,
     kw_all,
     lam,
     last_wk,
@@ -270,8 +275,10 @@ put(f"annualized volatilities (divisor T, A {f(A, 2)}) {fl(100 * vol, 2, 1)}%; a
     f"{fl(100 * mu, 2)}%")                                                                                 # 08
 put("daily correlations " + "; ".join(f"{F[a]}-{F[b]} {f(Cd[a, b], 2, 3, 4)}" for a in range(N)
                                       for b in range(a + 1, N)))                                         # 09
-put(f"weekly: {len(kw)} ISO weeks {kw[0]} .. {kw[-1]}; monthly: {len(km)} calendar months {km[0]} .. {km[-1]} (the "
-    f"first and last period, in which the sample starts and ends, dropped); keeping the last week ({kw_all[-1]}: "
+put(f"weekly (wealth frame): {len(kw5)} ISO weeks with a session {kw5[0]} .. {kw5[-1]}, {len(kw)} used (without "
+    f"{', '.join(drop_w)}, 0050 having no close at the end of the first); monthly (wealth frame): {len(km)} calendar "
+    f"months {km[0]} .. {km[-1]} (the first and last period, in which the sample starts and ends, dropped); keeping "
+    f"the last week ({kw_all[-1]}: "
     f"{last_wk[0]} .. {last_wk[-1]}, {len(last_wk)} sessions) would give {len(kw) + 1} weeks and weekly correlations "
     f"0050-00646 {f(Ck[0, J['00646']], 3)}, 0050-00679B {f(Ck[0, J['00679B']], 3)}")                  # 10
 rows = []
@@ -302,9 +309,9 @@ for nm, x in frq.items():
                  f"0050 share {f(100 * sh_[0], 1)}%")
     if nm == "weekly":
         cells[-1] += f" (vol {f(100 * sp_ * sqrt(365.25 / 7), 2)}% with A = 365.25 / 7)"
-put(f"R1's weights by frequency (A = {f(A, 2)}, {f(A_week, 2)}, 12; weekly A = {len(kw)} weeks with a session over "
+put(f"R1's weights by frequency (A = {f(A, 2)}, {f(A_week, 2)}, 12; weekly A = {len(kw5)} weeks with a session over "
     f"{f(years_wk, 4)} years from the close of {c_before}, before the first weekly return, to that of {c_last} "
-    f"({days_wk} days, the span of the {n_cal_weeks} calendar weeks {wk_first} .. {wk_last}) = {len(kw)} x 365.25 / "
+    f"({days_wk} days, the span of the {n_cal_weeks} calendar weeks {wk_first} .. {wk_last}) = {len(kw5)} x 365.25 / "
     f"{days_wk}): " + "; ".join(cells))                                                                    # 12
 put(f"R1 weights 1/5: s_p {f(100 * sp1, 1, 2, 3)}%; w's {f(100 * sw, 2)}%; ratio w's / s_p {f(sw / sp1, 3, 2)}; "
     f"variance terms {f(100 * var_terms, 1)}% of the variance, covariance terms {f(100 * (1 - var_terms), 1)}%")  # 13
@@ -422,7 +429,7 @@ put(f"widget matrix 12 S (monthly, {len(km)} calendar months, decimals): "
 put(f"widget matrix A S (daily, window {fr.est_dates[sch[kmin][2] - WINDOW]} .. {fr.est_dates[sch[kmin][2] - 1]}, "
     f"A = {f(A, 2)}, decimals): " + "; ".join(" ".join(f"{Sn[a, b]:.10f}" for b in range(N)) for a in range(N))
     + f"; R1: s_p {f(100 * spn, 2)}%, shares {fl(100 * shn, 1)}%")                                        # 49
-put("raw kurtosis (19.3), divisor T, estimation frame: "
+put("raw kurtosis (19.3), divisor T, daily on the estimation frame, weekly and monthly from the wealth frame: "
     + "; ".join(f"{nm} " + ", ".join(f"{F[j]} {kurt[nm][j]:.4f}" for j in range(N)) for nm in frq)
     + f"; largest daily and monthly 00642U ({f(float(k_d[J['00642U']]), 1)}, {f(float(k_m[J['00642U']]), 1)}), "
     f"largest weekly {k_hi['weekly']}; the other four daily {f(float(k_d[ko].min()), 1)} to "
@@ -524,8 +531,10 @@ chk("overview/case: its cost", 100 * tb.cost, ".3f", "0.031")
 chk("overview: NT$3,100", B * tb.cost, ",.0f", "3,100")
 chk("overview: 2,362 joint dates", T, ",d", "2,362")
 chk("overview: 2,368 sessions", len(fr.wealth_dates), ",d", "2,368")
-chk("overview: 0050-00679B daily", se[0, i79, "daily"][0], ".3f", "-0.105")
-chk("overview: 0050-00679B monthly", se[0, i79, "monthly"][0], ".3f", "-0.013")
+chk("overview: 00679B-00642U daily", se[i79, i42, "daily"][0], ".2f", "-0.18")
+chk("overview: 00679B-00642U monthly", se[i79, i42, "monthly"][0], ".2f", "-0.36")
+has("overview: the one gap of two SEs", "so daily correlations can mislead. Of five pairs, one daily–monthly gap reaches "
+                                        "two standard errors: 00679B–00642U's, -0.18 daily against -0.36 monthly.")
 chk("overview/case: 00642U's share", 100 * sh1[i42], ".1f", "45.9")
 chk("overview/case: 00679B's share", 100 * sh1[i79], ".1f", "2.6")
 chk("overview: negative windows", len(neg), "d", "22")
@@ -630,12 +639,14 @@ chk("tax", 100 * TAX["0050"], ".1f", "0.1")
 assert TAX["00679B"] == 0 and all(TAX[s_] == 0.001 for s_ in F if s_ != "00679B")
 factor = (COMMISSION + max(TAX.values())) * 1.5
 assert factor < 0.004
-has("factor below 0.4%", "For E5's rules the factor is below 0.4%.")
+has("factor below 0.4%", "For E5's rules the factor is below 0.4%: 0.2425% for a fully invested long-only book.")
+chk("the factor of a fully invested long-only book", 100 * (COMMISSION + max(TAX.values())) * 1.0, ".4f", "0.2425")
 chk("cost per unit of turnover, no tax", 200 * COMMISSION, ".3f", "0.285")
 chk("cost per unit of turnover, all taxed", 200 * COMMISSION + 0.1, ".3f", "0.385")
 # E2
 has("E2 equation", "W_t=1-0.001425W_t")
 has("E2 root", "W_t=1/1.001425=0.998577")
+has("E2 turnover is half the buys", "=0.5$, half the buys, since cash pays for them.")
 chk("E2 W after the purchase", W_first, ".6f", "0.998577")
 chk("E2 cost", 100 * t0.cost, ".4f", "0.1423")
 chk("E2 turnover", t0.turnover, ".1f", "0.5")
@@ -652,7 +663,7 @@ chk("E3 00642U's sale", 100 * (drift[i42] - 0.2), ".3f", "8.058")
 assert (drift[:4] < 0.2).all() and drift[i42] > 0.2                                     # only 00642U is sold
 chk("E3 approximation", 100 * approx, ".5f", "0.03102")
 chk("E3 approximation from the printed inputs", 0.285 * 8.058 / 100 + 0.1 * 8.058 / 100, ".5f", "0.03102", in_md=False)
-has("E3 approximation formula", "0.285%\\times8.058%+0.1%\\times8.058%=0.03102%")
+has("E3 approximation formula", "&0.285%\\times8.058%\\\\&\\quad+0.1%\\times8.058%=0.03102%.")
 chk("E3 exact cost", 100 * tb.cost, ".5f", "0.03100")
 chk("E3 NT$ cost", B * tb.cost, ",.0f", "3,100")
 has("E3 book", "NT$3,100 on a book of NT$10,000,000")
@@ -705,9 +716,15 @@ chk("KC4 E5's correlation", rho5, ".3f", "-0.105")
 for day_, want in (("2025-07-15", 4), ("2025-12-15", 5), ("2026-07-15", 4), ("2026-01-15", 5)):
     ny = datetime.fromisoformat(f"{day_}T16:00").replace(tzinfo=ZoneInfo("America/New_York"))
     assert ny.astimezone(ZoneInfo("Asia/Taipei")).hour == want, day_
-has("sessions", "Both markets match orders from 09:00 to 13:30 with a closing call auction from 13:25")
+has("sessions", "Both markets match orders from 09:00 to 13:30 (TWSE's Operating Rules, Art. 3")
+has("closing call", "Each closes with a call auction from 13:25, as its trading-system page says.")
 has("NYSE close", "New York's core session ends at 4:00 p.m. (NYSE): 04:00 Taipei time in US summer time, 05:00 otherwise")
-chk("weeks", len(kw), "d", "500")
+chk("weeks with a session", len(kw5), "d", "500")
+chk("weeks used", len(kw), "d", "498")
+assert drop_w == ["2025-W24", "2025-W25"]
+has("the weeks across the halt", "It drops the two weeks across 0050's halt, since 0050 has no close on 13 June 2025.")
+assert not fr.traded[fr.wealth_dates.index("2025-06-13"), J["0050"]]
+has("X4 note frames", "and weekly and monthly ones from the wealth frame (498 ISO weeks, 116 calendar months)")
 chk("weekly years", years_wk, ".4f", "9.6975")
 assert c_before == "2017-01-20" and c_last == "2026-10-02"
 has("weekly span", "from the close of 20 January 2017 to that of 2 October 2026")
@@ -735,14 +752,15 @@ has("X4 0050-00679B plug-in SEs", "(0050–00679B: 0.040, 0.053, 0.095)")
 chk("X4 ratio low", ratio[lo_p], ".1f", "1.4")
 chk("X4 ratio high", ratio[hi_p], ".1f", "2.4")
 # E5
-for (a, b), printed in (((0, i79), ("-0.105", "-0.023", "-0.013")), ((0, i46), ("0.599", "0.588", "0.552")),
-                        ((0, i35), ("0.180", "0.228", "0.187"))):
+for (a, b), printed in (((0, i79), ("-0.105", "-0.022", "-0.015")), ((0, i46), ("0.599", "0.588", "0.549")),
+                        ((0, i35), ("0.180", "0.231", "0.191")), ((0, i42), ("0.092", "0.072", "0.022"))):
     for nm, pr_ in zip(("daily", "weekly", "monthly"), printed, strict=True):
         chk(f"E5 {F[a]}-{F[b]} {nm}", se[a, b, nm][0], ".3f", pr_)
-for nm, pr_ in zip(("daily", "weekly", "monthly"), ("-0.18", "-0.20", "-0.36"), strict=True):
+for nm, pr_ in zip(("daily", "weekly", "monthly"), ("-0.18", "-0.19", "-0.36"), strict=True):
     chk(f"E5 00679B-00642U {nm}", se[i79, i42, nm][0], ".2f", pr_)
-has("E5 correlations", "0050 correlates -0.105, -0.023 and -0.013 with 00679B, 0.599, 0.588 and 0.552 with 00646, "
-                       "and 0.180, 0.228 and 0.187 with 00635U. 00679B–00642U gives -0.18, -0.20 and -0.36.")
+has("E5 correlations", "0050 correlates -0.105, -0.022 and -0.015 with 00679B, 0.599, 0.588 and 0.549 with 00646, "
+                       "and 0.180, 0.231 and 0.191 with 00635U. With 00642U, 0050 correlates 0.092, 0.072 and 0.022. "
+                       "00679B–00642U gives -0.18, -0.19 and -0.36.")
 chk("E5 00642U daily kurtosis", float(k_d[i42]), ".1f", "26.6")
 chk("E5 00642U monthly kurtosis", float(k_m[i42]), ".1f", "12.3")
 chk("E5 others daily, low", float(k_d[ko].min()), ".1f", "11.2")
@@ -750,26 +768,45 @@ chk("E5 others daily, high", float(k_d[ko].max()), ".1f", "21.0")
 chk("E5 others monthly, low", float(k_m[ko].min()), ".1f", "4.3")
 chk("E5 others monthly, high", float(k_m[ko].max()), ".1f", "5.7")
 assert k_hi["daily"] == k_hi["monthly"] == "00642U"
-chk("E5 largest daily-weekly gap", gap[kg], ".3f", "0.082")
+chk("E5 largest daily-weekly gap", gap[kg], ".4f", "0.0833")
 assert kg == (0, i79)
-chk("E5 that gap in weekly normal SEs", g_n[kg], ".1f", "1.8")
+chk("E5 that gap in weekly normal SEs", g_n[kg], ".1f", "1.9")
+chk("E5 that multiple from the printed gap and X4's SE", 0.0833 / 0.045, ".1f", "1.9", in_md=False)
+has("E5 the largest daily-weekly gap", "the largest, 0.0833 for 0050–00679B, is 1.9 normal-theory ones")
 assert all(g_n[k_] < 2 and g_p[k_] < 2 for k_ in pairs)
 higher = {k_ for k_ in pairs if se[k_[0], k_[1], "daily"][0] > se[k_[0], k_[1], "weekly"][0]}
 assert higher == {(0, i46), (0, i42), (i79, i42)}, higher
 has("E5 higher/lower", "The daily figure is higher for 0050–00646, 0050–00642U and 00679B–00642U, and lower for the "
                        "other two")
-chk("E5 daily-monthly gap", gap_m[a9, b9], ".4f", "0.1815")
+chk("E5 daily-monthly gap", gap_m[a9, b9], ".4f", "0.1807")
 assert round(gap_2dp, 2) == 0.18                                                       # hence "from the unrounded"
-has("E5 unrounded", "0.1815 (from the unrounded correlations)")
-chk("E5 monthly normal SE", se[a9, b9, "monthly"][1], ".4f", "0.0806")
-chk("E5 monthly plug-in SE", se[a9, b9, "monthly"][2], ".4f", "0.0888")
-chk("E5 gap in normal SEs", m_n[a9, b9], ".1f", "2.3")
+has("E5 unrounded", "0.1807 (from the unrounded correlations)")
+chk("E5 monthly normal SE", se[a9, b9, "monthly"][1], ".4f", "0.0807")
+chk("E5 monthly plug-in SE", se[a9, b9, "monthly"][2], ".4f", "0.0890")
+chk("E5 gap in normal SEs", m_n[a9, b9], ".1f", "2.2")
 chk("E5 gap in plug-in SEs", m_p[a9, b9], ".1f", "2.0")
-chk("E5 multiples from the printed gap and SEs (normal)", 0.1815 / 0.0806, ".1f", "2.3", in_md=False)
-chk("E5 multiples from the printed gap and SEs (plug-in)", 0.1815 / 0.0888, ".1f", "2.0", in_md=False)
+chk("E5 multiples from the printed gap and SEs (normal)", 0.1807 / 0.0807, ".1f", "2.2", in_md=False)
+chk("E5 multiples from the printed gap and SEs (plug-in)", 0.1807 / 0.0890, ".1f", "2.0", in_md=False)
+has("E5 the daily-monthly gap", "2.2 normal-theory ones (0.0807) and 2.0 plug-in ones (0.0890)")
 assert [k_ for k_ in pairs if m_n[k_] >= 2] == [(a9, b9)]
+# experiment 1 (R4): the gaps' own standard errors, resampling whole weeks or months (20,000 draws each)
+gw_full, sd_w, mc_w = boot_w
+gm_full, sd_m, mc_m = boot_m
+print(f"CHECK E5 bootstrap: weekly gap on the kept weeks {gw_full:.6f}, SD {sd_w:.6f} (MC SE {mc_w:.6f}); monthly gap "
+      f"{gm_full:.6f}, SD {sd_m:.6f} (MC SE {mc_m:.6f}); {B_BOOT} draws each")
+chk("E5 bootstrap draws", B_BOOT, ",d", "20,000")
+has("E5 bootstrap seed", "Experiment 1 draws 20,000 resamples of each, weeks first, from `default_rng([1, 20261011])`, "
+                         "with Monte Carlo errors below 0.001.")
+assert mc_w < 0.001 and mc_m < 0.001
+chk("E5 bootstrap SD of the daily-weekly gap", sd_w, ".3f", "0.046")
+chk("E5 that gap in bootstrap SEs", gap[kg] / sd_w, ".1f", "1.8", in_md=False)
+chk("E5 that gap in bootstrap SEs, from the printed", 0.0833 / 0.046, ".1f", "1.8", in_md=False)
+chk("E5 bootstrap SD of the daily-monthly gap", sd_m, ".2f", "0.08")
+assert gap_m[a9, b9] / sd_m > 2 and 0.1807 / 0.08 > 2 and abs(gm_full) / sd_m > 2      # "stays above two of them"
+has("E5 bootstrap", "Resampling whole weeks or months ([[LM22]]) gives about 0.046 for 0050–00679B's daily–weekly gap, "
+                    "1.8 of them, and about 0.08 for 00679B–00642U's daily–monthly gap, which stays above two of them.")
 chk("E5 largest monthly plug-in SE", se[kp[0], kp[1], "monthly"][2], ".2f", "0.16")
-for nm, pv, ps in (("daily", "11.49", "45.9"), ("weekly", "10.55", "41.9"), ("monthly", "10.02", "45.0")):
+for nm, pv, ps in (("daily", "11.49", "45.9"), ("weekly", "10.57", "41.9"), ("monthly", "10.03", "44.9")):
     chk(f"E5 R1 vol {nm}", 100 * fsp[nm][0], ".2f", pv)
     chk(f"E5 R1 00642U share {nm}", 100 * fsp[nm][1][i42], ".1f", ps)
 
@@ -850,6 +887,10 @@ lin_term = 1e4 * 2 * float(dlt @ SA @ w1)
 quad = 1e4 * float(dlt @ SA @ dlt)
 chk("E8 linear term", -lin_term, ".2f", "28.59")
 chk("E8 quadratic term", quad, ".2f", "4.42")
+# from X5's printed volatilities and correlation the quadratic term is 4.41, hence "from unrounded inputs" (R9)
+chk("E8 quadratic term from the printed inputs", 0.05**2 * (13.49**2 + 37.43**2 + 2 * 0.18 * 13.49 * 37.43), ".2f",
+    "4.41", in_md=False)
+has("E8 unrounded", "=4.42$, from unrounded inputs, is why")
 chk("E8 new variance", 1e4 * v_new, ".2f", "107.92")
 has("E8 sum", "132.09-28.59+4.42=107.92")
 assert round(132.09 - 28.59 + 4.42, 2) == 107.92
@@ -870,6 +911,13 @@ print("CHECK widget: three matrices to 1e-10; its first draw is R1 at the daily 
 chk("KC6 0050's beta in R2", b2[0], ".3f", "1.587")
 chk("KC6 0050's share in R2", 100 * sh2[0], ".1f", "63.5")
 chk("KC6 share from the printed beta", 0.4 * 1.587 * 100, ".1f", "63.5", in_md=False)
+chk("KC6 (b) 00642U stand-alone", 100 * stand[i42], ".1f", "36.1")
+chk("KC6 (b) 00642U variance term", 100 * vterm[i42], ".3f", "42.433")
+chk("KC6 (b) 00642U Euler share", 100 * sh1[i42], ".1f", "45.9")
+has("KC6 (b)", "36.1% stand-alone, a variance term of 42.433% and an Euler share of 45.9%")
+has("KC6 (b) answer", "The stand-alone parts add up to the weighted average volatility, 20.75%, and the variance terms "
+                      "to only 76.4% of the variance.")
+chk("KC6 (b) variance terms' sum", 100 * float(vterm.sum()), ".1f", "76.4")
 
 # ---------------------------------------------------------------- section 7
 assert sch[kmin][0] == "2020-02-27" and fr.est_dates[sch[kmin][2] - WINDOW] == "2018-01-29"
@@ -895,6 +943,8 @@ chk("windows: 0050 low", 100 * SH[:, 0].min(), ".1f", "16.8")
 chk("windows: 0050 high", 100 * SH[:, 0].max(), ".1f", "28.6")
 assert sch[int(SH[:, k6].argmin())][0] == "2026-02-26" and sch[int(SH[:, k6].argmax())][0] == "2020-02-27"
 has("X7 lowest window", "00642U's lowest share is in the window through 26 February 2026")
+has("X7 the last negative share", "00679B's last negative share, -0.0023% through 29 April 2022, is too small to see.")
+assert sch[kneg_last][0] == "2022-04-29" and f"{100 * SH[kneg_last, i79]:.2f}" == "-0.00"   # pct2 shows -0.00%
 assert sch[0][0] == "2019-02-27" and fr.est_dates[first_rows - WINDOW] == "2017-02-13"
 has("X7 first signal", "one point per month-end signal from 27 February 2019")
 has("X7 first window", "The first window, from 13 February 2017, gives 21.7%, 19.3%, 1.1%, 7.7% and 50.2%")
@@ -904,7 +954,7 @@ X7 = json.loads((CHARTS / "lm27-windows.json").read_text(encoding="utf-8"))
 for sr in X7["series"]:
     assert [round(v_, 6) for v_ in sr["y"]] == [round(float(x), 6) for x in SH[:, J[sr["name"]]]]
 assert all(mn[j] > 0 for j in range(N) if j != i79)
-has("KC7 MRCs", "Its MRC is -0.77% there and the other four MRCs are positive")
+has("KC7 MRCs", "In that window 00679B's MRC is -0.77% and the other MRCs are positive")
 
 # ---------------------------------------------------------------- section 8
 chk("E10 lowest beta", beta.min(), ".3f", "0.507")
@@ -985,7 +1035,9 @@ chk("S4 (Sigma w)_1", Sw3[0], ".4f", "0.0248")
 chk("S4 (Sigma w)_2", Sw3[1], ".4f", "0.0044")
 chk("S4 (Sigma w)_3", Sw3[2], ".2f", "0.03")
 chk("S4 variance", sp3**2, ".5f", "0.01768")
-has("S4 terms", "(\\Sigma\\mathbf w)_1=0.016+0.0016+0.0072=0.0248")
+has("S4 terms", "(\\Sigma\\mathbf w)_1&=0.016+0.0016+0.0072\\\\&=0.0248,")
+has("S4 variance", "\\sigma_p^2&=0.4\\times0.0248+0.4\\times0.0044\\\\&\\quad+0.2\\times0.03=0.01768")
+chk("S4 variance from its printed terms", 0.4 * 0.0248 + 0.4 * 0.0044 + 0.2 * 0.03, ".5f", "0.01768", in_md=False)
 has("S4 stand-alone", "0.08/0.18=44.4%")
 chk("P10 mu_p", 100 * float(w3 @ mu3), ".2f", "6.80")
 chk("P10 sigma_p", 100 * sp3, ".2f", "13.30")
@@ -997,17 +1049,24 @@ for j, printed in enumerate(("56.1", "10.0", "33.9")):
 assert f"{sum(round(100 * float(x), 1) for x in sh3):.1f}" == "100.0"
 for j, printed in enumerate(("18.65", "3.31", "22.56")):
     chk(f"P10 MRC {j + 1}", 100 * m3[j], ".2f", printed)
+for j, printed in enumerate(("7.461", "1.324", "4.512")):
+    chk(f"P10 RC {j + 1} (points)", 100 * rc3[j], ".3f", printed)
+chk("P10 the RCs' sum", 100 * float(rc3.sum()), ".3f", "13.297")
+assert f"{sum(round(100 * float(x), 3) for x in rc3):.3f}" == "13.297"               # the printed parts sum as printed
+has("S10 contributions", "The risk contributions are 7.461, 1.324 and 4.512 points, summing to 13.297")
+has("P10 stem", "the ratio (27.7), the risk contributions and the risk shares")
 chk("P10 linear", 100 * lin3, ".2f", "-0.96")
 chk("P10 linear from the printed MRCs", 0.05 * (3.31 - 22.56), ".2f", "-0.96", in_md=False)
 chk("P10 exact", -100 * ex3, ".2f", "0.89")
 chk("P10 new sigma_p", 100 * (sp3 + ex3), ".2f", "12.41")
 assert round(13.30 - 0.89, 2) == 12.41
 # P6
-chk("P6 stem rho", r_m, ".4f", "0.5521")
-chk("P6 key", (1 - r_st**2) / sqrt(116), ".4f", "0.0645")
+chk("P6 stem rho", r_m, ".4f", "0.5488")
+chk("P6 key", (1 - r_st**2) / sqrt(116), ".4f", "0.0649")
 chk("P6 1/sqrt(T)", 1 / sqrt(116), ".4f", "0.0928")
 chk("P6 divided by T", (1 - r_st**2) / 116, ".4f", "0.0060")
-chk("S6 1 - rho^2", 1 - r_st**2, ".4f", "0.6952")
+chk("S6 1 - rho^2", 1 - r_st**2, ".4f", "0.6988")
+chk("S6 key from its printed parts", 0.6988 / 10.770, ".4f", "0.0649", in_md=False)
 chk("S6 sqrt(116)", sqrt(116), ".3f", "10.770")
 chk("S6 plug-in", se[0, i46, "monthly"][2], ".3f", "0.081")
 # P8 and S8
@@ -1018,6 +1077,25 @@ chk("S8 bound", 100 * tb.cost * (COMMISSION + 0.001) * float(np.abs(tb.target).s
 chk("S8 0.2425", 100 * (COMMISSION + 0.001), ".4f", "0.2425")
 assert approx - tb.cost <= tb.cost * (COMMISSION + 0.001) * float(np.abs(tb.target).sum())
 chk("S8 bound from the printed", 0.0310028 * 0.2425 / 100, ".7f", "0.0000752", in_md=False)
+# R27: the closed form on E3's trade, from the drifted weights (four buys, one sale of 00642U)
+buys = drift < tb.target
+assert list(buys) == [True, True, True, True, False]
+nb = float(drift[buys].sum())
+num = 1 + COMMISSION * nb - (COMMISSION + TAX["00642U"]) * float(drift[i42])
+den = 1 + COMMISSION * float(tb.target[buys].sum()) - (COMMISSION + TAX["00642U"]) * float(tb.target[i42])
+chk("S8 the buys' drifted weights", nb, ".5f", "0.71942")
+chk("S8 00642U's drifted weight", float(drift[i42]), ".5f", "0.28058")
+chk("S8 numerator", num, ".7f", "1.0003448")
+chk("S8 numerator from the printed weights", 1 + 0.001425 * 0.71942 - 0.002425 * 0.28058, ".7f", "1.0003448",
+    in_md=False)
+chk("S8 denominator", den, ".6f", "1.000655")
+assert abs(den - 1.000655) < 1e-15                                                     # exact: 1 + 0.00114 - 0.000485
+chk("S8 ratio", num / den, ".7f", "0.9996900")
+assert abs(num / den - W_post / W_pre) < 1e-15                                         # the closed form is the root
+chk("S8 ratio from the printed parts", 1.0003448 / 1.000655, ".7f", "0.9996900", in_md=False)
+chk("S8 cost", 100 * (1 - num / den), ".5f", "0.03100")
+has("S8 check", "so the formula gives $W/W^{\\mathrm{pre}}=1.0003448/1.000655=0.9996900$, a cost of 0.03100%.")
+assert "write $k=" not in RAW and "k\\textstyle" not in RAW                            # R13: no symbol k
 # P12 / S12: the lab's recursion against the shared path (the lab prints it); S9's figures are E10's
 # stated inputs and labels that are not results
 has("P3 stem", "Their growth factors over the period are 1.40 and 0.80")
@@ -1027,6 +1105,23 @@ has("E8 linear", "$0.05(\\mathrm{MRC}_{00679B}-\\mathrm{MRC}_{00642U})=-1.24$")
 has("E6 formula", "0.3\\times(-0.97%)")
 has("time", "time: \"≈ 2.5 h + lab\"")
 has("Maillard's section", "(§2.1, p. 4, and its footnote)")
+# wording fixed in Stage 3, round 1 (R1, R16, R18, R19, R24, R26, K1, R5)
+for lab_, txt in (("E1 subject", "the book earns the funds' average, 2.685%"),
+                  ("E1 split sentence", "earned 2.73%. Its log return is the sum"),
+                  ("KC3 subject", "Each switch pays 0.1425% of commission on each side"),
+                  ("KC4 split sentence", "keeping one return from 10 to 18 June. That sample gives $\\hat\\rho=-0.1056$"),
+                  ("beta to the portfolio", "gives fund $i$'s beta to the portfolio,"),
+                  ("frames sentence", ("Weekly and monthly returns, and every book's return, drift, trade and wealth, "
+                                       "use the wealth frame.")),
+                  ("S11 sources", ("00646's and 00679B's 13:30 prices follow the previous New York session, while "
+                                   "0050 also moves with Taipei's own trading. The futures funds are valued on European "
+                                   "and US futures (Section 4).")),
+                  ("S11 multiple", "reaches two monthly normal-theory standard errors, 2.2 ([[eg:async]])"),
+                  ("P11 scope", ("which of [[ex:freq]]'s five pairs have daily–monthly gaps of two or more monthly "
+                                 "normal-theory standard errors?")),
+                  ("glossary book", "| Book | 帳戶 |")):
+    has(lab_, txt)
+assert "when all five funds traded" not in RAW and "Its MRC is" not in RAW and "Both pay" not in RAW
 
 # ---------------------------------------------------------------- structure: labels, tags and citations
 ex_labels = re.findall(r"\[!exhibit\][^\n]*\{#([\w-]+)\}", RAW)

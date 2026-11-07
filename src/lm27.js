@@ -2,7 +2,7 @@
    Data: the "widget" block of the chart JSON lm27-riskSplit, inlined in the page by the build
    (<script type="application/json" id="chart-lm27-riskSplit">), written by data/lm27_charts.py: the five funds and
    three annualized 5x5 covariance matrices of E5 in decimals, ten decimals each (daily on the 2,362 joint dates, A =
-   242.951; monthly on 116 calendar months, A = 12; daily on the window 29 January 2018 to 27 February 2020, A of the
+   242.951; monthly on 116 calendar months compounded from the wealth frame, A = 12; daily on the window 29 January 2018 to 27 February 2020, A of the
    full sample). Matrices only: no market series.
    Formulas: Sigma w, s_p = sqrt(w'Sigma w), shares w_i (Sigma w)_i / s_p^2, which sum to 1 by (27.5); the weighted
    average volatility sum_i w_i s_i and the ratio (27.7) while every weight is >= 0, else sum_i |w_i| s_i, the bound of
@@ -40,9 +40,10 @@
     var ctl = B.controls(host, defs, draw);
     var chart = document.createElement("div"), out = document.createElement("div"), note = document.createElement("p");
     out.className = "readout"; out.setAttribute("aria-live", "polite"); note.className = "w-note";
-    note.textContent = "Descriptive: E5's daily total returns, annualized, divisor T. " + F[4] + " takes the rest of " +
-      "the money. A risk share is w_i (Σw)_i / s_p², so the shares always add up to 100%; a negative share means " +
-      "that the fund lowers the book's volatility at the margin.";
+    note.innerHTML = "Descriptive: E5's total returns, annualized, divisor T: daily on the 2,362 joint dates or the " +
+      "window's 504, or monthly over 116 calendar months. " + F[4] + " takes the rest of the money. A risk share " +
+      "is w<sub>i</sub>(Σw)<sub>i</sub>/s<sub>p</sub>², so the shares always add up to 100%. A negative share " +
+      "of a fund held long means that more of it lowers the book's volatility at the margin.";
     host.appendChild(chart); host.appendChild(out); host.appendChild(note);
 
     function draw(v) {
@@ -50,7 +51,7 @@
       w.push(1 - w[0] - w[1] - w[2] - w[3]);
       w = w.map(function (x) { return Math.round(x * 1e10) / 1e10; });   // 0.2 + 0.2 + ... is not exactly 1 in floats
       var r = split(W.mats[v.mat], w);
-      if (!r) { out.innerHTML = "<div><span>s_p</span><b>0: no split</b></div>"; return; }
+      if (!r) { out.innerHTML = "<div><span>s<sub>p</sub></span><b>0: no split</b></div>"; return; }
       B.chart(chart, {
         type: "bar", height: 260,
         alt: "Money weights against risk shares of the five funds under the " + v.mat + " covariance matrix",
@@ -60,8 +61,8 @@
       });
       var html = "<div><span>Book's volatility, a year</span><b>" + fmt(r.sp, "pct2") + "</b></div>";
       html += r.shortSold
-        ? "<div><span>Σ|w_i| s_i, (8.11) with a short</span><b>" + fmt(r.avg, "pct2") + "</b></div>" +
-          "<div><span>Its ratio to s_p</span><b>" + fmt(r.ratio, "n2") + "</b></div>"
+        ? "<div><span>Σ|w<sub>i</sub>| s<sub>i</sub>, (8.11) with a short</span><b>" + fmt(r.avg, "pct2") +
+          "</b></div>" + "<div><span>Its ratio to s<sub>p</sub></span><b>" + fmt(r.ratio, "n2") + "</b></div>"
         : "<div><span>Weighted average volatility</span><b>" + fmt(r.avg, "pct2") + "</b></div>" +
           "<div><span>Ratio (27.7)</span><b>" + fmt(r.ratio, "n2") + "</b></div>";
       html += "<div><span>Sum of the risk shares</span><b>" + fmt(r.sum, "pct1") + "</b></div>";

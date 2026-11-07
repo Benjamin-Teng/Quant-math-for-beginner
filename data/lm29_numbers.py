@@ -28,8 +28,10 @@ import re
 import shutil
 import subprocess
 import sys
+from importlib import import_module
 from pathlib import Path
 
+import cvxpy as cp
 import numpy as np
 
 HERE = Path(__file__).resolve().parent
@@ -248,6 +250,8 @@ chk("U28 lambda = 2 sigma^2 from the printed 12.10%", 2 * 0.1210**2, ".4f", "0.0
 chk("U28 lowest excluded beta (Cement)", C.bU[C.imin], ".6f", "1.000019")
 assert C.u.names[C.imin] == "Cement" and C.u.names[C.imax] == "Optoelectronic"
 chk("U28 highest excluded beta", C.bU[C.imax], ".3f", "1.480")
+chk("KC 4: Cement's covariance must fall by more than (% of sigma_p^2)", 100 * (C.bU[C.imin] - 1), ".4f", "0.0019")
+flag("KC 4: Cement's fall", 100 * (C.bU[C.imin] - 1), 4)
 has("19 excluded", "The 19 excluded sectors")
 chk("U28 unconstrained shorts (echo A28-13)", int((C.wuU < -C.ZERO).sum()), "d", "12")
 chk("U28 unconstrained gross (echo A28-13)", float(np.abs(C.wuU).sum()), ".2f", "2.24")
@@ -277,6 +281,9 @@ chk("00646 asks (from the printed inputs)", 0.54436 * 39.722, ".3f", "21.623")
 chk("00646 asks (A29-10)", 100 * C.b4[1] * C.ep, ".3f", "21.623")
 chk("KC 5: shortfall from the printed inputs", 0.54436 * 39.722 - 16.437, ".2f", "5.19")
 chk("KC 5: shortfall unrounded", 100 * C.short[1], ".5f", "5.18612")
+chk("KC 5: the beta below which 00646 enters", float(C.eL[1] / C.ep), ".3f", "0.414")      # R4 is unchanged while 00646 is out
+chk("KC 5: that beta from the printed inputs", 16.437 / 39.722, ".3f", "0.414")
+has("KC 5 answer", "or its beta to the portfolio fall below $16.437/39.722=0.414$, so that its beta requires less")
 assert all(abs(C.nu4[i] / C.lam4 - C.short[i]) < 1e-12 for i in range(5))
 assert (C.hist[1], C.hist[2], C.hist[3], C.hist[4], C.hist[5]) == (2, 21, 56, 13, 0)
 has("R4 supports", "R4 holds one, two, three, four or five funds at 2, 21, 56, 13 and 0 signals")
@@ -319,6 +326,17 @@ chk("bump 00679B gain", bump_sr["00679B"] - C.srL, ".6f", "0.001358")
 chk("bump 00679B first-order", C.srL**3 * C.nu4[2] * 0.01 / 2, ".6f", "0.001365")
 chk("bump 00679B first-order from the printed SR and nu", 2.106733**3 * 0.02920 * 0.01 / 2, ".6f", "0.001365")
 has("bump size", "relax $y_i\\ge0$ to $y_i\\ge-0.01$")
+# (29.8) bounds the fall of J = y'Sigma y = 1 / SR^2 (y = w / e'w), not the ratio's gain (item R1)
+J0 = 1 / C.srL**2
+for name, i, p_fall, p_nu, p_nu_printed in (("00646", 1, "0.000232", "0.000234", 0.02337),
+                                             ("00679B", 2, "0.000290", "0.000292", 0.02920)):
+    fall = J0 - 1 / bump_sr[name] ** 2
+    assert 0 < fall <= C.nu4[i] * 0.01, (name, fall, C.nu4[i] * 0.01)       # (29.8): J(b + 0.01) >= J(b) - 0.01 nu
+    chk(f"bump {name}: fall of J", fall, ".6f", p_fall)
+    flag(f"bump {name}: fall of J", fall, 6)
+    chk(f"bump {name}: nu x 0.01", C.nu4[i] * 0.01, ".6f", p_nu)
+    chk(f"bump {name}: nu x 0.01 from the printed nu", p_nu_printed * 0.01, ".6f", p_nu)
+has("bump: (29.8) bounds J", "Inequality (29.8) bounds the fall of $J$, not the ratio's gain")
 
 # ---------------------------------------------------------------- Section 6: cap, limits, frontier, leverage
 chk("R3 00679B (last window)", 100 * C.w3L[2], ".1f", "56.5")
@@ -360,20 +378,33 @@ for ser, v, p in zip(LIM["series"], vols, ["2.18", "2.16", "2.11", "2.00"], stri
 assert LIM["series"][1]["values"] == [78.82, -7.59, -17.41, 23.36, 22.82]
 assert abs(sum(abs(x) for x in LIM["series"][1]["values"]) - 150) < 1e-9
 assert LIM["series"][3]["values"] == [40.0, 14.37, 0.0, 27.48, 18.15]
+# X2's note prints the two weight rows that X1 does not (item R3)
+for key, printed in (("gross <= 150%", ["78.82", "-7.59", "-17.41", "23.36", "22.82"]),
+                     ("long-only, cap 40%", ["40.00", "14.37", "0", "27.48", "18.15"])):
+    for v, p in zip(C.lims[key], printed, strict=True):
+        if p == "0":
+            assert abs(v) < C.ZERO, (key, v)
+        else:
+            chk(f"X2 note: {key} weight", 100 * float(v), ".2f", p)
+            flag(f"X2 note: {key} weight", 100 * float(v), 2)
+    assert abs(sum(float(x) for x in printed) - 100) < 1e-9
+has("X2 note: gross row", "Gross exposure at most 150% gives 78.82, -7.59, -17.41, 23.36 and 22.82% in [[ex:case]]'s order")
+has("X2 note: cap row", "and the 40% cap 40.00, 14.37, 0, 27.48 and 18.15%")
 chk("frontier: coincidence from", 100 * C.lo_m, ".2f", "4.12")
 chk("frontier: coincidence to", 100 * C.hi_m, ".2f", "30.44")
 chk("frontier: 40% unconstrained", 100 * C.vol(C.w30u, C.SL), ".2f", "18.29")
 chk("frontier: 40% long-only", 100 * C.vol(C.w30l, C.SL), ".2f", "18.32")
 chk("frontier: 0050 mean", 100 * C.muL[0], ".1f", "48.8")
 chk("frontier: 0050 volatility", 100 * C.volL[0], ".1f", "26.3")
-has("frontier end", "It ends at 0050, the highest mean (48.8%, 26.3%)")
+has("frontier end", "It ends at 0050, the fund with the highest mean, 48.8%, at a volatility of 26.3%")
 chk("X3: R3's mean", 100 * C.mgmv, ".2f", "8.46")
 chk("X3: tangency mean", 100 * float(C.wtL @ C.muL), ".2f", "71.13")
 chk("X3: R4 mean", 100 * float(C.w4L @ C.muL), ".2f", "41.22")
-has("X3 points", "R3, the global minimum (8.46%, 10.10%); R4 (41.22%, 18.85%); the tangency (71.13%, 31.94%)")
+has("X3 points", "Points, as (volatility, mean): R3, the global minimum (10.10%, 8.46%); R4 (18.85%, 41.22%); the "
+                 "tangency (31.94%, 71.13%)")
 chk("X3: tangency slope from the printed point", (71.13 - 1.5) / 31.94, ".2f", "2.18")
 chk("X3: R4 slope from the printed point", (41.22 - 1.5) / 18.85, ".2f", "2.11")
-has("X3 slopes", "capital market lines from $r_f=1.5%$, slopes 2.18 and 2.11")
+has("X3 slopes", "capital market lines from $r_f=1.5%$ with slopes 2.18 and 2.11")
 FRO = json.loads((CHARTS / "lm29-frontier.json").read_text(encoding="utf-8"))
 lo_curve = FRO["curves"][1]
 for m, vv in ((0.40, C.vol(C.w30l, C.SL)), (round(C.lo_m, 6), None), (round(C.hi_m, 6), None)):
@@ -386,7 +417,13 @@ assert [p["at"] for p in FRO["points"]] == [[round(C.vol(C.w3L, C.SL), 6), round
 L_rf = [float(m.group(1)) for m in re.finditer(r"L ([\d.]+)%", C.LINES[34])]
 chk("leverage at r_f 0 (A29-35)", L_rf[0], ".1f", "132.2")
 chk("leverage at r_f 2% (A29-35)", L_rf[1], ".1f", "130.6")
-has("leverage sentence", "At a 2-point spread and $r_f$ of 0% and 2%, $L=132.2%$ and 130.6%")
+# Section 6's three cases of financed leverage (item R2): R4's volatility lies below the borrowing-rate tangency's,
+# so the limits below, between and above the two give L < 1, L = 1 and L > 1
+w_b2 = C.maxsharpe(C.SL, C.eL - C.SPREAD, "x")
+assert w_b2 is not None
+assert v4 < C.vol(w_b2, C.SL) < 0.25, (v4, C.vol(w_b2, C.SL))
+has("leverage cases", "If the gross limit is slack, a limit below R4's volatility gives R4 scaled to the limit")
+has("leverage: in between", "In between, $L=1$.")
 
 # ---------------------------------------------------------------- Section 7: costs (A29-19 .. A29-21)
 drift1 = [f"{100 * v:.1f}" for v in C.wdc]
@@ -413,10 +450,11 @@ chk("band: sell edge from the printed lambda", 0.016660 + 0.001425 + 0.001, ".6f
 chk("band: 00679B's edge from the printed lambda", 0.016660 + 0.001425, ".6f", "0.018085")
 chk("KC 7: 0050's gradient", C.gp1[0], ".6f", "0.017684")
 assert C.lam_b - C.COMMISSION < C.gp1[0] < C.lam_b + C.COMMISSION + 0.001
-chk("no-trade threshold", C.bar, ".2f", "3.20")
+chk("no-trade threshold", C.bar, ".4f", "3.2022")
+has("E8 threshold", "No trade is optimal for $\\theta\\ge3.2022$, a threshold set by selling 00646")
 assert (FUNDS[C.pair[0]], FUNDS[C.pair[1]]) == ("00646", "00635U")
 has("threshold pair", "set by selling 00646 against buying 00635U")
-has("theta units", "$\\theta=2/(\\delta\\tau)$; $\\delta=4$ with monthly trading, $\\tau=1/12$, gives $\\theta=6$")
+has("theta units", "$\\theta=2/(\\delta\\tau)$. Monthly trading, $\\tau=1/12$, with $\\delta=4$ gives $\\theta=6$")
 assert 2 / (4 * (1 / 12)) == 6
 BAND = json.loads((CHARTS / "lm29-band.json").read_text(encoding="utf-8"))
 assert [a["y"] for a in BAND["ann"]] == [round(C.lam_b - C.COMMISSION, 6), round(C.lam_b + C.COMMISSION, 6),
@@ -435,7 +473,7 @@ for th, (to, cs, vm, vx, q) in sweep.items():
 chk("X5: 91 signals", len(C.SCH) - 1, "d", "91")
 chk("theta 1: planned turnover share", sweep["1"][0], ".1f", "31.5")
 chk("theta 1: untraded", sweep["1"][4], "d", "31")
-chk("theta 1: volatility given up", sweep["1"][2], ".1f", "4.9")
+chk("theta 1: volatility added", sweep["1"][2], ".1f", "4.9")
 assert C.sweep_gap < 1e-5
 
 # ---------------------------------------------------------------- Section 8: solvers (A29-22 .. A29-26)
@@ -448,6 +486,30 @@ assert (C.dflt.tol_gap_abs, C.dflt.tol_gap_rel, C.dflt.tol_feas, C.dflt.max_iter
 assert [m.group(1) for m in C.osqp_def.values() if m is not None] == ["1e-5", "1e-5", "10000"]
 has("defaults", "cvxpy's defaults are OSQP's $10^{-5}$ with 10,000 iterations and polishing, and CLARABEL's "
                "$10^{-8}$ with 200")
+# the book's OSQP settings (vol5_rules.OSQP_OPTS) and OSQP's own refinement default (item R25; Lab Part 9 prints 3)
+assert C.OSQP_OPTS["eps_abs"] == C.OSQP_OPTS["eps_rel"] == 1e-10 and C.OSQP_OPTS["max_iter"] == 400_000
+assert C.OSQP_OPTS.get("polishing") is True, C.OSQP_OPTS
+has("book's OSQP iterations", "to $10^{-10}$, with up to 400,000 iterations and polishing")
+_osqp = vars(import_module("osqp"))["OSQP"]()             # cvxpy's dependency, read as lm29_common reads clarabel
+_sp = import_module("scipy.sparse")
+_osqp.setup(_sp.csc_matrix(np.eye(2)), np.zeros(2), _sp.csc_matrix(np.ones((1, 2))), np.ones(1), np.ones(1),
+            verbose=False)
+assert _osqp.settings.polish_refine_iter == 3, _osqp.settings.polish_refine_iter
+print("CHECK OSQP's default polish_refine_iter: 3 (Lab Part 9)")
+# K3: tightening only one of CLARABEL's two gap tolerances leaves R3 at the first signal where the defaults put it
+for k_unit in (1.0, C.A):
+    S_k = k_unit * C.cov0(C.x0)
+    sols = []
+    for opts in (None, {"tol_gap_abs": 1e-12}, {"tol_gap_rel": 1e-12}, {"tol_gap_abs": 1e-14}, {"tol_gap_rel": 1e-14}):
+        wk = cp.Variable(C.N)
+        _, vk = C.solve(cp.quad_form(wk, cp.psd_wrap(S_k)), [cp.sum(wk) == 1, wk >= 0], "CLARABEL", opts)
+        sols.append(C.must(vk, "K3"))
+    assert all(np.abs(s_ - sols[0]).max() < 1e-12 for s_ in sols[1:]), [np.abs(s_ - sols[0]).max() for s_ in sols]
+    wk = cp.Variable(C.N)
+    _, vk = C.solve(cp.quad_form(wk, cp.psd_wrap(S_k)), [cp.sum(wk) == 1, wk >= 0], "CLARABEL",
+                    {"tol_gap_abs": 1e-12, "tol_gap_rel": 1e-12})
+    assert np.abs(C.must(vk, "K3 both") - sols[0]).max() > 1e-6        # both together move it
+has("K3", "Tightening only one of CLARABEL's two gap tolerances leaves R3 unchanged at the first signal.")
 w30d = C.minvar(C.cov0(C.x0), "R3 first daily")
 v_daily = float(w30d @ C.cov0(C.x0) @ w30d)
 v_annual = float(w30d @ (C.A * C.cov0(C.x0)) @ w30d)
@@ -486,6 +548,36 @@ sci("X7 note: R4's worst", gap_worst["R4 annual CLARABEL default"], 1, "9.5 -7")
 assert max(gap_worst[k] for k in gap_worst if k.startswith("R4")) == gap_worst["R4 annual CLARABEL default"]
 sci("worst daily gap (pitfall, overview)", gap_worst["R3 daily CLARABEL default"], 1, "2.1 -3")
 sci("worst annual gap (overview)", gap_worst["R3 annual CLARABEL default"], 1, "3.4 -5")
+# Solution 12 (item R4): R4's objective is A times larger on daily inputs, and its worst default gaps
+x_daily, a_daily = C.cov0(C.x0), C.x0.mean(axis=0) - C.RF / C.A
+x_annual, a_annual = C.A * C.cov0(C.x0), C.A * C.x0.mean(axis=0) - C.RF
+w4f = C.maxsharpe(x_annual, a_annual, "x")
+assert w4f is not None
+J4 = {}
+for unit, S_u, a_u in (("daily", x_daily, a_daily), ("annual", x_annual, a_annual)):
+    y_u = w4f / float(a_u @ w4f)                          # the exact y: a'y = 1, on R4's support
+    J4[unit] = float(y_u @ S_u @ y_u)
+assert abs(J4["daily"] / J4["annual"] - C.A) < 1e-9 * C.A
+assert abs(J4["annual"] - 1 / C.sr(w4f, x_annual, a_annual) ** 2) < 1e-12
+chk("S12: R4's daily objective at the first signal", J4["daily"], ".0f", "378")
+chk("S12: R4's annual objective at the first signal", J4["annual"], ".3f", "1.556")
+chk("S12: 378 from the printed 1.556 and A", 1.556 * 242.95, ".0f", "378")      # 1.56 x A would print 379
+sci("S12: R4's worst daily default gap (CLARABEL)", gap_worst["R4 daily CLARABEL default"], 1, "3.3 -7")
+assert gap_worst["R4 daily OSQP default"] <= gap_worst["R4 daily CLARABEL default"]       # "R4's worst default gaps"
+assert gap_worst["R4 annual OSQP default"] <= gap_worst["R4 annual CLARABEL default"]
+# Solution 12(d): (29.5)'s largest stationarity residual over lambda, CLARABEL's default R3 at the first signal
+res12 = {}
+for unit, S_u in (("daily", x_daily), ("annual", x_annual)):
+    wk = cp.Variable(C.N)
+    _, vk = C.solve(cp.quad_form(wk, cp.psd_wrap(S_u)), [cp.sum(wk) == 1, wk >= 0], "CLARABEL", None)
+    vk = C.must(vk, f"12(d) {unit}")
+    assert vk.min() > C.ZERO                                  # every fund is held
+    lam_k = float(2 * vk @ S_u @ vk)
+    res12[unit] = 100 * float(np.abs(2 * S_u @ vk - lam_k).max()) / lam_k
+chk("S12(d): daily residual (% of lambda)", res12["daily"], ".1f", "1.6")
+chk("S12(d): annual residual (% of lambda)", res12["annual"], ".2f", "0.03")
+has("S12(d)", "The largest gap is 1.6% of $\\lambda$ on daily inputs and 0.03% on annual ones")
+has("S12 polishing", "Its refinement still leaves $8.3\\times10^{-9}$ on daily inputs.")
 # E9: R4's checks (A29-25) and cvxpy's duals (A29-26)
 chk_line = C.LINES[24]
 
@@ -504,6 +596,16 @@ sci("E9 CLARABEL smallest nu", grab("smallest nu", clar_part), 1, "-9.3 -15")
 sci("E9 CLARABEL complementarity", grab("complementarity", clar_part), 1, "1.5 -14")
 sci("E9 CLARABEL weight gap", grab("weight gap", clar_part), 1, "1.7 -13")
 sci("E9 CLARABEL min y", grab("min y", clar_part), 1, "2.0 -13")
+# A1: the exact y has two zeros (00646, 00679B); CLARABEL's y there, from a fresh solve as in A29-25
+y9 = cp.Variable(C.N)
+_, v9 = C.solve(cp.quad_form(y9, cp.psd_wrap(C.SL)), [C.eL @ y9 == 1, y9 >= 0], cp.CLARABEL, C.CLARABEL_OPTS)
+v9 = C.must(v9, "E9 CLARABEL")
+assert f"{v9[2]:.1e}" == f"{grab('min y', clar_part):.1e}"            # the same solve as A29-25's
+sci("E9 CLARABEL y of 00646", float(v9[1]), 1, "3.4 -13")
+sci("E9 CLARABEL y of 00679B", float(v9[2]), 1, "2.0 -13")
+assert all(v9[i] > C.ZERO for i in (0, 3, 4)) and max(v9[1], v9[2]) < 1e-12
+has("E9 two zeros", "Where the exact $\\mathbf y$ has its two zeros, CLARABEL leaves $3.4\\times10^{-13}$ (00646) and "
+                    "$2.0\\times10^{-13}$ (00679B)")
 below("E9 closed form on the active set", grab("against the exact solution", chk_line.split("closed form")[1]), -15,
       "gives R4 to below $10^{-15}$")
 assert "OSQP status optimal" in chk_line and "CLARABEL status optimal" in chk_line
@@ -571,6 +673,17 @@ chk("S10: volatility", 100 * C.vol(C.vto, C.Sc), ".2f", "9.24")
 chk("S10: multiplier", C.nuto, ".5f", "0.00825")
 assert float(np.abs(C.vpen - C.vto).max()) < 1e-9
 has("S10 gap", "gives the same weights within $10^{-9}$")
+has("S10 unrounded multiplier", "The penalty with $\\theta$ equal to the unrounded multiplier gives the same weights")
+# A3, K7: the limit against the full trade and no trade
+to_full = 0.5 * float(np.abs(C.w3c - C.wdc).sum())
+chk("S10: share of R3's turnover", 100 * 0.05 / to_full, ".0f", "27")
+chk("S10: share from the printed turnover", 100 * 5 / 18.72, ".0f", "27")
+v_no, v_lim, v_r3 = (C.vol(w_, C.Sc) for w_ in (C.wdc, C.vto, C.w3c))
+share_vol = (v_no - v_lim) / (v_no - v_r3)
+assert 0.45 < share_vol < 0.55, share_vol                                  # "about half"
+assert 0.45 < (9.51 - 9.24) / (9.51 - 8.97) < 0.55                         # from the printed volatilities
+print(f"CHECK S10: the limit closes {share_vol:.3f} of the volatility gap (about half)")
+has("S10 weighing", "It trades 27% of R3's turnover and closes about half of the volatility gap between no trade and R3.")
 has("P10 limit", "\\tfrac12\\lVert\\mathbf w-\\mathbf w^{\\mathrm{drift}}_t\\rVert_1\\le0.05")
 # problem 11 (A29-31, A29-35)
 p11 = C.LINES[30]
@@ -663,20 +776,22 @@ chk("widget: f1's multiplier", b["nu"][1], ".4f", "0.0031", in_md=False)
 chk("widget: utility", b["utility"], ".4f", "0.0571", in_md=False)
 signs_infeasible = sorted(c["label"] for c in solv if c["signs"] and not c["feasible"])
 assert signs_infeasible == ["cap", "none"], signs_infeasible
-has("widget sentence", "The widget lists the eight binding sets of a two-fund example.")
+has("widget sentence", "The widget tries the eight binding sets of a two-fund example.")
+has("widget: (9.6)", "the system is singular by (9.6), since three gradients in $\\mathbb R^2$ are dependent")
+assert sum(1 for r in C.init if r[1] is None) == 1 and next(r for r in C.init if r[1] is None)[0] == "cap+f1>=0+f2>=0"
 JS = (ROOT / "src" / "lm29.js").read_text(encoding="utf-8")
 assert 'data-widget="kktPair"' in RAW and "B.widgets.kktPair = function" in JS
 assert '"2017-02-13 → 2019-02-27, on its 504 joint dates; in-sample' in JS    # the widget's caption
 
 # ---------------------------------------------------------------- overview (front matter) and other prose
 has("overview: U28", "On U28, 19 sectors are excluded, the closest at 1.000019")
-has("overview: 00646", "00646 earns 16.437 points a year above cash, but its beta asks for 21.623")
+has("overview: 00646", "00646 earns 16.437 points a year above cash, but its beta requires 21.623")
 has("overview: cap", "raising R3's 40% cap to 41% lowers its variance by 0.000102, against the linear prediction 0.000105")
 has("overview: sweep", "R3's path plans 31.5% of its turnover and leaves 31 of 91 signals untraded")
-has("theta 1 text", "At $\\theta=1$ the path plans 31.5% of R3's turnover, leaves 31 signals untraded and gives up 4.9")
+has("theta 1 text", "At $\\theta=1$ the path plans 31.5% of R3's turnover, leaves 31 signals untraded and adds 4.9")
 has("cost model", "0.1425% of $\\lVert\\boldsymbol\\Delta\\rVert_1$ plus a 0.1% tax on sales, none for 00679B")
 has("problem conventions", "Costs are 0.1425% a side plus a 0.1% tax on sales (none for 00679B)")
-has("tolerances", "CLARABEL's `tol_gap_abs`, `tol_gap_rel` and `tol_feas` to $10^{-12}$ for QPs and LPs, $10^{-10}$ "
+has("tolerances", "CLARABEL's `tol_gap_abs`, `tol_gap_rel` and `tol_feas` to $10^{-12}$ for QPs and LPs and $10^{-10}$ "
                   "for cone programs")
 has("P11 CLARABEL", "Solve by CLARABEL at $10^{-10}$")
 has("lab box", "From the repository root, run `uv run python data/fetch_finmind.py`, then `uv run python "
@@ -690,15 +805,19 @@ has("zh 5", "但它的 beta 要求 21.62")
 has("zh 7", "$\\theta=1$ 只規劃 R3 原本 31.5% 的週轉率")
 has("zh 7 bp", "平均高出 4.9 個基點")
 has("zh 8", "R3 的目標函數（objective function）只有 $1.035\\times10^{-5}$")
-has("zh 8 miss", "權重可能偏離 $2.1\\times10^{-3}$")
-has("zh 5 months", "在貫穿案例的 92 個月底")
+has("zh 8 miss", "權重偏離 $8.6\\times10^{-4}$，92 個訊號中最多偏離 $2.1\\times10^{-3}$")
+has("zh 5 months", "在貫穿案例（through case）的 92 個月底")
 has("constructed: 10% in 00679B", "$-w_3\\le-0.10$")
 has("constructed: cap row", "a 40% cap $w_i\\le0.40$")
 has("E2 arithmetic", "0.4\\times48.775+0.4\\times36.096+0.2\\times20.678=38.08%")
 for loc in ("§3.1.3, p. 69", "§3.2.3, p. 80", "§4.2.2, p. 138", "(4.34), p. 152", "§4.3.2, p. 151", "p. 156",
             "§5.5.3, p. 244", "(p. 227)", "§5.6.3, p. 251", "(5.57), p. 250"):
     has(f"Boyd and Vandenberghe {loc}", loc)
-for tag in ("(7.13)", "(10.9)", "(10.10)", "(11.9)", "(12.6)", "(27.2)", "(27.5)", "(28.6)"):
+has("hygiene: cap levels", "On the same window R3 takes five cap levels: none, 39%, 40%, 41% and 42%.")
+assert all(math.isfinite(v) for v in (C.v39, C.v41, C.v42))               # A29-14 solves the 39%, 41% and 42% caps
+has("hygiene: spreads", "The caps, limits, spreads and cost weights are **constructed** illustrations")
+has("P11 illustrative spread", "an illustrative spread over $r_f$ of 0 and of 2 points")
+for tag in ("(7.13)", "(9.6)", "(10.9)", "(10.10)", "(11.9)", "(12.6)", "(27.2)", "(27.5)", "(28.6)"):
     has(f"cited tag {tag}", tag)
 
 # ====================================================================== structure: labels, tags, charts

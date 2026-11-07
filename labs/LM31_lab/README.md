@@ -31,6 +31,8 @@ uv run jupyter nbconvert --to notebook --execute --inplace LM31_lab.ipynb
 
 The notebook reads FinMind files that you download once with your own token. From the repository root, run `uv run python data/fetch_finmind.py`, then `uv run python data/make_lab_data.py`. FinMind's licence does not allow the book to redistribute the data. After that, the notebook runs offline.
 
+On FinMind's free plan, run `uv run python data/fetch_finmind.py --exclude sectors_close/ --exclude vol4_settlement/` instead: the sector repair values come from a paid dataset. `sectors_close_repairs.csv` then has an empty `close_1330` column, Part 5 drops the closes it lists (524 in U28's sample), and the checks of U28's numbers against the module's are skipped.
+
 The same steps in a shell (`data/raw/` and this folder's `data/` are git-ignored):
 
 ```bash

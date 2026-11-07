@@ -77,6 +77,8 @@ Companion notebook to **From Calculus to Kelly, LM31**. It rebuilds the module's
 
 **Data.** The notebook reads FinMind files that you download once with your own token. From the repository root, run `uv run python data/fetch_finmind.py`, then `uv run python data/make_lab_data.py`. FinMind's licence does not allow the book to redistribute the data. After that, the notebook runs offline.
 
+On FinMind's free plan, run `uv run python data/fetch_finmind.py --exclude sectors_close/ --exclude vol4_settlement/` instead: the sector repair values come from a paid dataset. `sectors_close_repairs.csv` then has an empty `close_1330` column, Part 5 drops the closes it lists (524 in U28's sample), and the checks of U28's numbers against the module's are skipped.
+
 `data/` then holds six files, and the notebook reads nothing outside `data/`:
 
 - `e5_estimation.csv`: E5's estimation frame, one row per date and fund (`base`, `date`, `fund`, `R`): the 2,362 dates on which all five funds have a one-session total return, from 18 January 2017 to 8 October 2026.
@@ -280,10 +282,12 @@ prob = cp.Problem(cp.Minimize(0.5 * cp.quad_form(y, cp.psd_wrap(S0)) - b5 @ cp.l
 prob.solve(solver=cp.CLARABEL, tol_gap_abs=1e-10, tol_gap_rel=1e-10, tol_feas=1e-10)
 assert prob.status == "optimal" and y.value is not None
 w_cvx = y.value / y.value.sum()
-print(f"cvxpy (CLARABEL) against Newton: {np.abs(w_cvx - wn).max():.1e} (the check's tolerance is 1e-5)")
-assert np.abs(w_cvx - wn).max() < 1e-5
+print(f"cvxpy (CLARABEL), status {prob.status}, against Newton: {np.abs(w_cvx - wn).max():.1e} (the check's "
+      "tolerance is 1e-5; the book prints the bound 1e-6)")
+assert np.abs(w_cvx - wn).max() < 1e-6
 wj, sj = fixed_point(S0, b5)
-print("fixed point from 1/N:", np.round(wj, 3), f"after {sj} steps; shares", np.round(shares(wj, S0), 6))
+print("fixed point from 1/N:", np.round(wj, 4), f"after {sj} steps; shares", np.round(shares(wj, S0), 6))
+assert [f"{x:.4f}" for x in wj] == ["-1.3069", "-1.3060", "2.1321", "2.4082", "-0.9274"] and sj == 220
 fails = sum(fixed_point(A * cov0(X[r - WINDOW:r]), b5)[1] < 0 for _, _, r in sched)
 show("windows where the fixed point does not settle", fails, "d", "45")
 
@@ -292,6 +296,13 @@ S4 = S0[np.ix_(four, four)]
 b4 = np.array([0.4, 0.2, 0.3, 0.1])
 wb, sb_ = ccd(S4, b4)
 print("R2's mix as budgets:", np.round(wb, 4), f"in {sb_} sweeps; shares", np.round(shares(wb, S4), 6))
+y4 = cp.Variable(4)
+prob4 = cp.Problem(cp.Minimize(0.5 * cp.quad_form(y4, cp.psd_wrap(S4)) - b4 @ cp.log(y4)))
+prob4.solve(solver=cp.CLARABEL, tol_gap_abs=1e-10, tol_gap_rel=1e-10, tol_feas=1e-10)
+assert prob4.status == "optimal" and y4.value is not None
+gap4 = np.abs(y4.value / y4.value.sum() - wb).max()
+print(f"cvxpy against CCD: {gap4:.1e} (the book prints the bound 1e-6)")
+assert gap4 < 1e-6
 R = cholesky(S4, lower=False)
 z, _ = nnls(R, solve_triangular(R, np.ones(4), trans="T"))
 mv4 = z / z.sum()                             # long-only minimum variance of the four funds (exact, NNLS)
@@ -387,7 +398,7 @@ for k, (_, _, r) in enumerate(sched):
     o_col, o_d = quasi_diag(link(D2), 5), quasi_diag(link(d), 5)
     differ += o_col != o_d
     worst = max(worst, np.abs(hrp(o_col, S) - R7[k]).max())
-show("signals where linking on d changes the leaf order", differ, "d", "17")
+show("signals where linking on d changes the quasi-diagonal order", differ, "d", "17")
 print(f"R7 re-implemented at all {len(sched)} signals: largest gap to the through case {worst:.1e}")
 assert worst < 1e-12
 """)
@@ -483,7 +494,7 @@ print("R6 over the 92 signals (%): mean", np.round(100 * W6.mean(0), 1), "min", 
       "max", np.round(100 * W6.max(0), 1))
 i_oos = next(i for i, d in enumerate(est_dates) if d > sched[0][1])
 post = shares(W6.mean(0), A * cov0(X[i_oos:]))
-print(f"ex-post shares on the {len(est_dates) - i_oos} joint rows from {est_dates[i_oos]} (%):", np.round(100 * post, 1))
+print(f"ex-post shares on the {len(est_dates) - i_oos} joint dates from {est_dates[i_oos]} (%):", np.round(100 * post, 1))
 
 
 def ewma_path(p, start):
@@ -566,7 +577,8 @@ j = r25
 while est_dates[j] <= "2025-04-07":
     s2 = LAM * s2 + (1 - LAM) * (X[j] @ W6[k25]) ** 2
     j += 1
-show("[[eg:april2025]]: the EWMA on 7 April (%)", 100 * math.sqrt(A * s2), ".2f", "23.58")
+show("[[eg:april2025]]: the EWMA on 7 April, R6's 31 March weights held constant (%)", 100 * math.sqrt(A * s2), ".2f",
+     "23.58")
 show("its implied exposure", min(CAP, sbar[k25] / math.sqrt(s2)), ".2f", "0.33")
 show("R8's ratio from 2 April 2025", ratio["R8"][k25], ".2f", "5.78")
 show("annualized with A (%)", 100 * math.sqrt(A * msq["R8"][k25]), ".1f", "45.3")
@@ -575,7 +587,7 @@ show("annualized with A (%)", 100 * math.sqrt(A * msq["R8"][k25]), ".1f", "45.3"
 md(r"""
 ## Part 8 — A risk-triggered R8 (an in-sample illustration)
 
-The rule and its threshold were fixed by the editor on 24 October 2026, before any lab result. R8 keeps its month-end trades. In addition, after each close the EWMA of the book's funds, R6's drifted weights, is updated with the day's return; when the exposure it implies, $\min(1.5,\bar\sigma_t/\sigma)$ with the last signal's $\bar\sigma_t$, differs from the held exposure by more than 0.5, the book trades at the next session's close to that exposure times the last signal's R6 weights, with the through case's costs. (The exposure is the one implied at the triggering close; a month-end trade on the same day takes precedence.) The cell first rebuilds R8's net path with the wealth recursion (27.1)–(27.3) and checks it against `rule_wealth.csv`. Choosing the threshold by its results would be the search of LM34.
+The rule and its threshold were fixed by the editor on 24 October 2026, before any lab result. R8 keeps its month-end trades. In addition, after each close the EWMA of the book's funds, R6's drifted weights, is updated with the day's return; when the exposure it implies, $\min(1.5,\bar\sigma_t/\sigma)$ with the last signal's $\bar\sigma_t$, differs from the held exposure by more than 0.5, the book trades at the next session's close to that exposure times the last signal's R6 weights, with the through case's costs. (The exposure is the one implied at the triggering close; a month-end trade on the same day takes precedence.) The cell first rebuilds R8's net path with the wealth recursion (27.1)–(27.2) and checks it against `rule_wealth.csv`. Choosing the threshold by its results would be a search, of the kind LM34 corrects.
 """)
 
 code(r"""
@@ -635,8 +647,8 @@ q_trig = np.sqrt([np.mean(rt[ii[m]:ii[m + 1]] ** 2) for m in range(len(ii) - 1)]
 print(f"trigger trades: {n_trig}; holding-month ratio, median {np.quantile(q_trig, 0.5, method='inverted_cdf'):.2f} "
       f"(R8 {np.quantile(ratio['R8'], 0.5, method='inverted_cdf'):.2f}), SD of the log ratio {np.log(q_trig).std():.3f} "
       f"(R8 {np.log(ratio['R8']).std():.3f}); April 2025 {q_trig[k25]:.2f} (R8 {ratio['R8'][k25]:.2f})")
-print("One threshold, chosen before any result: whether another threshold does better is LM34's search, and LM33's "
-      "tests would count every threshold tried.")
+print("One threshold, chosen before any result: choosing it by its results would be a search, of the kind LM34 "
+      "corrects, and LM33's tests would count every threshold tried.")
 """)
 
 md(r"""
@@ -720,6 +732,8 @@ uv run jupyter nbconvert --to notebook --execute --inplace LM31_lab.ipynb
 ## Data (FinMind; not in the repository)
 
 The notebook reads FinMind files that you download once with your own token. From the repository root, run `uv run python data/fetch_finmind.py`, then `uv run python data/make_lab_data.py`. FinMind's licence does not allow the book to redistribute the data. After that, the notebook runs offline.
+
+On FinMind's free plan, run `uv run python data/fetch_finmind.py --exclude sectors_close/ --exclude vol4_settlement/` instead: the sector repair values come from a paid dataset. `sectors_close_repairs.csv` then has an empty `close_1330` column, Part 5 drops the closes it lists (524 in U28's sample), and the checks of U28's numbers against the module's are skipped.
 
 The same steps in a shell (`data/raw/` and this folder's `data/` are git-ignored):
 

@@ -166,6 +166,9 @@ mcv("case: SD of the 00646 exposure", pct(C.sd_b[i646]), pct(C.se_sd[i646]), "67
 mcv("case: mean SR, both", C.mb, C.sb, "0.423", "0.003")
 mcv("case: mean SR, covariances only", C.ms, C.ss, "0.87686", "0.00002")
 chk("case: SR* (3 dp)", C.sr_star, ".3f", "0.880")
+for r_, pr_ in ((0.0, "1.10"), (0.02, "0.82")):                      # notation note: the illustrative r_f (R4)
+    e_ = C.mu_d - r_ / C.A
+    chk(f"notation: SR* at r_f {r_}", sqrt(C.A * float(e_ @ np.linalg.solve(C.S_d, e_))), ".2f", pr_)
 has("case: SEs", "The simulation's standard errors are 0.5 points, 0.003 and 0.00002.")
 chk("case: R3 realized", pct(C.vols["R3"]), ".2f", "9.96")
 chk("case: R1 realized", pct(C.vols["R1"]), ".2f", "12.48")
@@ -182,6 +185,9 @@ mcv("X1: SD covariances only, 00646", pct(C.sd_s[i646]), pct(C.se_sd[C.N5 + i646
 has("X1: realized row", "| Realized volatility, net of costs: R1 / R3 / R5 | 12.48 / 9.96 / 9.97% |")
 has("X1: note SEs", "SEs 0.003, 0.003 and 0.00002 for the Sharpe ratios, 0.5 and 0.03 points for the SDs.")
 chk("X1: A", C.A, ".2f", "242.95")
+chk("X1: A_w", C.fr.A_wealth, ".2f", "243.57")
+has("X1: A_w sentence", "The realized volatilities annualize the 1,851 net daily returns of the wealth frame with "
+                        "$A_{\\mathrm w}=243.57$.")
 chk("X1: R1 fixed weights, full sample", pct(C.vol(C.w1, C.cov0(C.fr.X), C.A)), ".2f", "11.49")
 has("X1: dates", "13 February 2017 to 27 February 2019")
 assert (C.d_first, C.d_last) == ("2017-02-13", "2019-02-27")
@@ -256,7 +262,7 @@ assert C.nbelow == 4
 chk("E2: RMS relative error of S_hat", 100 * C.rms_rel, ".1f", "8.5")
 mcv("E2: predicted minimum variance", pct(C.mv_pred.mean()), pct(C.mv_pred.std() / sqrt(C.n1)), "4.990", "0.002")
 mcv("E2: true minimum variance", pct(C.mv_true.mean()), pct(C.mv_true.std() / sqrt(C.n1)), "5.0353", "0.0001")
-chk("E2: sigma_min", pct(C.vol(C.w_mv, C.S_d, C.A)), ".2f", "5.02")
+chk("E2: sigma_min", pct(C.vol(C.w_mv, C.S_d, C.A)), ".4f", "5.0152")
 chk("KC2: SE of 00646", pct(C.se_mean[i646]), ".1f", "8.2")
 chk("KC2: SE over sqrt 2, from the printed 8.2", 8.2 / sqrt(2), ".1f", "5.8")
 chk("KC2: SE over sqrt 2, unrounded", pct(C.se_mean[i646]) / sqrt(2), ".1f", "5.8")
@@ -291,6 +297,9 @@ chk("S3: 1,851 returns", len(C.pd1) - 1, ",d", "1,851")
 chk("S3: R3 predicted, mean", pct(C.pred3.mean()), ".2f", "8.84")
 chk("S3: R3 predicted, lowest", pct(C.pred3.min()), ".2f", "4.97")
 chk("S3: R3 predicted, highest", pct(C.pred3.max()), ".2f", "10.42")
+chk("S3: predicted-to-realized gap", pct(C.vols["R3"]) - pct(C.pred3.mean()), ".1f", "1.1")
+chk("S3: gap from the printed values", 9.96 - 8.84, ".1f", "1.1")
+has("S3: gap sentence", "Most of the 1.1-point gap comes from inputs that moved after each window")
 mcv("KC3: 1/N wins", 100 * C.p_lose, 100 * C.p_se, "31.4", "0.5")
 has("KC3: question", "1/N has a true Sharpe ratio of 0.33 against the best 0.88, yet it beats the plug-in in 31.4% of "
                      "samples (SE 0.5 points)")
@@ -314,6 +323,11 @@ chk("E4: 0050 raw kurtosis", float(C.k0[i50]), ".1f", "13.3")
 chk("E4: 00642U raw kurtosis", float(C.k0[i642]), ".1f", "4.5")
 chk("E4: 0050 share", pct(C.share0[i50]), ".0f", "36")
 chk("E4: 00642U share", pct(C.share0[i642]), ".0f", "39")
+chk("E4: 00646 share", pct(C.share0[i646]), ".0f", "21")
+chk("E4: 00679B share", pct(C.share0[i679]), ".0f", "4")
+chk("E4: 00635U share", pct(C.share0[i635]), ".1f", "0.2")
+assert int(np.argmax(C.share0)) == i642 and int(np.argmax(C.k0)) == i50     # "the most"; "the fattest"
+has("S10: shares", "The shares are 36% (0050), 21% (00646), 4% (00679B), 0.2% (00635U) and 39% (00642U).")
 chk("E4: 00642U volatility", pct(C.sd_a[i642]), ".1f", "23.2")
 # X4 and the case for the spectrum
 x60 = C.X1[-60:]
@@ -349,6 +363,8 @@ chk("E5: gross at 30", C.WIN[30]["gross"], ".2f", "13.48")
 chk("E5: c_hat at 30", C.WIN[30]["c"], ".3f", "0.823")
 chk("E5: shrunk realized at 30", C.WIN[30]["shrunk_real"], ".2f", "12.46")
 chk("E5: share of 1 outside the column space", 100 * C.WIN[20]["outside"], ".0f", "18")
+chk("E5: null-space dimension", C.NU - C.WIN[20]["rank"], "d", "9")
+has("E5: null space", "The null space has dimension $28-19=9$")
 chk("E5: c_hat, first half", C.c1, ".4f", "0.9951")
 chk("E5: kappa_c, first half", float(C.evc[-1] / C.evc[0]), ".2f", "121.38")
 chk("E5: realized, first half", C.WIN[2191]["real"], ".2f", "11.78")
@@ -360,7 +376,7 @@ mcv("Exp3: sample at 60", *e3[60]["sample"], "15.51", "0.04")
 mcv("Exp3: shrunk at 60", *e3[60]["shrunk"], "13.46", "0.02")
 mcv("Exp3: sample at 2,191", *e3[2191]["sample"], "11.4659", "0.0006")
 mcv("Exp3: shrunk at 2,191", *e3[2191]["shrunk"], "11.4651", "0.0006")
-chk("Exp3: true minimum", pct(C.vol(C.w_true, C.S1, C.AU)), ".2f", "11.40")
+chk("Exp3: true minimum", pct(C.vol(C.w_true, C.S1, C.AU)), ".4f", "11.3952")
 mcv("Exp3: mean c_hat at 20", *e3[20]["c"], "0.810", "0.002")
 mcv("Exp3: mean c_hat at 2,191", *e3[2191]["c"], "0.997963", "0.000002")
 has("S4: N/T", "Here $N/T$ runs from 5/504 on E5 to 28/20 on U28.")
@@ -588,6 +604,12 @@ chk("S9: f_BL 1", 100 * (0.5 - 0.6 / 4), ".0f", "35")
 chk("S9: f_BL 2", 100 * (0.5 + 0.6 / 4), ".0f", "65")
 chk("S12: T/N at 30", 30 / 28, ".1f", "1.1")
 chk("S12: T/N at 2,191", 2191 / 28, ".0f", "78")
+chk("P12(c): T/N at 60", 60 / 28, ".1f", "2.1")
+chk("P12(c): T/N on E5", 504 / 5, ".0f", "101")
+assert e3[60]["shrunk"][0] < 13.5 and e3[60]["longonly"][0] < 13.5, (e3[60]["shrunk"], e3[60]["longonly"])
+assert e3[60]["sample"][0] > 13.5
+has("S12(c): experiment 3", "in experiment 3 both cut the mean true volatility from 15.51% to under 13.5%")
+has("S12(a): constrain", "shrink, or constrain (0.38 points better in experiment 3, SE 0.03)")
 has("S12: check", "The check of (30.4) finds 19 binding constraints and weights that agree to $10^{-15}$.")
 
 # ---------------------------------------------------------------- the chart files' cited values
@@ -619,8 +641,8 @@ tags = re.findall(r"\\tag\{(30\.\d+)\}", RAW)
 assert tags == [f"30.{k}" for k in range(1, 6)], tags
 for name in re.findall(r'data-chart="(lm30-[\w-]+)"', RAW):
     assert (DATA / f"{name}.json").exists(), name
-for word in ("Model", "In-sample", "Out-of-sample", "Constructed"):
-    assert f"*{word}*" in RAW, word
+for word in ("model", "in-sample", "out-of-sample"):
+    assert f"**{word}**" in RAW, word
 print(f"labels: {len(ex_labels)} exhibits, {len(eg_labels)} examples, tags (30.1)-(30.5), every exhibit cited")
 
 # ====================================================================== report

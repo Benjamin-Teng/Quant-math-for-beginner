@@ -91,7 +91,7 @@ Companion notebook to **From Calculus to Kelly, LM30**. It rebuilds the module's
 - Long-only minimum variance and maximum Sharpe ratio are solved exactly, as a non-negative least-squares problem through the Cholesky factor (the through case's method); a weight below $10^{-6}$ is 0.
 - Simulations create `np.random.default_rng([e, 20261011])` once per experiment $e$. A Monte Carlo result prints at its standard error's first significant digit; a median's or an SD's standard error comes from 20 batches of 500 samples.
 - Medians use `method="inverted_cdf"`; counts against a threshold use the guard `1e-12`.
-- The first window and every simulation's model are *In-sample* estimates; experiments 1–3 are *Model*; the through case's rules from March 2019 and U28's second half are *Out-of-sample*.
+- The first window and every simulation's model are **in-sample** estimates; experiments 1–3 are **model** results; the through case's rules from March 2019 and U28's second half are **out-of-sample**.
 """)
 
 code(r"""
@@ -389,7 +389,7 @@ rms = math.sqrt((1 + float(np.trace(S_d)) ** 2 / fro2(S_d)) / WINDOW)
 show("RMS relative error of S_hat (%)", 100 * rms, ".1f", "8.5")
 show_mc("plug-in minimum variance, predicted (%)", *mean_se(100 * mv_pred), "4.990", "0.002")
 show_mc("plug-in minimum variance, true (%)", *mean_se(100 * mv_true), "5.0353", "0.0001")
-show("sigma_min (%)", 100 * vol(gmv(S_d), S_d, A), ".2f", "5.02")
+show("sigma_min (%)", 100 * vol(gmv(S_d), S_d, A), ".4f", "5.0152")
 """)
 
 md(r"""
@@ -465,7 +465,10 @@ show("normal-model oracle", dist0 / (dist0 + normal_noise(S_d, WINDOW)), ".4f", 
 share0, _, ratio0 = noise_split(x0)
 show("noise estimate / normal value", ratio0, ".2f", "2.14")
 k0 = kurtosis(x0, axis=0, fisher=False, bias=True)
-print("raw kurtosis:", fd((k0, 1)), "| share of the excess (%):", fd((100 * share0, 0)))
+print("raw kurtosis:", fd((k0, 1)), "| share of the excess (%):", fd((100 * share0, 1)))
+for j_, (fund_, fmt_, pr_) in enumerate(zip(FUNDS, (".0f", ".0f", ".0f", ".1f", ".0f"),
+                                             ("36", "21", "4", "0.2", "39"), strict=True)):
+    show(f"{fund_}'s share of the excess (%)", 100 * share0[j_], fmt_, pr_)
 """)
 
 md(r"""
@@ -489,7 +492,7 @@ fig, ax = plt.subplots()
 ax.semilogy(k, ev60, label="sample, last 60 returns of the first half")
 ax.semilogy(k, evs60, label=f"shrunk (c = {c60:.3f})")
 ax.semilogy(k, evh, label="sample, whole first half")
-ax.set_xlabel("k"); ax.set_ylabel("annual eigenvalue"); ax.legend(); ax.set_title("[[ex:spectrum]] (In-sample; price indices)")
+ax.set_xlabel("k"); ax.set_ylabel("annual eigenvalue"); ax.legend(); ax.set_title("[[ex:spectrum]] (in-sample; price indices)")
 plt.show()
 """)
 
@@ -535,7 +538,7 @@ show("T 60 realized (shrunk)", tab5.filter(pl.col("T") == 60)["shrunk realized %
 """)
 
 md(r"""
-Experiment 3 takes the first half's matrix as the truth (mean 0) and draws 1,000 samples at each length from one generator, one `standard_normal((T, 28))` call per sample. It judges the sample, shrunk and long-only portfolios by their true volatility, and pairs long-only against shrunk sample by sample. It takes about half a minute.
+Experiment 3 takes the first half's matrix as the truth (mean 0) and draws 1,000 samples at each length from one generator, one `standard_normal((T, 28))` call per sample. It judges the sample, shrunk and long-only portfolios by their true volatility, and pairs long-only against shrunk sample by sample. It takes a few seconds.
 """)
 
 code(r"""
@@ -564,6 +567,7 @@ show_mc("T 60 sample", *EXP3[60]["sample"], "15.51", "0.04", u28=True)
 show_mc("T 60 shrunk", *EXP3[60]["shrunk"], "13.46", "0.02", u28=True)
 show_mc("T 2191 sample", *EXP3[2191]["sample"], "11.4659", "0.0006", u28=True)
 show_mc("T 2191 shrunk", *EXP3[2191]["shrunk"], "11.4651", "0.0006", u28=True)
+show("true minimum (%)", 100 * vol(gmv(S1), S1, AU), ".4f", "11.3952", u28=True)
 show_mc("mean c_hat at 20", *EXP3[20]["c"], "0.810", "0.002", u28=True)
 show_mc("mean c_hat at 2191", *EXP3[2191]["c"], "0.997963", "0.000002", u28=True)
 show_mc("long-only minus shrunk at 2191", *EXP3[2191]["diff"], "1.2981", "0.0005", u28=True)
@@ -611,7 +615,7 @@ show("noise over normal there", ratio_m, ".1f", "13.1")
 show("c_hat with the normal value", c_norm, ".3f", "0.983")
 fig, ax = plt.subplots()
 ax.plot([date.fromisoformat(s) for s in sigs], chat); ax.axhline(0.9, ls="--", c="gray")
-ax.set_ylabel("c_hat"); ax.set_title("[[ex:chat]] (In-sample)")
+ax.set_ylabel("c_hat"); ax.set_title("[[ex:chat]] (in-sample)")
 plt.show()
 
 wealth = pl.read_csv(DATA / "rule_wealth.csv", schema_overrides={"date": pl.Utf8})
@@ -689,7 +693,7 @@ xpos = np.arange(5)
 fig, ax = plt.subplots()
 for j, (lab, v) in enumerate([("R2 (c = 0)", fbl[0.0]), ("c = 0.5", fbl[0.5]), ("c = 1", fbl[1.0]), ("plug-in", fp)]):
     ax.bar(xpos + 0.2 * j - 0.3, 100 * v, width=0.2, label=lab)
-ax.set_xticks(xpos, FUNDS); ax.set_ylabel("exposure (%)"); ax.legend(); ax.set_title("[[ex:bl]] (In-sample)")
+ax.set_xticks(xpos, FUNDS); ax.set_ylabel("exposure (%)"); ax.legend(); ax.set_title("[[ex:bl]] (in-sample)")
 plt.show()
 """)
 
@@ -739,7 +743,7 @@ print(f"stationary variant (block length {ell}): mean weights (%)", fd((100 * W5
 """)
 
 md(r"""
-The single-index matrix keeps the market factor and drops the residual covariances ([[ex:halves]]); the five estimators are fitted on the first half and judged on the second. The last row chooses $c$ on the second half itself, *In-sample*.
+The single-index matrix keeps the market factor and drops the residual covariances ([[ex:halves]]); the five estimators are fitted on the first half and judged on the second. The last row chooses $c$ on the second half itself, in-sample.
 """)
 
 code(r"""
@@ -801,25 +805,25 @@ print(f"cvxpy {pc.status}: largest gap to Higham's matrix {np.abs(np.asarray(Xv.
 md(r"""
 ## Part 9 — Practice problems 10, 11 and 12
 
-**Problem 10** is Part 3: $\hat c=0.9675$ by hand and with scikit-learn, the normal oracle 0.9851 and the ratio 2.14. 0050 carries 36% of the excess and 00642U 39%.
+**Problem 10** is Part 3: $\hat c=0.9675$ by hand and with scikit-learn, the normal oracle 0.9851 and the ratio 2.14. 0050, 00646, 00679B, 00635U and 00642U carry 36%, 21%, 4%, 0.2% and 39% of the excess.
 
-**Problem 11** is Part 2: the three mean true Sharpe ratios, 1/N's 31.4% and the 2,115 sign flips. The first window meets two of DeMiguel, Garlappi and Uppal's conditions (a best Sharpe ratio well above 1/N's, few assets) but not the third (a long window).
+**Problem 11** is Part 2: the three mean true Sharpe ratios, 1/N's 31.4% and the 2,115 sign flips. In the model, where the window's estimates are the truth, the first window meets two of DeMiguel, Garlappi and Uppal's conditions (a best Sharpe ratio well above 1/N's, few assets) but not the third (a long window); in the data the ex ante gap is unknown.
 
-**Problem 12** is Parts 4 and 6, with the ratio of observations to assets:
+**Problem 12** (a) and (b) are Parts 4 and 6, with the ratio of observations to assets; part (c) needs no code:
 """)
 
 code(r"""
 for T in (30, 2191):
     r = tab5.filter(pl.col("T") == T).row(0, named=True)
-    print(f"T {T} (T/N = {T / NU:.1f}): sample {r['predicted %']} / {r['realized %']}%, shrunk {r['shrunk realized %']}% "
-          f"(Out-of-sample)")
+    print(f"T {T} (T/N = {T / NU:.2f}): sample predicted {r['predicted %']:.2f}% (in-sample), realized "
+          f"{r['realized %']:.2f}%; shrunk realized {r['shrunk realized %']:.2f}% (out-of-sample)")
 print(f"(30.4) on the first half: {int((~act).sum())} binding constraints; weights agree to "
       f"{np.abs(gmv(S_nu) - w_lo).max():.0e}")
 """)
 
 # ---------------------------------------------------------------- Extension
 md(r"""
-## Extension — LM7's question, answered with shrinkage (*Out-of-sample*, versions declared)
+## Extension — LM7's question, answered with shrinkage (out-of-sample, versions declared)
 
 LM7's lab asked how long a window the 0050/00679B minimum-variance weight should be estimated on. Here the weight is re-estimated at each month's last session of the estimation frame, on the previous 6, 12, 24 or 36 calendar months, with the sample matrix or the Ledoit–Wolf matrix: eight versions, all reported, declared before they were run. The two-asset weight is LM7's $w^*=(\sigma_2^2-\sigma_{12})/(\sigma_1^2+\sigma_2^2-2\sigma_{12})$, short positions allowed. Each weight is held, rebalanced daily without costs, on the wealth frame from the session after its month-end to the next month-end's next session. All versions are judged on the same span, from the first month-end with 36 months of data. Choosing the best of the eight on these data is a search, which is LM34's subject.
 """)

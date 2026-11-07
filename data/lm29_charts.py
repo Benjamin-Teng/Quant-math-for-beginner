@@ -58,8 +58,9 @@ write("lm29-kktR4", {
     "type": "bar",
     "alt": "Bars for the five funds at R4 on the last window: each fund's excess return beside its beta to the "
            "portfolio times the portfolio's excess return. The bars are equal for 0050, 00635U and 00642U; 00646 "
-           "earns 16.437 points against 21.623 asked, and 00679B -7.276 against -0.797.",
+           "earns 16.437 points against 21.623 required, and 00679B -7.276 against -0.797.",
     "height": 300,
+    "valueLabels": True,
     "categories": FUNDS,
     "x": {"label": "Fund"},
     "y": {"fmt": "n3", "tfmt": "n0", "label": "% a year"},
@@ -134,8 +135,8 @@ write("lm29-frontier", {
     "type": "scatter",
     "alt": "Mean against volatility on the last window: the unconstrained frontier (dashed) and the long-only "
            "frontier (solid) coincide for target means from 4.12% to 30.44%; above that the long-only frontier lies "
-           "to the right and ends at 0050. Two capital market lines from 1.5% touch the tangency (71.13%, 31.94%) "
-           "and R4 (41.22%, 18.85%); R3 is the global minimum (8.46%, 10.10%).",
+           "to the right and ends at 0050. Two capital market lines from 1.5% touch the tangency (volatility 31.94%, "
+           "mean 71.13%) and R4 (18.85%, 41.22%); R3 is the global minimum (10.10%, 8.46%).",
     "height": 380,
     "x": {"label": "Volatility, % a year", "fmt": "pct2", "tfmt": "pct0", "min": 0, "max": 0.52,
           "ticks": [0, 0.1, 0.2, 0.3, 0.4, 0.5], "name": "volatility"},

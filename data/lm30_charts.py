@@ -6,12 +6,12 @@ Run:  uv run python data/lm30_charts.py
 
 Inputs and conventions: data/lm30_common.py (the computations of data/vol5_anchors_lm30.py, same names). Writes
   lm30-scatter     experiment 1's first 1,000 samples: the plug-in exposures to 00646 and 00679B, in percent, with
-                   means and covariances estimated and with the covariances alone (Model; simulated, no dates);
-  lm30-years       experiment 2: the mean true Sharpe ratio against years of sessions T / A (Model);
+                   means and covariances estimated and with the covariances alone (model; simulated, no dates);
+  lm30-years       experiment 2: the mean true Sharpe ratio against years of sessions T / A (model);
   lm30-spectrum    U28's annual eigenvalues: the last 60 returns of the first half, that matrix shrunk with its
-                   Ledoit-Wolf c, and the whole first half (price indices; In-sample);
-  lm30-chat        Ledoit and Wolf's c_hat at the 92 signals of the through case (R5's windows; In-sample);
-  lm30-bl          Black-Litterman exposures on the first window at c = 0, 0.5 and 1, and the plug-in (In-sample);
+                   Ledoit-Wolf c, and the whole first half (price indices; in-sample);
+  lm30-chat        Ledoit and Wolf's c_hat at the 92 signals of the through case (R5's windows; in-sample);
+  lm30-bl          Black-Litterman exposures on the first window at c = 0, 0.5 and 1, and the plug-in (in-sample);
   lm30-shrinkPath  the widget's initial chart and its "widget" block: per window of U28's first half (30, 60 and 250
                    returns and the whole half) the 28 annual eigenvalues, their eigenvectors and c_hat; the second
                    half's annual matrix; the sector names (derived statistics, no return series and no dates).
@@ -85,11 +85,11 @@ covo = [rd(m, 6) for _, _, _, m, _ in C.EXP2]
 assert [f"{v:.3f}" for v in both] == ["0.230", "0.322", "0.422", "0.546", "0.672", "0.759", "0.816"]
 write("lm30-years", {
     "alt": "Experiment 2: mean true Sharpe ratio of the plug-in portfolio against the sample's length in years of "
-           "sessions, log scale. With means and covariances estimated it rises from 0.230 at 0.52 years to 0.816 at "
-           "33.2, about equal to equal weights' 0.327 at 1.04 years; with the covariances alone it is 0.8660 already "
-           "at 0.52 years, near the best 0.880",
+           "sessions, log scale. With means and covariances estimated it rises from 0.230 at 0.52 years of sessions "
+           "to 0.816 at 33.2, about equal to equal weights' 0.327 at 1.04 years of sessions; with the covariances "
+           "alone it is 0.8660 already at 0.52 years of sessions, near the best 0.880",
     "height": 300,
-    "x": {"type": "log", "fmt": "n2", "label": "Years of sessions T / A (log scale)", "tipLabel": "years: ",
+    "x": {"type": "log", "fmt": "n2", "label": "Years of sessions T / A (log scale)", "tipLabel": "years of sessions: ",
           "values": [rd(v, 5) for v in yrs], "min": 0.5, "max": 35, "ticks": [0.5, 1, 2, 5, 10, 20],
           "tickLabels": ["0.5", "1", "2", "5", "10", "20"]},
     "y": {"type": "lin", "fmt": "n3", "tfmt": "n1", "label": "Mean true Sharpe ratio (annual)", "min": 0, "max": 1,

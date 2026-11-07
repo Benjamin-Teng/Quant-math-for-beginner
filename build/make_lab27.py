@@ -69,7 +69,7 @@ Companion notebook to **From Calculus to Kelly, LM27**. It rebuilds the module's
 | 1 | E5's two frames from the raw closes, distributions and split, checked against the derived frames ([[eg:frames]], Problem 11) |
 | 2 | The June 2025 span ([[eg:span]]) and the buy-and-hold drift ([[ex:drift]]) |
 | 3 | The wealth recursion (27.2): R1 and R2 from their targets against their net wealth paths, [[eg:first]], [[eg:rebalance]] and [[ex:trade]] (Problem 12) |
-| 4 | Asynchronous closes: correlations by frequency with both standard errors and the funds' kurtosis ([[ex:freq]], [[eg:async]]) |
+| 4 | Asynchronous closes: correlations by frequency with both standard errors, the funds' kurtosis and the gaps' bootstrap standard errors ([[ex:freq]], [[eg:async]]) |
 | 5 | $\hat\Sigma$, the means and the correlations ([[ex:cov]]), R1's and R2's $\mu_p$, $s_p$ and ratio (27.7) ([[eg:mix]]), and the knowledge checks of Sections 5 and 9 |
 | 6 | Risk splits ([[eg:split]], [[ex:shares]], [[ex:case]]), the slope check, the switch ([[eg:switch]]) and the widget's starting values |
 | 7 | R1's shares in the 92 windows ([[ex:windows]], [[eg:hedge]]) |
@@ -93,7 +93,7 @@ Companion notebook to **From Calculus to Kelly, LM27**. It rebuilds the module's
 
 - E5: simple total returns $(P_t+D_t)/P_{t-1}-1$, on a split day $(P_t+D_t)/(P_{t-1}/4)-1$. Estimation frame: the dates on which every fund has a one-session return, $T=2{,}362$; wealth frame: every TR23 session after the base close, 2,368, a halted fund earning 0 until it trades again.
 - Years are calendar days / 365.25 from the close before the first return to the last close; $A=T/\text{years}$. Moments divide by $T$ (`ddof=0`).
-- Weeks are ISO weeks (keys ISO year, ISO week), months calendar months; the first and last of each are dropped, complete or not. Weeks are annualized by the weeks with a session over their years, months by 12.
+- Weekly and monthly returns compound the wealth frame's returns within ISO weeks (keys ISO year, ISO week) and calendar months, so each runs from close to close. The first and last of each are dropped, complete or not, and so are the two weeks across 0050's halt, 2025-W24 and W25, in which 0050 lacks a close at the end of the week or of the week before. Weeks are annualized by the 500 weeks with a session over their years, months by 12.
 - Costs: commission 0.1425% on each side, tax 0.1% on sales of every fund but 00679B; cash at $r_f=1.5\%$ a year, $r_f/A_{\mathrm w}$ a session.
 - Counts against a threshold use the guard `1e-12`.
 """)
@@ -366,7 +366,7 @@ show("[[ex:trade]]: cost, NT$", B * big["cost"], ",.0f", "3,100")
 md(r"""
 ## Part 4 — Asynchronous closes ([[ex:freq]], [[eg:async]])
 
-Weekly and monthly returns compound the estimation frame's daily returns within ISO weeks and calendar months; the first and last week and month are dropped, complete or not. A correlation's normal-theory standard error is $(1-\hat\rho^2)/\sqrt T$; the plug-in one is LM20's $\operatorname{sd}(L_t)/\sqrt T$. Both assume independent periods, and the plug-in one needs finite fourth moments, so the cell prints each fund's raw kurtosis (19.3).
+Weekly and monthly returns compound the wealth frame's returns within ISO weeks and calendar months, so that every fund's period return runs between the same two closes. The first and last week and month are dropped, complete or not, and so is a period in which a fund has no close at its end or at the end of the period before: 0050's halt removes 2025-W24 and W25. The estimation frame would miss six sessions of June 2025 for every fund. A correlation's normal-theory standard error is $(1-\hat\rho^2)/\sqrt T$; the plug-in one is LM20's $\operatorname{sd}(L_t)/\sqrt T$. Both assume independent periods, and the plug-in one needs finite fourth moments, so the cell prints each fund's raw kurtosis (19.3).
 """)
 
 code(r"""
@@ -374,22 +374,35 @@ d = pl.col("date").str.to_date()
 
 
 def compound(keys):
-    g = (est.with_columns(*keys).group_by("fund", *[k.meta.output_name() for k in keys])
-         .agg((pl.col("R") + 1).product() - 1, pl.col("date").max().alias("last")))
-    wide = g.pivot(on="fund", index=[k.meta.output_name() for k in keys] + ["last"], values="R").sort("last")
-    return wide.slice(1, wide.height - 2)                # drop the first and last period
+    # period returns compounded from the wealth frame, without the first and last period; returns (kept, dropped),
+    # a period being kept when every fund has a close at its end and at the end of the period before
+    names = [k.meta.output_name() for k in keys]
+    g = (wfr.with_columns(*keys).group_by("fund", *names)
+         .agg((pl.col("R") + 1).product() - 1, pl.col("date").max().alias("last"),
+              pl.col("traded").sort_by("date").last().alias("closed")))
+    ends = (g.group_by(*names, "last").agg(pl.col("closed").all()).sort("last")
+             .with_columns((pl.col("closed") & pl.col("closed").shift(1)).alias("keep")))
+    wide = (g.pivot(on="fund", index=[*names, "last"], values="R")
+             .join(ends.select(*names, "keep"), on=names, how="left").sort("last"))
+    wide = wide.slice(1, wide.height - 2)                # drop the first and last period
+    return wide.filter(pl.col("keep")), wide.filter(~pl.col("keep"))
 
 
-wk = compound([d.dt.iso_year().alias("y"), d.dt.week().alias("k")])
-mo = compound([d.dt.year().alias("y"), d.dt.month().alias("m")])
+wk, wk_out = compound([d.dt.iso_year().alias("y"), d.dt.week().alias("k")])
+mo, mo_out = compound([d.dt.year().alias("y"), d.dt.month().alias("m")])
 Xw, Xm = wk.select(FUNDS).to_numpy(), mo.select(FUNDS).to_numpy()
-show("weeks", wk.height, "d", "500")
+print("weeks dropped across 0050's halt:", [f"{y}-W{k:02d}" for y, k in wk_out.select("y", "k").iter_rows()],
+      "| months dropped:", mo_out.height)
+n_weeks = wk.height + wk_out.height                      # the weeks with a session, which annualize
+show("weeks with a session", n_weeks, "d", "500")
+show("weeks used", wk.height, "d", "498")
 show("months", mo.height, "d", "116")
-c_before = max(dd for dd in edates if dd < wk["last"][0] and date.fromisoformat(dd).isocalendar()[:2]
+assert wk["last"][0] < min(wk_out["last"]) and max(wk_out["last"]) < wk["last"][-1]   # inside the span
+c_before = max(dd for dd in wdates if dd < wk["last"][0] and date.fromisoformat(dd).isocalendar()[:2]
                != date.fromisoformat(wk["last"][0]).isocalendar()[:2])
 c_last = wk["last"][-1]
 yrs_w = (date.fromisoformat(c_last) - date.fromisoformat(c_before)).days / 365.25
-A_WEEK = wk.height / yrs_w
+A_WEEK = n_weeks / yrs_w
 print(f"weekly years from the close of {c_before} to that of {c_last}: {yrs_w:.4f}")
 show("weekly A", A_WEEK, ".2f", "51.56")
 
@@ -404,12 +417,17 @@ cor = pl.DataFrame(rows)
 print(cor.with_columns(pl.col("rho", "SE normal", "SE plug-in").round(4)))
 get = {(r["pair"], r["frequency"]): r for r in rows}
 show("0050-00679B daily", get["0050-00679B", "daily"]["rho"], ".3f", "-0.105")
-show("0050-00679B monthly", get["0050-00679B", "monthly"]["rho"], ".3f", "-0.013")
+show("0050-00679B weekly", get["0050-00679B", "weekly"]["rho"], ".3f", "-0.022")
+show("0050-00679B monthly", get["0050-00679B", "monthly"]["rho"], ".3f", "-0.015")
 show("0050-00646 weekly", get["0050-00646", "weekly"]["rho"], ".3f", "0.588")
+show("0050-00646 monthly", get["0050-00646", "monthly"]["rho"], ".3f", "0.549")
 show("00679B-00642U monthly", get["00679B-00642U", "monthly"]["rho"], ".2f", "-0.36")
+gap_w = abs(get["0050-00679B", "daily"]["rho"] - get["0050-00679B", "weekly"]["rho"])
+show("0050-00679B daily-weekly gap", gap_w, ".4f", "0.0833")
+show("  in weekly normal-theory SEs", gap_w / get["0050-00679B", "weekly"]["SE normal"], ".1f", "1.9")
 gap = abs(get["00679B-00642U", "daily"]["rho"] - get["00679B-00642U", "monthly"]["rho"])
-show("00679B-00642U daily-monthly gap", gap, ".4f", "0.1815")
-show("  in monthly normal-theory SEs", gap / get["00679B-00642U", "monthly"]["SE normal"], ".1f", "2.3")
+show("00679B-00642U daily-monthly gap", gap, ".4f", "0.1807")
+show("  in monthly normal-theory SEs", gap / get["00679B-00642U", "monthly"]["SE normal"], ".1f", "2.2")
 show("  in monthly plug-in SEs", gap / get["00679B-00642U", "monthly"]["SE plug-in"], ".1f", "2.0")
 for nm, (x, _) in FRQ.items():
     k = ((x - x.mean(axis=0)) ** 4).mean(axis=0) / x.var(axis=0, ddof=0) ** 2
@@ -418,6 +436,9 @@ w1 = np.full(5, 0.2)
 for nm, (x, a_) in FRQ.items():
     sp_, _, _, _, sh_ = split(cov0(x), w1)
     print(f"R1, {nm}: volatility {100 * sp_ * math.sqrt(a_):.2f}%, 00642U's share {100 * sh_[J['00642U']]:.1f}%")
+show("R1's weekly volatility, %", 100 * split(cov0(Xw), w1)[0] * math.sqrt(A_WEEK), ".2f", "10.57")
+show("R1's monthly volatility, %", 100 * split(cov0(Xm), w1)[0] * math.sqrt(12), ".2f", "10.03")
+show("00642U's monthly share, %", 100 * split(cov0(Xm), w1)[4][J["00642U"]], ".1f", "44.9")
 
 fig, ax = plt.subplots()
 xs = np.arange(len(pairs))
@@ -428,6 +449,49 @@ ax.axhline(0, c="k", lw=0.8)
 ax.set_title("[[ex:freq]]: correlations by frequency")
 ax.legend()
 plt.show()
+""")
+
+md(r"""
+**The gap's own standard error (experiment 1).** A daily correlation and a weekly or monthly one come from the same days, so their gap has its own standard error. The cell resamples whole kept weeks (then months) with replacement, 20,000 times each from one generator, `default_rng([1, 20261011])`, created here. In each draw the daily correlation uses the estimation frame's days inside the drawn periods, and the period correlation the drawn period returns. The bootstrap standard error divides by $B$; its Monte Carlo error comes from the draws' fourth moment.
+""")
+
+code(r"""
+def pkey(dd, key):
+    x = date.fromisoformat(dd)
+    return (x.year, x.month) if key == "month" else x.isocalendar()[:2]
+
+
+def gap_boot(rng, P, keys, key, a, b, draws):
+    # SD over the draws of the daily-minus-period correlation gap of funds a and b, and its Monte Carlo SE
+    def sums(x, y):
+        return np.stack([np.ones_like(x), x, y, x * x, y * y, x * y], axis=-1)
+
+    def corr(S):
+        n, sx, sy, sxx, syy, sxy = (S[..., i] for i in range(6))
+        return (sxy / n - sx * sy / n**2) / np.sqrt((sxx / n - (sx / n) ** 2) * (syy / n - (sy / n) ** 2))
+
+    n = len(keys)
+    pos = {k: i for i, k in enumerate(keys)}
+    day = np.zeros((n, 6))
+    for dd, r in zip(edates, X):
+        if pkey(dd, key) in pos:
+            day[pos[pkey(dd, key)]] += sums(r[a:a + 1], r[b:b + 1])[0]
+    idx = rng.integers(0, n, size=(draws, n))
+    cnt = np.bincount((idx + n * np.arange(draws)[:, None]).ravel(), minlength=draws * n).reshape(draws, n)
+    g = corr(cnt @ day) - corr(cnt @ sums(P[:, a], P[:, b]))
+    sd = float(g.std(ddof=0))
+    return sd, math.sqrt((((g - g.mean()) ** 4).mean() - sd**4) / draws) / (2 * sd)
+
+
+rng1 = np.random.default_rng([1, 20261011])             # experiment 1, created once
+sd_w, mc_w = gap_boot(rng1, Xw, list(wk.select("y", "k").iter_rows()), "week", 0, J["00679B"], 20_000)
+sd_m, mc_m = gap_boot(rng1, Xm, list(mo.select("y", "m").iter_rows()), "month", J["00679B"], J["00642U"], 20_000)
+print(f"Monte Carlo errors of the two SDs: {mc_w:.5f}, {mc_m:.5f}")
+show("bootstrap SE of 0050-00679B's daily-weekly gap", sd_w, ".3f", "0.046")
+show("  the gap in bootstrap SEs", gap_w / sd_w, ".1f", "1.8")
+show("bootstrap SE of 00679B-00642U's daily-monthly gap", sd_m, ".2f", "0.08")
+print(f"  the gap in bootstrap SEs: {gap / sd_m:.2f} (above two)")
+assert gap / sd_m > 2
 """)
 
 md(r"""
@@ -638,6 +702,7 @@ show("P10: mu_p, %", 100 * float(w3 @ mu3), ".2f", "6.80")
 show("P10: sigma_p, %", 100 * sp3, ".2f", "13.30")
 show("P10: ratio (27.7)", float(w3 @ sd3) / sp3, ".2f", "1.35")
 print("P10: shares, %", np.round(100 * sh3, 1), "| MRC, %", np.round(100 * m3, 2), "| RC, points", np.round(100 * rc3, 3))
+show("P10: the risk contributions' sum, points", 100 * float(rc3.sum()), ".3f", "13.297")
 d3 = np.array([0, 0.05, -0.05])
 show("P10: linear change, points", 100 * float(d3 @ m3), ".2f", "-0.96")
 v3 = sp3**2 + 2 * float(d3 @ S3 @ w3) + float(d3 @ S3 @ d3)                       # (10.9)
@@ -662,11 +727,13 @@ w = np.full(5, 0.2)
 sp = np.sqrt(w @ S @ w)                        # 0.11493
 rc = w * (S @ w) / sp                          # (27.6)
 assert abs(rc.sum() - sp) < 1e-15              # Euler's identity
+wf = pl.read_csv("data/e5_wealth.csv",
+                 schema_overrides={"fund": pl.String})
 d = pl.col("date").str.to_date()
-wk = (est.group_by("fund", d.dt.iso_year().alias("y"),
-                   d.dt.week().alias("k"))
+wk = (wf.group_by("fund", d.dt.iso_year().alias("y"),
+                  d.dt.week().alias("k"))
       .agg((pl.col("R") + 1).product() - 1)   # weekly returns
-      .sort("fund", "y", "k"))
+      .sort("fund", "y", "k"))   # 502 weeks; Section 4 keeps 498
 
 def post_trade(W_pre, drift, f, tax, k=0.001425):
     W = W_pre                                  # (27.2) by iteration
@@ -710,7 +777,7 @@ Companion to *From Calculus to Kelly*, Learning Module 27. The notebook rebuilds
 - E5's two frames, the estimation frame and the wealth frame, from the raw closes, distributions and split;
 - the June 2025 span and the drift of a buy-and-hold book;
 - the wealth recursion with costs, for R1 and R2 from their per-date targets, and R1's trade of 1 April 2026;
-- correlations by frequency with both standard errors and the funds' kurtosis;
+- correlations by frequency with both standard errors, the funds' kurtosis and the gaps' bootstrap standard errors;
 - means, variances, the diversification ratio, Euler's risk split, the slope check and a switch;
 - R1's risk shares in the 92 trailing windows, and the factor split of an equal-weight U28 book.
 

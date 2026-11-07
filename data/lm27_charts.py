@@ -9,7 +9,8 @@ Inputs and conventions: data/lm27_common.py. Writes
                   thinned to the last session of each ISO week, the purchase date and every fund's lowest and highest
                   weight (402 dated points: buy-and-hold weights rebuild price ratios, so no daily series is published,
                   plans/vol-5.md, "Charts");
-  lm27-freq       correlations of the five pairs at daily, weekly and monthly frequency (estimation frame);
+  lm27-freq       correlations of the five pairs at daily frequency (estimation frame) and weekly and monthly frequency
+                  (compounded from the wealth frame; 498 ISO weeks, without the two across 0050's halt, and 116 months);
   lm27-shares     money and risk shares of R1 and R2 at the full-sample covariance, stacked;
   lm27-windows    R1's risk shares in the 92 trailing windows, one point per signal;
   lm27-riskSplit  the widget's initial chart and its "widget" block: three annualized 5x5 covariance matrices.
@@ -67,11 +68,16 @@ write("lm27-drift", {
 
 # ---------------------------------------------------------------- X4: correlations by frequency
 pair_names = [f"{F[a]}–{F[b]}" for a, b in C.pairs]
+# the alt text's figures are the values, three decimals (two for 00679B with 00642U, as E5 prints them)
+alt_vals = [", ".join(f"{se[a, b, nm][0]:.{2 if k == 4 else 3}f}" for nm in ("daily", "weekly", "monthly"))
+            for k, (a, b) in enumerate(C.pairs)]
+assert alt_vals == ["0.599, 0.588, 0.549", "-0.105, -0.022, -0.015", "0.180, 0.231, 0.191", "0.092, 0.072, 0.022",
+                    "-0.18, -0.19, -0.36"], alt_vals
 write("lm27-freq", {
     "type": "bar",
     "alt": "Correlations of daily, weekly and monthly simple returns for five pairs of E5 funds: 0050 with 00646 0.599, "
-           "0.588, 0.552; 0050 with 00679B -0.105, -0.023, -0.013; 0050 with 00635U 0.180, 0.228, 0.187; 0050 with "
-           "00642U 0.092, 0.073, 0.014; 00679B with 00642U -0.18, -0.20, -0.36",
+           "0.588, 0.549; 0050 with 00679B -0.105, -0.022, -0.015; 0050 with 00635U 0.180, 0.231, 0.191; 0050 with "
+           "00642U 0.092, 0.072, 0.022; 00679B with 00642U -0.18, -0.19, -0.36",
     "height": 280, "categories": pair_names, "x": {"label": "Pair"},
     "y": {"fmt": "n3", "tfmt": "n1", "label": "Correlation", "min": -0.4, "max": 0.7,
           "ticks": [-0.4, -0.2, 0, 0.2, 0.4, 0.6]},

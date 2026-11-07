@@ -28,9 +28,10 @@ from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE))
+import cvxpy as cp
 import lm31_common as K
 import numpy as np
-from vol5_rules import R2, cov0
+from vol5_rules import COMMISSION, R2, TAX, cov0
 
 ROOT = HERE.parent
 MD = ROOT / "src" / "lm31.md"
@@ -161,7 +162,7 @@ assert (sch[-1][0], sch[-1][1]) == ("2026-09-30", "2026-10-01")
 has("last signal", "30 September 2026")
 mlen = K.mlen
 assert (len(mlen), min(mlen), max(mlen)) == (91, 12, 23) and len(K.p8.dates) - 1 - K.idx[-1] == 5
-has("holding months", "12 to 23 sessions; the 91 complete ones leave out the last 5 sessions")
+has("holding months", "12 to 23 sessions. The 91 complete holding months exclude the last 5 sessions")
 chk("out-of-sample sessions", len(K.p8.dates) - 1, ",d", "1,851")
 assert K.p8.dates[1] == "2019-03-05"
 has("out of sample from", "Over the 1,851 sessions from 5 March 2019")
@@ -248,6 +249,10 @@ assert f"{sum(float(f'{x:.4f}') for x in K.w6):.4f}" == "1.0001"
 has("E2 sum", "(rounded separately; 1.0001 as printed)")
 assert np.abs(shares(K.w6, S0) - 0.2).max() < 1e-12
 pct("R3 vol (LM28's A28-10)", vol(K.w3, S0), 2, "5.02")
+pct("R3 vol at three decimals (E4)", vol(K.w3, S0), 3, "5.015")
+chk("R3 vol from LM28's sigma^2_min", 100 * math.sqrt(0.0025152), ".3f", "5.015")
+has("E4: LM28's sigma^2_min", "(above R3's 5.015%, from [[LM28]]'s $\\sigma^2_{\\min}=0.0025152$)")
+assert vol(K.w3, S0) < vol(K.w_mv4, K.S4), "R3 (five funds) is below the four funds' minimum variance"
 pct("R6 vol", vol(K.w6, S0), 2, "5.45")
 pct("R1 vol (LM28's A28-15)", vol(K.w1, S0), 2, "7.38")
 assert vol(K.w3, S0) <= vol(K.w6, S0) <= vol(K.w1, S0) and float(K.w3.min()) > 0
@@ -274,6 +279,17 @@ has("check tolerance", "so it checks Newton to $10^{-5}$")
 chk("Jacobi steps", K.it_j, "d", "220")
 has("Jacobi point", "$(-1.307,-1.306,2.132,2.408,-0.927)$")
 assert [f"{x:.3f}" for x in K.w_j] == ["-1.307", "-1.306", "2.132", "2.408", "-0.927"]
+chks("Jacobi 4 dp (S11)", K.w_j, ".4f", ["-1.3069", "-1.3060", "2.1321", "2.4082", "-0.9274"])
+has("S11 Jacobi", "settles after 220 steps at −1.3069, −1.3060, 2.1321, 2.4082 and −0.9274, every share 20%")
+# the first window's cvxpy check (S11), with the rules' options; its gap depends on where CLARABEL stops: a bound
+_y1 = cp.Variable(5)
+_p1 = cp.Problem(cp.Minimize(0.5 * cp.quad_form(_y1, cp.psd_wrap(S0)) - np.full(5, 0.2) @ cp.log(_y1)))
+_p1.solve(solver=cp.CLARABEL, **K.ERC_OPTS)
+assert _p1.status == "optimal" and _y1.value is not None
+gap_first = float(np.abs(np.asarray(_y1.value) / float(np.sum(_y1.value)) - K.w6).max())
+print(f"CHECK S11 cvxpy gap on the first window: {gap_first:.2e} (printed: below 1e-6)")
+assert gap_first < 1e-6, gap_first
+has("S11 cvxpy", "cvxpy reports `optimal` and agrees with Newton to below $10^{-6}$")
 assert np.abs(shares(K.w_j, S0) - 0.2).max() < 1e-9 and int((K.w_j < 0).sum()) == 3
 chk("Jacobi fails", int(K.fails), "d", "45")
 has("Jacobi fails text", "At 45 of the 92 windows it does not settle in 10,000 steps")
@@ -284,7 +300,10 @@ has("E4 R2 mix", "R2 holds 40% 0050, 20% 00646, 30% 00679B, 10% 00635U and no 00
 for k, p_ in enumerate(["0.2466", "0.1773", "0.4190", "0.1571"]):
     chk(f"E4 weight {k + 1}", float(K.w_rb[k]), ".4f", p_)
 chk("E4 sweeps", K.it_rb, "d", "12")
-sci("E4 cvxpy gap", float(np.abs(K.w_cvx - K.w_rb).max()), "4.4\\times10^{-7}")
+gap_e4 = float(np.abs(K.w_cvx - K.w_rb).max())
+print(f"CHECK E4 cvxpy gap: {gap_e4:.2e} (printed: within 1e-6)")
+assert gap_e4 < 1e-6, gap_e4
+has("E4 cvxpy bound", "cvxpy agrees within $10^{-6}$")
 pct("E4 0050 weight", float(K.w_rb[0]), 1, "24.7")
 pct("R2's 0050 share", float(shares(K.b4, K.S4)[0]), 1, "71.1")
 pct("four-fund minimum variance", vol(K.w_mv4, K.S4), 3, "5.016")
@@ -386,9 +405,9 @@ assert (K.u.dates[0], K.u.dates[-1]) == ("2008-12-02", "2026-10-08")
 has("U28 repairs (lm10.md:41)", "524 closes in this sample (on 38 dates) replaced by their 13:30:00 values")
 assert "524 closes in this sample (on 38 dates)" in (ROOT / "src" / "lm10.md").read_text(encoding="utf-8")
 assert K.same_obs and K.same_u and K.ok8 and K.diff_order == 17
-has("pitfall: 17 of 92", "the leaf order differs at 17 of the 92 windows")
-has("overview: 17 of 92", "changes the leaf order at 17 of 92 signals")
-has("S12: 17 of 92", "changes the leaf order at 17 of the 92 signals")
+has("pitfall: 17 of 92", "the quasi-diagonal order differs at 17 of the 92 windows")
+has("overview: 17 of 92", "changes the quasi-diagonal order at 17 of 92 signals")
+has("S12: 17 of 92", "changes the quasi-diagonal order at 17 of the 92 signals")
 
 # ---------------------------------------------------------------- Section 5
 W6, W7 = K.W6, K.W7
@@ -436,7 +455,11 @@ vols_ = {k: float(K.summ[k]["vol"]) for k in ("R1", "R3", "R5", "R6", "R7", "R8"
 pct("R6 realized", vols_["R6"], 2, "10.32")
 pct("R7 realized", vols_["R7"], 2, "10.14")
 pct("R8 realized", vols_["R8"], 2, "11.52")
-has("X5 realized row", "| Realized volatility | 10.32 | 10.14 | | | |")
+has("X5 realized row", "| Realized volatility (SD) | 10.32 | 10.14 | | | |")
+has("R8's SD (E10)", "R8's daily net returns had a standard deviation of 11.52% a year, R6's 10.32%")
+for k_ in ("R6", "R7", "R8"):                 # the printed figure is the SD with divisor T (ddof 0), times sqrt(A_w)
+    r_ = K.paths[k_].wealth[1:] / K.paths[k_].wealth[:-1] - 1
+    assert len(r_) == 1851 and abs(float(np.std(r_, ddof=0)) * math.sqrt(Aw) - vols_[k_]) < 1e-15, k_
 pct("R1 realized (LM30's A30-12)", vols_["R1"], 2, "12.48")
 pct("R3 realized (LM30's A30-12)", vols_["R3"], 2, "9.96")
 pct("R5 realized (LM30's A30-12)", vols_["R5"], 2, "9.97")
@@ -498,7 +521,42 @@ assert K.err < 1e-14
 has("EWMA matrix identity", "below $10^{-14}$ of $\\bar\\sigma_t^2$")
 r8 = K.p8.wealth[1:] / K.p8.wealth[:-1]
 assert bool((r8 > 0).all()) and K.p8.ruin is None and len(r8) == 1851
-has("domain check", "R8 keeps $1+R_t>0$ on all 1,851 sessions")
+has("domain check", "R8 keeps $1+R_{p,t}>0$ on all 1,851 sessions")
+# R8's held exposure between trades (X7's note): wealth_path's recursion replayed, holdings h drifting with the funds'
+# returns; the replay must reproduce p8.wealth, so the exposures below are vol5_rules' own path.
+_tax = np.array([TAX[s] for s in fr.funds])
+_wd = fr.wealth_dates
+_i0 = _wd.index(sigs[0].trade)
+_by = {s.trade: s for s in sigs}
+_h, _c = np.zeros(len(fr.funds)), 1.0
+held: dict[str, float] = {}
+_wealth = []
+for _i in range(_i0, len(_wd)):
+    if _i > _i0:
+        _h = _h * (1 + fr.W[_i])
+        _c *= 1 + ((K.RF if _c >= 0 else K.RF + K.SPREAD) / fr.A_wealth)
+    _W = float(_h.sum() + _c)
+    if _i > _i0:
+        held[_wd[_i]] = float(_h.sum()) / _W                  # after the day's return, before any trade
+    _s = _by.get(_wd[_i])
+    if _s is not None:
+        _f = _s.targets["R8"]
+        _Wn = _W
+        for _ in range(100):
+            _dl = _Wn * _f - _h
+            _new = _W - (COMMISSION * float(np.abs(_dl).sum()) + float(_tax @ np.clip(-_dl, 0, None)))
+            if abs(_new - _Wn) < 1e-15 * _W:
+                break
+            _Wn = _new
+        _h, _c, _W = _Wn * _f, _Wn * (1 - float(_f.sum())), _Wn
+    _wealth.append(_W)
+assert np.abs(np.array(_wealth) / K.p8.wealth - 1).max() < 1e-12, "the replay reproduces R8's wealth path"
+assert len(held) == 1851
+d_hi = max(held, key=lambda k: held[k])
+chk("R8's largest held exposure (X7 note)", held[d_hi], ".2f", "1.53")
+assert d_hi == "2023-08-22", d_hi
+has("X7 note: largest held exposure", "to at most 1.53 on 22 August 2023")
+print(f"   held exposure: max {held[d_hi]:.6f} on {d_hi}; above 1.5 on {sum(v > 1.5 for v in held.values())} sessions")
 has("Moreira and Muir's sample", "1926–2015 for the market, size, value and momentum")
 has("Harvey et al.'s sample", "more than 60 assets with daily data from as early as 1926")
 
@@ -629,7 +687,7 @@ has("S11 counts", "(CCD in 12 sweeps, Newton in 6 steps)")
 
 # ---------------------------------------------------------------- the overview's and summary's restatements
 has("overview: steps", "in 6 steps and coordinate descent in 12 sweeps")
-has("overview: R8", "its exposure averaged 1.14 over 92 trades and sat at the cap at 14 of them")
+has("overview: R8", "its exposure averaged 1.14 over 92 trades and was at the cap at 14 of them")
 has("overview: QLIKE", "in 56 of 91 holding months, yet its mean QLIKE was the higher, 0.791 against 0.691")
 has("summary: R8", "scales R6 to its window volatility, capped at 1.5.")
 

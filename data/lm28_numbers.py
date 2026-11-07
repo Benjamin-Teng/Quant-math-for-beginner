@@ -376,8 +376,11 @@ put(f"P4 same, r_f 1.5%: SR* {f(p4, 3)}; distractors 0.50 (SR_inf), {f(0.5 + 0.5
     f"{f(100 * (0.015 + p4**2 * 0.05**2 / (0.04 - 0.015)), 2)}%")                                       # 37
 put(f"P5 SR* 0.8, 1'Sigma^-1 e 8, delta 4: vol SR*/delta {f(100 * 0.8 / 4, 1)}%, L 8/4 {f(8 / 4, 1)}, borrowing "
     f"{f(8 / 4 - 1, 1)}; distractors L {f(4 / 8, 1)}, vol {f(100 * 0.8 * 4, 0)}%")                       # 38
-put(f"P6 r_f above mu_mv: Sigma^-1 e / 1'Sigma^-1 e has Sharpe -sqrt(e'Sigma^-1 e), the lowest of any fully invested "
-    f"portfolio (window {bw[1]}: {f(srn, 2, 3)})")                                                          # 39
+p6 = sqrt(0.5**2 + (0.0 - 0.015) ** 2 / 0.05**2)                       # P6 (constructed): the split of 8(c)
+put(f"P6 sigma_min 5%, mu_mv 0%, SR_inf 0.5, r_f 1.5% (constructed): SR*^2 {f(p6**2, 2)}, SR* {f(p6, 3)}; "
+    f"1'Sigma^-1 e {f((0.0 - 0.015) / 0.05**2, 2)} < 0, so Sigma^-1 e / 1'Sigma^-1 e has Sharpe -SR* {f(-p6, 2)}, the "
+    f"lowest of any fully invested portfolio; distractors +SR* {f(p6, 2, plus=True)}, -SR_inf -0.50 "
+    f"(window {bw[1]}: {f(srn, 2, 3)})")                                                                    # 39
 s1, s2, s12 = 0.026800, 0.018353, -0.004908
 o7 = Opt(np.zeros(2), np.array([[s1, s12], [s12, s2]]))
 put(f"P9 LM7's 2017-2021 inputs (lm07.md:409): w_mv {pct(o7.wmv)}%, sigma_min {f(100 * sqrt(o7.s2min), 2)}%, lambda* "
@@ -534,7 +537,7 @@ chk("test returns", len(Wt), ",d", "1,851")
 chk("test rows", len(Xt), ",d", "1,845")
 chk("test years", yt, ".2f", "7.60")
 assert missing == ["2025-06-11", "2025-06-12", "2025-06-13", "2025-06-16", "2025-06-17", "2025-06-18"]
-has("0050's halt", "There 0050 earns 0 during its halt from 11 to 17 June 2025 and its six-session return on 18 June. "
+has("0050's halt", "On that frame 0050 earns 0 during its halt from 11 to 17 June 2025 and its six-session return on 18 June. "
                    "Joint statistics use the 1,845 estimation rows, which lack those six sessions.")
 j_halt = [k for k, d_ in enumerate(wd) if "2025-06-11" <= d_ <= "2025-06-17"]
 assert len(j_halt) == 5 and not fr.traded[j_halt, 0].any() and (fr.W[j_halt, 0] == 0).all()
@@ -806,6 +809,9 @@ for (i, j), p0, p1 in (((0, 2), "-0.30", "-0.09"), ((1, 2), "-0.26", "-0.06")):
 has("E8 correlations", "0050–00679B from -0.30 to -0.09 and 00646–00679B from -0.26 to -0.06")
 chk("E8 counterfactual", 100 * cf_tv, ".2f", "8.35")
 chk("normal-days SE", 100 * held_mv["nse"], ".2f", "0.17")
+chk("normal-days SE, w_tan", 100 * held_tan["nse"], ".2f", "0.23")
+has("normal-days SEs", "For normal days the two standard errors would be 0.17 and 0.23. Gaps of 13 and 12 standard "
+                       "errors survive")
 
 # ---------------------------------------------------------------- section 7
 assert np.abs(sol[:5] - wl).max() < 1e-15 and np.abs(sol[:5] - wme).max() < 1e-15
@@ -857,6 +863,15 @@ chk("P5 key A L", 8 / 4, ".1f", "2.0")
 chk("P5 B", 4 / 8, ".1f", "0.5")
 chk("P5 C", 100 * 0.8 * 4, ".0f", "320")
 has("S6 the window", "on 30 April 2024 it was -1.20")
+chk("P6 SR*^2", p6**2, ".2f", "0.34")
+chk("P6 SR*^2 (printed)", 0.5**2 + 0.015**2 / 0.05**2, ".2f", "0.34")
+chk("P6 SR*", p6, ".3f", "0.583")
+chk("P6 key C", -p6, ".2f", "-0.58")
+chk("P6 A", p6, "+.2f", "+0.58")
+chk("P6 B", -0.5, ".2f", "-0.50")
+assert (0.0 - 0.015) / 0.05**2 < 0                                      # the denominator's sign, by (28.6)
+has("P6 stem", "$\\sigma_{\\min}=5%$, $\\mu_{\\mathrm{mv}}=0%$ and $\\mathrm{SR}_\\infty=0.5$, and $r_f=1.5%$ (constructed)")
+has("S6 split", "$\\mathrm{SR}^{*2}=0.5^2+0.015^2/0.05^2=0.34$ and $\\mathrm{SR}^*=0.583$")
 chk("S9 numerator", 0.018353 + 0.004908, ".6f", "0.023261")
 chk("S9 denominator", 0.026800 + 0.018353 + 2 * 0.004908, ".6f", "0.054969")
 chk("S9 weight", 100 * o7.wmv[0], ".1f", "42.3")
@@ -872,7 +887,28 @@ chk("S10 1 point in SE units", 0.01 / se_mu[0], ".2f", "0.11")
 chk("S10 1 point in SE units (printed)", 1 / 9.4, ".2f", "0.11")
 assert min(abs(dW[0, 0]), abs(dW[1, 0])) > 0.06
 has("S10 more than 6", "moves two weights by more than 6 points")
-has("S11 duals", "the duals +0.00193 and -0.161 are the negatives of LM7's multipliers")
+# S10(b): the weight change = column 1 over the new total - the old weights rescaled (quotient rule, exact)
+s10_sum = float(col1.sum())                                             # 1' Sigma^-1 e_1, annual units
+s10_den = o.den + 0.01 * s10_sum                                        # 1' Sigma^-1 e after +1 point in 0050's mean
+s10_col = 100 * 0.01 * col1 / s10_den
+s10_res = 100 * o.wtan * 0.01 * s10_sum / s10_den
+assert np.abs(s10_col - s10_res - 100 * dW[:, 0]).max() < 1e-10
+chk("S10 column 1 sum", s10_sum, ".1f", "42.6")
+assert f"{float((0.01 * col1 * 100).round(1).sum()):.1f}" == "42.5"   # hence "unrounded" in the text
+chk("S10 1'S^-1 e before", o.den, ".2f", "11.27")
+chk("S10 1'S^-1 e after", s10_den, ".2f", "11.70")
+chk("S10 column part 0050", s10_col[0], "+.2f", "+7.08")
+chk("S10 column part 00646", s10_col[1], ".2f", "-4.11")
+chk("S10 rescaling 0050", s10_res[0], ".2f", "0.43")
+chk("S10 rescaling 00646", s10_res[1], ".2f", "2.28")
+chk("S10 0050 parts (printed)", 7.08 - 0.43, ".2f", "6.65", in_md=False)
+chk("S10 00646 parts (printed)", -4.11 - 2.28, ".2f", "-6.39", in_md=False)
+has("S10 split", "column 1 sums to 42.6, so $\\mathbf 1^{\\top}\\Sigma^{-1}\\mathbf e$ rises from 11.27 to 11.70. "
+                 "Column 1 over the new total moves 0050 by +7.08 points and 00646 by -4.11. Rescaling the old "
+                 "weights takes 0.43 and 2.28 more")
+has("S11 duals", "The duals +0.00193 and -0.161 are the negatives of $\\lambda$ and $\\lambda_\\mu$ in [[eg:inside]]")
+has("S11 gaps", "with weight gaps to the closed form below $10^{-15}$ (OSQP) and $10^{-11}$ (CLARABEL) and KKT residuals "
+                "below $10^{-13}$")
 
 # ---------------------------------------------------------------- the chart files
 FJ = json.loads((ROOT / "src" / "data" / "lm28-frontier.json").read_text(encoding="utf-8"))
@@ -914,8 +950,11 @@ for form in ("最小變異數投資組合（minimum-variance portfolio）", "效
              "雙曲線（hyperbola）", "漸近線（asymptote）", "兩基金分離（two-fund separation）", "分離定理（separation theorem）",
              "切點投資組合（tangency portfolio）", "資本市場線（capital market line）", "無風險資產（risk-free asset）",
              "無風險利率（risk-free rate）", "風險規避（risk aversion）", "敏感度（sensitivity）", "估計誤差（estimation error）",
-             "拉格朗日乘數（Lagrange multiplier）", "共變異數矩陣（covariance matrix）", "凸函數（convex function）",
-             "樣本外（out-of-sample）", "樣本內（in-sample）"):
+             "拉格朗日乘數（Lagrange multiplier）", "共變異數矩陣（covariance matrix）",
+             "嚴格凸函數（strictly convex function）", "樣本外（out-of-sample）", "樣本內（in-sample）",
+             "最小變異數前緣（minimum-variance frontier）", "曝險（exposure）", "超額報酬（excess return）",
+             "視窗（window）", "恆等式（identity）", "全域最小值（global minimum）",
+             "相關係數（correlation coefficient）"):
     assert form in MD_RAW, form
 assert "切點組合" not in MD_RAW.replace("切點投資組合", "")
 print(f"labels: {len(ex_labels)} exhibits, {len(eg_labels)} examples, tags (28.1)-(28.9), every exhibit cited")
