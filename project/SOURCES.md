@@ -1344,6 +1344,11 @@ means nothing in the text was read; "unverified" marks a field or claim that no 
   (v1, 21 May 2024; the arXiv API record and abstract, re-read): a general-purpose interior-point solver for conic
   problems, based on a homogeneous embedding, specialized to quadratic objectives, "distributed as a standard solver
   for the Python CVXPY optimization suite". A preprint; no journal version was checked. Cited for the method's name.
+  LM29's Glossary row (interior-point method, lm29.md:591) also rests on a run in the project environment
+  (2026-11-07). CLARABEL 0.11.1, called through cvxpy 1.9.3 and stopped at max_iter=0 on R4's homogenized QP on the
+  last window, returns status user_limit and y = (1.2202, 0.3849, -0.2047, 0.4912, 0.7249). 00679B's y = -0.2047
+  violates y >= 0, while the bound duals stay strictly positive at max_iter 0 to 3. At convergence (Example 9,
+  lm29.md:404) it leaves y_i = 3.4e-13 and 2.0e-13 > 0 where the exact y is 0.
 - Boyd, Busseti, Diamond, Kahn, Koh, Nystrup & Speth, "Multi-Period Trading via Convex Optimization", *Foundations
   and Trends in Optimization* 3(1): 1–76, August 2017, DOI
   [10.1561/2400000023](https://doi.org/10.1561/2400000023). **Author order:** Crossref lists the seven authors as
@@ -3041,7 +3046,8 @@ LM27 and LM28 (new terms):
 | rebalancing; rebalance | —; — | —; — | —; — (管理學名詞-會計學 "rebalancing" 重新平衡; "rebalance" 再平衡 in 電子計算機名詞, 再平衡；重新平衡 in 一般性常見術語) | 再平衡 (lm08.md:403) |
 | buy-and-hold | — | — | — | 買進持有 (lm09.md:473) |
 | systematic risk | 系統性風險 | — | 系統風險 | 系統性風險 |
-| idiosyncratic risk; unsystematic risk | —; — | —; — | 特質風險; 非系統風險 | not used (殘差) |
+| idiosyncratic risk; unsystematic risk | —; — | —; — | 特質風險; 非系統風險 | not used (residual risk: 殘差風險, next row) |
+| residual risk | — | — | — (電子計算機名詞, 計量學名詞 and 電子工程名詞 殘餘風險; 土木工程名詞, 機械工程名詞 and 電機工程名詞 殘留風險; 'residual risk' 6 rows and '殘差風險' 0 rows in all listings, searched 2026-11-07) | 殘差風險 (lm27.md:413, 589), composed from 統計學名詞's residual 殘差 (lm23.md:116), the residuals of (27.8), and 風險 as in 系統性風險 |
 | single index model | 單一指標模型 | — | — | 單一指標模型 |
 | factor model | 因子模型 | — | 因子模型 (經濟學 要素模型) | 因子模型 |
 | variance decomposition | 變異數分解 (headword "variance decomposition (VDC)") | — | — | 變異數分解 |
@@ -3058,6 +3064,9 @@ LM27 and LM28 (new terms):
 | weight | 權數 | 重量；權[重]函數 | — | 權重 (Volume IV) |
 | correlation coefficient | 相關係數 | 相關係數 | 相關係數 (headword spelt "correlation coeffeicient", found by the query `相關係數`; also 經濟學) | 相關係數 |
 | closing price | — | — | 收盤價 | 收盤 |
+| book; account | — ("Dutch book" 荷蘭博弈 only); — (compounds: current account 經常帳 and nine more) | —; — | — (compounds: book inventory 帳面存貨, market/book (M/B) ratio 市帳比 and two more); — (46 compounds, such as margin account 保證金帳戶; 管理學名詞-會計學 "account" 帳戶; 會計學 "account" 帳，帳戶，帳目 and "book, book of account" 帳簿; 'book' 694 rows in all listings, first 300 read, 'account' 483, first 300 read, '帳戶' 265, searched 2026-11-07) | 帳戶 (lm27.md:105, 570) for a book, after 管理學名詞-會計學's "account" 帳戶; already printed for a holding at lm08.md:403 |
+| 1-norm | — (norm 範數; "L₁-norm" L₁範數, a headword with a subscript, found by `norm` and `範數` but not by the phrase `L1-norm`; "Lp-norm" Lp範數) | — (norm 範數) | — | L₁範數 (lm27.md:172), 統計學名詞's form ('1-norm', '1 norm' and 'l1 norm' 0 rows in all listings, '1-範數' only 海洋地質學's "norm" 1.範數；2.標準; 電子工程名詞 and 電機工程名詞 "L1-norm" L1 範數; searched 2026-11-07) |
+| identity | — (compounds only, e.g. identity matrix 單位矩陣) | 恆等[式]；單位[元素]；同一 | not run | 恆等式 (LM28 §2 box; also lm12.md:198 會計恆等式, lm14.md:257, lm16.md:300, lm17.md:368), the second checker's search of 2026-11-07, rechecked when recorded |
 | efficient portfolio | — | — | 效率投資組合 | 效率投資組合 |
 | risk-free asset | — | — | 無風險資產 (also 經濟學, with "riskless asset") | 無風險資產 |
 | separation theorem | 分離定理 | — | — (經濟學 分離定理) | 分離定理 |
@@ -3089,8 +3098,11 @@ LM29, LM30 and LM31 (new terms):
 | multiplier | — | 乘數；乘式；乘子 | — | 乘數 (LM7) |
 | active set; active constraint | —; — | —; 起作用的約束 | not run; — (經濟學 有效限制; 工業工程名詞 作用限制條件) | "active set" in English; 有效限制, as LM7's Glossary 緊限制式（有效限制） (lm07.md:769) |
 | interior-point method | 內點法 | — (interior point 內點) | not run (經濟學 "Interior point method" 內在點法) | 內點法 (統計學名詞), only where a box names the method |
+| optimization | not run | 最佳化 (the final check's search, 2026-11-07) | not run | 最佳化 (lm30.md:125, lm31.md:254; lm04.md:576, lm10.md:449, lm28.md:136) |
 | slack | — | — (slack variable 鬆弛變量；附加變數) | not run | 鬆弛 (lm07.md:572) |
 | no-trade band; operator splitting; solver | — | — (solver: compounds such as Riemann solver) | not run | English |
+| closed form | — | — ("analytic solution" 解析解) | — | 公式解 (lm29.md:414), the book's form, confirmed by the editor (2026-11-07): the common form; 數學名詞 lists 解析解 for 'analytic solution' (other fields: 電子計算機名詞 閉合形式 and "closed form solution" 閉合形式解答; 電子工程名詞 閉合形式解答；解析解; 機械工程名詞 閉合解, also "closed-form solution" in 土木工程名詞 and 機構與機器原理; 電機工程名詞 封閉解; 'closed form' 11 rows, 'closed-form' 2 and '公式解' 0 in all listings, searched 2026-11-07) |
+| through case | — | — | — ("Case" 案例, found by the query `案例`) | 貫穿案例 (lm29.md:254), composed from 管理學名詞's 案例 ('through case' and '貫穿案例' 0 rows in all listings, searched 2026-11-07) |
 | mean squared error | 均方誤差 ("mean squared error (MSE)", "mean square error (MSE)") | 均方誤差 ("mean square error (MSE)") | — | 均方誤差 |
 | bias–variance tradeoff | 偏誤及變異數之抵換 (tradeoff 抵換；互償) | — | — | 偏誤及變異數之抵換 |
 | sampling error | 抽樣誤差 | 抽樣誤差 | 抽樣誤差 | 抽樣誤差 |
@@ -3123,6 +3135,8 @@ LM29, LM30 and LM31 (new terms):
 | periodic | — | — | — (動物學名詞 周期性；定期的; 國防部新編國軍簡明美華軍語辭典 定期，週期的) | 定期 |
 | trigger | — | — | — (compound "trigger price" 觸發價格; 一般性常見術語 觸發；觸發點) | 風險觸發, composed |
 | threshold | compounds only | 閾值；門檻 | — | 門檻 |
+| holding month | — | — | — ("holding period" 持有期間, also 會計學; "holding period return" 持有期間報酬率) | 持有月份 (lm31.md:401, 577), composed from 持有, as in 管理學名詞's 持有期間, and the common 月份 ('holding month' and '持有月份' 0 rows in all listings, searched 2026-11-07) |
+| risk-budget portfolio | — | — | — | 風險預算投資組合 (lm31.md:192, 563), composed from 風險預算 (another field's "risk budget", above) and 投資組合, as 統計學名詞's "risk-parity portfolio" 風險平價投資組合 ('risk budget portfolio', 'risk-budget portfolio', 'risk budgeting portfolio', '風險預算投資組合' and '風險預算組合' 0 rows in all listings, searched 2026-11-07) |
 
 No listing has an entry for no-trade band, operator splitting, risk contribution, marginal contribution, coordinate
 descent, inverse variance or volatility, quasi-diagonalization, equal risk contribution, recursive bisection,
@@ -3158,6 +3172,16 @@ pages were not read, so the sense of the entry is not verified. The editor's dec
 probably the coding-theory term (the three entries together suggest it, unverified), and 行距離 reads as 行距 (the
 spacing of lines), so the book keeps its composed 行向量距離 for the distance between columns of $(d_{ij})$. LM29's §2
 box takes 數學名詞's 局部極小值 for "local minimum" and, with LM28, 全域最小值 for "global minimum".
+
+Stage 3 closing check (Volume V's cross-module item CV-6), 樂詞網 searched 2026-11-07 with curl, anonymously (generic
+User-Agent, no cookie, no personal data, about one request a second), with the Volume III URL pattern and
+`&page=<n>`: 30 query strings (17 English, 13 Chinese), each in all listings, 統計學名詞, 數學名詞 and 管理學名詞 (120
+searches, 127 result pages). Every filtered search and every all-listings search was read to its end, except the
+all-listings searches for `book` (694 rows) and `account` (483 rows), which were read to their first 300 rows. The
+results are the rows for book, 1-norm and residual risk (LM27 and LM28 table) and for closed form, through case,
+holding month and risk-budget portfolio (LM29, LM30 and LM31 table). 統計學名詞 writes its entry "L₁-norm" L₁範數
+with a subscript (the page's HTML has `L<Sub>1</Sub>`), so the phrase `L1-norm` misses it, as the search recorded at
+C27-5 in `reviews/lm27.md` did; `norm` and `範數` find it.
 
 Volume VI, LM32–LM35 (new terms):
 

@@ -243,6 +243,11 @@ sh_iv = shares(K.iv0, S0)
 for k, p_ in enumerate(["23.8", "23.0", "9.8", "18.7", "24.8"]):
     pct(f"IV share {k + 1}", float(sh_iv[k]), 1, p_)
 assert f"{sum(float(f'{100 * x:.1f}') for x in sh_iv):.1f}" == "100.1"
+# E2's mechanism: with every w_i sigma_i equal, each IV share is the fund's row sum of correlations over their total
+_rows = K.C0.sum(axis=1)
+assert np.abs(sh_iv - _rows / K.C0.sum()).max() < 1e-12
+assert K.funds[int(np.argmin(_rows))] == "00679B" and K.funds[int(np.argmax(_rows))] == "00642U"
+has("E2 row sums", "so its row sum is the lowest and its share is 9.8%. 00642U's row sum, the highest, gives 24.8%")
 has("X2 caption sums", "they sum to 100.1 and 99.9")
 for k, p_ in enumerate(["0.1561", "0.1828", "0.3386", "0.2372", "0.0854"]):
     chk(f"R6 first weight {k + 1}", float(K.w6[k]), ".4f", p_)
@@ -278,7 +283,7 @@ sci("cvxpy against Newton over the 92 windows", gap6, "1.2\\times10^{-6}")
 has("cvxpy tolerances", "`tol_gap_abs`, `tol_gap_rel` and `tol_feas` at $10^{-10}$")
 has("check tolerance", "so it checks Newton to $10^{-5}$")
 chk("Jacobi steps", K.it_j, "d", "220")
-has("Jacobi point", "$(-1.307,-1.306,2.132,2.408,-0.927)$")
+has("Jacobi point", "at −1.307, −1.306, 2.132, 2.408 and −0.927")
 assert [f"{x:.3f}" for x in K.w_j] == ["-1.307", "-1.306", "2.132", "2.408", "-0.927"]
 chks("Jacobi 4 dp (S11)", K.w_j, ".4f", ["-1.3069", "-1.3060", "2.1321", "2.4082", "-0.9274"])
 has("S11 Jacobi", "settles after 220 steps at −1.3069, −1.3060, 2.1321, 2.4082 and −0.9274, every share 20%")
@@ -312,7 +317,7 @@ pct("budget portfolio vol", vol(K.w_rb, K.S4), 3, "5.326")
 pct("R2 vol (LM30's A30-24)", vol(K.b4, K.S4), 3, "6.709")
 assert np.abs(shares(K.w_rb, K.S4) - K.b4).max() < 1e-10
 # the widget's start (the widget computes its readouts itself; the text prints Jacobi's point)
-has("widget: Jacobi", "$(-32.5,54.5,-20.9)$ (rounded separately; 1.1 as printed)")
+has("widget: Jacobi", "−32.5, 54.5 and −20.9 (rounded separately; 1.1 as printed)")
 assert [f"{x:.1f}" for x in K.jw] == ["-32.5", "54.5", "-20.9"] and K.jit > 0
 assert f"{sum(float(f'{x:.1f}') for x in K.jw):.1f}" == "1.1"
 WJ = json.loads(WIDGET.read_text(encoding="utf-8"))["widget"]
@@ -378,7 +383,8 @@ chk("E6 first left share", vb / (va + vb), ".4f", "0.1516")
 for k, p_ in enumerate(["0.1131", "0.2189", "0.3443", "0.2852", "0.0384"]):
     chk(f"R7 first weight {k + 1}", float(K.w7[k]), ".4f", p_)
 assert f"{sum(float(f'{x:.4f}') for x in K.w7):.4f}" == "0.9999"
-has("E6 sum", "(rounded separately; 0.9999 as printed)")
+assert f"{float(f'{K.w7[0]:.4f}') + float(f'{K.w7[4]:.4f}'):.4f}" == "0.1515"   # the left half, 0050 and 00642U
+has("E6 sum", "(rounded separately; 0.9999 as printed, and 0.1515 for the left half)")
 pct("R7 vol", vol(K.w7, S0), 2, "5.13")
 # U28
 chk("U28 pairs", len(K.off) // 2, "d", "378")

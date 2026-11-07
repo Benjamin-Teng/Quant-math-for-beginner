@@ -28,6 +28,18 @@ checks are named X2–X6, and their items are cited by number ("X3 item 6").
 
 LM3's 34 findings of edition 0.1 were fixed before the first push; its record starts with the gates on that text.
 
+## Status (2026-11-07): Volume V published in edition 0.6
+
+| Module | Round 1 | Revisions 1–2 | Closing check | Stage |
+|:--|:--|:--|:--|:--|
+| [LM27](lm27.md) Portfolio Return and Risk | 34 items (4 major) | Rev. 1: 0 reopened; 2 new (minor). Rev. 2: 2 new (minor) | 7 items (minor), all confirmed | final check: ready after the last fixes, verified; **published** in 0.6 |
+| [LM28](lm28.md) Mean–Variance Optimization | 37 items (2 major) | Rev. 1: 1 reopened; 5 new (minor). Rev. 2: 2 new (minor) | 8 items (minor), 6 confirmed, 2 in part | final check: ready after the last fixes, verified; **published** in 0.6 |
+| [LM29](lm29.md) Convex Optimization in Practice | 33 items (6 major) | Rev. 1: 0 reopened; 4 new (minor). Rev. 2: none new | 8 items (minor), 7 confirmed, 1 in part | final check: ready after the last fixes, verified; **published** in 0.6 |
+| [LM30](lm30.md) Estimation Error and Robust Portfolios | 40 items (3 major) | Rev. 1: 1 reopened; 4 new (minor). Rev. 2: none new | 9 items (minor), 7 confirmed, 2 in part | final check: ready after the last fixes, verified; **published** in 0.6 |
+| [LM31](lm31.md) Risk Parity, HRP and Volatility Targeting | 53 items (5 major) | Rev. 1: 0 reopened; 2 new (minor). Rev. 2: 1 new (minor) | 14 items (minor), 12 confirmed, 2 in part | final check: ready after the last fixes, verified; **published** in 0.6 |
+
+Volume V's cross-module checks are recorded in each module's record (X items in round 1, the re-checks after revisions 1 and 2, CV items in the closing check). Volume VI (LM32–LM35) follows in edition 0.7.
+
 ## Status (2026-10-20): Volume IV published in edition 0.5
 
 | Module | Round 1 | Revisions 1–3 | Closing check | Stage |

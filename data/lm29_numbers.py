@@ -289,7 +289,9 @@ assert all(abs(C.nu4[i] / C.lam4 - C.short[i]) < 1e-12 for i in range(5))
 assert (C.hist[1], C.hist[2], C.hist[3], C.hist[4], C.hist[5]) == (2, 21, 56, 13, 0)
 has("R4 supports", "R4 holds one, two, three, four or five funds at 2, 21, 56, 13 and 0 signals")
 chk("e>0 excluded", C.pos_out, "d", "80")
-chk("fund-signals", 5 * len(C.SCH), "d", "460")
+chk("e>0 fund-signals", C.pos_n, "d", "338")
+chk("fund-signals", 5 * len(C.SCH), "d", "460", in_md=False)                 # 338 with e_i > 0, the rest with e_i <= 0
+has("e>0 exclusion rate", "A fund with $e_i>0$ was excluded in 80 of 338 cases.")
 chk("hedges", C.neg_in, "d", "6")
 hed = next(h for h in C.hedges if h[0] == "00679B" and h[1] == "2021-08-31")
 chk("hedge weight", 100 * hed[2], ".1f", "14.4")
@@ -546,7 +548,7 @@ for unit, sv, tol, p1, p2 in x7:
 below("X7 annual OSQP first", gap_first["annual OSQP default"], -15, "| Annual | OSQP | default | below $10^{-15}$ | "
       "below $10^{-15}$ |")
 below("X7 annual OSQP worst", gap_worst["R3 annual OSQP default"], -15, "| Annual | OSQP | default |")
-for unit in ("daily", "annual"):                          # OSQP's book rows equal its default rows (left out)
+for unit in ("daily", "annual"):                          # OSQP's book rows equal its default rows (omitted)
     assert gap_first[f"{unit} OSQP book"] == gap_first[f"{unit} OSQP default"]
     assert gap_worst[f"R3 {unit} OSQP book"] == gap_worst[f"R3 {unit} OSQP default"]
 sci("X7 note: R4's worst", gap_worst["R4 annual CLARABEL default"], 1, "9.5 -7")
@@ -791,9 +793,9 @@ assert '"2017-02-13 → 2019-02-27, on its 504 joint dates; in-sample' in JS    
 # ---------------------------------------------------------------- overview (front matter) and other prose
 has("overview: U28", "On U28, 19 sectors are excluded, the closest at 1.000019")
 has("overview: 00646", "00646 earns 16.437 points a year above cash, but its beta requires 21.623")
-has("overview: cap", "raising R3's 40% cap to 41% lowers its variance by 0.000102, against the linear prediction 0.000105")
-has("overview: sweep", "R3's path plans 31.5% of its turnover and leaves 31 of 91 signals untraded")
-has("theta 1 text", "At $\\theta=1$ the path plans 31.5% of R3's turnover, leaves 31 signals untraded and adds 4.9")
+has("overview: cap", "raising a 40% cap on R3 to 41% lowers its variance by 0.000102, against the linear prediction 0.000105")
+has("overview: sweep", "the penalized path plans 31.5% of R3's turnover and leaves 31 of 91 signals untraded")
+has("theta 1 text", "At $\\theta=1$ the penalized path plans 31.5% of R3's turnover, leaves 31 signals untraded and adds 4.9")
 has("cost model", "0.1425% of $\\lVert\\boldsymbol\\Delta\\rVert_1$ plus a 0.1% tax on sales, none for 00679B")
 has("problem conventions", "Costs are 0.1425% a side plus a 0.1% tax on sales (none for 00679B)")
 has("tolerances", "CLARABEL's `tol_gap_abs`, `tol_gap_rel` and `tol_feas` to $10^{-12}$ for QPs and LPs and $10^{-10}$ "

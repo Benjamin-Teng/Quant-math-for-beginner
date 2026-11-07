@@ -50,8 +50,8 @@
     var chart = document.createElement("div"), out = document.createElement("div"), note = document.createElement("p");
     out.className = "readout"; out.setAttribute("aria-live", "polite"); note.className = "w-note";
     note.textContent = "Price indices, no dividends. The weights come from (11.8) with the shrunk eigenvalues of " +
-      "(30.1); no optimizer runs. Predicted volatility uses the shrunk matrix of the chosen window, realized " +
-      "volatility the second half (" + W.secondHalf + "), so the c that minimizes it is hindsight. At c = 0 the " +
+      "(30.1); no optimizer runs. Predicted volatility (in-sample) uses the shrunk matrix of the chosen window, " +
+      "realized volatility (out-of-sample) the second half (" + W.secondHalf + "), so the c that minimizes it is hindsight. At c = 0 the " +
       "portfolio is 1/N.";
     host.appendChild(chart); host.appendChild(out); host.appendChild(note);
     var slider = host.querySelector("#sp-c"), label = slider.parentNode.querySelector(".v");
@@ -64,6 +64,7 @@
       }
       var r = solve(win, cur), big = 0, gross = 0, i;
       for (i = 0; i < r.w.length; i++) { gross += Math.abs(r.w[i]); if (Math.abs(r.w[i]) > Math.abs(r.w[big])) big = i; }
+      var tie = Math.max.apply(null, r.w) - Math.min.apply(null, r.w) < 1e-6;   // c = 0: 1/N (the JSON's eigenvectors carry 9 decimals)
       var ks = win.lam.map(function (_, k) { return k + 1; });
       B.chart(chart, {
         alt: "Annual eigenvalues of U28's sample covariance matrix on " + win.label + ", largest first, and of the " +
@@ -85,7 +86,7 @@
         "<div><span>Predicted volatility</span><b>" + fmt(Math.sqrt(r.pvar), "pct2") + "</b></div>" +
         "<div><span>Realized, second half</span><b>" + fmt(Math.sqrt(quad(r.w, W.S2)), "pct2") + "</b></div>" +
         "<div><span>Gross exposure (sum of |w|)</span><b>" + fmt(gross, "n2") + "</b></div>" +
-        "<div><span>Largest weight</span><b>" + fmt(r.w[big], "pct1") + " " + W.names[big] + "</b></div>";
+        "<div><span>Largest weight</span><b>" + fmt(r.w[big], "pct1") + " " + (tie ? "all equal" : W.names[big]) + "</b></div>";
     }
     host.__redraw = function () { draw(ctl.values(), "redraw"); };
     ctl.fire();

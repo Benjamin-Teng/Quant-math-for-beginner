@@ -228,7 +228,9 @@ xL, SL, muL, eL, dL = window(len(sched) - 1)
 print("first window", d0[0], "->", d0[-1], "| last window", dL[0], "->", dL[-1])
 eig = [np.linalg.eigvalsh(window(k)[1]) for k in range(len(sched))]
 kap = [ev[-1] / ev[0] for ev in eig]
-show("smallest eigenvalue over the 92 windows (annual)", min(ev[0] for ev in eig), ".4f", "0.0050")
+lmin = min(ev[0] for ev in eig)
+print(f"smallest eigenvalue over the 92 windows (annual): {lmin:.4f}   (positive, so every window's Sigma is positive definite)")
+assert lmin > 0
 show("condition number, lowest", min(kap), ".2f", "9.72")
 show("condition number, highest", max(kap), ".2f", "20.46")
 """)
@@ -278,7 +280,7 @@ The lab re-implements LM29's long-only forms only: R3 is (29.5) and R4 the homog
 code(r"""
 gap_file, gap_cvx = 0.0, 0.0
 r3_min, r3_zero, shorts, held = (1.0, "", ""), 0, 0, []
-pos_out, hedges = 0, []
+pos_out, pos_n, hedges = 0, 0, []
 for k in range(len(sched)):
     x, S, mu, e, _ = window(k)
     w3, w4 = minvar(S), maxsharpe(S, e)
@@ -293,6 +295,7 @@ for k in range(len(sched)):
     shorts += int((z / z.sum()).min() < -ZERO)
     held.append(int((w4 > ZERO).sum()))
     pos_out += int(((e > 0) & (w4 < ZERO)).sum())
+    pos_n += int((e > 0).sum())
     hedges += [(FUNDS[i], sched[k][0], w4[i], e[i]) for i in range(N) if e[i] <= 0 and w4[i] > ZERO]
 print(f"largest gap to the through case's targets {gap_file:.1e}; OSQP (book) against nnls {gap_cvx:.1e}")
 assert gap_file < 1e-10 and gap_cvx < 1e-8
@@ -301,6 +304,7 @@ show("R3's smallest weight (%)", 100 * r3_min[0], ".2f", "0.13")
 print("  ", r3_min[1:])
 show("signals where LM28's formula shorts", shorts, "d", "92")
 print("R4 holds 1/2/3/4/5 funds at", [held.count(n) for n in range(1, 6)], "signals   [book: 2, 21, 56, 13, 0]")
+show("fund-signals with e_i > 0", pos_n, "d", "338")
 show("fund-signals with e_i > 0 excluded", pos_out, "d", "80")
 show("hedges (e_i <= 0, held)", len(hedges), "d", "6")
 for h in hedges:
@@ -772,7 +776,7 @@ dt = time.perf_counter() - t0
 print(f"{len(survivors)} survivor(s): {[[FUNDS[i] for i in s] for s, _ in survivors]}; "
       f"gap to nnls {np.abs(survivors[0][1] - w31).max():.1e}")
 print(f"31 supports in {dt * 1e3:.1f} ms; 2^28 supports of 28 assets would take about "
-      f"{dt / 31 * 2**28 / 3600:.0f} hours at this rate (larger systems are slower)")
+      f"{dt / 31 * 2**28 / 3600:.1f} hours at this rate (larger systems are slower)")
 # your code: repeat at every signal and count how often the surviving support changes from one month to the next.
 # The surviving active set is itself an estimate: in LM30's experiment 4 each fund is excluded in 18% to 72% of 1,000 bootstrap resamples of the first window.
 """)

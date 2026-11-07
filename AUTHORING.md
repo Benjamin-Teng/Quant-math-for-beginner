@@ -266,7 +266,7 @@ notation note):
 | $\widehat{\mathrm{SR}}$, $\mathrm{SR}_0$; PSR, DSR, MinTRL, PBO | an estimated Sharpe ratio; a benchmark ratio (no star); upright abbreviations (LM33, LM34) |
 | $\mathbf R^{\mathrm{sc}}$ | a stress scenario's return vector; P&L $W_0\mathbf f^{\top}\mathbf R^{\mathrm{sc}}$ (LM35) |
 
-Not used in Volumes V–VI: Merton's scalars $a,b,c,d$ for the frontier, $\gamma$ or $\lambda$ for risk aversion,
+Not used in Volumes V–VI: scalars $a,b,c,d$ for the frontier, $\gamma$ or $\lambda$ for risk aversion,
 $P$, $Q$, $\Omega$, $\tau$ for Black–Litterman, $\kappa$ for a VaR threshold.
 
 - Subscripted standard symbols are distinct symbols and may sit beside the table: $D_{\text{mod}}$, $D_{\text{Mac}}$,

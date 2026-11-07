@@ -225,6 +225,7 @@ shorts, wrong, gross_u, held = 0, [], [], []
 tan_n, tan_short = 0, 0                               # the windows with 1'Sigma^-1 e > 0, where the formula is a tangency
 r4z = np.zeros(N, dtype=int)
 pos_out, neg_in = 0, 0
+pos_n = 0                                             # fund-signals with e_i > 0 (the denominator of pos_out)
 hedges: list[tuple[str, str, float, float]] = []      # formatted after A29-07, so that f()'s flags stay on A29-08
 mv_gap = 0.0
 r3min = (1.0, "", "")
@@ -247,6 +248,7 @@ for k in range(len(SCH)):
     r4z += (w4 < ZERO).astype(int)
     pos_out += int(((e > 0) & (w4 < ZERO)).sum())
     neg_in += int(((e <= 0) & (w4 > ZERO)).sum())
+    pos_n += int((e > 0).sum())
     hedges += [(FUNDS[i], sg, float(w4[i]), float(e[i])) for i in range(N) if e[i] <= 0 and w4[i] > ZERO]
     mv_gap = max(mv_gap, float(np.abs(minvar(S, "x") - np.linalg.solve(S, ONE) / np.linalg.solve(S, ONE).sum()).max()))
     w3 = minvar(S, f"R3 {sg}")
@@ -262,7 +264,7 @@ put(f"92-signal backing: LM28's formula Sigma^-1 e / 1'Sigma^-1 e has a negative
     f"{hist[1]}/{hist[2]}/{hist[3]}/{hist[4]}/{hist[5]} signals; echo of A28-23 and A28-24 (LM28's): 1'Sigma^-1 e <= 0 "
     f"at {len(wrong)} ({wrong[0]} .. {wrong[-1]}), largest gross {f(max(gross_u), 1)}")
 put("R4 zero weights across the 92 signals: " + ", ".join(f"{s} {int(c)}" for s, c in zip(FUNDS, r4z, strict=True))
-    + f"; fund-signals with e_i > 0 but w_i = 0: {pos_out}; with e_i <= 0 but w_i > 0: {neg_in} (of {N * len(SCH)}): "
+    + f"; fund-signals with e_i > 0: {pos_n}, of them with w_i = 0: {pos_out}; with e_i <= 0 but w_i > 0: {neg_in} (of {N * len(SCH)}): "
     + "; ".join(f"{s} {sg} ({f(100 * wi, 1)}%, e {f(100 * ei, 2)}%)" for s, sg, wi, ei in hedges))
 put(f"R3's bounds never bind on E5 (LM29 owns this, decision A5; LM28's A28-12 and LM30's A30-16 echo it): R3 zero "
     f"weights across the 92 signals: {r3zero}; smallest R3 weight {f(100 * r3min[0], 2)}% ({r3min[1]}, {r3min[2]}); "

@@ -294,7 +294,7 @@ table.toc .lm-d {{ color: var(--ink-2); font-size: 0.86rem; margin-top: 0.1rem; 
 {"".join(vols)}
 
 <h2 class="sh" id="labs">Labs, data and environment</h2>
-<p>Each module ships with a Jupyter notebook that rebuilds its exhibits. Labs are Polars-first and use NumPy, SciPy and Matplotlib; later volumes add statsmodels, cvxpy and arch. Taiwan data come from FinMind and US data from FinMind's US price tables. FinMind's licence does not allow its raw data to be redistributed, so the repository lists every file the book uses with a checksum: download them once with your own FinMind token, and the labs then run offline. The Python environment is managed by uv and pinned in <code>uv.lock</code>.</p>
+<p>Each module ships with a Jupyter notebook that rebuilds its exhibits. Labs are Polars-first and use NumPy, SciPy and Matplotlib; later volumes add statsmodels, cvxpy, scikit-learn and arch. Taiwan data come from FinMind and US data from FinMind's US price tables. FinMind's licence does not allow its raw data to be redistributed, so the repository lists every file the book uses with a checksum: download them once with your own FinMind token, and the labs then run offline. The Python environment is managed by uv and pinned in <code>uv.lock</code>.</p>
 <div class="code"><div class="code-h"><span>Shell</span><button class="copy" type="button">Copy</button></div><pre class="hl"><code>git clone https://github.com/Benjamin-Teng/Quant-math-for-beginner.git
 cd Quant-math-for-beginner
 uv sync                                  # Python 3.13 environment, versions pinned by uv.lock

@@ -64,8 +64,8 @@
     var ctl = B.controls(host, defs, draw);
     var chart = document.createElement("div"), out = document.createElement("div"), note = document.createElement("p");
     out.className = "readout"; out.setAttribute("aria-live", "polite"); note.className = "w-note";
-    note.innerHTML = "Starting point: the first window's 0050, 00679B and 00642U (13 February 2017 to 27 February " +
-      "2019), with their unrounded volatilities and correlations and b₁ = 1/3, so the risk-budget portfolio is ERC. Once a " +
+    note.innerHTML = "Starting point (in-sample): the first window's 0050, 00679B and 00642U (13 February 2017 to " +
+      "27 February 2019), with their unrounded volatilities and correlations and b₁ = 1/3, so the risk-budget portfolio is ERC. Once a " +
       "slider moves, every input is a slider value (constructed). The other two funds share 1 − b₁ equally. Weights " +
       "by CCD (31.4) to 1e-12; risk shares RC<sub>i</sub>/σ<sub>p</sub>; volatilities a year.";
     host.appendChild(chart); host.appendChild(out); host.appendChild(note);

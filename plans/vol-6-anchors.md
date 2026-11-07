@@ -432,8 +432,8 @@ A35-40 (both residual bounds), A35-41 (R3 −1.40%, R5 −1.47% flagged, on 2024
 cross-module re-check, N1, after LM27's K1): weekly returns compound the wealth frame, each proxy's TWD values taken on
 its calendar, and the weeks in which a fund lacks a close at the end of the week or of the week before, 2025-W24 and
 W25 across 0050's halt, are dropped, as LM27 now does; the estimation frame's weeks missed 11–18 June for every fund
-and proxy. The script's output equals the previous run line by line except two rows, whose **definitions and value
-lines** change: A35-25 (498 weeks; the five weekly correlations 0.944339, 0.951812, 0.926433, 0.844800 and 0.894442,
+and proxy. The script's output equals the previous run line by line except two rows, whose **definitions, value
+lines and printed forms** change: A35-25 (498 weeks; the five weekly correlations 0.944339, 0.951812, 0.926433, 0.844800 and 0.894442,
 unchanged at 3 dp, two of them now flagged there) and A35-34 (the full-sample echo of A27-11, 498 weeks and
 −0.022089; the 2022 window's 38 weeks and +0.019 unchanged). The Common definitions' **Weeks** follows.
 

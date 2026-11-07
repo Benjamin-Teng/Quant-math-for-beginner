@@ -185,7 +185,8 @@ fact a decision rests on is stated here with its evidence.
   leverage), which use $r_f=1.5\%$ a year, LM7's illustrative rate, accrued as $r_f/A$ a day (simple accrual). The
   text says it is illustrative and how much 0% or 2% would change the result.
 - **Cost model** (official sources read 2026-10-24; LM34 owns the sources and prints them, every other module cites
-  LM34 or this decision before LM34 by a pointer). Each fund follows the rules of its own market: 00679B (E5) and
+  LM34 or this decision before LM34 by a pointer; since Volume V publishes before LM34, in edition 0.6, LM27 §3 cites
+  the sources once, Stage 3's V-3, and the other modules keep their pointers). Each fund follows the rules of its own market: 00679B (E5) and
   00720B (checkpoint) trade on TPEx, the other funds on TWSE. Commission 0.1425% of the value traded on each side:
   TWSE's Operating Rules Art. 94 and, for the TPEx funds, TPEx's 證券商營業處所買賣有價證券業務規則 Art. 64 (¶1–¶3
   unchanged since 2008-02-12), applied to ETFs by TPEx's ETF rules Art. 15 ¶1, let brokers set their rates and
@@ -240,7 +241,7 @@ fact a decision rests on is stated here with its evidence.
   | PSR, DSR, MinTRL, PBO | upright abbreviations (LM33, LM34) | new |
   | $\mathbf R^{\mathrm{sc}}$ | a stress scenario's return vector; P&L $W_0\mathbf f^{\top}\mathbf R^{\mathrm{sc}}$ (LM8's (8.2) with exposures; LM35 writes no holdings $\mathbf h$) | new |
 
-  Not used in Volumes V–VI: Merton's scalars $a,b,c,d$ for the frontier (they clash with the bets, the Kelly fraction
+  Not used in Volumes V–VI: scalars $a,b,c,d$ for the frontier (they clash with the bets, the Kelly fraction
   and the coefficient count; write the frontier with $\mathbf 1^{\top}\Sigma^{-1}\mathbf 1$ and its kin), $\gamma$ or
   $\lambda$ for risk aversion, $\alpha$ for a VaR level or a shrinkage intensity, $P$/$Q$/$\Omega$/$\tau$ for
   Black–Litterman, $\kappa$ for a VaR threshold (LM5's local $\kappa$; $\kappa$ is the condition number), a scalar
@@ -574,8 +575,13 @@ limits).
 - **G. Stage 4 leads** (merged, X list G3): lm01 +27, +32, +35; lm02 +35; lm03 +27; lm04 +29, +33, +34; lm05 +32; lm07
   +30, +31; lm08 +28, +29; lm09 +29, +30; lm10 +32; lm11 +29, +31, +34; lm12 +28, +29; lm14 +30; lm15 +30; lm18 +33; lm19 +27;
   lm20 +27, +28, +34; lm21 +32; lm22 +27, +32; lm23 +28, +35; lm26 +35. Stage 4 rewordings: lm07.md:511–512, lm07.md:786, lm19.md:359 (LM33's wording), lm21.md:373
-  (LM34's wording), the syllabus line of LM31 (LM31's wording), LM3's TQQQ example, lm08.md:290 (required, Stage 3 cross-check X21); optional: lm04.md's
-  MDD sign (46–50, 510).
+  (LM34's wording), the syllabus line of LM31 (LM31's wording), the syllabus line of LM27, build/make_lab04.py's
+  walk-forward extension, LM3's TQQQ example, lm08.md:290 (required, Stage 3 cross-check X21); optional: lm04.md's
+  MDD sign (46–50, 510). By the publication each serves ("Stage 4 changes to earlier modules" below tags each item):
+  Volume V: the leads +27…+31, lm07.md:511–512, lm07.md:786, lm08.md:290 and the syllabus lines of LM27 and LM31.
+  Volume VI: the leads +32…+35, lm19.md:359, lm21.md:373, build/make_lab04.py and lm04.md's MDD sign. Either
+  publication (published defect, capability D): LM3's TQQQ example, which the editor deferred to edition 0.7
+  (Volume VI's publication) on 2026-11-07.
 
 ### Per module (beyond the cross-module decisions)
 
@@ -860,33 +866,53 @@ writer's departures from its brief are listed in the module's review record (`re
 
 ## Stage 4 changes to earlier modules
 
-Collected here as the briefs add them; applied at publication with the edition note.
+Collected here as the briefs add them; applied at publication with the edition note. Each item is tagged with the
+publication it serves (decision G): *Volume V* (published before Volume VI is written, as the owner chose; Stage 2
+above), *Volume VI* (an item that rewords a pointer to LM32–LM35 or follows their protocol), or *either* (a published
+defect).
 
-- Leads: list G of "Editor's decisions on the briefs" (merged from the briefs' prerequisites); each brief's "Stage 4
-  for earlier modules" names the files and lines.
-- lm07.md:511–512: 切點組合 → 切點投資組合 (the Glossary's form, lm07.md:771).
-- lm07.md:786: Chopra and Ziemba (1993) gains its issue number, 19(2): 6–11.
-- lm19.md:359: Lo's "as much as 65%" is stated for a hedge fund in his illustrative example (Lo 2002, p. 36); the
-  sentence says so (LM33's Sources).
-- lm21.md:373: White (2000) and Romano–Wolf (2005) correct a search on the same data; testing rules fixed in advance on
-  later data is the other half of LM34. Reword so the sentence says both.
-- `src/syllabus.yaml`: LM31's line ("Euler risk contributions and risk-based allocation") becomes risk budgeting with
-  LM27's contributions.
-- `src/syllabus.yaml`: LM27's line becomes "A book's return, drift and trading costs; Euler risk contributions and factor risk."
-- LM3's TQQQ example (lm03.md:45, 464, 467, 469, 471; capability D). A re-fetch of QQQ's back-adjusted closes
-  re-rounds them: the exact rebalancing effect $-0.31325$ (unrounded −0.3132492, 0.42 of a unit from the five-decimal
+- *Volume V and VI.* Leads: list G of "Editor's decisions on the briefs" (merged from the briefs' prerequisites); each
+  brief's "Stage 4 for earlier modules" names the files and lines. Volume V adds +27…+31, Volume VI +32…+35.
+- *Volume V.* lm08.md:290 (required, Stage 3 cross-check X21; LM31's brief): "[[LM31]] groups assets by this
+  distance." → "[[LM31]] builds a tree of assets from half this distance."
+- Optional, with Volume VI (LM32): lm04.md's MDD sign (46–50, 510).
+- *Volume V.* lm07.md:511–512: 切點組合 → 切點投資組合 (the Glossary's form, lm07.md:771).
+- *Volume V.* lm07.md:786: Chopra and Ziemba (1993) gains its issue number, 19(2): 6–11.
+- *Volume VI.* lm19.md:359: Lo's "as much as 65%" is stated for a hedge fund in his illustrative example (Lo 2002,
+  p. 36); the sentence says so (LM33's Sources).
+- *Volume VI.* lm21.md:373: White (2000) and Romano–Wolf (2005) correct a search on the same data; testing rules fixed
+  in advance on later data is the other half of LM34. Reword so the sentence says both.
+- *Volume V.* `src/syllabus.yaml`: LM31's line ("Euler risk contributions and risk-based allocation") becomes risk
+  budgeting with LM27's contributions.
+- *Volume V.* `src/syllabus.yaml`: LM27's line becomes "A book's return, drift and trading costs; Euler risk
+  contributions and factor risk."
+- *Either publication* (a published defect; the editor deferred it to edition 0.7, Volume VI's publication, on
+  2026-11-07). LM3's TQQQ example (lm03.md:34, 45, 464, 467, 469, 471, 475, 477; capability D). A re-fetch of QQQ's
+  back-adjusted closes re-rounds them: the exact rebalancing effect $-0.31325$ (unrounded −0.3132492, 0.42 of a unit from the five-decimal
   boundary) became −0.31324, and the four-decimal −0.3132 sits 8e-7 from its own boundary. After the next distribution
   every adjusted level moves (the review's simulation of 300 rescaled re-fetches: ln(8.27/39.55) = −1.56493 changed
   in 299, 3 ln G = −1.18252 and the residual −0.0692 in 277, TQQQ's −79.09% in 205, QQQ's dividends 0.0074 in 168,
   the residual against unadjusted closes −0.047 in 129, "6.7% of value" in 118, T3 −0.3107 in 67, QQQ's −32.58% in
-  31; RV and √RV in none), and `data/lm03_numbers.py:313` asserts the levels (39.55, 8.27) exactly, so `build.sh
-  --data` would fail on a fresh checkout. Fix in LM3: quote levels with their retrieval date (2026-10-10) or from
+  31; RV and √RV in none), and `data/lm03_numbers.py:313–314` checks ln(8.27/39.55) from the literal levels and
+  asserts the levels (39.55, 8.27) exactly, so `build.sh --data` would fail on a fresh checkout. Fix in LM3: quote levels with their retrieval date (2026-10-10) or from
   unadjusted closes, print each derived value only to digits a cent per value cannot move, replace the exact-level
   assert by a ratio check, and align Lab 3 Part 6.
-- `build/make_lab04.py`'s walk-forward extension sets each month's leverage from data through the month-end close and
-  holds it from that close, E5's slip; shift it one session (trade at the next close), as LM34's lab does, and say
-  so in the scaffold (it prints no number in the module).
-- Each brief's "Stage 4 for earlier modules".
+- *Volume VI.* `build/make_lab04.py`'s walk-forward extension sets each month's leverage from data through the
+  month-end close and holds it from that close, E5's slip; shift it one session (trade at the next close), as LM34's
+  lab does, and say so in the scaffold (it prints no number in the module).
+- *Volume V.* src/pages/getting-started.md:113 ('When you combine two series, keep only the dates they share.'): a
+  statistic of two series uses their shared dates; a portfolio's wealth uses every session, each asset earning its own
+  return ([[LM27]]'s wealth frame). Applied with Volume V.
+- *Volume V.* src/pages/getting-started.md:88–91 (CV-13, V-1): three groups of files need a paid plan, not one:
+  `data/raw/sectors_close/` (561 files that repair copied sector closes), `data/raw/vol4_settlement/` (Volume IV's
+  cross-check of final settlements, which `vol4_series.py` skips when absent) and `data/raw/vol6/`'s two ETF snapshots
+  (`etf_snapshot__…`, used for one count in Volume VI). The free-plan command becomes `uv run python
+  data/fetch_finmind.py --exclude sectors_close/ --exclude vol4_settlement/ --exclude vol6/etf_snapshot`, as
+  `data/fetch_finmind.py`'s hint and LM31's lab README give it. Applied with Volume V.
+- *Volume V.* build/build_index.py:297 (V-4, the front page): 'later volumes add statsmodels, cvxpy and arch' →
+  'later volumes add statsmodels, cvxpy, scikit-learn and arch' (LM30's lab runs scikit-learn's Ledoit–Wolf). Applied
+  with Volume V.
+- *The brief's own volume.* Each brief's "Stage 4 for earlier modules".
 
 ## Spines
 
@@ -953,7 +979,7 @@ listing 28: LM7, 9, 10, 11, 16.
 
 **Owns.** The N-asset Lagrangian with LM7's signs; the global minimum-variance portfolio
 $\mathbf w^{\mathrm{mv}}=\Sigma^{-1}\mathbf 1/(\mathbf 1^{\top}\Sigma^{-1}\mathbf 1)$ and $\sigma^2_{\min}$; the
-frontier as a parabola in $(\sigma_p^2,\mu_p)$, a hyperbola in $(\sigma_p,\mu_p)$, written without Merton's scalars;
+frontier as a parabola in $(\sigma_p^2,\mu_p)$, a hyperbola in $(\sigma_p,\mu_p)$, written without scalars $a,b,c,d$;
 two-fund separation; the tangency portfolio $\mathbf w^{\mathrm{tan}}\propto\Sigma^{-1}\mathbf e$ and the capital
 market line with $r_f=1.5\%$; risk aversion $\delta$ in the exposure form with a riskless asset, and LM7's
 two-asset Kelly result cited; conditions ($\Sigma$ positive definite, $\boldsymbol\mu$ not proportional to
@@ -1094,7 +1120,8 @@ with its dendrogram; R8's exposure path and realized volatility against its wind
 three funds (sliders for volatilities and one correlation; weights and risk shares by fixed-point iteration, tested
 against Python).
 
-**Hygiene.** In-sample trees and weights *Descriptive*; R6–R8 in the through case *Out-of-sample*.
+**Hygiene.** Trees and weights fitted to one window *In-sample*; U28's correlation heatmap *Descriptive*; R6–R8 in
+the through case *Out-of-sample*.
 
 **Brief settles.** The ERC solution method shown by hand; the source for unequal budgets; how R8's realized
 volatility is judged (against its window volatility, with the number of months).
@@ -2141,7 +2168,7 @@ problem 12; 7 — §7, E9, KC §7, problem 11; 8 — §5's and §6's pitfalls, t
   $\mathbf w^{\top}\Sigma\mathbf w=\sigma^2_{\min}+(\mathbf w-\mathbf w^{\mathrm{mv}})^{\top}\Sigma(\mathbf w-
   \mathbf w^{\mathrm{mv}})$ for $\mathbf 1^{\top}\mathbf w=1$, LM7's (7.9) for $N$ assets; the bounds
   $\lambda_N/N\le\sigma^2_{\min}\le\lambda_1/N$ from (11.4) (KC §2).
-- The frontier (28.4)–(28.5) without Merton's scalars: $\mathbf w(\mu_p)=\mathbf w^{\mathrm{mv}}+\frac{\mu_p-
+- The frontier (28.4)–(28.5) without scalars $a,b,c,d$: $\mathbf w(\mu_p)=\mathbf w^{\mathrm{mv}}+\frac{\mu_p-
   \mu_{\mathrm{mv}}}{\mathrm{SR}_\infty^2}\Sigma^{-1}(\boldsymbol\mu-\mu_{\mathrm{mv}}\mathbf 1)$ and
   $\sigma_p^2=\sigma^2_{\min}+(\mu_p-\mu_{\mathrm{mv}})^2/\mathrm{SR}_\infty^2$, with
   $\mathrm{SR}_\infty^2:=(\boldsymbol\mu-\mu_{\mathrm{mv}}\mathbf 1)^{\top}\Sigma^{-1}(\boldsymbol\mu-\mu_{\mathrm{mv}}
@@ -2302,13 +2329,13 @@ note (accepted as declared, decision B5):
 |:--|:--|:--|
 | $\mu_{\mathrm{mv}}$ | the minimum-variance portfolio's mean, $\boldsymbol\mu^{\top}\mathbf w^{\mathrm{mv}}$ | subscripted $\mu$, as $\mu_p$ |
 | $\mu_{\tan}$, $\sigma_{\tan}$ | the tangency portfolio's mean and volatility | subscripted, as $\mu_p$, $\sigma_p$ |
-| $\mathrm{SR}_\infty$ | slope of the frontier's asymptotes, $\mathrm{SR}_\infty^2=(\boldsymbol\mu-\mu_{\mathrm{mv}}\mathbf 1)^{\top}\Sigma^{-1}(\boldsymbol\mu-\mu_{\mathrm{mv}}\mathbf 1)$: the Sharpe ratio, measured from $\mu_{\mathrm{mv}}$, that a frontier portfolio approaches as $\sigma_p$ grows | new; no star (not an optimum), not LM33's $\mathrm{SR}_0$ or LM7's asset ratio $\mathrm{SR}_i$ (integer subscript); replaces Merton's $D/C$ (accepted, decision B5) |
+| $\mathrm{SR}_\infty$ | slope of the frontier's asymptotes, $\mathrm{SR}_\infty^2=(\boldsymbol\mu-\mu_{\mathrm{mv}}\mathbf 1)^{\top}\Sigma^{-1}(\boldsymbol\mu-\mu_{\mathrm{mv}}\mathbf 1)$: the Sharpe ratio, measured from $\mu_{\mathrm{mv}}$, that a frontier portfolio approaches as $\sigma_p$ grows | new; no star (not an optimum), not LM33's $\mathrm{SR}_0$ or LM7's asset ratio $\mathrm{SR}_i$ (integer subscript); replaces the ratio $D/C$ of the usual closed-form scalars (accepted, decision B5) |
 | $K$ ($k\times N$), $\mathbf b$, $k$ | equality constraints $K\mathbf w=\mathbf b$; their number | the Volume V row (LM28, LM29, LM35); $k$ an integer count, LM28 has no $k$ standard deviations or lag |
 | $\boldsymbol\lambda$ | the vector of the $k$ equality multipliers in (28.1); in §3 its entries are $\lambda$ (budget) and $\lambda_\mu$ (target mean) | bold $\lambda$ is new; its entries are never written with an integer subscript, so $\lambda_1$, $\lambda_N$ stay eigenvalues (KC §2 only) |
 | $\boldsymbol\Delta$; $\Delta\mu_i$, $\Delta\mathbf e$ | a weight change with $\mathbf 1^{\top}\boldsymbol\Delta=0$ (LM10's (10.9)); a change of a mean | §6's common $\Delta$ |
 | $\partial\mathbf w^{\mathrm{tan}}/\partial\mathbf e^{\top}$ | the $N\times N$ Jacobian, entry $(i,j)=\partial w^{\mathrm{tan}}_i/\partial e_j$ | introduced in one sentence (Uses before taught) |
 
-Not used: Merton's $a,b,c,d$ (and his $A$, $B$, $C$, $D$, which clash with $A$, the bets and $C$); $\gamma$ or $\lambda$
+Not used: scalars $a,b,c,d$ for the frontier (nor the usual closed-form scalars $A$, $B$, $C$, $D$, which clash with $A$, the bets and $C$); $\gamma$ or $\lambda$
 for risk aversion; $\theta$ (LM28 has no angle; $\mathrm{SR}_\infty$ replaces a slope letter); a Cholesky $L$ ($L$ is
 total exposure); $\mathbf e_i$ (written "column $i$ of $\Sigma^{-1}$"); E5's $\kappa$ (see Pitfalls); $m$ (a number of
 days; LM28 sums no days); $\mathbf h$ (no holdings). The examples set $\boldsymbol\mu:=A\bar{\mathbf R}$ and
@@ -4671,8 +4698,9 @@ the risk-triggered variant of R8, the GARCH-scaled variant.
   `data/lm31_charts.py` (X2–X4, X7, X8, the widget block and its Node test); both after `data/vol5_series.py`,
   `data/vol5_rules.py`'s outputs and `data/vol2_series.py`.
 
-**Hygiene declaration.** *Descriptive:* the first window's weights, risk shares and trees (E1–E6, X2); U28's
-full-sample tree, heatmap and in-sample volatilities (X3, X4, X6's in-sample column). *Out-of-sample* (fixed in advance
+**Hygiene declaration.** *Descriptive:* U28's full-sample correlation heatmap (X3). *In-sample:* the first window's
+weights, risk shares and trees (E1–E6, X2); U28's full-sample tree and in-sample volatilities (X4, X6's in-sample
+column). *Out-of-sample* (fixed in advance
 on 2026-10-24): R6, R7 and R8 in the through case (weights at each signal, exposure path, realized volatility, ex-post
 risk shares, holding-month ratios), three of the through case's eight rules; the two variance forecasts made at each signal
 and scored by QLIKE; U28's halves, one fixed split in LM7's pattern, LM31's three portfolios (inverse volatility, ERC,
@@ -4683,7 +4711,7 @@ decision D) and GARCH-scaled variant. *Constructed:* the widget's and the proble
 note: "R6, R7 and R8 are three of the eight rules fixed on 24 October 2026, before any result was computed. Their
 weights use only the 504 joint dates up to and including each month-end, and they trade at the next session's close.
 So every through-case result is out of sample. Whether one rule beats another is [[LM33]]'s test, across eight
-rules." A second paragraph follows: "Weights, risk shares and trees on one window are descriptive plug-in estimates whose sampling error this module does not measure. On U28 one split was fixed in advance, and three
+rules." A second paragraph follows: "Weights, risk shares and trees fitted to one window are in-sample plug-in estimates whose sampling error this module does not measure. On U28 one split was fixed in advance, and three
 risk-based portfolios are compared with [[LM30]]'s 1/N and its two minimum-variance portfolios. Other variants are illustrations, not
 candidates."
 
@@ -4731,7 +4759,7 @@ Resolved: (a) the forecast: §7, E9, E10: over 91 holding months R8's realized-t
 R6's 0.83, but the same spread (SD of its logarithm 0.421 for both) [A31-34]; as a forecast of R6's next holding month
 the EWMA's mean QLIKE is 0.791 against the window's 0.691, and without the one holding month 2 April → 2 May 2025 the
 order reverses [A31-35], because a one-day forecast stands for a whole holding month (lm26.md:142) and a month-end rule
-cannot meet a gap. (b) equal risk: §2, §5, E7: the shares are equal on the window by construction; on the covariance
+cannot react to a gap. (b) equal risk: §2, §5, E7: the shares are equal on the window by construction; on the covariance
 of the 1,845 joint dates that followed (5 March 2019 → 8 October 2026), the mean of R6's 92 target weights carried
 20.5, 19.2, 19.2, 23.1 and 18.0% of the risk, while each holding month's own target weights, on that holding month's
 covariance, gave shares that ranged widely, and some share was negative in 29 of 91 holding months [A31-26]. The
@@ -4747,7 +4775,7 @@ qualifying date (the "first session after the Qingming holiday") is PITFALLS §7
 | 4 | Hierarchical Risk Parity {4} | X3, X4 (U28); $d_{ij}$ (31.5) as half of (8.10)'s per-date distance, a metric by (8.8); the column distance; single linkage; scaling leaves the tree (LM8's promise); quasi-diagonal order (each merge lists its lower-numbered member first: the assets are numbered 1 to $N$, E5's in the order 0050, 00646, 00679B, 00635U, 00642U, and the cluster of merge $k$ is number $N+k$, as SciPy's `linkage` and `leaves_list` do); bisection (31.6), the first half of $n$ items taking $\lfloor n/2\rfloor$; no inverse needed; U28's full-sample weights and in-sample volatilities (X4's note, A31-22); E5 (three funds by hand), E6 (R7's first weights; the cut separates 0050 from 00646); pitfall: two codes, two trees (the author's code reads the square matrix as observations and gives the column-distance tree at all 92 windows and on U28, A31-19; linking on $d$ changes 17 of 92 orders, A31-20); 導讀; KC | 670 |
 | 5 | R6 and R7 Out of Sample {5} | X5: weights and ex-ante shares across 92 signals; E7: R6's ex-post shares; realized volatility 10.32% and 10.14% (A31-27), beside LM30's R1, R3 and R5 (A30-12; R1's 12.48% named as out of sample, decision C7); X6: U28's halves, HRP the lowest out of sample of 1/N (LM30's) and LM31's three (IV, ERC, HRP), and above LM30's long-only minimum variance (A30-19); López de Prado's Monte Carlo stated with its design; whether one rule beats another is [[LM33]]'s (the hygiene note); KC | 480 |
 | 6 | Volatility Targeting: R8 {6,8} | (31.7): $\bar\sigma_t$, (26.2) on R6's book (simple returns, uncentred), the cap, cash at 1.5%, borrowing at 3.5%, drift, cash and borrowing in the wealth recursion by (27.1)–(27.3); domain check; E8 (first signal by hand); X7 (exposure path; the ranges of $\bar\sigma_t$ and the forecast over the 92 signals, A31-30; the largest uncapped ratio, A31-29); the EWMA matrix (31.8) and its identity; evidence: Moreira and Muir (design and sample), Harvey et al. (where the Sharpe ratio improves, where only the vol of vol and the left tail do); pointers to [[LM32]], [[LM34]]; pitfall: R8's target moves with R6's own past; 導讀 (指數加權移動平均模型, as LM26); KC | 650 |
-| 7 | Judging the Target Out of Sample {7} | X8: 91 holding months' ratios, R6 against R8; E10: QLIKE of the window and the EWMA, the EWMA's wins against its losses, the one holding month that decides the comparison, the two crash holding months; R8's realized volatility over the whole period (A31-27); why (lm26.md:142; (26.4) reverts); E9: April 2025, periodic re-estimation against a risk trigger (guidance); the trigger as a lab illustration, its threshold 0.5 fixed by decision D; the size of R8's trades (mean 9.2% one-way over the 91 trades after the first purchase, the largest 45.2%, A31-36; annual turnover is [[LM34]]'s, decision A2); the data do not support R8's leverage on E5 (guidance g:116); case resolved; pitfall: a month-end rule cannot meet a gap; 導讀; KC | 590 |
+| 7 | Judging the Target Out of Sample {7} | X8: 91 holding months' ratios, R6 against R8; E10: QLIKE of the window and the EWMA, the EWMA's wins against its losses, the one holding month that decides the comparison, the two crash holding months; R8's realized volatility over the whole period (A31-27); why (lm26.md:142; (26.4) reverts); E9: April 2025, periodic re-estimation against a risk trigger (guidance); the trigger as a lab illustration, its threshold 0.5 fixed by decision D; the size of R8's trades (mean 9.2% one-way over the 91 trades after the first purchase, the largest 45.2%, A31-36; annual turnover is [[LM34]]'s, decision A2); the data do not support R8's leverage on E5 (guidance g:116); case resolved; pitfall: a month-end rule cannot react to a gap; 導讀; KC | 590 |
 | 8 | Risk-Based Allocation in Python {3,4} | NumPy CCD and Newton; cvxpy `Minimize(0.5*quad_form(y, psd_wrap(S)) - b @ log(y))` with CLARABEL and the status check; SciPy `linkage(squareform(D2), "single")` after symmetrizing `D2` and setting its diagonal to 0 (then `squareform`'s checks pass, so `checks=False` is not needed), `leaves_list`, the `ClusterWarning` that a square, symmetric, non-negative, hollow matrix triggers; lab box | 200 |
 | — | Summary (8) / Problems (12) / Solutions | | 150 / 420 / 540 |
 | | **Total** | | **5,320** |
@@ -4820,7 +4848,7 @@ and X6 (U28), FinMind `TaiwanStockPrice`, retrieved 11 October 2026, with the re
   shares 23.8, 23.0, 9.8, 18.7, 24.8% [A31-09]; R6 20% each [A31-10]; R7 13.0, 24.0, 26.3, 30.0, 6.6% [A31-11]. The
   caption says that the cited shares are rounded separately: IV's sum to 100.1 and R7's to 99.9 as printed. Note:
   first window, 504 estimation rows, 13 February 2017 → 27 February 2019; ex-ante shares on that window's
-  $\hat\Sigma$; descriptive.
+  $\hat\Sigma$; in-sample.
 - X3 `u28corr` (`heatmap`, §4): U28's 28×28 correlation matrix in HRP's order, `min` 0, `max` 1 (all 378 correlations
   lie between 0.217 and 0.755 [A31-22]), `fmt` `n2`; the note lists the 28 sectors in order (labels drop out on a
   phone). Values cited: the first merge, ComputerPeripheralEquipment with ElectronicPartsComponents. Note: daily price
@@ -4830,7 +4858,7 @@ and X6 (U28), FinMind `TaiwanStockPrice`, retrieved 11 October 2026, with the re
   Values cited: first merge 0.5012, root 0.7426; on the full sample HRP's weights run from 12.87%
   (CommunicationsInternet) to 1.29% (GlassCeramic) and ERC's from 6.06% to 2.43% (the same two sectors); in-sample
   volatilities ($A=245.48$) 1/N 15.75% (lm10.md:36), inverse volatility 15.28%, ERC 15.18%, HRP 14.48% [A31-22]. Note:
-  single linkage on $\lVert\mathbf d_i-\mathbf d_j\rVert$; descriptive (in sample).
+  single linkage on $\lVert\mathbf d_i-\mathbf d_j\rVert$; in-sample.
 - X5 `rules` (table, §5): per fund, R6's and R7's mean (min–max) weight across the 92 signals [A31-24, A31-25]; R7's mean
   ex-ante share [A31-25]; R6's ex-post share (the mean of its 92 target weights on the out-of-sample covariance) and,
   over the holding months, the 10–90% range of the share that each holding month's own target weights carry on that
@@ -5008,7 +5036,7 @@ X7, E8; 7 X8, QLIKE, E9, E10; 8 the risk-triggered variant (*In-sample* illustra
 editor on 2026-10-24, before any lab result, decision D: after each close, update the EWMA of R6's drifted book; when
 the implied exposure differs from the held one by more than 0.5, trade to it at the next session's close with the
 through case's costs; count the trades and compare the holding months' ratios; a closing sentence says that choosing
-the threshold is LM34's search); 9 problems 6 and 8. Extension (lm26.md:183): replace the
+the threshold by its results would be a search, of the kind LM34 corrects); 9 problems 6 and 8. Extension (lm26.md:183): replace the
 EWMA by a GARCH(1,1) fit on each window (`arch`, LM26's settings) and its average forecast over the next 21 sessions (a fixed horizon near a holding month's 12–23 sessions, A31-04, set before any lab result) by
 (26.4); compare QLIKE with the window's and the EWMA's; label it one more variant. Labs write plain "LM33", "LM34",
 never `[[LM34]]`.
@@ -5063,8 +5091,8 @@ LM32–LM35 briefs and the same table: (31.1) is cited by LM35, (31.7) by LM32, 
 - R8 targets R6's own volatility over the trailing 504 joint dates, not a fixed level; the cap binds at 14 of 92 signals
   [A31-29]; cash earns 1.5% and borrowing costs 3.5%; check $1+R_t>0$ on every date [A31-37], and leave the worst day
   to LM35.
-- A one-day EWMA forecast is also its forecast for every later day (lm26.md:142); a month-end rule meets a gap with
-  the exposure set at the last month-end (E9). A risk trigger reacts after the day's loss, not before it.
+- A one-day EWMA forecast is also its forecast for every later day (lm26.md:142); a month-end rule cannot react to a
+  gap: it holds the exposure set at the last month-end (E9). A risk trigger reacts after the day's loss, not before it.
 - Holding-month ratios: uncentred RMS against the uncentred $\bar\sigma_t$; daily units on both sides (an annual
   figure printed beside a ratio uses the target's $A$ for both); the partial last holding month left out; 91 holding
   months is a short record for comparing spreads.

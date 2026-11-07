@@ -85,11 +85,16 @@ account.
 Run `uv run python data/fetch_finmind.py`, then `uv run python data/make_lab_data.py`. After that, every lab runs
 offline. The book ships no market data, because FinMind's licence does not allow the book to redistribute it.
 
-Volume I's files come from FinMind's free datasets, and so do Volume II's sector indices. One folder needs a paid
-plan: `data/raw/sectors_close/`, 561 small files that repair FinMind's copied sector closes (see "Check, do not trust"
-below). On the free plan, run `uv run python data/fetch_finmind.py --exclude sectors_close/`; `make_lab_data.py` does not
-need those files, and Volume II's labs say what changes without them. The fetch skips any file that it cannot get, lists it at the end and stops with
-an error code.
+Volume I's files come from FinMind's free datasets, and so do Volume II's sector indices. Three groups of files need a
+paid plan. `data/raw/sectors_close/` holds 561 small files that repair FinMind's copied sector closes (see "Check, do
+not trust" below). `data/raw/vol4_settlement/` holds TX's final settlement prices, a cross-check of Volume IV that
+`vol4_series.py` skips when the file is absent. The two ETF snapshots `data/raw/vol6/etf_snapshot__…` serve one count
+in Volume VI.
+
+On the free plan, run
+`uv run python data/fetch_finmind.py --exclude sectors_close/ --exclude vol4_settlement/ --exclude vol6/etf_snapshot`.
+`make_lab_data.py` does not need those files, and Volume II's labs say what changes without the repairs. The fetch
+skips any file that it cannot get, lists it at the end and stops with an error code.
 
 ## Data you will meet
 
@@ -110,8 +115,9 @@ an error code.
 
 - Use the exchange's trading dates, not a Monday-to-Friday calendar. The 0050 data contain nine Saturday trading
   days, such as 2016-01-30.
-- When you combine two series, keep only the dates they share. That changes the number of returns, so every count in
-  the book says which sample it comes from.
+- When you compute a statistic of two series together, keep only the dates they share. That changes the number of
+  returns, so every count in the book says which sample it comes from. A portfolio's wealth uses every session
+  instead: each asset earns its own return, 0 while it is halted ([[LM27]]'s wealth frame).
 - A trading halt makes one return cover several days. 0050 was halted from 11 to 17 June 2025 for its split, so its
   return on 2025-06-18 covers six trading days.
 - After a join, sort by date again. Never rely on the order of rows.
@@ -130,8 +136,8 @@ an error code.
 
 ## Reproducible numbers
 
-- From Volume III on, create the random generator once, at the start of each simulated experiment, as
-  `rng = np.random.default_rng([e, 20261011])` with `e` the experiment's number, and never reseed it inside the
+- From Volume III on, create the random generator once, at the start of each simulated experiment:
+  `rng = np.random.default_rng([e, 20261011])`, with `e` the experiment's number. Never reseed it inside the
   experiment ([[LM18]]). Every run then gives the same draws with the NumPy version that `uv.lock` pins.
 - Never test two computed numbers with `x == y`. Compare them with a tolerance that fits their size, such as
   `math.isclose(x, y, rel_tol=1e-9, abs_tol=1e-12)`: relative for large amounts, absolute near zero.

@@ -21,9 +21,11 @@ reports that the request quota ("upper limit") is used up. Re-run to retry; entr
     uv run python data/fetch_finmind.py --only 00679B  # restrict to manifest paths containing a substring
     uv run python data/fetch_finmind.py --exclude sectors_close/   # skip paths containing a substring (repeatable),
                                                        # e.g. on FinMind's free plan, which lacks that dataset
-                                                       # (and vol4_settlement/, an optional Backer cross-check)
+                                                       # (and vol4_settlement/, an optional Backer cross-check, and
+                                                       # vol6/etf_snapshot, served only above the Free plan)
     uv run python data/make_lab_data.py                # then rebuild every lab's data/ folder (needs data/raw/*.csv,
-                                                       # lm06/ and sectors/; uses sectors_close/ when present)
+                                                       # lm06/, sectors/, taiex_close/, vol3/, vol4/, vol5/, vol6/, not its
+                                                       # ETF snapshots; uses sectors_close/ when present)
 
 --verify accepts a missing file in an OPTIONAL folder (vol4_settlement/: a cross-check that vol4_series.py skips when
 the file is absent), so a checkout without it still passes --verify; a present file must match like any other.
@@ -90,7 +92,8 @@ LOCK = ROOT / "data" / "raw_manifest.lock"
 API ="https://api.finmindtrade.com/api/v4/data"
 PAUSE = 0.7                                                # seconds between requests, far below the hourly API limit
 MAX_CONSECUTIVE_FAILURES = 25
-LAB_INPUTS = ("lm06/", "sectors/", "vol3/", "vol4/")      # folders make_lab_data.py needs, besides the top level
+LAB_INPUTS = ("lm06/", "sectors/", "taiex_close/", "vol3/", "vol4/", "vol5/", "vol6/")   # folders make_lab_data.py needs, besides the top level
+LAB_SKIPS = ("vol6/etf_snapshot",)  # files in those folders that make_lab_data.py does not read (LM34's anchors only)
 OPTIONAL = ("vol4_settlement/",)   # cross-checks their script skips when absent: --verify accepts them missing
 
 def sha256(b: bytes) -> str:
@@ -367,14 +370,17 @@ def main():
               + (" Fetched now:" if fetched else ""))
         for p in fetched:
             print(f"  {p}")
-        # make_lab_data.py reads the top level of data/raw, lm06/, sectors/, vol3/ and vol4/ (Volume IV's labs);
-        # sectors_close/ only when present; vol4_settlement/ is a cross-check for vol4_series.py only
+        # make_lab_data.py reads the top level of data/raw, lm06/, sectors/, taiex_close/ (TR23's builder), vol3/,
+        # vol4/ (Volume IV's labs), vol5/
+        # and vol6/ (Volumes V-VI); sectors_close/ only when present; vol4_settlement/ is a cross-check for
+        # vol4_series.py only, and vol6/'s ETF snapshots serve LM34's anchors only
         need = [e["path"] for e in load_manifest()["files"]
-                if ("/" not in e["path"] or e["path"].startswith(LAB_INPUTS)) and not verify_local(e)]
+                if ("/" not in e["path"] or e["path"].startswith(LAB_INPUTS)) and not e["path"].startswith(LAB_SKIPS)
+                and not verify_local(e)]
         if need:
-            print(f"make_lab_data.py needs {len(need)} more files (data/raw/*.csv, lm06/, sectors/, vol3/, vol4/): "
-                  "run fetch_finmind.py with no --only and no --exclude (on the free plan: --exclude sectors_close/ "
-                  "--exclude vol4_settlement/ only) before it.")
+            print(f"make_lab_data.py needs {len(need)} more files (data/raw/*.csv, lm06/, sectors/, taiex_close/, vol3/, "
+                  "vol4/, vol5/, vol6/): run fetch_finmind.py with no --only and no --exclude (on the free plan: --exclude "
+                  "sectors_close/ --exclude vol4_settlement/ --exclude vol6/etf_snapshot only) before it.")
         else:
             print("make_lab_data.py has every file it needs; next: uv run python data/make_lab_data.py")
     else:

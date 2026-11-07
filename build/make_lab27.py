@@ -610,7 +610,7 @@ n = n_rows[k]
 Sn = A * cov0(X[n - WINDOW:n])
 spn, bn, mn, _, shn = split(Sn, w1)
 print(f"window {edates[n - WINDOW]} .. {edates[n - 1]}: s_p {100 * spn:.2f}%, MRC {np.round(100 * mn, 2)}")
-show("00679B's beta to the book", bn[J["00679B"]], ".4f", "-0.0944")
+show("00679B's beta to the portfolio", bn[J["00679B"]], ".4f", "-0.0944")
 show("00679B's share, %", 100 * shn[J["00679B"]], ".2f", "-1.89")
 show("after the switch, %", 100 * math.sqrt(float((w1 + dlt) @ Sn @ (w1 + dlt))), ".2f", "7.07")
 

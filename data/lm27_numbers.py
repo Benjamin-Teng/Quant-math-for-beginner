@@ -557,7 +557,7 @@ has("case: the purchase date", "Bought on 4 March 2019 and held, 0050 grew to 48
 idx_names = {"0050": "FTSE TWSE Taiwan 50", "00646": "S&P 500", "00679B": "ICE US Treasury 20+ Year",
              "00635U": "S&P GSCI Gold Excess Return", "00642U": "S&P GSCI Crude Oil Enhanced Excess Return"}
 for j, s_ in enumerate(F):
-    sh2_txt = "0" if w2[j] == 0 else f"{100 * sh2[j]:.1f}%"
+    sh2_txt = "0%" if w2[j] == 0 else f"{100 * sh2[j]:.1f}%"
     row = (f"| {s_} | {idx_names[s_]} | {100 * vol[j]:.2f}% | {100 * w1[j]:.0f}% | {100 * sh1[j]:.1f}% | "
            f"{100 * w2[j]:.0f}% | {sh2_txt} |")
     has(f"X1 row {s_}", row)

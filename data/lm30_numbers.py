@@ -454,7 +454,7 @@ mcv("S5: long-only minus shrunk at 2,191", e3[2191]["diff"][0], e3[2191]["diff"]
 assert e3[30]["diff"][0] < 0 and e3[60]["diff"][0] < 0 and e3[120]["diff"][0] > 0
 assert all(e3[T]["diff"][0] > 0 for T in (120, 250, 504, 2191))       # "raises it from 120 returns on"
 chk("S5: R3 zero weights (A29-09)", C.z3, "d", "0")
-has("S5: 92 signals", "at none of the 92 signals")
+has("S5: 92 signals", "binds at none of the through case's 92 signals")
 
 # ---------------------------------------------------------------- section 6
 assert [C.R2[k] for k in F5] == [0.40, 0.20, 0.30, 0.10, 0.0]
