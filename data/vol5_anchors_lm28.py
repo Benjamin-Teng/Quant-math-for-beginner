@@ -434,8 +434,11 @@ put(f"P4 same, r_f 1.5%: SR* {f(p4, 3)}; distractors 0.50 (SR_inf), {f(0.5 + 0.5
     f"{f(100 * (0.015 + p4**2 * 0.05**2 / (0.04 - 0.015)), 2)}%")                                       # 37
 put(f"P5 SR* 0.8, 1'Sigma^-1 e 8, delta 4: vol SR*/delta {f(100 * 0.8 / 4, 1)}%, L 8/4 {f(8 / 4, 1)}, borrowing "
     f"{f(8 / 4 - 1, 1)}; distractors L {f(4 / 8, 1)}, vol {f(100 * 0.8 * 4, 0)}%")                       # 38
-put(f"P6 r_f above mu_mv: Sigma^-1 e / 1'Sigma^-1 e has Sharpe -sqrt(e'Sigma^-1 e), the lowest of any fully invested "
-    f"portfolio (window {bw[1]}: {f(srn, 2, 3)})")                                                          # 39
+p6 = sqrt(0.5**2 + (0.0 - 0.015) ** 2 / 0.05**2)                       # P6 (constructed): the split of 8(c)
+put(f"P6 sigma_min 5%, mu_mv 0%, SR_inf 0.5, r_f 1.5% (constructed): SR*^2 {f(p6**2, 2)}, SR* {f(p6, 3)}; "
+    f"1'Sigma^-1 e {f((0.0 - 0.015) / 0.05**2, 2)} < 0, so Sigma^-1 e / 1'Sigma^-1 e has Sharpe -SR* {f(-p6, 2)}, the "
+    f"lowest of any fully invested portfolio; distractors +SR* {f(p6, 2, plus=True)}, -SR_inf -0.50 "
+    f"(window {bw[1]}: {f(srn, 2, 3)})")                                                                    # 39
 s1, s2, s12 = 0.026800, 0.018353, -0.004908
 o7 = Opt(np.zeros(2), np.array([[s1, s12], [s12, s2]]))
 put(f"P9 LM7's 2017-2021 inputs (lm07.md:409): w_mv {pct(o7.wmv)}%, sigma_min {f(100 * sqrt(o7.s2min), 2)}%, lambda* "

@@ -1338,8 +1338,8 @@ means nothing in the text was read; "unverified" marks a field or claim that no 
 - Stellato, Banjac, Goulart, Bemporad & Boyd, "OSQP: An Operator Splitting Solver for Quadratic Programs",
   *Mathematical Programming Computation* 12(4): 637–672, 2020 (Crossref: online 2020-02-20, print December 2020), DOI
   [10.1007/s12532-020-00179-2](https://doi.org/10.1007/s12532-020-00179-2). Cited for the method's name, which the
-  title states, and for polishing (LM29 §8), read in arXiv:1711.08013v4 (12 February 2020; its arXiv record carries
-  this DOI), §4, pp. 10–11. The journal text was not read (Springer's page: "Open Access": "N").
+  title states (lm29.md:369). Its §4, pp. 10–11, read in arXiv:1711.08013v4 (12 February 2020; its arXiv record
+  carries this DOI), agrees with the osqp.org pages on which LM29 §8's polishing sentence rests. The journal text was not read (Springer's page: "Open Access": "N").
 - Goulart & Chen, "Clarabel: An Interior-Point Solver for Conic Programs with Quadratic Objectives", arXiv:2405.12762
   (v1, 21 May 2024; the arXiv API record and abstract, re-read): a general-purpose interior-point solver for conic
   problems, based on a homogeneous embedding, specialized to quadratic objectives, "distributed as a standard solver
@@ -1354,11 +1354,15 @@ means nothing in the text was read; "unverified" marks a field or claim that no 
   that one sentence.
 - Lawson & Hanson, *Solving Least Squares Problems*, SIAM, 1995, DOI
   [10.1137/1.9781611971217](https://doi.org/10.1137/1.9781611971217). Crossref: monograph issued 1995-01-01, print
-  ISBN 978-0-89871-356-5, online ISBN 978-1-61197-121-7. The series Classics in Applied Mathematics is **unverified**
-  (Crossref does not record it; SIAM's page answered 403) and is not printed. Edition (LM29 R21, 2026-11-07, anonymous
-  requests): SIAM's book page again answered 403; the Crossref record has no edition number, original title or
-  relation, so a republication of the 1974 Prentice-Hall edition is unconfirmed and not printed; LM29 drops the
-  unrecorded place 'Philadelphia'. Cited through SciPy 1.18.1's
+  ISBN 978-0-89871-356-5, online ISBN 978-1-61197-121-7. The series Classics in Applied Mathematics is recorded by the
+  Library of Congress (below), not by Crossref (SIAM's page answered 403), and is not printed. Edition (LM29 R21,
+  2026-11-07, anonymous requests): SIAM's book page again answered 403; the Crossref record has no place, edition
+  number, original title or relation. The Library of Congress record (LCCN 95035178, MARCXML read 2026-11-07) gives
+  "Philadelphia : SIAM, c1995", the series "Classics in applied mathematics ; 15" and the title-page-verso note "This
+  SIAM edition is an unabridged, revised republication of the work first published by Prentice-Hall, Inc., Englewood
+  Cliffs, New Jersey, 1974". The front matter itself was not read. On this record LM29 prints "Revised republication
+  of the 1974 Prentice-Hall edition" (the editor's decision on R21 and N4), without the series, and without the place,
+  as in LM29's other references. Cited through SciPy 1.18.1's
   `scipy.optimize.nnls` docstring (re-read in the project environment), which cites the book as "SIAM, 1995" and says
   the function uses an active-set method that solves the KKT conditions of non-negative least squares. The book was not
   read.
@@ -2531,8 +2535,8 @@ one of the twelve has in `uv.lock` a Windows wheel that installs on CPython 3.13
 ### Not checked here
 
 - cvxpy's "Solver Features" page, quoted by the survey: not relied on.
-- The Clarabel paper is cited for the solver's name only, the OSQP paper also for polishing (arXiv v4, above), and
-  Diamond and Boyd (2016) at its abstract
+- The Clarabel paper is cited for the solver's name only, the OSQP paper for its method's name too (its polishing
+  section, read in arXiv v4, above, only backs osqp.org's pages), and Diamond and Boyd (2016) at its abstract
   (LM29's entries under Papers).
 
 ## Taiwan facts (Volume III)
@@ -3021,6 +3025,7 @@ The shared list (`plans/vol-5.md`, "Chinese terms"):
 | subadditivity; finite subadditivity | —; — | 劣可加性; 有限[的]次加性；有限[的]劣加性 | not run (經濟學 次加性) | 劣可加性 |
 | risk measure; coherent risk measure | 風險量數; — | —; — | —; — | 一致性風險量數, the book's own |
 | backtesting; backtest | —; — | —; — | 回溯測試; — | 回測 (lm21.md:189) |
+| risk share | — | — | — | 風險份額, composed (統計學名詞 "share distribution" 份額分布; 'risk share' and '風險份額' 0 rows in all listings, searched 2026-11-07) |
 
 No listing has an entry for tangency portfolio, KKT conditions (only 經濟學's "Kuhn-Tucker conditions" 肯塔克條件),
 drawdown (only other senses: 洩降, a water-level term, in earth-science, engineering and environmental listings; a
@@ -3122,14 +3127,14 @@ LM29, LM30 and LM31 (new terms):
 No listing has an entry for no-trade band, operator splitting, risk contribution, marginal contribution, coordinate
 descent, inverse variance or volatility, quasi-diagonalization, equal risk contribution, recursive bisection,
 volatility targeting, reference portfolio, Black–Litterman or Ledoit–Wolf. LM31's composed forms, printed with their
-English in every box that uses them: 等風險貢獻 (equal risk contribution, ERC), 反波動率權重 (inverse-volatility weights)
-and 準對角化 (quasi-diagonalization); the other forms are in the rows above and in the list of the book's own forms.
+English in every box that uses them: 等風險貢獻 (equal risk contribution, ERC), 反波動率權重 (inverse-volatility weights),
+準對角化 (quasi-diagonalization) and 風險份額 (risk share); the other forms are in the rows above and in the list of the book's own forms.
 
 Stage 3 round 1 (LM28, LM29, LM31), 樂詞網 searched 2026-11-07 with curl, anonymously (generic User-Agent, no cookie,
 about one request a second), with the Volume III URL pattern and `&page=<n>`: 44 query strings (25 English, 19
 Chinese), each in all listings, 數學名詞, 統計學名詞 and 管理學名詞 (176 searches, 182 result pages). Every filtered
-search was read to its end, and every all-listings search but `distance` (2,129 rows) and `距離` (2,335), read to
-their first 300 rows. Entry pages answered 302 without a session and were not read.
+search and every all-listings search was read to its end, except the all-listings searches for `distance` (2,129
+rows) and `距離` (2,335 rows), which were read to their first 300 rows. Entry pages answered 302 without a session and were not read.
 
 | English | 統計學名詞 | 數學名詞 | 管理學名詞 | Book |
 |:--|:--|:--|:--|:--|

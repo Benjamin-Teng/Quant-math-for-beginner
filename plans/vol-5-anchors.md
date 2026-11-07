@@ -47,7 +47,8 @@ Stage 3, 2026-11-07: A27-10, A27-11, A27-12, A27-40, A27-48 and A27-50 re-derive
 end or at the end of the period before is dropped (2025-W24 and W25, across 0050's halt), so 498 of the 500 weeks with
 a session are used ($A_{\text{week}}$ still counts 500) and the 116 months are unchanged in number; the script mirrors
 `data/lm27_common.py` (`pkey`, `closed`), and its output equals the six lines `data/lm27_numbers.py` printed as anchor
-differences. Definitions, Values and Printed as changed in those six rows (A27-40's stem becomes 0.5488, its key 0.0649);
+differences. Values changed in those six rows, Definitions in A27-10, A27-40 and A27-50, and Printed as in all but
+A27-50 (A27-40's stem becomes 0.5488, its key 0.0649);
 the Common definitions, the flag list (A27-11 0.191, −0.19, 0.0890; A27-40's 0.0645 dropped) and the
 unrounded-inputs paragraph (0.1807; 2.2 and 2.0 from 0.1807, 0.0807 and 0.0890) follow. The other 44 lines are
 unchanged.
@@ -187,8 +188,11 @@ the reverse (5.69492%, not printed), and the held portfolios' wealth-frame volat
 2.3e-14), and the common definitions say so. The definitions of A28-12 (R3's exact NNLS solution, A29-09's reference)
 and of A28-29 and A28-30 (log growth over A28-03's unrounded years) are reworded, with no value changed; the Printed-as
 cells of A28-05 to A28-07 (LM29's and LM31's echoes), A28-10, A28-29 and A28-30 (where each form prints) are
-completed. These rows were reproduced by the fresh verification of 2026-10-31. The Value column is the script's line after its ID, verbatim, except that a
-`|` is written `\|`.
+completed. These rows were reproduced by the fresh verification of 2026-10-31.
+Stage 3, 2026-11-07 (K2, K3): A28-39's definition, value and printed form change for the constructed Problem 6
+($\sigma_{\min}=5\%$, $\mu_{\mathrm{mv}}=0\%$, $\mathrm{SR}_\infty=0.5$, $r_f=1.5\%$: $\mathrm{SR}^{*2}=0.34$,
+$\mathrm{SR}^*=0.583$, key −0.58, distractors +0.58 and −0.50; A28-24's −1.202410 kept); the other 45 lines are
+unchanged. The Value column is the script's line after its ID, verbatim, except that a `|` is written `\|`.
 
 **Common definitions.** E5 is `vol5_series.frames("E5")`: the estimation frame (2,362 joint one-session total
 returns 2017-01-18 → 2026-10-08, $A=T/\text{years}$) and the wealth frame (2,368 sessions, a halted fund earning 0

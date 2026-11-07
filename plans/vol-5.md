@@ -82,8 +82,9 @@ fact a decision rests on is stated here with its evidence.
     check): each fund earns its own close-to-close return, a halted fund earns 0 and its spanning return is booked on
     the day it trades again (0050: flat 2025-06-11 → 06-17, then $(4\times47.57)/188.65-1$ on 06-18). Covariances,
     means and every statistic of joint daily returns use the estimation frame; weekly and monthly returns compound the wealth frame, and a period in which a fund has no close at its end or at the end of the period before is dropped (2025-W24 and W25); wealth, drift, costs, drawdowns and every
-    return of a portfolio use the wealth frame. A joint computation's inputs ($\hat{\boldsymbol\mu}$, $\hat\Sigma$ and
-    its diagonal) use the estimation frame and say so ("on the 2,362 joint dates"); a fund described alone uses its
+    return of a portfolio use the wealth frame. A joint computation's daily inputs ($\hat{\boldsymbol\mu}$, $\hat\Sigma$
+    and its diagonal) use the estimation frame and say so ("on the 2,362 joint dates"), and weekly or monthly ones say
+    "from the wealth frame"; a fund described alone uses its
     own dates, annualized by its own sessions per year (editor's decision on the briefs, X18). (Without the
     wealth frame every rule would miss 2025-06-10 → 06-18: 00642U +12.82%, R1 about +2.7%; fresh check. PITFALLS §3,
     "Aligned samples change the counts".) The scripts print the authoritative counts.
@@ -222,7 +223,7 @@ fact a decision rests on is stated here with its evidence.
   | $\mathbf w^{\mathrm{mv}}$, $\sigma^2_{\min}$, $\mathbf w^{\mathrm{tan}}$, $\mathrm{SR}^*$ | minimum-variance weights and variance, tangency weights (LM7), best Sharpe ratio | new for mv; star only for an optimum |
   | $\beta_{i,p}$, $\beta_i$ | an asset's beta to its portfolio, $\operatorname{Cov}(R_i,R_p)/\sigma_p^2$; its market beta (LM23's (23.1)) | new for $\beta_{i,p}$ (LM27) |
   | $\mathrm{TO}_t$; $\text{tax}_i$ | one-way turnover $\tfrac12\lVert\mathbf w_t-\mathbf w^{\mathrm{drift}}_t\rVert_1$; a fund's tax rate on sales (upright word) | new; no scalar cost symbol next to $\mathrm{TO}$ |
-  | $c$, $\hat\Sigma_{\mathrm{tgt}}$, $\hat\Sigma_c=c\hat\Sigma+(1-c)\hat\Sigma_{\mathrm{tgt}}$ | the data's weight in a shrunk covariance (LM24's $c$; scikit-learn's `shrinkage_` is $1-c$), target, shrunk matrix (LM30) | extends §6's $c$ row (LM24) to LM30, which has no Kelly fraction |
+  | $c$, $\hat\Sigma_{\mathrm{tgt}}$, $\hat\Sigma_c=c\hat\Sigma+(1-c)\hat\Sigma_{\mathrm{tgt}}$ | the data's weight in a shrunk covariance (LM24's $c$; scikit-learn's `shrinkage_` is $1-c$), and in (30.5) a view's weight in the Black–Litterman posterior (Stage 3, LM30 R11); target, shrunk matrix (LM30) | extends §6's $c$ row (LM24) to LM30, which has no Kelly fraction |
   | $n_0$, $\mathbf w_{\mathrm{ref}}$, $\mathbf e_{\mathrm{eq}}$, $K\mathbf e=\mathbf b+\boldsymbol\varepsilon$, $\Xi$ | Black–Litterman: prior worth in observations ($\tau=1/n_0$; LM24's $n_0$), reference weights, implied excess returns $\delta\Sigma\mathbf w_{\mathrm{ref}}$, views on excess returns, view-error covariance | new; $P$, $Q$, $\Omega$, $\tau$, $\pi$ are taken book-wide |
   | $\mathrm{MRC}_i$, $\mathrm{RC}_i$ | marginal and component risk contribution, $\mathrm{RC}_i=w_i(\Sigma\mathbf w)_i/\sigma_p$, $\sum_i\mathrm{RC}_i=\sigma_p$ (LM27 owns, LM31 uses) | new |
   | $\mathbf b$ in LM31 | risk budgets (shares summing to 1); LM31 writes its constraints out, without $K\mathbf w=\mathbf b$ | scoped |
@@ -579,7 +580,7 @@ limits).
 ### Per module (beyond the cross-module decisions)
 
 - **LM27.** Print every derived result so that it follows from the printed inputs (recompute: E1's 2.55% from the
-  printed 0.0252, or print 0.02524; problem 6's stem gives ρ = 0.5521; KC §9 and E3 carry the digit their product
+  printed 0.0252, or print 0.02524; problem 6's stem gives ρ = 0.5488 (0.5521 before Stage 3's K1); KC §9 and E3 carry the digit their product
   needs; MRC, shares and $\beta s_p$ in E7 and E9 carry a digit or say "from unrounded inputs"); parts sum as printed
   (A27-26 to three decimals, A27-16, X8 and E10); "$A=2{,}362\times365.25/3{,}551$" as lm10.md:41 writes it; the 22
   negative 00679B windows as "22 of the 36 windows from May 2019 to April 2022, the last −0.0023%"; R1's and R2's
@@ -624,7 +625,7 @@ revised with it.
   maximum-Sharpe portfolios) named a variant, and Michaud (1989) at the level of its abstract. LM29's sentence on
   cvxpy's rewriting cites Agrawal et al. (2018) only once the paper is read (Stage 2's source pass).
 - **Weeks and months.** LM27's weekly and monthly returns drop the sample's first and last ISO week and calendar
-  month, complete or not (2026-W41 holds four sessions and is dropped; the rule needs no holiday calendar). Stage 3 (K1 option (b)): the returns compound the wealth frame, and a period in which a fund has no close at its end or at the end of the period before is dropped (2025-W24 and W25, across 0050's halt): 498 weeks, 116 months; A still counts the 500 weeks with a session.
+  month, complete or not (2026-W41 holds four sessions and is dropped; the rule needs no holiday calendar). Stage 3 (K1 option (b)): the returns compound the wealth frame, and a period in which a fund has no close at its end or at the end of the period before is dropped (2025-W24 and W25, across 0050's halt). 498 weeks, 116 months. The weekly $A=500\times365.25/3{,}542$ (decision D) still counts the 500 weeks with a session.
 - **Labs.** `make_lab_data.py` writes both E5 frames, the wealth frame with its traded flags (shared "Labs").
 - **Leads.** LM28's tangency beta identity, $\beta_{i,\mathrm{tan}}=e_i/(\mu_{\mathrm{tan}}-r_f)$, puts $\mathbf
   w_{\mathrm{tan}}$ in the market's place in LM23's CAPM equation (lm23.md:285): prerequisite 23, and lm23 gains +28
@@ -665,7 +666,8 @@ brief text. These choices settle the open alternatives:
 - **Notation (Y6–Y10).** LM32 writes a loss as $-R$; LM30 writes residual variances with LM27's "res" subscript;
   LM33 writes "a moment of order a little above 4" for its $4+\delta$; LM28 outcome 1 reads "of $N$ assets".
 - **LM27.** E5 says no daily–weekly gap reaches two weekly standard errors and prints the 00679B–00642U monthly gap
-  without naming a cause (2.3 normal-theory standard errors, 2.0 plug-in; A27-11 prints it); E7's sentence becomes
+  without naming a cause (2.2 normal-theory standard errors after Stage 3's K1, 2.0 plug-in; A27-11 prints it); E7's
+  sentence becomes
   "only Euler's parts add up to the book's volatility, and only they price a switch", with the stand-alone and
   variance sums beside it.
 - **LM28.** A weight vector or column printed at one decimal carries "rounded separately; sums to 100.1" (the
@@ -837,7 +839,8 @@ writer's departures from its brief are listed in the module's review record (`re
 - **LM27.** Solution 10 prints the three risk contributions at three decimals (7.461, 1.324, 4.512, summing to 13.297)
   beside the shares, as the brief's "all three contributions" asks; applied at the first revision. (27.7) keeps the
   brief's number in §5, before (27.5)–(27.6), which LM28–LM31 and the Volume VI briefs cite by number (as LM31's
-  tags).
+  tags). Experiment 1's resampled standard errors (Stage 3, R4; about 0.046 and 0.08) are printed without an anchor:
+  `data/lm27_numbers.py` computes and asserts them, and from Stage 3 the module and its scripts are authoritative.
 - **LM28.** The units pitfall stays in §7's code comment until a review asks for prose; the widget needs no
   expected-readout file beyond its Node-against-NumPy assertions.
 - **LM29.** The 25–30-word sentences style.py lists are left to the reviewers; Lab part 5 checks U28's numbers only
@@ -1501,8 +1504,8 @@ Problem 6 (E5's monthly correlation). *Stability check:* R1's risk shares in the
 fixed in advance (2026-10-24):* the trades of R1 and R2, shown as accounting, not compared: the module prints no
 comparison criterion. *Constructed:* R2's weights; Problems 1–4 and 10. Versions on the same data: two rules (R1, R2)
 and one variant shown only by its weights (the buy-and-hold book). Local note: "Every matrix and risk share here
-describes E5's 2,362 joint daily returns from 18 January 2017 to 8 October 2026, or U28's sector price indices from
-2008 to 2026: descriptive. R1's shares in its 92 trailing windows are a stability check. The trades are the through
+describes E5's daily, weekly or monthly returns from 18 January 2017 to 8 October 2026 (Section 4), or U28's sector
+price indices from 2008 to 2026: descriptive. R1's shares in its 92 trailing windows are a stability check. The trades are the through
 case's, fixed in advance on 24 October 2026; they show the accounting, and no rule is judged here. Nothing is tested
 on later data: [[LM30]], [[LM33]] and [[LM34]] do that."
 
@@ -1835,8 +1838,8 @@ decision C8):
 
 **Pitfalls to pre-empt.**
 
-- A joined frame's dates (PITFALLS §3): a statistic of joint returns uses the estimation frame; wealth, drift and costs
-  the wealth frame; one fund's statistic its own dates. Name the frame next to every count and $A$.
+- A joined frame's dates (PITFALLS §3): a statistic of joint daily returns uses the estimation frame; weekly and
+  monthly returns, wealth, drift and costs the wealth frame; one fund's statistic its own dates. Name the frame next to every count and $A$.
 - Averaging log returns across funds understates a book's return ((1.14), E1); compounding weights across days needs
   the drift, not the target weights.
 - Turnover: one-way is half the 1-norm; a script that adds buys and sells and calls it turnover doubles it; the cost
@@ -1862,7 +1865,8 @@ decision C8):
 - R1's own results: the module prints R1's trades, never its net wealth, growth, turnover total or costs total (LM34);
   E3 is scaled to a NT\$10 million book so that R1's wealth level stays unprinted.
 - Price indices in U28: only their covariances are used; under (23.8)'s assumption that dividends accrue evenly, the dividend gap moves the intercepts, not the covariances; every caption says price indices.
-- Weekly and monthly statistics drop the first and last periods, complete or not; the caption says so (AUTHORING §7).
+- Weekly and monthly statistics drop the first and last periods, complete or not, and the two weeks across 0050's halt
+  (2025-W24, W25); the caption says so (AUTHORING §7).
 
 **Curriculum guidance carried** (plans/vol-5.md's table):
 
@@ -1879,8 +1883,8 @@ decision C8):
 - Not carried here: drawdown definitions (LM32), checkpoints (LM33, LM35), volatility targeting (LM31).
 
 **Stage 4 for earlier modules.** `leads` gain 27 in lm01.md:6 ((1.12)–(1.14)), lm03.md:6 (the working rule,
-lm03.md:266–271), lm19.md:6 (weekly and monthly returns, (19.3), (19.7)) and lm20.md:6 (Problem 6's standard error),
-as decision G lists; lm07, lm08, lm09, lm10, lm11, lm12, lm16 and lm23 already list 27. No wording change in published
+lm03.md:266–271), lm19.md:6 (weekly and monthly returns, (19.3), (19.7)), lm20.md:6 (Problem 6's standard error)
+and lm22.md:6 (resampling whole weeks and months, Stage 3's R4), as decision G lists; lm07, lm08, lm09, lm10, lm11, lm12, lm16 and lm23 already list 27. No wording change in published
 modules.
 
 **Sources** (as the source checks and the SOURCES drafts of 2026-10-24 record them, with the version read and the
@@ -2523,9 +2527,10 @@ label (shared decision "Problems").
    added) [A28-37]. The solution adds $\mu_{\tan}=6.50\%$.
 5. MC: $\mathrm{SR}^*=0.8$, $\mathbf 1^{\top}\Sigma^{-1}\mathbf e=8$ (annual units), $\delta=4$; the book's volatility and
    $L$. **A** 20%, 2.0. B 20%, 0.5 ($L=\delta/8$). C 320%, 2.0 ($\mathrm{SR}^*\delta$) [A28-38].
-6. MC: $r_f$ exceeds $\mu_{\mathrm{mv}}$; what is $\Sigma^{-1}\mathbf e/(\mathbf 1^{\top}\Sigma^{-1}\mathbf e)$? A the
-   tangency portfolio, levered. B the equal-weight portfolio. **C** the fully invested portfolio with the lowest Sharpe
-   ratio [A28-39, A28-24].
+6. MC: $\sigma_{\min}=5\%$, $\mu_{\mathrm{mv}}=0\%$, $\mathrm{SR}_\infty=0.5$, $r_f=1.5\%$ (constructed); the Sharpe
+   ratio of $\Sigma^{-1}\mathbf e/(\mathbf 1^{\top}\Sigma^{-1}\mathbf e)$. A +0.58 (the denominator's sign ignored).
+   B −0.50 (minus the asymptote's slope). **C** −0.58 [A28-39]. The solution gives $\mathrm{SR}^{*2}=0.34$ and
+   $\mathrm{SR}^*=0.583$ by Problem 8(c)'s split, and the window of 30 April 2024's −1.20 [A28-24].
 7. Derive (28.1) from the Lagrangian and (10.8); prove the identity with (10.9) and deduce uniqueness; specialize to
    (28.2) and $\lambda^*=2\sigma^2_{\min}$.
 8. (a) Derive (28.5) from (28.4); (b) show the asymptotes $\mu_p=\mu_{\mathrm{mv}}\pm\mathrm{SR}_\infty\sigma_p$; (c) derive
@@ -5288,7 +5293,7 @@ the anchor rows that check changed reproduced them (2026-10-31), so nothing rema
   decisions B1, B3, B5); the Deep Dive writes no eigenvalue symbol. O5 (the trigger threshold): fixed at 0.5 by decision
   D. O7 (HRP on E5 in the text) and O11 (the CCD widget): accepted, decisions D and E. O8 (the funds' indices): LM27's
   brief records them from the issuers, and LM31 uses LM27's wording. O9 (prerequisites): confirmed both ways (decision
-  C9). O10 (lm08.md:290): optional at Stage 4, decision G (below). O6 (sources): decision F, then R3 below. The forward
+  C9). O10 (lm08.md:290): optional at Stage 4, decision G (below; required since Stage 3's cross-check X21). O6 (sources): decision F, then R3 below. The forward
   promise "whether R6's and R7's realized volatilities differ by more than chance" is dropped (per-module decision on
   LM33). The first recomputation's findings were applied then (A31-34's divisor 91, holding months named by their
   dates, gaps at machine precision as bounds, Newton's count following `erc()`, A31-39's annualized $\Sigma$, E8's $L$
@@ -5332,6 +5337,6 @@ the anchor rows that check changed reproduced them (2026-10-31), so nothing rema
 
 Left to a later stage by the decisions (not before Stage 2):
 
-- **lm08.md:290's rewording** (optional, decision G). Recommendation: make it at Stage 4 as "Stage 4 for earlier
+- **lm08.md:290's rewording** (required, Stage 3 cross-check X21). Recommendation: make it at Stage 4 as "Stage 4 for earlier
   modules" words it. The present sentence is not wrong, since the factor 2 changes no tree (A31-21), but HRP builds its
   tree on the column distance of half that distance, and the new wording says so.
