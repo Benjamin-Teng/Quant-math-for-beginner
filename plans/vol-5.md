@@ -81,7 +81,7 @@ fact a decision rests on is stated here with its evidence.
     check), $A=242.951$. The **wealth frame** holds every TR23 session from 2017-01-18 to 2026-10-08 (2,368, fresh
     check): each fund earns its own close-to-close return, a halted fund earns 0 and its spanning return is booked on
     the day it trades again (0050: flat 2025-06-11 → 06-17, then $(4\times47.57)/188.65-1$ on 06-18). Covariances,
-    means and every statistic of joint returns use the estimation frame; wealth, drift, costs, drawdowns and every
+    means and every statistic of joint daily returns use the estimation frame; weekly and monthly returns compound the wealth frame, and a period in which a fund has no close at its end or at the end of the period before is dropped (2025-W24 and W25); wealth, drift, costs, drawdowns and every
     return of a portfolio use the wealth frame. A joint computation's inputs ($\hat{\boldsymbol\mu}$, $\hat\Sigma$ and
     its diagonal) use the estimation frame and say so ("on the 2,362 joint dates"); a fund described alone uses its
     own dates, annualized by its own sessions per year (editor's decision on the briefs, X18). (Without the
@@ -90,9 +90,7 @@ fact a decision rests on is stated here with its evidence.
   - **Timing of E5.** The four foreign funds close at 13:30 Taipei time and carry the previous US session (survey:
     00646's daily correlation with SPY's previous session 0.681, with the same-dated session 0.118; not printed,
     since it mixes E5 with US data and needs LM35's pairing rule). 0050 at the same close also reflects that US
-    session, so a same-day correlation is not simply biased in one direction (LM27's A27-11, simple returns, ISO weeks
-    and calendar months without the sample's first and last: 0050 with 00646 0.599 daily, 0.588 weekly, 0.552
-    monthly; with 00679B −0.105, −0.023, −0.013). LM27 shows daily, weekly and monthly
+    session, so a same-day correlation is not simply biased in one direction (LM27's A27-11, simple returns; weekly and monthly ones compounded from the wealth frame, without the sample's first and last period and the two weeks across 0050's halt: 0050 with 00646 0.599 daily, 0.588 weekly, 0.549 monthly; with 00679B −0.105, −0.022, −0.015). LM27 shows daily, weekly and monthly
     correlations once and says the daily figure can differ either way; other modules state the frequency they use.
     The rules estimate $\hat\Sigma$ from daily returns.
   - **U28** (Volume II): the 28 TWSE sector price indices, 2008-12-02 → 2026-10-08, $T=4{,}382$, $A=245.4794$, for
@@ -574,8 +572,8 @@ limits).
   (LM29 proves optimality by exhibiting a KKT point).
 - **G. Stage 4 leads** (merged, X list G3): lm01 +27, +32, +35; lm02 +35; lm03 +27; lm04 +29, +33, +34; lm05 +32; lm07
   +30, +31; lm08 +28, +29; lm09 +29, +30; lm10 +32; lm11 +29, +31, +34; lm12 +28, +29; lm14 +30; lm15 +30; lm18 +33; lm19 +27;
-  lm20 +27, +28, +34; lm21 +32; lm22 +32; lm23 +28, +35; lm26 +35. Stage 4 rewordings: lm07.md:511–512, lm07.md:786, lm19.md:359 (LM33's wording), lm21.md:373
-  (LM34's wording), the syllabus line of LM31 (LM31's wording), LM3's TQQQ example; optional: lm08.md:290, lm04.md's
+  lm20 +27, +28, +34; lm21 +32; lm22 +27, +32; lm23 +28, +35; lm26 +35. Stage 4 rewordings: lm07.md:511–512, lm07.md:786, lm19.md:359 (LM33's wording), lm21.md:373
+  (LM34's wording), the syllabus line of LM31 (LM31's wording), LM3's TQQQ example, lm08.md:290 (required, Stage 3 cross-check X21); optional: lm04.md's
   MDD sign (46–50, 510).
 
 ### Per module (beyond the cross-module decisions)
@@ -626,7 +624,7 @@ revised with it.
   maximum-Sharpe portfolios) named a variant, and Michaud (1989) at the level of its abstract. LM29's sentence on
   cvxpy's rewriting cites Agrawal et al. (2018) only once the paper is read (Stage 2's source pass).
 - **Weeks and months.** LM27's weekly and monthly returns drop the sample's first and last ISO week and calendar
-  month, complete or not (2026-W41 holds four sessions and is dropped; the rule needs no holiday calendar).
+  month, complete or not (2026-W41 holds four sessions and is dropped; the rule needs no holiday calendar). Stage 3 (K1 option (b)): the returns compound the wealth frame, and a period in which a fund has no close at its end or at the end of the period before is dropped (2025-W24 and W25, across 0050's halt): 498 weeks, 116 months; A still counts the 500 weeks with a session.
 - **Labs.** `make_lab_data.py` writes both E5 frames, the wealth frame with its traded flags (shared "Labs").
 - **Leads.** LM28's tangency beta identity, $\beta_{i,\mathrm{tan}}=e_i/(\mu_{\mathrm{tan}}-r_f)$, puts $\mathbf
   w_{\mathrm{tan}}$ in the market's place in LM23's CAPM equation (lm23.md:285): prerequisite 23, and lm23 gains +28
@@ -837,7 +835,9 @@ writer's departures from its brief are listed in the module's review record (`re
 - **Labels.** Where a brief gave an exhibit and an example the same label, the writer renamed one (LM27's E10
   `u28book`, LM28's X5 `u28w`), since `build.py` keys labels by name; kept.
 - **LM27.** Solution 10 prints the three risk contributions at three decimals (7.461, 1.324, 4.512, summing to 13.297)
-  beside the shares, as the brief's "all three contributions" asks; applied at the first revision.
+  beside the shares, as the brief's "all three contributions" asks; applied at the first revision. (27.7) keeps the
+  brief's number in §5, before (27.5)–(27.6), which LM28–LM31 and the Volume VI briefs cite by number (as LM31's
+  tags).
 - **LM28.** The units pitfall stays in §7's code comment until a review asks for prose; the widget needs no
   expected-readout file beyond its Node-against-NumPy assertions.
 - **LM29.** The 25–30-word sentences style.py lists are left to the reviewers; Lab part 5 checks U28's numbers only
@@ -869,6 +869,7 @@ Collected here as the briefs add them; applied at publication with the edition n
   later data is the other half of LM34. Reword so the sentence says both.
 - `src/syllabus.yaml`: LM31's line ("Euler risk contributions and risk-based allocation") becomes risk budgeting with
   LM27's contributions.
+- `src/syllabus.yaml`: LM27's line becomes "A book's return, drift and trading costs; Euler risk contributions and factor risk."
 - LM3's TQQQ example (lm03.md:45, 464, 467, 469, 471; capability D). A re-fetch of QQQ's back-adjusted closes
   re-rounds them: the exact rebalancing effect $-0.31325$ (unrounded −0.3132492, 0.42 of a unit from the five-decimal
   boundary) became −0.31324, and the four-decimal −0.3132 sits 8e-7 from its own boundary. After the next distribution
@@ -1389,7 +1390,7 @@ Taught, practised and assessed (REVIEW_PROMPT item 10):
 | 3 [U] | §4 | E4, E5 | KC §4; P6, P11 |
 | 4 [C] | §5 (27.4), (27.7) | E6 | KC §5; P4, P10 |
 | 5 [D] | §6 (27.5), (27.6), Deep Dive | E7, E8 | KC §6; P7 (derive), P10 |
-| 6 [U] | §6, §7 | E7, E9 | KC §7; P5 |
+| 6 [U] | §6, §7 | E7, E9 | KC §6 (b), §7; P5 |
 | 7 [C] | §8 (27.8) | E10 | KC §8; P9 |
 | 8 [C] | §9 | lab Parts 3, 6 | KC §9; P11, P12 |
 
@@ -1457,16 +1458,16 @@ the cost sources → LM34 (decision A2). Scenario losses → LM35. Net and gross
   year (decision X18); LM27 describes no fund alone beyond that frame comparison.
 - **LM7's pair** (recorded use): 2,363 returns between common closes, recomputed to LM8's $\rho=-0.1056$ and 20.11%,
   13.50% [A27-07]; E5's frame gives −0.105 on 2,362, without 2025-06-18.
-- **Weekly and monthly returns:** compound the estimation frame's daily returns within ISO weeks (keys ISO year, ISO
+- **Weekly and monthly returns:** compound the wealth frame's daily returns within ISO weeks (keys ISO year, ISO
   week) and calendar months. The first and last period, in which the sample starts and ends, are dropped, complete or
-  not (decision "Weeks and months"; the rule needs no holiday calendar): 500 weeks and 116 calendar months [A27-10].
+  not (decision "Weeks and months"; the rule needs no holiday calendar); so are 2025-W24 and W25, in which 0050 lacks a close at the end of the week or of the week before: 500 weeks with a session, 498 used, and 116 calendar months [A27-10].
   Weeks are annualized as LM19 counts a year (lm19.md:39), by the periods with data (decision D):
   $A=500\times365.25/3{,}542=51.56$, the 500 weeks with a session over 9.6975 years from the close of 20 January 2017,
   before the first weekly return, to that of 2 October 2026 (decision C7; the span of the 506 calendar weeks, six of
   them Lunar New Year weeks without a session). Months use $A=12$, the book's monthly convention (shared decision
   "Sharpe ratio") [A27-12]. Each caption says so. The last ISO week, 5–8 October 2026, holds all four of its sessions
   (TX's settlement file, `data/raw/vol4/`, has no session on 9 October) and is dropped by the rule; keeping it would
-  move 0050–00679B's weekly correlation from −0.023 to −0.024 [A27-10], a figure the module does not print.
+  move 0050–00679B's weekly correlation from −0.022 to −0.023 [A27-10], a figure the module does not print.
 - **Windows:** `vol5_rules.schedule`: the trailing 504 estimation rows through each of the 92 signals, 27 February 2019
   → 30 September 2026 [A27-20]; the first window runs 13 February 2017 → 27 February 2019 [A27-21]. A window's
   covariance is annualized with the full sample's $A=242.951$, as `vol5_rules.signals` does.
@@ -1634,8 +1635,7 @@ $2\Sigma\mathbf w$ ((10.8)), twice each fund's covariance with the book, turns t
   10,000,000, trades to −3,100). Note: the through case's R1, signal 31 March 2026; the book's size is hypothetical (the
   recursion is scale-free); rates per the shared cost model, sources in LM34.
 - X4 `freq` (`bar`, §4): categories 0050–00646, 0050–00679B, 0050–00635U, 0050–00642U, 00679B–00642U; series daily,
-  weekly, monthly (colours 1–3); `fmt: "n3"`. Values cited [A27-11]. Note: simple returns on the 2,362 joint dates, 500
-  ISO weeks and 116 calendar months (the first and last period dropped, complete or not); normal-theory standard
+  weekly, monthly (colours 1–3); `fmt: "n3"`. Values cited [A27-11]. Note: daily simple returns on the 2,362 joint dates, and weekly and monthly ones from the wealth frame (498 ISO weeks, 116 calendar months; the first and last period dropped, complete or not, and the two weeks across 0050's halt); normal-theory standard
   errors near zero correlation about 0.02, 0.045 and 0.09 (0050–00679B: 0.020, 0.045, 0.093); the plug-in ones are
   1.4 to 2.4 times as large on daily data (0050–00679B: 0.040, 0.053, 0.095). Both assume independent periods, and the
   plug-in one finite fourth moments.
@@ -1695,21 +1695,19 @@ shares 21.2%, 17.7%, 2.6%, 12.6%, 45.9% [A27-15].
   [A27-02, A27-03, A27-04]. Over the estimation frame 00642U's growth factor is 1.412, over the wealth frame 1.593
   [A27-06]: the dropped days include its +12.816% span [A27-05]. LM7's pair keeps the spanning return, 2,363 returns,
   $\rho=-0.1056$ (lm08.md:284), recomputed [A27-07].
-- E5 §4 `async`: 0050 with 00679B: −0.105 daily, −0.023 weekly, −0.013 monthly; with 00635U: 0.180, 0.228, 0.187; with
-  00646: 0.599, 0.588, 0.552; 00679B with 00642U: −0.18, −0.20, −0.36 [A27-11]. 0050–00679B's normal-theory standard
+- E5 §4 `async`: 0050 with 00679B: −0.105 daily, −0.022 weekly, −0.015 monthly; with 00635U: 0.180, 0.231, 0.191; with 00646: 0.599, 0.588, 0.549; with 00642U: 0.092, 0.072, 0.022; 00679B with 00642U: −0.18, −0.19, −0.36 [A27-11]. 0050–00679B's normal-theory standard
   errors are 0.020, 0.045 and 0.093; the plug-in ones, which do not assume normality (LM20's Problem 6), are 1.4 to 2.4
   times as large on daily data across the five pairs (0.040 for 0050–00679B) [A27-11]. Both assume independent
   periods, and the plug-in one needs finite fourth moments. So read the plug-in errors of 00642U's pairs with care: its
   raw kurtosis, 26.6 on daily and 12.3 on monthly returns, is the largest of the five (the other four 11.2 to 21.0 and
   4.3 to 5.7) [A27-50]. Of the five pairs, no daily–weekly gap reaches two weekly standard errors of either kind; the
-  largest, 0.082 for 0050–00679B, is 1.8 normal-theory ones [A27-11]. The daily figure can differ from the weekly one
+  largest, 0.0833 for 0050–00679B, is 1.9 normal-theory ones [A27-11], and 1.8 of its own resampled standard error, about 0.046 (experiment 1: whole weeks or months, 20,000 draws each, default_rng([1, 20261011])). The daily figure can differ from the weekly one
   either way: it is higher for 0050–00646, 0050–00642U and 00679B–00642U, lower for 0050–00679B and 0050–00635U
   [A27-11]. Of the five pairs, one daily–monthly gap reaches two monthly standard errors: 00679B–00642U's daily and
-  monthly correlations differ by 0.1815 (from the unrounded correlations), which is 2.3 normal-theory standard errors
-  (0.0806) and 2.0 plug-in ones (0.0888) [A27-11]. The text names no cause. Monthly correlations from 116 calendar
+  monthly correlations differ by 0.1807 (from the unrounded correlations), which is 2.2 normal-theory standard errors (0.0807) and 2.0 plug-in ones (0.0890) [A27-11], and above two resampled ones (about 0.08). The text names no cause. Monthly correlations from 116 calendar
   months carry normal-theory errors near 0.09 when they are near zero, and plug-in errors up to 0.16 [A27-11]. R1's
-  weights on the full sample give 11.49%, 10.55% and 10.02% a year at the three frequencies ($A=242.951$, 51.56 and
-  12), and 00642U's share 45.9%, 41.9% and 45.0% [A27-12].
+  weights on the full sample give 11.49%, 10.57% and 10.03% a year at the three frequencies ($A=242.951$, 51.56 and
+  12), and 00642U's share 45.9%, 41.9% and 44.9% [A27-12].
 - E6 §5 `mix`: R1: $\mu_p$ is the average of the five annual means 24.16%, 14.87%, −0.97%, 9.26%, 10.53% [A27-08],
   11.57% [A27-47]; $s_p=11.49\%$ (full sample, weights reset daily); variance terms 76.4% of $s_p^2$, covariance terms
   23.6% [A27-13], against 7.2% and 92.8% for U28's book (lm10.md:220, recomputed [A27-31]). Weighted average
@@ -1762,8 +1760,8 @@ sales of every E5 fund except 00679B), and the rounding.
 5. MC (no numbers): in a window, a fund held long ($w_i>0$) has a negative risk contribution to the book. Which statement always holds? **A** Moving a small
    weight into it from a fund with a positive $\mathrm{MRC}$ lowers the book's volatility. B Raising its weight lowers
    the volatility at any size. C Selling it lowers the volatility. The solution derives $\partial\mathrm{MRC}_i/\partial w_i=\sigma_i^2(1-\rho_{i,p}^2)/\sigma_p\ge0$, the other weights fixed.
-6. MC: E5's monthly 0050–00646 correlation, 0.5521 on 116 calendar months (E5's data, descriptive); its normal-theory
-   standard error, to four decimals. A 0.0060 ($T$ for $\sqrt T$). **B** 0.0645. C 0.0928 ($1-\rho^2$ omitted)
+6. MC: E5's monthly 0050–00646 correlation, 0.5488 on 116 calendar months (E5's data, descriptive); its normal-theory
+   standard error, to four decimals. A 0.0060 ($T$ for $\sqrt T$). **B** 0.0649. C 0.0928 ($1-\rho^2$ omitted)
    [A27-40]; the solution adds the plug-in value 0.081 [A27-11].
 7. Derive $\partial\sigma_p/\partial w_i=(\Sigma\mathbf w)_i/\sigma_p$ for $\sigma_p>0$ from (10.8), Euler's identity
    (27.6), the shares $w_i\beta_{i,p}$ and $\sum_iw_i\beta_{i,p}=1$; show that the Euler share is the variance term plus
@@ -1778,9 +1776,9 @@ sales of every E5 fund except 00679B), and the rounding.
     exact −0.89 points, $\sigma_p$ 13.30% → 12.41% [A27-38, A27-39]. Python part: check with (10.9).
 11. Python: build E5's two frames from the lab's closes, distributions and split, and check them against the lab's
     derived frames; reproduce 2,362 and 2,368, 0.864% on 18 June 2025, the growth factors of A27-06, and the
-    correlations of X4 from the ISO weeks and calendar months without the first and last [A27-02–A27-06, A27-10,
+    correlations of X4 from the wealth frame's ISO weeks and calendar months, without the first and last and the two weeks across 0050's halt [A27-02–A27-06, A27-10,
     A27-11]. Then say, from §4's sessions, why a daily correlation of these funds can mislead. Say also which of
-    the five pairs' daily–monthly gaps reach two monthly normal-theory SEs (only 00679B–00642U's, 2.3; no cause named)
+    the five pairs' daily–monthly gaps reach two monthly normal-theory SEs (only 00679B–00642U's, 2.2; no cause named)
     [A27-11].
 12. Python: run (27.2) for R1 from cash of 1 at the close of 4 March 2019 to 8 October 2026 (the through case,
     fixed in advance). Trade at the lab's trade dates, the first session after each month-end signal on which all five
@@ -4599,7 +4597,7 @@ against the ruin line → LM35 (decision A1). The first window's fund statistics
 first-window weights → LM28 (decision A4); R1's first-window risk shares → LM27 (A4's carve-out, A27-21). 1/N,
 minimum variance and shrinkage on U28's halves, R1's, R3's and R5's realized volatility (decision A5), and R2's
 first-window volatility (A4's exception, A30-24) → LM30. Multivariate GARCH → out of scope (one
-sentence). Choosing $\lambda$, the cap or a trigger threshold by backtest → LM34's search. Other linkages and
+sentence). Choosing $\lambda$, the cap or a trigger threshold by backtest → a search of the kind LM34 corrects (Stage 3 X1: LM34's grid has no threshold search). Other linkages and
 tree-following splits → not in the book, one sentence (López de Prado notes that stage 3 could split along the tree's
 clusters instead, p. 11 of the SSRN version). To the lab (density): R7 re-implemented at all 92 signals,
 the risk-triggered variant of R8, the GARCH-scaled variant.
@@ -5111,7 +5109,7 @@ LM32–LM35 briefs and the same table: (31.1) is cited by LM35, (31.7) by LM32, 
 
 - `leads` gain 31 in lm07.md:6 and lm11.md:6 ((11.3) and the equal-correlation eigenvalues); both are on decision G's
   merged list (lm07 +30, +31; lm11 +29, +31, +34). lm08, lm10, lm16 and lm26 already list 31.
-- lm08.md:290 (optional, decision G): "[[LM31]] groups assets by this distance" → "[[LM31]] builds a tree of assets
+- lm08.md:290 (required, Stage 3 cross-check X21): "[[LM31]] groups assets by this distance" → "[[LM31]] builds a tree of assets
   from half this distance", since HRP clusters on the column distance of $d$, not on $\sqrt{2(1-\rho)}$ itself.
 - `src/syllabus.yaml` (decision G, LM31's wording): LM31's line reads "Risk budgets from LM27's contributions, HRP's
   tree, and volatility targeting."

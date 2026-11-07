@@ -2,8 +2,8 @@
    Data: the "widget" block of the chart JSON lm27-riskSplit, inlined in the page by the build
    (<script type="application/json" id="chart-lm27-riskSplit">), written by data/lm27_charts.py: the five funds and
    three annualized 5x5 covariance matrices of E5 in decimals, ten decimals each (daily on the 2,362 joint dates, A =
-   242.951; monthly on 116 calendar months compounded from the wealth frame, A = 12; daily on the window 29 January 2018 to 27 February 2020, A of the
-   full sample). Matrices only: no market series.
+   242.951; monthly on 116 calendar months compounded from the wealth frame, A = 12; daily on the window 29 January
+   2018 to 27 February 2020, A of the full sample). Matrices only: no market series.
    Formulas: Sigma w, s_p = sqrt(w'Sigma w), shares w_i (Sigma w)_i / s_p^2, which sum to 1 by (27.5); the weighted
    average volatility sum_i w_i s_i and the ratio (27.7) while every weight is >= 0, else sum_i |w_i| s_i, the bound of
    (8.11) with a short. The matrices are positive semidefinite by (10.5), so only s_p > 0 is checked. No optimizer.

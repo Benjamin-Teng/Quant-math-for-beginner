@@ -1337,8 +1337,9 @@ means nothing in the text was read; "unverified" marks a field or claim that no 
   environment (A29-22).
 - Stellato, Banjac, Goulart, Bemporad & Boyd, "OSQP: An Operator Splitting Solver for Quadratic Programs",
   *Mathematical Programming Computation* 12(4): 637–672, 2020 (Crossref: online 2020-02-20, print December 2020), DOI
-  [10.1007/s12532-020-00179-2](https://doi.org/10.1007/s12532-020-00179-2). Cited only for the method's name, which
-  the title states. Text not read.
+  [10.1007/s12532-020-00179-2](https://doi.org/10.1007/s12532-020-00179-2). Cited for the method's name, which the
+  title states, and for polishing (LM29 §8), read in arXiv:1711.08013v4 (12 February 2020; its arXiv record carries
+  this DOI), §4, pp. 10–11. The journal text was not read (Springer's page: "Open Access": "N").
 - Goulart & Chen, "Clarabel: An Interior-Point Solver for Conic Programs with Quadratic Objectives", arXiv:2405.12762
   (v1, 21 May 2024; the arXiv API record and abstract, re-read): a general-purpose interior-point solver for conic
   problems, based on a homogeneous embedding, specialized to quadratic objectives, "distributed as a standard solver
@@ -1354,7 +1355,10 @@ means nothing in the text was read; "unverified" marks a field or claim that no 
 - Lawson & Hanson, *Solving Least Squares Problems*, SIAM, 1995, DOI
   [10.1137/1.9781611971217](https://doi.org/10.1137/1.9781611971217). Crossref: monograph issued 1995-01-01, print
   ISBN 978-0-89871-356-5, online ISBN 978-1-61197-121-7. The series Classics in Applied Mathematics is **unverified**
-  (Crossref does not record it; SIAM's page answered 403) and is not printed. Cited through SciPy 1.18.1's
+  (Crossref does not record it; SIAM's page answered 403) and is not printed. Edition (LM29 R21, 2026-11-07, anonymous
+  requests): SIAM's book page again answered 403; the Crossref record has no edition number, original title or
+  relation, so a republication of the 1974 Prentice-Hall edition is unconfirmed and not printed; LM29 drops the
+  unrecorded place 'Philadelphia'. Cited through SciPy 1.18.1's
   `scipy.optimize.nnls` docstring (re-read in the project environment), which cites the book as "SIAM, 1995" and says
   the function uses an active-set method that solves the KKT conditions of non-negative least squares. The book was not
   read.
@@ -1609,7 +1613,7 @@ means nothing in the text was read; "unverified" marks a field or claim that no 
   incorrect under some conditions), which fits Crossref's issue listing (the next article starts at p. 1873). The
   Cambridge-style DOI 10.1017/S0022109000017798 is not registered (Crossref and doi.org both returned 404): cite
   10.2307/2329621.
-- Chopra & Ziemba (1993), same list: LM28 and LM30 cite it as lm07.md:509 does, with no ratio printed. Crossref,
+- Chopra & Ziemba (1993), same list: LM30 cites it as lm07.md:509 does, with no ratio printed. Crossref,
   re-read: *JPM* 19(2): 6–11, 1993, DOI 10.3905/jpm.1993.409440 (Crossref's record for that DOI, read 2026-10-31: the
   title, both authors, volume, issue and pages match).
 - Boyd & Vandenberghe (2004), same list ("Stanford PDF"): LM28, LM29 and LM31. *Convex Optimization*, Cambridge
@@ -2419,6 +2423,19 @@ one of the twelve has in `uv.lock` a Windows wheel that installs on CPython 3.13
   `reductions/solvers/qp_solvers/osqp_qpif.py:111-114`); polishing is on for a fresh solve (`:147-148`) and, on a warm
   re-solve, only when the matrices changed (`:142-143`). Options pass straight to `OSQP.setup` (`:150-151`); the book's
   `OSQP_OPTS` (`data/vol5_rules.py:64`) is `eps_abs` = `eps_rel` = 1e-10, `max_iter` 400,000, `polishing` True.
+- **OSQP 1.1.3's polishing** (LM29 R25, K3, U4; read 2026-11-07; the installed defaults printed read-only, no solve).
+  Installed: `polishing` 0, `polish_refine_iter` 3, `delta` 1e-6, `eps_abs` = `eps_rel` 1e-3, `max_iter` 4,000. OSQP's
+  [Solver settings](https://osqp.org/docs/interfaces/solver_settings.html) page (HTTP 200, built from master) agrees:
+  `polishing` "Perform polishing", default False; `delta` "Polishing regularization parameter", 1e-06;
+  `polish_refine_iter` "Refinement iterations in polishing", 3. The [solver page](https://osqp.org/docs/solver/index.html),
+  "Polishing": "Polishing works by guessing the active constraints at the optimum and solving an additional linear
+  system. If the guess is correct, OSQP returns a high accuracy solution. Otherwise OSQP returns the ADMM solution";
+  small `eps_abs` and `eps_rel` make success likelier. That page still names the setting `polish`; 1.1.3's wrapper
+  renames `polish` to `polishing` with a DeprecationWarning (`osqp/interface.py:283-295`). cvxpy, not OSQP, turns
+  polishing on (above). Stellato et al., arXiv:1711.08013v4, §4, pp. 10–11: the active sets come from the signs of the
+  dual iterate; the candidate solves the KKT system with those constraints as equalities, (27), and is kept if it
+  satisfies the optimality conditions; OSQP solves a regularized system, (30), δ ≈ 1e-6, then iterative refinement,
+  (31), for a fixed number of passes with no termination test. LM29 §8 and Solution 12(c) rest on these sources.
 - **CLARABEL settings** (brief: A29-22, `clarabel.DefaultSettings()`; run). The installed 0.11.1 defaults are
   `tol_gap_abs` = `tol_gap_rel` = `tol_feas` = `tol_infeas_abs` = `tol_infeas_rel` = 1e-8 and `max_iter` = 200. cvxpy
   sets each keyword as an attribute of the settings object and raises `TypeError` ("unrecognized solver setting") for
@@ -2505,11 +2522,17 @@ one of the twelve has in `uv.lock` a Windows wheel that installs on CPython 3.13
   and an exactly zero diagonal (`:2399-2409`). Run on 200 toy correlation matrices (5 to 28 variables): `np.corrcoef`
   was asymmetric in all 200; `squareform` rejected the raw distance matrix in 199, the symmetrized one in 190, and the
   symmetrized one with its diagonal set to 0 in none. The shared decision's "191 of 200" is the fresh check's own draws.
+- **`scipy.cluster.hierarchy.leaves_list`** (LM31 §4, §8 and References; the installed 1.18.1 docstring read and the
+  function run on 2026-11-07): returns the leaf ids in the tree's left-to-right order (docstring). Observed, not
+  documented: `linkage` lists the lower-numbered cluster first at every merge (Z[i, 0] < Z[i, 1]), and expanding the
+  root, each cluster replaced by its two members in that order, gives `leaves_list`'s order, at all 92 of E5's windows
+  and on U28 (Stage 3 checks). LM31's §4 states the convention as SciPy's.
 
 ### Not checked here
 
 - cvxpy's "Solver Features" page, quoted by the survey: not relied on.
-- The OSQP and Clarabel papers are cited for the solvers' names only, and Diamond and Boyd (2016) at its abstract
+- The Clarabel paper is cited for the solver's name only, the OSQP paper also for polishing (arXiv v4, above), and
+  Diamond and Boyd (2016) at its abstract
   (LM29's entries under Papers).
 
 ## Taiwan facts (Volume III)
@@ -3101,6 +3124,35 @@ descent, inverse variance or volatility, quasi-diagonalization, equal risk contr
 volatility targeting, reference portfolio, Black–Litterman or Ledoit–Wolf. LM31's composed forms, printed with their
 English in every box that uses them: 等風險貢獻 (equal risk contribution, ERC), 反波動率權重 (inverse-volatility weights)
 and 準對角化 (quasi-diagonalization); the other forms are in the rows above and in the list of the book's own forms.
+
+Stage 3 round 1 (LM28, LM29, LM31), 樂詞網 searched 2026-11-07 with curl, anonymously (generic User-Agent, no cookie,
+about one request a second), with the Volume III URL pattern and `&page=<n>`: 44 query strings (25 English, 19
+Chinese), each in all listings, 數學名詞, 統計學名詞 and 管理學名詞 (176 searches, 182 result pages). Every filtered
+search was read to its end, and every all-listings search but `distance` (2,129 rows) and `距離` (2,335), read to
+their first 300 rows. Entry pages answered 302 without a session and were not read.
+
+| English | 統計學名詞 | 數學名詞 | 管理學名詞 | Book |
+|:--|:--|:--|:--|:--|
+| local minimum | — (compound: locally minimum variance unbiased estimator 局部最小變異數不偏估計量) | [局部]極小[值] | — (工業工程名詞, 電子計算機名詞, 資訊與通訊術語大辭典 局部最小值; 經濟學 區域最小) | 局部極小值 (LM29 §2 box), after 數學名詞's [局部]極小[值] |
+| global minimum | — | 總體最小值 | — (經濟學 全域最小; 電子計算機名詞 全局極小值; 資訊與通訊術語大辭典 全局極小值（總體最小值）) | 全域最小值 (LM28 and LM29 §2 boxes), after LM4's 全域 (lm04.md:211–212, 727), not 數學名詞's 總體最小值 |
+| local maximum; global maximum | —; — | [局部]極大[值]; 總體最大值 | —; — (經濟學 全域最大值) | 局部／全域極大值 (LM4's Glossary, lm04.md:727) |
+| absolute minimum; relative minimum | —; — | 最小值；絕對極小值; 相對極小[值] | —; — | not used |
+| global optimum; global optimization | —; compound "global optimization algorithm" 全域最佳化演算法 | 總體最佳值; — | —; — | not used |
+| minimum-variance frontier (also unhyphenated; mean-variance frontier; minimum variance set) | — | — | — | 最小變異數前緣, composed from 統計學名詞's 最小變異數 (minimum variance) and 管理學名詞's 效率前緣 (LM28) |
+| efficient frontier | — | — | 效率前緣 | 效率前緣 |
+| frontier | — (compounds: stochastic frontier model 隨機前沿模型；隨機邊界模型; stochastic frontier analysis 隨機邊界分析) | 邊界 (frontier point 邊界點, frontier set 邊界集) | — (compounds: efficient frontier 效率前緣 and four trade terms) | 前緣, only in 效率前緣 and 最小變異數前緣 |
+| column vector; row vector | —; — | 行向量; 列向量 | —; — | 行向量 (lm09.md:221) |
+| column distance; row distance | —; — | 行距離; 列距離 | —; — | 行向量距離 (LM31's Glossary), composed; see below |
+| distance; distance matrix | 距離; — (shaded distance matrix 陰影距離矩陣; cross-distance matrix 交互距離矩陣) | 距離; — | —; — | 距離, 距離矩陣 (LM31 §4 box) |
+
+No listing has 全域最小值, 全域極小, 全域極大, 最小變異數前緣 or 行向量距離; 前緣 (232 rows) appears only in 效率前緣 and
+電機工程名詞's "tree frontier" 樹前緣. In 數學名詞, 全域 is only "universe" (全域；宇集); 統計學名詞 writes 全域 for
+"global" in three compounds (全域趨勢模型, 全域最佳化演算法, 貝氏全域向量自我迴歸). 數學名詞 lists "column distance"
+行距離 and "row distance" 列距離 beside "free distance" 自由距離; the search page gives no definition and the entry
+pages were not read, so the sense of the entry is not verified. The editor's decision (2026-11-07): 數學名詞's 行距離 is
+probably the coding-theory term (the three entries together suggest it, unverified), and 行距離 reads as 行距 (the
+spacing of lines), so the book keeps its composed 行向量距離 for the distance between columns of $(d_{ij})$. LM29's §2
+box takes 數學名詞's 局部極小值 for "local minimum" and, with LM28, 全域最小值 for "global minimum".
 
 Volume VI, LM32–LM35 (new terms):
 

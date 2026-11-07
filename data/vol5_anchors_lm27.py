@@ -37,9 +37,10 @@ A = 2,362 x 365.25 / 3,551 as lm10.md:41 writes it; decision C7), U28's A = 245.
 periods a year as LM19 counts them (lm19.md:39): the 500 weeks with a session over the years from the close before
 the first weekly return to the last weekly close (the same 3,542 days as the 506 calendar weeks they span; six Lunar
 New Year weeks have no session); monthly ones A = 12 (plans/vol-5.md, "Sharpe ratio"). Weekly and monthly returns
-compound the estimation frame's daily returns inside ISO weeks (Monday to Sunday; keys (ISO year, ISO week)) and
+compound the wealth frame's returns inside ISO weeks (Monday to Sunday; keys (ISO year, ISO week)) and
 calendar months; the first and last period, in which the sample starts (Wednesday 2017-01-18) and ends (Thursday
-2026-10-08), are dropped, complete or not (plans/vol-5.md, "Weeks and months"; the last week, 2026-W41, holds all
+2026-10-08), are dropped, complete or not, and so is a period in which a fund has no close at its end or at the end of
+the period before (2025-W24, W25: 498 weeks) (plans/vol-5.md, "Weeks and months"; the last week, 2026-W41, holds all
 four of its sessions). A27-10 prints what keeping the last week would change.
 Risk decomposition of weights w under a covariance matrix S: Cov(R_i, R_p) = (S w)_i, beta_{i,p} = (S w)_i / w'S w,
 MRC_i = (S w)_i / sqrt(w'S w), RC_i = w_i MRC_i, share_i = RC_i / sqrt(w'S w) = w_i beta_{i,p}; annualized volatility
@@ -128,20 +129,33 @@ def wkey(d: str) -> str:
     return f"{y}-W{wk:02d}"
 
 
+def pkey(d: str, key: str) -> str:
+    """The period of a date: its calendar month ("month") or its ISO week ("week")."""
+    return d[:7] if key == "month" else wkey(d)
+
+
 def periods(dates: list[str], R: Mat, key: str, drop: bool = True) -> tuple[list[str], Mat]:
     """Compound daily returns within ISO weeks ("week") or calendar months ("month"); drop the first and last period
     (complete or not) unless drop is False."""
-    def k(d: str) -> str:
-        return d[:7] if key == "month" else wkey(d)
     keys: list[str] = []
     rows: list[Vec] = []
     for d, r in zip(dates, R, strict=True):
-        if not keys or k(d) != keys[-1]:
-            keys.append(k(d))
+        if not keys or pkey(d, key) != keys[-1]:
+            keys.append(pkey(d, key))
             rows.append(np.ones(R.shape[1]))
         rows[-1] = rows[-1] * (1 + r)
     G = np.array(rows) - 1
     return (keys[1:-1], G[1:-1]) if drop else (keys, G)
+
+
+def closed(dates: list[str], traded: NDArray[np.bool_], key: str) -> set[str]:
+    """The periods after the first in which every fund has a close on the period's last session and on the last
+    session of the period before, so that every fund's compounded return spans the same closes."""
+    last: dict[str, int] = {}
+    for i, d in enumerate(dates):
+        last[pkey(d, key)] = i
+    ks = list(last)
+    return {ks[n] for n in range(1, len(ks)) if traded[last[ks[n - 1]]].all() and traded[last[ks[n]]].all()}
 
 
 def se_rho(x: Vec, y: Vec) -> tuple[float, float, float]:
@@ -242,13 +256,23 @@ put(f"annualized volatilities (divisor T, A {f(A, 2)}) {fl(100 * vol, 2, 1)}%; a
 Cd = corr_mat(X)
 put("daily correlations " + "; ".join(f"{F[a]}-{F[b]} {f(Cd[a, b], 2, 3, 4)}" for a in range(N)
                                       for b in range(a + 1, N)))                                         # 09
-kw, Xw = periods(fr.est_dates, X, "week")
-km, Xm = periods(fr.est_dates, X, "month")
-kw_all, Xw_all = periods(fr.est_dates, X, "week", drop=False)
-last_wk = [d for d in fr.est_dates if wkey(d) == kw_all[-1]]
-Ck = corr_mat(Xw_all[1:])
-put(f"weekly: {len(kw)} ISO weeks {kw[0]} .. {kw[-1]}; monthly: {len(km)} calendar months {km[0]} .. {km[-1]} (the "
-    f"first and last period, in which the sample starts and ends, dropped); keeping the last week ({kw_all[-1]}: "
+# weeks and months compound the wealth frame (each a return from close to close); a period without every fund's close
+# at its end or at the end of the period before is dropped: 2025-W24 and 2025-W25, across 0050's halt (K1 option (b))
+kw5, Xw5 = periods(fr.wealth_dates, fr.W, "week")              # the 500 weeks with a session (A_week counts them)
+ok_w, ok_m = closed(fr.wealth_dates, fr.traded, "week"), closed(fr.wealth_dates, fr.traded, "month")
+drop_w = [k for k in kw5 if k not in ok_w]
+assert drop_w == ["2025-W24", "2025-W25"], drop_w
+kw = [k for k in kw5 if k in ok_w]
+Xw = Xw5[np.array([k in ok_w for k in kw5])]
+km, Xm = periods(fr.wealth_dates, fr.W, "month")
+assert all(k in ok_m for k in km)                               # every month runs from close to close
+kw_all, Xw_all = periods(fr.wealth_dates, fr.W, "week", drop=False)
+last_wk = [d for d in fr.wealth_dates if wkey(d) == kw_all[-1]]
+Ck = corr_mat(Xw_all[1:][np.array([k in ok_w for k in kw_all[1:]])])     # keeping the last week as well: 499 weeks
+put(f"weekly (wealth frame): {len(kw5)} ISO weeks with a session {kw5[0]} .. {kw5[-1]}, {len(kw)} used (without "
+    f"{', '.join(drop_w)}, 0050 having no close at the end of the first); monthly (wealth frame): {len(km)} calendar "
+    f"months {km[0]} .. {km[-1]} (the first and last period, in which the sample starts and ends, dropped); keeping "
+    f"the last week ({kw_all[-1]}: "
     f"{last_wk[0]} .. {last_wk[-1]}, {len(last_wk)} sessions) would give {len(kw) + 1} weeks and weekly correlations "
     f"0050-00646 {f(Ck[0, J['00646']], 3)}, 0050-00679B {f(Ck[0, J['00679B']], 3)}")                  # 10
 frq = {"daily": X, "weekly": Xw, "monthly": Xm}
@@ -318,17 +342,18 @@ put("; ".join(rows) + f"; 00679B-00642U daily, weekly, monthly {', '.join(c79)} 
 w1 = np.full(N, 1 / N)
 # periods a year as LM19 counts them (lm19.md:39: periods with data over the years they span); the years run from the
 # close before the first weekly return (the last session of the dropped first week) to the last kept week's last close
-# (decision C7), which here equals the span of the calendar weeks, Monday of kw[0] to Sunday of kw[-1]; weeks without
+# (decision C7), which here equals the span of the calendar weeks, Monday of kw5[0] to Sunday of kw5[-1]; weeks without
 # a session (Lunar New Year) are not periods
-wk_first = date.fromisocalendar(int(kw[0][:4]), int(kw[0][6:]), 1)
-wk_last = date.fromisocalendar(int(kw[-1][:4]), int(kw[-1][6:]), 7)
+wk_first = date.fromisocalendar(int(kw5[0][:4]), int(kw5[0][6:]), 1)
+wk_last = date.fromisocalendar(int(kw5[-1][:4]), int(kw5[-1][6:]), 7)
 n_cal_weeks = ((wk_last - wk_first).days + 1) // 7
-c_before = max(d for d in fr.est_dates if wkey(d) == kw_all[0])
-c_last = max(d for d in fr.est_dates if wkey(d) == kw[-1])
+c_before = max(d for d in fr.wealth_dates if wkey(d) == kw_all[0])
+c_last = max(d for d in fr.wealth_dates if wkey(d) == kw5[-1])
 days_wk = (date.fromisoformat(c_last) - date.fromisoformat(c_before)).days
 assert days_wk == (wk_last - wk_first).days + 1
 years_wk = days_wk / 365.25
-A_week = len(kw) / years_wk
+A_week = len(kw5) / years_wk                  # the 500 weeks with a session; the statistics use the 498 kept ones
+assert len(kw5) == 500 and len(kw) == 498 and kw[0] == kw5[0] and kw[-1] == kw5[-1]
 assert len(km) == 116 and km[0] == "2017-02" and km[-1] == "2026-09"     # 116 months over 116 / 12 years: A = 12
 Afreq = {"daily": A, "weekly": A_week, "monthly": 12.0}
 cells = []
@@ -338,9 +363,9 @@ for nm, x in frq.items():
                  f"0050 share {f(100 * sh[0], 1)}%")
     if nm == "weekly":
         cells[-1] += f" (vol {f(100 * sp * sqrt(365.25 / 7), 2)}% with A = 365.25 / 7)"
-put(f"R1's weights by frequency (A = {f(A, 2)}, {f(A_week, 2)}, 12; weekly A = {len(kw)} weeks with a session over "
+put(f"R1's weights by frequency (A = {f(A, 2)}, {f(A_week, 2)}, 12; weekly A = {len(kw5)} weeks with a session over "
     f"{f(years_wk, 4)} years from the close of {c_before}, before the first weekly return, to that of {c_last} "
-    f"({days_wk} days, the span of the {n_cal_weeks} calendar weeks {wk_first} .. {wk_last}) = {len(kw)} x 365.25 / "
+    f"({days_wk} days, the span of the {n_cal_weeks} calendar weeks {wk_first} .. {wk_last}) = {len(kw5)} x 365.25 / "
     f"{days_wk}): " + "; ".join(cells))                                                                    # 12
 
 # ---------------------------------------------------------------- R1 and R2 on the full-sample covariance
@@ -632,7 +657,7 @@ k_hi = {nm: F[int(np.argmax(kurt[nm]))] for nm in frq}
 assert k_hi["daily"] == k_hi["monthly"] == "00642U"
 ko = [j for j in range(N) if F[j] != "00642U"]
 k_d, k_m = kurt["daily"], kurt["monthly"]
-put("raw kurtosis (19.3), divisor T, estimation frame: "
+put("raw kurtosis (19.3), divisor T, daily on the estimation frame, weekly and monthly from the wealth frame: "
     + "; ".join(f"{nm} " + ", ".join(f"{F[j]} {kurt[nm][j]:.4f}" for j in range(N)) for nm in frq)
     + f"; largest daily and monthly 00642U ({f(float(k_d[J['00642U']]), 1)}, {f(float(k_m[J['00642U']]), 1)}), "
     f"largest weekly {k_hi['weekly']}; the other four daily {f(float(k_d[ko].min()), 1)} to "

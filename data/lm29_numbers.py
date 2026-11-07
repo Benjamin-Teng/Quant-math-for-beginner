@@ -250,13 +250,14 @@ chk("U28 lambda = 2 sigma^2 from the printed 12.10%", 2 * 0.1210**2, ".4f", "0.0
 chk("U28 lowest excluded beta (Cement)", C.bU[C.imin], ".6f", "1.000019")
 assert C.u.names[C.imin] == "Cement" and C.u.names[C.imax] == "Optoelectronic"
 chk("U28 highest excluded beta", C.bU[C.imax], ".3f", "1.480")
-chk("KC 4: Cement's covariance must fall by more than (% of sigma_p^2)", 100 * (C.bU[C.imin] - 1), ".4f", "0.0019")
+chk("KC 4: Cement's covariance must fall by about (% of sigma_p^2)", 100 * (C.bU[C.imin] - 1), ".4f", "0.0019")
 flag("KC 4: Cement's fall", 100 * (C.bU[C.imin] - 1), 4)
 has("19 excluded", "The 19 excluded sectors")
 chk("U28 unconstrained shorts (echo A28-13)", int((C.wuU < -C.ZERO).sum()), "d", "12")
 chk("U28 unconstrained gross (echo A28-13)", float(np.abs(C.wuU).sum()), ".2f", "2.24")
 assert len(C.held1) == 9 and len(set(C.held1) & set(C.heldU)) == 7
-has("first half (echo A30-22)", "again holds 9 sectors, only 7 of them the full sample's")
+has("first half (echo A30-22)", "On the first half alone, the long-only portfolio again holds 9 sectors ([[LM30]]), "
+                                "only 7 of them the full sample's")
 has("2^28", "2^{28}=268,435,456")
 assert 2**28 == 268_435_456
 
@@ -484,8 +485,8 @@ has("SCS version", "SCS 3.3.1")
 has("SciPy version", "SciPy 1.18.1")
 assert (C.dflt.tol_gap_abs, C.dflt.tol_gap_rel, C.dflt.tol_feas, C.dflt.max_iter) == (1e-8, 1e-8, 1e-8, 200)
 assert [m.group(1) for m in C.osqp_def.values() if m is not None] == ["1e-5", "1e-5", "10000"]
-has("defaults", "cvxpy's defaults are OSQP's $10^{-5}$ with 10,000 iterations and polishing, and CLARABEL's "
-               "$10^{-8}$ with 200")
+has("defaults", "cvxpy's defaults for OSQP are $10^{-5}$ with 10,000 iterations and polishing, in place of OSQP's "
+               "own $10^{-3}$, 4,000 and no polishing. CLARABEL keeps its own defaults, $10^{-8}$ with 200.")
 # the book's OSQP settings (vol5_rules.OSQP_OPTS) and OSQP's own refinement default (item R25; Lab Part 9 prints 3)
 assert C.OSQP_OPTS["eps_abs"] == C.OSQP_OPTS["eps_rel"] == 1e-10 and C.OSQP_OPTS["max_iter"] == 400_000
 assert C.OSQP_OPTS.get("polishing") is True, C.OSQP_OPTS
@@ -496,6 +497,10 @@ _osqp.setup(_sp.csc_matrix(np.eye(2)), np.zeros(2), _sp.csc_matrix(np.ones((1, 2
             verbose=False)
 assert _osqp.settings.polish_refine_iter == 3, _osqp.settings.polish_refine_iter
 print("CHECK OSQP's default polish_refine_iter: 3 (Lab Part 9)")
+# Section 8: OSQP's own defaults, which cvxpy replaces (eps 1e-3, 4,000 iterations, no polishing)
+_own = _osqp.settings
+assert (_own.eps_abs, _own.eps_rel, _own.max_iter, bool(_own.polishing)) == (1e-3, 1e-3, 4000, False), _own
+print("CHECK OSQP's own defaults: eps_abs = eps_rel = 1e-3, max_iter 4000, no polishing")
 # K3: tightening only one of CLARABEL's two gap tolerances leaves R3 at the first signal where the defaults put it
 for k_unit in (1.0, C.A):
     S_k = k_unit * C.cov0(C.x0)

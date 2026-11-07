@@ -862,7 +862,7 @@ chk("P5 key A vol", 100 * 0.8 / 4, ".0f", "20")
 chk("P5 key A L", 8 / 4, ".1f", "2.0")
 chk("P5 B", 4 / 8, ".1f", "0.5")
 chk("P5 C", 100 * 0.8 * 4, ".0f", "320")
-has("S6 the window", "on 30 April 2024 it was -1.20")
+has("S6 the window", "On the window of 30 April 2024 the same formula gave -1.20")
 chk("P6 SR*^2", p6**2, ".2f", "0.34")
 chk("P6 SR*^2 (printed)", 0.5**2 + 0.015**2 / 0.05**2, ".2f", "0.34")
 chk("P6 SR*", p6, ".3f", "0.583")
@@ -901,11 +901,13 @@ chk("S10 column part 0050", s10_col[0], "+.2f", "+7.08")
 chk("S10 column part 00646", s10_col[1], ".2f", "-4.11")
 chk("S10 rescaling 0050", s10_res[0], ".2f", "0.43")
 chk("S10 rescaling 00646", s10_res[1], ".2f", "2.28")
-chk("S10 0050 parts (printed)", 7.08 - 0.43, ".2f", "6.65", in_md=False)
-chk("S10 00646 parts (printed)", -4.11 - 2.28, ".2f", "-6.39", in_md=False)
+chk("S10 0050 parts (printed)", 7.08 - 0.43, ".2f", "6.65", in_md=False)   # a one-decimal tie: hence the
+chk("S10 00646 parts (printed)", -4.11 - 2.28, ".2f", "-6.39", in_md=False)  # unrounded changes in the text
+chk("S10 change 0050 unrounded", 100 * dW[0, 0], ".4f", "6.6498")
+chk("S10 change 00646 unrounded", 100 * dW[1, 0], ".4f", "-6.3892")
 has("S10 split", "column 1 sums to 42.6, so $\\mathbf 1^{\\top}\\Sigma^{-1}\\mathbf e$ rises from 11.27 to 11.70. "
                  "Column 1 over the new total moves 0050 by +7.08 points and 00646 by -4.11. Rescaling the old "
-                 "weights takes 0.43 and 2.28 more")
+                 "weights takes 0.43 and 2.28 more, leaving 6.6498 and -6.3892 unrounded.")
 has("S11 duals", "The duals +0.00193 and -0.161 are the negatives of $\\lambda$ and $\\lambda_\\mu$ in [[eg:inside]]")
 has("S11 gaps", "with weight gaps to the closed form below $10^{-15}$ (OSQP) and $10^{-11}$ (CLARABEL) and KKT residuals "
                 "below $10^{-13}$")

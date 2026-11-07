@@ -53,9 +53,11 @@ the previous close (no rule trades on a named day). The rules' actual path is th
 2026-10-24) times the mid rate (spot_buy + spot_sell) / 2 of the first FX row dated after D; a Taiwan date d takes
 the last US session before d, so its return compounds the US sessions D with d_prev <= D < d and the FX change
 (plans/vol-5.md, capability B5). 0050 is itself in every hypothetical book: its own 2007-2008 files in 2008, LM2's
-sample in 2015, the wealth frame in the 2020 proxy check. Weekly returns compound daily returns within ISO weeks,
-keys (ISO year, ISO week); the first and last week of a span, in which it starts and ends, are dropped, complete or
-not (LM27's convention; plans/vol-5.md, "Weeks and months"). Mahalanobis distances use the full estimation frame's
+sample in 2015, the wealth frame in the 2020 proxy check. Weekly returns compound the wealth frame's daily returns
+(each fund's, and each proxy's on the same calendar) within ISO weeks, keys (ISO year, ISO week); the first and last
+week of a span, in which it starts and ends, are dropped, complete or not, and so is every week in which a fund lacks
+a close at its end or at the end of the week before (2025-W24 and W25, across 0050's halt: 498 weeks; LM27's
+convention after its Stage 3 revision; plans/vol-5.md, "Weeks and months"). Mahalanobis distances use the full estimation frame's
 mean and covariance (divisor T); the reverse stress test minimizes d^2 = (x - mu)' S^-1 (x - mu) subject to
 f'x = -l (closed form) and, bounded, with 0050's shock >= -10% (cvxpy: CLARABEL and OSQP in percent units, which the
 shared decision "Solver output" allows with the KKT residuals printed; tolerances printed; the stationarity
@@ -243,17 +245,22 @@ def growth(a: str, b: str) -> Vec:
     return np.prod(1 + fr.W[WIDX[a] + 1:WIDX[b] + 1], axis=0) - 1
 
 
-def weeks(dates: list[str], x: Mat) -> tuple[int, Mat]:
-    """Compound daily returns (rows of x) within ISO weeks, keys (ISO year, ISO week); the first and last week of the
-    span, in which it starts and ends, are dropped, complete or not (LM27's convention). Returns the count and the
-    rows."""
+def weeks(dates: list[str], x: Mat, traded: NDArray[np.bool_]) -> tuple[int, Mat, list[str]]:
+    """Compound daily returns (rows of x, on the wealth frame's dates) within ISO weeks, keys (ISO year, ISO week); the
+    first and last week of the span, in which it starts and ends, are dropped, complete or not, and so is a week in
+    which a fund (traded, rows of E5's wealth frame) has no close on its last session or on the last session of the
+    week before (LM27's convention after its Stage 3 revision, data/lm27_common.py's closed()). Returns the count, the
+    rows and the weeks dropped for a missing close."""
     keys = [date.fromisoformat(d).isocalendar()[:2] for d in dates]
     uk = sorted(set(keys))
     acc = {k: np.ones(x.shape[1]) for k in uk}
-    for k, r in zip(keys, x, strict=True):
+    last: dict[tuple[int, int], int] = {}
+    for i, (k, r) in enumerate(zip(keys, x, strict=True)):
         acc[k] = acc[k] * (1 + r)
-    kept = uk[1:-1]
-    return len(kept), np.array([acc[k] - 1 for k in kept])
+        last[k] = i
+    shut = [k for n, k in enumerate(uk[1:-1], 1) if not (traded[last[uk[n - 1]]].all() and traded[last[k]].all())]
+    kept = [k for k in uk[1:-1] if k not in shut]
+    return len(kept), np.array([acc[k] - 1 for k in kept]), [f"{y}-W{w:02d}" for y, w in shut]
 
 
 def rules_line(vals: dict[str, float], k: int = 2) -> str:
@@ -449,16 +456,23 @@ def book_u(e: Vec, us: list[float]) -> float:
     return float(sum(abs(float(e[j])) * us[j] for j in range(1, len(e))))
 
 
+wi = [TPOS[d] for d in WD]                    # the wealth frame: every TR23 session after the base
+if wi != list(range(wi[0], wi[0] + len(WD))) or TD[wi[0] - 1] != fr.base:
+    fail("the wealth frame is not every TR23 session after the base")
 rows = []
 for fund, s in [*PROXIES.items(), ("00642U", "DBO")]:
     j = FUNDS.index(fund)
-    rp = np.array([PV[s][LASTD[i]] / PV[s][LASTD[i - 1]] - 1 for i in ci])
-    nwk, wkr = weeks(fr.est_dates, np.column_stack([rp, fr.X[:, j]]))
+    rp = np.array([PV[s][LASTD[i]] / PV[s][LASTD[i - 1]] - 1 for i in ci])          # estimation frame: daily, gap
+    rpw = np.array([PV[s][LASTD[i]] / PV[s][LASTD[i - 1]] - 1 for i in wi])         # wealth frame: weeks
+    nwk, wkr, dwk = weeks(WD, np.column_stack([rpw, fr.W[:, j]]), fr.traded)
+    if dwk != ["2025-W24", "2025-W25"]:
+        fail(f"weeks dropped for a missing close: {dwk}")
     gapy = (np.log1p(fr.X[:, j]).sum() - np.log1p(rp).sum()) / fr.years
     rows.append(f"{fund}~{s} daily {f(np.corrcoef(rp, fr.X[:, j])[0, 1], 3)} weekly "
                 f"{f(np.corrcoef(wkr[:, 0], wkr[:, 1])[0, 1], 3)} gap {pc(gapy, 2)}")
-put(f"proxies against the funds on the estimation frame (correlation daily and over {nwk} ISO weeks, the first and "
-    "last dropped; annual log-growth gap, fund minus proxy): " + "; ".join(rows))
+put(f"proxies against the funds (correlation daily on the estimation frame and over {nwk} ISO weeks of the wealth "
+    f"frame, the first and last and {', '.join(dwk)} dropped; annual log-growth gap on the estimation frame, fund "
+    "minus proxy): " + "; ".join(rows))
 
 out = []
 for name in ("2020", "2024-08-05", "2025-04-07"):
@@ -602,8 +616,9 @@ g22 = growth(a, b)
 ep = np.array([a < d <= b for d in fr.est_dates])
 
 
-nwf, wf = weeks(fr.est_dates, X)
-nwe, we = weeks([d for d, m in zip(fr.est_dates, ep, strict=True) if m], X[ep])
+epw = np.array([a < d <= b for d in WD])
+nwf, wf, _ = weeks(WD, fr.W, fr.traded)                      # 498 weeks, as A27-11's weekly correlations
+nwe, we, _ = weeks([d for d, m in zip(WD, epw, strict=True) if m], fr.W[epw], fr.traded[epw])
 put(f"2022 (an illustration, not a ROADMAP scenario): TR23 peak {a}, trough {b}, {k22 - p22} sessions, "
     f"{pc(LV[k22] / LV[p22] - 1, 2)}; funds {funds_line(FUNDS, g22)}; 0050/00679B correlation daily "
     f"{f(np.corrcoef(X[ep, 0], X[ep, 2])[0, 1], 3)} and over the window's {nwe} ISO weeks "

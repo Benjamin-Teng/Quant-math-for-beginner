@@ -396,7 +396,7 @@ P = cl.select(U28).to_numpy()
 cd = np.array(cl["date"].to_list())
 XU = P[1:] / P[:-1] - 1                    # one-session returns on the full grid of closes
 XU = XU[~np.isnan(XU).any(axis=1)]         # a dropped close removes the returns into and out of it (Lab 23)
-AU =XU.shape[0] / ((date.fromisoformat(cd[-1]) - date.fromisoformat(cd[0])).days / 365.25)
+AU = XU.shape[0] / ((date.fromisoformat(cd[-1]) - date.fromisoformat(cd[0])).days / 365.25)
 SU = AU * cov0(XU)
 print(f"full data: {FULL_DATA}; {len(U28)} sectors, T = {XU.shape[0]}, A = {AU:.2f}   [book: T = 4,382, A = 245.48]")
 wU = minvar(SU)
@@ -774,7 +774,7 @@ print(f"{len(survivors)} survivor(s): {[[FUNDS[i] for i in s] for s, _ in surviv
 print(f"31 supports in {dt * 1e3:.1f} ms; 2^28 supports of 28 assets would take about "
       f"{dt / 31 * 2**28 / 3600:.0f} hours at this rate (larger systems are slower)")
 # your code: repeat at every signal and count how often the surviving support changes from one month to the next.
-# The surviving active set is itself an estimate: on U28's first half (LM30) the long-only minimum-variance portfolio holds 9 sectors, only 7 of them the full sample's.
+# The surviving active set is itself an estimate: in LM30's experiment 4 each fund is excluded in 18% to 72% of 1,000 bootstrap resamples of the first window.
 """)
 
 nb = nbf.v4.new_notebook()

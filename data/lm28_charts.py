@@ -64,7 +64,7 @@ ix, iy = branch(o, Y0 / 100, o.mumv)
 cml_end = (Y1 / 100 - RF) / sr
 frontier_spec: dict[str, Any] = {
     "type": "scatter",
-    "alt": "The first window's mean-variance frontier in volatility and mean, % a year: the efficient branch rises from "
+    "alt": "The first window's minimum-variance frontier in volatility and mean, % a year: the efficient branch rises from "
            "the minimum-variance portfolio at 5.02% and 4.34%; the capital market line runs from 1.5% through the "
            "tangency portfolio at 7.81% and 8.38%; equal weights lie inside the frontier at 7.38% and 3.91%",
     "height": 330,

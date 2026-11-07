@@ -215,6 +215,7 @@ chk("cash rate", 100 * K.RF, ".1f", "1.5")
 
 # ---------------------------------------------------------------- Section 2
 pct("R1's 00642U share (LM27's A27-21)", float(shares(K.w1, S0)[J["00642U"]]), 1, "50.2")
+has("R1's 00642U share cited", "carried 50.2% of its risk ([[ex:shares]]), as [[LM27]]'s note on its trailing windows")
 v0 = K.v0
 vol2 = [f"{100 * x:.2f}" for x in v0]
 assert vol2 == ["13.50", "11.87", "8.54", "9.39", "23.17"], vol2

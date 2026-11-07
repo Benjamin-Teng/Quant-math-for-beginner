@@ -186,8 +186,8 @@ has("X1: realized row", "| Realized volatility, net of costs: R1 / R3 / R5 | 12.
 has("X1: note SEs", "SEs 0.003, 0.003 and 0.00002 for the Sharpe ratios, 0.5 and 0.03 points for the SDs.")
 chk("X1: A", C.A, ".2f", "242.95")
 chk("X1: A_w", C.fr.A_wealth, ".2f", "243.57")
-has("X1: A_w sentence", "The realized volatilities annualize the 1,851 net daily returns of the wealth frame with "
-                        "$A_{\\mathrm w}=243.57$.")
+has("X1: A_w sentence", "The realized volatilities are the standard deviations (divisor $T$) of the 1,851 net daily "
+                        "returns of the wealth frame, annualized with $A_{\\mathrm w}=243.57$.")
 chk("X1: R1 fixed weights, full sample", pct(C.vol(C.w1, C.cov0(C.fr.X), C.A)), ".2f", "11.49")
 has("X1: dates", "13 February 2017 to 27 February 2019")
 assert (C.d_first, C.d_last) == ("2017-02-13", "2019-02-27")

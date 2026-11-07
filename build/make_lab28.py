@@ -511,6 +511,8 @@ show("column part, 0050", part_col[0], "+.2f", "+7.08")
 show("column part, 00646", part_col[1], ".2f", "-4.11")
 show("rescaling, 0050", part_res[0], ".2f", "0.43")
 show("rescaling, 00646", part_res[1], ".2f", "2.28")
+show("change, 0050, unrounded", 100 * dW[0, 0], ".4f", "6.6498")      # 7.08 - 0.43 would be a rounding tie
+show("change, 00646, unrounded", 100 * dW[1, 0], ".4f", "-6.3892")
 show("corr(0050, 00646)", Cw[0, 1], ".2f", "0.54")
 show("1 point over 0050's SE", 0.01 / se[0], ".2f", "0.11")
 """)

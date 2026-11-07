@@ -2797,7 +2797,7 @@ four failure forms compared on the same rules (guidance g:87–90). The rules' s
 each rule's loss on 2025-04-07 included (shared decision "Owners", decision A1: LM32 points here), and the T5S
 per-day lows of 2025-04-07 and 2024-08-05 (A35-45; decision A5: LM32's lab echoes them). Values owned: every A35
 anchor except the echoed inputs. The text prints each echo with its owner's ID at no more than the owner's precision
-(decision C12): the full-sample correlations −0.105, 0.599 and −0.023 (A27-11); R8's largest uncapped ratio 2.14
+(decision C12): the full-sample correlations −0.105, 0.599 and −0.022 (A27-11); R8's largest uncapped ratio 2.14
 (A31-29) and its exposures after the trades of 2 March 2020, 0.884 (A31-33), and 1 April 2025, 1.33 (A31-32);
 00631L's −19.995% and −11.20% (lm02.md:498); TR23's 5,849 returns (lm19.md:46) and its −9.70% on 2025-04-07
 (lm26.md:32); TX's $F_t=49{,}357$ (lm23.md:327). The rules' weights (A35-23, A35-38, LM27–LM31's) are replay inputs
@@ -2889,9 +2889,11 @@ sentence in §9.
   AUTHORING §8); a window's length is given in sessions.
   $\hat\Sigma$ and $\bar{\mathbf R}$ of the full estimation frame, divisor $T$ (`cov0`, `ddof` passed). Betas: OLS slope
   with an intercept on TR23's same-day $R$. Mahalanobis $d=\sqrt{d^2}$ with that mean and $\hat\Sigma$. Ruin leverage
-  $-1/R$ for a loss $R<0$. Quantiles `inverted_cdf`. Weekly returns compound the daily ones within ISO weeks, keys
-  (ISO year, ISO week), with the span's first and last week dropped, complete or not (LM27's convention; decision D
-  and the first revision's "Weeks and months").
+  $-1/R$ for a loss $R<0$. Quantiles `inverted_cdf`. Weekly returns compound the wealth frame's daily returns within
+  ISO weeks, keys (ISO year, ISO week), a proxy's on the same calendar, with the span's first and last week dropped,
+  complete or not, and every week in which a fund lacks a close at its end or at the end of the week before (2025-W24
+  and W25, across 0050's halt; LM27's convention after its Stage 3 revision; decision D and the first revision's
+  "Weeks and months").
   Solver settings as the shared decision "Solver output" (CLARABEL 1e-12, OSQP 1e-10 polished), in percent units,
   which that decision allows with the KKT residuals printed. The objective is given to cvxpy as
   `cp.quad_form(x - Rbar, cp.psd_wrap(Sigma_inv))`, $\hat\Sigma^{-1}$ wrapped as positive semidefinite. In that form
@@ -3198,7 +3200,8 @@ sorted distances (about 30 KB), computed by `data/lm35_charts.py`. No optimizer 
   0, since the data hold no US session on 21 January [A35-28]; R2 loses 2.8% that day.
 - E5 §4 `proxycheck`, the proxies where the funds exist (*hypothetical* in the replay line): daily correlations with
   their funds on the estimation frame 0.705 (SPY), 0.783 (TLT), 0.745 (GLD), 0.655 (USO), 0.696 (DBO), and 0.944,
-  0.952, 0.926, 0.845, 0.894 over its 500 ISO weeks, the first and last dropped [A35-25]; the daily figures are lower
+  0.952, 0.926, 0.845, 0.894 over the wealth frame's 498 ISO weeks, the first and last and the two across 0050's halt
+  dropped [A35-25]; the daily figures are lower
   because the funds close at 13:30 Taipei time, hours after the New York close they are paired with (shared decision
   "Timing of E5"). Over 2020's window 00642U lost 46.42%, USO 60.7% and DBO about 46% [A35-26]. USCF states USO's
   roll (the near-month contract, moved to the next over five days each month); Invesco's page names DBO's index, the
@@ -3218,7 +3221,7 @@ sorted distances (about 30 KB), computed by `data/lm35_charts.py`. No optimizer 
   −2.04% [A35-33]. R3's loss rises from 1.41% to 2.95%, R7's from 1.40% to 3.00% [A35-33]. 2022 shows a real case
   (an illustration, not one of the five scenarios): from 2022-01-17 to 2022-10-25 TR23 lost 28.47%, 0050 33.93% and 00679B
   22.15%; frozen at the start, R2 lost 22.37% and R4 29.86% [A35-34]. Their daily correlation inside the window was
-  −0.138, and +0.019 over the window's 38 ISO weeks [A35-34], against −0.023 over the full sample's 500 [A27-11]: the
+  −0.138, and +0.019 over the window's 38 ISO weeks [A35-34], against −0.022 over the full sample's 498 [A27-11]: the
   bonds fell with the stocks while the correlation stayed near zero, because both trended down. On the 48 days when
   0050 fell two standard deviations or more, its correlation with 00646 was 0.540, against 0.669 from (16.10)
   [A35-35] and 0.599 in the full sample [A27-11]. For a normal variable a one-sided tail narrows the spread

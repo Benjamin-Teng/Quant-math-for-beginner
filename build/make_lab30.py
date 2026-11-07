@@ -809,7 +809,7 @@ md(r"""
 
 **Problem 11** is Part 2: the three mean true Sharpe ratios, 1/N's 31.4% and the 2,115 sign flips. In the model, where the window's estimates are the truth, the first window meets two of DeMiguel, Garlappi and Uppal's conditions (a best Sharpe ratio well above 1/N's, few assets) but not the third (a long window); in the data the ex ante gap is unknown.
 
-**Problem 12** (a) and (b) are Parts 4 and 6, with the ratio of observations to assets; part (c) needs no code:
+**Problem 12** (a) and (b) are Parts 4 and 6; part (c) needs no code. The cell below prints (a)'s rows, with the ratio of observations to assets, and (b)'s check:
 """)
 
 code(r"""
