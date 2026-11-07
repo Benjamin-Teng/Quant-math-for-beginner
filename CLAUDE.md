@@ -7,6 +7,8 @@ every project instruction here, not there.
 
 ## Read first, in this order
 
+0. [`project/handover.md`](project/handover.md) — where the last session stopped, what to do next and the traps it hit
+   (rewritten at the end of each stretch; kept out of `docs/`, which GitHub Pages publishes).
 1. [`TODO.md`](TODO.md) — the current work queue and its order; [`plans/ROADMAP.md`](plans/ROADMAP.md) for the volumes after Volume I.
 2. [`project/SPEC.md`](project/SPEC.md) — what the owner decided (format, language, rigor, hosting, rules).
 3. [`project/PITFALLS.md`](project/PITFALLS.md) — mistakes already made and the rule that prevents each. Do not repeat them.

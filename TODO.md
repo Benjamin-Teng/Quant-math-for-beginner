@@ -1,6 +1,6 @@
 # TODO — handoff (2026-11-07)
 
-> 給接手的 Claude Code：先讀 `CLAUDE.md`，再依下列順序執行。每完成一項就 commit 並直接 push 到 `main`，並用繁體中文向 Benjamin 回報。
+> 給接手的 Claude Code：先讀 `CLAUDE.md` 與交接手冊 [`project/handover.md`](project/handover.md)，再依下列順序執行。每完成一項就 commit 並直接 push 到 `main`，並用繁體中文向 Benjamin 回報。
 
 課綱建議見 [plans/curriculum-guidance.md](plans/curriculum-guidance.md)（2026-10-21）：保留現有卷序，補強跨卷能力驗收與決策整合。
 它是建議，不是規範；每卷 brief 的共同決策記錄採用、調整或暫不採用的理由（編輯決定）。
