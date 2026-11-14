@@ -23,3 +23,4 @@ labs/*/data/
 data/raw_manifest.lock
 data/raw_manifest.json.tmp
 data/raw_intraday_manifest.json.tmp
+.kata.local.toml
