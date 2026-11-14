@@ -24,18 +24,21 @@ it: 0.33 is not inside 0.331, 0.32 not inside 10.32, and an unsigned 0.0328 not 
   chk(label, value, fmt, printed, n=None)
       format(value, fmt) equals the printed string, the value is not a rounding tie of that format, and the printed
       string occurs n times in the text as a whole number (n=None: at least once). An integer of three digits or
-      fewer is too common to place this way: it is checked with in_md=False, and a has() places it in its context.
+      fewer is too common to place this way: it is checked with in_md=False and at=<the label of the has() that places
+      it>, and the end of the script asserts that this has() holds the integer as a whole number.
       Hand computations are redone from the printed, rounded inputs (PITFALLS section 7).
   sci(label, value, printed, n=None)
       a number printed as m\\times10^{e}, compared at the printed mantissa, occurring n times (None: at least once).
   has(label, text, n=None)
-      a literal string (a date, a phrase, a table row) occurs n times (None: at least once); where it begins or ends
-      with a digit, it is matched there as a whole number.
-Part 3 runs the module's printed Python block and compares it with the computations; part 4 checks the structure
-(labels, tags, knowledge checks, chart files) and the published lines that the text echoes. At the end every checked
-string that occurs more than once must carry its exact count, and the numbers that no check covers (scanned from the
-outcomes, the overview and the body up to the References, without the Python block) must equal ALLOW, where each entry
-has its reason: a new number fails until it is checked or listed. The script then prints "all N checks passed".
+      a literal string (a date, a phrase, a table row; TeX or plain) occurs n times (None: at least once); where it
+      begins or ends with a digit, it is matched there as a whole number.
+Each check records the places (spans of the text) of every occurrence it counted. Part 3 runs the module's printed
+Python block and compares it with the computations; part 4 checks the structure (labels, tags, knowledge checks, chart
+files) and the published lines that the text echoes. At the end every checked string that occurs more than once must
+carry its exact count, and every number of the scanned text (the outcomes, the overview and the body up to the
+References, without the Python block, ordered-list markers and heading attributes) must lie inside a recorded place:
+the numbers outside all of them, counted with their multiplicity, must equal ALLOW, where each entry has its count and
+its reason. A changed or new number then fails until it is checked or listed. The script prints "all N checks passed".
 """
 import inspect
 import json
@@ -72,27 +75,37 @@ def norm_text(s: str) -> str:
 
 TEXT = norm_text(RAW)
 N_CHECKS = 0
-COVERED: set[str] = set()
 ANCHOR_DIFFS: list[str] = []
 # (kind, checked string) -> its number of occurrences, and the exact count asserted for it (None: "at least once")
 COUNTED: dict[tuple[str, str], tuple[int, int | None]] = {}
+PLACES: list[tuple[int, int]] = []        # the spans of TEXT that the checks counted
+HAS_TEXT: dict[str, str] = {}             # has() label -> its text, plain
+SHORT: list[tuple[str, str, str]] = []    # (chk label, printed short integer, the label of the has() that places it)
 NUM_LB = r"(?<![\d.\-−])"          # before a whole number: no digit, decimal point or minus (ASCII or U+2212)
 NUM_TOKEN = re.compile(r"(?<![\w.])(?:\d{1,3}(?:,\d{3})+|\d+)(?:\.\d+)?(?![\w])")   # a number of the text
 SHORT_INT = re.compile(r"[-+]?\d{1,3}")
 
 
-def occurrences(printed: str, where: str = TEXT) -> int:
-    """How often the printed number occurs as a whole number (see the docstring)."""
-    return len(re.findall(NUM_LB + re.escape(printed) + r"(?!\d)", where))
+def whole(printed: str) -> re.Pattern[str]:
+    """printed as a whole number at the ends where it has a digit (see the docstring)."""
+    return re.compile((NUM_LB if printed[0].isdigit() else "") + re.escape(printed)
+                      + (r"(?!\d)" if printed[-1].isdigit() else ""))
 
 
-def counted(kind: str, label: str, what: str, found: int, n: int | None) -> None:
-    """found must equal n, or be at least 1 when n is None; the end of the script asks for n where found > 1."""
+def spans(printed: str) -> list[tuple[int, int]]:
+    """The places of TEXT where printed occurs (as a whole number at its digit ends)."""
+    return [m.span() for m in whole(printed).finditer(TEXT)]
+
+
+def counted(kind: str, label: str, what: str, found: list[tuple[int, int]], n: int | None) -> None:
+    """len(found) must equal n, or be at least 1 when n is None; the end of the script asks for n where it is above 1.
+    The places found are recorded for the final coverage pass."""
     want = "at least 1" if n is None else str(n)
-    assert (found >= 1) if n is None else (found == n), f"{label}: {what!r} occurs {found} times in src/lm34.md, " \
-                                                         f"expected {want}"
+    k = len(found)
+    assert (k >= 1) if n is None else (k == n), f"{label}: {what!r} occurs {k} times in src/lm34.md, expected {want}"
     if n is not None or (kind, what) not in COUNTED:
-        COUNTED[(kind, what)] = (found, n)
+        COUNTED[(kind, what)] = (k, n)
+    PLACES.extend(found)
 
 
 def tie(value: float, fmt: str) -> bool:
@@ -102,7 +115,8 @@ def tie(value: float, fmt: str) -> bool:
     return abs(scaled - math.floor(scaled) - 0.5) < 1e-9
 
 
-def chk(label: str, value: float, fmt: str, printed: str, in_md: bool = True, n: int | None = None) -> None:
+def chk(label: str, value: float, fmt: str, printed: str, in_md: bool = True, n: int | None = None,
+        at: str | None = None) -> None:
     global N_CHECKS
     got = format(value, fmt)
     print(f"CHECK {label}: {got} (printed {printed})")
@@ -110,25 +124,28 @@ def chk(label: str, value: float, fmt: str, printed: str, in_md: bool = True, n:
     assert not tie(value, fmt), ("rounding tie: print more digits", label, value)
     if in_md:
         assert not SHORT_INT.fullmatch(printed), f"{label}: {printed!r} has three digits or fewer: check it with " \
-                                                 "in_md=False and place it with has() in its context"
-        counted("chk", label, printed, occurrences(printed), n)
-        COVERED.add(printed.lstrip("-+"))
+                                                 "in_md=False and at=<the has() that places it>"
+        counted("chk", label, printed, spans(printed), n)
     else:
         assert n is None, label
+        if SHORT_INT.fullmatch(printed):
+            assert at, f"{label}: a short integer checked with in_md=False needs at=<the has() that places it>"
+            SHORT.append((label, printed, at))
     N_CHECKS += 1
 
 
-def pct(label: str, frac: float, d: int, printed: str, in_md: bool = True, n: int | None = None) -> None:
-    chk(label, 100 * frac, f".{d}f", printed, in_md, n)
+def pct(label: str, frac: float, d: int, printed: str, in_md: bool = True, n: int | None = None,
+        at: str | None = None) -> None:
+    chk(label, 100 * frac, f".{d}f", printed, in_md, n, at)
 
 
 def has(label: str, text: str, n: int | None = None) -> None:
     global N_CHECKS
-    where = TEXT if text in TEXT else RAW
-    pat = (NUM_LB if text[0].isdigit() else "") + re.escape(text) + (r"(?!\d)" if text[-1].isdigit() else "")
-    counted("has", label, text, len(re.findall(pat, where)), n)
+    plain = norm_text(text)
+    counted("has", label, plain, spans(plain), n)
+    assert label not in HAS_TEXT or HAS_TEXT[label] == plain, f"has() label used twice: {label}"
+    HAS_TEXT[label] = plain
     print(f"CHECK {label}: '{text[:80]}' in text")
-    COVERED.update(NUM_TOKEN.findall(norm_text(text)))
     N_CHECKS += 1
 
 
@@ -141,9 +158,8 @@ def sci(label: str, value: float, printed: str, n: int | None = None) -> None:
     digits = len(mant.split(".")[1]) if "." in mant else 0
     got = f"{value / 10**ex:.{digits}f}"
     assert got == mant, (label, got, printed)
-    counted("sci", label, printed, occurrences(printed, RAW), n)
+    counted("sci", label, printed, spans(norm_text(printed)), n)
     print(f"CHECK {label}: {value:.3e} (printed {printed})")
-    COVERED.update(NUM_TOKEN.findall(norm_text(printed)))
     N_CHECKS += 1
 
 
@@ -248,6 +264,14 @@ has("fixed on", "fixed on 24 October 2026")
 pct("R3 growth", gr["R3"], 2, "8.70", n=3)
 pct("R2 growth", gr["R2"], 2, "14.49", n=5)
 pct("R4 growth", gr["R4"], 2, "10.51", n=5)
+# the overview's and the case box's range: the lowest rule's growth first, the highest second, each with its rule
+lo_r, hi_r = min(RULES, key=lambda k: gr[k]), max(RULES, key=lambda k: gr[k])
+assert (lo_r, hi_r) == ("R3", "R2")
+rng_txt = f"eight rules grew between {100 * gr[lo_r]:.2f}% ({lo_r}) and {100 * gr[hi_r]:.2f}% ({hi_r}) a year"
+has("overview: the range", f"Fixed in advance and net of Taiwan's commission and tax, the through case's {rng_txt} from "
+    "March 2019 to October 2026.")
+has("case box: the range", f"From March 2019 to October 2026, the through case's {rng_txt} after Taiwan's commission "
+    "and tax.")
 growth = G["growth"]
 order = G["order"]
 pct("grid best", growth[order[0]], 2, "18.62", n=6)
@@ -273,6 +297,7 @@ has("X1 reality-check row", "| 59 differences; studentized, $B=10{,}000$, `defau
     "0.0048) |")
 all6, sur6 = K["all6"], K["sur6"]
 pct("all six", all6 - 1, 1, "-27.7", n=2)
+pct("all six, the loss (unsigned)", 1 - all6, 1, "27.7", n=3)
 pct("survivors", sur6 - 1, 1, "5.4", n=5)
 has("X1 futures row", "| all six; the four survivors | −27.7%; +5.4% |")
 assert len(G["conf"]) == 60 and len(G["oth"]) == 59
@@ -351,8 +376,8 @@ has("cost sums' trades", f"Over {n_tr} trades the costs sum to 0.81% of wealth f
 has("P2 stem", f"R1's {n_tr} costs sum to 0.0080755 of pre-trade wealth.")
 tax_share = {k: 1 - K["comm"][k] / summ[k]["costs"] for k in RULES}
 lo_tax, hi_tax = f"{100 * min(tax_share.values()):.0f}", f"{100 * max(tax_share.values()):.0f}"
-pct("tax share low", min(tax_share.values()), 0, "17", in_md=False)
-pct("tax share high", max(tax_share.values()), 0, "22", in_md=False)
+pct("tax share low", min(tax_share.values()), 0, "17", in_md=False, at="tax share")
+pct("tax share high", max(tax_share.values()), 0, "22", in_md=False, at="tax share")
 has("tax share", f"The tax is {lo_tax}% to {hi_tax}% of each rule's costs.")
 lg1 = math.log(K["gross"]["R1"].wealth[-1] / paths["R1"].wealth[-1])
 lg4 = math.log(K["gross"]["R4"].wealth[-1] / paths["R4"].wealth[-1])
@@ -468,8 +493,8 @@ has("same close size", "For monthly rules the shift moves growth by less than a 
 has("KC4 numbers", "yield 15.44% of the year-end close, against 2.92% on the actual close")
 
 # ---------------------------------------------------------------- Section 5: survivorship
-chk("ETFs 2017", K["n2017"], "d", "69", in_md=False)
-chk("gone by 2026", len(K["gone"]), "d", "10", in_md=False)
+chk("ETFs 2017", K["n2017"], "d", "69", in_md=False, at="E6 counts")
+chk("gone by 2026", len(K["gone"]), "d", "10", in_md=False, at="E6 counts")
 assert all(g in K["dld"] for g in K["gone"])
 has("E6 counts", f"Of {K['n2017']} ETFs listed on TWSE or TPEx with a row that day, {len(K['gone'])} had none on "
     f"{day(C.END)}")
@@ -561,7 +586,7 @@ has("E8 Bonferroni", "so Bonferroni's bound is 1")
 has("E8 best", "is 1.296 (R4, 126 dates, every 6 month-ends), with one-sided p-value 0.0975")
 chk("grid block estimate", max(G["pwd"]), ".2f", "74.63")
 assert G["ell"] == 75.0 and name[G["oth"][int(np.argmax(G["pwd"]))]] == "R4 126 1m"
-chk("R1's own estimate (rounded)", G["pw_r1"], ".0f", "17", in_md=False)
+chk("R1's own estimate (rounded)", G["pw_r1"], ".0f", "17", in_md=False, at="E8 at 17")
 assert round(G["pw_r1"]) == C.ELL_SENS
 has("E8 at 17", f"At $\\ell={G['pw_r1']:.0f}$, R1 monthly's own estimate rounded,")
 chk("p at 17", G["p_rc17"], ".3f", "0.421", n=2)
@@ -577,7 +602,7 @@ chk("median correlation", float(np.quantile(G["corr"], 0.5, method="inverted_cdf
 # ---------------------------------------------------------------- Section 7: PBO
 # the declaration as printed: trades per frequency, the grid order, the degradation statistics
 for q, printed in ((1, "92"), (3, "31"), (6, "16")):
-    chk(f"trades every {q} month-end signals", len(sigs[::q]), "d", printed, in_md=False)
+    chk(f"trades every {q} month-end signals", len(sigs[::q]), "d", printed, in_md=False, at="declared trades")
 has("declared trades", f"signals 1, $1+q$, $1+2q$, … ({len(sigs)}, {len(sigs[::3])} and {len(sigs[::6])} trades)")
 has("declared rebalancing", f"every $q=1$, 3 or 6 month-end signals from {day(sigs[0].signal)}")
 conf_order = [(k, 0, q) for k in ("R1", "R2") for q in (1, 3, 6)]
@@ -600,7 +625,7 @@ assert [name[i] for i in top] == ["R2 - 1m", "R4 252 6m", "R4 126 6m"]
 pct("top 1", cnt[top[0]] / 12_870, 1, "19.1")
 pct("top 2", cnt[top[1]] / 12_870, 1, "18.8")
 pct("top 3", cnt[top[2]] / 12_870, 1, "13.8")
-chk("distinct bests", int((cnt > 0).sum()), "d", "31", in_md=False)
+chk("distinct bests", int((cnt > 0).sum()), "d", "31", in_md=False, at="E9 top three")
 has("E9 top three", "R2 monthly (19.1% of splits), R4 at 252 dates every 6 (18.8%) and R4 at 126 dates every 6 "
     f"(13.8%), of {int((cnt > 0).sum())} in all.")
 chk("splits", len(G["lg"]), ",d", "12,870", n=11)
@@ -617,7 +642,7 @@ has("Pascal", r"$$\begin{aligned}\binom{16}{8}&=\binom{15}{7}+\binom{15}{8}\\&=6
     r"\end{aligned}$$")
 has("misprint", "(the manuscript prints 12,780)")
 nz = K["noise"]
-chk("noise panels", len(nz["pb"]), "d", "200", in_md=False)
+chk("noise panels", len(nz["pb"]), "d", "200", in_md=False, at="noise stem")
 assert "g2.standard_normal((Tg, n)) * 0.01" in inspect.getsource(C.noise) and G["Tg"] == K["n_days"]
 has("noise stem", f"Run CSCV on {len(nz['pb'])} panels of 60 independent zero-mean strategies over {K['n_days']:,} "
     f"days. Each panel is one draw `standard_normal(({K['n_days']}, 60))` × 1% from")
@@ -655,20 +680,20 @@ chk("logit j=30", math.log(30 / 31), ".4f", "-0.0328")
 chk("logit j=31", math.log(31 / 30), ".4f", "0.0328")
 chk("logit j=60", math.log(60), ".3f", "4.094", n=2)
 chk("logit j=1", math.log(1 / 60), ".3f", "-4.094")
-chk("n + 1 (KC 7)", 60 + 1, "d", "61", in_md=False)
+chk("n + 1 (KC 7)", 60 + 1, "d", "61", in_md=False, at="KC7 logits")
 has("KC7 logits", f"The logits are $\\ln(j/({60 + 1}-j))$ for $j=1,\\dots,60$")
 has("KC7 ranks", f"$\\omega=j/{60 + 1}$ is never $\\tfrac12$, none is 0: at $j=30$ and 31 the logit is −0.0328 and "
     "0.0328.")
 # Problem 4: rank 45 of 60 out of sample (1 = worst); B counts from the best, C takes the in-sample rank 60
 chk("P4 key", math.log(45 / 16), ".3f", "1.034", n=2)
 chk("P4 B", math.log(16 / 45), ".3f", "-1.034")
-chk("P4 rank from the best", 61 - 45, "d", "16", in_md=False)
+chk("P4 rank from the best", 61 - 45, "d", "16", in_md=False, at="S4")
 has("P4 stem", "the in-sample best ranks 45th of 60 out of sample (1 = worst)")
 has("S4", f"$\\omega=45/{60 + 1}$, so the logit is $\\ln(45/{61 - 45})=1.034$. B counts the rank from the best, "
     f"$j={61 - 45}$, and C uses the in-sample rank, 60.")
 chk("2^16", 2**16, ",d", "65,536")
-chk("extension: the eight rules every 12 signals", len(RULES), "d", "8", in_md=False)
-chk("extension: n", 60 + len(RULES), "d", "68", in_md=False)
+chk("extension: the eight rules every 12 signals", len(RULES), "d", "8", in_md=False, at="extension")
+chk("extension: n", 60 + len(RULES), "d", "68", in_md=False, at="extension")
 assert len(sigs[::12]) == 8                          # its 8 trades (A34-26); the lab builds it
 has("extension", f"The lab's extension adds {len(RULES)}, declared after the grid's results were seen, so it counts "
     f"$n={60 + len(RULES)}$.")
@@ -733,8 +758,8 @@ pct("P9 walk-forward", kw["walk"], 2, "22.27", n=3)
 pct("P9 f = 1", kw["f1"], 2, "13.38")
 pct("P9 4.14 with borrowing", kw["p414_fin"], 2, "20.71")
 pct("P9 walk-forward with borrowing", kw["walk_fin"], 2, "16.63", n=3)
-chk("P9 month-ends", kw["ends"], "d", "250", in_md=False)
-chk("P9 at the cap", kw["at_cap"], "d", "178", in_md=False)
+chk("P9 month-ends", kw["ends"], "d", "250", in_md=False, at="S9 cap")
+chk("P9 at the cap", kw["at_cap"], "d", "178", in_md=False, at="S9 cap")
 assert C.BORROW == 0.035
 src_kw = inspect.getsource(C.kelly_walk)                            # the window and the cap that P9 prints
 assert "T, W = len(R), 729" in src_kw and "min(max(kelly_root(R[e - W + 1:e + 1]), 0.0), 3.0)" in src_kw
@@ -853,6 +878,67 @@ has("cite Romano-Wolf", "Romano and Wolf (2005) ask which rules beat the benchma
 has("Romano-Wolf details", "(their footnote 22) and centred at the sample means (their Remark 3.4)")
 has("cite Hansen", "Hansen's (2005) test for superior predictive ability (SPA)")
 has("cite Sullivan et al.", "Sullivan, Timmermann and White (1999) applied the reality check")
+for t in ("34.1", "34.2", "34.3", "34.4"):                     # this module's tags (part 4 checks their order)
+    has(f"tag ({t})", f"\\tag{{{t}}}")
+
+# ---------------------------------------------------------------- the rest of the numbers, each in its place
+for k, cnt_w in (("R1", 2), ("R2", 3)):                       # the final wealth outside the E1 table
+    chk(f"{k} final wealth", wealth[k], ".4f", w4[k], n=cnt_w)
+chk("0050's February 2017 distribution", K["div50"]["2017-02-08"], ".2f", "1.70", n=2)
+chk("commission rate, every mention", 100 * V.COMMISSION, ".4f", "0.1425", n=6)
+has("the misprint, twice", "12,780", n=2)
+has("C(16, 8)", f"$\\binom{{{C.BLOCKS}}}{{{S2}}}=12,870$", n=2)
+wins = sorted({w for _, w, _ in G["conf"] if w})
+assert wins == [126, 252, 504] and name[order[0]] == "R4 252 6m"
+has("X7 note: windows", f"within each rule, {wins[0]} to {wins[-1]} dates from left to right")
+has("case box: the best", f"The best, maximum Sharpe on a {G['conf'][order[0]][1]}-date window traded every six "
+    "month-ends, grew 18.62% a year.")
+# the grid's 59 differences from R1 monthly and their block length 75
+n_oth, ell_g = len(G["oth"]), int(G["ell"])
+has("Section 6: the grid's T", f"For the grid's {n_oth} differences it means 1,851, closer to his setting.")
+has("E8 stem", f"Does any of the grid's other {n_oth} configurations beat R1 monthly in mean daily net return?")
+has("E8: the largest t-stat", f"The largest t-stat of the {n_oth} mean differences is 1.296")
+has("E8: the block length", f"[[LM22]]'s rule on the {n_oth} differences gives $\\ell={ell_g}$ (from 74.63)")
+has("E8: correlation", f"since the {n_oth} differences move together (median correlation 0.78)")
+has("Section 9: the grid", f"On the grid's {n_oth} differences, `ell={ell_g}`, `B={C.B_RC}` and")
+has("P11: the grid", f"Run the studentized check on the grid's {n_oth} differences from R1 monthly at "
+    f"$\\ell={ell_g}$")
+# the 920 in-sample days of a half and the median formula (21.9)
+half = nz["half"]
+has("Section 7: the half", f"a per-day ratio on the {half} in-sample days is nearly normal (17.5), with standard "
+    f"error about $1/\\sqrt{{{half}}}$ by (20.9).")
+has("Section 7: the median", f"has median about $\\Phi^{{-1}}(0.5^{{1/n}})/\\sqrt{{{half}}}$, and annualized at "
+    f"$n={n_conf}$")
+has("summary: the median", "has median $\\Phi^{-1}(0.5^{1/n})$ standard errors")
+has("P12: the half", f"For {n_conf} independent zero-skill strategies over {half} in-sample days")
+has("S12: the law", f"Each per-day in-sample ratio is about $\\mathcal N(0,1/{half})$ by (17.5) and (20.9).")
+has("S12: the median", f"lies below $\\Phi^{{-1}}(0.5^{{1/{n_conf}}})/\\sqrt{{{half}}}$ with probability "
+    f"$\\tfrac12$, so that is its median, with $\\Phi^{{-1}}(0.5^{{1/{n_conf}}})=2.274$: 1.17 annualized.")
+# X8's bins of 0.5, as the chart file has them
+cats = json.loads((ROOT / "src" / "data" / "lm34-logits.json").read_text(encoding="utf-8"))["categories"]
+centres = [float(c.replace("−", "-")) for c in cats]
+assert np.abs(np.diff(centres) - 0.5).max() < 1e-12
+has("X8 bins", "Note: bins of 0.5 by their centres, the ends clipped;")
+# the base year 2017, the valuation year 2026 and the dates of retrieval and declaration
+Y0, Y1 = C.BASE[:4], C.END[:4]
+has("overview: the six", f"Of six gold, oil and VIX futures ETFs trading in January {Y0}, two were delisted.")
+has("E4: the February yield", f"February {Y0}'s NT$1.70 yielded 2.32% of the previous close but 12.65% in {Y1}'s "
+    "series")
+has("X4 title", f"0050's {Y0} seen from later build dates")
+has("KC4 stem", f"On a series adjusted on {day(C.END)}, 0050's {Y0} distributions yield 15.44% of the year-end close")
+has("KC4 question", f"Which could the screen have seen in {Y0}, and why?")
+has("KC4 answer", f"Only 2.92%. The adjusted close of {Y0} divides by the growth factor to {Y1}, (34.2)")
+has("E6 title", f"The funds of January {Y0} (descriptive)")
+has("X5 title", f"Six futures ETFs of January {Y0}")
+has("Section 8 table: survivorship", f"among the {Y0} futures funds, survivors alone overstate growth")
+has("E5's universe", f"E5 itself was chosen in {Y1} from funds still listed")
+has("S9: the root's data", f"The root 4.14 uses every return to {Y1}, unknown in {kw['before'][:4]}")
+has("Art. 2-1 to 2026", "Art. 2-1 suspends the tax on listed and OTC-listed (上市及上櫃) bond ETFs to 2026.")
+has("S1: Art. 2-1", "Art. 2-1 suspends the tax on listed and OTC-listed bond ETFs to 31 December 2026.")
+has("box: bond ETFs", "債券 ETF 在 2026 年底前免徵")
+has("retrieval of Volume VI's files", "retrieved 24 October 2026", n=4)
+has("retrieval of TR23", "retrieved 18 October 2026", n=2)
+has("the grid's declaration", "The case's grid was declared on 24 October 2026")
 
 # ====================================================================== part 3: the printed Python block
 block = re.search(r"```python\n(.*?)```", RAW, flags=re.DOTALL)
@@ -911,32 +997,53 @@ for f, s in ECHO:
     assert s in (ROOT / "src" / f).read_text(encoding="utf-8"), (f, s)
 print(f"echoes: {len(ECHO)} published strings found as printed")
 
-# ====================================================================== occurrence counts and uncovered numbers
+# ====================================================================== occurrence counts and places
 uncounted = sorted(f"{k} {w!r} ({found})" for (k, w), (found, n) in COUNTED.items() if n is None and found > 1)
 assert not uncounted, f"strings that occur more than once need their exact count: {uncounted}"
+# a short integer checked with in_md=False is placed by the has() that its at= names, as a whole number
+for lab, p, at in SHORT:
+    assert at in HAS_TEXT and whole(p).search(HAS_TEXT[at]), f"{lab}: {p!r} is not placed by has({at!r})"
 n_multi = sum(1 for _, n in COUNTED.values() if n is not None and n > 1)
 print(f"\noccurrence counts: {len(COUNTED)} checked strings, {n_multi} of them printed more than once, each with its "
-      "exact count")
+      f"exact count; {len(SHORT)} short integers, each placed by its has()")
 
 
-def scanned(raw: str) -> str:
-    """The text whose numbers must be covered: the front matter's list items (outcomes and overview), then the body up
-    to the References, without the fenced Python block (part 3 runs it), ordered-list markers and heading attributes."""
-    _, front, body = raw.split("---\n", 2)
-    items = "\n".join(line for line in front.splitlines() if line.startswith("  - "))
-    body = re.sub(r"```.*?```", "", body.split("\n## References", 1)[0], flags=re.DOTALL)
-    body = re.sub(r"(?m)^((?:> )*\s*)\d+\. ", r"\1", body)
-    body = re.sub(r"\{lo=[\d,]+\}", "", body)
-    return norm_text(items + "\n" + body)
+def scanned_numbers() -> list[re.Match[str]]:
+    """The numbers of TEXT that must lie in a checked place: the front matter's list items (outcomes and overview) and
+    the body up to the References, without the fenced Python block (part 3 runs it), ordered-list markers and heading
+    attributes."""
+    fm = TEXT.index("---\n", 4) + 4
+    skip = [m.span() for m in re.finditer(r"(?m)^(?!  - ).*$", TEXT[:fm])]
+    skip.append((TEXT.index("\n## References"), len(TEXT)))
+    skip += [m.span() for m in re.finditer(r"```.*?```", TEXT, flags=re.DOTALL)]
+    skip += [m.span(1) for m in re.finditer(r"(?m)^(?:> )*\s*(\d+)\. ", TEXT)]
+    skip += [m.span() for m in re.finditer(r"\{lo=[\d,]+\}", TEXT)]
+    return [m for m in NUM_TOKEN.finditer(TEXT) if not any(a <= m.start() < b for a, b in skip)]
 
 
-ALLOW = {
-    "95": "the level of the 95% points (np.quantile(..., 0.95) in data/lm34_common.py), printed 6 times",
+# the numbers outside every checked place, each with its count and reason
+ALLOW: dict[str, tuple[int, str]] = {
+    "95": (6, "the level of the 95% points (np.quantile(..., 0.95) in data/lm34_common.py)"),
+    "0": (5, "a constant in a formula: epsilon > 0, a > 0 (twice), 0 <= x < 1"),
+    "1": (24, "a constant in a formula: 1 - x, 1/(1 - x), 1 + R, t + 1, t - 1, n + 1, 1 - omega"),
+    "2": (7, "a constant in a formula: R_{t+2}, sqrt(2 ln ln T), S/2 (three times), x^2/2 (twice)"),
+    "0050": (4, "a fund code in prose and in the tax table"),
+    "00646": (2, "a fund code in the tax table and in Problem 1's options"),
 }
-left = set(NUM_TOKEN.findall(scanned(RAW))) - COVERED
-assert left == set(ALLOW), ("numbers no check covers, not in ALLOW:", sorted(left - set(ALLOW)),
-                            "ALLOW entries now covered or gone:", sorted(set(ALLOW) - left))
-print(f"uncovered numbers: exactly the {len(ALLOW)} entries of ALLOW")
+places = sorted(set(PLACES))
+outside: dict[str, list[str]] = {}
+for m in scanned_numbers():
+    if not any(a <= m.start() and m.end() <= b for a, b in places):
+        outside.setdefault(m.group(0), []).append(TEXT[max(0, m.start() - 50):m.end() + 25].replace("\n", " "))
+left = {t: len(v) for t, v in outside.items()}
+want = {t: k for t, (k, _) in ALLOW.items()}
+for t in sorted(set(left) | set(want)):
+    if left.get(t) != want.get(t):
+        print(f"OUTSIDE EVERY CHECK {t!r}: x{left.get(t, 0)}, ALLOW x{want.get(t, 0)}",
+              *(f"\n    ...{c}..." for c in outside.get(t, [])))
+assert left == want, "the numbers outside every checked place differ from ALLOW (listed above)"
+print(f"places: every number of the scanned text lies in a checked place ({len(places)} places), except ALLOW's "
+      f"{len(ALLOW)} entries ({sum(want.values())} occurrences)")
 print(f"anchor differences ({len(ANCHOR_DIFFS)}):")
 for a in ANCHOR_DIFFS:
     print("   ", a)
