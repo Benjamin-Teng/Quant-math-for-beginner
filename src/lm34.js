@@ -11,7 +11,8 @@
    blocks in lexicographic order (as itertools.combinations); the in-sample best by the Sharpe ratio of the in-sample
    days (population moments; the first on a tie); its out-of-sample rank j among the n (1 = the worst);
    logit ln(w / (1 - w)), w = j / (n + 1); PBO the share of logits at or below 0 (guard 1e-12).
-   data/lm34_charts.py runs Book.widgets.pboSim.math.cscv in Node on the test matrix against Python's cscv(). */
+   data/lm34_charts.py runs Book.widgets.pboSim.math's cscv, pbo and hist in Node against Python on the test matrix
+   and on 1,851-row matrices (11 rows dropped) at every n the select offers and at n = 7. */
 (function () {
   "use strict";
   var B = window.Book, fmt = B.fmt, EDGES = [];

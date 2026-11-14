@@ -37,12 +37,54 @@ OUT.mkdir(parents=True, exist_ok=True)
 MAXPTS = 1172
 
 
+MONTHS = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October",
+          "November", "December"]
+
+
 def rd(x: float, n: int = 6) -> float:
     return round(float(x), n)
 
 
+def month_year(d: str) -> str:
+    """2019-03-04 -> 'March 2019' (the alt texts' spans)."""
+    return f"{MONTHS[int(d[5:7]) - 1]} {d[:4]}"
+
+
+def long_date(d: str) -> str:
+    """2020-03-19 -> '19 March 2020'."""
+    return f"{int(d[8:])} {MONTHS[int(d[5:7]) - 1]} {d[:4]}"
+
+
+def short_date(d: str) -> str:
+    """2025-04-07 -> '7 Apr 2025' (the point labels)."""
+    return f"{int(d[8:])} {MONTHS[int(d[5:7]) - 1][:3]} {d[:4]}"
+
+
+def in_range(name: str, spec: dict[str, Any]) -> None:
+    """Every plotted number lies inside the axis range the spec sets: book.js clips the lines at the plot rectangle
+    (src/assets/book.js, the clip path of the line chart), so a value beyond y.min or y.max is drawn cut off."""
+    xs: list[float] = []
+    ys: list[float] = []
+    for s in spec.get("series", []):
+        ys += s.get("y", []) + s.get("values", [])
+        xs += [v for v in s.get("x", []) if not isinstance(v, str)]
+    for a in spec.get("ann", []):
+        if a["type"] in ("point", "hline"):
+            ys.append(a["y"])
+        if a["type"] in ("point", "vline") and not isinstance(a["x"], str):
+            xs.append(a["x"])
+    for ln in spec.get("lines", []):
+        xs += [ln["from"][0], ln["to"][0]]
+        ys += [ln["from"][1], ln["to"][1]]
+    for ax, vals in (("x", xs), ("y", ys)):
+        lo, hi = spec.get(ax, {}).get("min"), spec.get(ax, {}).get("max")
+        assert lo is None or all(v >= lo for v in vals), (name, ax, "below min", lo, min(vals))
+        assert hi is None or all(v <= hi for v in vals), (name, ax, "above max", hi, max(vals))
+
+
 def write(name: str, spec: dict[str, Any]) -> None:
     assert isinstance(spec.get("alt"), str) and spec["alt"].strip()
+    in_range(name, spec)
     text = json.dumps(spec, ensure_ascii=False, separators=(",", ":"), allow_nan=False)
     assert len(text.encode("utf-8")) < 300_000, (name, len(text))
     (OUT / f"{name}.json").write_text(text, encoding="utf-8", newline="\n")
@@ -53,10 +95,12 @@ def write(name: str, spec: dict[str, Any]) -> None:
 v1, e1 = 100 * K.var_h(K.R, K.U), 100 * K.es_h(K.R, K.U)
 vn, en = 100 * K.var_n(K.mu, K.s, K.U), 100 * K.es_n(K.mu, K.s, K.U)
 assert (f"{v1:.2f}", f"{e1:.2f}", f"{vn:.2f}", f"{en:.2f}") == ("3.57", "4.69", "2.75", "3.16")
+assert 2 * int(np.sum(K.loss293 < 3)) > len(K.loss293) and int(np.sum(K.loss293 > 6)) >= 2   # "most", "a few"
 write("lm32-tail", {
-    "alt": "Histogram of the 293 worst daily losses of the TAIEX total-return index, 2003 to 2026, in bins of 0.25 "
-           "points: most lie between 1.86% and 3%, a few reach beyond 6%, the worst 9.70%; the historical 99% VaR "
-           "3.57% and ES 4.69% lie right of the normal model's 2.75% and 3.16%",
+    "alt": f"Histogram of the {len(K.loss293)} worst daily losses of the TAIEX total-return index, {K.dates[0][:4]} to "
+           f"{K.dates[-1][:4]}, in bins of {K.EDGES[1] - K.EDGES[0]:.2f} points: most lie between "
+           f"{K.loss293.min():.2f}% and 3%, a few reach beyond 6%, the worst {K.loss293.max():.2f}%; the historical "
+           f"99% VaR {v1:.2f}% and ES {e1:.2f}% lie right of the normal model's {vn:.2f}% and {en:.2f}%",
     "height": 300,
     "x": {"type": "num", "fmt": "n2", "tfmt": "n0", "label": "Loss (%)", "tipLabel": "loss from (%)", "min": 1.75,
           "max": 10, "ticks": [2, 3, 4, 5, 6, 7, 8, 9, 10]},
@@ -84,17 +128,21 @@ for m, col in (("HS", "1"), ("GARCH-t", "2")):
         pts.append({"type": "point", "x": fdates[int(j)], "y": rd(K.Ro[int(j)], 6), "color": col})
         n_pts += 1
 assert n_pts == 56 + 77 <= MAXPTS
-pts.append({"type": "point", "x": "2025-04-07", "y": rd(K.R[K.i7], 6), "label": "7 Apr 2025 −9.70%", "anchor": "end",
+d7, loss7 = K.dates[K.i7], f"{-100 * K.R[K.i7]:.2f}"
+assert d7 == "2025-04-07" and fdates[K.k7] == d7
+pts.append({"type": "point", "x": d7, "y": rd(K.R[K.i7], 6), "label": f"{short_date(d7)} −{loss7}%", "anchor": "end",
             "dx": -8})
+fc7 = ", ".join(f"{100 * K.VAR[m][K.k7]:.2f}%" for m in ("HS", "GARCH-t")) + f" and {100 * K.VAR['N'][K.k7]:.2f}%"
 write("lm32-rollvar", {
     "alt": "Minus the one-day 99% value at risk of the TAIEX total-return index forecast by historical simulation, "
-           "GARCH with t innovations and the normal model, January 2008 to October 2026, with the returns of the "
-           "exceedance days of the first two as points: the forecasts widen after each crash, and on 7 April 2025 "
-           "the index fell 9.70% against forecasts of 3.53%, 4.14% and 2.66%",
+           f"GARCH with t innovations and the normal model, {month_year(fdates[0])} to {month_year(fdates[-1])}, with "
+           "the returns of the exceedance days of the first two as points: the forecasts widen after each crash, and "
+           f"on {long_date(d7)} the index fell {loss7}% against forecasts of {fc7}",
     "height": 320,
     "x": {"type": "date", "values": [fdates[j] for j in keep]},
-    "y": {"type": "lin", "fmt": "pct2", "tfmt": "pct0", "label": "Return; minus VaR", "min": -0.1, "max": 0,
-          "ticks": [-0.1, -0.08, -0.06, -0.04, -0.02, 0]},
+    # GARCH-t's minus VaR reaches -10.54% on 11 April 2025 (a kept weekly point): the axis runs to -12%
+    "y": {"type": "lin", "fmt": "pct2", "tfmt": "pct0", "label": "Return; minus VaR", "min": -0.12, "max": 0,
+          "ticks": [-0.12, -0.1, -0.08, -0.06, -0.04, -0.02, 0]},
     "series": series,
     "ann": pts,
 })
@@ -102,11 +150,13 @@ write("lm32-rollvar", {
 # ---------------------------------------------------------------- X5: exceedance counts against Basel's zones
 cnt = [int(K.BT[m]["x"]) for m in K.MODELS]
 assert cnt == [56, 110, 69, 103, 102, 77]
+nm_z = ["historical simulation", "normal", "Student t", "EWMA", "GARCH-n", "GARCH-t"]
 write("lm32-zones", {
     "type": "bar", "height": 280, "valueLabels": True,
-    "alt": "Exceedances of the six models' 99% VaR forecasts over 4,609 days: historical simulation 56, normal 110, "
-           "Student t 69, EWMA 103, GARCH-n 102, GARCH-t 77, against 46.09 expected; Basel's 1996 probabilities "
-           "applied to 4,609 days put yellow from 57 and red from 73",
+    "alt": f"Exceedances of the six models' 99% VaR forecasts over {K.n_bt:,} days: "
+           + ", ".join(f"{a} {c}" for a, c in zip(nm_z, cnt, strict=True))
+           + f", against {K.n_bt * K.U:.2f} expected; Basel's 1996 probabilities applied to {K.n_bt:,} days put "
+             f"yellow from {K.yN} and red from {K.rN}",
     "categories": ["HS", "N", "t", "EWMA", "GARCH-n", "GARCH-t"], "x": {"label": ""},
     "y": {"fmt": "n0", "tfmt": "n0", "label": "Exceedances", "min": 0, "max": 120, "ticks": [0, 20, 40, 60, 80, 100, 120]},
     "series": [{"name": "exceedances", "color": "1", "values": cnt, "fmt": "n0"}],
@@ -136,10 +186,16 @@ for k, col in (("R1", "1"), ("R3", "2"), ("R6", "3"), ("R8", "4")):
     place = {"R3": {"anchor": "end", "dx": -8, "dy": 16}, "R6": {"anchor": "end", "dx": -8}}.get(k, {})
     troughs.append({"type": "point", "x": sp.trough, "y": rd(-sp.mdd, 6), "color": col,
                     "label": f"{k} −{100 * sp.mdd:.2f}%", **place})
+uw_mdd = {k: f"{100 * K.SP[k].mdd:.2f}%" for k in ("R1", "R3", "R6", "R8")}
+tr_late = {K.SP[k].trough for k in ("R3", "R6", "R8")}
+assert len(tr_late) == 1                                  # R3, R6 and R8 share one trough
+over20 = [k for k in ("R1", "R3", "R6", "R8") if K.SP[k].mdd > 0.20]
+assert over20 == ["R1"], over20
 write("lm32-underwater", {
-    "alt": "Underwater chart, minus the drawdown from the running peak, of R1, R3, R6 and R8 from March 2019 to "
-           "October 2026: R1 falls 23.19% into 19 March 2020; R3, R6 and R8 fall 19.11%, 18.90% and 18.42% into 21 "
-           "October 2022; only R1 crosses the hypothetical 20% limit among the four",
+    "alt": "Underwater chart, minus the drawdown from the running peak, of R1, R3, R6 and R8 from "
+           f"{month_year(wd[0])} to {month_year(wd[-1])}: R1 falls {uw_mdd['R1']} into {long_date(K.SP['R1'].trough)}; "
+           f"R3, R6 and R8 fall {uw_mdd['R3']}, {uw_mdd['R6']} and {uw_mdd['R8']} into {long_date(tr_late.pop())}; "
+           f"only {over20[0]} crosses the hypothetical 20% limit among the four",
     "height": 320,
     "x": {"type": "date", "values": [wd[j] for j in keepw]},
     "y": {"type": "lin", "fmt": "pct2", "tfmt": "pct0", "label": "Minus drawdown", "min": -0.25, "max": 0,
@@ -168,11 +224,17 @@ for k in K.RULES:
     boot_x.append(rd(100 * q(mb, 0.5), 3))
     yy.append(y0)
 assert f"{perm_x[0]:.1f}" == "17.2" and f"{boot_x[0]:.1f}" == "20.7" and f"{real_x[0]:.2f}" == "23.19"
+nres = {len(v) for v in (*K.MP.values(), *K.MB.values())}
+assert len(nres) == 1
+nres_t = f"{nres.pop():,}"
+inside = all(q(v, 0.05) <= K.SP[k].mdd <= q(v, 0.95) for k in K.RULES for v in (K.MP[k], K.MB[k]))
+assert inside                                             # "every realized MDD lies inside both ranges"
 write("lm32-mddboot", {
     "type": "scatter", "equal": False, "height": 360, "legend": True,
     "alt": "Forest plot of the eight rules' maximum drawdowns: for each rule the realized MDD, the median and 5-95% "
-           "range of 10,000 permutations of its returns (thin) and of 10,000 stationary-bootstrap resamples (thick); "
-           "every realized MDD lies inside both ranges, R1's 23.19% against medians of 17.2% and 20.7%",
+           f"range of {nres_t} permutations of its returns (thin) and of {nres_t} stationary-bootstrap resamples "
+           f"(thick); every realized MDD lies inside both ranges, R1's {100 * K.SP['R1'].mdd:.2f}% against medians of "
+           f"{100 * q(K.MP['R1'], 0.5):.1f}% and {100 * q(K.MB['R1'], 0.5):.1f}%",
     "x": {"label": "Maximum drawdown (%)", "fmt": "n1", "tfmt": "n0", "min": 8, "max": 40,
           "ticks": [10, 15, 20, 25, 30, 35, 40], "name": "MDD (%)"},
     "y": {"label": "", "fmt": "n0", "min": 0.4, "max": 8.6, "ticks": list(range(1, 9)),

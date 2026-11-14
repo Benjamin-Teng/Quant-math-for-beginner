@@ -20,8 +20,11 @@ Inputs and conventions: data/lm34_common.py (the anchor script's computations, i
                   and a synthetic 160 x 5 test matrix (default_rng([7, 20261011]), experiment 7, normal draws, no
                   market data) with its Python PBO and logit histogram.
 No published file carries a daily series (plans/vol-5.md, "Charts", X37). The script then runs the widget's CSCV
-(src/lm34.js, Book.widgets.pboSim.math) in Node on the test matrix against Python's cscv() and stops on a logit
-difference above 1e-12; it also times one widget panel at the initial state (n = 60, ratio 0, seed 1).
+(src/lm34.js, Book.widgets.pboSim.math) in Node against Python's cscv(): on the test matrix, and on the widget's own
+shape, 1,851 rows (11 dropped) from the same generator, at n = 2, 5, 7, 10, 20, 60 and 100 (every n the widget
+offers, and an odd n), without skill and with strategy 1 at ratio 2; it stops on a logit difference above 1e-12 or on
+any difference in PBO or in the widget's hist() against Python's histogram, and times one widget panel at the initial
+state (n = 60, ratio 0, seed 1).
 """
 import json
 import math
@@ -240,7 +243,7 @@ wg = K["widget"]
 means = {str(n): [rd(wg[(n, s)][0], 6) for s in SRS] for n in NS}
 se_max = max(v[1] for v in wg.values())
 assert f"{se_max:.3f}" == "0.051"
-gt = np.random.default_rng([7, C.SEED])                 # experiment 7: the widget's test matrix, created once
+gt = np.random.default_rng([7, C.SEED])                 # experiment 7: the widget's test matrices, created once
 test = gt.standard_normal((160, 5)) * 0.01
 lg_test = C.cscv(test, 0.0)[0]
 pbo_test = float((lg_test <= C.EPS).mean())
@@ -261,6 +264,18 @@ write("lm34-pboSim", {
 })
 
 # ---------------------------------------------------------------- the widget's CSCV in Node against Python
+# Besides the 160 x 5 matrix (16 blocks of 10, nothing dropped), the widget's own shape: a 1,851 x 100 matrix from the
+# same generator, drawn after it (so the JSON's test block is unchanged), whose first n columns give one test for each
+# n the widget offers and for n = 7, an odd n whose middle rank has a logit of exactly 0; 1,851 = 16 x 115 + 11, so
+# the 11 earliest rows are dropped. The matrix is used as drawn (no skill: logits spread around 0) and with strategy 1
+# at the widget's largest ratio, 2 (the in-sample best often ranks first out of sample, so the top bins and the clip at
+# 4.5, which ln(100) exceeds, are reached). Each test compares the logits, the PBO and the widget's hist() with Python's.
+Tg = int(G["Tg"])
+assert Tg % C.BLOCKS == 11
+big = gt.standard_normal((Tg, max(NS))) * 0.01
+skill = big.copy()
+skill[:, 0] += max(SRS) / math.sqrt(aw) * 0.01         # the widget's drift (src/lm34.js, panel()) at its largest ratio
+NT = sorted({*NS, 7})
 DRIVER = r"""
 const vm = require("vm"), fs = require("fs");
 const ctx = { window: {}, document: { readyState: "loading", addEventListener() {} }, console, Float64Array, Math };
@@ -271,19 +286,47 @@ const M = ctx.window.Book.widgets.pboSim.math, q = JSON.parse(fs.readFileSync(0,
 const x = new Float64Array(q.x.length * q.x[0].length);
 q.x.forEach((row, t) => row.forEach((v, k) => { x[t * row.length + k] = v; }));
 const lg = M.cscv(x, q.x.length, q.x[0].length, 16);
+const wide = [];
+q.bigs.forEach((big, c) => q.ns.forEach((n) => {   // the first n columns of a T x nb matrix, row-major
+  const y = new Float64Array(q.T * n);
+  for (let t = 0; t < q.T; t++) for (let k = 0; k < n; k++) y[t * n + k] = big[t * q.nb + k];
+  const l = M.cscv(y, q.T, n, 16);
+  wide.push({ c, n, logits: Array.from(l), pbo: M.pbo(l), hist: M.hist(l) });
+}));
 const t0 = Date.now(), p = M.panel(60, 0, 1, q.days, q.Aw);
-process.stdout.write(JSON.stringify({ logits: Array.from(lg), pbo: M.pbo(lg), panelPbo: p.pbo,
+process.stdout.write(JSON.stringify({ logits: Array.from(lg), pbo: M.pbo(lg), hist: M.hist(lg), wide, panelPbo: p.pbo,
                                       panelMs: Date.now() - t0, splits: p.logits.length }));
 """
 node_exe = shutil.which("node")
 assert node_exe, "Node is needed to check the widget (it is needed to build the site too)"
 out = subprocess.run([node_exe, "-e", DRIVER, str(ROOT / "src" / "assets" / "book.js"), str(ROOT / "src" / "lm34.js")],
-                     input=json.dumps({"x": wblock["test"]["x"], "days": int(G["Tg"]), "Aw": aw}),
+                     input=json.dumps({"x": wblock["test"]["x"], "days": Tg, "Aw": aw, "T": Tg, "nb": big.shape[1],
+                                       "bigs": [m.ravel().tolist() for m in (big, skill)], "ns": NT}),
                      capture_output=True, text=True, encoding="utf-8", check=True)
 got = json.loads(out.stdout)
+edges = np.linspace(-4.5, 4.5, 19)
+
+
+def py_hist(lg: np.ndarray) -> list[int]:
+    return [int(h) for h in np.histogram(np.clip(lg, -4.5 + 1e-9, 4.5 - 1e-9), bins=edges)[0]]
+
+
 lg_py = C.cscv(np.asarray(wblock["test"]["x"], dtype=float), 0.0)[0]
 diff = float(np.abs(np.asarray(got["logits"]) - lg_py).max())
 assert len(got["logits"]) == 12_870 and diff < 1e-12, diff
-assert abs(got["pbo"] - pbo_test) < 1e-15 and got["splits"] == 12_870
-print(f"widget CSCV against Python on the 160 x 5 test matrix: largest logit difference {diff:.1e}, PBO "
-      f"{got['pbo']:.4f} both; one initial-state panel (n = 60, ratio 0, seed 1) took {got['panelMs']} ms in Node")
+assert abs(got["pbo"] - pbo_test) < 1e-15 and got["splits"] == 12_870 and got["hist"] == hist_test
+assert [(w["c"], w["n"]) for w in got["wide"]] == [(c, n) for c in (0, 1) for n in NT]
+for w in got["wide"]:
+    lg_w, *_, m_w, drop_w = C.cscv((big, skill)[w["c"]][:, :w["n"]], 0.0)
+    d_w = float(np.abs(np.asarray(w["logits"]) - lg_w).max())
+    assert (m_w, drop_w) == (115, 11) and len(w["logits"]) == 12_870 and d_w < 1e-12, (w["c"], w["n"], d_w)
+    assert w["pbo"] == float((lg_w <= C.EPS).mean()) and w["hist"] == py_hist(lg_w), (w["c"], w["n"])
+    diff = max(diff, d_w)
+wd = {(w["c"], w["n"]): w for w in got["wide"]}
+assert np.any(np.asarray(wd[(0, 7)]["logits"]) == 0.0)                  # the odd n's middle rank, logit 0
+assert wd[(1, 100)]["hist"][-1] > 0 and max(wd[(1, 100)]["logits"]) > 4.5    # the skill case reaches the clip
+pbos = "; ".join(", ".join(f"{wd[(c, n)]['pbo']:.3f}" for n in NT) for c in (0, 1))
+print(f"widget CSCV against Python on the 160 x 5 test matrix and on {Tg:,} x n (11 rows dropped) for n = "
+      f"{', '.join(map(str, NT))}, without skill and with strategy 1 at ratio {max(SRS):g}: largest logit difference "
+      f"{diff:.1e}; PBO and histogram identical (PBO {pbos}); one initial-state panel (n = 60, ratio 0, seed 1) took "
+      f"{got['panelMs']} ms in Node")

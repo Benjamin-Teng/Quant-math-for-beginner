@@ -128,10 +128,10 @@ REF = {
     'R3 caps': ['00679B', '00720B'],
     'R3 floors': ['00662'],
     'R3 cap binds': '67',
-    'R8 min': '0.284',
-    'R8 mean': '1.175',
+    'R8 traded min': '0.284',
+    'R8 traded mean': '1.183',
+    'R8 traded at cap': '20',
     'R8 uncapped max': '2.020',
-    'R8 at cap': '20',
 }
 
 # ---------------------------------------------------------------- exhibit / example numbers from the module's labels
@@ -934,6 +934,8 @@ for rule in ("R1", "R3", "R6", "R8"):
     for key, val in out.items():
         assert val == REF[f"{rule} {key}"], (rule, key, val, REF[f"{rule} {key}"])
     print(rule, out)
+    if rule == "R8":
+        L8 = np.array([t[0].sum() for t in trs])   # the exposures R8 trades, after the turnover limit
 refshow("HAC lag", lag, "d", REF["lag"])
 refshow("daily returns", len(rr), ",d", REF["T"])
 w_last, lam, nlo, nhi = caps[sch8[-1][1]]
@@ -943,8 +945,10 @@ print("R3 at", sch8[-1][1], {s: f"{w_last[j]:.4f}" for j, s in enumerate(CFUNDS)
 assert [s for j, s in enumerate(CFUNDS) if nhi[j] > 0] == REF["R3 caps"]
 refshow("signals where the cap binds", sum(1 for t in caps if caps[t][0].max() > 0.30 - 1e-6),
      "d", REF["R3 cap binds"])
-L8 = np.array([targets["R8"][t].sum() for t in targets["R8"]])
-refshow("R8 mean exposure", L8.mean(), ".3f", REF["R8 mean"])
+assert len(L8) == len(sch8)
+refshow("R8's traded exposure (after the turnover limit), lowest", L8.min(), ".3f", REF["R8 traded min"])
+refshow("R8's traded exposure (after the turnover limit), mean", L8.mean(), ".3f", REF["R8 traded mean"])
+refshow("R8's trades at the cap 1.5", int((L8 >= CAP - EPS).sum()), "d", REF["R8 traded at cap"])
 refshow("R8 largest uncapped ratio", max(unc.values()), ".3f", REF["R8 uncapped max"])
 """, hidden=True)
 

@@ -1161,8 +1161,11 @@ def checkpoint() -> dict[str, object]:
     SI100c = np.linalg.inv(S100c)
     SI100c = (SI100c + SI100c.T) / 2
     j56 = fc.funds.index("0056")
+    L8 = np.zeros(0)
     for k in CP_RULES:
         p, ex, cut, low = path(k, CP_LIMIT, True)
+        if k == "R8":                              # the exposures R8 trades, after the turnover limit (task (e))
+            L8 = np.array([t.exposure for t in p.trades])
         m = vr.summary(fc, p)
         rr = p.wealth[1:] / p.wealth[:-1] - 1
         sr, se, lag = hac_se(rr - RF / fc.A_wealth)
@@ -1213,8 +1216,9 @@ def checkpoint() -> dict[str, object]:
                       "uncapped": sg[-1].targets["R3"]}
     out["R3 cap binds"] = sum(1 for s in sg if float(caps[s.trade][0].max()) > CP_CAP - 1e-6)
     out["R3 uncapped above"] = sum(1 for s in sg if float(s.targets["R3"].max()) > CP_CAP + 1e-6)
-    L8 = np.array([float(s.targets["R8"].sum()) for s in sg])
     Lu = np.array([unc[s.trade] for s in sg])
+    if len(L8) != len(sg):
+        fail(f"checkpoint R8: {len(L8)} trades for {len(sg)} signals")
     out["R8 exposure"] = {"min": float(L8.min()), "mean": float(L8.mean()), "max": float(L8.max()),
-                 "at cap": int((L8 >= 1.5 - EPS).sum()), "uncapped max": float(Lu.max())}
+                          "at cap": int((L8 >= 1.5 - EPS).sum()), "uncapped max": float(Lu.max())}
     return out

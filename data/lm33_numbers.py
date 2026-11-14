@@ -12,15 +12,27 @@ Stage 1 anchors A33-01 .. A33-67.
 Part 1 compares each anchor line, as data/lm33_common.py recomputes it, with the anchor table's Value column: a
 difference is reported, never forced.
 
-Part 2 checks the text (each check stops the script on a failure):
-  chk(label, value, fmt, printed)  format(value, fmt) equals the printed string, the value is not a rounding tie of
-                                   that format, and the printed string is in the module as a whole number. Results the
-                                   module computes beside their inputs are redone from the printed, rounded inputs
-                                   (PITFALLS section 7, "from printed").
-  has(label, text)                 a literal string (a date, a phrase, a table row built from the values) is in the
-                                   module.
-Numbers quoted from published modules are checked against those modules' lines. At the end the script lists the
-numbers of the module that no check covered and prints "all N checks passed".
+Part 2 checks the text (each check stops the script on a failure). The text is the page: the front matter's title,
+subtitle, time, outcomes and overview, then the body up to the References (the bibliography is checked by the source
+check, project/SOURCES.md; lm, prereq, leads and js print as the module number and links, which the structure checks
+cover), without the headings' {lo=..} attributes. A number is a whole number on the page: not part of a longer number
+(0.33 is not in 0.331 or 10.33, 21 not in 21.4), not signed when the printed string is unsigned (0.09 is not in
+−0.09, ASCII or U+2212), and not part of a name (the 23 of TR23, the 2 of R2, the 0 of SR_0); TeX control words are
+not names (the 0.112 of \\times0.112 is a number).
+  chk(label, value, fmt, printed, count=None)
+        format(value, fmt) equals the printed string, the value is not a rounding tie of that format, and the printed
+        string occurs on the page as a whole number exactly `count` times (at least once if count is None). Results the
+        module computes beside their inputs are redone from the printed, rounded inputs (PITFALLS section 7, "from
+        printed").
+  has(label, text, count=None)
+        a literal string (a date, a phrase, a table row built from the values) occurs on the page exactly `count` times
+        (at least once if count is None).
+Every string that occurs more than once carries its exact count in at least one of its checks; the script asserts
+that. Numbers quoted from published modules are checked against those modules' lines. At the end every number on the
+page is either inside a has() string, an occurrence of a chk() string, or an occurrence of a number in the explicit
+allowlist ALLOW (equation tags, section and problem numbers, inputs stated as given, years and the like): the script
+asserts that the numbers outside every check are exactly ALLOW's, so a new number fails until it is checked or listed.
+Then it prints "all N checks passed".
 """
 import json
 import math
@@ -34,6 +46,7 @@ import arch
 import lm33_common as K
 import numpy as np
 import scipy
+import yaml
 from scipy import stats
 
 ROOT = HERE.parent
@@ -50,15 +63,50 @@ def norm_text(s: str) -> str:
     return re.sub(r"\\text\{\s*([^}]*)\}", r" \1", s)
 
 
+def page_text(raw: str) -> str:
+    """What the page prints (see the docstring): front matter fields, then the body up to the References."""
+    m = re.match(r"(?s)^---\n(.*?)\n---\n(.*)$", raw)
+    assert m is not None, "no front matter"
+    fm_ = yaml.safe_load(m.group(1))
+    head = [fm_["title"], fm_["subtitle"], fm_["time"], *fm_["outcomes"], *fm_["overview"]]
+    body_ = re.sub(r" ?\{lo=[\d,]+\}", "", m.group(2).split("\n## References", 1)[0])
+    return norm_text("\n".join(head) + "\n" + body_)
+
+
+def numbers_view(s: str) -> str:
+    """The page with TeX control words blanked (\\times0.112 -> 0.112) and the digits of names hashed (TR23, R2,
+    SR_0), position for position, so that only numbers are left as digits."""
+    s = re.sub(r"\\[A-Za-z]+", lambda m: " " * len(m.group()), s)
+    return re.sub(r"(?<=[A-Za-z_])\d+", lambda m: "#" * len(m.group()), s)
+
+
 TEXT = norm_text(RAW)
+PAGE = page_text(RAW)
+NUMS = numbers_view(PAGE)
+assert len(NUMS) == len(PAGE)
 N_CHECKS = 0
-COVERED: set[str] = set()
+CLAIMS: list[tuple[int, int]] = []          # spans of the page that a check accounts for
+COUNTS: dict[str, tuple[int, bool]] = {}    # a checked string: (occurrences on the page, an exact count was given)
 ANCHOR_DIFFS: list[str] = []
 
 
+def whole(printed: str) -> re.Pattern[str]:
+    """A printed number as a whole number: no digit, point or minus before it, no digit or [.,]digit after it."""
+    return re.compile(r"(?<![\d.\-\u2212])" + re.escape(printed) + r"(?![\d]|[.,]\d)")
+
+
+def counted(label: str, key: str, spans: list[tuple[int, int]], count: int | None) -> None:
+    n = len(spans)
+    assert n == count if count is not None else n >= 1, \
+        f"{label}: {key!r} occurs {n} times on the page, not {count if count is not None else 'at least once'}"
+    seen = COUNTS.get(key)
+    COUNTS[key] = (n, count is not None or (seen is not None and seen[1]))
+    CLAIMS.extend(spans)
+
+
 def in_text(printed: str) -> bool:
-    """The printed number appears as a whole number (0.33 is not inside 0.331, 0.32 not inside 10.32)."""
-    return re.search(r"(?<![\d.])" + re.escape(printed) + r"(?![\d])", TEXT) is not None
+    """The printed number appears on the page as a whole number."""
+    return whole(printed).search(NUMS) is not None
 
 
 def tie(value: float, fmt: str) -> bool:
@@ -68,27 +116,44 @@ def tie(value: float, fmt: str) -> bool:
     return abs(scaled - math.floor(scaled) - 0.5) < 1e-9
 
 
-def chk(label: str, value: float, fmt: str, printed: str, in_md: bool = True) -> None:
+def chk(label: str, value: float, fmt: str, printed: str, count: int | None = None, at: str | None = None) -> None:
+    """at: a literal string around the printed number, for a number whose other occurrences on the page are not this
+    value (the 0 of R4's 0% haircut, not of PSR(0) or a lag 0); the count is then at's, and at's span is checked."""
     global N_CHECKS
     got = format(value, fmt)
     print(f"CHECK {label}: {got} (printed {printed})")
     assert got == printed, (label, got, printed)
     assert not tie(value, fmt), ("rounding tie: print more digits", label, value)
-    assert not in_md or in_text(printed), f"{label}: {printed!r} not found in src/lm33.md"
-    COVERED.add(printed.lstrip("+-"))
+    if at is None:
+        counted(label, printed, [m.span() for m in whole(printed).finditer(NUMS)], count)
+    else:
+        assert whole(printed).search(numbers_view(norm_text(at))), (label, printed, at)
+        counted(label, norm_text(at), [m.span() for m in literal(at).finditer(PAGE)], count)
     N_CHECKS += 1
 
 
-def pct(label: str, frac: float, d: int, printed: str, in_md: bool = True) -> None:
-    chk(label, 100 * frac, f".{d}f", printed, in_md)
+def pct(label: str, frac: float, d: int, printed: str, count: int | None = None, at: str | None = None) -> None:
+    chk(label, 100 * frac, f".{d}f", printed, count, at)
 
 
-def has(label: str, text: str) -> None:
+def literal(text: str) -> re.Pattern[str]:
+    """A literal string as a whole: a number at either end is a whole number, as in whole()."""
+    t = norm_text(text)
+    p = re.escape(t)
+    if t[0].isdigit():
+        p = r"(?<![\w.\-])" + p
+    if t[-1].isdigit():
+        p += r"(?![\d]|[.,]\d)"
+    return re.compile(p)
+
+
+def has(label: str, text: str, count: int | None = None, page: bool = True) -> None:
+    """page=False: a string outside the page (the References), checked in the file without a count."""
     global N_CHECKS
     assert text in TEXT or text in RAW, f"{label}: {text!r} not found in src/lm33.md"
+    if page:
+        counted(label, norm_text(text), [m.span() for m in literal(text).finditer(PAGE)], count)
     print(f"CHECK {label}: '{text[:90]}' in text")
-    for num in re.findall(r"\d[\d,]*\.?\d*", text):
-        COVERED.add(num.rstrip(".,"))
     N_CHECKS += 1
 
 
@@ -128,58 +193,90 @@ SR, mom, SE9, SEH, SEN = K.SR, K.mom, K.SE9, K.SEH, K.SEN
 SRy = {k: SR[k] * sqA for k in RULES}
 
 # ---------------------------------------------------------------- data role (case, notation, hygiene, X1 note)
-chk("T", T, ",d", "1,851")
+chk("T", T, ",d", "1,851", count=23)
 assert (K.dates[0], K.dates[1], K.dates[-1]) == ("2019-03-04", "2019-03-05", "2026-10-08")
 has("first trade's close", "from the close of 4 March 2019 to 8 October 2026")
-has("first return", "5 March 2019 to 8 October 2026")
-chk("calendar years", K.cal_years, ".2f", "7.60")
+has("first return", "5 March 2019 to 8 October 2026", count=2)
+chk("calendar years", K.cal_years, ".2f", "7.60", count=9)
 chk("calendar years, 4 dp", K.cal_years, ".4f", "7.5975")
 chk("years of sessions", tau, ".2f", "7.60")
 chk("years of sessions, 4 dp", tau, ".4f", "7.5995")
-has("calendar years in the case", "7.60 calendar years")
+has("calendar years in the case", "7.60 calendar years", count=3)
 has("years of sessions in the notation note", "is the record in years of sessions")
 chk("wealth frame sessions", len(K.fr.wealth_dates), ",d", "2,368")
-chk("A_w", Aw, ".2f", "243.57")
-chk("TR23 T", K.Tt, ",d", "5,849")
+chk("A_w", Aw, ".2f", "243.57", count=9)
+chk("TR23 T", K.Tt, ",d", "5,849", count=3)
 chk("TR23 A", K.At, ".2f", "246.12")
-has("fixed in advance", "fixed on 24 October 2026, before any result was computed")
-has("r_f", "$r_f=1.5\\%$")
+has("fixed in advance", "fixed on 24 October 2026, before any result was computed", count=2)
+has("r_f", "$r_f=1.5\\%$", count=4)
 assert K.RF == 0.015
 has("four families", "Four families of tests run on these returns: eight one-sided tests against zero, the seven pairs "
     "against R1 by two methods, and the eight two-sided tests behind the haircuts.")
 assert K.L == 7 and K.Lt == 9 and K.lag_rule(K.TM) == 3 and K.TM == 90
 has("lag rule values", "7 for 1,851 returns, 9 for TR23's 5,849 and 3 for 90 months")
+# settings printed throughout; each count is every whole occurrence on the page, each read against its meaning
+#   7: the lag (18 times, with the code's "# 7"), Section 7 (5), Problem 7 (2) with its two numbers, Kurt - 1 = 7
+#      in Solution 2, and Holm's seven pairs in Solution 12
+chk("lag", K.L, "d", "7", count=29)
+#   8: n = 8 trials (17: E Z_(8), Phi^8, (1 - p)^8, Bonferroni's x 8, eq. (9) and X6 at 8 among them), the date
+#      8 October 2026 (3), Section 8, and Problem 8 with its solution number (2)
+assert len(RULES) == 8 and K.dates[-1] == "2026-10-08"
+chk("trials", len(RULES), "d", "8", count=23)
+#   22: b = 22 (4) and E7's lag 22, the block size
+chk("block size b", K.b_rule, "d", "22", count=5)
+#   60: the largest lag in X3's note, E3's table, E7 and Problem 11, and Harvey and Liu's "approximately 60%"
+assert K.LAGS == list(range(61))
+chk("largest lag", K.LAGS[-1], "d", "60", count=5)
+#   90: the 90 calendar months (7), Problem 2's T = 90 months (2) and KC 2's two-sided 90% interval
+chk("months", K.TM, "d", "90", count=10)
+chk("resamples B", K.B, ",d", "9,999", count=4)
+# the seeds: [i, 20261011] for experiment i
+assert K.SEED == 20261011
+for i_, r_ in enumerate((K.rng1, K.rng2, K.rng3), start=1):
+    seq = r_.bit_generator.seed_seq
+    assert isinstance(seq, np.random.SeedSequence) and seq.entropy == [i_, K.SEED], (i_, seq)
+assert len(K.mx) == 10**6
+has("experiment 1 seed", "Experiment 1 draws $B=9{,}999$ resamples with `default_rng([1, 20261011])`")
+has("experiment 2 seed", "Experiment 2 draws $10^6$ vectors of $\\mathcal N_8(\\mathbf 0,C)$ by (16.7), with "
+    "`default_rng([2, 20261011])`")
+has("experiment 3 seed", "Experiment 3, `default_rng([3, 20261011])`, repeats the bootstrap")
+has("P12 settings", "with lag $\\ell=7$, block size $b=22$ and $B=9{,}999$ resamples, seed `[1, 20261011]`")
+has("code: seed", "rng = np.random.default_rng([1, 20261011])")
+has("code: B", "for i in range(9999):")
+has("code: lag", "lag = int(4 * (len(x) / 100) ** (2 / 9))                 # 7")
+has("X1 note date", "fixed in advance on 24 October 2026")
+has("X1 source date", "`TaiwanStockSplitPrice`, retrieved 24 October 2026")
 
 # ---------------------------------------------------------------- the case box and the overview
 best, worst = K.best, K.worst
 assert (best, worst) == ("R2", "R4")
-chk("case: R2 a year", SRy["R2"], ".2f", "1.14")
-chk("case: R1 a year", SRy["R1"], ".2f", "0.98")
-chk("case: R4 a year", SRy["R4"], ".2f", "0.63")
+chk("case: R2 a year", SRy["R2"], ".2f", "1.14", count=4)
+chk("case: R1 a year", SRy["R1"], ".2f", "0.98", count=2)
+chk("case: R4 a year", SRy["R4"], ".2f", "0.63", count=4)
 chk("case: R2's SE (20.9)", SE9["R2"] * sqA, ".3f", "0.367")
-chk("case: R2's interval lo", K.CI9["R2"][0], ".2f", "0.42")
-chk("case: R2's interval hi", K.CI9["R2"][1], ".2f", "1.86")
+chk("case: R2's interval lo", K.CI9["R2"][0], ".2f", "0.42", count=4)      # and R7's volatility SE in E2
+chk("case: R2's interval hi", K.CI9["R2"][1], ".2f", "1.86", count=3)
 inside = sum(1 for k in RULES if k != "R2" and abs(SR[k] - SR["R2"]) < Z975 * SE9["R2"])
 assert inside == 7
-has("case: all seven inside", "holds all seven other estimates")
-chk("case: R2 - R1", SRy["R2"] - SRy["R1"], ".2f", "0.16")
-chk("case: correlation R2-R1", K.r21, ".2f", "0.70")
-chk("case: LW p-value (HAC)", K.PAIR["R2"]["p_hac"], ".2f", "0.52")
+has("case: all seven inside", "holds all seven other estimates", count=2)
+chk("case: R2 - R1", SRy["R2"] - SRy["R1"], ".2f", "0.16", count=3)
+chk("case: correlation R2-R1", K.r21, ".2f", "0.70", count=4)
+chk("case: LW p-value (HAC)", K.PAIR["R2"]["p_hac"], ".2f", "0.52", count=11)
 chk("case: LW p-value (bootstrap)", K.PAIR["R2"]["p_boot"], ".2f", "0.52")
 chk("case: best of eight under the null", K.SR0_8 * sqA, ".2f", "0.52")
 has("case: best of eight", "the best of their estimates would still average 0.52 a year over 1,851 daily returns")
 kmin = min(mom[k][3] for k in RULES)
 kmax = max(mom[k][3] for k in RULES)
-chk("overview: raw kurtosis low", kmin, ".0f", "10")
-chk("overview: raw kurtosis high", kmax, ".0f", "23")
+chk("overview: raw kurtosis low", kmin, ".0f", "10", count=2, at="raw kurtosis of 10 to 23")   # other 10s: n, b, 10^6
+chk("overview: raw kurtosis high", kmax, ".0f", "23", count=3)
 has("overview: kurtosis", "Negative skewness and raw kurtosis of 10 to 23 lift (20.9)'s standard error only from 0.363 to "
     "at most 0.371, if the data have the fourth moment it needs.")
 assert all(f"{SEN[k] * sqA:.3f}" == "0.363" for k in RULES)
-chk("max SE (20.9)", max(SE9.values()) * sqA, ".3f", "0.371")
-chk("min SE (20.9)", min(SE9.values()) * sqA, ".3f", "0.367")
+chk("max SE (20.9)", max(SE9.values()) * sqA, ".3f", "0.371", count=4)
+chk("min SE (20.9)", min(SE9.values()) * sqA, ".3f", "0.367", count=7)
 ratio_h = {k: SEH[k] / SE9[k] for k in RULES}
-chk("overview: HAC move low (%)", 100 * (min(ratio_h.values()) - 1), "+.0f", "-8")
-chk("overview: HAC move high (%)", 100 * (max(ratio_h.values()) - 1), "+.0f", "+4")
+chk("overview: HAC move low (%)", 100 * (min(ratio_h.values()) - 1), "+.0f", "-8", count=2)
+chk("overview: HAC move high (%)", 100 * (max(ratio_h.values()) - 1), "+.0f", "+4", count=2)
 has("overview: HAC moves", "moves it by −8% to +4%")
 has("overview: months", "lowers R1's annual ratio from 1.06 to 0.92")
 has("overview: correction's noise", "0.38 on a ratio of 1.31")
@@ -211,7 +308,7 @@ for k in RULES[1:]:
         assert not tie(v, fm), (k, v, fm)
     d_p, se_p = float(f"{p['d']:.3f}"), float(f"{p['se']:.3f}")
     assert f"{2 * stats.norm.sf(abs(d_p / se_p)):.2f}" == f"{p['p_hac']:.2f}", (k, "HAC p from printed")
-chk("X1 note: DSR at n = 8", K.dsr_at(8), ".3f", "0.955")
+chk("X1 note: DSR at n = 8", K.dsr_at(8), ".3f", "0.955", count=8)
 assert K.b_rule == 22 and K.B == 9999
 has("X1 note: bootstrap", "circular blocks of $b=22$ with $B=9{,}999$ resamples, seed `[1, 20261011]`, Monte Carlo SE "
     "at most 0.005")
@@ -219,20 +316,23 @@ assert max(p["p_se"] for p in K.PAIR.values()) <= 0.005
 
 # ---------------------------------------------------------------- Section 2: E1, E2, R4, r_f
 m2, s2, sk2, ku2 = mom["R2"]
-pct("E1 mean", m2, 4, "0.0564")
-pct("E1 s", s2, 3, "0.774")
+pct("E1 mean", m2, 4, "0.0564", count=2)
+pct("E1 s", s2, 3, "0.774", count=2)
 chk("E1 skewness", sk2, ".3f", "-0.112")
-chk("E1 raw kurtosis", ku2, ".2f", "13.58")
-chk("E1 ratio from printed", 0.0564 / 0.774, ".4f", "0.0729")
+chk("E1 skewness's size in V", -sk2, ".3f", "0.112")
+has("E1 V", "$$\\begin{aligned}\\hat V_{\\mathrm{SR}}&=1+0.0729\\times0.112\\\\&\\quad+\\tfrac14\\times12.58\\times"
+    "0.0729^2\\\\&=1+0.0082+0.0167=1.0249.\\end{aligned}$$")
+chk("E1 raw kurtosis", ku2, ".2f", "13.58", count=2)
+chk("E1 ratio from printed", 0.0564 / 0.774, ".4f", "0.0729", count=5)
 chk("E1 ratio", SR["R2"], ".4f", "0.0729")
 chk("E1 skew term from printed", 0.0729 * 0.112, ".4f", "0.0082")
 chk("E1 kurtosis term from printed", 12.58 / 4 * 0.0729**2, ".4f", "0.0167")
 chk("E1 skew term", -SR["R2"] * sk2, ".4f", "0.0082")
 chk("E1 kurtosis term", (ku2 - 1) / 4 * SR["R2"] ** 2, ".4f", "0.0167")
-chk("E1 V from printed", 1 + 0.0082 + 0.0167, ".4f", "1.0249")
+chk("E1 V from printed", 1 + 0.0082 + 0.0167, ".4f", "1.0249", count=4)
 chk("E1 V", K.v209(SR["R2"], sk2, ku2), ".4f", "1.0249")
 chk("E1 12.58", ku2 - 1, ".2f", "12.58")
-chk("E1 SE daily from printed", math.sqrt(1.0249 / 1851), ".4f", "0.0235")
+chk("E1 SE daily from printed", math.sqrt(1.0249 / 1851), ".4f", "0.0235", count=2)
 chk("E1 SE a year from printed", 0.0235 * math.sqrt(243.57), ".3f", "0.367")
 chk("E1 t-stat from printed", 0.0729 * math.sqrt(1851), ".2f", "3.14")
 chk("E1 t-stat", SR["R2"] * math.sqrt(T), ".2f", "3.14")
@@ -253,24 +353,24 @@ has("E2: negative skewness, kurtosis above 10", "since every skewness is negativ
 has("E2: unrounded", "[[ex:case]] (a) gives each Sharpe ratio, the mean over the volatility from unrounded values, "
     "with its (20.9) standard error.")
 has("E2: SE range", "(20.9) raises it to between 0.367 and 0.371")
-chk("R4 interval lo", K.CI9["R4"][0], ".2f", "-0.09")
-chk("R4 interval hi", K.CI9["R4"][1], ".2f", "1.35")
-chk("R4 one-sided p", 1 - K.PSR0["R4"], ".3f", "0.044")
-chk("R4 PSR(0)", K.PSR0["R4"], ".3f", "0.956")
+chk("R4 interval lo", K.CI9["R4"][0], ".2f", "-0.09", count=2)
+chk("R4 interval hi", K.CI9["R4"][1], ".2f", "1.35", count=2)
+chk("R4 one-sided p", 1 - K.PSR0["R4"], ".3f", "0.044", count=3)
+chk("R4 PSR(0)", K.PSR0["R4"], ".3f", "0.956", count=5)
 assert min(K.PSR0.values()) > 0.95 and min(K.PSR0, key=lambda k: K.PSR0[k]) == "R4"
 assert max(K.PSR0, key=lambda k: K.PSR0[k]) == "R2"
-chk("R2 PSR(0)", K.PSR0["R2"], ".3f", "0.999")
+chk("R2 PSR(0)", K.PSR0["R2"], ".3f", "0.999", count=5)
 chk("Holm largest adjusted", max(K.HOLM_PSR.values()), ".3f", "0.044")
 assert sum(1 for a in K.HOLM_PSR.values() if a <= 0.05 + 1e-12) == 8
 has("Holm on eight", "Holm (21.7) on the eight one-sided p-values rejects all eight at 5%, with a largest adjusted "
     "p-value of 0.044")
 z90 = float(stats.norm.ppf(0.95))
-chk("KC 2: 90% lo", (SR["R4"] - z90 * SE9["R4"]) * sqA, ".2f", "0.02")
+chk("KC 2: 90% lo", (SR["R4"] - z90 * SE9["R4"]) * sqA, ".2f", "0.02", count=3)
 chk("KC 2: 90% hi", (SR["R4"] + z90 * SE9["R4"]) * sqA, ".2f", "1.23")
-for rate, lo_, hi_ in ((0.0, "0.09", "0.15"), (0.02, "0.03", "0.05")):
+for rate, lo_, hi_, n_lo, n_hi in ((0.0, "0.09", "0.15", 2, 2), (0.02, "0.03", "0.05", 1, 4)):
     chg = [abs(K.rf_sr[rate][k] - SR[k]) * sqA for k in RULES]
-    chk(f"r_f {rate}: smallest change", min(chg), ".2f", lo_)
-    chk(f"r_f {rate}: largest change", max(chg), ".2f", hi_)
+    chk(f"r_f {rate}: smallest change", min(chg), ".2f", lo_, count=n_lo)     # 0.09 also 0.30^2 in S2
+    chk(f"r_f {rate}: largest change", max(chg), ".2f", hi_, count=n_hi)     # 0.15 also HL's p_M; 0.05 P3's SR
     assert max(RULES, key=lambda k: K.rf_sr[rate][k]) == "R2" and min(RULES, key=lambda k: K.rf_sr[rate][k]) == "R4"
     for k in RULES:     # the change is the change in rate over the rule's volatility
         assert abs(abs(K.rf_sr[rate][k] - SR[k]) * sqA - abs(K.RF - rate) / (mom[k][1] * sqA)) < 1e-12
@@ -295,25 +395,25 @@ has("moment flag for (33.1)", "which TR23 may lack (Section 2)")
 published("TR23 raw kurtosis 8.27", "lm20.md", "skewness −0.34 and kurtosis 8.27")
 published("TR23 excess kurtosis 5.27", "lm19.md", "excess kurtosis from 5.27")
 published("0050 excess kurtosis 8.12", "lm04.md", "excess kurtosis** of 8.12")
-chk("KC 9: scipy default kurtosis", float(stats.kurtosis(K.X["R2"])), ".2f", "10.58")
+chk("KC 9: scipy default kurtosis", float(stats.kurtosis(K.X["R2"])), ".2f", "10.58", count=2)
 chk("KC 9: raw kurtosis", float(stats.kurtosis(K.X["R2"], fisher=False)), ".2f", "13.58")
 
 # ---------------------------------------------------------------- Section 3: HAC
 rho1 = {k: K.rho1(K.X[k]) for k in RULES}
-chk("rho_1 R1", rho1["R1"], ".3f", "-0.054")
+chk("rho_1 R1", rho1["R1"], ".3f", "-0.054", count=2)
 chk("rho_1 R4", rho1["R4"], ".3f", "0.002")
 assert min(rho1, key=lambda k: rho1[k]) == "R1" and max(rho1, key=lambda k: rho1[k]) == "R4"
-chk("rho_1 of R1's squares", K.rho1((K.X["R1"] - K.X["R1"].mean()) ** 2), ".3f", "0.246")
+chk("rho_1 of R1's squares", K.rho1((K.X["R1"] - K.X["R1"].mean()) ** 2), ".3f", "0.246", count=3)
 lc = K.LAGCURVE
-for k, lg, p_ in (("R2", 0, "0.367"), ("R2", 7, "0.382"), ("R2", 20, "0.393"), ("R4", 7, "0.340"),
-                  ("R2", 60, "0.389")):
-    chk(f"E3 {k} at lag {lg}", lc[k][lg], ".3f", p_)
+for k, lg, p_, n_ in (("R2", 0, "0.367", 7), ("R2", 7, "0.382", 3), ("R2", 20, "0.393", 2), ("R4", 7, "0.340", 2),
+                      ("R2", 60, "0.389", 2)):
+    chk(f"E3 {k} at lag {lg}", lc[k][lg], ".3f", p_, count=n_)
 assert [f"{lc['R1'][lg]:.3f}" for lg in (0, 7, 20, 60)] == ["0.370", "0.363", "0.359", "0.367"]
 assert [f"{lc['R4'][lg]:.3f}" for lg in (0, 7, 20, 60)] == ["0.368", "0.340", "0.316", "0.300"]
-chk("E3 HAC/iid low", min(ratio_h.values()), ".2f", "0.92")
+chk("E3 HAC/iid low", min(ratio_h.values()), ".2f", "0.92", count=5)
 chk("E3 HAC/iid high", max(ratio_h.values()), ".2f", "1.04")
 assert min(ratio_h, key=lambda k: ratio_h[k]) == "R4" and max(ratio_h, key=lambda k: ratio_h[k]) == "R2"
-chk("E3 vol HAC/iid low", min(K.vr.values()), ".2f", "1.51")
+chk("E3 vol HAC/iid low", min(K.vr.values()), ".2f", "1.51", count=3)
 chk("E3 vol HAC/iid high", max(K.vr.values()), ".2f", "1.60")
 se_v1 = mom["R1"][1] * math.sqrt((mom["R1"][3] - 1) / (4 * T)) * sqA
 pct("E3 R1 vol SE iid", se_v1, 3, "0.576")
@@ -322,17 +422,17 @@ pct("E3 R1 vol SE lag 20", K.se_vol_hac(K.X["R1"], 20) * sqA, 3, "1.026")
 pct("E3 R1 vol SE lag 60", K.se_vol_hac(K.X["R1"], 60) * sqA, 3, "1.156")
 chk("KC 3: R1 vol ratio from printed", 0.872 / 0.576, ".2f", "1.51")
 mean_ratio = K.se_mean_hac(K.X["R1"], 7) / (mom["R1"][1] / math.sqrt(T))
-chk("KC 3: R1 mean ratio", mean_ratio, ".2f", "0.94")
+chk("KC 3: R1 mean ratio", mean_ratio, ".2f", "0.94", count=2)
 pct("KC 3: R1 mean SE HAC", K.se_mean_hac(K.X["R1"], 7) * Aw, 2, "4.25")
-pct("KC 3: R1 mean SE iid", mom["R1"][1] / math.sqrt(T) * Aw, 2, "4.53")
+pct("KC 3: R1 mean SE iid", mom["R1"][1] / math.sqrt(T) * Aw, 2, "4.53", count=2)
 chk("KC 3: mean ratio from printed", 4.25 / 4.53, ".2f", "0.94")
 chk("E4 TR23 daily", K.srt, ".4f", "0.0517")
-chk("E4 TR23 a year", K.srt * math.sqrt(K.At), ".2f", "0.81")
-chk("E4 TR23 skewness", K.skt, ".2f", "-0.34")
-chk("E4 TR23 raw kurtosis", K.kut, ".2f", "8.27")
-chk("E4 (20.9)", math.sqrt(K.v209(K.srt, K.skt, K.kut) / K.Tt) * math.sqrt(K.At), ".3f", "0.207")
+chk("E4 TR23 a year", K.srt * math.sqrt(K.At), ".2f", "0.81", count=2)
+chk("E4 TR23 skewness", K.skt, ".2f", "-0.34", count=2)
+chk("E4 TR23 raw kurtosis", K.kut, ".2f", "8.27", count=2)
+chk("E4 (20.9)", math.sqrt(K.v209(K.srt, K.skt, K.kut) / K.Tt) * math.sqrt(K.At), ".3f", "0.207", count=2)
 chk("E4 HAC lag 9", K.se_sr_hac(K.Rt, 9) * math.sqrt(K.At), ".3f", "0.213")
-chk("E4 HAC lag 145", K.se_sr_hac(K.Rt, 145) * math.sqrt(K.At), ".3f", "0.243")
+chk("E4 HAC lag 145", K.se_sr_hac(K.Rt, 145) * math.sqrt(K.At), ".3f", "0.243", count=3)
 published("LM20's 0.207", "lm20.md", "| Sharpe ratio a year, TR23 | 0.81 | — | 0.205 | 0.207 | 0.40 to 1.22 |")
 for scheme, v in (("Moving blocks", "0.247"), ("Circular blocks", "0.244"), ("Stationary bootstrap", "0.233")):
     published(f"LM22's {scheme}", "lm22.md", f"| {scheme} |")
@@ -345,6 +445,9 @@ for row in ("| (20.9), as [[LM20]] printed it | 0.207 |", "| (33.1) at the book'
 # E3's table: (33.1) a year at lags 0, 7, 20, 60 for R1, R2, R4, and R1's volatility SE in percent
 for k in ("R1", "R2", "R4"):
     has(f"E3 table {k}", f"| Sharpe ratio, {k} | " + " | ".join(f"{lc[k][lg]:.3f}" for lg in (0, 7, 20, 60)) + " |")
+has("E3 table head", "| Standard error a year | Lag 0, (20.9) | Lag 7 | Lag 20 | Lag 60 |")
+has("X3 note lags", "(33.1) a year at lags $\\ell=0$ to 60 for R1, R2 and R4; $\\ell=0$ is (20.9)")
+has("P11 lags", "Compute (33.1) for R2 at $\\ell=0$, 7, 20 and 60, and check $\\ell=0$ against (20.9)")
 vol_se = [se_v1] + [K.se_vol_hac(K.X["R1"], lg) * sqA for lg in (7, 20, 60)]
 has("E3 table R1 volatility", "| Volatility of R1, % | " + " | ".join(f"{100 * v:.3f}" for v in vol_se) + " |")
 for v in [lc[k][lg] for k in ("R1", "R2", "R4") for lg in (0, 7, 20, 60)] + [100 * v for v in vol_se]:
@@ -362,17 +465,17 @@ assert 0.233 <= K.se_sr_hac(K.Rt, 145) * math.sqrt(K.At) <= 0.247
 assert int(K.nsess.min()) == 12 and int(K.nsess.max()) == 23 and K.mar19 == 19 and K.oct26 == 6
 has("E5 months", "The 90 calendar months run from April 2019 to September 2026, 12 to 23 sessions each. The 19 "
     "returns of March 2019 and the 6 of October 2026 are excluded.")
-chk("E5 R1 monthly ratio", K.srm_["R1"], ".3f", "0.305")
-chk("E5 R1 sqrt12", K.srm_["R1"] * math.sqrt(12), ".2f", "1.06")
+chk("E5 R1 monthly ratio", K.srm_["R1"], ".3f", "0.305", count=3)
+chk("E5 R1 sqrt12", K.srm_["R1"] * math.sqrt(12), ".2f", "1.06", count=4)
 chk("E5 R1 sqrt12 from printed", 0.305 * math.sqrt(12), ".2f", "1.06")
-chk("E5 R1 ratio", K.den["R1"], ".3f", "1.309")
-chk("E5 R1 ratio, 2 dp", K.den["R1"], ".2f", "1.31")
+chk("E5 R1 ratio", K.den["R1"], ".3f", "1.309", count=2)
+chk("E5 R1 ratio, 2 dp", K.den["R1"], ".2f", "1.31", count=2)
 chk("E5 R1 Lo", K.srm_["R1"] * K.eta["R1"], ".2f", "0.92")
 chk("E5 R1 Lo from printed", 0.305 * math.sqrt(12 / 1.309), ".2f", "0.92")
 chk("E5 R2 sqrt12", K.srm_["R2"] * math.sqrt(12), ".2f", "1.05")
 chk("E5 R2 Lo", K.srm_["R2"] * K.eta["R2"], ".2f", "0.94")
 chk("E5 R4 sqrt12", K.srm_["R4"] * math.sqrt(12), ".2f", "0.62")
-chk("E5 R4 Lo", K.srm_["R4"] * K.eta["R4"], ".2f", "0.49")
+chk("E5 R4 Lo", K.srm_["R4"] * K.eta["R4"], ".2f", "0.49", count=2)
 assert sorted(K.eta) == sorted(RULES)              # "over the eight rules"
 has("E5 table sqrt12", "| By $\\sqrt{12}$ | " + " | ".join(f"{K.srm_[k] * math.sqrt(12):.2f}" for k in ("R1", "R2", "R4"))
     + " |")
@@ -381,22 +484,22 @@ has("E5 scale over eight", "Over the eight rules the scale factors run from 2.74
 chk("E5 scale low", min(K.eta.values()), ".2f", "2.74")
 chk("E5 scale high", max(K.eta.values()), ".2f", "3.33")
 chk("E5 sqrt12", math.sqrt(12), ".2f", "3.46")
-chk("E5 robust SE", K.serob["R1"], ".2f", "0.38")
+chk("E5 robust SE", K.serob["R1"], ".2f", "0.38", count=3)
 chk("E5 excess over 1", K.den["R1"] - 1, ".3f", "0.309")
 chk("E5 iid SE", K.se_iid12, ".3f", "0.395")
-chk("E5 iid SEs", (K.den["R1"] - 1) / K.se_iid12, ".2f", "0.78")
+chk("E5 iid SEs", (K.den["R1"] - 1) / K.se_iid12, ".2f", "0.78", count=3)
 chk("E5 iid SEs from printed", 0.309 / 0.395, ".2f", "0.78")
 has("E5 eleven", "the corrected ratio carries the noise of 11 autocorrelations")
 dlog = {k: K.xd[k].mean() / K.xd[k].std() * sqA for k in RULES}
-chk("log ratios low", min(dlog.values()), ".2f", "0.54")
+chk("log ratios low", min(dlog.values()), ".2f", "0.54", count=2)
 chk("log ratios high", max(dlog.values()), ".2f", "1.08")
 assert min(dlog, key=lambda k: dlog[k]) == "R4" and max(dlog, key=lambda k: dlog[k]) == "R2"
 has("simple ratios range", "against 0.63 to 1.14")
 chk("KC 4: AR(1) scale factor", K.ar, ".3f", "2.879")
-chk("KC 4: sqrt12", math.sqrt(12), ".3f", "3.464")
+chk("KC 4: sqrt12", math.sqrt(12), ".3f", "3.464", count=2)
 chk("KC 4: factor", math.sqrt(12) / K.ar, ".3f", "1.203")
 chk("KC 4: factor from printed", 3.464 / 2.879, ".3f", "1.203")
-pct("KC 4: overstatement", math.sqrt(12) / K.ar - 1, 0, "20")
+pct("KC 4: overstatement", math.sqrt(12) / K.ar - 1, 0, "20", at="by a factor of 1.203, or 20%")  # not lag 20
 has("KC 4: Lo's Table 2", "Lo's Table 2 (his p. 41) prints 2.88")
 
 # ---------------------------------------------------------------- Section 5: PSR and MinTRL
@@ -404,25 +507,27 @@ chk("z with sqrt(T-1)", K.zt, ".3f", "3.097")
 chk("z with sqrt(T)", K.zt * math.sqrt(T / (T - 1)), ".3f", "3.098")
 pct("sqrt(T/(T-1)) - 1", math.sqrt(T / (T - 1)) - 1, 3, "0.027")
 has("T/(T-1)", "$\\sqrt{1{,}851/1{,}850}$")
+assert K.X4_SR == (0.5, 1.0, 1.5)
+has("X4 note inputs", "normal returns, annual Sharpe ratios 0.5, 1.0 and 1.5 held fixed as the record lengthens")
 for a, pm, pp in zip(K.X4_SR, ("10.83", "2.72", "1.21"), ("0.916", "0.997", "1.000"), strict=True):
     chk(f"X4 MinTRL at {a}", K.X4_MIN[a], ".2f", pm)
     chk(f"X4 PSR at 7.60, {a}", K.X4_AT[a], ".3f", pp)
-for k, p0, n0, y0, yn in (("R2", "0.999", "523", "2.15", "2.10"), ("R1", "0.996", "720", "2.96", "2.85"),
-                          ("R4", "0.956", "1,717", "7.05", "6.85")):
+for k, p0, n0, y0, yn, c0 in (("R2", "0.999", "523", "2.15", "2.10", 5), ("R1", "0.996", "720", "2.96", "2.85", 2),
+                              ("R4", "0.956", "1,717", "7.05", "6.85", 5)):
     _, _, sk, ku = mom[k]
     n_ = K.mintrl(SR[k], 0, sk, ku)
-    chk(f"E6 {k} PSR(0)", K.PSR0[k], ".3f", p0)
+    chk(f"E6 {k} PSR(0)", K.PSR0[k], ".3f", p0, count=c0)
     chk(f"E6 {k} MinTRL sessions", n_, ",.0f", n0)
     chk(f"E6 {k} MinTRL years", n_ / Aw, ".2f", y0)
     chk(f"E6 {k} normal MinTRL years", K.mintrl(SR[k], 0, 0, 3) / Aw, ".2f", yn)
     assert f"{float(n0.replace(',', '')) / 243.57:.2f}" == y0     # also from the printed count
     assert n_ < T
-chk("E6 R2 MinTRL from printed", 1 + 1.0249 * (Z95 / 0.0729) ** 2, ".0f", "523")
-chk("E6 R2 years from printed", 523 / 243.57, ".2f", "2.15")
+chk("E6 R2 MinTRL from printed", 1 + 1.0249 * (Z95 / 0.0729) ** 2, ".0f", "523", count=2)
+chk("E6 R2 years from printed", 523 / 243.57, ".2f", "2.15", count=3)
 chk("E6 TR23 daily", K.srt, ".5f", "0.05173")
 chk("E6 TR23 PSR(0)", K.psr(K.srt, 0, K.Tt, K.skt, K.kut), ".5f", "0.99995")
 chk("E6 TR23 MinTRL", K.n_tr, ",.0f", "1,035")
-chk("E6 TR23 years", K.n_tr / K.At, ".2f", "4.20")
+chk("E6 TR23 years", K.n_tr / K.At, ".2f", "4.20", count=2)
 n_tr_p = 1 + K.v209(0.05173, -0.34, 8.27) * (Z95 / 0.05173) ** 2
 chk("E6 TR23 MinTRL from printed", n_tr_p, ",.0f", "1,035")
 chk("E6 TR23 years from printed, unrounded count", n_tr_p / 246.12, ".2f", "4.20")
@@ -451,22 +556,22 @@ chk("E6 BLdP years from printed", 59.9 / 12, ".2f", "4.99")
 has("E6 BLdP inputs", "a monthly ratio $2/\\sqrt{12}$ against $1/\\sqrt{12}$")
 has("E6 BLdP table, normal", "| Normal | 38.9 | 3.24 |")
 has("E6 BLdP table", "| Skewness −0.72, raw kurtosis 5.78 | 59.9 | 4.99 |")
-chk("pitfall: R4 sessions", K.mintrl(SR["R4"], 0, mom["R4"][2], mom["R4"][3]), ",.0f", "1,717")
+chk("pitfall: R4 sessions", K.mintrl(SR["R4"], 0, mom["R4"][2], mom["R4"][3]), ",.0f", "1,717", count=2)
 has("LM24's reading", "In [[LM24]] a flat prior gives a posterior probability equal to the one-sided p-value to the "
     "printed digits")
 published("LM24's agreement", "lm24.md", "and the two agree to the printed digits")
 has("Leaves: shrinkage", "Shrinking a Sharpe ratio toward a prior uses [[LM24]]'s tools and is not done here.")
 chk("KC 5: misuse years", K.mintrl(SR["R2"], SR["R1"], sk2, ku2) / Aw, ".0f", "106")
-chk("KC 5: misuse PSR", K.psr(SR["R2"], SR["R1"], T, sk2, ku2), ".2f", "0.67")
+chk("KC 5: misuse PSR", K.psr(SR["R2"], SR["R1"], T, sk2, ku2), ".2f", "0.67", count=2)
 
 # ---------------------------------------------------------------- Section 6: two Sharpe ratios
 p21 = K.PAIR["R2"]
-chk("E7 Delta", p21["d"], "+.3f", "+0.162")
-chk("E7 SE", p21["se"], ".3f", "0.253")
+chk("E7 Delta", p21["d"], "+.3f", "+0.162", count=3)
+chk("E7 SE", p21["se"], ".3f", "0.253", count=4)
 chk("E7 t-stat", p21["t"], "+.2f", "+0.64")
 chk("E7 HAC lo", p21["hac_lo"], "+.2f", "-0.33")
 chk("E7 HAC hi", p21["hac_hi"], "+.2f", "+0.66")
-chk("E7 bootstrap MC SE", p21["p_se"], ".3f", "0.005")
+chk("E7 bootstrap MC SE", p21["p_se"], ".3f", "0.005", count=3)
 chk("E7 quantile", p21["q"], ".1f", "2.0")
 chk("E7 quantile MC SE", p21["q_se"], ".2f", "0.02")
 chk("E7 boot lo", p21["boot_lo"], "+.2f", "-0.34")
@@ -491,18 +596,19 @@ has("QS kernel", "Andrews and Monahan's (1992) prewhitened quadratic-spectral ke
 has("Algorithm 3.1", "(their Algorithm 3.1)")
 for lg, p_ in ((0, "0.280"), (7, "0.253"), (22, "0.250"), (60, "0.243")):
     chk(f"E7 SE at lag {lg}", K.lw_parts(K.X["R2"], K.X["R1"], lg)[1] * sqA, ".3f", p_)
-chk("E7 block sizes low", min(K.sens_p.values()), ".2f", "0.53")
-chk("E7 block sizes high", max(K.sens_p.values()), ".2f", "0.56")
+has("E7 SE by lag", "At $\\ell=0$, 7, 22 and 60 the standard error is 0.280, 0.253, 0.250 and 0.243.")
+chk("E7 block sizes low", min(K.sens_p.values()), ".2f", "0.53", count=2)
+chk("E7 block sizes high", max(K.sens_p.values()), ".2f", "0.56", count=4)
 assert sorted(K.sens_p) == [1, 5, 10, 26, 50, 100]
 chk("E7 gap, 4 dp", p21["d"], ".4f", "0.1617")
-chk("E7 SE, 4 dp", p21["se"], ".4f", "0.2528")
+chk("E7 SE, 4 dp", p21["se"], ".4f", "0.2528", count=2)
 c21 = 0.2528 * math.sqrt(7.60)
 z80 = float(stats.norm.ppf(0.975) + stats.norm.ppf(0.8))
-chk("E7 years for 80% power", (z80 * K.c21 * sqA / (K.dl21 * sqA)) ** 2, ".0f", "146")
-chk("E7 years, one-sided", (Z95 * K.c21 * sqA / (K.dl21 * sqA)) ** 2, ".0f", "50")
+chk("E7 years for 80% power", (z80 * K.c21 * sqA / (K.dl21 * sqA)) ** 2, ".0f", "146", count=2)
+chk("E7 years, one-sided", (Z95 * K.c21 * sqA / (K.dl21 * sqA)) ** 2, ".0f", "50", count=2)
 chk("E7 years for 80% power from printed", (z80 * c21 / 0.1617) ** 2, ".0f", "146")
 chk("E7 years, one-sided, from printed", (Z95 * c21 / 0.1617) ** 2, ".0f", "50")
-chk("E7 one-year error from printed", c21, ".3f", "0.697")
+chk("E7 one-year error from printed", c21, ".3f", "0.697", count=2)
 chk("E7 one-year error", K.c21 * sqA, ".3f", "0.697")
 chk("E7 80% power from the printed 0.697", (z80 * 0.697 / 0.1617) ** 2, ".0f", "146")
 chk("E7 one-sided from the printed 0.697", (Z95 * 0.697 / 0.1617) ** 2, ".0f", "50")
@@ -517,8 +623,8 @@ has("T = 84 x 22 + 3", "$T=1{,}851=84\\times22+3$")
 assert max(p["end_se"] for p in K.PAIR.values()) <= 0.006
 has("X5 note", "Monte Carlo SE of the ends at most 0.006")
 ph = {k: K.PAIR[k]["p_hac"] for k in RULES[1:]}
-chk("pairs: smallest HAC p", min(ph.values()), ".2f", "0.22")
-chk("pairs: largest HAC p", max(ph.values()), ".2f", "0.87")
+chk("pairs: smallest HAC p", min(ph.values()), ".2f", "0.22", count=4)
+chk("pairs: largest HAC p", max(ph.values()), ".2f", "0.87", count=2)
 assert min(ph, key=lambda k: ph[k]) == "R4" and max(ph, key=lambda k: ph[k]) == "R6"
 assert min(K.hb) == 1.0 and min(K.hh) == 1.0
 has("pairs: Holm", "Holm (21.7) on either family of seven adjusts every p-value to 1.00")
@@ -528,12 +634,12 @@ chk("KC 6: sqrt(1 - rho) from printed", math.sqrt(1 - 0.70), ".2f", "0.55")
 chk("KC 6: ratio at lag 0", K.lw_parts(K.X["R2"], K.X["R1"], 0)[1] / K.naive, ".2f", "0.54")
 chk("KC 6: ratio at lag 7", K.sd21 / K.naive, ".2f", "0.49")
 p4 = K.PAIR["R4"]
-chk("S12 Delta", p4["d"], ".3f", "-0.347")
-chk("S12 SE", p4["se"], ".3f", "0.285")
+chk("S12 Delta", p4["d"], ".3f", "-0.347", count=2)
+chk("S12 SE", p4["se"], ".3f", "0.285", count=2)
 chk("S12 HAC p", p4["p_hac"], ".2f", "0.22")
 chk("S12 HAC lo", p4["hac_lo"], "+.2f", "-0.91")
 chk("S12 HAC hi", p4["hac_hi"], "+.2f", "+0.21")
-chk("S12 boot p", p4["p_boot"], ".2f", "0.25")
+chk("S12 boot p", p4["p_boot"], ".2f", "0.25", count=3)
 chk("S12 boot MC SE", p4["p_se"], ".3f", "0.004")
 chk("S12 quantile", p4["q"], ".1f", "2.1")
 chk("S12 quantile MC SE", p4["q_se"], ".2f", "0.02")
@@ -542,27 +648,29 @@ chk("S12 boot hi", p4["boot_hi"], "+.2f", "+0.25")
 chk("S12 boot lo from printed", -0.347 - 2.1 * 0.285, "+.2f", "-0.95")
 chk("S12 boot hi from printed", -0.347 + 2.1 * 0.285, "+.2f", "+0.25")
 assert 7 * min(ph.values()) > 1
-has("S12 (b)", "The smallest HAC p-value, 0.22, times 7 exceeds 1")
+has("S12 (b)", "The smallest HAC p-value, 0.22, times 7 exceeds 1, so Holm caps it at 1.00, and the running maximum "
+    "keeps every other adjusted p-value at 1.00.")
 
 # ---------------------------------------------------------------- Section 7: deflation
 ez8 = K.emax(8)
-chk("E Z_(8), 4 dp", ez8, ".4f", "1.4236")
+chk("E Z_(8), 4 dp", ez8, ".4f", "1.4236", count=3)
 chk("E Z_(8), 3 dp", ez8, ".3f", "1.424")
-chk("approximation at 8", K.emax_bldp(8), ".3f", "1.459")
+chk("approximation at 8", K.emax_bldp(8), ".3f", "1.459", count=2)
 chk("median at 8", float(stats.norm.ppf(0.5 ** (1 / 8))), ".2f", "1.39")
-chk("null SD a year", K.s0 * sqA, ".3f", "0.363")
+chk("null SD a year", K.s0 * sqA, ".3f", "0.363", count=8)
 chk("SR_0 at 8", K.SR0_8 * sqA, ".3f", "0.517")
 chk("SR_0 from printed", 1.4236 * 0.363, ".3f", "0.517")
-chk("E8 R2 a year", SRy["R2"], ".3f", "1.138")
-chk("E8 gap from printed", 1.138 - 0.517, ".3f", "0.621")
+chk("E8 R2 a year", SRy["R2"], ".3f", "1.138", count=3)
+chk("E8 gap from printed", 1.138 - 0.517, ".3f", "0.621", count=2)
+has("E8 gap", "R2 exceeds it by $1.138-0.517=0.621$ a year")
 zp = 0.621 * math.sqrt(1850 / 243.57) / math.sqrt(1.0249)
-chk("E8 z from printed", zp, ".3f", "1.691")
+chk("E8 z from printed", zp, ".3f", "1.691", count=2)
 z_exact = (SR["R2"] - K.SR0_8) * math.sqrt(T - 1) / math.sqrt(K.v209(SR["R2"], sk2, ku2))
 chk("E8 z", z_exact, ".3f", "1.691")
 chk("E8 DSR from printed", float(stats.norm.cdf(1.691)), ".3f", "0.955")
 chk("E8 DSR", K.dsr_at(8), ".3f", "0.955")
 chk("E8 DSR approx", K.psr(SR["R2"], K.emax_bldp(8) * K.s0, T, sk2, ku2), ".3f", "0.951")
-chk("E8 DSR with HAC SE", K.dsr_at(8, SEH["R2"]), ".3f", "0.948")
+chk("E8 DSR with HAC SE", K.dsr_at(8, SEH["R2"]), ".3f", "0.948", count=2)
 chk("E8 n at 0.95", K.nstar, ".1f", "8.8")
 assert 8.5 < K.nstar < 9.0
 has("from nine trials on", "from nine trials on, R2's DSR is below 0.95")
@@ -571,38 +679,38 @@ has("X6 note: PSR line", "Dashed at 0.53, the $\\mathrm{SR}_0$ at which R2's PSR
 assert abs(K.psr(SR["R2"], K.PASS_LINE / sqA, T, sk2, ku2) - 0.95) < 1e-9
 has("null scale", "standard deviation $1/\\sqrt T$, which PSR's convention writes $1/\\sqrt{T-1}$")
 Cm, off, iu = K.Cm, K.off, K.iu
-chk("mean correlation", float(off.mean()), ".3f", "0.821")
-chk("mean correlation, 2 dp", float(off.mean()), ".2f", "0.82")
+chk("mean correlation", float(off.mean()), ".3f", "0.821", count=2)
+chk("mean correlation, 2 dp", float(off.mean()), ".2f", "0.82", count=2)
 chk("min correlation", float(Cm[iu].min()), ".2f", "0.61")
 chk("max correlation", float(Cm[iu].max()), ".3f", "0.998")
 assert (RULES[iu[0][K.pmin]], RULES[iu[1][K.pmin]], RULES[iu[0][K.pmax]], RULES[iu[1][K.pmax]]) == ("R3", "R4", "R3", "R5")
 chk("R6-R8", float(Cm[5, 7]), ".2f", "0.96")
 chk("R2-R1", float(Cm[1, 0]), ".2f", "0.70")
-chk("experiment 2 mean", K.emc, ".3f", "0.588")
+chk("experiment 2 mean", K.emc, ".3f", "0.588", count=2)
 chk("experiment 2 MC SE", K.emc_se, ".4f", "0.0009")
-chk("n_eff", K.neff, ".2f", "2.07")
+chk("n_eff", K.neff, ".2f", "2.07", count=5)
 chk("n_eff low", K.d_lo, ".2f", "2.06")
 chk("n_eff high", K.d_hi, ".2f", "2.07")
-chk("SR_0 at n_eff", K.emc * K.s0 * sqA, ".2f", "0.21")
-chk("DSR at n_eff", K.psr(SR["R2"], K.emc * K.s0, T, sk2, ku2), ".3f", "0.994")
+chk("SR_0 at n_eff", K.emc * K.s0 * sqA, ".2f", "0.21", count=4)
+chk("DSR at n_eff", K.psr(SR["R2"], K.emc * K.s0, T, sk2, ku2), ".3f", "0.994", count=3)
 chk("eq. (9)", float(off.mean()) + (1 - float(off.mean())) * 8, ".2f", "2.25")
 chk("eq. (9) from printed", 0.821 + (1 - 0.821) * 8, ".2f", "2.25")
-chk("cross-section SD", K.cs_sd * sqA, ".3f", "0.141")
+chk("cross-section SD", K.cs_sd * sqA, ".3f", "0.141", count=2)
 chk("expected SD", K.exp_sd * sqA, ".3f", "0.144")
 chk("BLdP recipe SR_0", K.cs_sd * K.emax_bldp(8) * sqA, ".2f", "0.21")
 chk("BLdP recipe from printed", 0.141 * 1.459, ".2f", "0.21")
 chk("BLdP recipe DSR", K.psr(SR["R2"], K.cs_sd * K.emax_bldp(8), T, sk2, ku2), ".3f", "0.994")
 sv = math.sqrt(1.0249)
-for n_, ez, sess, yrs in ((1, 0.0, None, "2.15"), (8, 1.4236, "1,796", "7.37"), (100, 2.508, None, "13.5")):
-    mt_p = 1 + ((Z95 * sv + ez) / 0.0729) ** 2
-    if sess:
-        chk(f"MinTRL at {n_} from printed", mt_p, ",.0f", sess)
-        chk(f"MinTRL at {n_}", K.mintrl_n(ez8), ",.0f", sess)
+# each n with its own E Z_(n), printed (ez_p) and exact; the session count is printed at n = 8 only
+for n_, ez_p, sess, yrs in ((1, 0.0, None, "2.15"), (8, 1.4236, "1,796", "7.37"), (100, 2.508, None, "13.5")):
+    ez = K.emax(n_)
+    mt_p = 1 + ((Z95 * sv + ez_p) / 0.0729) ** 2
     d_ = 1 if n_ == 100 else 2
+    if sess:
+        chk(f"MinTRL at {n_} from printed", mt_p, ",.0f", sess, count=3)
+        chk(f"MinTRL at {n_}", K.mintrl_n(ez), ",.0f", sess, count=3)
     chk(f"MinTRL years at {n_} from printed", mt_p / 243.57, f".{d_}f", yrs)
-chk("MinTRL years at 8", K.mintrl_n(ez8) / Aw, ".2f", "7.37")
-chk("MinTRL years at 1", K.mintrl_n(0) / Aw, ".2f", "2.15")
-chk("MinTRL years at 100", K.mintrl_n(K.emax(100)) / Aw, ".1f", "13.5")
+    chk(f"MinTRL years at {n_}", K.mintrl_n(ez) / Aw, f".{d_}f", yrs)
 chk("E Z_(100)", K.emax(100), ".3f", "2.508")
 chk("MinTRL years at n_eff", K.mintrl_n(K.emc) / Aw, ".1f", "3.9")
 assert f"{K.mintrl_n(K.emc - 2 * K.emc_se) / Aw:.1f}" == f"{K.mintrl_n(K.emc + 2 * K.emc_se) / Aw:.1f}" == "3.9"
@@ -610,7 +718,7 @@ chk("MinTRL at n_eff from printed", (1 + ((Z95 * sv + 0.588) / 0.0729) ** 2) / 2
 assert K.mintrl_n(ez8) < T
 chk("BLdP 2014 SR_0", math.sqrt(K.v14) * K.emax_bldp(100), ".4f", "0.1132")
 chk("BLdP 2014 DSR at 100", K.dsr14(100, -3, 10), ".4f", "0.9004")
-chk("BLdP 2014 DSR at 46", K.dsr14(46, -3, 10), ".4f", "0.9505")
+chk("BLdP 2014 DSR at 46", K.dsr14(46, -3, 10), ".4f", "0.9505", count=2)
 chk("BLdP 2014 DSR at 88, normal", K.dsr14(88, 0, 3), ".4f", "0.9505")
 # the example's inputs, printed beside it (A33-51): SR 2.5 a year, T = 1,250 at 250 a year, variance 1/2, -3, 10
 assert K.v14 == 0.5 / 250 and abs(K.sr14 - 2.5 / math.sqrt(250)) < 1e-15
@@ -627,10 +735,10 @@ has("E8 table head", "| Trials $n$ | 1 | 2.07, effective | 8 | 100 |")
 assert abs(K.emax(K.neff) - K.emc) < 1e-9                      # E Z at n_eff is experiment 2's mean
 has("E8 1,796", "R2 needs the records below, 1,796 sessions at $n=8$")
 ex6 = dict(zip(K.X6_N, K.X6_EXACT, strict=True))
-for n_, p_ in ((1.0, "0"), (2.0, "0.20"), (8.0, "0.52"), (10.0, "0.56"), (100.0, "0.91"), (1000.0, "1.18"),
-               (10000.0, "1.40")):
+for n_, p_, c_ in ((1.0, "0", 0), (2.0, "0.20", 2), (8.0, "0.52", 11), (10.0, "0.56", 4), (100.0, "0.91", 1),
+                   (1000.0, "1.18", 1), (10000.0, "1.40", 1)):
     if p_ != "0":
-        chk(f"X6 at {n_:g}", ex6[n_], ".2f", p_)
+        chk(f"X6 at {n_:g}", ex6[n_], ".2f", p_, count=c_)       # 0.20 also R7's interval in X1
     else:
         assert ex6[n_] == 0.0
 has("X6 values", "Exact values: 0, 0.20, 0.52, 0.56, 0.91, 1.18 and 1.40 at $n=1$, 2, 8, 10, 100, 1,000 and 10,000")
@@ -642,20 +750,21 @@ assert f"{K.EULER:.4f}" == "0.5772"
 
 # ---------------------------------------------------------------- Section 8: haircuts
 pS2 = K.pS["R2"]
-chk("E9 t-stat", SR["R2"] * math.sqrt(T), ".3f", "3.137")
+chk("E9 t-stat", SR["R2"] * math.sqrt(T), ".3f", "3.137", count=2)
 chk("E9 p-value", pS2, ".5f", "0.00171")
-chk("E9 independent", 1 - (1 - pS2) ** 8, ".4f", "0.0136")
+chk("E9 independent", 1 - (1 - pS2) ** 8, ".4f", "0.0136", count=3)
 chk("E9 Bonferroni", 8 * pS2, ".4f", "0.0137")
 chk("E9 independent from printed", 1 - (1 - 0.00171) ** 8, ".4f", "0.0136")
 chk("E9 Bonferroni from printed", 8 * 0.00171, ".4f", "0.0137")
 t_adj = float(stats.norm.isf((1 - (1 - pS2) ** 8) / 2))
-chk("E9 t-stat adj", t_adj, ".2f", "2.47")
+chk("E9 t-stat adj", t_adj, ".2f", "2.47", count=2)
 chk("E9 t-stat adj from printed", float(stats.norm.isf(0.0136 / 2)), ".2f", "2.47")
-chk("E9 HSR", K.HSR_IND["R2"], ".2f", "0.90")
+has("E9 formulas", "$1-(1-0.00171)^8=0.0136$. So $\\text{t-stat}_{\\text{adj}}=\\Phi^{-1}(1-0.0136/2)=2.47$")
+chk("E9 HSR", K.HSR_IND["R2"], ".2f", "0.90", count=4)
 chk("E9 HSR from printed", 1.138 * 2.47 / 3.137, ".2f", "0.90")
-pct("E9 haircut", 1 - K.HSR_IND["R2"] / SRy["R2"], 0, "21")
+pct("E9 haircut", 1 - K.HSR_IND["R2"] / SRy["R2"], 0, "21", count=7)
 pct("E9 haircut from printed", 1 - 2.47 / 3.137, 0, "21")
-chk("X7 R2 Holm", K.HSR_HOLM["R2"], ".2f", "0.89")
+chk("X7 R2 Holm", K.HSR_HOLM["R2"], ".2f", "0.89", count=2)
 has("X7 note", "R2: 1.14, 0.90 and 0.89")
 # Bonferroni's HSR and haircut for R2, also Holm's (its first step multiplies the smallest p-value by n)
 chk("E9 Bonferroni HSR", K.HSR_BON["R2"], ".2f", "0.89")
@@ -667,14 +776,16 @@ has("E9 Holm is Bonferroni", "Bonferroni's adjusted p-value is also Holm's for R
 has("E9 table independent", "| Eight independent tests | 0.0136 | 0.90 | 21% |")
 has("E9 table Bonferroni", "| Bonferroni and Holm | 0.0137 | 0.89 | 21% |")
 chk("HL normal p", K.two_sided(K.t240), ".4f", "0.0008")
-chk("HL normal p_M", 1 - (1 - K.two_sided(K.t240)) ** 200, ".2f", "0.15")
+chk("HL normal p_M", 1 - (1 - K.two_sided(K.t240)) ** 200, ".2f", "0.15", count=2)
 chk("HL normal HSR", K.hn240, ".2f", "0.32")
 pct("HL haircut from printed", (0.75 - 0.32) / 0.75, 0, "57")
 chk("HL t239 HSR", K.h240, ".2f", "0.31")
 has("HL example", "has 240 months, a ratio of 0.75 a year and 200 tests")
+has("HL haircut and t_239", "$(0.75-0.32)/0.75=57\\%$. With $t_{239}$, as their eqs. (1) and (3) say, the HSR is 0.31")
+assert K.t240 == 0.75 / math.sqrt(12) * math.sqrt(240) and f"{K.h240:.2f}" == "0.31"   # t_239: 240 months less 1
 has("HL sixty", "their \"approximately 60%\"")
 chk("KC 8: R4's p-value", K.pS["R4"], ".3f", "0.083")
-pct("KC 8: Holm haircut of R4", 1 - K.HSR_HOLM["R4"] / SRy["R4"], 0, "0")
+pct("KC 8: Holm haircut of R4", 1 - K.HSR_HOLM["R4"] / SRy["R4"], 0, "0", at="Holm's haircut of R4 is 0%")
 pct("KC 8: Bonferroni haircut of R4", 1 - K.HSR_BON["R4"] / SRy["R4"], 0, "75")
 for k in ("R6", "R7", "R8"):
     chk(f"KC 8: Holm HSR {k}", K.HSR_HOLM[k], ".2f", "0.71")
@@ -699,37 +810,37 @@ published("LM4's f*", "lm04.md", "$f^*\\approx\\mu/\\sigma^2=\\mathrm{SR}/\\sigm
 
 # ---------------------------------------------------------------- practice problems and solutions
 p1 = math.sqrt((1 + 0.06**2 / 2) / 1851)
-chk("P1 daily", p1, ".4f", "0.0233")
+chk("P1 daily", p1, ".4f", "0.0233", count=2)
 chk("P1 annual", p1 * math.sqrt(243.57), ".3f", "0.363")
 chk("P1 times A", p1 * 243.57, ".2f", "5.67")
-chk("P2 factor", K.v209(0.3, -1, 8), ".4f", "1.4575")
-chk("P2 SE", math.sqrt(K.v209(0.3, -1, 8) / 90), ".3f", "0.127")
+chk("P2 factor", K.v209(0.3, -1, 8), ".4f", "1.4575", count=2)
+chk("P2 SE", math.sqrt(K.v209(0.3, -1, 8) / 90), ".3f", "0.127", count=2)
 chk("P2 excess as raw", math.sqrt(K.v209(0.3, -1, 5) / 90), ".3f", "0.124")
 chk("P2 normal", math.sqrt(K.v209(0.3, 0, 3) / 90), ".3f", "0.108")
 chk("S2 from printed", math.sqrt(1.4575 / 90), ".3f", "0.127")
 chk("S2 terms", 1 + 0.30 + 0.25 * 7 * 0.09, ".4f", "1.4575")
-chk("P3 V", K.v209(0.05, 0, 3), ".5f", "1.00125")
+chk("P3 V", K.v209(0.05, 0, 3), ".5f", "1.00125", count=2)
 chk("P3 MinTRL", K.n3, ",.0f", "1,085")
-chk("P3 years", K.n3 / 243.57, ".2f", "4.45")
+chk("P3 years", K.n3 / 243.57, ".2f", "4.45", count=2)
 chk("P3 from printed", 1 + 1.00125 * (1.644854 / 0.05) ** 2, ",.0f", "1,085")
 chk("P3 two-sided", K.n3b / 243.57, ".2f", "6.32")
 chk("P3 annual in daily", K.n3c / 243.57, ".3f", "0.028")
-chk("P4 exact", K.emax(5), ".3f", "1.163")
+chk("P4 exact", K.emax(5), ".3f", "1.163", count=2)
 chk("P4 approximation", K.emax_bldp(5), ".3f", "1.193")
 chk("P4 median", float(stats.norm.ppf(0.5**0.2)), ".3f", "1.129")
-chk("P5", 12 / math.sqrt(12 + 2 * 11 * 0.1), ".3f", "3.184")
+chk("P5", 12 / math.sqrt(12 + 2 * 11 * 0.1), ".3f", "3.184", count=2)
 chk("P5 reversed", 12 / math.sqrt(12 - 2 * 11 * 0.1), ".3f", "3.833")
 chk("P5 sqrt12", math.sqrt(12), ".3f", "3.464")
-chk("P6", 0.36 * math.sqrt(2 * 0.1), ".3f", "0.161")
+chk("P6", 0.36 * math.sqrt(2 * 0.1), ".3f", "0.161", count=2)
 chk("P6 t", 0.2 / (0.36 * math.sqrt(0.2)), ".2f", "1.24")
-chk("P6 independent", 0.36 * math.sqrt(2), ".3f", "0.509")
-chk("P6 independent t", 0.2 / (0.36 * math.sqrt(2)), ".2f", "0.39")
+chk("P6 independent", 0.36 * math.sqrt(2), ".3f", "0.509", count=2)
+chk("P6 independent t", 0.2 / (0.36 * math.sqrt(2)), ".2f", "0.39", count=3)
 chk("P6 wrong", 0.36 * 0.1, ".3f", "0.036")
 assert re.findall(r"^\d+\. \*\*([ABC])\*\* is correct", RAW, flags=re.MULTILINE) == ["B", "C", "A", "C", "B", "A"]
-chk("P8 E max", 1 / math.sqrt(math.pi), ".4f", "0.5642")
+chk("P8 E max", 1 / math.sqrt(math.pi), ".4f", "0.5642", count=2)
 chk("P8 E max by (33.4)", K.emax(2), ".4f", "0.5642")
 chk("P8 approximation at 2", K.emax_bldp(2), ".3f", "0.520")
-chk("P8 (b)", math.sqrt(0.5 / math.pi), ".4f", "0.3989")
+chk("P8 (b)", math.sqrt(0.5 / math.pi), ".4f", "0.3989", count=2)
 chk("P8 (b) n", K.n05, ".3f", "1.608")
 has("P8 (b) eq. (9)", "$0.5+0.5\\times2=1.5$")
 p9 = K.two_sided(2.5)
@@ -739,13 +850,28 @@ chk("P9 adjusted from printed", 1 - (1 - 0.01242) ** 10, ".4f", "0.1175")
 t9 = float(stats.norm.isf((1 - (1 - p9) ** 10) / 2))
 chk("P9 t adj", t9, ".3f", "1.565")
 chk("P9 t adj from printed", float(stats.norm.isf(0.1175 / 2)), ".3f", "1.565")
-pct("P9 haircut", 1 - t9 / 2.5, 1, "37.4")
+pct("P9 haircut", 1 - t9 / 2.5, 1, "37.4", count=2)
 pct("P9 haircut from printed", 1 - 1.565 / 2.5, 1, "37.4")
 chk("P9 Bonferroni", 10 * p9, ".4f", "0.1242")
 tb = float(stats.norm.isf(10 * p9 / 2))
 chk("P9 Bonferroni t", tb, ".3f", "1.537")
-pct("P9 Bonferroni haircut", 1 - tb / 2.5, 1, "38.5")
+pct("P9 Bonferroni haircut", 1 - tb / 2.5, 1, "38.5", count=2)
 pct("P9 Bonferroni haircut from printed", 1 - 1.537 / 2.5, 1, "38.5")
+# the solutions' worked lines, whose inputs restate the stems and whose results the checks above compute
+assert 0.30**2 == 0.09 and 8 - 1 == 7 and 8 - 3 == 5 and 12 - 1 == 11
+has("S1", "$\\sqrt{(1+0.06^2/2)/1{,}851}=0.0233$ a day, times $\\sqrt{243.57}$ is 0.363")
+has("S2", "$\\hat V_{\\mathrm{SR}}=1+0.30+\\tfrac14\\times7\\times0.09=1.4575$, and $\\sqrt{1.4575/90}=0.127$. A types the "
+    "excess kurtosis 5 as raw.")
+has("S3 V", "normal returns give $\\hat V_{\\mathrm{SR}}=1+0.05^2/2=1.00125$")
+has("S4", "B is (21.9)'s median, $\\Phi^{-1}(0.5^{1/5})$")
+has("S5", "$12/\\sqrt{12+2\\times11\\times0.1}=3.184$")
+has("S6", "$0.36\\sqrt{2(1-0.9)}=0.161$, so the t-stat of the gap 0.2 is 1.24. B treats the estimates as independent, "
+    "$0.36\\sqrt2=0.509$, t-stat 0.39. C is $0.36\\times(1-0.9)$.")
+has("P8 (b) stem", "If $Z_1$ and $Z_2$ correlate 0.5, the same steps give $\\sqrt{0.5/\\pi}=0.3989$")
+has("S8 (a)", "$Z_1-Z_2$ is $\\mathcal N(0,2)$ by (16.3) and (16.7)")
+has("S8 (b)", "Now $Z_1-Z_2$ has SD $\\sqrt{2(1-0.5)}=1$, so $\\E\\max=\\tfrac12\\sqrt{2/\\pi}=0.3989$")
+has("S9", "The single p-value is $2\\Phi(-2.5)=0.01242$, and $1-(1-0.01242)^{10}=0.1175$. So "
+    "$\\text{t-stat}_{\\text{adj}}=\\Phi^{-1}(1-0.1175/2)=1.565$, a haircut of $1-1.565/2.5=37.4\\%$.")
 assert [f"{lc['R2'][lg]:.3f}" for lg in (0, 7, 20, 60)] == ["0.367", "0.382", "0.393", "0.389"]
 has("S11 (b)", "The lab gives 0.367, 0.382, 0.393 and 0.389 a year")
 has("S10", "The lab gives 0.305, 1.06 by $\\sqrt{12}$ and 0.92 by (19.9), from the ratio 1.31 with robust standard "
@@ -772,6 +898,7 @@ has("E7 B", "Experiment 1 draws $B=9{,}999$ resamples")
 has("LW Remark", "(their Remark 3.2, eq. (9))")
 assert all(f"{SE9[k] * sqA:.2f}" == "0.37" for k in RULES)
 has("overview: about 0.37", "Each standard error is about 0.37")
+has("summary: about 0.37", "each rule's Sharpe ratio has a standard error of about 0.37 a year")
 has("zh: 0.37", "八條規則的標準誤都在 0.37 左右")
 assert f"{min(K.vr.values()):.1f}" == "1.5" and f"{max(K.vr.values()):.1f}" == "1.6"
 has("zh: 1.5 to 1.6", "在落期 7 放大到 1.5 到 1.6 倍")
@@ -801,6 +928,7 @@ assert f"{K.sd21 / K.naive:.1f}" == "0.5"                            # 0.49, pri
 has("zh: two independent rules", "效果約等於只有 2 條彼此獨立的規則")
 assert round(K.neff) == 2
 has("LM21's 11.9", "[[LM21]]'s two-sided test at 80% power needed 11.9 years of daily data")
+has("zh: LM21's 11.9", "TR23 要 11.9 年的日資料")
 has("pitfall: quoted kurtoses", "TR23's 8.27 in [[LM20]] is raw, its excess 5.27 in [[LM19]], while 0050's 8.12 in "
     "[[LM4]] is excess")
 
@@ -873,16 +1001,61 @@ has("Lo's 2.88", "Lo's Table 2 (his p. 41) prints 2.88")
 assert all(abs(K.se_sr_hac(K.X[k], 0) - SE9[k]) < 1e-15 for k in RULES)
 has("lag 0 to 1e-15", "$\\ell=0$ equals (20.9) to $10^{-15}$")
 assert scipy.__version__ == "1.18.1" and arch.__version__ == "8.0.0", (scipy.__version__, arch.__version__)
-has("versions", "checked against SciPy 1.18.1; arch 8.0.0")
+has("versions", "checked against SciPy 1.18.1; arch 8.0.0", page=False)       # in the References
 print(f"labels: {len(ex_labels)} exhibits, {len(eg_labels)} examples, tags (33.1)-(33.7), every exhibit cited, "
       f"every prerequisite cited")
 
+# ====================================================================== numbers outside the checks
+# Each entry: a number with occurrences on the page that no check accounts for, and what those occurrences are.
+TAG = "equation tag"
+ALLOW: dict[str, str] = {
+    "0": "zero as a label, bound or setting: PSR(0), SR_0 = 0, the lag 0, an interval that contains 0, code indices",
+    "1": "one in formulas (1 - alpha, T - 1, the '1 +' of (33.3)), n = 1, experiment 1, eq. (1), problem 1",
+    "2": "two in formulas (squares, /2, sqrt 2), n = 2, experiment 2, Sections 2 to 4, problem 2",
+    "3": "the normal raw kurtosis 3, cubes, experiment 3, eq. (3), Section 3, problem 3, the time '3 h'",
+    "4": "fourth powers and moments, the 4 of the lag rule, eq. (4), Sections 2 to 4, problem 4",
+    "5": "the levels 5%, Section 5, eq. (5), Problem 4's n = 5 and its median's 1/5, problem 5",
+    "6": "s^6 in the Deep Dive, Section 6, problem 6",
+    "9": "Lo's formula (9) and Bailey and Lopez de Prado's eq. (9), the lag rule's 2/9, Section 9, problem 9",
+    "10": "problem 10 and its solution",
+    "11": "rho_11, Bailey and Lopez de Prado's eq. (11), problem 11",
+    "12": "twelve months a year (sqrt 12, m = 12, k/12, months / 12), the 1/2 of \\tfrac12, problem 12",
+    "14": "Lo's eqs. (14)-(15), the 1/4 of \\tfrac14 in (20.9)",
+    "15": "Lo's eqs. (14)-(15)",
+    "20": "Lo's eq. (20)",
+    "31": "the date of Bailey and Lopez de Prado's 31 July 2014 version",
+    "80": "the power 80% of (21.4)",
+    "95": "the levels 95% (intervals, PSR's 1 - alpha, the bootstrap's quantile)",
+    "100": "the lag rule's T/100",
+    "0.5": "the median's 0.5^(1/n) and Phi^-1(0.5) = 0",
+    "0.95": "the level 0.95 (PSR or DSR at 1 - alpha, the bootstrap quantile F^-1(0.95))",
+    "2.5": "the 2.5% in each tail of a two-sided 5% test, Bailey and Lopez de Prado's section 2.5",
+    "3.2.2": "Ledoit and Wolf's section 3.2.2",
+    **{t: TAG for t in ("4.3", "16.3", "16.7", "18.2", "19.2", "19.3", "19.5", "19.7", "19.8", "19.9", "20.2", "20.8",
+                        "20.9", "21.2", "21.3", "21.4", "21.6", "21.7", "21.9", "22.4", "23.7", "25.6")},
+    **{f"33.{k}": TAG for k in range(1, 8)},
+    **{y: "year of a citation" for y in ("1987", "1996", "2002", "2008", "2012", "2014", "2015")},
+}
+N_MULTI = 127       # checked strings that occur more than once on the page, each with its exact count
+
 # ====================================================================== report
-body_t = TEXT.split("\n## Glossary", 1)[0]
-nums = set(re.findall(r"(?<![\w.])\d+\.\d+|(?<![\w.,])\d{1,3}(?:,\d{3})+", body_t))
-left = sorted(n for n in nums if n not in COVERED)
-print(f"\nnumbers with a decimal point or thousands separator not covered by a check ({len(left)}):")
-print("   " + " ".join(left))
+# a string that occurs more than once carries its exact count in at least one of its checks
+multi = sorted(k for k, (n, exact) in COUNTS.items() if n > 1 and not exact)
+assert not multi, f"give these strings their exact counts: {multi}"
+assert sum(n > 1 for n, _ in COUNTS.values()) == N_MULTI, sum(n > 1 for n, _ in COUNTS.values())
+# every number on the page lies inside a has() string or is an occurrence of a chk() string, or is listed in ALLOW
+claims = sorted(CLAIMS)
+LEFT: dict[str, list[str]] = {}
+for m in re.finditer(r"(?<!\d)\d+(?:[.,]\d+)*", NUMS):
+    if not any(a <= m.start() and m.end() <= b for a, b in claims):
+        LEFT.setdefault(m.group(), []).append(PAGE[max(0, m.start() - 60):m.end() + 25].replace("\n", " "))
+extra, stale = sorted(set(LEFT) - set(ALLOW)), sorted(set(ALLOW) - set(LEFT))
+for t in extra:
+    print(f"NOT CHECKED OR LISTED {t}:", *(f"\n    ...{c}..." for c in LEFT[t]))
+assert not extra and not stale, f"numbers outside every check and not in ALLOW: {extra}; ALLOW entries now checked or " \
+                                f"gone: {stale}"
+print(f"\npage numbers: every occurrence is checked or in ALLOW ({len(ALLOW)} entries, "
+      f"{sum(len(v) for v in LEFT.values())} occurrences); {len(COUNTS)} checked strings, {N_MULTI} with a count above 1")
 print(f"anchor differences ({len(ANCHOR_DIFFS)}):")
 for a in ANCHOR_DIFFS:
     print("   ", a)

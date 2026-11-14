@@ -20,7 +20,11 @@ through vol5_rules). Writes
 No published file carries a daily series (plans/vol-5.md, "Charts", X37): only per-rule statistics and model curves.
 The script then runs the widget's functions (src/lm33.js, Book.widgets.minTrack.math) in Node against Python on the
 eight rules at ten trial counts, three confidence levels and three observation frequencies, and stops on a relative
-difference above 1e-6 in E Z_(n) or MinTRL, or above 1e-9 in DSR; it checks the widget's initial readouts.
+difference above 1e-6 in E Z_(n) or MinTRL, or above 1e-9 in DSR; it checks the widget's initial readouts. Last it
+drives the widget itself (Book.controls and draw) on a minimal DOM in Node: a slider moves, 12 and 52 a year are
+chosen, R2 is chosen again, then R4, n = 1 and another slider. At each step it checks the rule and frequency shown,
+that the frequency select is disabled exactly while a rule's moments are in use (they are daily, so 243.57 a year),
+and the readouts against Python from the inputs that step should use.
 """
 import json
 import math
@@ -213,7 +217,76 @@ const cases = q.cases.map(([sr, sk, ku, n, conf, T]) => ({
 const ap = q.ns.map(n => M.approx(n));
 const init = q.init;
 const mt8 = M.mintrl(init.sr, init.sk, init.ku, ez[8], 0.95), mt1 = M.mintrl(init.sr, init.sk, init.ku, 0, 0.95);
-process.stdout.write(JSON.stringify({ ez: q.ns.map(n => ez[n]), ap, cases,
+// The widget itself on a minimal DOM: enough of Element for Book.controls's markup and the widget's own nodes.
+// A choice in a select fires "input" only when it changes the value, as in a browser.
+class El {
+  constructor(tag, attrs) {
+    attrs = attrs || {};
+    this.tagName = tag.toUpperCase(); this.attrs = attrs; this.children = []; this.parent = null; this.listeners = {};
+    this.textContent = ""; this.title = ""; this.id = attrs.id || ""; this.className = attrs.class || "";
+    this.disabled = "disabled" in attrs; this.selected = "selected" in attrs; this.v = attrs.value; this.html = "";
+  }
+  appendChild(c) { c.parent = this; this.children.push(c); return c; }
+  setAttribute(k, v) { this.attrs[k] = v; }
+  addEventListener(t, f) { (this.listeners[t] = this.listeners[t] || []).push(f); }
+  dispatch(t) { (this.listeners[t] || []).forEach(f => f({ target: this })); }
+  get innerHTML() { return this.html; }
+  set innerHTML(h) { this.html = h; this.children = []; parse(h, this); }
+  all() { const out = [], walk = e => e.children.forEach(c => { out.push(c); walk(c); }); walk(this); return out; }
+  get options() { return this.all().filter(e => e.tagName === "OPTION"); }
+  get value() {
+    if (this.tagName !== "SELECT") return this.v;
+    const o = this.options.find(e => e.selected) || this.options[0];
+    return o ? o.v : "";
+  }
+  set value(x) {
+    if (this.tagName !== "SELECT") { this.v = String(x); return; }
+    this.options.forEach(e => { e.selected = e.v === String(x); });
+  }
+  querySelector(s) {
+    return this.all().find(e => s[0] === "#" ? e.id === s.slice(1) : s[0] === "." ?
+      e.className.split(" ").includes(s.slice(1)) : e.tagName === s.toUpperCase()) || null;
+  }
+}
+function parse(h, root) {
+  const re = /<(\/?)([a-zA-Z]+)([^>]*)>|([^<]+)/g;
+  let m, cur = root;
+  while ((m = re.exec(h))) {
+    if (m[4] !== undefined) { cur.textContent += m[4]; continue; }
+    if (m[1]) { cur = cur.parent; continue; }
+    const attrs = {};
+    m[3].replace(/([\w-]+)(?:="([^"]*)")?/g, (_, k, v) => { attrs[k] = v === undefined ? "" : v; });
+    const e = cur.appendChild(new El(m[2], attrs));
+    if (m[2] !== "input") cur = e;
+  }
+}
+const dom = { window: {}, console, requestAnimationFrame: f => f(),
+  document: { readyState: "loading", addEventListener() {}, createElement: t => new El(t),
+              getElementById: id => id === "chart-lm33-mintrack" ? { textContent: fs.readFileSync(process.argv[3], "utf8") } : null } };
+vm.createContext(dom);
+vm.runInContext(fs.readFileSync(process.argv[1], "utf8"), dom);
+vm.runInContext(fs.readFileSync(process.argv[2], "utf8"), dom);
+dom.window.Book.chart = () => {};
+const host = new El("div");
+dom.window.Book.widgets.minTrack(host);
+const sel = id => host.querySelector("#" + id);
+function choose(id, v) { const s = sel(id); if (!s.disabled && s.value !== v) { s.value = v; s.dispatch("input"); } }
+function slide(id, v) { sel(id).value = v; sel(id).dispatch("input"); }
+const steps = [];
+function record(what) {
+  steps.push({ what, rule: sel("mt-rule").value, a: sel("mt-a").value, locked: sel("mt-a").disabled, n: sel("mt-n").value,
+    sliders: ["mt-sr", "mt-sk", "mt-ku"].map(id => sel(id).value),
+    readouts: [...host.querySelector(".readout").innerHTML.matchAll(/<b>(.*?)<\/b>/g)].map(x => x[1]) });
+}
+record("first drawing");
+slide("mt-sr", "1.2"); record("a slider moves");
+choose("mt-a", "12"); record("12 a year");
+choose("mt-a", "52"); record("52 a year");
+choose("mt-rule", "R2"); record("R2 chosen again");
+choose("mt-rule", "R4"); record("R4");
+choose("mt-n", "1"); record("n = 1");
+slide("mt-ku", "5"); record("another slider");
+process.stdout.write(JSON.stringify({ ez: q.ns.map(n => ez[n]), ap, cases, steps,
   readouts: [F(mt8, "n0"), F(mt8 / init.A, "n2"), F(M.dsr(init.sr, init.sk, init.ku, ez[8], init.T), "n3"),
              F(mt1 / init.A, "n2"), F(ez[8], "n4"), F(M.dsr(init.sr, init.sk, init.ku, 0, init.T), "n3")] }));
 """
@@ -229,7 +302,8 @@ for k in RULES:
             for conf in (0.9, 0.95, 0.99):
                 cases.append([sr, K.W_SKEW[j], K.W_KURT[j], n, conf, K.tau * A])
 init = {"sr": sr2, "sk": sk2, "ku": ku2, "A": K.Aw, "T": K.tau * K.Aw}
-out = subprocess.run([node_exe, "-e", DRIVER, str(ROOT / "src" / "assets" / "book.js"), str(ROOT / "src" / "lm33.js")],
+out = subprocess.run([node_exe, "-e", DRIVER, str(ROOT / "src" / "assets" / "book.js"), str(ROOT / "src" / "lm33.js"),
+                      str(OUT / "lm33-mintrack.json")],
                      input=json.dumps({"ns": NS, "cases": cases, "init": init}), capture_output=True, text=True,
                      encoding="utf-8", check=True)
 got = json.loads(out.stdout)
@@ -249,9 +323,47 @@ for (sr, sk, ku, n, conf, T), g in zip(cases, got["cases"], strict=True):
     worst_d = max(worst_d, abs(g["dsr"] - d), abs(g["psr"] - p0))
 assert worst_mt < 1e-6 and worst_d < 1e-9, (worst_mt, worst_d)
 assert got["readouts"] == ["1,796", "7.37", "0.955", "2.15", "1.4236", "0.999"], got["readouts"]
+
+
+# the widget driven on a minimal DOM: each step's readouts redone in Python from the inputs the widget should use
+def readouts(sr: float, sk: float, ku: float, n: int, A: float) -> list[str]:
+    ez = K.emax(n)
+    ap = "—" if n == 1 else f"{K.emax_bldp(n):.4f}"
+    v = K.v209(sr, sk, ku)
+    mt = 1 + ((stats.norm.ppf(0.95) * math.sqrt(v) + ez) / sr) ** 2
+    T = K.tau * A
+    d = float(stats.norm.cdf((sr * math.sqrt(T - 1) - ez) / math.sqrt(v)))
+    p0 = float(stats.norm.cdf(sr * math.sqrt(T - 1) / math.sqrt(v)))
+    return [f"{ez:.4f}; {ap}", f"{mt:,.0f} observations, {mt / A:.2f} years of observations", f"{p0:.3f}", f"{d:.3f}"]
+
+
+# step: (rule shown, frequency shown, frequency select disabled, trials); a rule's exact moments at A_w, else sliders
+want_steps = {"first drawing": ("R2", "daily", True, 8), "a slider moves": ("constructed", "daily", False, 8),
+              "12 a year": ("constructed", "12", False, 8), "52 a year": ("constructed", "52", False, 8),
+              "R2 chosen again": ("R2", "daily", True, 8), "R4": ("R4", "daily", True, 8),
+              "n = 1": ("R4", "daily", True, 1), "another slider": ("constructed", "daily", False, 1)}
+assert [s["what"] for s in got["steps"]] == list(want_steps)
+for s in got["steps"]:
+    rule, a, locked, n = want_steps[s["what"]]
+    assert (s["rule"], s["a"], s["locked"], int(s["n"])) == (rule, a, locked, n), s
+    if rule in RULES:
+        j = RULES.index(rule)
+        want = readouts(K.W_SR[j], K.W_SKEW[j], K.W_KURT[j], n, K.Aw)
+        assert s["sliders"] == [f"{K.W_SR[j] * sqA:.4f}", f"{K.W_SKEW[j]:.4f}", f"{K.W_KURT[j]:.3f}"], s
+    else:
+        A = K.Aw if a == "daily" else float(a)
+        sr_a, sk_c, ku_c = (float(x) for x in s["sliders"])
+        want = readouts(sr_a / math.sqrt(A), sk_c, ku_c, n, A)
+    assert s["readouts"] == want, (s["what"], s["readouts"], want)
+st0 = got["steps"]
+assert st0[0]["readouts"] == st0[4]["readouts"] and st0[0]["sliders"] == st0[4]["sliders"]   # R2's exact values restored
+assert st0[1]["sliders"][0] == "1.2" and st0[7]["sliders"][2] == "5"
+assert st0[2]["readouts"] != st0[1]["readouts"] != st0[3]["readouts"]                        # 12 and 52 do apply
 assert abs(K.psr(sr2, ez8 * K.s0, K.T, sk2, ku2) - float(stats.norm.cdf((sr2 * math.sqrt(K.T - 1) - ez8)
                                                                       / math.sqrt(v2)))) < 1e-12
 assert np.isclose(K.tau * K.Aw, K.T)
 print(f"widget arithmetic against Python over {len(cases)} cases: largest difference in E Z_(n) {worst_ez:.1e}, "
       f"relative in MinTRL {worst_mt:.1e}, in DSR and PSR(0) {worst_d:.1e}; initial readouts "
       f"{', '.join(got['readouts'])}")
+print(f"widget on a minimal DOM, {len(st0)} steps: the frequency select is disabled at 243.57 exactly while a rule's "
+      f"moments are in use, R2 chosen again after a slider move restores its exact values, and every readout matches")

@@ -12,9 +12,13 @@
    sqrt(V)), (33.2) and (33.4). The chart draws DSR against the record in years of observations (observations over
    the observations a year; 0.5 to 20, log scale), dashed at the confidence and at MinTRL.
    The first drawing uses the data block's exact values for R2. Choosing a rule in the first select sets the three
-   sliders to its values (shown at the nearest step) and uses its exact values; once one of the three sliders moves,
-   every input is a slider value (constructed). data/lm33_charts.py runs Book.widgets.minTrack.math in Node against
-   Python on the eight rules at several n and confidence levels. */
+   sliders to its values (shown at the nearest step) and uses its exact values, which are daily: while they are in
+   use, the "Observations a year" select is fixed at 243.57 (A_w) and disabled. Once one of the three sliders moves,
+   every input is a slider value (constructed), the first select shows "Constructed inputs" (an option the reader
+   cannot choose, so that choosing any rule again is a change and fires), and 12 and 52 observations a year become
+   available, the sliders then giving that period's moments. data/lm33_charts.py runs Book.widgets.minTrack.math in
+   Node against Python on the eight rules at several n, confidence levels and frequencies, and drives the widget
+   itself on a minimal DOM through a slider move, a frequency, a rule chosen again and a trial count. */
 (function () {
   "use strict";
   var B = window.Book, fmt = B.fmt, D = B.dist, EULER = 0.5772156649015329;
@@ -77,25 +81,34 @@
     out.className = "readout"; out.setAttribute("aria-live", "polite"); note.className = "w-note";
     note.innerHTML = "Starting point (out-of-sample): R2's unrounded daily Sharpe ratio, skewness and raw kurtosis " +
       "over the 1,851 sessions from 5 March 2019, 243.57 observations a year, n = 8 trials and 95%. Choosing a rule " +
-      "restores its exact values; once a slider moves, the inputs are constructed. At 12 or 52 observations a year, " +
-      "a rule's daily skewness and raw kurtosis are applied to that period's ratio, also a constructed input. " +
+      "restores its exact values, which are daily, so the frequency stays at 243.57 observations a year. Once a " +
+      "slider moves, the inputs are constructed, and 12 or 52 observations a year read the sliders as that period's " +
+      "moments. " +
       "E Z<sub>(n)</sub> by quadrature of (33.4); MinTRL by (33.5); PSR(0) and DSR at the record of 7.60 years of " +
       "sessions, that is 7.60 times the observations a year. A record's years are its observations over the " +
       "observations a year. Model: independent trials with true ratio zero, and the estimate held fixed as the " +
       "record lengthens.";
     host.appendChild(chart); host.appendChild(out); host.appendChild(note);
+    var ruleSel = host.querySelector("#mt-rule"), aSel = host.querySelector("#mt-a");
+    var cons = document.createElement("option");   // shown once a slider moves; the reader cannot choose it
+    cons.value = "constructed"; cons.textContent = "Constructed inputs"; cons.disabled = true;
+    ruleSel.appendChild(cons);
 
     function draw(v, id) {
-      if (id === "mt-rule") {          // set the sliders to the rule's values without firing their input events
+      if (id === "mt-rule" && W.rules.indexOf(v.rule) >= 0) {   // the sliders take the rule's values, no input events
         rule = W.rules.indexOf(v.rule);
         SL.forEach(function (s) {
           var el = host.querySelector("#" + s[0]);
           el.value = near(s[1](rule), s[2], s[3]);
           host.querySelector("#" + s[0] + "-v").textContent = fmt(+el.value, s[4]);
         });
-      } else if (id === "mt-sr" || id === "mt-sk" || id === "mt-ku") rule = -1;
-      var A = v.a === "daily" ? W.Aw : +v.a, n = +v.n, conf = +v.c, ex = rule >= 0;
-      var sr = (ex ? annual(rule) : v.sr) / Math.sqrt(A);
+      } else if (id === "mt-sr" || id === "mt-sk" || id === "mt-ku") { rule = -1; ruleSel.value = "constructed"; }
+      var ex = rule >= 0;
+      if (ex) aSel.value = "daily";   // a rule's moments are daily: 243.57 observations a year while they are in use
+      aSel.disabled = ex;
+      aSel.title = ex ? "A rule's moments are daily. Move a slider to choose 12 or 52." : "";
+      var A = ex || v.a === "daily" ? W.Aw : +v.a, n = +v.n, conf = +v.c;
+      var sr = ex ? W.sr[rule] : v.sr / Math.sqrt(A);
       var sk = ex ? W.skew[rule] : v.sk, ku = ex ? W.kurt[rule] : v.ku;
       var ez = emax(n), ap = approx(n), T = W.tau * A;
       var mt = mintrl(sr, sk, ku, ez, conf), d = dsr(sr, sk, ku, ez, T), p0 = dsr(sr, sk, ku, 0, T);
