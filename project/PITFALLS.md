@@ -220,6 +220,20 @@ unless stated.
   return onto a slider step. Every count against a threshold or band edge uses one guard (`<= k + 1e-12`, `> lo + 1e-12`)
   in the scripts, the lab and the printed code alike, or exact arithmetic; stored values keep enough decimals (ten)
   not to land on an edge; an audit recounts with `fractions.Fraction` from the raw closes.
+- **A check that a printed number "appears in the text" passes on any occurrence** (2026-11-15, Volume VI Stage 2's
+  code review). The numbers scripts format a computed value and assert that the string occurs somewhere in the
+  module. When that string is printed twice, changing one copy passes, because the other still matches: LM33's "−0.09
+  to 1.35" changed to "1.53" printed "all 525 checks passed". Short integers match a page range or a date (LM34's
+  "69" matched "39–69" in the references). An unsigned value matches inside a signed one ("0.0328" in "−0.0328"). A
+  helper that compares absolute values passes "lost 8.33%" for a gain, and front matter can satisfy a phrase before
+  the body does. A "not covered" list that is printed but not asserted catches nothing. So every check also asserts
+  its string's number of occurrences, matching is sign-aware, an integer of three digits or fewer is checked only
+  inside a phrase (`has()`), and the uncovered numbers must equal an explicit allowlist. Before a numbers script is
+  trusted, single-digit edits at 25 or more places in a scratch copy of the module must each make it fail. Counts
+  protect a string's number of occurrences, not its place. Two computed numbers swapped in a sentence keep every
+  count, and the re-review of the hardened scripts found such swaps passing in all four modules. So a sentence that
+  prints two or more computed numbers is bound by a phrase built from the computed values, as table rows are. Every
+  sentence a revision writes or changes gets that phrase check.
 
 ## 6. Working with agents
 

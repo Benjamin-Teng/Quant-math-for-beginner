@@ -1928,8 +1928,8 @@ nothing in the text was read; "unverified" marks a field or claim that no record
   plausibility (§2.1, p. 209) and the worst loss within `d ≤ k`, which is the paper's construction, not the book's own
   (§2.3, p. 211); Proposition 1 may support (35.3)'s conditional choice under ellipticity. The survey also lists the
   paper as OeNB Working Paper 150: **unverified**.
-- Kupiec, "Stress Testing in a Value at Risk Framework", *J. Derivatives* 6(1): 7–24, 1998 (Crossref: 31 August 1998),
-  DOI [10.3905/jod.1998.408008](https://doi.org/10.3905/jod.1998.408008). Text not read (the publisher's page needs a
+- Kupiec, "Stress Testing in a Value at Risk Framework", *J. Derivatives* 6(1): 7–24, 1998 (Crossref: 31 August 1998;
+  author Paul H. Kupiec, checked 2026-11-15), DOI [10.3905/jod.1998.408008](https://doi.org/10.3905/jod.1998.408008). Text not read (the publisher's page needs a
   login; OpenAlex holds no abstract). Cited only as Breuer et al. (2009, §2.2, p. 210) describe it: they attribute to
   it the four options they compare for the non-stressed risk factors. (35.3) is derived from (16.8).
 
@@ -3229,6 +3229,34 @@ them, printed with their English in every box that uses them: 回撤, 最大回�
 循環區塊 (LM22), 滾動前進測試, 反向壓力測試, 壓力情境, 歷史情境, 跳空, 鎖跌停 (limit-down lock, LM35's brief; searched
 in Chinese only), 代理資產 and 權益歸零; "exceedance" is glossed 超過 VaR 的日子, and PSR, DSR, MinTRL and haircut stay
 in English.
+
+Stage 2 (LM32, LM34, LM35), 樂詞網 searched 2026-11-15 by the editor with curl, anonymously (generic User-Agent, no
+cookie, no personal data, about one request a second), with the Volume III URL pattern and `&page=<n>`: 49 query
+strings (27 English, 22 Chinese), each in all listings, 統計學名詞, 數學名詞 and 管理學名詞 (196 searches). Every
+search was read to its end, except the all-listings searches for `moment`, `multiple`, `correlation`, `相關`, `shock`,
+`衝擊` and `mean`, which were read to their first 800 rows. It also re-ran the searches LM32's writer reported.
+
+| English | 統計學名詞 | 數學名詞 | 管理學名詞 | Book |
+|:--|:--|:--|:--|:--|
+| axiom | — | 公理；公設 | — | 公理 (LM32 §5) |
+| empirical distribution | — (empirical distribution function 經驗分布函數) | 經驗分布；經驗分配 | — | 經驗分布 |
+| moment; first moment | 動差; 一級動差 | 矩；動差; — | — (moment matching method 動差配適法); — | 動差; 一階動差 (LM32 §3), the book's pattern of the published 三階動差 and 四階動差 (一階動差: 0 rows in all listings) |
+| square root rule | 平方根規則 (another rule) | — | — | √m 法則 for the square-root-of-time rule, composed (LM32 §3; 'square root of time' and 'square-root-of-time': no entry in the three listings) |
+| criteria | — (compounds only, such as criteria for estimation 估計準則) | — (compounds only) | — (compounds only, such as decision criteria 決策準則) | 評比標準 (LM34 §2), composed from 標準 (一般性常見術語 "criteria" 標準；基準；準則) |
+| proportional | — (compounds only, such as proportional error 比例誤差) | — (compounds only) | — | 成正比 (LM34 §3), the everyday word (一般性常見術語 "proportional" 比例) |
+| multiple | — (compounds only) | 倍數；倍式；多重 | — (compounds only) | 倍數 (LM34 §5) |
+| correlation | 相關 | 相關；對射變換 | 相關性 | 相關 (LM34 §6) |
+| shock | 衝擊項 | — | — | 衝擊 (LM35 §6), as in 統計學名詞's technology shocks 技術衝擊 and structural shocks 結構性衝擊 (衝擊項 is a time-series model's error term) |
+| initial margin; maintenance margin | —; — | —; — | 原始保證金; 維持保證金 | 原始保證金, 維持保證金 (lm02.md:831–832) |
+
+平均數 (mean) has its row above (Volume IV). No listing has an entry for log return or logarithmic return (as
+recorded above), initial wealth, initial capital, decision date, reference rate, cost share, log gap, scenario window,
+factor shock or partial scenario. Underwater appears only in other fields (水下的), and 土木工程名詞's "cost ratio"
+成本比例 is another sense. The Chinese 一階動差, 水下期間, 期初資本, 決策日, 評比標準, 參考費率, 對數差距, 成正比 (in the
+three listings), 情境區間, 因子衝擊 and 部分情境 have no entry. The book's own forms for them: 對數報酬 (LM19), 水下期間
+(spell under water) and 從期初資本算起的損失 (loss from initial wealth) in LM32's Glossary; 決策日, 參考費率, 成本比例
+(cost share) and 對數差距 (log gap) in LM34's boxes; 情境區間 (scenario window), 因子衝擊 (factor shock) and 部分情境
+(partial scenario) in LM35's boxes and Glossary.
 
 ## Writing style (AUTHORING §1, checked 2026-10-11)
 

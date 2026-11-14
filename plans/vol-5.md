@@ -864,6 +864,97 @@ writer's departures from its brief are listed in the module's review record (`re
 - **Preview PDFs** keep `file:///` links to the other preview pages: `render_pdf.py` rewrites links only under
   `docs/` (its `CNAME`), so the published PDFs are checked at Stage 4 (`grep -ac 'file:///'` gives 0).
 
+## Stage 2 of Volume VI (2026-11-15)
+
+Four writers drafted LM32–LM35 at the same time, each in place on its own files, from the Stage 1 briefs in
+`plans/vol-6.md`. Each numbers script starts from its anchor script, rebuilds every anchor row (all 220 reproduce) and
+asserts every printed number. New in this batch, Stage 2 had a check of its own: a fresh, read-only checker tested
+each first draft against its brief and against 45 lessons drawn from Volume V's review records, and recomputed a
+sample of the numbers; the writer checked each item, fixed what held and re-ran every gate. The checkers reported 30,
+24, 29 and 31 items (2 critical, 13 major in all). Stage 3's reviewers are fresh agents, so the review stays
+independent of both. Each module's review record (`reviews/lm32.md` … `lm35.md`) lists the writer's departures from
+the brief, the check's items with their dispositions and the lessons not met. The editor's answers to the writers'
+questions:
+
+- **Length.** LM33, LM34 and LM35 run 5,497 to 5,498 words of prose. LM32 runs 5,678: the check's fixes added about
+  430 words and the writer cut about 250 without dropping a brief element. Accepted (AUTHORING §1's limit is 6,000);
+  LM32's Stage 3 starts with cuts that drop nothing, such as its four "not in this book" sentences merged into one.
+  Stage 3's fixes may use the room up to 6,000, and each record states the count.
+- **Tables in examples.** LM32, LM33 and LM35 print some examples' lists of numbers as small tables, each rebuilt row
+  by row by the numbers script; the PDFs run 31 to 34 pages, none shrunk (limit 36). Accepted.
+- **Numbers without an anchor** stand, as in Volume V: the numbers scripts compute and assert them, and from Stage 3
+  the module and its scripts are authoritative. They include LM32's experiments 9 and 10 (E4: a permutation test of
+  the order of TR23's days and a stationary-bootstrap SE of the ten-session VaR, which replace a "the data do not
+  separate" reading that the gap's own SE contradicts), LM33's TR23 MinTRL with normal moments (4.12 years of
+  sessions), LM34's printed values listed in its record, and LM35's X9 ruin row and recast problems. No anchor rows
+  are added.
+- **Seeds.** Experiments outside a brief's list keep the scripts' numbers: LM32's 8 (the lab's coloured portfolio
+  draws), 9 and 10; LM34's 7 (the widget's synthetic test matrix) and 30 (the lab's check of the twin generators).
+- **Answer keys** follow no cycle (lesson 19): LM33's B, C, A, C, B, A and LM34's B, A, C, A, C, B.
+- **Labels and tags.** LM33's E9 is `hsr` (X7 keeps `haircut`), since `build.py` keys labels by name. LM33's (33.6)
+  in §6 comes before (33.4)–(33.5) in §7; the tags keep the brief's numbers, as LM27's (27.7) did.
+- **Cross-module.** LM32's §7 (src/lm32.md:381) says that what each rule lost on its worst day "is LM35's", but LM35
+  prints the losses of 7 April 2025, not R7's of 19 March 2020. Stage 3 rewords LM32: "what each lost on 7 April 2025
+  is [[LM35]]'s".
+- **Lab boxes.** LM32's and LM35's labs need named days of the 5-second TAIEX. Their boxes add one sentence after the
+  standard four, as LM26's does, with the command the notebook gives (`uv run python data/fetch_intraday.py --series
+  taiex5s --dates …`); applied at Stage 3, with AUTHORING §9 and Getting Started at Stage 4.
+- **Chinese terms.** SOURCES records the editor's 樂詞網 searches of 2026-11-15 for the terms LM32, LM34 and LM35
+  print without a row. LM32 keeps 一階動差 beside the published 三階動差 and 四階動差 (統計學名詞 lists "first moment"
+  as 一級動差; recorded). LM33's Glossary keeps "—" for "Scale factor" and "Effective number of trials", as LM22 does
+  for terms without a Chinese form.
+- **LM32.** Acerbi and Tasche (2002a) and (2002b) are kept: LM32 cites both papers, and no other module prints them.
+  The 34-page PDF is accepted.
+- **LM33.** Exhibit 1 stays one exhibit with tables (a) and (b). The lab's rolling-window PSR stays in the lab, as the
+  brief says: the module's hygiene note declares four families of tests, and the windows would add a fifth. The
+  widget fixes the frequency at 243.57 while a rule's moments are in use; 12 and 52 apply once a slider moves, as
+  constructed inputs (made with the code fixes below).
+- **LM34.** Problem 2's distractor C rests on a named slip, the sign of the second term of $-\ln(1-x)$, so that it has
+  a value: accepted. E7 leaves the SPA p-value and Romano and Wolf's first step to the paragraphs that state those
+  tests, so nothing is used before it is taught: accepted. The grid file keeps its first-purchase row (1,852 rows), so
+  that the lab rebuilds every configuration's growth exactly; `make_lab_data.py`'s docstring says so. The lab computes
+  the extension's CSCV and reality check, as Volume V's labs answer their extensions (LM30). `lm34-pboSim` keeps its
+  name, as `lm33-psrT` does.
+- **LM35.** Problems 3 ($L=4$) and 12 (equity NT\$1,402,000) are recast so that they do not repeat §8 and E10:
+  accepted. X9's ruin row is (35.2) on each rule's unit book, so R8's equals R6's 7.67, as its note says: kept. The
+  second pass's cuts (§4's A35-24 counts, which the lab prints, and §9's Breuer sentence, which §6 cites) and the
+  widget's Exposure select are accepted. Crossref lists Kupiec (1998) as Paul H. Kupiec (checked 2026-11-15, recorded
+  in SOURCES), so the References may print the initials (Stage 3).
+- **Code review.** Codex's quota had run out, so a fresh opus agent reviewed the drafts' code adversarially (the
+  routing the global rules give for that case). It found no number computed wrong and no look-ahead. One plotted
+  value was clipped by its axis: LM32's rolling VaR reached −10.54% under a −10% floor, now −12%, and LM32's charts
+  script asserts that every plotted value lies inside its axes. The main finding was checks that could not fail where
+  they pointed (PITFALLS §5): a printed string was checked for presence anywhere in the module. So a typo at a second
+  copy passed, as did a short integer matched by a page range and an unsigned value matched inside a signed one.
+  Each writer hardened its numbers script:
+  - matching is sign-aware, and LM35's `pc` takes the expected sign;
+  - every string printed more than once has its exact count;
+  - the numbers no check covers must equal an explicit allowlist, with reasons;
+  - integers are numbers too, and a short one is checked only inside a phrase.
+
+  The scripts now make 722, 562, 516 and 580 checks (LM34's after the re-review below). The writers' mutation tests caught every single-digit edit they
+  tried: 78, 47, 40, and in LM35 all 1,901 body numbers. Only constants inside formulas stay unchecked, which is left
+  to content review. Two more changes came with the fixes. LM33's widget fixes its frequency at 243.57 while a rule's
+  moments are in use. LM35's lab reference for R8's exposure is now the traded path's (mean 1.183; it was the targets'
+  1.175). No printed number changed.
+
+  A second fresh opus agent re-reviewed the hardening with 75 mutations of its own design. It confirmed the fixes,
+  found no check weakened, and caught every single-digit typo and sign flip in LM32, LM33 and LM35. It found two
+  remaining holes:
+  - LM34's final coverage pass still matched strings, so a typo that produced a number printed elsewhere passed. Its
+    pass was made position-based, as the other three are.
+  - In all four modules, two computed numbers swapped inside a sentence keep every count and pass. Table rows are
+    bound by phrase checks; prose sentences mostly are not (43 to 146 such pairs a module).
+
+  Decision: the swaps are a known limit for now. In Stage 3, every sentence a revision writes or changes that prints
+  two or more computed numbers gets a phrase check built from the computed values (PITFALLS §5). Each revision's
+  fresh verifier checks the numbers sentence by sentence as before.
+- **Shared code.** Each module's `lm3N_common.py` carries its anchor script's arithmetic under the same names;
+  `build.sh`'s `DATA_STEPS` and `data/README.md` list the eight scripts, and `lm34_numbers.py` writes
+  `processed/lm34_grid.parquet` before `make_lab_data.py` reads it.
+- **Preview PDFs** keep `file:///` links to the other preview pages, as in Volume V; the published PDFs are checked
+  at Stage 4.
+
 ## Stage 4 changes to earlier modules
 
 Collected here as the briefs add them; applied at publication with the edition note. Each item is tagged with the

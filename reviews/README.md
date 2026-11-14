@@ -28,6 +28,19 @@ checks are named X2–X6, and their items are cited by number ("X3 item 6").
 
 LM3's 34 findings of edition 0.1 were fixed before the first push; its record starts with the gates on that text.
 
+## Status (2026-11-15): Volume VI drafted, in review for edition 0.7
+
+| Module | Stage 2 check | Code review | Stage |
+|:--|:--|:--|:--|
+| [LM32](lm32.md) VaR, Expected Shortfall and Drawdown | 30 items (2 critical, 3 major) | axis clip and position-blind checks, fixed | draft (5,678 words); Stage 3 next |
+| [LM33](lm33.md) The Statistics of the Sharpe Ratio | 24 items (2 major) | position-blind checks, fixed | draft (5,498 words); Stage 3 next |
+| [LM34](lm34.md) Backtesting Without Fooling Yourself | 29 items (3 major) | checks matched elsewhere (critical) and position-blind checks, fixed | draft (5,498 words); Stage 3 next |
+| [LM35](lm35.md) Stress Testing | 31 items (5 major) | position-blind and sign-blind checks, fixed | draft (5,497 words); Stage 3 next |
+
+The Stage 2 check (a fresh checker of each draft against its brief, then the writer's pass) and the code review are
+new in this batch; each record lists their items and dispositions, and `plans/vol-5.md`, "Stage 2 of Volume VI",
+holds the editor's answers.
+
 ## Status (2026-11-07): Volume V published in edition 0.6
 
 | Module | Round 1 | Revisions 1–2 | Closing check | Stage |
