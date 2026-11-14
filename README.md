@@ -26,7 +26,7 @@ README updated: **2026-11-07**. Latest textbook edition: **0.6 (2026-11-07)**, a
 
 Edition 0.6 adds portfolio optimization: portfolio return and risk contributions, mean–variance optimization, convex optimization under portfolio limits, estimation error and robust portfolios, and risk parity, hierarchical risk parity and volatility targeting. The remaining risk-measurement, stochastic-calculus, advanced Kelly and capstone modules are roadmap items, not published chapters.
 
-See [TODO.md](TODO.md) for the current queue and [the roadmap](plans/ROADMAP.md) for future volumes.
+See [the roadmap](plans/ROADMAP.md) for future volumes.
 
 ## Start learning
 
@@ -116,7 +116,6 @@ For an HTML-only build, run `uv run python build/build.py` after installing depe
 | `reviews/` | Independent review findings and verification records |
 | `project/` | Specification, pitfalls and source records |
 | `AUTHORING.md` | Writing, notation, review and publication rules |
-| `TODO.md` | Current work queue and handoff |
 
 ## Authoring and checks
 

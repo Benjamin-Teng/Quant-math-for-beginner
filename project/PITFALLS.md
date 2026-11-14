@@ -229,7 +229,7 @@ unless stated.
   anonymous requests only, and check any reused helper script; before a batch closes, grep the scratch folder for
   `mailto`.
 - **One module per writer; shared files belong to the editor** (`build/`, `src/assets/`, `src/syllabus.yaml`,
-  `AUTHORING.md`, `README.md`, `build.sh`, `data/README.md`, `reviews/`, `project/`, `TODO.md`, `CLAUDE.md`).
+  `AUTHORING.md`, `README.md`, `build.sh`, `data/README.md`, `reviews/`, `project/`, `CLAUDE.md`).
 - **Reviews must be independent and read-only**: a fresh agent that did not write the module, recomputing from raw data,
   forbidden to run scripts that write files. Writers' own checks missed 116 findings across five Volume I modules
   (6 critical), and the LM3 review found 34 (including figures 10× too large).

@@ -2,7 +2,7 @@
 
 What the owner (Benjamin) and Claude agreed for this book. Change any item here only with the owner's approval,
 and record the change with its date. How modules are written is in [`../AUTHORING.md`](../AUTHORING.md); what is
-left to do is in [`../TODO.md`](../TODO.md).
+left to do is in kata (`kata list`).
 
 ## 1. Purpose
 

@@ -492,7 +492,7 @@ bundled):
    sentences for a second look.
 8. From Volume II, no display formula needs sideways scrolling on a phone: `uv run python build/qa/display_scroll.py
    dist/preview/lm/lmNN.html 400` (`overflow.py` cannot see a display that scrolls inside its own box). Volume I's
-   displays that scroll inside their own box (92 at 400 px) are accepted; TODO lists their clean-up as optional.
+   displays that scroll inside their own box (92 at 400 px) are accepted; their clean-up is optional (kata `d9v8`).
 
 ## 11. Review and publishing
 

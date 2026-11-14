@@ -14,7 +14,7 @@
 [SPEC](../project/SPEC.md)、[AUTHORING](../AUTHORING.md) 與 [ROADMAP](ROADMAP.md)。
 brief 起草者與主編應在相關 brief 中說明採用、調整或暫不採用的理由；正式規範與排程由主編維護。
 各卷的採用決定記在該卷 brief（`plans/vol-N.md`）的共同決策中。
-出版狀態以 [syllabus](../src/syllabus.yaml) 與 [TODO](../TODO.md) 為準，不從本文推定完成進度。
+出版狀態以 [syllabus](../src/syllabus.yaml) 為準，不從本文推定完成進度。
 
 ## 保留的課程結構
 

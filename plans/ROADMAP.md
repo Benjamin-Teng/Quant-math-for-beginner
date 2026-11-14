@@ -46,6 +46,69 @@ than one session. New FinMind data come through the owner's computer, which must
 The old numbers belonged only to unpublished modules. Volume I's references, leads and lab, AUTHORING's example and
 `plans/vol-1.md` follow the new numbers; the review records in `reviews/` written before the change keep the old ones.
 
+## How a batch runs
+
+Each batch repeats Stages 1–4 and bumps the edition (batch 4 twice: 0.6 for Volume V, 0.7 for Volume VI, by the
+owner's choice of 2026-11-07). Ask the owner about code, site, repository and his standing rules, and about the open
+decisions at the end of this roadmap before the batch that needs them; content is the editor's call. The work queue
+is in kata (`kata list`); a volume's record is in its brief (`plans/vol-N.md`) and in `reviews/`.
+
+**Stage 1, before any writer starts**, as Volumes III and IV did (`plans/vol-4.md` is the model):
+
+1. A spine per module in `plans/vol-N.md` within the module boundaries below, with shared decisions (samples, return
+   types, notation that follows AUTHORING §6, ownership of each statistic, which recommendations of
+   `plans/curriculum-guidance.md` apply). Scan `src/lm*.md`, `src/pages/*.md` and `build/make_lab*.py` for the
+   batch's forward links (`[[LM27]]` … `[[LM35]]` for batch 4, and plain "LM34" mentions in the labs) and honour
+   each; take over what earlier briefs leave to the batch.
+2. Capability check: list every exhibit, widget, dataset and package the spines need; check each against
+   `src/assets/book.js`, `build/qa/`, `data/` and `pyproject.toml`; send the owner one list of what is missing and
+   build what he approves before any writer starts, each piece reviewed by a fresh agent (0 differences on the
+   published pages).
+3. Data through the FinMind API (intraday by a logged script), each new series checked as PITFALLS §3 says (and, for
+   a series without a spread column, against an independent series, as `data/vol3_series.py` does), registered in
+   the manifest.
+4. Briefs drafted from the spines by one agent per module, cross-checked by a fresh agent, decided by the editor and
+   revised; anchors (`plans/vol-N-anchors.md`) printed by one script per module and recomputed independently by
+   fresh agents from the raw files; facts and references checked on official sources (SOURCES, 樂詞網).
+5. Lab data in `data/make_lab_data.py`; the briefs name the files.
+6. A fresh check of the whole of Stage 1, then commit and push.
+
+**Stage 2, writing.** One writer per module, launched together, each in place in the main checkout on its own files
+only, with AUTHORING, PITFALLS, the shared part of the brief, its own brief and anchors. (A worktree lacks the
+git-ignored `data/raw/`, `data/processed/` and `build/node_modules/`, and linking them risks deleting the originals.)
+Each writer starts its `data/lmNN_numbers.py` from its anchor script and asserts from the first draft that every
+printed value appears in the text and follows from the printed inputs (a printed string with LaTeX is a raw string);
+writes its charts script, module, widget and lab generator; keeps the first draft under 5,500 words of prose; runs
+style.py, the build, overflow.py and display_scroll.py at 400 px, print_width.py, the PDF with pdf_scale.py,
+check_terms.py, ruff and ty, and the lab; and asks the editor for shared-file changes (`build.sh`'s `DATA_STEPS`,
+`data/README.md`). The editor re-runs every gate on `main` and commits the drafts. The published site is not rebuilt
+for drafts: a rebuild of `docs/` marks them "In review" on the front page, so `docs/` changes only at publication.
+
+**Stage 3, review.** Per module, in parallel: the independent reviewer (`reviews/REVIEW_PROMPT.md`), the blind solver
+(K) and the number auditor (A), plus one cross-module check (X) for the volume; a fresh agent per module merges the
+reports and re-checks every major item adversarially; the editor decides and records (`reviews/lmNN.md`, stating
+every item and its fix in the record itself, PITFALLS §6) → writers revise → fresh verifiers and a volume re-check →
+a second revision if needed → closing check with a fresh adversarial second check of every new item → closing fixes
+→ a fresh final check. The editor recomputes every major finding before accepting it and passes no agent claim
+through unchecked. The brief and anchors keep the plan and the corrected facts; values and wording that a revision
+changes in a module are not copied back.
+
+**Stage 4, publishing.** `status: published`, the edition note, the README status table (`README.md` and
+`README.zh-TW.md`), prereq and leads consistent both ways (earlier modules gain leads to the new ones),
+`./build.sh --pdf`, and on every page: `overflow.py` at 400 px, `print_width.py`, no dead links,
+`grep -ac 'file:///' docs/pdf/*.pdf` gives 0, and
+`git grep --untracked -nE "uv pip install|python3 |bundled|source \.venv|import requests" -- src labs build data`
+finds nothing.
+
+- **Publishing deploys the site.** GitHub Pages serves `docs/` from `main` (README, "Hosting"), so a push that
+  carries a rebuilt `docs/` goes live; nothing is built on GitHub. Commit `docs/` with `src/`, `data/` and `labs/`
+  (AUTHORING §11). Only build output belongs in `docs/`: GitHub Pages serves every committed file there as is
+  (`docs/.nojekyll`), and the build removes only stale pages and PDFs (`remove_unpublished()` in `build/build.py`),
+  so a hand-written file of another kind, such as a `.md`, stays public.
+- **PDF links** (owner-approved, 2026-10-17): `build/render_pdf.py` sends a link to another page of the book to the
+  live site (the domain in `docs/CNAME`) and keeps same-page anchors as internal PDF links, so a PDF built from
+  `docs/` holds no `file:///` path.
+
 ## Brief format
 
 Each volume's brief gives, per module: prerequisites and leads; **Owns**; **Leaves** (each item with the module that

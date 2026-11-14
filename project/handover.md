@@ -2,14 +2,16 @@
 
 > **建立日期**：2026-11-07　|　**上一段做完的事**：Volume V（LM27–LM31）完成 Stage 3、4，以 edition 0.6 上線（`66c636e`）。
 > **性質**：接手用文件，會過期，每段重寫（歷史交給 git 與 `reviews/`）。
-> 為什麼做看 `project/SPEC.md` 與 `plans/ROADMAP.md`，怎麼做看 `CLAUDE.md` 與 `AUTHORING.md`，完整待辦看 `TODO.md`。
+> 為什麼做看 `project/SPEC.md` 與 `plans/ROADMAP.md`，怎麼做看 `CLAUDE.md` 與 `AUTHORING.md`，待辦看 kata（`kata list`）。
 > 本檔不放 `docs/`：那裡是 GitHub Pages 的站台輸出，放進去的 .md 會公開上網。
 
 ## 0. 三十秒版本
 
 - Volume VI 的 Stage 2（四位 writer 起草 LM32–LM35）**只在 Benjamin 下令後開始**。他希望下一週完成 Volume VI，
   以 **edition 0.7** 出版；同一版要一起套用 Volume V 留下的 Stage 4 項目（第 3 節）。
-- 開工前先讀 `TODO.md` 的 batch 4 一節、`plans/vol-5.md` 的共同決策到 Stage 4 清單（1–935 行），以及 `reviews/lm27.md` …
+- 待辦都在 kata：`vtr7`（Benjamin 下令）→ `0n3s`（Stage 2）→ `cgpp`（Stage 3）→ `fpst`（Stage 4 與 0.7 出版）；
+  全書完成後的排版細節是 `d9v8`，選做的是 `jwfw`、`0st8`，Volume VII–IX 是 `kata list` 裡標 `roadmap` 的任務。
+- 開工前先讀 `plans/ROADMAP.md` 的「How a batch runs」、`plans/vol-5.md` 的共同決策到 Stage 4 清單（1–935 行），以及 `reviews/lm27.md` …
   `lm31.md`：Volume V 在 Stage 3 改過的規則，Volume VI 的 brief 已同步（第 4 節）。
 
 ## 1. 現在的狀態
@@ -23,7 +25,7 @@
     腳本是 `data/vol6_anchors_lm32.py` … `lm35.py`，輸出必須與表格逐字一致。
   - lab 資料：`data/make_lab_data.py` 已寫好 LM32_lab … LM35_lab。processed 檔缺的時候，它會自己先跑 builder。
 - **資料**：`data/raw/` 已在本機（git-ignored），環境變數有 `FINMIND_TOKEN`。
-- **版控**：`main` 與 `origin/main` 同步。edition 0.6 的 commit 是 `66c636e`，本檔與 `CLAUDE.md`、`TODO.md`
+- **版控**：`main` 與 `origin/main` 同步。edition 0.6 的 commit 是 `66c636e`，本檔與 `CLAUDE.md`
   的指向在它之後一起 commit；之後工作樹乾淨。
 
 可直接執行的檢查（從 repo 根目錄）：
@@ -32,12 +34,12 @@
 PYTHONUTF8=1 uv run python data/vol6_anchors_lm35.py      # 印出 A35-xx；與 plans/vol-6-anchors.md 的 Value 欄比對
 uv run python build/build.py --preview                    # 草稿建到 dist/preview/（git-ignored）
 uv run python build/qa/check_terms.py                     # 必須 clean
-npx --yes markdownlint-cli2 plans/vol-6.md TODO.md         # 必須 0 issues
+npx --yes markdownlint-cli2 plans/vol-6.md                 # 必須 0 issues
 ```
 
 ## 2. 立刻要做（Benjamin 下令後）：Volume VI Stage 2
 
-照 `TODO.md` 的「Stage 2, writing」做：四位 writer 同時在主 checkout 裡各改自己的檔案，編輯在 `main` 上重跑所有
+照 `plans/ROADMAP.md`「How a batch runs」的「Stage 2, writing」做（kata `0n3s`）：四位 writer 同時在主 checkout 裡各改自己的檔案，編輯在 `main` 上重跑所有
 gate 後 commit。Volume V 用過的 workflow 腳本可以當範本，但不能整批把 `vol-5` 換成 `vol-6`：共同決策與
 spine 仍在 `plans/vol-5.md`（`plans/vol-6.md` 開頭也這樣說）。要換的只有 brief 檔（`plans/vol-6.md`）、anchors 檔
 （`plans/vol-6-anchors.md`）、anchor 腳本前綴（`data/vol6_anchors_lmNN.py`）、各行號範圍、標題，以及
@@ -69,7 +71,7 @@ Volume VI 特有、要寫進 writer prompt 的事：
 | `git status docs` | 草稿階段不得有變動 | 有變動就 `git checkout -- docs`（見第 4 節） |
 
 做完要回寫：`build.sh` 的 `DATA_STEPS`、`data/README.md` 的腳本表、`plans/vol-5.md` 的 Stage 2 紀錄、
-`reviews/lm32.md` … `lm35.md`（開頭記草稿 commit 與 writer 偏離 brief 之處）、`TODO.md`，以及本檔。
+`reviews/lm32.md` … `lm35.md`（開頭記草稿 commit 與 writer 偏離 brief 之處）、kata 任務（結案或留言），以及本檔。
 
 ## 3. 接著要做：Volume VI Stage 3 與 Stage 4（edition 0.7）
 
@@ -95,7 +97,7 @@ Volume VI 特有、要寫進 writer prompt 的事：
   - `./build.sh --data --pdf`：src/data 與 data/derived 應該 0 變動。
   - 每頁 `overflow.py` 400 px 與 `print_width.py`。首頁安裝區塊 755 px 是已知項目，全書完成後才處理。
   - 站內連結 0 斷連；`grep -ac 'file:///' docs/pdf/*.pdf` 每份 0。
-  - TODO 列出的禁用字串 `git grep` 為空。
+  - ROADMAP「Stage 4, publishing」列出的禁用字串 `git grep` 為空。
   - 兩位 fresh agent 分別驗證出版文字與 `docs/`。
   - commit 前 `git add -A docs`：新頁面、資產與 PDF 是 untracked，漏加的話 README 的連結會斷。
 
@@ -154,3 +156,4 @@ batch 7（Volume IX Capstone，1.0）。每個 batch 開始前，先處理 `plan
 | 版本 | 日期 | 變更 |
 |:--|:--|:--|
 | 1 | 2026-11-07 | 首版：Volume V 出版後，交接 Volume VI |
+| 2 | 2026-11-14 | 待辦改由 kata 管理：`TODO.md` 刪除，流程說明移到 `plans/ROADMAP.md`「How a batch runs」 |

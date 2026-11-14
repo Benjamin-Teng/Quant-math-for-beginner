@@ -2,14 +2,15 @@
 
 A self-study quantitative-finance textbook (static website + A4 PDFs + Jupyter labs) that runs from first-year
 calculus, statistics and linear algebra to Kelly leverage, GBM and Itô's lemma. Owner: Benjamin. MIT License.
-An independent personal-study project. `AGENTS.md` lets Codex take over the project by pointing to this file; keep
-every project instruction here, not there.
+An independent personal-study project. Codex reviews code in this repository (owner, 2026-11-14); `AGENTS.md` points
+it to this file. Keep every project instruction here, not there.
 
 ## Read first, in this order
 
 0. [`project/handover.md`](project/handover.md) — where the last session stopped, what to do next and the traps it hit
    (rewritten at the end of each stretch; kept out of `docs/`, which GitHub Pages publishes).
-1. [`TODO.md`](TODO.md) — the current work queue and its order; [`plans/ROADMAP.md`](plans/ROADMAP.md) for the volumes after Volume I.
+1. `kata list` — the current work queue and its order (kata holds every to-do; `kata show <ref>` gives an item's
+   detail); [`plans/ROADMAP.md`](plans/ROADMAP.md) for the volumes after Volume I and for how a batch runs (Stages 1–4).
 2. [`project/SPEC.md`](project/SPEC.md) — what the owner decided (format, language, rigor, hosting, rules).
 3. [`project/PITFALLS.md`](project/PITFALLS.md) — mistakes already made and the rule that prevents each. Do not repeat them.
 4. [`AUTHORING.md`](AUTHORING.md) — how a module is written, checked, reviewed and published; §6 is the book-wide notation table.
@@ -26,7 +27,7 @@ every project instruction here, not there.
   the owner's decisions are those `project/SPEC.md` attributes to him.
 - **Process is the editor's choice** (owner, 2026-10-11): this is a learning-content project, not a software
   project. No SDD, OpenSpec or other process skill is required; decide per task whether any process helps. The
-  default is the project's own cycle: briefs in `plans/`, the queue in `TODO.md`, the gates of AUTHORING §10–§11.
+  default is the project's own cycle: briefs in `plans/`, the queue in kata, the gates of AUTHORING §10–§11.
 - **Source authenticity comes first** (owner, 2026-10-11): textbooks, papers, official documents, FinMind data and
   Claude's own knowledge are all acceptable sources, but every citation is checked to exist as cited, and no data,
   reference or quotation is ever invented.
@@ -73,10 +74,10 @@ uv run ruff check <files> && uv run ty check <files>   # Python gates (dev group
 
 - One writer agent per module; it edits only that module's files. The main session is the editor and alone edits
   shared files (`build/`, `src/assets/`, `src/syllabus.yaml`, `AUTHORING.md`, `README.md`, `build.sh`,
-  `data/README.md`, `reviews/`, `project/`, `TODO.md`, `CLAUDE.md`).
+  `data/README.md`, `reviews/`, `project/`, `CLAUDE.md`).
 - Reviewers and verifiers are fresh, read-only agents that recompute from raw data; use `reviews/REVIEW_PROMPT.md`.
-- Reviews of diffs and code also go to fresh Opus subagents, never to Codex (the owner's instruction, 2026-10-10):
-  do not run `codex-companion` or enable the Codex review gate in this repository.
+- Reviews of diffs and code go to Codex (owner, 2026-11-14); reviews of the book's content stay with the fresh
+  agents above.
 - Launch independent agents together in one message; do the editor's quick work before launching a batch.
 - Data: raw FinMind files are never committed (licence); `data/raw_manifest.json` lists them and `fetch_finmind.py`
   rebuilds them. New data come from FinMind through its API (`FINMIND_TOKEN`), a whole series per query where the dataset
