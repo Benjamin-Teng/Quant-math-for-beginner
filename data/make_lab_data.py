@@ -36,8 +36,9 @@ round-trip exactly, so a lab can check its own results to 1e-12), booleans as tr
   - ohlc_0050_0056_00720B.csv: the checked daily rows of those funds (data/vol5_series.py's vol5_ohlc.parquet);
   - tx23_limit_days.csv: TX23's rows (data/vol4_series.py) whose settlement moved 9.95% or more since 2015-06-01, with
     2025-04-08 and 2026-10-08 (LM35);
-  - lm34_grid.csv: the 60 configurations' daily net returns, once data/lm34_numbers.py writes
-    data/processed/lm34_grid.parquet (skipped with a message until then).
+  - lm34_grid.csv: the 60 configurations' net returns (first row 2019-03-04, the first purchase from the cash of 1,
+    then the 1,851 daily returns), once data/lm34_numbers.py writes data/processed/lm34_grid.parquet (skipped with
+    a message until then).
 A missing processed file is built first by its script (vol3_series.py first, then vol4_series.py, and vol5_series.py
 before vol5_rules.py), which writes only data/processed/; a missing raw input stops the script.
 

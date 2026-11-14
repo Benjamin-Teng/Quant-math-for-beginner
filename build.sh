@@ -65,6 +65,10 @@ DATA_STEPS=(
   data/lm29_charts.py data/lm29_numbers.py   # through case from vol5_series.py and vol5_rules.py, U28 from
   data/lm30_charts.py data/lm30_numbers.py   # vol2_series.py
   data/lm31_charts.py data/lm31_numbers.py
+  data/lm32_charts.py data/lm32_numbers.py   # Volume VI: charts first (each numbers script checks its chart files
+  data/lm33_charts.py data/lm33_numbers.py   # and widget data; the widget checks need Node); TR23 and TX23, LM26's
+  data/lm34_charts.py data/lm34_numbers.py   # forecasts and the through case; lm34_numbers.py also writes
+  data/lm35_charts.py data/lm35_numbers.py   # processed/lm34_grid.parquet for make_lab_data.py
 )
 # Raw FinMind data are not committed (licence): fetch them with your token and verify against data/raw_manifest.json.
 if [ "$FETCH" = 1 ]; then
