@@ -103,7 +103,7 @@ npx --yes markdownlint-cli2 reviews/lm35.md         # 必須 0 issues
 | lm25→34、lm32→33、lm32→34 三個只靠前向指標的 lead 保留 | 已定（decision C9），記在 Stage 4 清單 |
 | LM35_lab 不讀的兩個 0050 檔（`make_lab_data.py`）不拿掉 | 決定不做：只多兩個檔，拿掉要改共用程式 |
 | 首頁安裝區塊 755 px、`book.js` 的小項、LM6 的長公式、Volume I 的 92 個捲動公式 | 全書完成後一起處理（kata `d9v8`） |
-| `build.sh --data` 的 `fetch_finmind.py --verify` 在免費方案會因缺付費檔失敗 | 已知、未處理：屬 fetch_finmind 的架構，owner 的決定 |
+| `build.sh --data` 的 `fetch_finmind.py --verify` 在免費方案會因缺付費檔失敗 | 決定不改（owner 2026-11-15 結案）：`--data` 重算全書數字，本來就要付費資料；讀者做 lab 走 `make_lab_data.py` |
 | LM31 widget 的 b₁ 保留 Unicode 下標；LM31 的「行向量距離」 | 決定不改，SOURCES 有記錄 |
 
 ## 5. 之後的路
