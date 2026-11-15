@@ -5,7 +5,8 @@ Run after data/build_series.py:  uv run python data/lm03_stats.py
 The 0050 and 00631L figures use processed/etf_daily_returns.parquet: total returns on the 2,902 dates on which
 both funds traded. Each fund's split halt removes a few sessions from the other fund's series, so the returns dated
 2025-06-18 and 2026-03-31 span several sessions. 0050's own calendar is used only to check the worst-day claims of
-the module. QQQ and TQQQ use FinMind's adjusted closes for calendar 2022.
+the module. QQQ and TQQQ use FinMind's adjusted closes for calendar 2022; FinMind rebuilds these at every retrieval,
+so data/lm03_numbers.py checks that the module's digits survive simulated re-fetches (qqq_tqqq_2022 is shared).
 """
 
 import json
@@ -20,6 +21,7 @@ RAW = HERE / "raw"
 PROC = HERE / "processed"
 BASE = date(2014, 10, 31)  # last close before the first daily return
 SPLITS = {"0050": ("2025-06-18", 4), "00631L": ("2026-03-31", 22)}
+WINDOW_2022 = ("2021-12-31", "2022-12-30")  # Example tqqq: the last closes of 2021 and of 2022
 
 
 def decomposition(R, RF, L):
@@ -41,6 +43,32 @@ def block(R, RL, label):
     d = decomposition(R, RL, 2)
     return {"label": label, "n": len(R), "ret0050": G0 - 1, "ret00631L": GL - 1, "twice0050": 2 * (G0 - 1),
             "exact2x": G2 - 1, "taylor2x": G0**2 * np.exp(-d["RV"]) - 1, **d, "gap": d["exact"] - d["T2"]}
+
+
+def qqq_tqqq_2022(qa, qc, ta, tc):
+    """Example tqqq from the closes of the 2022 window (WINDOW_2022): qa, ta are QQQ's and TQQQ's adjusted closes, qc,
+    tc their closes. TQQQ targets three times the Nasdaq-100 price index (NDX), which leaves dividends out, so the
+    residual is also measured against QQQ's close; the adjusted close adds QQQ's 2022 dividends."""
+    rq, rt = qa[1:] / qa[:-1] - 1, ta[1:] / ta[:-1] - 1
+    d3 = decomposition(rq, rt, 3)
+    du = decomposition(qc[1:] / qc[:-1] - 1, rt, 3)
+    G, Gu = qa[-1] / qa[0], qc[-1] / qc[0]
+    return {"n": len(rq), "G": G, "lnG": np.log(G), "QQQ": G - 1, "TQQQ": ta[-1] / ta[0] - 1, "thrice": 3 * (G - 1),
+            "GT": ta[-1] / ta[0], "TQQQ_close": tc[-1] / tc[0] - 1, "tqqq_first": ta[0], "tqqq_last": ta[-1],
+            "sqrtRV": np.sqrt(d3["RV"]), **d3,
+            "residual_vs_T2": d3["actual"] - d3["power"] - d3["T2"],
+            "taylor_value": G**3 * np.exp(d3["T2"]), "exact_value": G**3 * np.exp(d3["exact"]),
+            "div_qqq": np.log(G) - np.log(Gu), "qqq_adj_first": qa[0], "qqq_adj_last": qa[-1],
+            "qqq_close_first": qc[0], "qqq_close_last": qc[-1], "power_unadj": du["power"], "exact_unadj": du["exact"],
+            "residual_unadj": du["residual"], "G_unadj": Gu, "RV_unadj": du["RV"],
+            # the benchmark G^3 e^(-3 RV) on the unadjusted (price-only) closes
+            "taylor_value_unadj": Gu**3 * np.exp(du["T2"]), "exact_value_unadj": Gu**3 * np.exp(du["exact"])}
+
+
+def qqq_tqqq_frame():
+    """QQQ's and TQQQ's FinMind files joined on date and cut to WINDOW_2022 (suffix _t: TQQQ)."""
+    return (pl.read_csv(RAW / "QQQ__us_2022.csv").join(pl.read_csv(RAW / "TQQQ__us_2022.csv"), on="date", suffix="_t")
+            .sort("date").filter(pl.col("date").is_between(pl.lit(WINDOW_2022[0]), pl.lit(WINDOW_2022[1]))))
 
 
 def own_returns(sym):
@@ -133,26 +161,10 @@ def main():
         span[d1] = 1 + sum(d0 < d < d1 for d in other)
     res["span_sessions"] = span
 
-    # ---- QQQ and TQQQ in 2022 (Example tqqq): adjusted closes from 2021-12-31 to 2022-12-30. TQQQ targets three
-    # times the Nasdaq-100 price index (NDX), which leaves dividends out, so the residual is also measured against
-    # QQQ's unadjusted close; the adjusted close adds QQQ's 2022 dividends.
-    qt = (pl.read_csv(RAW / "QQQ__us_2022.csv").join(pl.read_csv(RAW / "TQQQ__us_2022.csv"), on="date", suffix="_t")
-          .sort("date").filter(pl.col("date").is_between(pl.lit("2021-12-31"), pl.lit("2022-12-30"))))
-    qa, ta, qc = qt["adj_close"].to_numpy(), qt["adj_close_t"].to_numpy(), qt["close"].to_numpy()
-    rq, rt = qa[1:] / qa[:-1] - 1, ta[1:] / ta[:-1] - 1
-    d3 = decomposition(rq, rt, 3)
-    du = decomposition(qc[1:] / qc[:-1] - 1, rt, 3)
-    G, Gu = qa[-1] / qa[0], qc[-1] / qc[0]
-    res["qqq2022"] = {"n": len(rq), "first": qt["date"][0], "last": qt["date"][-1], "G": G, "lnG": np.log(G),
-                      "QQQ": G - 1, "TQQQ": ta[-1] / ta[0] - 1, "thrice": 3 * (G - 1), "tqqq_first": ta[0],
-                      "tqqq_last": ta[-1], "sqrtRV": np.sqrt(d3["RV"]), **d3,
-                      "residual_vs_T2": d3["actual"] - d3["power"] - d3["T2"],
-                      "taylor_value": G**3 * np.exp(d3["T2"]), "exact_value": G**3 * np.exp(d3["exact"]),
-                      "div_qqq": np.log(G) - np.log(qc[-1] / qc[0]), "qqq_close_first": qc[0],
-                      "qqq_close_last": qc[-1], "power_unadj": du["power"], "exact_unadj": du["exact"],
-                      "residual_unadj": du["residual"], "G_unadj": Gu, "RV_unadj": du["RV"],
-                      # the benchmark G^3 e^(-3 RV) on the unadjusted (price-only) closes
-                      "taylor_value_unadj": Gu**3 * np.exp(du["T2"]), "exact_value_unadj": Gu**3 * np.exp(du["exact"])}
+    # ---- QQQ and TQQQ in 2022 (Example tqqq): closes from 2021-12-31 to 2022-12-30
+    qt = qqq_tqqq_frame()
+    res["qqq2022"] = {"first": qt["date"][0], "last": qt["date"][-1],
+                      **qqq_tqqq_2022(*(qt[c].to_numpy() for c in ("adj_close", "close", "adj_close_t", "close_t")))}
 
     (PROC / "lm03_stats.json").write_text(json.dumps(res, indent=1, default=float), encoding="utf-8")
 

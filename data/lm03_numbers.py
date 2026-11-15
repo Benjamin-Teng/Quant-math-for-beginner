@@ -5,15 +5,23 @@ Run after data/lm03_stats.py:  uv run python data/lm03_numbers.py
 Each check prints a label and the value as the module prints it, and fails if the value no longer appears in
 src/lm03.md. Where the module shows a computation, the check also recomputes it from the printed (rounded) inputs,
 so that a reader who redoes the arithmetic gets the printed result.
+
+The 2022 example of QQQ and TQQQ (and its lines in the case and the paradox exhibit) uses FinMind's adjusted closes,
+which FinMind rebuilds at every retrieval. Its strings are checked whole, each occurring once, and a seeded simulation
+of re-fetches asserts that none of them changes (see the section "Example tqqq").
 """
 
+import csv
+import io
 import json
 import math
 from decimal import ROUND_HALF_UP, Decimal
 from pathlib import Path
 
+import fetch_finmind as FF
 import numpy as np
 import polars as pl
+from lm03_stats import WINDOW_2022, qqq_tqqq_2022
 
 HERE = Path(__file__).resolve().parent
 TEXT = (HERE.parent / "src" / "lm03.md").read_text(encoding="utf-8").replace("−", "-").replace("{,}", ",")
@@ -62,10 +70,7 @@ chk("CAGR 0050 %", f(100 * full["cagr0050"], 1))
 chk("CAGR 00631L %", f(100 * full["cagr00631L"], 1))
 same("CAGR 0050 from printed", f(100 * (10.0225 ** (1 / 11.94) - 1), 1), f(100 * full["cagr0050"], 1))
 same("CAGR 00631L from printed", f(100 * (44.545 ** (1 / 11.94) - 1), 1), f(100 * full["cagr00631L"], 1))
-chk("QQQ 2022 %", f(100 * q22["QQQ"], 2))
-chk("TQQQ 2022 %", f(100 * q22["TQQQ"], 2))
-chk("3 x QQQ %", f(100 * q22["thrice"], 1))
-same("3 x printed -32.58", f(3 * -32.58, 1), f(100 * q22["thrice"], 1))
+# the 2022 sentence of the case and the exhibit's 2022 row and note: in the section "Example tqqq" below
 assert ST["span_sessions"] == {"2025-06-18": 6, "2026-03-31": 5}, ST["span_sessions"]
 assert full["n"] == 2902 and ST["own0050"]["n"] == 2906
 
@@ -300,54 +305,204 @@ for yy, k in (("2017", "exact2x"), ("2017", "twice0050"), ("2022", "exact2x"), (
               ("2015", "twice0050")):
     chk(f"{yy} {k} %", f(100 * abs(years[yy][k]), 1))
 
-# ---------------------------------------------------------------- Example tqqq: TQQQ in 2022
-chk("QQQ closes", "386.63 to 260.68", text=False)
-chk("3 ln G", f(q22["power"], 5))
-chk("G^3", f(q22["G"] ** 3, 4))
-chk("RV", f(q22["RV"], 4))
-chk("sqrt RV %", f(100 * q22["sqrtRV"], 1))
-chk("-3 RV", f(-3 * rd(q22["RV"], 4), 4))
-chk("third-order", f(q22["T3"], 4))
-chk("exact rebalancing", f(q22["exact"], 4))
-chk("exact rebalancing (5 dp)", f(q22["exact"], 5))
-chk("ln(8.27/39.55)", f(math.log(8.27 / 39.55), 5))
-assert (q22["tqqq_first"], q22["tqqq_last"]) == (39.55, 8.27)
-chk("residual vs exact", f(q22["residual"], 4))
-same("residual from printed", f(-1.56493 + 1.18252 + 0.31325, 4), f(q22["residual"], 4))
-chk("residual, % of value", f(100 * -math.expm1(q22["residual"]), 1))
-chk("residual vs second order", f(q22["residual_vs_T2"], 4))
-same("residual vs T2 from printed", f(-1.56493 + 1.18252 + 0.30900, 4), f(q22["residual_vs_T2"], 4))
-costs = 0.0086 + 2 * 0.0168  # expense ratio after waivers (1 Oct 2022) + 2 x average effective fed funds 2022
-chk("costs, log points", f(costs, 3))
-same("costs from printed terms", f(0.0086 + 2 * 0.0168, 3), "0.042")
-chk("costs / residual (roughly three-fifths)", f(costs / -q22["residual"], 2), text=False)
-assert 0.55 < costs / -q22["residual"] < 0.65
-# benchmark difference: QQQ's adjusted close includes its dividends; TQQQ targets the NDX price index
-chk("QQQ dividends 2022, log points", f(q22["div_qqq"], 4))
-chk("3 x dividends", f(3 * q22["div_qqq"], 3))
-same("3 x printed 0.0074", f(3 * 0.0074, 3), f(3 * q22["div_qqq"], 3))
-assert 3 * q22["div_qqq"] > 0.5 * (-q22["residual"] - costs)  # most of the rest
-assert (q22["qqq_close_first"], q22["qqq_close_last"]) == (397.85, 266.28)
-chk("residual vs unadjusted QQQ", f(q22["residual_unadj"], 3))
-same("residual vs unadjusted from printed", f(-0.0692 + 0.022, 3), f(q22["residual_unadj"], 3))
-chk("beyond fees and financing", f(-q22["residual_unadj"] - costs, 3))
-same("beyond fees and financing from printed", f(0.047 - 0.042, 3), f(-q22["residual_unadj"] - costs, 3))
-chk("e^(-0.309)", f(math.exp(-0.309), 3))
-chk("Taylor value 0.3065 x 0.734", f(0.3065 * 0.734, 3))
-chk("Taylor loss %", f(100 * (1 - q22["taylor_value"]), 1))
-chk("exact loss %", f(100 * (1 - q22["exact_value"]), 1))
-# the same benchmark on QQQ's unadjusted closes, which approximate the NDX price index that TQQQ targets
-chk("QQQ unadjusted closes", "unadjusted closes (397.85 to 266.28)")
-Gu3 = q22["G_unadj"] ** 3
-chk("G_u^3", f(Gu3, 4))
-same("G_u^3 from printed closes", f((266.28 / 397.85) ** 3, 4), f(Gu3, 4))
-same("G_u^3 = exp(3 ln G_u)", f(math.exp(q22["power_unadj"]), 4), f(Gu3, 4))
-same("e^(-3 RV) on unadjusted closes", f(math.exp(-3 * q22["RV_unadj"]), 3), "0.734")
-chk("unadjusted benchmark 0.2998 x 0.734", f(0.2998 * 0.734, 3))
-same("unadjusted benchmark, unrounded", f(q22["taylor_value_unadj"], 3), f(0.2998 * 0.734, 3))
-chk("unadjusted benchmark loss %", f(100 * (1 - 0.220), 1))
-same("unadjusted benchmark loss, unrounded", f(100 * (1 - q22["taylor_value_unadj"]), 1), "78.0")
-chk("unadjusted exact-effect loss % (not printed)", f(100 * (1 - q22["exact_value_unadj"]), 1), text=False)
+# ---------------------------------------------------------------- Example tqqq, and 2022 in the case and the exhibit
+# FinMind rebuilds USStockPrice's Adj_Close backward from the latest day at every retrieval: each later distribution
+# rescales the column and re-rounds it to cents, and data/fetch_finmind.py accepts such a re-fetch (other columns
+# identical, the adjusted column within its rounding allowance). The module therefore quotes the adjusted levels with
+# their retrieval date and prints each derived value only to digits that a re-fetch cannot move. tqqq_phrases()
+# builds every printed string of the case's 2022 sentence, the exhibit's 2022 row and note and Example tqqq from the
+# computed values; each occurs once in the module, and the stability check rebuilds them from simulated re-fetches.
+LEVELS = {  # the printed levels: raw file, column, last close of 2021, last close of 2022
+    "QQQ adjusted": ("QQQ__us_2022.csv", "adj_close", 386.63, 260.68),
+    "TQQQ adjusted": ("TQQQ__us_2022.csv", "adj_close", 39.55, 8.27),
+    "QQQ close": ("QQQ__us_2022.csv", "close", 397.85, 266.28),
+}
+COST = 0.0086 + 2 * 0.0168  # expense ratio after waivers (1 Oct 2022) + 2 x average effective fed funds 2022
+MOVE = "0.002"              # printed: how far a later retrieval can move the residual (checked after refetch)
+MANIFEST = {e["path"]: e for e in json.loads((HERE / "raw_manifest.json").read_text(encoding="utf-8"))["files"]}
+RAW_FILES = {name: (HERE / "raw" / name).read_bytes() for name in ("QQQ__us_2022.csv", "TQQQ__us_2022.csv")}
+SEED, N_SIM, FACTORS = 20261115, 1000, (0.80, 1.00)   # the stability check's design (see refetch)
+
+
+def lost(x, k):
+    """A loss printed without its sign ("lost 32.6%"); a gain would print with a minus sign and fail the match."""
+    return f(-100 * x, k)
+
+
+def window(data):
+    """Dates, adjusted closes and closes of a raw file inside WINDOW_2022, parsed as lm03_stats parses them."""
+    rows = [r for r in csv.DictReader(io.StringIO(data.decode("utf-8")))
+            if WINDOW_2022[0] <= r["date"] <= WINDOW_2022[1]]
+    return ([r["date"] for r in rows], np.array([float(r["adj_close"]) for r in rows]),
+            np.array([float(r["close"]) for r in rows]))
+
+
+def example_2022(files):
+    """lm03_stats.qqq_tqqq_2022 on the bytes of the two raw files."""
+    dq, qa, qc = window(files["QQQ__us_2022.csv"])
+    dt, ta, tc = window(files["TQQQ__us_2022.csv"])
+    assert dq == dt and (dq[0], dq[-1]) == WINDOW_2022
+    return qqq_tqqq_2022(qa, qc, ta, tc)
+
+
+def check_levels(files):
+    """The printed levels against the data. A file with its registered bytes, and any close (fetch_finmind requires
+    the closes to reproduce exactly), must hold the printed levels exactly. A re-fetched adjusted column must pass
+    fetch_finmind's check, and the printed levels' ratio must equal the data's within that check's daily allowance
+    (ADJ_K half-cents on each of the four values): a re-fetch passes, a level mistyped beyond its cents fails."""
+    for label, (name, col, p0, p1) in LEVELS.items():
+        data = files[name]
+        _, adj, close = window(data)
+        d0, d1 = (float(close[0]), float(close[-1])) if col == "close" else (float(adj[0]), float(adj[-1]))
+        if col == "close" or FF.sha256(data) == MANIFEST[name]["sha256"]:
+            assert (d0, d1) == (p0, p1), f"{label}: printed {p0} to {p1}, data {d0} to {d1}"
+        else:
+            assert FF.matches(MANIFEST[name], data), f"{name} is not a re-fetch that fetch_finmind accepts"
+            tol = FF.ADJ_K * 0.005 * (1 / p0 + 1 / p1 + 1 / d0 + 1 / d1)
+            gap = abs(math.log(p1 / p0) - math.log(d1 / d0))
+            assert gap <= tol, f"{label}: printed ratio {p1}/{p0} is {gap:.5f} off the data's {d1}/{d0} (> {tol:.5f})"
+
+
+def tqqq_phrases(q):
+    """(label, string) for every printed string of the 2022 example, the case and the exhibit, built from q
+    (qqq_tqqq_2022) and the printed levels, with ASCII minus signs as in TEXT."""
+    (a0, a1), (t0, t1), (c0, c1) = ((v[2], v[3]) for v in LEVELS.values())
+    qqq, tqqq, thrice = f(100 * q["QQQ"], 1), f(100 * q["TQQQ"], 1), f(100 * q["thrice"], 0)
+    res, bench_u = math.exp(q["residual"]), q["taylor_value_unadj"]
+    return [
+        ("case, 2022", (f"QQQ lost {lost(q['QQQ'], 1)}%; the 3× fund TQQQ lost {lost(q['TQQQ'], 1)}%. Three times "
+                       f"QQQ's loss is {thrice}%, so TQQQ lost")),
+        ("exhibit, 2022 row", f"| Calendar 2022 | QQQ: {qqq}% | TQQQ (3×): {tqqq}% | 3 × ({qqq}%) = {thrice}% |"),
+        ("exhibit note", (f"QQQ and TQQQ use adjusted closes, which include their distributions; on its close alone, "
+                         f"TQQQ lost {lost(q['TQQQ_close'], 1)}%.")),
+        ("levels", (f"In 2022 QQQ's adjusted close fell from {a0:.2f} to {a1:.2f} ({qqq}%) and TQQQ's from {t0:.2f} to "
+                   f"{t1:.2f} ({tqqq}%). These levels are FinMind's as retrieved on 10 October 2026")),
+        ("RV", (rf"realized variance $\mathrm{{RV}}={f(q['RV'], 3)}$, a realized volatility $\sqrt{{\mathrm{{RV}}}}$ "
+               rf"of {f(100 * q['sqrtRV'], 1)}%.")),
+        ("power", (rf"Index power: $G={a1:.2f}/{a0:.2f}$, so the power term $G^3$ alone is a "
+                  rf"{lost(q['G'] ** 3 - 1, 0)}% loss.")),
+        ("drag", (rf"$-\tfrac{{3\cdot2}}{{2}}\mathrm{{RV}}=-3\times{f(q['RV'], 3)}={f(q['T2'], 3)}$; adding the "
+                 rf"third-order term $8\sum R_t^3$ gives ${f(q['T3'], 3)}$. The exact rebalancing effect "
+                 rf"$\sum[\ln(1+3R_t)-3\ln(1+R_t)]$ is ${f(q['exact'], 3)}$.")),
+        ("residual", (rf"Residual: TQQQ's growth factor was ${t1:.2f}/{t0:.2f}={f(q['GT'], 3)}$. The power and the "
+                     rf"exact effect alone give $G^3e^{{{f(q['exact'], 3)}}}={f(q['exact_value'], 3)}$, so the "
+                     rf"residual factor is ${f(q['GT'], 3)}/{f(q['exact_value'], 3)}={f(res, 2)}$. In log points the "
+                     rf"residual is about ${f(q['residual'], 2)}$, or {lost(res - 1, 0)}% of value. Against the "
+                     rf"second-order drag it is {f(q['T2'] - q['exact'], 3)} more negative.")),
+        ("precision", (f"coarse near its year-end level of {t1:.2f}. A later retrieval can therefore move the residual "
+                      f"by about {MOVE}, so it is quoted to two decimals.")),
+        ("cost", rf"Roughly three-fifths of the residual is cost, about $0.0086+2\times0.0168={f(COST, 3)}$."),
+        ("dividends", (rf"Most of the rest, about $3\times{f(q['div_qqq'], 3)}={f(3 * q['div_qqq'], 2)}$, is a "
+                      rf"benchmark difference. QQQ's adjusted close includes its dividends, worth "
+                      rf"{f(q['div_qqq'], 3)} log points in 2022.")),
+        ("unadjusted residual", (f"Against QQQ's unadjusted close the residual is about {f(q['residual_unadj'], 2)}. "
+                                f"Fees and financing leave less than 0.01 of it")),
+        ("resolution", (rf"“3 × {qqq}% = {thrice}%” compares the fund to the wrong benchmark. The right benchmark is "
+                       rf"$G^3e^{{-3\,\mathrm{{RV}}}}={f(q['taylor_value'], 3)}$, a {lost(q['taylor_value'] - 1, 1)}% "
+                       rf"loss before costs ({lost(q['exact_value'] - 1, 1)}% with the exact rebalancing effect). On "
+                       rf"QQQ's unadjusted closes ({c0:.2f} to {c1:.2f}), which approximate the index TQQQ targets, it "
+                       rf"is ${f(q['G_unadj'] ** 3, 4)}\times{f(math.exp(-3 * q['RV_unadj']), 3)}={f(bench_u, 3)}$, a "
+                       rf"{lost(bench_u - 1, 1)}% loss.")),
+    ]
+
+
+def tqqq_claims(q):
+    """The comparisons the example states in words; they must hold on every retrieval."""
+    assert q["QQQ"] < 0 and q["thrice"] < q["TQQQ"] < 0      # TQQQ lost less than three times QQQ's loss
+    assert q["TQQQ_close"] < q["TQQQ"]                       # the close alone leaves out TQQQ's distribution
+    assert q["residual_vs_T2"] < q["residual"] < 0           # more negative against the second-order drag
+    assert 0.55 < COST / -q["residual"] < 0.65               # roughly three-fifths of the residual is cost
+    assert 3 * q["div_qqq"] > 0.5 * (-q["residual"] - COST)  # most of the rest is the benchmark difference
+    assert 0 < -q["residual_unadj"] - COST < 0.01            # fees and financing leave less than 0.01
+
+
+qq = example_2022(RAW_FILES)
+assert all(math.isclose(v, q22[k], rel_tol=0, abs_tol=1e-12) for k, v in qq.items() if k != "n"), "stats JSON is stale"
+check_levels(RAW_FILES)
+tqqq_claims(qq)
+PHRASES = tqqq_phrases(qq)
+for label, s in PHRASES:
+    n = TEXT.count(s)
+    print(f"{'2022: ' + label:44s} {s[:70]}{'…' if len(s) > 70 else ''}")
+    assert n == 1, f"2022 {label}: occurs {n} times in src/lm03.md, not once: {s}"
+# a reader who redoes the arithmetic from the printed numbers gets the printed results
+(a0, a1), (t0, t1), (c0, c1) = ((v[2], v[3]) for v in LEVELS.values())
+resf = math.exp(qq["residual"])
+same("QQQ % from printed levels", f(100 * (a1 / a0 - 1), 1), f(100 * qq["QQQ"], 1))
+same("TQQQ % from printed levels", f(100 * (t1 / t0 - 1), 1), f(100 * qq["TQQQ"], 1))
+same("3 x printed QQQ %", f(3 * rd(100 * qq["QQQ"], 1), 0), f(100 * qq["thrice"], 0))
+same("power loss from printed levels", f(100 * (1 - (a1 / a0) ** 3), 0), lost(qq["G"] ** 3 - 1, 0))
+same("-3 x printed RV", f(-3 * rd(qq["RV"], 3), 3), f(qq["T2"], 3))
+same("growth factor from printed levels", f(t1 / t0, 3), f(qq["GT"], 3))
+same("G^3 e^(printed exact)", f((a1 / a0) ** 3 * math.exp(rd(qq["exact"], 3)), 3), f(qq["exact_value"], 3))
+same("residual factor from printed factors", f(rd(qq["GT"], 3) / rd(qq["exact_value"], 3), 2), f(resf, 2))
+same("log residual from printed factor", f(math.log(rd(resf, 2)), 2), f(qq["residual"], 2))
+same("% of value from printed factor", f(100 * (1 - rd(resf, 2)), 0), lost(resf - 1, 0))
+same("printed drags differ by", f(rd(qq["T2"], 3) - rd(qq["exact"], 3), 3), f(qq["T2"] - qq["exact"], 3))
+assert 0.55 < rd(COST, 3) / -rd(qq["residual"], 2) < 0.65                       # three-fifths, from printed
+same("3 x printed dividends", f(3 * rd(qq["div_qqq"], 3), 2), f(3 * qq["div_qqq"], 2))
+assert rd(3 * qq["div_qqq"], 2) > 0.5 * (-rd(qq["residual"], 2) - rd(COST, 3))   # most of the rest, from printed
+assert 0 < -rd(qq["residual_unadj"], 2) - rd(COST, 3) < 0.01                    # less than 0.01, from printed
+same("benchmark from printed levels and RV", f((a1 / a0) ** 3 * math.exp(-3 * rd(qq["RV"], 3)), 3),
+     f(qq["taylor_value"], 3))
+same("loss from printed benchmark", f(100 * (1 - rd(qq["taylor_value"], 3)), 1), lost(qq["taylor_value"] - 1, 1))
+same("exact-effect loss from printed 0.224", f(100 * (1 - rd(qq["exact_value"], 3)), 1),
+     lost(qq["exact_value"] - 1, 1))
+same("G_u^3 from printed closes", f((c1 / c0) ** 3, 4), f(qq["G_unadj"] ** 3, 4))
+same("e^(-3 x printed RV), unadjusted", f(math.exp(-3 * rd(qq["RV"], 3)), 3), f(math.exp(-3 * qq["RV_unadj"]), 3))
+same("unadjusted benchmark from printed factors",
+     f(rd(qq["G_unadj"] ** 3, 4) * rd(math.exp(-3 * qq["RV_unadj"]), 3), 3), f(qq["taylor_value_unadj"], 3))
+same("unadjusted loss from printed benchmark", f(100 * (1 - rd(qq["taylor_value_unadj"], 3)), 1),
+     lost(qq["taylor_value_unadj"] - 1, 1))
+
+
+def refetch(rng, name):
+    """One simulated re-fetch of a raw file. FinMind rounds each adjusted price (the close times its distribution
+    factor) to cents, so the unrounded value behind a registered cell a lies within half a cent of it, and a later
+    retrieval rounds that value times a new factor f. A simulated cell is therefore round((a + u) f, 2), with u drawn
+    uniformly within half a cent for every cell and f uniformly from FACTORS for the file (0.80 is 20% of
+    distributions, about 30 years of QQQ's 2022 yield). It lands within 0.005 (1 + f), at most a cent, of a f: on some
+    days a cent away from a plain re-rounding of a f, never further than a re-rounding can reach. (Adding a cent to a
+    re-rounded value would reach 1.5 cents, which no retrieval can produce.) Every such file passes fetch_finmind's
+    check, as asserted here."""
+    rows = list(csv.reader(io.StringIO(RAW_FILES[name].decode("utf-8"))))
+    j = rows[0].index("adj_close")
+    a = np.array([float(r[j]) for r in rows[1:]])
+    new = np.round((a + rng.uniform(-0.005, 0.005, len(a))) * rng.uniform(*FACTORS), 2)
+    buf = io.StringIO()
+    csv.writer(buf, lineterminator="\n").writerows(
+        [rows[0], *([*r[:j], f"{v:.2f}", *r[j + 1:]] for r, v in zip(rows[1:], new, strict=True))])
+    data = buf.getvalue().encode("utf-8")
+    assert FF.adjusted_match(MANIFEST[name], data), f"{name}: a simulated re-fetch fails fetch_finmind's check"
+    return data
+
+
+# "A later retrieval can therefore move the residual by about 0.002, so it is quoted to two decimals": a cent on each
+# of the four end values of the growth factors moves it by up to MOVE (to first order; the daily path adds little), no
+# simulated re-fetch below moves it by 0.0025 or more, and some move its third decimal.
+same("residual move from a cent per end value", f(0.01 * (1 / t0 + 1 / t1 + 3 / a0 + 3 / a1), 3), MOVE)
+
+# The stability check is a test of the printed digits, so it starts from the registered bytes. On a re-fetched
+# checkout the data are themselves one such re-fetch: the strings above were just checked on them.
+if all(FF.sha256(b) == MANIFEST[name]["sha256"] for name, b in RAW_FILES.items()):
+    rng = np.random.default_rng(SEED)
+    moves, third = [], 0
+    for i in range(N_SIM):
+        sim = {name: refetch(rng, name) for name in RAW_FILES}
+        check_levels(sim)
+        qs = example_2022(sim)
+        tqqq_claims(qs)
+        for (label, s), (_, b) in zip(tqqq_phrases(qs), PHRASES, strict=True):
+            assert s == b, f"simulated re-fetch {i}: 2022 {label} would print\n  {s}\nnot\n  {b}"
+        moves.append(abs(qs["residual"] - qq["residual"]))
+        third += f(qs["residual"], 3) != f(qq["residual"], 3)
+    assert max(moves) < float(MOVE) + 0.0005, f"a simulated re-fetch moved the residual by {max(moves):.4f}"
+    assert third > 0, "no simulated re-fetch moved the residual's third decimal"
+    print(f"2022 stability: seed {SEED}, {N_SIM} simulated re-fetches (factors {FACTORS[0]:.2f}-{FACTORS[1]:.2f}, "
+          f"each value within a cent of the rescaled registered one): all {len(PHRASES)} strings unchanged; the "
+          f"residual moved by at most {max(moves):.4f}, its third decimal in {third}")
+else:
+    print("2022 stability: skipped, data/raw holds a re-fetch of QQQ or TQQQ (the strings were checked on it)")
 
 # ---------------------------------------------------------------- knowledge check: flat index, RV = 0.04
 chk("2x", f(100 * math.expm1(-0.04), 1))

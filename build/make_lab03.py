@@ -79,7 +79,7 @@ Companion notebook to **From Calculus to Kelly, LM3**. It rebuilds every exhibit
 
 {ENV_TEXT}
 
-**Data.** {DATA_TEXT} `data/` then holds FinMind `TaiwanStockPrice` closes for 0050 and 00631L (2014-10-31 → 2026-10-08), 0050 cash dividends from `TaiwanStockDividendResult`, and QQQ and TQQQ closes for 2022 from `USStockPrice`, retrieved 2026-10-10. Every daily close was checked against FinMind's own `spread` column (close − previous close); the only mismatches are ex-dividend and split days, which Part 2 handles explicitly.
+**Data.** {DATA_TEXT} `data/` then holds FinMind `TaiwanStockPrice` closes for 0050 and 00631L (2014-10-31 → 2026-10-08), 0050 cash dividends from `TaiwanStockDividendResult`, and QQQ and TQQQ closes for 2022 from `USStockPrice`, retrieved 2026-10-10 (FinMind rebuilds their adjusted closes at every retrieval; Part 6 explains what that changes). Every daily close was checked against FinMind's own `spread` column (close − previous close); the only mismatches are ex-dividend and split days, which Part 2 handles explicitly.
 
 **Conventions (as in the module).** $T$ counts returns; a span in years is calendar days ÷ 365.25, and $A$ is the number of returns per year in the sample in use. The 0050 and 00631L series are aligned on the 2,902 days on which both funds traded.
 """)
@@ -426,33 +426,41 @@ md(r"""
 
 Calendar-2022 returns use the adjusted close from 2021-12-31 to 2022-12-30; $L=3$, so the second-order drag coefficient is $L(L-1)/2=3$ and the third-order coefficient $(L^3-L)/3=8$.
 
+FinMind rebuilds adjusted closes backward from the latest day at every retrieval, so each later distribution rescales them and re-rounds them to cents. The adjusted levels printed below are those of your retrieval; [[eg:tqqq]] quotes those of 2026-10-10. The values the module cites are printed at its digits, which such a re-fetch leaves unchanged. TQQQ's year-end close is near 8 USD, where a cent is coarse, so the residual is quoted to two decimals.
+
 TQQQ targets three times the daily return of the Nasdaq-100 Index (NDX), a price index that leaves dividends out. QQQ's adjusted close includes its dividends and its unadjusted close does not. The last lines therefore also measure the residual, and the benchmark $G^3e^{-3\,\mathrm{RV}}$, against the unadjusted close.
 """)
 
 code(r"""
 qt = (pl.read_csv(DATA / "QQQ_TQQQ_2022.csv")
         .filter(pl.col("date").is_between(pl.lit("2021-12-31"), pl.lit("2022-12-30"))).sort("date"))
-qa, ta, qc = qt["qqq_adj"].to_numpy(), qt["tqqq_adj"].to_numpy(), qt["qqq_close"].to_numpy()
+qa, ta = qt["qqq_adj"].to_numpy(), qt["tqqq_adj"].to_numpy()
+qc, tc = qt["qqq_close"].to_numpy(), qt["tqqq_close"].to_numpy()
 rq, rt = qa[1:] / qa[:-1] - 1, ta[1:] / ta[:-1] - 1
 d3 = leverage_decomposition(rq, rt, 3)
-G = qa[-1] / qa[0]
+G, GT = qa[-1] / qa[0], ta[-1] / ta[0]
 RVq = float(np.sum(rq**2))
-print(f"QQQ {qa[0]} -> {qa[-1]}: {G - 1:.2%}   TQQQ {ta[0]} -> {ta[-1]}: {ta[-1] / ta[0] - 1:.2%}   "
-      f"3 x QQQ {3 * (G - 1):.1%}")
-print(f"RV {RVq:.4f}, sqrt(RV) {math.sqrt(RVq):.1%};  3 ln G {3 * math.log(G):.5f}, G^3 {G**3:.4f}")
-print({name: round(float(v), 5) for name, v in d3.items()})   # [[eg:tqqq]]
-print(f"residual vs the exact effect {d3['residual']:.4f} ({math.expm1(d3['residual']):.1%} of value); "
-      f"vs the second-order drag {d3['actual'] - d3['power'] - d3['taylor2']:.4f}")
-print(f"before costs: Taylor {G**3 * math.exp(d3['taylor2']):.3f}, exact {G**3 * math.exp(d3['exact_drag']):.3f}")
+print(f"adjusted closes of your retrieval: QQQ {qa[0]} -> {qa[-1]}, TQQQ {ta[0]} -> {ta[-1]}")
+print(f"QQQ {G - 1:.1%}, TQQQ {GT - 1:.1%} (on its close alone {tc[-1] / tc[0] - 1:.1%}), 3 x QQQ {3 * (G - 1):.0%}")
+print(f"RV {RVq:.3f}, sqrt(RV) {math.sqrt(RVq):.1%}; the power G^3 alone is a {1 - G**3:.0%} loss")
+print(f"drag: second order {d3['taylor2']:.3f}, third order {d3['taylor3']:.3f}, exact {d3['exact_drag']:.3f}")
+
+# [[eg:tqqq]]: the residual against the power and the exact effect, as a factor and in log points
+bench = G**3 * math.exp(d3["exact_drag"])
+print(f"TQQQ growth {GT:.3f} against {bench:.3f}: residual factor {GT / bench:.2f}, "
+      f"residual {d3['residual']:.2f} log points ({-math.expm1(d3['residual']):.0%} of value); "
+      f"against the second-order drag {d3['taylor2'] - d3['exact_drag']:.3f} more negative")
 
 # what the residual contains: fees and financing, then the dividends in QQQ's adjusted close
 cost = 0.0086 + 2 * 0.0168   # expense ratio after waivers + two units at 2022's average fed funds rate
 div_qqq = math.log(G) - math.log(qc[-1] / qc[0])
 du = leverage_decomposition(qc[1:] / qc[:-1] - 1, rt, 3)
-print(f"fees and financing {cost:.3f} ({cost / -d3['residual']:.0%} of the residual); "
-      f"QQQ dividends {div_qqq:.4f} log points, x 3 = {3 * div_qqq:.3f}")
-print(f"QQQ unadjusted {qc[0]} -> {qc[-1]}: residual {du['residual']:.3f}, "
-      f"beyond fees and financing {-du['residual'] - cost:.3f}")
+print(f"fees and financing {cost:.3f} ({cost / -d3['residual']:.1f} of the residual); "
+      f"QQQ dividends {div_qqq:.3f} log points, x 3 = {3 * div_qqq:.2f}")
+print(f"QQQ unadjusted {qc[0]} -> {qc[-1]}: residual {du['residual']:.2f}; "
+      f"fees and financing leave {-du['residual'] - cost:.3f} of it (less than 0.01)")
+taylor = G**3 * math.exp(d3["taylor2"])
+print(f"benchmark G^3 e^(-3 RV) = {taylor:.3f}, a {1 - taylor:.1%} loss ({1 - bench:.1%} with the exact effect)")
 Gu3 = (qc[-1] / qc[0]) ** 3
 bench_u = Gu3 * math.exp(du["taylor2"])
 print(f"benchmark on the unadjusted closes: {Gu3:.4f} x {math.exp(du['taylor2']):.3f} = {bench_u:.3f}, "
@@ -601,6 +609,10 @@ The folder then holds:
 | `data/00631L_daily_raw.csv` | 00631L daily close and `spread`, same period (unadjusted) |
 | `data/0050_dividends.csv` | 0050 ex-dividend dates and cash dividends (`TaiwanStockDividendResult`) |
 | `data/QQQ_TQQQ_2022.csv` | QQQ and TQQQ adjusted and raw closes, 2021-12-30 → 2023-01-03 (`USStockPrice`) |
+
+FinMind rebuilds the adjusted closes backward from the latest day at every retrieval, so a later download can rescale
+them and re-round them to cents. The values the module cites from them keep their printed digits; the levels it
+quotes are those of 2026-10-10.
 
 Every close was verified against FinMind's own `spread` column (close − previous close). The only mismatches are
 0050's ex-dividend days in the window and the two split days: 0050 4-for-1 on 2025-06-18 and 00631L 22-for-1 on

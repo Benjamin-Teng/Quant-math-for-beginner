@@ -43,6 +43,10 @@ The folder then holds:
 | `data/0050_dividends.csv` | 0050 ex-dividend dates and cash dividends (`TaiwanStockDividendResult`) |
 | `data/QQQ_TQQQ_2022.csv` | QQQ and TQQQ adjusted and raw closes, 2021-12-30 → 2023-01-03 (`USStockPrice`) |
 
+FinMind rebuilds the adjusted closes backward from the latest day at every retrieval, so a later download can rescale
+them and re-round them to cents. The values the module cites from them keep their printed digits; the levels it
+quotes are those of 2026-10-10.
+
 Every close was verified against FinMind's own `spread` column (close − previous close). The only mismatches are
 0050's ex-dividend days in the window and the two split days: 0050 4-for-1 on 2025-06-18 and 00631L 22-for-1 on
 2026-03-31. Part 2 of the notebook re-runs this check. The two funds are aligned on the 2,902 days on which both
