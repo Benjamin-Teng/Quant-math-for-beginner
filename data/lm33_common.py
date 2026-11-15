@@ -388,35 +388,48 @@ put("optimal_block_length on squared demeaned excess returns, stationary: " + ",
     f"({RULES[1 + int(np.argmax(dif_))]} - R1)")
 
 
+def lw_grad(a: float, b_: float, c: float, d: float) -> Vec:
+    """The gradient of (33.6)'s h at theta = (a, b_, c, d): two means and two uncentred second moments."""
+    return np.array([c / (c - a**2) ** 1.5, -d / (d - b_**2) ** 1.5,
+                     -0.5 * a / (c - a**2) ** 1.5, 0.5 * b_ / (d - b_**2) ** 1.5])
+
+
 def lw_parts(xj: Vec, x1: Vec, lag: int) -> tuple[float, float]:
     """(Delta hat, s(Delta hat)) per observation, Ledoit and Wolf's (5) with (23.7)'s Psi."""
     a, b_, c, d = xj.mean(), x1.mean(), (xj**2).mean(), (x1**2).mean()
     Y = np.column_stack([xj - a, x1 - b_, xj**2 - c, x1**2 - d])
-    grad = np.array([c / (c - a**2) ** 1.5, -d / (d - b_**2) ** 1.5,
-                     -0.5 * a / (c - a**2) ** 1.5, 0.5 * b_ / (d - b_**2) ** 1.5])
+    grad = lw_grad(a, b_, c, d)
     delta = a / sqrt(c - a**2) - b_ / sqrt(d - b_**2)
     return float(delta), float(np.sqrt(grad @ lrv(Y, lag) @ grad / len(xj)))
+
+
+def boot_psi(Xs: Mat, b: int) -> tuple[Vec, Vec, Mat]:
+    """A resample's means, its uncentred second moments and its Goetze-Kuensch Psi_boot: the terms centred at the
+    resample's own means (divisor T), their sums over the floor(T/b) complete blocks over sqrt(b), Z' Z / floor(T/b),
+    which is b / floor(T/b) times the sum of the block means' outer products (the module's display after (33.6))."""
+    Tn = Xs.shape[0]
+    lb = Tn // b
+    mu, ga = Xs.mean(axis=0), (Xs**2).mean(axis=0)
+    Ys = np.concatenate([Xs - mu, Xs**2 - ga], axis=1)[: lb * b]
+    Z = Ys.reshape(lb, b, -1).sum(axis=1) / sqrt(b)
+    return mu, ga, Z.T @ Z / lb
 
 
 def lw_boot(XA: Mat, pairs: list[tuple[int, int]], b: int, B: int, rng: np.random.Generator) -> NDArray[np.float64]:
     """Centred studentized statistics |Delta* - Delta| / s(Delta*) for every pair, B circular-block resamples."""
     Tn = XA.shape[0]
-    nb, lb = ceil(Tn / b), Tn // b
+    nb = ceil(Tn / b)
     base = {p: lw_parts(XA[:, p[0]], XA[:, p[1]], 0)[0] for p in pairs}
     out = np.empty((B, len(pairs)))
     ar_ = np.arange(b)
     for i in range(B):
         idx = ((rng.integers(0, Tn, size=nb)[:, None] + ar_) % Tn).ravel()[:Tn]
         Xs = XA[idx]
-        mu, ga = Xs.mean(axis=0), (Xs**2).mean(axis=0)
-        Ys = np.concatenate([Xs - mu, Xs**2 - ga], axis=1)[: lb * b]
-        Z = Ys.reshape(lb, b, -1).sum(axis=1) / sqrt(b)
-        P = Z.T @ Z / lb
+        mu, ga, P = boot_psi(Xs, b)
         nr = XA.shape[1]
         for jj, (j, o) in enumerate(pairs):
             a, b_, c, d = mu[j], mu[o], ga[j], ga[o]
-            grad = np.array([c / (c - a**2) ** 1.5, -d / (d - b_**2) ** 1.5,
-                             -0.5 * a / (c - a**2) ** 1.5, 0.5 * b_ / (d - b_**2) ** 1.5])
+            grad = lw_grad(a, b_, c, d)
             ix = [j, o, nr + j, nr + o]
             se = sqrt(float(grad @ P[np.ix_(ix, ix)] @ grad) / Tn)
             ds = a / sqrt(c - a**2) - b_ / sqrt(d - b_**2)

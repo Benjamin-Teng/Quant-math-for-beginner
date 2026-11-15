@@ -24,7 +24,8 @@ difference above 1e-6 in E Z_(n) or MinTRL, or above 1e-9 in DSR; it checks the 
 drives the widget itself (Book.controls and draw) on a minimal DOM in Node: a slider moves, 12 and 52 a year are
 chosen, R2 is chosen again, then R4, n = 1 and another slider. At each step it checks the rule and frequency shown,
 that the frequency select is disabled exactly while a rule's moments are in use (they are daily, so 243.57 a year),
-and the readouts against Python from the inputs that step should use.
+and the readouts against Python from the inputs that step should use, with their labels: "years of sessions" at
+243.57 observations a year, "years of observations" at 12 or 52.
 """
 import json
 import math
@@ -276,7 +277,8 @@ const steps = [];
 function record(what) {
   steps.push({ what, rule: sel("mt-rule").value, a: sel("mt-a").value, locked: sel("mt-a").disabled, n: sel("mt-n").value,
     sliders: ["mt-sr", "mt-sk", "mt-ku"].map(id => sel(id).value),
-    readouts: [...host.querySelector(".readout").innerHTML.matchAll(/<b>(.*?)<\/b>/g)].map(x => x[1]) });
+    readouts: [...host.querySelector(".readout").innerHTML.matchAll(/<b>(.*?)<\/b>/g)].map(x => x[1]),
+    labels: [...host.querySelector(".readout").innerHTML.matchAll(/<span>(.*?)<\/span>/g)].map(x => x[1]) });
 }
 record("first drawing");
 slide("mt-sr", "1.2"); record("a slider moves");
@@ -334,7 +336,12 @@ def readouts(sr: float, sk: float, ku: float, n: int, A: float) -> list[str]:
     T = K.tau * A
     d = float(stats.norm.cdf((sr * math.sqrt(T - 1) - ez) / math.sqrt(v)))
     p0 = float(stats.norm.cdf(sr * math.sqrt(T - 1) / math.sqrt(v)))
-    return [f"{ez:.4f}; {ap}", f"{mt:,.0f} observations, {mt / A:.2f} years of observations", f"{p0:.3f}", f"{d:.3f}"]
+    return [f"{ez:.4f}; {ap}", f"{mt:,.0f} observations, {mt / A:.2f}{yrs(A)}", f"{p0:.3f}", f"{d:.3f}"]
+
+
+def yrs(A: float) -> str:
+    """The readouts' unit: years of sessions at the wealth frame's 243.57 a year, years of observations at 12 or 52."""
+    return " years of sessions" if A == K.Aw else " years of observations"
 
 
 # step: (rule shown, frequency shown, frequency select disabled, trials); a rule's exact moments at A_w, else sliders
@@ -355,6 +362,11 @@ for s in got["steps"]:
         sr_a, sk_c, ku_c = (float(x) for x in s["sliders"])
         want = readouts(sr_a / math.sqrt(A), sk_c, ku_c, n, A)
     assert s["readouts"] == want, (s["what"], s["readouts"], want)
+    A_ = K.Aw if a == "daily" else float(a)
+    assert s["labels"] == ["E Z<sub>(n)</sub>, exact; approximation", "MinTRL after n trials",
+                           f"PSR(0) at 7.60{yrs(A_)}", f"DSR at 7.60{yrs(A_)}"], (s["what"], s["labels"])
+assert [s["labels"][2] for s in got["steps"][:4]] == ["PSR(0) at 7.60 years of sessions"] * 2 + \
+    ["PSR(0) at 7.60 years of observations"] * 2                                  # daily, daily, 12, 52
 st0 = got["steps"]
 assert st0[0]["readouts"] == st0[4]["readouts"] and st0[0]["sliders"] == st0[4]["sliders"]   # R2's exact values restored
 assert st0[1]["sliders"][0] == "1.2" and st0[7]["sliders"][2] == "5"

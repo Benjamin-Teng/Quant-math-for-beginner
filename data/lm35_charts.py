@@ -8,7 +8,7 @@ Inputs and conventions: data/lm35_common.py (the anchor script's computations; E
 through vol5_rules' files, TR23 through vol3_taiex.parquet). Writes
   lm35-windows   the five scenario windows on TR23: worst day, worst 5 and 20 sessions, peak to trough (bars);
   lm35-replay    R1's, R3's, R6's and R8's frozen losses in the 2020, 2024 and 2025 windows (bars);
-  lm35-attrib    the parts f_i R_i of R1, R3, R6 and R8 on 7 April 2025 (stacked bars; 00679B in the muted colour);
+  lm35-attrib    the parts f_i R_i of R1, R3, R6 and R8 on 7 April 2025 (stacked bars; 00635U in the muted colour);
   lm35-reverse   the reverse stress shocks of R1 and R8 (35.4), R2's with 0050's limit, and the worst day of each fund;
   lm35-ruin      1 + L R for R6's book in three replays and for 0050 to the open of 8 April 2025 (straight lines);
   lm35-builder   the widget's initial chart and its "widget" block (the eight current books, the presets, for each
@@ -33,7 +33,7 @@ ROOT = K.HERE.parent
 OUT = ROOT / "src" / "data"
 OUT.mkdir(parents=True, exist_ok=True)
 FUNDS = K.FUNDS                                    # 0050, 00646, 00679B, 00635U, 00642U
-COLOR = {"0050": "1", "00646": "2", "00679B": "var(--muted)", "00635U": "3", "00642U": "4"}
+COLOR = {"0050": "1", "00646": "2", "00679B": "3", "00635U": "var(--muted)", "00642U": "4"}   # Volume V's
 SCEN = ["2008", "2015", "2020", "2024-08-05", "2025-04-07"]
 SHORT = {"2008": "2008", "2015": "2015", "2020": "2020", "2024-08-05": "2024", "2025-04-07": "2025"}
 
@@ -85,7 +85,7 @@ write("lm35-replay", {
 
 # ---------------------------------------------------------------- X4: attribution on 7 April 2025
 i7 = K.i7
-order = ["0050", "00646", "00635U", "00642U", "00679B"]          # colours 1-4, then the muted 00679B
+order = ["0050", "00646", "00679B", "00642U", "00635U"]          # colours 1-4, then the muted 00635U
 parts = {k: K.expo(k, "2025-04-02") * K.fr.W[i7] for k in ("R1", "R3", "R6", "R8")}
 write("lm35-attrib", {
     "type": "bar", "stack": True, "valueLabels": True, "height": 300,

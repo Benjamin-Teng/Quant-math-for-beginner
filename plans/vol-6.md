@@ -706,10 +706,10 @@ decision on the second cross-check); (31.7) (LM31's list names LM32; its (31.8) 
 
 **Stage 4 for earlier modules.**
 
-- `leads` gain 32 in lm01.md:6 ((1.17), $\mathrm{DD}_t$), lm05.md:6 ((5.11); on the Stage 4 list), lm10.md:6 ((10.4)),
-  lm21.md:6 (the exact binomial tests, (21.6)) and lm22.md:6 ((22.3), the block rule). lm12, lm14, lm15, lm16, lm18,
-  lm19, lm20 and lm26 already list 32; LM12 keeps it through §6's colouring sentence. These five are on the editor's
-  merged list (decision G).
+- `leads` gain 32 in lm01.md:6 ((1.17), $\mathrm{DD}_t$), lm05.md:6 ((5.11); on the Stage 4 list), lm10.md:6 (the
+  long-only bound after (10.4)), lm21.md:6 (the exact binomial tests, (21.6)) and lm22.md:6 ((22.3), the block rule).
+  lm12, lm14, lm15, lm16, lm18, lm19, lm20 and lm26 already list 32; LM12 keeps it through §6's colouring sentence.
+  These five are on the editor's merged list (decision G).
 - lm04.md:46–50 and 510 print maximum drawdowns as negative numbers (−93.3%); with §6's $\mathrm{DD}\ge0$ and LM32's MDD
   they become 93.3% (the column header stays "Maximum drawdown"). Optional (decision G lists it so).
 - No other wording change: lm20.md:276's "its standard error is [[LM32]]'s" is kept by E5; lm18.md:300's "applies these
@@ -1031,8 +1031,8 @@ them, and by Holm on the eight rules' own p-values (the book's adaptation); the 
 (one paragraph). Values owned: every A33 anchor except the echoed numbers of LM19, LM20, LM21 and LM22 (file:line in the
 anchors) and the volatilities of R1, R3 and R5 (LM30, A30-12) and of R6–R8 (LM31, A31-27).
 
-**Leaves.** Testing rules fixed in advance on later data, White's reality check, PBO and gross against net Sharpe
-ratios → LM34 (one sentence each in §6 and §7). Sizing from an uncertain Sharpe ratio (bootstrap Kelly, shrinkage of
+**Leaves.** Testing rules fixed in advance on later data, White's reality check, PBO and gross against net growth
+→ LM34 (one sentence each in §6 and §7). Sizing from an uncertain Sharpe ratio (bootstrap Kelly, shrinkage of
 the fraction) → LM45 (§8, one sentence). Bayesian shrinkage of a Sharpe ratio toward a prior → LM24's tools, one
 sentence (§5). Ledoit and Wolf's calibration of the block size (their Algorithm 3.1) and their prewhitened
 quadratic-spectral kernel → named once, not used (§6). The test of one
@@ -1460,8 +1460,8 @@ the curve is one more trial ([[LM34]]'s subject; the lab writes plain "LM34").
   Z_{(n)}/\sqrt{T-1})$, iid trials with true ratio zero under $H_0$, on the null scale $1/\sqrt{T-1}$ of one estimate
   (the book's; Bailey and López de Prado's eq. (1) scales by the standard deviation of the trials' own estimates); the
   approximation
-  $(1-\gamma_{\mathrm E})\Phi^{-1}(1-1/n)+\gamma_{\mathrm E}\Phi^{-1}(1-1/(ne))$ stated. No later brief cites it (LM34
-  cites the deflated ratio by pointer).
+  $(1-\gamma_{\mathrm E})\Phi^{-1}(1-1/n)+\gamma_{\mathrm E}\Phi^{-1}(1-1/(ne))$ stated. Cited by LM34 (§7: the maximum's
+  mean at $n=60$); LM34 cites the deflated ratio by pointer.
 - (33.5) $T\ge1+\big((\Phi^{-1}(1-\alpha)\sqrt{\hat V_{\mathrm{SR}}}+\E Z_{(n)})/\widehat{\mathrm{SR}}\big)^2$, the
   track record that makes DSR $\ge1-\alpha$ after $n$ trials, for $\widehat{\mathrm{SR}}>0$ (with
   $\widehat{\mathrm{SR}}\le0$ no record length suffices). No later brief cites it.
@@ -1969,7 +1969,11 @@ Romano–Wolf and Hansen (Harvey, Liu and Zhu's hurdle is LM21's, lm21.md:371).
 - **Scripts.** `data/lm34_numbers.py` (every printed value, asserted against `src/lm34.md`, compared with the anchors,
   rounding flags) and `data/lm34_charts.py` (X2, X3, X5–X9 and the widget block, with a Node check of the widget's
   CSCV against Python's, as `data/lm15_charts.py` does); both after `data/vol3_series.py`, `data/vol5_series.py` and
-  `data/vol5_rules.py` have written `data/processed/`.
+  `data/vol5_rules.py` have written `data/processed/`. From Stage 3 (2026-11-15; the owner approved the builder that
+  day), `data/lm34_grid.py` also writes the grid's 60 net-return series to `data/processed/lm34_grid.parquet`, after
+  `data/vol5_series.py` and `data/vol5_rules.py`; `data/make_lab_data.py` builds it when it is missing and writes the
+  lab's `lm34_grid.csv` from it, and `data/lm34_numbers.py`, which therefore runs after `data/lm34_grid.py`, asserts
+  it against the full computation.
 
 **Hygiene declaration.** *Out-of-sample:* the eight rules' results (windows, dates, timing, costs and criteria fixed
 in advance on 2026-10-24, before any result was computed); the daily scale (problem 8) and
@@ -2416,9 +2420,10 @@ write plain "LM33", "LM45", never `[[…]]`.
 - lm21.md:373 (on the plan's list), proposed wording: "[[LM4]] warned that backtests overstate Sharpe ratios. [[LM33]]
   deflates a Sharpe ratio for the number of trials. [[LM34]] corrects a search on the same data (White 2000; Romano
   and Wolf 2005) and tests rules fixed in advance on later data."
-- No other wording change: lm04.md:209's "largely noise" agrees with E8 and E9; research-hygiene.md:35 and 62 are kept
-  by §3–§7; `make_lab04.py:642` stays on 0050 (Lab 4's own data), and LM34's lab says that it repeats the exercise on
-  TR23's longer history.
+- No wording change for lm04.md:209 (its "largely noise" agrees with E8 and E9) or research-hygiene.md:35 and 62
+  (kept by §3–§7). `make_lab04.py:642`: the scaffold trades each month's leverage at the next close (Section 2's
+  protocol) and says so, still on 0050 (Lab 4's own data; plans/vol-5.md's Stage 4 list, the walk-forward item), and
+  LM34's lab says that it repeats the exercise on TR23's longer history.
 
 **Sources** (full citations, with the version read and the locations it verified; paraphrase only, never more than a
 sentence quoted; the bibliographic data follow SOURCES, from Crossref unless another source is named):

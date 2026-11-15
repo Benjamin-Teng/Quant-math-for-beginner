@@ -123,8 +123,9 @@ Stage 2 留下、交給審查判斷的：每份 review 紀錄的「Lessons not m
   - 用量上限或登入失效會讓 workflow 的 agent 中途停下。正解：prompt 加上「從 scratch 的進度檔接續」，
     再用 `resumeFromRunId` 重跑。
 - **資料**
-  - 多位 writer 同時跑 `make_lab_data.py` 會互相碰撞：只由編輯跑。`lm34_numbers.py` 寫 `processed/lm34_grid.parquet`，
-    `make_lab_data.py` 要在它之後跑。
+  - 多位 writer 同時跑 `make_lab_data.py` 會互相碰撞：只由編輯跑。`lm34_grid.py` 寫 `processed/lm34_grid.parquet`，
+    只需要 E5 的 frames 與 `vol5_rules.py`，免費方案也能跑。`make_lab_data.py` 缺這個檔時會先跑它；
+    `lm34_numbers.py` 只讀這個檔來比對，不會寫。
   - 免費方案有三組付費檔：`sectors_close/`、`vol4_settlement/`、`vol6/etf_snapshot__…`。
 - **流程**
   - Stage 2 內加一道 fresh 檢查（brief 覆蓋、數字覆蓋、45 項 Volume V 教訓）再讓 writer 補正，四模組共抓到 114 項

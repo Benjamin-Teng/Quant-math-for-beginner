@@ -836,6 +836,10 @@ put("TX settlement moves of 9.95% or more since 2015-06-01 (TX23): "
     f"initial margin {TX_MARGIN[0]:,} as equity f = {f(lev, 2)}, a 10% limit day loses {f(lev * 0.10, 3)} times equity "
     f"(equity {notional * -0.10 + TX_MARGIN[0]:,.0f}); maintenance {TX_MARGIN[1]:,} is reached after a fall of "
     f"{f(100 * (TX_MARGIN[0] - TX_MARGIN[1]) / notional, 3)}% (lm02.md:462)")
+t5_need = [WIN[n][2] for n in ("2008", "2015", "2020", "2024-08-05", "2025-04-07")]
+if missing := [d for d in t5_need if not (T5S / d[:4] / f"{d}.csv").exists()]:
+    fail(f"T5S days {', '.join(missing)} absent from {T5S}: run uv run python data/fetch_intraday.py --series taiex5s "
+         f"--dates {','.join(missing)}")
 gl = []
 for name in ("2008", "2015", "2020", "2024-08-05", "2025-04-07"):
     nd = WIN[name][2]

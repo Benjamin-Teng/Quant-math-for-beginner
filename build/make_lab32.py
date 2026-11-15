@@ -462,11 +462,12 @@ show("one bond: ES (%)", float(100 * e1b), ".2f", "47.60")
 show("half in each: Pr(some default) (%)", float(100 * pany), ".2f", "1.59")
 show("half in each: VaR (%)", float(100 * vhb), ".2f", "29.00")
 show("half in each: ES (%)", float(100 * ehb), ".2f", "29.20")
-(v7a, e7a), (v7h, e7h), p7 = bonds(Fraction(4, 100), Fraction(5, 100))
-show("Problem 7: VaR of half in each (%)", float(100 * v7h), ".2f", "29.00")
+(v7a, e7a), (v7h, e7h), p7 = bonds(Fraction(4, 100), Fraction(5, 100), lgd=Fraction(-50, 100))
+show("Problem 7: one bond's VaR (%)", float(100 * v7a), ".2f", "-2.00")
+show("Problem 7: VaR of half in each (%)", float(100 * v7h), ".2f", "24.00")
 show("Problem 7: Pr(some default) (%)", float(100 * p7), ".2f", "7.84")
-show("Problem 7: one bond's ES (%)", float(100 * e7a), ".2f", "47.60")
-show("Problem 7: the mixture's ES (%)", float(100 * e7h), ".2f", "29.99")
+show("Problem 7: one bond's ES (%)", float(100 * e7a), ".2f", "39.60")
+show("Problem 7: the mixture's ES (%)", float(100 * e7h), ".2f", "24.83")
 
 Ls = np.sort(-100 * R)[::-1]                    # losses in %, largest first
 csl = np.concatenate([[0.0], np.cumsum(Ls)])
@@ -692,7 +693,8 @@ print(f"Problem 10: estimate {wis.mean():.2e} +- {wis.std() / 100:.0e}; exact {s
 show("  plain draws expected in the tail", 10_000 * stats.norm.cdf(-a), ".6f", "0.000011")
 show("  shifted draws in the tail", int((Z <= 0).sum()), ",", "4,927")
 p_ = stats.norm.cdf(-a)
-print(f"  variance ratio {p_ * (1 - p_) / (math.exp(a * a) * stats.norm.cdf(-2 * a) - p_**2):.2e}")
+print(f"  variance ratio of one draw, by LM18's second moment {p_ * (1 - p_) / (math.exp(a * a) * stats.norm.cdf(-2 * a) - p_**2):.2e}")
+print(f"  variance ratio from the draws' sample variance {p_ * (1 - p_) / wis.var(ddof=1):.2e}")
 
 # The same weighted draws also give a far quantile, the inverse question (a model illustration, no module number):
 # the smallest shifted draw at which the weighted tail sum reaches 1e-9 estimates Phi^-1(1e-9), and (32.8) turns it
@@ -787,8 +789,9 @@ plt.legend()
 plt.title("Rolling 99% VaR forecasts and the exceedances (out of sample)")
 plt.show()
 
-show("Problem 8: Pr(X <= 9), 500 days", stats.binom.cdf(9, 500, U), ".4f", "0.9689")
-show("Problem 8: Pr(X >= 9)", stats.binom.sf(8, 500, U), ".4f", "0.0671")
+show("Problem 8: Pr(X <= 15), 1,000 days", stats.binom.cdf(15, 1000, U), ".4f", "0.9521")
+show("Problem 8: Pr(X >= 15)", stats.binom.sf(14, 1000, U), ".4f", "0.0824")
+print("Problem 8: zones at 1,000 days, yellow and red from", zones(1000), "| at 250 days", zones(250))
 show("Problem 9: expected", 59 * 60 / 2000, ".2f", "1.77")
 show("Problem 9: Pr(Bin(59, 0.03) >= 6)", stats.binom.sf(5, 59, 0.03), ".4f", "0.0084")
 """)
@@ -883,7 +886,7 @@ plt.show()
 wp = np.array([1.00, 1.08, 1.02, 0.90, 0.95, 1.10, 1.04, 1.12])         # Problem 4
 print("Problem 4: DD_t (%)", np.round(100 * dd_of(wp), 2))
 show("Problem 4: MDD (%)", 100 * dd_of(wp).max(), ".2f", "16.67")
-show("Problem 4: B, the largest loss from W_0 (%)", 100 * (1 - wp.min()), ".2f", "10.00")
+show("Problem 4: B, the largest loss from initial wealth (%)", 100 * (1 - wp.min()), ".2f", "10.00")
 """)
 
 code(r"""

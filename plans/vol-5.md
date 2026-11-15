@@ -329,8 +329,8 @@ fact a decision rests on is stated here with its evidence.
   carries no copy of `vol5_rules.py`; it re-implements only its own module's rule as an exercise and checks it
   against those files. LM35's checkpoint (lab part 9) is the exception: the reader implements R1, R3 with its 30% cap,
   R6 and R8 on the checkpoint universe, and the reference answers from `data/lm35_numbers.py` sit in a collapsed
-  cell. The derived files also include TX23's limit-day rows (LM35); `lm34_grid.csv` needs a processed source, which LM34's numbers script writes to
-  `data/processed/` (proposed with the `make_lab_data.py` change).
+  cell. The derived files also include TX23's limit-day rows (LM35); `lm34_grid.csv` needs a processed source, which `data/lm34_grid.py` writes to
+  `data/processed/` (a BUILDERS entry of `make_lab_data.py`, so the two standard commands build it on both plans).
   LM35's lab ends with the batch's checkpoint (guidance, below).
 - **Problems.** As Volume IV, plus: an optimization stem states the feasible set, the solver tolerance and the
   rounding; a backtest stem states the window, the rebalancing dates, the costs and the label.
@@ -950,10 +950,39 @@ questions:
   two or more computed numbers gets a phrase check built from the computed values (PITFALLS §5). Each revision's
   fresh verifier checks the numbers sentence by sentence as before.
 - **Shared code.** Each module's `lm3N_common.py` carries its anchor script's arithmetic under the same names;
-  `build.sh`'s `DATA_STEPS` and `data/README.md` list the eight scripts, and `lm34_numbers.py` writes
-  `processed/lm34_grid.parquet` before `make_lab_data.py` reads it.
+  `build.sh`'s `DATA_STEPS` and `data/README.md` list the eight scripts (nine from Stage 3, 2026-11-15, with
+  `lm34_grid.py`, which writes `processed/lm34_grid.parquet`; `make_lab_data.py` builds that file when it is missing,
+  and `lm34_numbers.py` checks it).
 - **Preview PDFs** keep `file:///` links to the other preview pages, as in Volume V; the published PDFs are checked
   at Stage 4.
+
+## Stage 3 of Volume VI (2026-11-15)
+
+Stage 3 ran as Volume V's did, and every item, its re-check, decision and fix is in `reviews/lm32.md` … `lm35.md`.
+Round 1 had a reviewer, a blind solver and a number auditor per module and a cross-module check, merged by a fresh
+consolidator per module (30, 34, 30 and 35 items; 11 major, none critical). Two verified revisions followed, then a
+closing check with an adversarial second check (two more majors: LM33's "Volume IV's checkpoint", LM34's White
+moment condition), the closing fixes and a fresh final check: all four modules and the volume READY TO PUBLISH. The
+decisions that reach beyond one module:
+
+- **The owner's approvals (2026-11-15).** `data/make_lab_data.py`'s `t5s_days` copies the named 5-second-TAIEX days
+  it finds and skips a missing one with the download command (a partial download used to stop every lab's data). The
+  LM34 grid is built by the new `data/lm34_grid.py`, registered in `make_lab_data.py`'s `BUILDERS`, so the lab box's
+  two standard commands give LM34's lab its file on both plans.
+- **Lab boxes.** LM32's and LM35's sentence after the standard four takes one form, "Part N also reads K named days of
+  the 5-second TAIEX: run `uv run python data/fetch_intraday.py --series taiex5s --dates …` before
+  `make_lab_data.py`." (Stage 4: AUTHORING §9 and Getting Started).
+- **One term, one meaning.** A later Glossary row that reuses an earlier term with another meaning is scoped ("Here,
+  …"): Backtest (LM32), Rank, Benchmark, Turnover and Contango (LM34). Heavy tail is LM15's term (LM32, LM33); iid is
+  獨立同分布; correlation is 相關係數; 雙邊檢定 is two-sided test (SOURCES, Stage 3 block).
+- **AUTHORING §6** scopes LM32's $q$ and $v$, LM34's $q$, $a$, $k$ and $k^*$, and LM35's $\mathbf z$.
+- **Colours.** Each chart keeps its legend colours for the rules; LM35's charts take Volume V's fund colours.
+- **Journal form.** Kupiec's journal is *Journal of Derivatives* in LM32 and LM35, the book's house form.
+- **A process slip.** The editor's first round-1 prompts gave LM35's brief and anchors cut short (a line count that
+  skipped blank lines). Second runs of LM35's three checkers and the cross-module check with the full ranges added
+  ten items (S and C in `reviews/lm35.md`); messages to running workflow agents start copies instead of reaching them.
+- **Code review.** Codex's quota had run out, so fresh opus agents reviewed the code diff adversarially; four minor
+  findings, reproduced and fixed (each record's "Code review, Stage 3").
 
 ## Stage 4 changes to earlier modules
 
@@ -968,10 +997,16 @@ waits for edition 0.7 (Volume VI).
   **Volume V's +27…+31: applied in edition 0.6** (20 leads in lm01, lm03, lm04, lm07, lm08, lm09, lm11, lm12, lm14,
   lm15, lm19, lm20, lm22 and lm23), checked both ways: every prerequisite of LM27–LM31 lists the module in its leads,
   and every lead to LM27–LM31 is cited in that module by [[LMn]] or an equation number. **Volume VI's +32…+35: waits
-  for edition 0.7 (Volume VI).**
+  for edition 0.7 (Volume VI).** At that check three leads stand on a forward pointer in the earlier module, not on a
+  citation in the later one (decision C9; shared decision "Leads and tags"), and they stay as they are: lm25.md:6's 34
+  (lm25.md:54) and src/lm32.md:6's 33 and 34 (src/lm32.md:517, "The rules' Sharpe ratios are [[LM33]]'s, their net
+  results [[LM34]]'s…"; Volume VI's closing check, CV-5).
 - *Volume V.* lm08.md:290 (required, Stage 3 cross-check X21; LM31's brief): "[[LM31]] groups assets by this
   distance." → "[[LM31]] builds a tree of assets from half this distance." **Applied in edition 0.6.**
-- Optional, with Volume VI (LM32): lm04.md's MDD sign (46–50, 510). **Waits for edition 0.7 (Volume VI).**
+- *Volume VI.* Optional (LM32): lm04.md's MDD sign (46–50, 510), together with `build/make_lab04.py`, whose
+  `max_drawdown` returns $\min(w/\text{peak}-1)$ (lines 170–172) and whose checks assert −0.933 and −0.701 (lines 189
+  and 196): the module and Lab 4 change together, and Lab 4 is regenerated and executed. **Waits for edition 0.7
+  (Volume VI).**
 - *Volume V.* lm07.md:511–512: 切點組合 → 切點投資組合 (the Glossary's form, lm07.md:771). **Applied in edition 0.6**
   (three times: the box title and twice in line 512).
 - *Volume V.* lm07.md:786: Chopra and Ziemba (1993) gains its issue number, 19(2): 6–11. **Applied in edition 0.6**,
@@ -987,19 +1022,44 @@ waits for edition 0.7 (Volume VI).
 - *Volume V.* `src/syllabus.yaml`: LM27's line becomes "A book's return, drift and trading costs; Euler risk
   contributions and factor risk." **Applied in edition 0.6.**
 - *Either publication* (a published defect; the editor deferred it to edition 0.7, Volume VI's publication, on
-  2026-11-07). LM3's TQQQ example (lm03.md:34, 45, 464, 467, 469, 471, 475, 477; capability D). A re-fetch of QQQ's
-  back-adjusted closes re-rounds them: the exact rebalancing effect $-0.31325$ (unrounded −0.3132492, 0.42 of a unit from the five-decimal
-  boundary) became −0.31324, and the four-decimal −0.3132 sits 8e-7 from its own boundary. After the next distribution
-  every adjusted level moves (the review's simulation of 300 rescaled re-fetches: ln(8.27/39.55) = −1.56493 changed
-  in 299, 3 ln G = −1.18252 and the residual −0.0692 in 277, TQQQ's −79.09% in 205, QQQ's dividends 0.0074 in 168,
-  the residual against unadjusted closes −0.047 in 129, "6.7% of value" in 118, T3 −0.3107 in 67, QQQ's −32.58% in
-  31; RV and √RV in none), and `data/lm03_numbers.py:313–314` checks ln(8.27/39.55) from the literal levels and
-  asserts the levels (39.55, 8.27) exactly, so `build.sh --data` would fail on a fresh checkout. Fix in LM3: quote levels with their retrieval date (2026-10-10) or from
-  unadjusted closes, print each derived value only to digits a cent per value cannot move, replace the exact-level
-  assert by a ratio check, and align Lab 3 Part 6. **Waits for edition 0.7 (Volume VI).**
+  2026-11-07). LM3's TQQQ example (capability D). A re-fetch of QQQ's back-adjusted closes re-rounds them: the exact
+  rebalancing effect $-0.31325$ (unrounded −0.3132492, 0.42 of a unit from the five-decimal boundary) became
+  −0.31324, and the four-decimal −0.3132 sat 8e-7 from its own boundary. After the next distribution every adjusted
+  level moves (the review's simulation of 300 rescaled re-fetches: ln(8.27/39.55) = −1.56493 changed in 299,
+  3 ln G = −1.18252 and the residual −0.0692 in 277, TQQQ's −79.09% in 205, QQQ's dividends 0.0074 in 168, the
+  residual against unadjusted closes −0.047 in 129, "6.7% of value" in 118, T3 −0.3107 in 67, QQQ's −32.58% in 31;
+  RV and √RV in none). `data/lm03_numbers.py` checked ln(8.27/39.55) from the literal levels and asserted the levels
+  (39.55, 8.27) exactly, so `build.sh --data` would have failed on a fresh checkout. **Applied for edition 0.7** (the
+  source changed on 2026-11-15; the site with edition 0.7), independently reviewed and verified (reviews/lm03.md,
+  "Edition 0.7: the TQQQ example made robust to re-fetches"). src/lm03.md:34 (the case), 45 and 47 (the exhibit's
+  2022 row and note) and Example `tqqq` (lines 465–483) quote the adjusted levels with their retrieval date
+  (10 October 2026) and print each derived value only to digits a re-fetch cannot move. `data/lm03_stats.py` and
+  `data/lm03_numbers.py` share the example's function (`qqq_tqqq_2022`, lm03_stats.py:48–66). The numbers script's
+  exact level asserts now hold only for the registered bytes and became ratio checks for a re-fetch (`check_levels`,
+  lines 348–363), with a re-fetch stability check (lines 480–505). `build/make_lab03.py` aligns Lab 3 Part 6
+  (lines 424–468), its Data paragraph and its README; Lab 3 was regenerated and executed.
 - *Volume VI.* `build/make_lab04.py`'s walk-forward extension sets each month's leverage from data through the
-  month-end close and holds it from that close, E5's slip; shift it one session (trade at the next close), as LM34's
-  lab does, and say so in the scaffold (it prints no number in the module). **Waits for edition 0.7 (Volume VI).**
+  month-end close and holds it from that close, trading at the signal's own close: the scaffold's
+  `lev[e + 1:nxt + 1] = f_hat` (line 654) starts the position on the return after the signal close `e`. Shift it one
+  session (trade at the next close, for example `lev[e + 2:nxt + 2] = f_hat`), as LM34's lab does, and say so in the
+  extension's text (line 642, "hold that leverage for the next month"); it prints no number in the module (LM34's
+  record, X8). With it, build/make_lab34.py:661's "(Section 2's protocol, a session later than Lab 4's scaffold,
+  which runs on 0050)" becomes "(Section 2's protocol, as Lab 4's scaffold trades on 0050)", and Labs 4 and 34 are
+  regenerated and executed. **Waits for edition 0.7 (Volume VI).**
+- *Volume VI.* AUTHORING §9's standard wording (AUTHORING.md:465–468) gains, beside LM26's two sentences, the
+  lab-box sentence of LM32 and LM35 in the one form both boxes print from Stage 3 (2026-11-15): "Part N also reads K
+  named days of the 5-second TAIEX: run `uv run python data/fetch_intraday.py --series taiex5s --dates …` before
+  `make_lab_data.py`.", with N the lab's part and K the count of days in words (src/lm32.md:568, three days;
+  src/lm35.md:477, five days). src/pages/getting-started.md:85–86 (the two commands, then "After that, every lab
+  runs offline.") gains a sentence that names the intraday days the labs read besides the two commands: LM26's
+  optional 243 days of 2025 (copied by hand from `data/raw/intraday/taiex5s/2025/` into
+  `labs/LM26_lab/data/taiex5s_2025/`, as build/make_lab26.py:1065 says), LM32's three and LM35's five, which
+  `make_lab_data.py` copies from `data/raw/intraday/taiex5s/` and otherwise skips with the download command
+  (cross-module check X7; reviews/lm32.md, E2 and R1; reviews/lm35.md, E2, R2, X6; the folder from Volume VI's
+  closing check, CV-4). **Waits for edition 0.7 (Volume VI).**
+- *Volume VI.* Optional: lm23.md:577, the Glossary row "| Long-run variance | — | …": the dash becomes 長期變異數,
+  LM33's form (src/lm33.md:615; SOURCES, Volume VI's list of the book's own forms, which no listing has). **Waits for
+  edition 0.7 (Volume VI).**
 - *Volume V.* src/pages/getting-started.md:113 ('When you combine two series, keep only the dates they share.'): a
   statistic of two series uses their shared dates; a portfolio's wealth uses every session, each asset earning its own
   return ([[LM27]]'s wealth frame). **Applied in edition 0.6** (the source changed with Stage 3's last fixes,
@@ -1019,6 +1079,19 @@ waits for edition 0.7 (Volume VI).
 - *Volume V.* build/build_index.py:297 (V-4, the front page): 'later volumes add statsmodels, cvxpy and arch' →
   'later volumes add statsmodels, cvxpy, scikit-learn and arch' (LM30's lab runs scikit-learn's Ledoit–Wolf).
   **Applied in edition 0.6** (the source changed with Stage 3's last fixes, `5516bb4`; the site with this edition).
+- *Volume VI.* src/pages/research-hygiene.md:58–59 gains one sentence after "…as **constructed** ([[LM13]],
+  [[LM16]]).": "Volume VI marks a result that uses information its decision could not have had as **look-ahead, not
+  achievable** ([[LM34]])." LM34 prints the label in its hygiene note (src/lm34.md:65), in Example 5's title (213) and
+  in Solutions 8 and 9 (563, 565), and the page says that every result from Volume II on carries one of its labels
+  (Volume VI's closing check, CV-2). The edition note names it with the page's other changes. **Waits for edition 0.7
+  (Volume VI).**
+- *Volume VI.* src/pages/getting-started.md:91–92: "…serve one count in Volume VI." → "…serve two counts in one
+  example of Volume VI." The two snapshots give Example 6's 69 ETFs with a row on 17 January 2017 and the 10 of them
+  with no row on 8 October 2026 (src/lm34.md:236), the two counts that `data/lm34_numbers.py` leaves unchecked on the
+  free plan (data/README.md says so since Stage 3; the Volume V item above records edition 0.6's wording). Optional, in
+  the same item: build/make_lab31.py:80 and 736, "two ETF snapshots for one count in Volume VI" → "two ETF snapshots
+  for two counts in one example of Volume VI", then Lab 31 is regenerated and executed, so that its README and
+  notebook follow (Volume VI's closing check, CV-3). **Waits for edition 0.7 (Volume VI).**
 - *The brief's own volume.* Each brief's "Stage 4 for earlier modules". **Volume V's five briefs (LM27–LM31): applied
   in edition 0.6**; each of their items is one of those above (leads, lm07.md:511–512 and 786, lm08.md:290, LM31's
   syllabus line), and they name no other wording change. **Volume VI's four briefs (`plans/vol-6.md`): wait for

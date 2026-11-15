@@ -73,7 +73,7 @@
     var ctl = B.controls(host, [
       { id: "pbo-n", key: "n", type: "select", label: "Strategies n", value: "60",
         options: W.n.map(function (v) { return [String(v), String(v)]; }) },
-      { id: "pbo-sr", key: "sr", type: "select", label: "True Sharpe ratio of strategy 1", value: "0",
+      { id: "pbo-sr", key: "sr", type: "select", label: "True annual Sharpe ratio of strategy 1", value: "0",
         options: W.sr.map(function (v) { return [String(v), String(v)]; }) },
       { id: "pbo-new", type: "button", label: "New draw" }
     ], draw);
@@ -100,7 +100,7 @@
       function item(lbl, val) { return "<div><span>" + lbl + "</span><b>" + val + "</b></div>"; }
       out.innerHTML = item("This panel's PBO", fmt(p.pbo, "n3")) +
         item("Mean PBO of " + W.panels + " panels (experiment 3)", fmt(mean, "n2")) +
-        item("Strategies; strategy 1's true Sharpe ratio", n + "; " + sr) + item("Seed", String(seed));
+        item("Strategies; strategy 1's true annual Sharpe ratio", n + "; " + sr) + item("Seed", String(seed));
     }
     host.__redraw = function () { draw(ctl.values(), null); };
     ctl.fire();

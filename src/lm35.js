@@ -17,7 +17,7 @@
 (function () {
   "use strict";
   var B = window.Book, fmt = B.fmt;
-  var COLORS = ["1", "2", "var(--muted)", "3", "4"];   // 0050, 00646, 00679B (grey), 00635U, 00642U
+  var COLORS = ["1", "2", "3", "var(--muted)", "4"];   // 0050, 00646, 00679B, 00635U (grey), 00642U
 
   function dot(a, b) { var s = 0; for (var i = 0; i < a.length; i++) s += a[i] * b[i]; return s; }
   function mv(M, v) { return M.map(function (row) { return dot(row, v); }); }

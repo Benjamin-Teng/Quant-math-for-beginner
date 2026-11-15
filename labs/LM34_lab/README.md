@@ -50,7 +50,7 @@ uv run python data/make_lab_data.py    # writes every lab's data/ folder
 | `data/e5_wealth.csv` | E5's wealth frame: every session after the base close of 2017-01-17, with `traded` per fund (FinMind `TaiwanStockPrice`, `TaiwanStockDividendResult`, `TaiwanStockSplitPrice`) |
 | `data/rule_targets.csv` | the through case's trades (`data/vol5_rules.py`): rule, signal, trade, the five target exposures, exposure, turnover, cost |
 | `data/rule_wealth.csv` | the eight rules' net and gross wealth paths from the first trade |
-| `data/lm34_grid.csv` | the declared grid's 60 net-return series, first row the first purchase of 2019-03-04, then the 1,851 daily returns (`data/lm34_numbers.py`) |
+| `data/lm34_grid.csv` | the declared grid's 60 net-return series, first row the first purchase of 2019-03-04, then the 1,851 daily returns (`data/lm34_grid.py`) |
 | `data/taiex_tr.csv` | the TAIEX total-return index (FinMind `TaiwanStockTotalReturnIndex`) |
 | `data/0050_daily_raw.csv`, `data/0050_dividends.csv` | 0050's closes and distributions (FinMind `TaiwanStockPrice`, `TaiwanStockDividendResult`) |
 | `data/splits__2016-12-01__2026-10-08.csv` | the registered splits (FinMind `TaiwanStockSplitPrice`) |

@@ -1,8 +1,8 @@
 """Every number that LM34 (Backtesting Without Fooling Yourself) prints, computed and checked against src/lm34.md.
 
 Run:  PYTHONUTF8=1 uv run python data/lm34_numbers.py
-      (after data/vol3_series.py, data/vol5_series.py and data/vol5_rules.py; and after data/lm34_charts.py, whose
-      chart and widget files this script checks)
+      (after data/vol3_series.py, data/vol5_series.py, data/vol5_rules.py and data/lm34_grid.py; and after
+      data/lm34_charts.py, whose chart and widget files this script checks)
 
 Inputs and conventions: data/lm34_common.py, which keeps the code of data/vol6_anchors_lm34.py (the Stage 1 anchor
 script): E5 through vol5_series.frames("E5"), the through case and the grid through vol5_rules (no rule is
@@ -10,12 +10,18 @@ re-implemented here), TR23 through data/processed/vol3_taiex.parquet, the surviv
 The module text is src/lm34.md; plans/vol-6-anchors.md, "LM34", holds the Stage 1 anchors A34-01 .. A34-38.
 
 Part 1 compares each anchor line, as data/lm34_common.py recomputes it, with the anchor table's Value column: a
-difference is reported, never forced. It also writes data/processed/lm34_grid.parquet (git-ignored): the grid's 60
+difference is reported, never forced. It also builds the grid's table from the full computation: the 60
 configurations' net returns on the wealth frame, one column per configuration in the declared grid order (R1_1m,
 R1_3m, R1_6m, R2_1m, ..., R3_126_1m, R3_126_3m, ..., R8_504_6m) after a column `date`. Its first row, 2019-03-04,
 is the first purchase from the cash of 1 (wealth after it minus 1, so minus the cost share); the 1,851 rows from
 2019-03-05 to 2026-10-08 are the daily net returns that CSCV and the reality check use, and the product of one plus
-every row is the final wealth. data/make_lab_data.py copies it to labs/LM34_lab/data/lm34_grid.csv.
+every row is the final wealth. It asserts that data/processed/lm34_grid.parquet, which data/lm34_grid.py writes and
+data/make_lab_data.py copies to labs/LM34_lab/data/lm34_grid.csv, equals that table; it reads the file and never
+writes it.
+
+On FinMind's free plan (data/raw/vol6/etf_snapshot* absent) A34-18 is not computed, so part 1 reports it as a
+difference and part 2 leaves Example 6's two counts unchecked: their sentence is recorded as a place, and the last
+line names it.
 
 Part 2 checks the text (each check stops the script on a failure). The text is the whole of src/lm34.md, front matter
 included (its outcomes and overview are printed on the page), with TeX separators, escaped signs and U+2212 made plain.
@@ -57,6 +63,10 @@ import vol5_rules as V
 from scipy import stats
 
 ROOT = HERE.parent
+GRID_FILE = ROOT / "data" / "processed" / "lm34_grid.parquet"
+if not GRID_FILE.exists():
+    sys.exit("lm34_numbers: run data/lm34_grid.py first (it writes data/processed/lm34_grid.parquet)")
+C.main()
 MD = ROOT / "src" / "lm34.md"
 JS = ROOT / "src" / "lm34.js"
 ANCHORS = ROOT / "plans" / "vol-6-anchors.md"
@@ -163,6 +173,19 @@ def sci(label: str, value: float, printed: str, n: int | None = None) -> None:
     N_CHECKS += 1
 
 
+UNCHECKED: list[str] = []                 # sentences whose numbers need a file the reader may lack (unchecked())
+
+
+def unchecked(label: str, pattern: str) -> None:
+    """The one place of TEXT that the regex pattern matches is recorded for the coverage pass, its numbers unchecked,
+    because they need a file that FinMind's free plan does not serve; the last line names it."""
+    found = [m.span() for m in re.finditer(pattern, TEXT)]
+    assert len(found) == 1, f"{label}: {len(found)} places"
+    PLACES.extend(found)
+    UNCHECKED.append(label)
+    print(f"NOT CHECKED {label}: '{TEXT[found[0][0]:found[0][1]][:80]}'")
+
+
 MONTHS = ("January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November",
           "December")
 
@@ -207,10 +230,11 @@ grid_df = pl.DataFrame({"date": [case.paths["R1"].dates[0], *G["dates"]],
                         **{c: XF[:, i] for i, c in enumerate(cols)}})
 assert grid_df.height == 1852 and grid_df.width == 61 and grid_df["date"][1] == "2019-03-05"
 assert np.abs(np.log1p(XF).sum(axis=0) / case.ev_years - np.asarray(G["growth"])).max() < 1e-12
-(ROOT / "data" / "processed").mkdir(exist_ok=True)
-grid_df.write_parquet(ROOT / "data" / "processed" / "lm34_grid.parquet")
-print(f"wrote data/processed/lm34_grid.parquet ({grid_df.height} rows, {grid_df.width} columns: date and 60 "
-      "configurations; the first row is the first purchase)")
+grid_file = pl.read_parquet(GRID_FILE)
+assert grid_file.schema == grid_df.schema and grid_file.equals(grid_df), \
+    "data/processed/lm34_grid.parquet differs from the grid computed here: rerun data/lm34_grid.py"
+print(f"data/processed/lm34_grid.parquet (data/lm34_grid.py) equals the grid computed here ({grid_df.height} rows, "
+      f"{grid_df.width} columns: date and 60 configurations; the first row is the first purchase)")
 
 # ====================================================================== part 2: the text
 summ, gsum, paths = K["summ"], K["gsum"], case.paths
@@ -307,7 +331,6 @@ nd = sum(1 for s in C.FUTURES6 if s in K["dld"])
 assert nd == 2 and len(C.FUTURES6) == 6
 has("case: delisted", "Of the six gold, oil and VIX futures funds trading in January 2017, two were delisted.")
 has("overview: t-stat", "with a t-stat of 3.97, is what chance gives: its p-value is 0.283")
-has("overview: R4 gap", "(34.1): 0.0422 for R4, or 0.56 points of growth a year")
 has("overview: grid reality check", "yet no configuration's mean beats R1's beyond chance: the reality check's p-value "
     "for the largest t-stat is 0.375")
 has("case question", "And could the search alone have produced 18.62%?")
@@ -320,7 +343,7 @@ wealth = {k: float(paths[k].wealth[-1]) for k in RULES}
 w4 = {k: f"{wealth[k]:.4f}" for k in RULES}
 assert list(w4.values()) == ["2.6620", "3.0079", "1.9367", "2.2214", "2.0400", "2.2722", "2.1829", "2.4119"]
 NAMES = {"R1": "equal weights", "R2": "reference mix", "R3": "minimum variance", "R4": "maximum Sharpe",
-         "R5": "shrunk minimum variance", "R6": "equal risk", "R7": "HRP", "R8": "volatility target"}
+         "R5": "shrunk minimum variance", "R6": "equal risk contributions", "R7": "HRP", "R8": "volatility target"}
 E1_N = {"R1": 2, "R2": 5, "R3": 3, "R4": 5, "R8": 2}     # growths printed more than once
 for k in RULES:
     row = (f"| {k} {NAMES[k]} | {w4[k]} | {100 * gr[k]:.2f} | {100 * gg[k]:.2f} | {summ[k]['turnover']:.2f} | "
@@ -337,6 +360,7 @@ rank_net = sorted(RULES, key=lambda k: -gr[k])
 assert " > ".join(rank_net) == "R2 > R1 > R8 > R6 > R4 > R7 > R5 > R3"
 has("E1 ranking", "The ranking R2 > R1 > R8 > R6 > R4 > R7 > R5 > R3 puts the two rules without estimates first")
 has("E1 R1 growth", r"$\ln2.6620/7.5975=12.89\%$")
+has("E1: LM33's test", "Whether any rule's Sharpe ratio beats R1's beyond chance is [[LM33]]'s test, (33.6).")
 assert all(p.ruin is None and float(np.min(p.wealth)) > 0 for p in paths.values())
 assert all(p.ruin is None for p in K["gross"].values())
 has("no ruin", "No path reaches wealth 0.")
@@ -361,8 +385,10 @@ has("first purchase formula", r"$0.001425/1.001425=0.1423\%$")
 l8, to8, c8 = K["first_r8"]
 assert l8 < 1 and c8 < std
 has("R8's first exposure", "less for R8, whose first exposure is below 1.")
-has("switch", "Switching NT$1,000,000 from 0050 into 00679B costs about NT$3,850, and back about NT$2,850")
 assert round(1e6 * (2 * V.COMMISSION + V.TAX["0050"])) == 3850 and round(1e6 * 2 * V.COMMISSION) == 2850
+has("switch", f"Switching a hypothetical NT$1,000,000 from 0050 into 00679B costs about "
+    f"NT${round(1e6 * (2 * V.COMMISSION + V.TAX['0050'])):,}, and back about NT${round(1e6 * 2 * V.COMMISSION):,}, "
+    "since only 0050's sale is taxed ([[LM27]]).")
 to1, co1 = K["r1_to"], K["r1_cost"]
 assert len(to1) == 91 == n_tr - 1
 pct("R1 mean TO", float(np.mean(to1)), 2, "1.96")
@@ -400,6 +426,8 @@ has("identity bound", r"to below $2\times10^{-14}$")
 chk("R4 gap a year (KC 3)", 100 * (gg["R4"] - gr["R4"]), ".2f", "0.56", n=6)
 chk("R4 cost sum over tau, printed", 100 * 0.0422 / 7.5975, ".2f", "0.56")
 chk("R4 log gap over tau, printed", 100 * 0.0422296 / 7.5975, ".2f", "0.56")
+has("overview: R4 gap", f"over the trades, (34.1). For R4 it is {lg4:.4f}, or {100 * (gg['R4'] - gr['R4']):.2f} points "
+    "of growth a year.")
 pct("R4 gross (KC 3)", gg["R4"], 2, "11.06", n=2)
 chk("R4 gap from printed parts", 11.06 - 10.51, ".2f", "0.55", in_md=False)   # why the KC says "separately"
 has("KC3 note", "[[ex:grossnet]]'s 11.06% and 10.51% are rounded separately")
@@ -454,7 +482,8 @@ has("the base date of Sections 4 and 5", day(C.BASE), n=8)
 for built in ("2020-01-02", "2024-12-31"):
     has(f"build date {built}", day(built))
 has("X4 header", "| Quantity | Actual | Built 2 Jan 2020 | Built 31 Dec 2024 | Built 8 Oct 2026 |")
-has("E4 build dates", "It reads 65.12 in a series built on 2 January 2020 and 55.20 in one built on 31 December 2024.")
+has("E4 build dates", f"That close reads {adj('2017-01-17', '2020-01-02'):.2f} in a series built on 2 January 2020 and "
+    f"{adj('2017-01-17', '2024-12-31'):.2f} in one built on 31 December 2024.")
 assert sum(1 for d in K["div50"] if "2017-01-17" < d <= "2026-10-08") == 20
 has("20 distributions", "after 20 distributions and the 4-for-1 split of 18 June 2025")
 assert K["ex17"] == ["2017-02-08", "2017-07-31"] and K["end17"] == "2017-12-29"
@@ -488,16 +517,26 @@ assert min(chg, key=lambda k: chg[k]) == "R4" and max(chg, key=lambda k: chg[k])
 chk("same close R4 change from printed (why 'from unrounded')", 10.09 - 10.51, ".2f", "-0.42", in_md=False)
 has("same close wording", "From unrounded values, the changes run from −0.41 points (R4) to +0.89 (R8), and seven "
     "of the eight rules gain.")
+# R1 and R2 use no estimate (the same targets at every signal), so their changes come from the one-session shift alone
+assert all(np.array_equal(s.targets[k], sigs[0].targets[k]) for s in sigs for k in ("R1", "R2"))
+chk("same close change R1", chg["R1"], ".2f", "0.26")
+chk("same close change R2", chg["R2"], ".2f", "0.09")
+has("same close R1 R2", f"R1 and R2 use no estimate, so their gains, {chg['R1']:+.2f} and {chg['R2']:+.2f} points from "
+    "unrounded values, come from the shift alone.")
 assert max(abs(v) for v in chg.values()) < 1.0          # "less than a point a year"
 has("same close size", "For monthly rules the shift moves growth by less than a point a year.")
 has("KC4 numbers", "yield 15.44% of the year-end close, against 2.92% on the actual close")
 
 # ---------------------------------------------------------------- Section 5: survivorship
-chk("ETFs 2017", K["n2017"], "d", "69", in_md=False, at="E6 counts")
-chk("gone by 2026", len(K["gone"]), "d", "10", in_md=False, at="E6 counts")
-assert all(g in K["dld"] for g in K["gone"])
-has("E6 counts", f"Of {K['n2017']} ETFs listed on TWSE or TPEx with a row that day, {len(K['gone'])} had none on "
-    f"{day(C.END)}")
+if "n2017" in K:
+    chk("ETFs 2017", K["n2017"], "d", "69", in_md=False, at="E6 counts")
+    chk("gone by 2026", len(K["gone"]), "d", "10", in_md=False, at="E6 counts")
+    assert all(g in K["dld"] for g in K["gone"])
+    has("E6 counts", f"Of {K['n2017']} ETFs listed on TWSE or TPEx with a row that day, {len(K['gone'])} had none on "
+        f"{day(C.END)}")
+else:     # FinMind's free plan: without the two ETF snapshots A34-18 and these two counts are not computed
+    unchecked("E6 counts (no data/raw/vol6/etf_snapshot*)", r"Of \d+ ETFs listed on TWSE or TPEx with a row that day, "
+              r"\d+ had none on " + re.escape(day(C.END)))
 chk("all six mean", all6, ".4f", "0.7234", n=2)
 chk("survivors mean", sur6, ".4f", "1.0539", n=2)
 y17 = K["years17"]
@@ -574,10 +613,10 @@ chk("SPA threshold", -rc["thr"], ".3f", "-2.079")
 chk("SPA p", rc["p_spa"], ".3f", "0.277")
 has("SPA sentence", "On Experiment 10 that threshold is −2.079, so it recentres 9,814 rules")
 assert rc["p_spa"] == rc["p_spa_strict"]
-chk("Experiment 10 days", rc["T"], ",d", "5,849")
+chk("Experiment 10 days", rc["T"], ",d", "5,849", n=2)
 assert C.B_RC == 10_000
 jb = G["jb"]
-chk("grid best t", float(G["tg"][jb]), ".3f", "1.296")
+chk("grid best t", float(G["tg"][jb]), ".3f", "1.296", n=3)
 assert name[G["oth"][jb]] == "R4 126 6m"
 chk("grid one-sided p", G["p1"], ".4f", "0.0975")
 chk("grid one-sided p from printed", float(stats.norm.sf(1.296)), ".4f", "0.0975")
@@ -595,7 +634,16 @@ has("E8 seeds", "the studentized reality check ($B=10{,}000$, `default_rng([4, 2
 has("E8 seed at 17", "`default_rng([5, 20261011])` gives 0.421 (MC SE 0.0049)")
 has("P11 seeds", "at $\\ell=75$ (`default_rng([4, 20261011])`) and 17 (`default_rng([5, 20261011])`)")
 has("Section 9 seed", "`ell=75`, `B=10000` and `default_rng([4, 20261011])` give [[eg:rcgrid]]'s 0.375")
-chk("grid 95% point", G["q95"], ".2f", "2.42", n=2)
+chk("grid 95% point", G["q95"], ".2f", "2.42", n=4)
+# the stepdown's first step on the grid (KC 8 (b) and Section 8's table): no t-stat reaches the studentized 95% point
+assert float(np.max(G["tg"])) < G["q95"]
+has("KC8 (b) stepdown", f"Its first step rejects nothing, since the largest t-stat, {float(G['tg'][jb]):.3f}, lies below "
+    f"the bootstrap's 95% point, {G['q95']:.2f} ([[eg:rcgrid]]).")
+has("KC8 (b) trials", f"Which tool corrects one configuration's Sharpe ratio for the {len(G['conf'])} trials?")
+has("KC8 (a)", f"(a) The grid's PBO is {G['pbo']:.3f}, while the in-sample best's out-of-sample Sharpe ratio is below 0 "
+    f"in only {100 * G['neg'] / len(G['lg']):.2f}% of the splits.")
+has("Section 8 stepdown cell", f"| none: the largest t-stat, {float(G['tg'][jb]):.3f}, lies below the first step's 95% "
+    f"point, {G['q95']:.2f} |")
 chk("Bonferroni's 95% point", G["bonf"], ".2f", "3.14", n=2)
 chk("median correlation", float(np.quantile(G["corr"], 0.5, method="inverted_cdf")), ".2f", "0.78", n=2)
 
@@ -636,6 +684,9 @@ chk("IS mean", float(np.mean(G["is"])) * math.sqrt(aw), ".2f", "1.31")
 chk("OOS mean", float(np.mean(G["oos"])) * math.sqrt(aw), ".2f", "0.80")
 chk("slope", G["slope"], ".2f", "-0.86", n=2)
 chk("intercept", G["icept"], ".2f", "1.93")
+has("degradation sentence", f"Here $k^*$'s mean annualized Sharpe ratio falls from "
+    f"{float(np.mean(G['is'])) * math.sqrt(aw):.2f} in sample to {float(np.mean(G['oos'])) * math.sqrt(aw):.2f} out "
+    f"of sample, with OLS slope (23.1) {G['slope']:.2f}")
 pct("OOS below 0", G["neg"] / 12_870, 2, "0.99", n=5)
 chk("C(15, 7)", math.comb(15, 7), ",d", "6,435", n=2)
 has("Pascal", r"$$\begin{aligned}\binom{16}{8}&=\binom{15}{7}+\binom{15}{8}\\&=6{,}435+6{,}435=12{,}870,"
@@ -643,9 +694,9 @@ has("Pascal", r"$$\begin{aligned}\binom{16}{8}&=\binom{15}{7}+\binom{15}{8}\\&=6
 has("misprint", "(the manuscript prints 12,780)")
 nz = K["noise"]
 chk("noise panels", len(nz["pb"]), "d", "200", in_md=False, at="noise stem")
-assert "g2.standard_normal((Tg, n)) * 0.01" in inspect.getsource(C.noise) and G["Tg"] == K["n_days"]
-has("noise stem", f"Run CSCV on {len(nz['pb'])} panels of 60 independent zero-mean strategies over {K['n_days']:,} "
-    f"days. Each panel is one draw `standard_normal(({K['n_days']}, 60))` × 1% from")
+assert "cscv(g2.standard_normal((Tg, n)) * 0.01, 0.0)" in inspect.getsource(C.noise) and G["Tg"] == K["n_days"]
+has("noise stem", f"Run CSCV with $r_f=0$ on {len(nz['pb'])} panels of 60 independent zero-mean strategies over "
+    f"{K['n_days']:,} days. Each panel is one draw `standard_normal(({K['n_days']}, 60))` × 1% from")
 has("X8 note: noise panels", f"([[eg:noise]]'s mean over {len(nz['pb'])} panels)")
 chk("noise PBO", nz["mean"], ".2f", "0.50", n=2)
 chk("noise PBO SE", nz["se"], ".3f", "0.012")
@@ -669,11 +720,14 @@ chk("widget n=60, ratio 0", wg[(60, 0.0)][0], ".2f", "0.51")
 chk("widget n=60, ratio 2", wg[(60, 2.0)][0], ".2f", "0.05")
 chk("widget SE, n=60, ratio 0", wg[(60, 0.0)][1], ".3f", "0.026")
 chk("widget SE, n=60, ratio 2", wg[(60, 2.0)][1], ".3f", "0.010")
-has("widget readout", "is 0.51 (SE 0.026) at $n=60$ without skill and 0.05 (SE 0.010) at a ratio of 2")
+has("widget readout", f"is {wg[(60, 0.0)][0]:.2f} (SE {wg[(60, 0.0)][1]:.3f}) at $n=60$ without skill and "
+    f"{wg[(60, 2.0)][0]:.2f} (SE {wg[(60, 2.0)][1]:.3f}) at an annual ratio of 2")
 assert C.N_STATE == 40
 has("widget's panels", f"Its readout, the mean PBO of {C.N_STATE} panels (*model*; `default_rng([3, {C.SEED}])`)")
-has("widget's strategy 1", "one panel at a time, giving strategy 1 a true Sharpe ratio you choose")
+has("widget's strategy 1", "one panel at a time, giving strategy 1 a true annual Sharpe ratio you choose")
 js = JS.read_text(encoding="utf-8")
+assert 'label: "True annual Sharpe ratio of strategy 1"' in js and "strategy 1's true annual Sharpe ratio" in js
+assert "Z[:, 0] += sr / sqrt(aw) * 0.01" in inspect.getsource(C.noise)     # the widget's ratio is annual
 assert "so with no skill the expected PBO is (n + 1)/(2n): 0.6 at n = 5." in js and (5 + 1) / (2 * 5) == 0.6
 assert f"{wg[(5, 0.0)][0]:.2f}" == "0.65"
 chk("logit j=30", math.log(30 / 31), ".4f", "-0.0328")
@@ -708,7 +762,7 @@ has("R1 range", "R4's configurations start at 10.51%, while R1's three span 12.8
 has("KC3 fraction", "$0.0422/7.5975$")
 pct("tax rate", V.TAX["0050"], 1, "0.1", n=5)
 pct("cash rate", V.RF, 1, "1.5")
-pct("borrowing rate", V.RF + V.SPREAD, 1, "3.5", n=2)
+pct("borrowing rate", V.RF + V.SPREAD, 1, "3.5", n=3)
 chk("resamples", C.B_RC, ",d", "10,000", n=15)
 chk("Experiment 10's rules", len(tt), ",d", "10,000")
 has("rounding note", "two printed parts can miss their total by 0.01")
@@ -720,7 +774,7 @@ chk("P8 days", scl["days"], ",d", "5,344")
 assert (scl["first"], scl["before"]) == ("2005-01-12", "2005-01-11")
 has("P8 span", f"Over 5,344 days (21.74 years from the close of {day(scl['before'])}, $A=245.83$)")
 assert '"2025-04-07"' in inspect.getsource(C.vol_scale)          # the day of scl["r7"], LM26's fall
-has("7 April 2025", day("2025-04-07"), n=2)
+has("7 April 2025", day("2025-04-07"), n=3)
 chk("P8 years", scl["years"], ".2f", "21.74")
 chk("P8 A", scl["A"], ".2f", "245.83")
 gh, vh, mh = scl["honest"]
@@ -749,9 +803,15 @@ has("problems preamble", "Rules on TR23, the TAIEX total-return index, rebalance
 kw = K["kelly"]
 chk("P9 days", kw["days"], ",d", "5,103")
 assert kw["before"] == "2006-01-02" and (kw["first_end"], kw["last_end"]) == ("2005-12-30", "2026-09-30")
-has("P9 span", f"over 5,103 days (20.76 years from the close of {day(kw['before'])})")
+assert len(K["R"]) == rc["T"] == 5849 and round(kw["full"], 2) == C.F_LM22    # the root on all of TR23's returns
+has("P9 root", f"The full-sample Kelly root of (4.5), on TR23's {rc['T']:,} daily simple returns, is {kw['full']:.2f} "
+    "([[LM22]]).")
+has("P9 span", f"Held over the {kw['days']:,} days from the close of {day(kw['before'])} ({kw['years']:.2f} years, "
+    f"$A={kw['days'] / kw['years']:.2f}$), it grows {100 * kw['p414']:.2f}% a year.")
+chk("P9 sessions a year", kw["days"] / kw["years"], ".2f", "245.76")
+assert abs(kw["A"] - kw["days"] / kw["years"]) < 1e-12           # the A of the stem's 3.5%/A
 chk("P9 years", kw["years"], ".2f", "20.76")
-chk("P9 root (LM22's precision)", kw["full"], ".2f", "4.14", n=2)
+chk("P9 root (LM22's precision)", kw["full"], ".2f", "4.14", n=3)   # the fourth, in "1-4.14", is S9's phrase
 pct("P9 held at 4.14", kw["p414"], 2, "31.70", n=3)
 pct("P9 held at the unrounded root", kw["full_held"], 2, "31.70", in_md=False)
 pct("P9 walk-forward", kw["walk"], 2, "22.27", n=3)
@@ -763,9 +823,25 @@ chk("P9 at the cap", kw["at_cap"], "d", "178", in_md=False, at="S9 cap")
 assert C.BORROW == 0.035
 src_kw = inspect.getsource(C.kelly_walk)                            # the window and the cap that P9 prints
 assert "T, W = len(R), 729" in src_kw and "min(max(kelly_root(R[e - W + 1:e + 1]), 0.0), 3.0)" in src_kw
+assert "BORROW / ak" in src_kw                                      # borrowing accrues 3.5%/A a session
+# Solution 9's domain: 1 + fR > 0 on every one of the 5,103 days, the worst at 4.14 and at the cap of 3
+R_all, TD_all = K["R"], K["TD"]
+i_w = TD_all.index(kw["before"]) + 1
+R_w = np.asarray(R_all[i_w:], dtype=np.float64)
+assert len(R_w) == kw["days"]
+j_w = int(np.argmin(R_w))
+wd, rw = TD_all[i_w + j_w], float(R_w[j_w])
+assert wd == "2025-04-07" and 1 + C.F_LM22 * rw > 0 and 1 + 3.0 * rw > 0
+chk("S9 worst return", -rw, ".4f", "0.0970", in_md=False)
+chk("S9 1 + fR on the worst day", 1 + C.F_LM22 * rw, ".2f", "0.60", in_md=False)
+chk("S9 1 + fR from printed", 1 - 4.14 * 0.0970, ".2f", "0.60", in_md=False)
+has("S9: the domain", rf"Every day keeps $1+fR>0$: at {C.F_LM22:.2f} the worst day, {day(wd)}, gives "
+    rf"$1-{C.F_LM22:.2f}\times{-rw:.4f}={1 + C.F_LM22 * rw:.2f}$.")
 has("P9 window", "The trailing 729-return root, capped to [0, 3], set at each calendar month-end close and traded at "
     "the next, grows 22.27%, and $f=1$ grows 13.38%.")
-has("P9 borrowing", "Borrowing at 3.5% a year on $f-1$ lowers 31.70% to 20.71% and 22.27% to 16.63%.")
+has("P9 borrowing", f"Borrowing on $f-1$ at {100 * C.BORROW:.1f}% a year, ${100 * C.BORROW:.1f}\\%/A$ a session, "
+    f"lowers {100 * kw['p414']:.2f}% to {100 * kw['p414_fin']:.2f}% and {100 * kw['walk']:.2f}% to "
+    f"{100 * kw['walk_fin']:.2f}%.")
 has("S9 cap", f"Borrowing charges the exposure above 1, so the more levered root pays more. Without costs and at an "
     f"illustrative rate, even 16.63% is *hypothetical*, its leverage capped at 3 at {kw['at_cap']} of {kw['ends']} "
     "month-ends.")
@@ -776,13 +852,22 @@ has("hygiene: TR23 versions", "TR23 adds three scales and four Kelly versions, t
 has("S9 protocol", f"At each of {kw['ends']} calendar month-ends from {day(kw['first_end'])}")
 
 # ---------------------------------------------------------------- Section 8 and the summary
-has("Section 8 slip cell", "the slip moves growth by −0.41 to +0.89 points")
+has("Section 8 slip cell", f"yes; trading at the signal's own close instead moves growth by {min(chg.values()):.2f} to "
+    f"{max(chg.values()):+.2f} points |")
+has("S8 index and slip", f"The index grew {100 * scl['index'][0]:.2f}% (volatility {100 * scl['index'][1]:.2f}%) on "
+    f"those days, and the scale traded at its own close, as in [[eg:sameclose]], grew {100 * scl['slip']:.2f}%.")
 has("Section 8 survivorship cell", "survivors alone overstate growth by 3.87 points a year")
 has("Section 8 reality-check cell", "| not shown: p-value 0.375 |")
 has("Section 8 reading", "No configuration beats R1 beyond chance, so the search alone could have produced the winner")
 has("summary: grid", "On E5 no configuration beats R1 beyond chance.")
 has("summary: independent", "the in-sample best of $n$ independent strategies has median")
-has("S7 derivation", "Both paths hold the same exposures after each trade, so their ratio changes only at trades.")
+has("S7 derivation", "Both paths hold the same exposures after each trade, and interest and borrowing accrue in "
+    "proportion to wealth, so their ratio changes only at trades.")
+# the Deep Dive of (34.1) cites the Result box's hypothesis 2, the financing in proportion to wealth
+assert re.search(r"(?m)^> 2\. cash interest and borrowing accrue in proportion to wealth, at rates set by each path's "
+                 r"exposure\.$", RAW)
+has("deep dive: hypothesis 2", "By hypothesis 2 their ratio then stays fixed, and both reach the next trade $t$ with "
+    "the same $\\mathbf w^{\\mathrm{drift}}_t$.")
 has("summary survivors", "3.87 points a year among the futures funds of 2017")
 has("summary PBO", "0.663 here, about one half without skill")
 
@@ -847,8 +932,9 @@ has("Hansen's corollary", "(his Corollary 2)")
 
 # ---------------------------------------------------------------- cross-references and citations
 # every equation reference, with its count; (34.1)-(34.4) are this module's tags (part 4)
-EQ_REFS = {"4.5": 1, "17.5": 2, "18.2": 1, "20.9": 3, "21.2": 1, "21.6": 1, "21.9": 12, "22.3": 2, "23.1": 1,
-           "26.8": 1, "27.2": 8, "27.3": 2, "31.7": 1, "34.1": 10, "34.2": 5, "34.3": 4, "34.4": 2}
+EQ_REFS = {"4.5": 1, "17.5": 2, "18.2": 1, "20.9": 3, "21.2": 1, "21.6": 1, "21.9": 11, "22.3": 2, "23.1": 1,
+           "26.8": 1, "27.2": 8, "27.3": 2, "31.7": 1, "33.4": 1, "33.6": 1, "34.1": 10, "34.2": 5, "34.3": 4,
+           "34.4": 2}
 for tag, k in EQ_REFS.items():
     has(f"equation reference ({tag})", f"({tag})", n=k if k > 1 else None)
 assert sorted(re.findall(r"\((\d+\.\d+)\)", TEXT)) == sorted(t for t, k in EQ_REFS.items() for _ in range(k))
@@ -864,7 +950,7 @@ has("Problem 9", "(Problem 9)", n=2)
 # in-text citations, against the reference list
 REFS = RAW.split("\n## References", 1)[1]
 for author, year, detail in (("Bailey, D. H.", 2017, "Algorithm 2.3"), ("Elton, E. J.", 1996, "Abstract only"),
-                             ("Hansen, P. R.", 2005, ""), ("Romano, J. P.", 2005, ""),
+                             ("Hansen, P. R.", 2005, ""), ("Harvey, C. R.", 2016, ""), ("Romano, J. P.", 2005, ""),
                              ("Sullivan, R.", 1999, "Abstract only"), ("White, H.", 2000, "Corollary 2.4")):
     line = next(ln for ln in REFS.splitlines() if ln.startswith(f"- {author}"))
     assert f"({year})" in line and detail in line, author
@@ -874,7 +960,9 @@ has("cite White", "White's (2000) reality check corrects this data snooping")
 has("cite White's corollary", "(White 2000, Corollary 2.4; stated without proof)")
 has("White's corollary again", "White's Corollary 2.4 gives their law for large $T$.")
 has("cite Romano-Wolf and Hansen", "(Romano and Wolf 2005, §4.1; Hansen 2005)")
-has("cite Romano-Wolf", "Romano and Wolf (2005) ask which rules beat the benchmark. Their stepdown (Algorithm 3.1)")
+has("cite Romano-Wolf", "Romano and Wolf (2005) ask which rules beat the benchmark. Their stepdown (Algorithm 3.1; "
+    "studentized, Algorithm 4.1)")
+has("Romano-Wolf: the studentized first step", "The studentized first step is [[eg:rc10]]'s 95% point")
 has("Romano-Wolf details", "(their footnote 22) and centred at the sample means (their Remark 3.4)")
 has("cite Hansen", "Hansen's (2005) test for superior predictive ability (SPA)")
 has("cite Sullivan et al.", "Sullivan, Timmermann and White (1999) applied the reality check")
@@ -892,10 +980,23 @@ wins = sorted({w for _, w, _ in G["conf"] if w})
 assert wins == [126, 252, 504] and name[order[0]] == "R4 252 6m"
 has("X7 note: windows", f"within each rule, {wins[0]} to {wins[-1]} dates from left to right")
 has("case box: the best", f"The best, maximum Sharpe on a {G['conf'][order[0]][1]}-date window traded every six "
-    "month-ends, grew 18.62% a year.")
+    f"month-ends, grew {100 * growth[order[0]]:.2f}% a year ([[ex:case]]).")
 # the grid's 59 differences from R1 monthly and their block length 75
 n_oth, ell_g = len(G["oth"]), int(G["ell"])
-has("Section 6: the grid's T", f"For the grid's {n_oth} differences it means 1,851, closer to his setting.")
+has("Section 6: the grid's T", f"For the grid's {n_oth} differences it means {K['n_days']:,}, closer to his setting "
+    "in the number of rules.")
+# White's hypothesis 1, the moment of order 6 + epsilon, against TR23's Student-t fit ([[LM20]]'s 3.065): Experiment
+# 10's rules return +R_t or -R_t (data/lm34_common.reality_check), so their differences from the zero benchmark have
+# TR23's absolute values
+assert re.search(r"(?m)^> 1\. each difference from the benchmark has a finite moment of order \$6\+\\varepsilon\$", RAW)
+assert "(2.0 * pos[c:c + 500].astype(np.float64) - 1.0) * R" in inspect.getsource(C.reality_check)
+nu_t = float(stats.t.fit(K["R"])[0])
+chk("TR23 Student-t degrees of freedom (LM20's)", nu_t, ".3f", "3.065", n=2)
+has("Section 6: White's moment condition", "White's moment condition, hypothesis 1, may fail on both searches. "
+    f"[[LM20]]'s Student-t fit to TR23 has {nu_t:.3f} degrees of freedom, so its moments exist only below order "
+    f"{nu_t:.3f}. Experiment 10's returns $\\pm R_t$ have the same absolute values as TR23's. E5's rules may lack even "
+    "a fourth moment ([[LM33]]), so the corollary does not cover either reality-check p-value, and each is a practical "
+    "guide.")
 has("E8 stem", f"Does any of the grid's other {n_oth} configurations beat R1 monthly in mean daily net return?")
 has("E8: the largest t-stat", f"The largest t-stat of the {n_oth} mean differences is 1.296")
 has("E8: the block length", f"[[LM22]]'s rule on the {n_oth} differences gives $\\ell={ell_g}$ (from 74.63)")
@@ -910,7 +1011,10 @@ has("Section 7: the half", f"a per-day ratio on the {half} in-sample days is nea
 has("Section 7: the median", f"has median about $\\Phi^{{-1}}(0.5^{{1/n}})/\\sqrt{{{half}}}$, and annualized at "
     f"$n={n_conf}$")
 has("summary: the median", "has median $\\Phi^{-1}(0.5^{1/n})$ standard errors")
-has("P12: the half", f"For {n_conf} independent zero-skill strategies over {half} in-sample days")
+has("Section 7: the mean", f"against the maximum's mean, {nz['mean_219']:.2f}, by [[LM33]]'s (33.4).")
+has("P12: the half", f"For {n_conf} independent skill-free strategies over {half} in-sample days, derive the median of "
+    "the in-sample best's annualized Sharpe ratio from (21.9) and (20.9), with "
+    f"$A_{{\\mathrm w}}={fr.A_wealth:.2f}$, and its expected out-of-sample value.")
 has("S12: the law", f"Each per-day in-sample ratio is about $\\mathcal N(0,1/{half})$ by (17.5) and (20.9).")
 has("S12: the median", f"lies below $\\Phi^{{-1}}(0.5^{{1/{n_conf}}})/\\sqrt{{{half}}}$ with probability "
     f"$\\tfrac12$, so that is its median, with $\\Phi^{{-1}}(0.5^{{1/{n_conf}}})=2.274$: 1.17 annualized.")
@@ -992,7 +1096,9 @@ ECHO = [("lm27.md", "0.1423% of the pre-trade wealth"), ("lm27.md", "traded 8.06
         ("lm22.md", "145 for TR23"), ("lm26.md", "fell 9.70%"), ("lm31.md", "above 1 at 62"),
         ("lm26.md", "Six forecasts are fixed in advance"), ("lm26.md", "4,609 days"),
         ("lm26.md", "GARCH normal has the lowest QLIKE"), ("lm22.md", "draws the stationary bootstrap in arch's order"),
-        ("lm21.md", "Under (21.9) the best of 1,000 has median")]
+        ("lm21.md", "Under (21.9) the best of 1,000 has median"),
+        ("lm20.md", "| Student-t degrees of freedom | 3.065 |"),
+        ("lm33.md", "The data may lack (20.9)'s fourth moment.")]
 for f, s in ECHO:
     assert s in (ROOT / "src" / f).read_text(encoding="utf-8"), (f, s)
 print(f"echoes: {len(ECHO)} published strings found as printed")
@@ -1023,11 +1129,11 @@ def scanned_numbers() -> list[re.Match[str]]:
 
 # the numbers outside every checked place, each with its count and reason
 ALLOW: dict[str, tuple[int, str]] = {
-    "95": (6, "the level of the 95% points (np.quantile(..., 0.95) in data/lm34_common.py)"),
+    "95": (5, "the level of the 95% points (np.quantile(..., 0.95) in data/lm34_common.py)"),
     "0": (5, "a constant in a formula: epsilon > 0, a > 0 (twice), 0 <= x < 1"),
     "1": (24, "a constant in a formula: 1 - x, 1/(1 - x), 1 + R, t + 1, t - 1, n + 1, 1 - omega"),
     "2": (7, "a constant in a formula: R_{t+2}, sqrt(2 ln ln T), S/2 (three times), x^2/2 (twice)"),
-    "0050": (4, "a fund code in prose and in the tax table"),
+    "0050": (3, "a fund code in prose and in the tax table"),
     "00646": (2, "a fund code in the tax table and in Problem 1's options"),
 }
 places = sorted(set(PLACES))
@@ -1047,5 +1153,6 @@ print(f"places: every number of the scanned text lies in a checked place ({len(p
 print(f"anchor differences ({len(ANCHOR_DIFFS)}):")
 for a in ANCHOR_DIFFS:
     print("   ", a)
-print(f"\nall {N_CHECKS} checks passed")
+print(f"\nall {N_CHECKS} checks passed"
+      + (f"; not checked (FinMind's free plan): {'; '.join(UNCHECKED)}" if UNCHECKED else ""))
 sys.exit(0)

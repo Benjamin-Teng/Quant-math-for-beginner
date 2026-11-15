@@ -23,9 +23,10 @@ gets vol4_rv.csv, the committed per-day realized variances (data/derived/, built
 Volumes V and VI's labs (LM27-LM35) get the files their briefs list (plans/vol-5.md and plans/vol-6.md, "Lab parts";
 plans/vol-5.md, the shared decision "Labs"). Raw copies keep their raw names (data/raw/vol5/, raw/vol6/; the
 distribution files gain the fetch window, since vol5/0050_dividends.csv differs from Volume I's 0050_dividends.csv);
-the T5S days a brief names are copied as taiex5s_<date>.csv when data/raw/intraday/taiex5s/ is present and skipped
-with a message otherwise. Derived files are rows of data/processed/*.parquet written as CSV, floats by repr (they
-round-trip exactly, so a lab can check its own results to 1e-12), booleans as true/false:
+the T5S days a brief names are copied as taiex5s_<date>.csv from data/raw/intraday/taiex5s/, and a day it does not
+hold is skipped with a message that gives the download command. Derived files are rows of data/processed/*.parquet
+written as CSV, floats by repr (they round-trip exactly, so a lab can check its own results to 1e-12), booleans as
+true/false:
   - e5_estimation.csv (base, date, fund, R) and e5_wealth.csv (base, date, fund, R, traded): E5's two frames, one row
     per date and fund (data/vol5_series.py); e5_checkpoint_estimation.csv and e5_checkpoint_wealth.csv: the same for
     the checkpoint universe (sample E5+checkpoint, LM35);
@@ -37,10 +38,11 @@ round-trip exactly, so a lab can check its own results to 1e-12), booleans as tr
   - tx23_limit_days.csv: TX23's rows (data/vol4_series.py) whose settlement moved 9.95% or more since 2015-06-01, with
     2025-04-08 and 2026-10-08 (LM35);
   - lm34_grid.csv: the 60 configurations' net returns (first row 2019-03-04, the first purchase from the cash of 1,
-    then the 1,851 daily returns), once data/lm34_numbers.py writes data/processed/lm34_grid.parquet (skipped with
-    a message until then).
-A missing processed file is built first by its script (vol3_series.py first, then vol4_series.py, and vol5_series.py
-before vol5_rules.py), which writes only data/processed/; a missing raw input stops the script.
+    then the 1,851 daily returns), from data/processed/lm34_grid.parquet, which data/lm34_grid.py writes from E5's
+    frames and vol5_rules.py alone (no raw file, so it runs on FinMind's free plan).
+A missing processed file is built first by its script (vol3_series.py first, then vol4_series.py, vol5_series.py
+before vol5_rules.py, and vol5_rules.py before lm34_grid.py), which writes only data/processed/; a missing raw input
+stops the script.
 
     uv run python data/make_lab_data.py            # write labs/LMNN_lab/data/*
     uv run python data/make_lab_data.py --check    # compare with existing files; writes no lab file (a missing
@@ -75,6 +77,7 @@ BUILDERS: dict[str, tuple[str, tuple[str, ...], tuple[str, ...]]] = {
                      *(f"vol5/{s}_dividends.csv" for s in ["0050", "00679B", "0056", "00720B"]),
                      "0050__*.csv", "00679B__*.csv", "0050_dividends.csv", "00679B_dividends.csv")),
     "vol5_rules": ("vol5_rules.py", ("vol5_frames",), ()),
+    "lm34_grid": ("lm34_grid.py", ("vol5_frames", "vol5_rules"), ()),
 }
 BUILDERS["vol5_ohlc"] = BUILDERS["vol5_frames"]
 BUILDERS["vol5_trades"] = BUILDERS["vol5_rules"]
@@ -154,19 +157,14 @@ def frame(sample, kind):
     return table(df.drop("sample", "frame", *(("traded",) if kind == "estimation" else ())))
 
 def t5s_days(days):
-    """The raw T5S days a brief names, or none (with a message) when the intraday download is absent."""
-    if not T5S.is_dir():
-        print(f"skipped T5S days {', '.join(days)}: no data/raw/intraday/taiex5s/ "
-              "(uv run python data/fetch_intraday.py --series taiex5s)")
-        return {}
-    out = {}
-    for d in days:
-        f = T5S / d[:4] / f"{d}.csv"
-        if not f.exists():
-            raise SystemExit(f"missing data/raw/intraday/taiex5s/{d[:4]}/{d}.csv: run uv run python "
-                             "data/fetch_intraday.py --series taiex5s first")
-        out[f"taiex5s_{d}.csv"] = f.read_text(encoding="utf-8")
-    return out
+    """The raw T5S days a brief names that data/raw/intraday/taiex5s/ holds; a missing day is skipped with a message
+    (the lab's intraday cell then says so). Without the folder, every day is missing."""
+    have = [d for d in days if (T5S / d[:4] / f"{d}.csv").exists()]
+    missing = [d for d in days if d not in have]
+    if missing:
+        print(f"skipped T5S days {', '.join(missing)}: not in data/raw/intraday/taiex5s/ "
+              f"(uv run python data/fetch_intraday.py --series taiex5s --dates {','.join(missing)})")
+    return {f"taiex5s_{d}.csv": (T5S / d[:4] / f"{d}.csv").read_text(encoding="utf-8") for d in have}
 
 def qqq_tqqq():
     hq, q = read(RAW / "QQQ__us_2022.csv"); ht, t = read(RAW / "TQQQ__us_2022.csv")
@@ -254,12 +252,7 @@ def build():
     day = pl.col("date").cast(pl.Utf8)
     limit = (day >= "2015-06-01") & ((pl.col("rF").exp() - 1).abs() >= 0.0995)   # the anchors' 9.95%, simple move
     tx_limit = {"tx23_limit_days.csv": table(tx23.filter(limit | day.is_in(["2025-04-08", "2026-10-08"])).sort("date"))}
-    grid = {}
-    if (PROC / "lm34_grid.parquet").exists():
-        grid = {"lm34_grid.csv": table(pl.read_parquet(PROC / "lm34_grid.parquet"))}
-    else:
-        print("skipped labs/LM34_lab/data/lm34_grid.csv until data/lm34_numbers.py writes "
-              "data/processed/lm34_grid.parquet")
+    grid = {"lm34_grid.csv": table(processed("lm34_grid"))}
     futures = {f"{Path(p).name}__{V5}.csv": copy(f"{p}__{V5}.csv") for p in FUTURES}
     proxies = {f"{p}2007-07-02__2026-10-08.csv": copy(f"vol6/{p}2007-07-02__2026-10-08.csv") for p in PROXIES}
     y2008 = {n: copy(f"vol6/{n}") for n in ("0050__2007-07-02__2008-12-31.csv",

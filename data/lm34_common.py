@@ -1,15 +1,18 @@
-"""Shared computations of LM34's scripts (Backtesting Without Fooling Yourself), imported by data/lm34_numbers.py and
-data/lm34_charts.py; it prints nothing and writes nothing.
+"""Shared computations of LM34's scripts (Backtesting Without Fooling Yourself), imported by data/lm34_numbers.py,
+data/lm34_charts.py and data/lm34_grid.py; it prints nothing and writes nothing.
 
-It is data/vol6_anchors_lm34.py, the Stage 1 anchor script, with its code kept: importing this module recomputes the
-38 anchor lines A34-01 .. A34-38 exactly as that script prints them (the list OUT, which data/lm34_numbers.py compares
-with the Value column of plans/vol-6-anchors.md, "LM34"), and leaves the intermediate results that the two scripts
-need in the dictionary KEEP (the gross and twice-the-costs paths, the adjusted 0050 series, the TR23 scales, the
-survivorship factors, the reality check's resampled maxima, the grid's 60 daily net-return series and its CSCV, the
-noise panels' logit histograms and the widget grid). Only those KEEP assignments, the noise panels' histogram (which
-draws nothing) and the last lines differ from the anchor script. The anchor script's own notes follow.
+It is data/vol6_anchors_lm34.py, the Stage 1 anchor script, with its code kept: main() recomputes the 38 anchor lines
+A34-01 .. A34-38 exactly as that script prints them (the list OUT, which data/lm34_numbers.py compares with the Value
+column of plans/vol-6-anchors.md, "LM34"), and leaves the intermediate results that the scripts need in the
+dictionary KEEP (the gross and twice-the-costs paths, the adjusted 0050 series, the TR23 scales, the survivorship
+factors, the reality check's resampled maxima, the grid's 60 daily net-return series and its CSCV, the noise panels'
+logit histograms and the widget grid). Only those KEEP assignments, the noise panels' histogram (which draws nothing),
+the grid's paths in grid_paths(), the split table read on first use (splits()) and the last lines differ from the
+anchor script. Importing the module reads nothing and runs nothing: data/lm34_numbers.py and data/lm34_charts.py call
+main(), while data/lm34_grid.py calls only grid_paths() and grid_frame(), which need E5's frames and vol5_rules alone
+(no raw file, no ETF snapshot, no TR23). The anchor script's own notes follow.
 
-Use:  import lm34_common as C     (from data/; the scripts insert data/ into sys.path)
+Use:  import lm34_common as C; C.main()     (from data/; the scripts insert data/ into sys.path)
       PYTHONUTF8=1 uv run python data/lm34_common.py   prints the 38 anchor lines, as the anchor script does
 
 Reads only data/processed/*.parquet through the shared builders, plus the registered raw files named here (run the
@@ -77,6 +80,7 @@ from contextlib import contextmanager
 from dataclasses import dataclass
 from datetime import date
 from decimal import Decimal
+from functools import cache
 from itertools import combinations
 from math import comb, log, sqrt
 from pathlib import Path
@@ -178,16 +182,20 @@ def read_rows(p: Path) -> list[dict[str, str]]:
         return list(csv.DictReader(fh))
 
 
-SPLITS = [(r["stock_id"], r["date"], Decimal(r["before_price"]), Decimal(r["after_price"]))
-          for r in read_rows(RAW5 / "splits__2016-12-01__2026-10-08.csv")]
+@cache
+def splits() -> list[tuple[str, str, Decimal, Decimal]]:
+    """The registered splits (stock_id, date, before_price, after_price), read on first use, so that grid_paths()
+    and data/lm34_grid.py read no raw file."""
+    return [(r["stock_id"], r["date"], Decimal(r["before_price"]), Decimal(r["after_price"]))
+            for r in read_rows(RAW5 / "splits__2016-12-01__2026-10-08.csv")]
 
 
 def split_factor(sym: str) -> dict[str, float]:
-    """Date -> new units per old unit (k for a k-for-1 split, 1/k for a k-to-1 reverse split), from SPLITS: on that
+    """Date -> new units per old unit (k for a k-for-1 split, 1/k for a k-to-1 reverse split), from splits(): on that
     day the previous close is restated per current share, divided by this ratio (Volume I's total return). The ratio
     is the registered before / after price (or its inverse) rounded to an integer; it must lie within 0.01 of one."""
     out = {}
-    for s, d, b, a in SPLITS:
+    for s, d, b, a in splits():
         if s == sym:
             q = b / a if b >= a else a / b
             k = int(q.to_integral_value())
@@ -198,7 +206,7 @@ def split_factor(sym: str) -> dict[str, float]:
 
 def split_ratios(sym: str) -> list[Decimal]:
     """The registered before / after price ratios (or their inverses, for a reverse split) of sym's splits."""
-    return [b / a if b >= a else a / b for s, _, b, a in SPLITS if s == sym]
+    return [b / a if b >= a else a / b for s, _, b, a in splits() if s == sym]
 
 
 def split_ratio_gap(sym: str) -> float:
@@ -479,7 +487,7 @@ def growth_to_end(sym: str) -> tuple[float, str, int, int]:
     rows = [r for r in read_rows(raw / f"{sym}__2016-12-01__2026-10-08.csv") if BASE <= r["date"] <= END]
     assert rows[0]["date"] == BASE and Decimal(rows[0]["close"]) != 0, (sym, rows[0])
     sp = split_factor(sym)
-    before = {d: b for s, d, b, _ in SPLITS if s == sym}
+    before = {d: b for s, d, b, _ in splits() if s == sym}
     g, prev, idle_before, idle, zeros, last = 1.0, Decimal(rows[0]["close"]), False, 0, 0, BASE
     for r in rows[1:]:
         c = Decimal(r["close"])
@@ -741,26 +749,59 @@ def median_ic(x: Vec | list[float]) -> float:
     return float(np.quantile(np.asarray(x, dtype=np.float64), 0.5, method="inverted_cdf"))
 
 
-def pbo_grid(case: Case) -> int:
-    fr, sigs, rules = case.fr, case.sigs, V.RULES
+GRID_WINDOWS = (126, 252, 504)    # the declared grid (the brief's "PBO grid"): windows for R3-R8
+GRID_FREQS = (1, 3, 6)            # trade every q-th month-end signal
+
+
+@dataclass
+class GridPaths:
+    conf: list[tuple[str, int, int]]    # (rule, window, q) in grid order; window 0 for R1 and R2, which use none
+    paths: list[V.WealthPath]           # each configuration's net path from the cash of 1 at the first trade's close
+    fallback: list[str]                 # "window signal" where R4 holds R3
+
+
+def grid_paths(fr: Frames, sigs: list[V.Signal]) -> GridPaths:
+    """The declared grid's 60 net wealth paths through vol5_rules (no rule is re-implemented): signals() at each
+    window, set for the call and restored, keeps the through case's schedule from its first signal (sigs, signals()
+    at vol5_rules.WINDOW = 504), and a q-month configuration trades at signals 1, 1 + q, 1 + 2q, ... It needs only
+    E5's frames and vol5_rules: data/lm34_grid.py calls it alone, and pbo_grid() within main()."""
     by_w: dict[int, list[V.Signal]] = {}
-    for w in (126, 252, 504):
+    for w in GRID_WINDOWS:
         with window(w):
             sg = V.signals(fr, [])
         k0 = next(i for i, s in enumerate(sg) if s.signal == sigs[0].signal)
         by_w[w] = sg[k0:]
         assert [s.signal for s in by_w[w]] == [s.signal for s in sigs]
     for a, b in zip(by_w[504], sigs, strict=True):
-        assert all(np.array_equal(a.targets[k], b.targets[k]) for k in rules)
+        assert all(np.array_equal(a.targets[k], b.targets[k]) for k in V.RULES)
     # R4 holds R3 when no fund's window mean exceeds r_f / A (vol5_rules assigns R3's array itself)
-    fallback = [f"{w} {s.signal}" for w in (126, 252, 504) for s in by_w[w] if s.targets["R4"] is s.targets["R3"]]
-    conf = [(k, 0, q) for k in ("R1", "R2") for q in (1, 3, 6)]
-    conf += [(k, w, q) for k in rules[2:] for w in (126, 252, 504) for q in (1, 3, 6)]
+    fallback = [f"{w} {s.signal}" for w in GRID_WINDOWS for s in by_w[w] if s.targets["R4"] is s.targets["R3"]]
+    conf = [(k, 0, q) for k in ("R1", "R2") for q in GRID_FREQS]
+    conf += [(k, w, q) for k in V.RULES[2:] for w in GRID_WINDOWS for q in GRID_FREQS]
+    paths = [V.wealth_path(fr, by_w[504 if w == 0 else w][::q], k) for k, w, q in conf]
+    assert all(p.ruin is None and p.dates == paths[0].dates for p in paths)
+    return GridPaths(conf, paths, fallback)
+
+
+def grid_frame(gp: GridPaths) -> pl.DataFrame:
+    """The table of data/processed/lm34_grid.parquet (data/lm34_grid.py writes it, data/lm34_numbers.py checks it): a
+    column `date`, then one column per configuration in grid order (R1_1m, R1_3m, R1_6m, R2_1m, ..., R3_126_1m, ...,
+    R8_504_6m). Its first row, the first trade's date, is the first purchase from the cash of 1 (wealth after it minus
+    1); every later row is a day's net return, so the product of one plus every row is the final wealth."""
+    cols = {(f"{k}_{q}m" if w == 0 else f"{k}_{w}_{q}m"): np.concatenate([[p.wealth[0] - 1],
+                                                                          p.wealth[1:] / p.wealth[:-1] - 1])
+            for (k, w, q), p in zip(gp.conf, gp.paths, strict=True)}
+    return pl.DataFrame({"date": gp.paths[0].dates, **cols})
+
+
+def pbo_grid(case: Case) -> int:
+    fr, sigs, rules = case.fr, case.sigs, V.RULES
+    gp = grid_paths(fr, sigs)
+    conf, fallback = gp.conf, gp.fallback
     n = len(conf)
     rets, growth = [], []
-    for k, w, q in conf:
-        p = V.wealth_path(fr, by_w[504 if w == 0 else w][::q], k)
-        assert p.ruin is None and p.dates == case.paths["R1"].dates
+    for p in gp.paths:
+        assert p.dates == case.paths["R1"].dates
         rets.append(p.wealth[1:] / p.wealth[:-1] - 1)
         growth.append(float(np.log(p.wealth[-1]) / case.ev_years))
         KEEP.setdefault("grid_first", []).append(float(p.wealth[0]))   # wealth after the first purchase
@@ -874,7 +915,7 @@ def noise(Tg: int, aw: float) -> None:
     mp, sp = float(np.mean(pb)), float(np.std(pb, ddof=0)) / sqrt(N_NOISE)
     se_is, se_oos = (float(np.std(v, ddof=0)) / sqrt(N_NOISE) for v in (a_is, a_oos))
     half = (Tg // BLOCKS) * BLOCKS // 2
-    # (21.9)'s mean of the maximum of n standard normals: the integral of z n phi(z) Phi(z)^(n - 1)
+    # the mean of the maximum of n standard normals (LM33's (33.4)): the integral of z n phi(z) Phi(z)^(n - 1)
     mean_max = float(integrate.quad(lambda z: z * n * stats.norm.pdf(z) * stats.norm.cdf(z) ** (n - 1), -10, 10)[0])
     put(f"noise (experiment 2, Model): {N_NOISE} panels of {n} iid normal strategies with mean 0, {Tg} days: PBO mean "
         f"{f(mp, 3)} (SE {f(sp, 3)}), range {f(min(pb), 2, 3)} .. {f(max(pb), 2, 3)}; the in-sample best's annualized "
@@ -946,8 +987,7 @@ def main() -> None:
     KEEP.update(case=case, R=R, TD=TD)
 
 
-main()
-
 if __name__ == "__main__":
+    main()
     for line in OUT:
         print(line)

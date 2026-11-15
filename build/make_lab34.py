@@ -8,7 +8,7 @@ The notebook reads only labs/LM34_lab/data/, built by data/make_lab_data.py from
 data out of the repository): e5_wealth.csv (E5's wealth frame), rule_targets.csv (the through case's per-trade
 targets, exposures, turnover and costs, from data/vol5_rules.py), rule_wealth.csv (the eight rules' net and gross
 wealth paths), lm34_grid.csv (the declared grid's 60 net-return series, first row the first purchase, from
-data/lm34_numbers.py), taiex_tr.csv
+data/lm34_grid.py), taiex_tr.csv
 (TR23), 0050_daily_raw.csv and 0050_dividends.csv, the split list, the delisting list and the six futures ETFs' prices.
 It carries no copy of vol5_rules.py: rebuilding the wealth recursion (27.2) from the targets, with cash, borrowing and
 costs, is LM34's own walk-forward procedure (plans/vol-5.md, "Labs"; decision on the third revision), checked against
@@ -84,7 +84,7 @@ On FinMind's free plan, run `uv run python data/fetch_finmind.py --exclude secto
 
 - `e5_wealth.csv`: E5's wealth frame, every TR23 session after the base close of 17 January 2017 (`R` is 0 while a fund is halted, `traded` says whether it has a close).
 - `rule_targets.csv` and `rule_wealth.csv`: the through case's 92 trades per rule (signal, trade, the five target exposures, exposure, one-way turnover, cost over pre-trade wealth) and the eight rules' net and gross wealth after each close, from the first trade (`data/vol5_rules.py`).
-- `lm34_grid.csv`: the declared grid's 60 configurations' net returns (`data/lm34_numbers.py`), columns `R1_1m` … `R8_504_6m` (rule, window, rebalancing every 1, 3 or 6 month-end signals). Its first row, 4 March 2019, is the first purchase from the cash of 1; the 1,851 rows from 5 March 2019 to 8 October 2026 are the daily net returns.
+- `lm34_grid.csv`: the declared grid's 60 configurations' net returns (`data/lm34_grid.py`), columns `R1_1m` … `R8_504_6m` (rule, window, rebalancing every 1, 3 or 6 month-end signals). Its first row, 4 March 2019, is the first purchase from the cash of 1; the 1,851 rows from 5 March 2019 to 8 October 2026 are the daily net returns.
 - `taiex_tr.csv`: the TAIEX total-return index (FinMind `TaiwanStockTotalReturnIndex`), from which TR23's 5,849 daily returns follow.
 - `0050_daily_raw.csv`, `0050_dividends.csv` and `splits__2016-12-01__2026-10-08.csv`: 0050's closes and distributions, and the registered splits (0050 4-for-1 on 2025-06-18, 00673R 1 for 4 on 2025-10-22, 00674R 1 for 5 on 2026-04-22).
 - `delisting__2000-01-01__2026-10-08.csv` and the six futures ETFs' price files (`00635U__…`, `00642U__…`, `00672L__…`, `00673R__…`, `00674R__…`, `00677U__…`).
@@ -350,11 +350,13 @@ for k, printed in (("R1", "13.14"), ("R2", "14.59"), ("R4", "10.09"), ("R8", "12
 chg = {k: 100 * (same[k] - growth[k]) for k in RULES}
 show("lowest change (R4)", min(chg.values()), ".2f", "-0.41")
 show("highest change (R8)", max(chg.values()), ".2f", "0.89")
+show("R1's change (no estimate: the shift alone)", chg["R1"], "+.2f", "+0.26")
+show("R2's change (no estimate: the shift alone)", chg["R2"], "+.2f", "+0.09")
 print("rules that gain:", sum(v > 0 for v in chg.values()), "of 8")
 """)
 
 md(r"""
-**Problem 8.** R8's scale (31.7) on TR23's daily simple returns: $\bar\sigma_t^2$ the uncentred mean square of the 504 returns through $t$, and (26.2) with $\lambda=0.94$ run through the same returns from $\bar\sigma_t^2$. Set at the close of $t$ and traded at the next close, it first scales $R_{t+2}$; the version that peeks scales $R_t$ itself; E5's slip, traded at its own close, scales $R_{t+1}$. All three run on the honest version's days, with cash and borrowing at 0.
+**Problem 8.** R8's scale (31.7) on TR23's daily simple returns: $\bar\sigma_t^2$ the uncentred mean square of the 504 returns through $t$, and (26.2) with $\lambda=0.94$ run through the same returns from $\bar\sigma_t^2$. Set at the close of $t$ and traded at the next close, it first scales $R_{t+2}$; the version that peeks scales $R_t$ itself; the scale traded at its own close, as in [[eg:sameclose]], scales $R_{t+1}$. All three run on the honest version's days, with cash and borrowing at 0.
 """)
 
 code(r"""
@@ -370,9 +372,9 @@ sbar2[W - 1:] = sq.mean(axis=1)
 ew = np.full(T, np.nan)                        # the EWMA run through each window, in closed form
 ew[W - 1:] = lam**W * sbar2[W - 1:] + sq @ ((1 - lam) * lam ** np.arange(W - 1, -1, -1))
 scale = np.minimum(1.5, np.sqrt(sbar2 / ew))   # known at the close of t
-honest, slip, peek = (np.full(T, np.nan) for _ in range(3))
+honest, own, peek = (np.full(T, np.nan) for _ in range(3))
 honest[W + 1:] = scale[W - 1:-2]
-slip[W:] = scale[W - 1:-1]
+own[W:] = scale[W - 1:-1]                      # traded at the close it is set
 peek[W:] = scale[W:]
 ok = ~np.isnan(honest)
 assert int(np.flatnonzero(ok)[0]) == W + 1     # a scale set at the close of t first scales R at t + 2
@@ -394,7 +396,7 @@ for lab, lv, pr in (("traded at the next close", honest, ("15.08", "18.27", "-7.
     show(f"{lab}: growth", 100 * g, ".2f", pr[0])
     show(f"{lab}: volatility", 100 * v, ".2f", pr[1])
     show(f"{lab}: worst day", 100 * m, ".2f", pr[2])
-show("E5's slip: growth", 100 * run(slip)[0], ".2f", "14.90")
+show("traded at its own close: growth", 100 * run(own)[0], ".2f", "14.90")
 i7 = TD.index("2025-04-07")
 show("7 April 2025: honest scale", honest[i7], ".3f", "0.703")
 show("7 April 2025: peeking scale", peek[i7], ".3f", "0.428")
@@ -581,7 +583,7 @@ show("median correlation", np.quantile(cc, 0.5, method="inverted_cdf"), ".2f", "
 md(r"""
 ## Part 6 — CSCV
 
-The module's `cscv` (Section 9): block sums, every choice of 8 of the 16 blocks, one matrix product for the in-sample sums, and the out-of-sample sums as the totals minus those. The performance is the Sharpe ratio of daily returns over $r_f/A_{\mathrm w}$.
+The module's `cscv` (Section 9): block sums, every choice of 8 of the 16 blocks, one matrix product for the in-sample sums, and the out-of-sample sums as the totals minus those. The performance is the Sharpe ratio of daily returns in excess of $r_f/A_{\mathrm w}$.
 """)
 
 code(r"""
@@ -631,7 +633,7 @@ plt.show()
 """)
 
 md(r"""
-**[[eg:noise]]** (*model*): 200 panels of 60 independent zero-mean strategies, each panel one draw `standard_normal((1851, 60))` × 1% from `default_rng([2, 20261011])`, rows days.
+**[[eg:noise]]** (*model*): CSCV with $r_f=0$ on 200 panels of 60 independent zero-mean strategies, each panel one draw `standard_normal((1851, 60))` × 1% from `default_rng([2, 20261011])`, rows days.
 """)
 
 code(r"""
@@ -697,14 +699,18 @@ full = kelly_root(R)
 show("the full-sample root", full, ".2f", "4.14")
 show("4.14 held", 100 * grow(4.14 * R[mk]), ".2f", "31.70")
 print(f"2.07 held: {100 * grow(2.07 * R[mk]):.2f}%")
+show("sessions a year A (borrowing accrues 3.5%/A a session)", ak, ".2f", "245.76")
 show("walk-forward, borrowing at 3.5%", 100 * grow(fin(lev[mk])), ".2f", "16.63")
 show("4.14, borrowing at 3.5%", 100 * grow(fin(np.full(int(mk.sum()), 4.14))), ".2f", "20.71")
+iw = int(np.argmin(R[mk]))
+print("worst day:", [d for d, m in zip(TD, mk) if m][iw])
+show("1 + 4.14 R on the worst day", 1 + 4.14 * R[mk][iw], ".2f", "0.60")
 """)
 
 md(r"""
 ## Part 8 — Problem 12
 
-With zero skill, each per-day in-sample ratio is about $\mathcal N(0, 1/920)$; by (21.9) the largest of 60 has median $\Phi^{-1}(0.5^{1/60})/\sqrt{920}$, and its mean is $\int z\,\mathrm d\Phi(z)^{60}$ over $\sqrt{920}$.
+With zero skill, each per-day in-sample ratio is about $\mathcal N(0, 1/920)$; by (21.9) the largest of 60 has median $\Phi^{-1}(0.5^{1/60})/\sqrt{920}$, and its mean, by LM33's (33.4), is $\int z\,\mathrm d\Phi(z)^{60}$ over $\sqrt{920}$.
 """)
 
 code(r"""
@@ -809,7 +815,7 @@ uv run python data/make_lab_data.py    # writes every lab's data/ folder
 | `data/e5_wealth.csv` | E5's wealth frame: every session after the base close of 2017-01-17, with `traded` per fund (FinMind `TaiwanStockPrice`, `TaiwanStockDividendResult`, `TaiwanStockSplitPrice`) |
 | `data/rule_targets.csv` | the through case's trades (`data/vol5_rules.py`): rule, signal, trade, the five target exposures, exposure, turnover, cost |
 | `data/rule_wealth.csv` | the eight rules' net and gross wealth paths from the first trade |
-| `data/lm34_grid.csv` | the declared grid's 60 net-return series, first row the first purchase of 2019-03-04, then the 1,851 daily returns (`data/lm34_numbers.py`) |
+| `data/lm34_grid.csv` | the declared grid's 60 net-return series, first row the first purchase of 2019-03-04, then the 1,851 daily returns (`data/lm34_grid.py`) |
 | `data/taiex_tr.csv` | the TAIEX total-return index (FinMind `TaiwanStockTotalReturnIndex`) |
 | `data/0050_daily_raw.csv`, `data/0050_dividends.csv` | 0050's closes and distributions (FinMind `TaiwanStockPrice`, `TaiwanStockDividendResult`) |
 | `data/splits__2016-12-01__2026-10-08.csv` | the registered splits (FinMind `TaiwanStockSplitPrice`) |

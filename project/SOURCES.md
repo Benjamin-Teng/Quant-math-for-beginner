@@ -2000,6 +2000,8 @@ nothing in the text was read; "unverified" marks a field or claim that no record
   strictly above `V_l` (p. 1110). Crossref, re-read: 68(5): 1097–1126, September 2000.
 - Sullivan, Timmermann & White (1999), "LM21": one sentence in LM34's §6 (the reality check on technical trading
   rules). Crossref, re-read: *JF* 54(5): 1647–1691, October 1999.
+- Harvey, Liu & Zhu (2016), "LM21": LM34's §6 names their hurdle of 3 (LM21's), and LM34's References list the paper
+  as lm21.md:538 prints it.
 - Ledoit & Wolf (2008), "LM22": LM33's two-Sharpe test, now read in the JEF text (its LM22 entry, rewritten).
 - Jobson & Korkie (1981), "LM22": LM33 names it once; bibliographic data only. Memmel (2003) stays **unverified**,
   and LM33 does not cite it. Crossref, re-read: *JF* 36(4): 889–908, September 1981.
@@ -3245,7 +3247,7 @@ search was read to its end, except the all-listings searches for `moment`, `mult
 | criteria | — (compounds only, such as criteria for estimation 估計準則) | — (compounds only) | — (compounds only, such as decision criteria 決策準則) | 評比標準 (LM34 §2), composed from 標準 (一般性常見術語 "criteria" 標準；基準；準則) |
 | proportional | — (compounds only, such as proportional error 比例誤差) | — (compounds only) | — | 成正比 (LM34 §3), the everyday word (一般性常見術語 "proportional" 比例) |
 | multiple | — (compounds only) | 倍數；倍式；多重 | — (compounds only) | 倍數 (LM34 §5) |
-| correlation | 相關 | 相關；對射變換 | 相關性 | 相關 (LM34 §6) |
+| correlation | 相關 | 相關；對射變換 | 相關性 | 相關係數 (LM34 §6), as LM8's and LM16's Glossaries pair it |
 | shock | 衝擊項 | — | — | 衝擊 (LM35 §6), as in 統計學名詞's technology shocks 技術衝擊 and structural shocks 結構性衝擊 (衝擊項 is a time-series model's error term) |
 | initial margin; maintenance margin | —; — | —; — | 原始保證金; 維持保證金 | 原始保證金, 維持保證金 (lm02.md:831–832) |
 
@@ -3257,6 +3259,19 @@ three listings), 情境區間, 因子衝擊 and 部分情境 have no entry. The 
 (spell under water) and 從期初資本算起的損失 (loss from initial wealth) in LM32's Glossary; 決策日, 參考費率, 成本比例
 (cost share) and 對數差距 (log gap) in LM34's boxes; 情境區間 (scenario window), 因子衝擊 (factor shock) and 部分情境
 (partial scenario) in LM35's boxes and Glossary.
+
+Stage 3 round 1 (LM33), 樂詞網 searched 2026-11-15 by the editor with curl, anonymously (generic User-Agent, no
+cookie, no personal data, about one request a second), with the Volume III URL pattern: 8 query strings
+(`two-sided test`, `two-tailed test`, `two sided test`, `two tailed test`, `two-sided`, `雙邊檢定`, `雙側檢定`,
+`雙尾檢定`), each in all listings, 統計學名詞, 數學名詞 and 管理學名詞 (32 searches, one result page each, every one
+read to its end; the largest, `two-sided` in all listings, has 51 rows).
+
+| English | 統計學名詞 | 數學名詞 | 管理學名詞 | Book |
+|:--|:--|:--|:--|:--|
+| two-sided test; two-tailed test | 雙邊檢定 (also "double-sided test"); 雙尾檢定 (also "double-tailed test") | 雙側檢定 (also 數學名詞-兩岸數學名詞); 雙尾檢定 | —; — (經濟學 兩端檢定; 雙尾檢定) | 雙邊檢定 (LM33 §5), 統計學名詞's form, beside 單邊檢定 |
+
+數學名詞 also lists "double-sided test" 雙邊檢定. Without the hyphen, `two sided test` finds only 機械工程名詞's 雙側檢定
+and `two tailed test` nothing.
 
 ## Writing style (AUTHORING §1, checked 2026-10-11)
 

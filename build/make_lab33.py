@@ -504,7 +504,7 @@ plt.show()
 md(r"""
 ## Part 6 — Ledoit and Wolf's test by hand
 
-(33.6) with (23.7) at lag 7, and their studentized circular block bootstrap with the book's settings: $b=22$ (the largest stationary estimate of `optimal_block_length` over the eight rules' squared demeaned returns), 85 block starts per resample cut to 1,851 rows, moments centred at the resample's own means, the block covariance from the 84 complete blocks. Experiment 1 shares one set of block starts among the seven pairs, so problem 12's pair R4 − R1 is one column of it.
+(33.6) with (23.7) at lag 7, and their studentized circular block bootstrap with the book's settings: $b=22$ (the largest stationary estimate of `optimal_block_length` over the eight rules' squared demeaned returns), 85 block starts per resample cut to 1,851 rows, moments centred at the resample's own means, and $\hat\Psi_{\text{boot}}$, $b/\lfloor T/b\rfloor$ times the sum of the block means' outer products, from the 84 complete blocks. Experiment 1 shares one set of block starts among the seven pairs, so problem 12's pair R4 − R1 is one column of it.
 """)
 
 code(r"""
@@ -537,7 +537,7 @@ def lw_boot(XA, pairs, blk, n_boot, rng):
         mu, ga = Xs.mean(axis=0), (Xs**2).mean(axis=0)
         V = np.concatenate([Xs - mu, Xs**2 - ga], axis=1)[: lb * blk]
         Z = V.reshape(lb, blk, -1).sum(axis=1) / math.sqrt(blk)
-        Pb = Z.T @ Z / lb
+        Pb = Z.T @ Z / lb                    # Psi_boot: b / floor(T/b) x sum of the block means' outer products
         for jj, (j, o) in enumerate(pairs):
             a, b_, c, d = mu[j], mu[o], ga[j], ga[o]
             grad = np.array([c / (c - a**2) ** 1.5, -d / (d - b_**2) ** 1.5, -0.5 * a / (c - a**2) ** 1.5,
@@ -660,7 +660,7 @@ show("DSR at n_eff", psr(SR["R2"], emc * s0, T, sk2, ku2), ".3f", "0.994")
 show("eq. (9) of Bailey and Lopez de Prado", float(off.mean()) + (1 - float(off.mean())) * 8, ".2f", "2.25")
 cs = float(np.array([SR[k] for k in RULES]).std())
 show("SD of the eight estimates, a year", cs * sqA, ".3f", "0.141")
-show("expected under equal true ratios", math.sqrt((1 - C.sum() / 64) / T) * sqA, ".3f", "0.144")
+show("root of the eight estimates' expected variance under equal true ratios", math.sqrt((1 - C.sum() / 64) / T) * sqA, ".3f", "0.144")
 
 
 def mintrl_n(ez):

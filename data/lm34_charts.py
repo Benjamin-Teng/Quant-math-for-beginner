@@ -4,7 +4,7 @@ Run:  PYTHONUTF8=1 uv run python data/lm34_charts.py
       (after data/vol3_series.py, data/vol5_series.py and data/vol5_rules.py; data/lm34_numbers.py then checks the
       text against the same computations)
 
-Inputs and conventions: data/lm34_common.py (the anchor script's computations, imported, about a minute). Writes
+Inputs and conventions: data/lm34_common.py (the anchor script's computations, its main(), about a minute). Writes
   lm34-wealth     the eight rules' net wealth at the last session of each ISO week (week keys by ISO year and week),
                   from the first trade's close to 2026-10-08, plus the first and last sessions (every cited value);
                   R1, R2, R4 and R8 named, R3, R5, R6 and R7 as quiet lines (X37: weekly points, no daily series);
@@ -44,6 +44,7 @@ from scipy import stats
 ROOT = HERE.parent
 OUT = ROOT / "src" / "data"
 OUT.mkdir(parents=True, exist_ok=True)
+C.main()
 K = C.KEEP
 RULES = ["R1", "R2", "R3", "R4", "R5", "R6", "R7", "R8"]
 
@@ -255,7 +256,7 @@ wblock = {"n": NS, "sr": SRS, "means": means, "seMax": rd(se_max, 6), "days": in
 write("lm34-pboSim", {
     "type": "bar", "valueLabels": False, "height": 280,
     "alt": "Mean PBO of 40 simulated panels by the number of strategies: near one half when no strategy has skill, "
-           "falling as strategy 1's true Sharpe ratio rises to 2",
+           "falling as strategy 1's true annual Sharpe ratio rises to 2",
     "categories": [str(n) for n in NS], "x": {"label": "Strategies n"},
     "y": {"fmt": "n2", "tfmt": "n1", "label": "Mean PBO", "min": 0, "max": 0.8, "ticks": [0, 0.2, 0.4, 0.6, 0.8]},
     "series": [{"name": f"true ratio {s:g}", "color": str(c), "values": [means[str(n)][SRS.index(s)] for n in NS],

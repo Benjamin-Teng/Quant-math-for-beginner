@@ -215,11 +215,15 @@ cnt("rules' returns", nR, "1,851", 2)
 assert K.rdates[0] == "2019-03-05" and K.rdates[-1] == "2026-10-08" and K.paths["R1"].dates[0] == "2019-03-04"
 has("rules' start", "1,851 sessions from 5 March 2019 (7.60 years from the close of 4 March 2019)")
 has("rules' recursion", "net returns on the wealth frame, (27.1)–(27.2),")
+has("notation x", "$X$, $x$ a count and its value ($x$ a loss level in Section 3);")
+has("not in the book", "Extreme value theory beyond Hill's estimator, backtests of ES, multivariate GARCH and conditional "
+    "drawdown measures are not in this book.")
 has("hygiene fixing date", "**fixed in advance** on 24 October 2026")
 has("hygiene labels", "**Constructed** and **hypothetical** inputs are labelled where they appear")
 has("hygiene tests", "Section 3 runs one test, Section 7 twelve and Section 8 eight")
 for lab_ in ("A hypothetical sample of $T=180$", "A hypothetical daily return is normal", "A hypothetical wealth path",
-             "Over 2,000 hypothetical days", "500 hypothetical days", "A hypothetical model gives $-4\\%$",
+             "Over 2,000 hypothetical days", "1,000 hypothetical days", "A hypothetical model gives $-4\\%$",
+             "A hypothetical EWMA forecast",
              "A hypothetical $\\sigma=20\\%$", "a hypothetical 20% limit", "(*constructed*). Compare",
              "(*constructed*). At $u=5\\%$"):
     has("label in place", lab_, 3 if lab_ == "a hypothetical 20% limit" else None)
@@ -324,6 +328,8 @@ chk("E2 ES/VaR 1%", es_h(R, U) / var_h(R, U), ".2f", "1.31")
 chk("E2 ES/VaR 2.5%", es_h(R, U2) / var_h(R, U2), ".2f", "1.41")
 chk("E2 ratio 1% from printed", 4.689 / 3.567, ".2f", "1.31")
 chk("E2 ratio 2.5% from printed", 3.740 / 2.648, ".2f", "1.41")
+has("E2 ratios", f"ES ÷ VaR is {es_h(R, U) / var_h(R, U):.2f} at {100 * U:.0f}% ([[ex:tail]]'s solid lines) and "
+    f"{es_h(R, U2) / var_h(R, U2):.2f} at {100 * U2:.1f}%.")
 # pitfall: the ceil(uT) mean, the floor(uT) mean and (32.2)
 pct("pitfall mean of 59", es_k(R, U), 3, "4.679")
 pct("pitfall mean of 58", -float(np.sort(R)[:58].mean()), 3, "4.699")
@@ -401,8 +407,7 @@ for u in (0.001, 0.01):
     num_ = integrate.quad(lambda x_: x_ ** (-K.ah), lev, np.inf)[0]
     den_ = integrate.quad(lambda x_: x_ ** (-K.ah - 1), lev, np.inf)[0]
     assert abs(num_ / den_ - K.ah / (K.ah - 1) * lev) < 1e-9 * lev, u
-has("Hill derivation", "whose density there is proportional to $x^{-\\alpha-1}$")
-has("not in the book: EVT", "Extreme value theory beyond Hill's estimator is not in this book.")
+has("Hill derivation", "whose density is proportional to $x^{-\\alpha-1}$")
 # E4
 assert len(K.R10) == 5840
 cnt("E4 overlapping sums", len(K.R10), "5,840")
@@ -476,18 +481,32 @@ for lv_, t_days, d_days in ((0.03, "79.0", 108), (0.05, "19.6", 15)):
     d_at[lv_] = int(np.sum(R <= -lv_ + K.EPS))
     assert f"{t_at[lv_]:.1f}" == t_days and d_at[lv_] == d_days
 assert t_at[0.03] - t_at[0.05] < d_at[0.03] - d_at[0.05] and t_at[0.05] > d_at[0.05]   # too few from -3% to -5%, too many beyond
-has("KC 3 (a)", "The order of days raised it in [[eg:horizon]]. Under GARCH ([[eg:mc10]]), mean reversion from a high "
-    "variance lowers it, and the variance's random feedback raises it")
+# KC 3 (a): compounding is the third failure; the rule on the one-day log VaR, then compounded
+has("KC 3 (a) failures", "Heavy tails that average out over the sum, a positive mean and compounding move the true value "
+    "below the rule.")
+lv1 = -math.log1p(-var_h(R, U))                                 # the one-day log VaR
+lg10, sm10 = math.sqrt(10) * lv1, 1 - math.exp(-math.sqrt(10) * lv1)
+chk("KC 3 (a) log VaR", 100 * lv1, ".3f", "3.632")
+chk("KC 3 (a) in logs", 100 * lg10, ".2f", "11.49")
+chk("KC 3 (a) simple", 100 * sm10, ".2f", "10.85")
+chk("KC 3 (a) in logs from printed", 100 * math.sqrt(10) * 0.03632, ".2f", "11.49")
+chk("KC 3 (a) simple from printed", 100 * (1 - math.exp(-0.1149)), ".2f", "10.85")
+assert sm10 < math.sqrt(10) * var_h(R, U)                       # compounding moves it below the rule's 11.28%
+for xl_ in (0.01, lv1, 0.1):                                    # and for any loss: 1 - e^(-sqrt(m) x) < sqrt(m)(1 - e^-x)
+    assert 1 - math.exp(-math.sqrt(10) * xl_) < math.sqrt(10) * (1 - math.exp(-xl_))
+has("KC 3 (a) compounding", rf"The rule on the one-day log VaR gives $\sqrt{{10}}\times{100 * lv1:.3f}\%={100 * lg10:.2f}\%$ "
+    f"in logs, a simple loss of {100 * sm10:.2f}%.")
+has("KC 3 (a) order", "The order of days raised the true value in [[eg:horizon]].")
 
 # ---------------------------------------------------------------- Section 4
 xs = K.xs
 j1, j2, cov = K.binom_interval(T, U)
 assert (j1, j2) == (44, 75)
 for row_ in ("| Ranks $j_1$, $j_2$ | 44, 75 | 2,850, 3,000 |", "| Interval (%) | −4.016 to −3.425 | 0.069 to 0.114 |",
-             "| Coverage | 0.9587 | 0.9502 |", "| Spacing density (per point) | 0.0090 | 0.5655 |",
+             "| Coverage | 0.9587 | 0.9502 |",
+             "| Spacing density, from the unrounded ends (per point) | 0.0090 | 0.5655 |",
              "| SE by (32.6) (points) | 0.145 | 0.0116 |", "| Half the width ÷ 1.96 (points) | 0.151 | |"):
     has("E5 table", row_)
-has("E5 large T", "For the 1% quantile the two SEs nearly agree, so at 5,849 days \"large $T$\" holds")
 chk("E5 point", 100 * float(xs[58]), ".3f", "-3.567")
 has("E5 ranks", f"$R_{{({K.jrank(U, T)})}}=-3.567\\%$, and its median, $R_{{({K.jrank(0.5, T)})}}=0.0879\\%$")
 chk("E5 lower", 100 * float(xs[j1 - 1]), ".3f", "-4.016")
@@ -502,6 +521,18 @@ chk("E5 SE from the printed density", math.sqrt(0.01 * 0.99 / 5849) / 0.0090, ".
 half = 100 * (float(xs[j2 - 1]) - float(xs[j1 - 1])) / 2 / 1.96
 chk("E5 half-width / 1.96", half, ".3f", "0.151")
 chk("E5 half-width from printed", (4.016 - 3.425) / 2 / 1.96, ".3f", "0.151")
+# the two SEs agree by construction: their ratio is fixed by T, u and the ranks, whatever the returns
+assert abs(se_a / half - 3.92 * math.sqrt(T * U * (1 - U)) / (j2 - j1)) < 1e-12 and 0.95 < se_a / half < 1
+has("E5 same ranks", f"Both SEs of the 1% quantile rest on ranks {j1} and {j2}, so they nearly agree whatever the data.")
+jq = K.jrank(U, T)
+lo_ = 100 * float(xs[jq - 1] - xs[j1 - 1])
+hi_ = 100 * float(xs[j2 - 1] - xs[jq - 1])
+chk("E5 span below", lo_, ".3f", "0.449")
+chk("E5 span above", hi_, ".3f", "0.142", 2)                    # also E10's purchase cost
+assert lo_ > 3 * hi_                                            # the density changes across the interval
+has("E5 lopsided", f"but ranks {j1} to {jq} span {lo_:.3f} points and ranks {jq} to {j2} only {hi_:.3f}.")
+has("E5 large T", "\"Large $T$\" here means an interval narrow enough for a nearly constant density, but ranks")
+has("E5 rough guide", f"So even at {T:,} days, (32.6) with the spacing density is a rough guide.")
 chk("E5 iid bootstrap", 100 * float(K.qi_a.std()), ".3f", "0.119")
 chk("E5 iid batch SE", 100 * K.batch_se_sd(K.qi_a), ".4f", "0.0014")
 chk("E5 block bootstrap", 100 * float(K.qb_a.std()), ".3f", "0.257")
@@ -509,8 +540,9 @@ chk("E5 block batch SE", 100 * K.batch_se_sd(K.qb_a), ".4f", "0.0019")
 chk("E5 ratio", float(K.qb_a.std() / K.qi_a.std()), ".1f", "2.2", 2)
 chk("E5 ratio from printed", 0.257 / 0.119, ".1f", "2.2", 2)
 has("E5 block length", "(experiment 6, `default_rng([6, 20261011])`, $\\ell=145$ by [[LM22]]'s rule, in its draw order)")
-has("E5 iid", "The iid bootstrap (experiment 5, `default_rng([5, 20261011])`, 10,000 resamples) gives the 1% quantile an "
-    "SE of 0.119 points (batch SE 0.0014)")
+has("E5 iid", f"The iid bootstrap (experiment 5, `default_rng([5, {K.SEED}])`, {len(K.qi_a):,} resamples), which needs no "
+    f"density, gives the 1% quantile an SE of {100 * float(K.qi_a.std()):.3f} points (batch SE "
+    f"{100 * K.batch_se_sd(K.qi_a):.4f})")
 m1, m2, mcov = K.binom_interval(T, 0.5)
 assert (m1, m2) == (2850, 3000) and K.jrank(0.5, T) == 2925
 chk("E5 median", 100 * float(xs[2924]), ".4f", "0.0879")
@@ -521,6 +553,9 @@ fm = (m2 - m1) / (T * 100 * (float(xs[m2 - 1]) - float(xs[m1 - 1])))
 chk("E5 median spacing density", fm, ".4f", "0.5655")
 chk("E5 median SE", math.sqrt(0.25 / T) / fm, ".4f", "0.0116")
 chk("E5 median SE from the printed density", math.sqrt(0.25 / 5849) / 0.5655, ".4f", "0.0116")
+# the printed median ends (0.069, 0.114) give 0.5699 and an SE of 0.0115, so the table's density row says it uses the
+# unrounded ends; the 1% column's 0.0090 follows from either (chk "E5 density from printed" above)
+assert f"{150 / (5849 * (0.114 - 0.069)):.4f}" == "0.5699" and f"{math.sqrt(0.25 / 5849) / 0.5699:.4f}" == "0.0115"
 assert m2 - m1 == 150
 has("E5 LM20 location SE", "[[LM20]]'s $t$ location had 0.0124")
 assert "| 0.0997 (0.0124) |" in (ROOT / "src" / "lm20.md").read_text(encoding="utf-8")   # lm20.md:269
@@ -557,13 +592,13 @@ assert float(K.var1) == -0.02 and float(K.es1) == 0.476
 has("E6 inputs", "Two independent bonds each lose 60% with probability 0.8% and gain 2% otherwise (*constructed*)")
 chk("E6 one bond VaR", float(100 * K.var1), ".2f", "-2.00", 5)   # also Problem 7's option A (one bond at 5%)
 has("E6 ES display", "$-\\big[0.008\\times(-60\\%)+0.002\\times2\\%\\big]/0.01=47.60\\%$")
-chk("E6 one bond ES", float(100 * K.es1), ".2f", "47.60", 5)
-chk("E6 ES from the printed formula", -(0.008 * -60 + 0.002 * 2) / 0.01, ".2f", "47.60", 5)
+chk("E6 one bond ES", float(100 * K.es1), ".2f", "47.60", 4)
+chk("E6 ES from the printed formula", -(0.008 * -60 + 0.002 * 2) / 0.01, ".2f", "47.60", 4)
 chk("E6 some default", float(100 * K.p_any), ".2f", "1.59")
 chk("E6 some default from printed", 100 * (1 - 0.992**2), ".2f", "1.59")
 has("E6 some default display", "$1-0.992^2=1.59\\%$")
-chk("E6 half VaR", float(-100 * K.half_one), ".2f", "29.00", 4)
-chk("E6 half VaR from printed", -(-60 + 2) / 2, ".2f", "29.00", 4)
+chk("E6 half VaR", float(-100 * K.half_one), ".2f", "29.00", 3)
+chk("E6 half VaR from printed", -(-60 + 2) / 2, ".2f", "29.00", 3)
 chk("E6 half ES", float(100 * K.es_half), ".2f", "29.20", 3)
 assert float(2 * K.var1 / 2) == -0.02
 has("E6 conclusion", "Diversifying raised VaR and lowered ES")
@@ -580,6 +615,9 @@ has("Basel normal display", f"$\\operatorname{{ES}}_{{{U2}}}={K.k_n:.3f}\\sigma$
     f"$\\operatorname{{VaR}}_{{{U}}}={-K.z01:.3f}\\sigma$")
 chk("KC 5 ratio", K.k_n / -K.z01, ".3f", "1.005")
 chk("KC 5 ratio from printed", 2.338 / 2.326, ".3f", "1.005")
+has("KC 5 question", "without changing a normal book's measured risk much, and why does the switch matter on TR23?")
+has("KC 5 answer", f"The ratio ${K.k_n:.3f}/{-K.z01:.3f}$ is {K.k_n / -K.z01:.3f}, so a normal book's measured risk "
+    "barely moves.")
 chk("TR23 ES2.5/VaR1 historical", es_h(R, U2) / var_h(R, U), ".2f", "1.05")
 chk("TR23 ES2.5/VaR1 t", es_t(K.nu0, K.loc0, K.sc0, U2) / var_t(K.nu0, K.loc0, K.sc0, U), ".2f", "1.11")
 chk("historical ratio from X3's printed cells", 3.74 / 3.57, ".2f", "1.05")
@@ -595,6 +633,11 @@ chk("E7 GARCH-t sigma", sg["GARCH-t"], ".4f", "1.7040", 2)
 chk("E7 normal mean", float(K.pn[0]), ".4f", "0.1020")
 chk("E7 t mean", float(K.pt[0]), ".4f", "0.1190")
 chk("E7 t nu", float(K.pt[4]), ".2f", "6.39")
+has("E7 sigmas", f"On 2 April the forecasts $\\sigma_{{t+1\\mid t}}$ were {sg['EWMA']:.4f}% (EWMA) and "
+    f"{sg['GARCH-n']:.4f}% (GARCH-n), as [[LM26]] prints them, and {sg['GARCH-t']:.4f}% (GARCH-t) a day.")
+lm26 = (ROOT / "src" / "lm26.md").read_text(encoding="utf-8")
+assert f"| 2 April → 7 April | {sg['GARCH-n']:.4f} | {sg['EWMA']:.4f} |" in lm26          # lm26.md:39 prints these two
+assert f"{sg['GARCH-t']:.4f}" not in lm26                                                  # and not GARCH-t's (LM32's refit)
 # the VaRs from the printed inputs (32.8)
 z = float(stats.norm.ppf(U))
 chk("E7 EWMA VaR from printed", 100 * (1 - math.exp(1.5605 * z / 100)), ".2f", "3.57", 5)
@@ -664,6 +707,25 @@ chk("E8 feedback SE", 100 * float(np.std(K.bq_full - K.bq_d)) / math.sqrt(20), "
 # KC 6
 chk("KC 6", 100 * (math.exp(-0.04) - 1), ".2f", "-3.92")
 has("KC 6 display", "$e^{-0.04}-1=-3.92\\%$")
+# KC 6 (b): a hypothetical EWMA forecast (g = 0, normal innovations) through (32.8) and the completed square
+s6 = 0.03
+v6 = 1 - math.exp(s6 * z)
+P6 = float(stats.norm.cdf(z - s6))
+e6 = 1 - math.exp(s6**2 / 2) * P6 / U
+es6_q = 1 - integrate.quad(lambda v: math.exp(s6 * v) * float(stats.norm.pdf(v)), -np.inf, z)[0] / U
+assert abs(es6_q - e6) < 1e-10                                  # the completed square, by quadrature
+chk("KC 6 (b) VaR", 100 * v6, ".2f", "6.74")
+chk("KC 6 (b) VaR from printed", 100 * (1 - math.exp(-0.03 * 2.32635)), ".2f", "6.74")
+chk("KC 6 (b) z", z, ".5f", "-2.32635", 2)       # the question and the answer; E3's -2.3263 would give 0.009229, 7.67%
+chk("KC 6 (b) Phi", P6, ".6f", "0.009228")
+chk("KC 6 (b) Phi from printed", float(stats.norm.cdf(-2.32635 - 0.03)), ".6f", "0.009228")
+assert f"{float(stats.norm.cdf(-2.3263 - 0.03)):.6f}" != "0.009228"
+chk("KC 6 (b) ES", 100 * e6, ".2f", "7.68")
+chk("KC 6 (b) ES from printed", 100 * (1 - math.exp(0.00045) * 0.009228 / 0.01), ".2f", "7.68")
+has("KC 6 (b) question", f"(b) A hypothetical EWMA forecast is $\\sigma_{{t+1\\mid t}}={100 * s6:.0f}\\%$. With "
+    f"$\\Phi^{{-1}}({U:.2f})={z:.5f}$, find the {100 * (1 - U):.0f}% VaR and ES of the simple return.")
+has("KC 6 (b) answer", f"(b) By (32.8) the VaR is $1-e^{{-{s6:.2f}\\times{-z:.5f}}}={100 * v6:.2f}\\%$. With "
+    f"$\\Phi({z:.5f}-{s6:.2f})={P6:.6f}$, completing the square gives an ES of {100 * e6:.2f}%.")
 
 # ---------------------------------------------------------------- Section 7
 BT = K.BT
@@ -673,7 +735,8 @@ has("margins", "is 0.011 points for HS and 0.0012 over all six models, so no ret
 has("t refits", "the $t$ refits at each month's first session on the 1,231 returns before it")
 cnt("window", K.W_, "1,231", 4)                 # the case, X1's note and the backtest's two
 assert K.dates[K.s7 - K.W_] == "2020-03-10" and K.dates[K.s7 - 1] == "2025-03-31"   # the t's fit of 1 April
-cnt("n", K.n_bt, "4,609", 6)
+cnt("n", K.n_bt, "4,609", 7)
+has("X5 title", f"Exceedances against Basel's rule applied to {K.n_bt:,} days")
 assert K.dates[K.first] == "2008-01-02"
 has("backtest start", "on $n=4{,}609$ days from 2 January 2008")
 chk("expected", K.n_bt * U, ".2f", "46.09", 4)
@@ -745,12 +808,20 @@ cnt("X6b windows", 4360, "4,360")
 assert (min(n_tie.values()), max(n_tie.values())) == (7, 19), n_tie       # "From 7 to 19 windows tie at each maximum"
 assert {m for m in MODELS if tie_months[m]} == {"N", "EWMA"}
 assert tie_months["N"] == {"2009-06"} and tie_months["EWMA"] == {"2020-03", "2022-03"}, tie_months
-has("X6b recurrences", "The most recurs months later only for N, in June 2009, and for EWMA, in March 2020 and March "
-    "2022. From 7 to 19 windows tie at each maximum")
+
+
+def month_year(ym: str) -> str:
+    """2009-06 -> 'June 2009'."""
+    return f"{MONTHS[int(ym[5:7]) - 1]} {ym[:4]}"
+
+
+rec_n, rec_e = (" and ".join(month_year(s_) for s_ in sorted(tie_months[m])) for m in ("N", "EWMA"))
+has("X6b recurrences", f"The most recurs more than a month later only for N, in {rec_n}, and for EWMA, in {rec_e}. "
+    f"From {min(n_tie.values())} to {max(n_tie.values())} windows tie at each maximum")
 has("independence HS", "HS's 9 of 56, against 0.68 expected, give $2.6\\times10^{-8}$")
 has("independence p-value", "and its upper tail gives the p-value")
-has("not in the book: ES backtests", "Backtests of ES and multivariate GARCH are not in this book.")
 has("LM26 scored", "scored the variance forecasts behind EWMA and the two GARCH laws")
+has("count against scores", "A count tests a quantile, while [[LM26]]'s QLIKE")
 chk("Bonferroni", 0.05 / 12, ".4f", "0.0042", 3)
 rej_cov = [m for m in MODELS if BT[m]["p_cov"] <= 0.05 / 12]
 rej_ind = [m for m in MODELS if BT[m]["p_ind"] <= 0.05 / 12]
@@ -770,7 +841,7 @@ chk("KC 7 z from printed", (56 - 46.09) / 6.75, ".2f", "1.47", 2)
 has("KC 7 displays", "The SD is $\\sqrt{4609\\times0.01\\times0.99}=6.75$, so $z=(56-46.09)/6.75=1.47$")
 has("KC 7 question", f"HS had {x['HS']} exceedances against {K.n_bt * U:.2f} expected")
 has("KC 7 answer", f"{int(BT['HS']['n11'])} of HS's {x['HS']} exceedances were followed by another")
-has("中文導讀 backtest", f"的次數 {x['HS']} 與模型應有的 {K.n_bt * U:.2f} 次")
+has("中文導讀 backtest", f"超過 VaR 的日子有 {x['HS']} 天，與模型正確時應有的 {K.n_bt * U:.2f} 天")
 
 # ---------------------------------------------------------------- Section 8
 rt_rows = []
@@ -785,6 +856,7 @@ has("X8a note 19 days", "The 1% figures rest on 19 days, and no standard error i
 has("widget labels", "by the three methods (the normal and $t$ fits in-sample)")
 assert "(divisor 1,851; in-sample)" in (ROOT / "src" / "lm32.js").read_text(encoding="utf-8")
 has("worst days", "Each rule's worst day was 7 April 2025, except R7's, 19 March 2020")
+has("LM35 pointer", f"What each lost on {long_date(K.dates[i7])} is [[LM35]]'s.")      # LM35's X1 prints those eight losses
 for k in K.RULES:
     sp = SP[k]
     row = (f"| {k} | {100 * sp.mdd:.2f} | {short_date(sp.peak)} | {short_date(sp.trough)} | "
@@ -809,20 +881,21 @@ assert (s1.long, s1.long_peak, s1.long_end) == (484, "2022-03-07", "2024-03-05")
 has("E10 longest", "484 sessions below the peak of 7 March 2022, back on 5 March 2024")
 assert s1.dd0_date == s1.trough == "2020-03-19"
 pct("E10 DD0", s1.dd0, 2, "10.24", 2)
-has("E10 DD0", "Its largest loss from the start, 10.24%, came at the same trough.")
+has("E10 DD0", f"Its largest loss from initial wealth, {100 * s1.dd0:.2f}%, came at the same trough.")
 has("E10 (31.7)", "R8 scales R6 by a volatility forecast, [[LM31]]'s (31.7).")
 pct("E10 recovery", s1.mdd / (1 - s1.mdd), 2, "30.19")
 chk("E10 recovery from printed", 100 * 0.2319 / 0.7681, ".2f", "30.19")
 has("E10 recovery printed", "$0.2319/0.7681=30.19\\%$")
 s2 = SP["R2"]
 assert s2.dd0_date == "2019-03-08"
-has("E10 R2", "R2's MDD is 22.97%, yet its loss from the start never exceeded 0.39%, on 8 March 2019")
-# the MDDs and R2's largest loss from the start wherever they are printed (X8b, the prose, KC 8, the 中文導讀)
+has("E10 R2", f"R2's MDD is {100 * s2.mdd:.2f}%, yet its loss from initial wealth never exceeded {100 * s2.dd0:.2f}%, "
+    f"on {long_date(s2.dd0_date)}")
+# the MDDs and R2's largest loss from initial wealth wherever they are printed (X8b, the prose, KC 8, the 中文導讀)
 chk("R1 MDD", 100 * SP["R1"].mdd, ".2f", "23.19", 4)
 chk("R2 MDD", 100 * SP["R2"].mdd, ".2f", "22.97", 6)
 chk("R2 max DD0", 100 * SP["R2"].dd0, ".2f", "0.39", 5)
 chk("R6 MDD", 100 * SP["R6"].mdd, ".2f", "18.90", 2)
-pct("E10 purchase cost (LM27's A27-23)", 1 - float(K.paths["R2"].wealth[0]), 3, "0.142")
+pct("E10 purchase cost (LM27's A27-23)", 1 - float(K.paths["R2"].wealth[0]), 3, "0.142", 2)   # also E5's span
 pct("E10 R8 ES", es_h(ret["R8"], U), 2, "3.16", 5)
 pct("E10 R6 ES", es_h(ret["R6"], U), 2, "2.86", 2)
 has("E10 R6 R8", "Its 1% ES is higher (3.16% against 2.86%), yet its MDD is lower (18.42% against 18.90%)")
@@ -874,7 +947,8 @@ has("X9 atoms", "In 399 to 1,737 bootstrap resamples, by rule, the MDD equals a 
     "21 February, 24 February or 9 March)")
 on_atom = [k for k in K.RULES if float(np.mean(np.abs(K.MB[k] - qv(K.MB[k], 0.5)) < 1e-10)) > 0.01]
 assert on_atom == ["R5", "R6"]
-has("X9 atom medians", "R5's and R6's bootstrap medians lie on them and have no batch SE")
+has("X9 atom medians", "R5's and R6's bootstrap medians equal atoms, and a batch SE does not measure a median's error "
+    "there, so none is printed.")
 has("X9 atoms gloss", "so these values are atoms, values that many resamples take exactly")
 assert int(np.sum(np.abs(K.MB["R1"] - SP["R1"].mdd) < 1e-10)) == 223
 has("X9 223", "And 223 of R1's 3,305 equal its MDD exactly")
@@ -886,7 +960,18 @@ chk("KC 8 share", 100 * pge[1] / 10_000, ".2f", "5.57")
 chk("KC 8 share SE", 100 * math.sqrt(0.0557 * 0.9443 / 10_000), ".2f", "0.23")
 has("KC 8 SE", "No: 5.57% (SE 0.23 points) is above 5%")
 has("KC 8 question", f"(c) {pge[1]} of 10,000 permutations of R2's returns reach its MDD")
-has("not in the book: conditional drawdown", "Conditional drawdown measures are not in this book.")
+# KC 8 (a): the investor from March 2019 lost at most the DD0; one who bought at the MDD's peak lost the MDD exactly
+assert K.rdates[0][:7] == "2019-03"
+w2_, lab2_ = K.path_of(K.paths["R2"].wealth), ["start", *K.paths["R2"].dates]
+ip2_ = lab2_.index(s2.peak)
+assert abs(float(w2_[ip2_:].min()) / float(w2_[ip2_]) - (1 - s2.mdd)) < 1e-12
+assert lab2_[ip2_ + int(np.argmin(w2_[ip2_:]))] == s2.trough
+has("KC 8 (a) question", f"(a) R2's MDD is {100 * s2.mdd:.2f}%, but its largest loss from initial wealth is "
+    f"{100 * s2.dd0:.2f}%. Which is the most an investor who started in March 2019 ever lost of the capital put in? "
+    "Who lost the other?")
+has("KC 8 (a) answer", f"(a) {100 * s2.dd0:.2f}%, the loss from initial wealth. An investor who bought at the peak of "
+    f"{long_date(s2.peak)} lost {100 * s2.mdd:.2f}% by {long_date(s2.trough)}.")
+has("pointers paragraph", "the mean percentage fall is lower.\n\nThe rules' Sharpe ratios")     # its own paragraph
 # (32.10)
 chk("(32.10)", math.sqrt(math.pi / 2) * 0.20 * math.sqrt(10), ".3f", "0.793", 2)
 chk("(32.10) four decimals, the exponent", -math.sqrt(math.pi / 2) * 0.20 * math.sqrt(10), ".4f", "-0.7927")
@@ -914,6 +999,11 @@ has("KC 9 rank", f"Which one is $R_{{({j_})}}$")
 has("KC 9 ranks", f"returns $R_{{({j_})}}=-3.5671\\%$")
 has("KC 9 neighbours", f"between $R_{{({j_})}}$ and $R_{{({j_ + 1})}}$, so it lies a little above")
 has("section 9 LM26", "The lab refits the forecasts with [[LM26]]'s `arch` code.")
+T5S_DAYS = "2020-03-19,2024-08-05,2025-04-07"                 # the lab's three T5S days (build/make_lab32.py)
+assert f"--dates {T5S_DAYS}" in (ROOT / "build" / "make_lab32.py").read_text(encoding="utf-8")
+assert len(T5S_DAYS.split(",")) == 3                           # "three named days"
+has("lab box T5S", "Part 8 also reads three named days of the 5-second TAIEX: run `uv run python "
+    f"data/fetch_intraday.py --series taiex5s --dates {T5S_DAYS}` before `make_lab_data.py`.")
 
 # ---------------------------------------------------------------- practice problems and solutions
 assert K.jrank(U, 250) == 3 and math.floor(0.01 * 250) == 2
@@ -960,22 +1050,61 @@ assert (K.j1k, K.j2k) == (4, 18) and K.jrank(U, 1000) == 10
 chk("P6 coverage", K.covk, ".4f", "0.9761")
 has("P6 inputs", "For $T=1{,}000$ and $u=1\\%$")                   # binom_interval(1000, U) in lm32_common
 has("S6", "the ranks are 4 and 18, around the point $R_{(10)}$, with coverage 0.9761")
-chk("P7 some default", float(100 * K.pa7), ".2f", "7.84")
+# Problem 7 (Stage 3): a 50% loss, so that the key is not E6's 29.00%; anchor A32-50 keeps the plan's 60%
+u7, lgd7 = Fraction(5, 100), Fraction(-50, 100)
+assert K.pd7 == Fraction(4, 100) and K.gain == Fraction(2, 100)
+pa7 = 1 - (1 - K.pd7) ** 2
+pb7, pone7 = K.pd7**2, 2 * K.pd7 * (1 - K.pd7)
+assert K.pd7 < u7 and pb7 < u7 <= pb7 + pone7                 # one bond's 5% quantile is its gain; half each: one default
+var7_1 = -K.gain
+es7_1 = -(K.pd7 * lgd7 + (u7 - K.pd7) * K.gain) / u7
+half7 = (lgd7 + K.gain) / 2
+es7_h = -(pb7 * lgd7 + (u7 - pb7) * half7) / u7
+chk("P7 some default", float(100 * pa7), ".2f", "7.84")
 chk("P7 some default from printed", 100 * (1 - 0.96**2), ".2f", "7.84")
-chk("P7 both", float(100 * K.pb7), ".2f", "0.16", 2)
-chk("P7 VaR", float(-100 * K.half_one), ".2f", "29.00", 4)
-chk("P7 one bond ES", float(100 * K.es7_1), ".2f", "47.60", 5)
-chk("P7 one bond ES from printed", -(0.04 * -60 + 0.01 * 2) / 0.05, ".2f", "47.60", 5)
-chk("P7 mixture ES", float(100 * K.es7_h), ".2f", "29.99")
-chk("S7 quantile", float(100 * K.half_one), ".2f", "-29.00")
-has("S7 some default display", "$1-0.96^2=7.84\\%$")
-has("S7 ES display", "$-[0.04\\times(-60\\%)+0.01\\times2\\%]/0.05$")
-assert K.pb7 < Fraction(5, 100) <= K.pb7 + K.pone7
-chk("P8 Pr(X<=9)", float(stats.binom.cdf(9, 500, U)), ".4f", "0.9689")
-chk("P8 Pr(X>=9)", float(stats.binom.sf(8, 500, U)), ".4f", "0.0671")
-N8, X8 = 500, 9                                              # Problem 8's inputs, as the two checks above use them
-assert float(stats.binom.sf(9, 500, U)) < 0.05 < float(stats.binom.sf(8, 500, U))   # a 5% test rejects from 10
-has("S8 red", "here at 9 with 0.9689, and red at 15")
+chk("P7 both", float(100 * pb7), ".2f", "0.16", 2)
+chk("P7 VaR", float(-100 * half7), ".2f", "24.00")
+chk("P7 one bond ES", float(100 * es7_1), ".2f", "39.60")
+chk("P7 one bond ES from printed", -(0.04 * -50 + 0.01 * 2) / 0.05, ".2f", "39.60")
+chk("P7 mixture ES", float(100 * es7_h), ".2f", "24.83")
+chk("P7 mixture ES from printed", (0.0016 * 50 + 0.0484 * 24) / 0.05, ".2f", "24.83", in_md=False)
+chk("S7 quantile", float(100 * half7), ".2f", "-24.00")
+assert float(var7_1) == float(K.var1)                         # option A, the halves' VaRs summed: -2.00%
+has("P7 inputs", f"lose {-100 * float(lgd7):.0f}% with probability {100 * float(K.pd7):.0f}% and gain "
+    f"{100 * float(K.gain):.0f}%")
+has("P7 options", f"   - **A.** {float(100 * var7_1):.2f}%\n   - **B.** {float(-100 * half7):.2f}%\n"
+    f"   - **C.** {float(100 * es7_1):.2f}%")
+has("S7 sentence", f"some default has probability $1-{float(1 - K.pd7):.2f}^2={float(100 * pa7):.2f}\\%$, above "
+    f"{100 * float(u7):.0f}%, while both default with {float(100 * pb7):.2f}%, so the {100 * float(u7):.0f}% quantile is "
+    f"one default, {float(100 * half7):.2f}%.")
+has("S7 ES display", f"$-[{float(K.pd7):.2f}\\times({100 * float(lgd7):.0f}\\%)+{float(u7 - K.pd7):.2f}\\times"
+    f"{100 * float(K.gain):.0f}\\%]/{float(u7):.2f}$")
+has("S7 mixture", f"The mixture's ES is {float(100 * es7_h):.2f}%.")
+# Problem 8 (Stage 3): 1,000 days and 15 exceedances, which no example prints; anchor A32-51 keeps 500 and 9
+N8, X8 = 1000, 15
+yel8, red8 = K.zones(N8)
+assert (yel8, red8) == (15, 24) and X8 == yel8                # 15 is the first yellow count: C
+assert K.zones(250) == (5, 10) and X8 >= K.zones(250)[1]      # on Basel's 250-day table 15 is red: B
+cdf8, sf8 = float(stats.binom.cdf(X8, N8, U)), float(stats.binom.sf(X8 - 1, N8, U))
+chk("P8 Pr(X<=15)", cdf8, ".4f", "0.9521")
+chk("P8 Pr(X>=15)", sf8, ".4f", "0.0824")
+assert float(stats.binom.cdf(X8 - 1, N8, U)) < 0.95
+assert float(stats.binom.sf(X8, N8, U)) < 0.05 < sf8          # a one-sided 5% test rejects from 16, one count later
+has("P8 inputs", f"applied to {N8:,} hypothetical days of 99% VaR forecasts with {X8} exceedances")
+has("S8 red", f"yellow starts where $\\Pr(X\\le x)\\ge95\\%$, here at {yel8} with {cdf8:.4f}, and red at {red8}.")
+has("S8 A", f"A reads $\\Pr(X\\ge{X8})={sf8:.4f}$ as a pass")
+has("S8 B", f"B applies Basel's 250-day table, whose red zone starts at {K.zones(250)[1]}.")
+rej8 = next(x for x in range(N8 + 1) if stats.binom.sf(x - 1, N8, U) <= 0.05)   # the first count a 5% test rejects
+assert rej8 - yel8 == 1, (rej8, yel8)
+has("S8 one count", "but Basel's yellow begins one count before a one-sided 5% test would reject.")
+# the answer keys: 7 from the options' order (P7 options above), 8 from the zone of X8 and the option list
+opts7 = [float(100 * var7_1), float(-100 * half7), float(100 * es7_1)]
+key7 = "ABC"[opts7.index(float(-100 * half7))]
+has("P8 options", "   - **A.** green\n   - **B.** red\n   - **C.** yellow")
+zone8 = "green" if X8 < yel8 else "yellow" if X8 < red8 else "red"
+key8 = "ABC"[["green", "red", "yellow"].index(zone8)]
+assert re.findall(r"^(\d+)\. \*\*([ABC])\*\* is correct", RAW, flags=re.MULTILINE) == [
+    ("1", "C"), ("2", "A"), ("3", "B"), ("4", "A"), ("7", key7), ("8", key8)]
 chk("P9 rate", 60 / 2000, ".2f", "0.03", 5)
 chk("P9 expected", 59 * 60 / 2000, ".2f", "1.77")
 chk("P9 p", float(stats.binom.sf(5, 59, 0.03)), ".4f", "0.0084")
@@ -996,6 +1125,19 @@ sci("P10 exact", K.p_n, "1.091\\times10^{-9}")
 chk("P10 plain expected", 10_000 * K.p_n, ".6f", "0.000011")
 cnt("P10 shifted in the tail", int((K.Z <= 0).sum()), "4,927")
 sci("P10 variance ratio", K.p_n * (1 - K.p_n) / K.var_one, "1.34\\times10^8")
+# the ratio from the draws' sample variance, which a solver who skips LM18's second moment gets (either divisor)
+w_ = (K.Z <= 0) * np.exp(K.kk * K.Z - K.kk**2 / 2)
+assert np.array_equal(w_, K.wis)
+r_e = K.p_n * (1 - K.p_n) / K.var_one
+r_s = K.p_n * (1 - K.p_n) / float(np.var(w_, ddof=1))
+assert f"{K.p_n * (1 - K.p_n) / float(np.var(w_, ddof=0)) / 1e8:.2f}" == f"{r_s / 1e8:.2f}"
+sci("P10 sample variance ratio", r_s, "1.26\\times10^8")
+has("P10 stem", "plain sampling's expected tail draws and, by [[LM18]]'s second moment $e^{a^2}\\Phi(-2a)$, the exact "
+    "variance ratio of one draw.")
+assert "the second moment of one draw, $e^{k^2}\\Phi(-2k)$ at $a=k$" in (ROOT / "src" / "lm18.md").read_text(
+    encoding="utf-8")                                         # lm18.md:300, LM18's second moment, written there at a = k
+has("S10 ratios", f"The variance of one draw falls by a factor of ${r_e / 1e8:.2f}\\times10^8$ (the draws' sample "
+    f"variance gives ${r_s / 1e8:.2f}\\times10^8$).")
 chk("P11 alpha", K.ah, ".3f", "3.634", 2)
 for u, (vq, eq) in ((0.001, ("6.69", "9.23")), (0.01, ("3.55", "4.90"))):
     chk(f"P11 VaR {u}", hill[u][0], ".2f", vq, N_HILL[vq])
@@ -1004,7 +1146,7 @@ for u, (vq, eq) in ((0.001, ("6.69", "9.23")), (0.01, ("3.55", "4.90"))):     # 
     vv = 3 * (108 / (u * 5849)) ** (1 / 3.634)
     chk(f"P11 VaR {u} from printed", vv, ".2f", vq, N_HILL[vq])
     chk(f"P11 ES {u} from printed", vv * 3.634 / 2.634, ".2f", eq, N_HILL[eq])
-has("S11 k", f"With $k={K.kh}$, $\\hat\\alpha={K.ah:.3f}$.")
+has("S11 k", f"With $k={K.kh}$, Hill's estimate is $\\hat\\alpha={K.ah:.3f}$.")
 has("S11 historical", f"against the historical {100 * var_h(R, U):.2f}%, {100 * es_h(R, U):.2f}%, "
     f"{100 * var_h(R, 0.001):.2f}% and {100 * es_h(R, 0.001):.2f}%")
 assert K.WINDOW == 504 and K.fr.est_dates[K.rows0 - 504] == "2017-02-13" and K.fr.est_dates[K.rows0 - 1] == "2019-02-27"
@@ -1030,8 +1172,8 @@ has("S12 uniqueness", "Within $10^{-9}$ of the minimum no weight moves by more t
 # the dates of the case: 7 April (the day), 2 April (the forecasts), 1 April (the t's refit), with and without the year
 # (counts over the whole file: the overview and the references' "7 April 2025" included)
 d7_, dfc_, dfit_, dr_ = (long_date(d_) for d_ in (K.dates[i7], K.dates[i7 - 1], K.dates[K.s7], K.rdates[0]))
-has("date, the day", d7_, 8)
-has("date, the day, day and month", d7_.rsplit(" ", 1)[0], 17)
+has("date, the day", d7_, 9)
+has("date, the day, day and month", d7_.rsplit(" ", 1)[0], 18)
 has("date, the forecasts", dfc_, 1)
 has("date, the forecasts, day and month", dfc_.rsplit(" ", 1)[0], 7)
 has("date, the t's refit, day and month", dfit_.rsplit(" ", 1)[0], 2)
@@ -1065,10 +1207,6 @@ has("S2 rank", f"$uT={180 * U2:.1f}$ and $j={K.jrank(U2, 180)}$")
 has("S2 options", f"B is the mean of the $\\lceil uT\\rceil={K.jrank(U2, 180)}$ worst, C of the "
     f"$\\lfloor uT\\rfloor={math.floor(180 * U2)}$ worst")
 has("S6 binomial", f"$X\\sim\\operatorname{{Bin}}(1000,{U})$ the ranks are {K.j1k} and {K.j2k}")
-has("P7 inputs", f"lose {-100 * float(K.lgd):.0f}% with probability {100 * float(K.pd7):.0f}% and gain "
-    f"{100 * float(K.gain):.0f}%")
-has("P8 inputs", f"applied to {N8} hypothetical days of 99% VaR forecasts with {X8} exceedances")
-has("S8 A", f"A reads $\\Pr(X\\ge{X8})=0.0671$ as a pass")
 has("P10 seed", f"`np.random.default_rng([2, {K.SEED}])` and 10,000 `standard_normal` draws")
 
 # ---------------------------------------------------------------- the overview's and summary's restatements
@@ -1076,12 +1214,13 @@ has("P10 seed", f"`np.random.default_rng([2, {K.SEED}])` and 10,000 `standard_no
 ov = [(f"On 7 April 2025 the TAIEX total-return index fell {loss7:.2f}%: {lo:.1f} to {hi:.1f} times the one-day 99% "
        f"value at risk that six models had forecast on 2 April."),
       (f"Historical VaR is minus an order statistic, and historical ES, (32.2), is the tail mean of the empirical "
-       f"distribution. On TR23's {T:,} returns they are {100 * var_h(R, U):.2f}% and {100 * es_h(R, U):.2f}%, against a "
-       f"normal model's {100 * var_n(K.mu, K.s, U):.2f}% and {100 * es_n(K.mu, K.s, U):.2f}%."),
-      (f"From {T:,} iid days the 1% quantile has a standard error of {se_a:.3f} points. A block bootstrap, which keeps "
-       f"the order of days, gives {100 * float(K.qb_a.std()):.3f}. From 250 iid returns no order statistic is a 95% "
-       f"lower bound."),
-      (f"Two independent bonds held half and half raise VaR from {float(100 * K.var1):.2f}% to "
+       f"distribution. On TR23's {T:,} returns the 99% VaR and ES are {100 * var_h(R, U):.2f}% and "
+       f"{100 * es_h(R, U):.2f}%, against a normal model's {100 * var_n(K.mu, K.s, U):.2f}% and "
+       f"{100 * es_n(K.mu, K.s, U):.2f}%."),
+      (f"From {T:,} days an iid bootstrap gives the 1% quantile a standard error of {100 * float(K.qi_a.std()):.3f} "
+       f"points. A block bootstrap, which keeps the order of days, gives {100 * float(K.qb_a.std()):.3f}. From 250 iid "
+       f"returns no order statistic is a 95% lower bound."),
+      (f"Two constructed, independent bonds held half and half raise VaR from {float(100 * K.var1):.2f}% to "
        f"{float(-100 * K.half_one):.2f}%, while ES falls from {float(100 * K.es1):.2f}% to {float(100 * K.es_half):.2f}%: "
        f"ES is coherent, and it is the minimum of a convex function, (32.7)."),
       (f"Under GARCH with normal innovations 7 April was a once-in-{1 / (K.p_n * K.A) / 1e6:.1f}-million-years day. With "
@@ -1157,13 +1296,14 @@ print(f"labels: {len(ex_labels)} exhibits, {len(eg_labels)} examples, tags (32.1
 # ====================================================================== 中文導讀: every term glossed at its first use in each box
 GLOSS = {
     "風險值": "value at risk", "預期短缺": "expected shortfall", "分位數": "quantile", "歷史模擬法": "historical simulation",
-    "順序統計量": "order statistic", "常態分布": "normal distribution", "尾部風險": "tail risk", "厚尾": "fat tails",
+    "順序統計量": "order statistic", "常態分布": "normal distribution", "尾部風險": "tail risk", "厚尾": "heavy tails",
+    "自由度": "degrees of freedom", "尾部指數": "tail index", "從期初資本算起的損失": "loss from initial wealth",
     "動差": "moment", "一致性風險量數": "coherent risk measure", "劣可加性": "subadditivity",
     "條件風險值": "conditional value at risk", "凸函數": "convex function", "線性規劃": "linear programming",
     "回測": "backtest", "二項分布": "binomial distribution", "獨立性檢定": "independence test", "回撤": "drawdown",
     "最大回撤": "maximum drawdown", "排列檢定": "permutation test", "區塊自助重抽法": "block bootstrap",
     "經驗分布": "empirical distribution", "對數報酬": "log return", "公理": "axiom", "投資組合": "portfolio",
-    "期望值": "expected value",
+    "期望值": "expected value", "獨立同分布": "iid",
 }
 boxes = re.findall(r"^> \[!zh\][^\n]*\n((?:>[^\n]*\n?)+)", RAW, flags=re.MULTILINE)
 assert len(boxes) == 5, len(boxes)
@@ -1191,7 +1331,6 @@ ALLOW: dict[str, tuple[int, str]] = {
     "1.17": (2, "(1.17), LM1's recovery gain"),
     "5.11": (2, "(5.11), LM5's tail mean"),
     "9.7": (1, "(9.7) of Glasserman (2003)"),
-    "10.4": (1, "(10.4)"),
     "12.8": (1, "(12.8), LM12's Cholesky factor"),
     "14.10": (2, "(14.10), Jensen's inequality"),
     "15.6": (1, "(15.6)"),
@@ -1227,22 +1366,23 @@ ALLOW: dict[str, tuple[int, str]] = {
     # tail probabilities and levels that the text states rather than computes
     "0.01": (7, "u = 0.01: the notation, (32.1)'s note, E3's Phi^{-1}(0.01), Bin(250, 0.01), KC 9 three times"),
     "0.1": (5, "u = 0.1%: E2's question and table, X3's head, Problem and Solution 11"),
-    "2.5": (8, "u = 2.5%: E2, X3's head, KC 3, X8a's head, Problems 2 and 12"),
+    "2.5": (7, ("u = 2.5%: E2's question and table, X3's head, KC 3, X8a's head, Problems 2 and 12 (E2's ratio "
+                "sentence is in its phrase check)")),
     "0.025": (1, "the equal-tail 95% interval's lower tail, Pr(X <= j1 - 1) <= 0.025"),
     "0.975": (1, "the equal-tail 95% interval's upper tail"),
     "99.99": (1, "Basel's red-zone probability (BCBS 1996a), restated in the pitfall"),
     # plain integers that are not computed: constants of formulas, levels, numbering, inputs and citation years
     "0": (18, ("formula constants (0<u<1, Unif(0,1), probability 0, eta>=0, mean 0, g=0, max(0, .), DD^0, W_t<=0, "
                "KC 9's 'from 0') and the Python block's [0] and >= 0")),
-    "1": (140, ("formula constants (F^{-1}, 1-u, 1/T, j-1, t+1, nu-1, frac1u, mathbf 1, e^r-1, ln(1+R_t), variance 1, "
+    "1": (139, ("formula constants (F^{-1}, 1-u, 1/T, j-1, t+1, nu-1, frac1u, mathbf 1, e^r-1, ln(1+R_t), variance 1, "
                 "W_0 = 1, summing to 1); the level 1% (u = 1%, '1% quantile', X8a's heads); axiom 1, Theorem 1, "
                 "lo = 1, Problem and Solution 1; the Python block's 1e-12, 1e-13, 1e-14 and j - 1")),
     "2": (30, ("formula constants (nu-2, nu>2, x^2, y^2, q^2, sigma^2/2, (nu-1)/2, pi/2, chi^2); Sections 2 to 7, "
                "Section 2's, Basel's Table 2, axiom 2, lo = 2, Problem and Solution 2")),
-    "3": (6, "Section 3, axiom 3 (twice), lo = 3, Problem and Solution 3"),
+    "3": (7, "Section 3 (twice), axiom 3 (twice), lo = 3, Problem and Solution 3"),
     "4": (7, "axiom 4 (twice), Section 4's (twice), lo = 4, Problem and Solution 4"),
-    "5": (15, ("the level 5% (the worst 5%, u = 5%, the 5-95% ranges, significance at 5%, Problem 7's 5% quantile), "
-               "lo = 5, Section 5, Problem and Solution 5")),
+    "5": (12, ("the level 5% (the worst 5%, u = 5%, the 5-95% ranges, significance at 5%; Solution 7's two and "
+               "Solution 8's one are in their phrase checks), lo = 5, Section 5, Problem and Solution 5")),
     "6": (3, "lo = 6, Problem and Solution 6"),
     "7": (4, "Sections 2 to 7, lo = 7, Problem and Solution 7"),
     "8": (6, "Section 8, lo = 8 (three headings), Problem and Solution 8"),
@@ -1252,7 +1392,7 @@ ALLOW: dict[str, tuple[int, str]] = {
     "12": (9, "Problem 12 (twice) and Solution 12, tfrac12, the Python block's guards and tolerances 1e-12 (five)"),
     "13": (1, "the Python block's quad tolerance 1e-13"),
     "14": (1, "the Python block's quad tolerance 1e-14"),
-    "95": (8, "the 95% level of the intervals and of Basel's yellow zone"),
+    "95": (7, "the 95% level of the intervals and of Basel's yellow zone (Solution 8's is in its phrase check)"),
     "99": (20, "the 99% level of VaR and ES"),
     "100": (1, "the Python block's 100 * R (percent)"),
     "250": (9, ("Basel's 250-day year and the 250-return examples (inputs of Section 4, KC 4, E9, X6b's windows, the "

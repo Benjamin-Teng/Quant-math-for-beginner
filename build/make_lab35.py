@@ -178,17 +178,16 @@ Companion notebook to **From Calculus to Kelly, LM35**. It rebuilds the module's
 | 1 | Data: E5's two frames, TR23, $T$, $A$, $A_{\mathrm w}$ |
 | 2 | The scenario windows ([[ex:windows]]), [[eg:window25]] and LM1's running peak, the returns that span holidays |
 | 3 | The rules' books rebuilt from their trades; [[ex:case]], [[ex:replay]], [[ex:attrib]], [[eg:day25]], [[eg:frozen]], problems 9 and 10 |
-| 4 | The pairing rule (35.5) for US proxies; [[eg:y2008]], [[eg:proxycheck]], problem 4 |
+| 4 | The pairing rule (35.5) for US proxies; [[eg:y2008]], [[eg:proxycheck]], problem 4; an extension: 2008 with R2's mix and with DBO |
 | 5 | Betas, the partial scenario (35.3) and the correlation break: [[eg:factor]], [[eg:break]], the check of (16.10) |
 | 6 | The reverse stress test (35.4) by hand and in cvxpy with a price limit: [[eg:revbooks]], [[ex:reverse]], problem 11 |
 | 7 | [[ex:gaps]] from the five 5-second days, [[ex:limits]], [[eg:lock]], [[ex:ruin]], [[eg:margin]], problem 12 |
 | 8 | The widget's starting state |
 | 9 | **The batch's checkpoint**: allocate, compare out of sample, stress and explain, on eight funds |
-| 10 | Extension: 2008 with R2's mix and with DBO |
 
 **Environment.** From the repository root, `uv sync` installs the locked Python environment (`uv.lock`). Open this notebook with the `.venv` kernel, or run `uv run --with jupyterlab jupyter lab`.
 
-**Data.** The notebook reads FinMind files that you download once with your own token. From the repository root, run `uv run python data/fetch_finmind.py`, then `uv run python data/make_lab_data.py`. FinMind's licence does not allow the book to redistribute the data. After that, the notebook runs offline.
+**Data.** The notebook reads FinMind files that you download once with your own token. From the repository root, run `uv run python data/fetch_finmind.py`, then `uv run python data/make_lab_data.py`. FinMind's licence does not allow the book to redistribute the data. After that, the notebook runs offline. On FinMind's free plan, run `uv run python data/fetch_finmind.py --exclude sectors_close/ --exclude vol4_settlement/ --exclude vol6/etf_snapshot` instead, as the book's Getting Started page says. This lab reads none of the excluded files.
 
 Part 7 also reads the five named days of the 5-second TAIEX (`taiex5s_<date>.csv`). `make_lab_data.py` copies them when `data/raw/intraday/taiex5s/` holds them, which `uv run python data/fetch_intraday.py --series taiex5s --dates 2008-01-22,2015-08-24,2020-01-30,2024-08-05,2025-04-07` fetches (five requests); without them Part 7 says so and skips [[ex:gaps]]. The notebook writes per-day statistics only, never an intraday path.
 
@@ -289,7 +288,7 @@ show("TR23 returns", len(TD) - 1, ",d", "5,849")
 md(r"""
 ## Part 2 — Scenario windows
 
-The trough is TR23's lowest close of the named year, or of the 20 sessions from the named day; the peak is the highest close after the previous scenario's trough. A span of $m$ sessions is dated from the close before its first return.
+The trough is TR23's lowest close of the named year, or of the 20 sessions from 5 August 2024 or 7 April 2025; the peak is the highest close after the previous scenario's trough. A span of $m$ sessions is dated from the close before its first return.
 """)
 
 code(r"""
@@ -559,6 +558,43 @@ z = np.array([LASTD[TPOS[d]] == LASTD[TPOS[d] - 1] for d in E["est"]])
 show("dates without a US session", int(z.sum()), "d", "80")
 pct("00646 on them", np.abs(X[z, 1]).mean(), 2, "0.43")
 """)
+
+md(r"""
+### Extension: 2008 with R2's mix and with DBO
+
+Replay 2008 for R1 and R6 with R2's fixed mix in place of each one's first weights, and with DBO in place of USO. For each rule, which choice moves the loss more? Print every proxy number to the digits a cent in the adjusted closes leaves safe.
+""")
+
+code(r"""
+# your code: first["R1"], first["R6"], first["R2"] @ ret08["USO"] and ret08["DBO"]
+""")
+
+code(r"""
+# reference: 2008 for R1 and R6 with R2's mix and with DBO; a cent in the adjusted
+# closes moves a loss by up to the sum of |f_j| times each proxy's cent bound, so
+# print one decimal only where that cannot move it
+def loss08(f, oil):
+    x = float(f @ ret08[oil])
+    u = 0.0
+    for j, s in zip(range(1, 5), ("SPY", "TLT", "GLD", oil), strict=True):
+        pa, pb = ADJ[s][LASTD[TPOS[a8]]], ADJ[s][LASTD[TPOS[b8]]]
+        u += abs(f[j]) * (1 + prox(s, a8, b8)) * 0.01 * (1 / pa + 1 / pb)
+    d = 1 if round(1000 * (x - u)) == round(1000 * (x + u)) else 0
+    return -100 * x, f"{-100 * x:.{d}f}"
+
+
+for k in ("R1", "R6"):
+    own, mix = loss08(first[k], "USO"), loss08(first["R2"], "USO")
+    dbo = loss08(first[k], "DBO")
+    print(f"{k}: loses {own[1]}% at its first weights with USO, {mix[1]}% with R2's mix, "
+          f"{dbo[1]}% with DBO; change in points: weights {mix[0] - own[0]:+.0f}, "
+          f"oil proxy {dbo[0] - own[0]:+.0f}")
+L1, L6 = (loss08(first[k], "USO")[0] for k in ("R1", "R6"))
+M = loss08(first["R2"], "USO")[0]
+D1, D6 = (loss08(first[k], "DBO")[0] for k in ("R1", "R6"))
+# R1: the oil proxy moves the loss more; R6: the weights do
+assert abs(D1 - L1) > abs(M - L1) and abs(M - L6) > abs(D6 - L6)
+""", hidden=True)
 
 md(r"""
 ## Part 5 — Betas, the partial scenario and the correlation break
@@ -952,16 +988,6 @@ refshow("R8's trades at the cap 1.5", int((L8 >= CAP - EPS).sum()), "d", REF["R8
 refshow("R8 largest uncapped ratio", max(unc.values()), ".3f", REF["R8 uncapped max"])
 """, hidden=True)
 
-md(r"""
-## Part 10 — Extension: 2008 with R2's mix and with DBO
-
-Replay 2008 for R1 and R6 with R2's fixed mix in place of each one's first weights, and with DBO in place of USO. For each rule, which choice moves the loss more? Print every proxy number to the digits a cent in the adjusted closes leaves safe.
-""")
-
-code(r"""
-# your code: first["R1"], first["R6"], first["R2"] @ ret08["USO"] and ret08["DBO"]
-""")
-
 nb = nbf.v4.new_notebook()
 nb["cells"] = cells
 nb["metadata"] = {"kernelspec": {"display_name": "Python 3", "language": "python", "name": "python3"},
@@ -981,7 +1007,7 @@ Companion to *From Calculus to Kelly*, Learning Module 35. The notebook rebuilds
 - the hypothetical years 2008 and 2015 on 0050 itself and US proxies, and the proxies checked against the funds;
 - the factor shock, the partial scenario and the correlation break;
 - the reverse stress test in closed form and in cvxpy with a price limit, checked by KKT;
-- the overnight gaps from five days of 5-second TAIEX statistics, the price limits, a limit lock, ruin and a TX margin call.
+- the overnight gaps from five days of 5-second TAIEX statistics, the price limits, a limit-down lock, ruin and a TX margin call.
 
 It solves the computational practice problems, reproduces the widget's starting state, and ends with the batch's checkpoint on eight funds, whose reference answers sit in a collapsed cell.
 
@@ -1005,6 +1031,8 @@ uv run jupyter nbconvert --to notebook --execute --inplace LM35_lab.ipynb
 ## Data (FinMind; not in the repository)
 
 The notebook reads FinMind files that you download once with your own token. From the repository root, run `uv run python data/fetch_finmind.py`, then `uv run python data/make_lab_data.py`. FinMind's licence does not allow the book to redistribute the data. After that, the notebook runs offline.
+
+On FinMind's free plan, run `uv run python data/fetch_finmind.py --exclude sectors_close/ --exclude vol4_settlement/ --exclude vol6/etf_snapshot` instead, as the book's Getting Started page says. This lab reads none of the excluded files.
 
 Part 7 also reads the five named days of the 5-second TAIEX. `make_lab_data.py` copies them when `data/raw/intraday/taiex5s/` holds them, which `uv run python data/fetch_intraday.py --series taiex5s --dates 2008-01-22,2015-08-24,2020-01-30,2024-08-05,2025-04-07` fetches (five requests); without them Part 7 says so and skips those statistics.
 

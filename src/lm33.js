@@ -8,8 +8,9 @@
    [-10, 0] and [0, 10] with 2,000 steps each (Book.dist.Phi); Bailey and Lopez de Prado's approximation
    (1 - g) PhiInv(1 - 1/n) + g PhiInv(1 - 1/(n e)), g = 0.5772156649 (Book.dist.PhiInv); MinTRL after n trials
    1 + ((PhiInv(c) sqrt(V) + E Z_(n)) / SR)^2 observations, (33.5), for SR > 0; PSR(0) and DSR at the through case's
-   record of tau years of sessions, that is tau x (observations a year) observations: Phi((SR sqrt(T - 1) - E Z_(n)) /
-   sqrt(V)), (33.2) and (33.4). The chart draws DSR against the record in years of observations (observations over
+   record of tau years, that is tau x (observations a year) observations (years of sessions at 243.57):
+   Phi((SR sqrt(T - 1) - E Z_(n)) / sqrt(V)), (33.2) and (33.4). The readouts say "years of sessions" at 243.57
+   observations a year and "years of observations" at 12 or 52. The chart draws DSR against the record in years of observations (observations over
    the observations a year; 0.5 to 20, log scale), dashed at the confidence and at MinTRL.
    The first drawing uses the data block's exact values for R2. Choosing a rule in the first select sets the three
    sliders to its values (shown at the nearest step) and uses its exact values, which are daily: while they are in
@@ -84,8 +85,8 @@
       "restores its exact values, which are daily, so the frequency stays at 243.57 observations a year. Once a " +
       "slider moves, the inputs are constructed, and 12 or 52 observations a year read the sliders as that period's " +
       "moments. " +
-      "E Z<sub>(n)</sub> by quadrature of (33.4); MinTRL by (33.5); PSR(0) and DSR at the record of 7.60 years of " +
-      "sessions, that is 7.60 times the observations a year. A record's years are its observations over the " +
+      "E Z<sub>(n)</sub> by quadrature of (33.4); MinTRL by (33.5); PSR(0) and DSR at the record of 7.60 years, " +
+      "that is 7.60 times the observations a year (years of sessions at 243.57). A record's years are its observations over the " +
       "observations a year. Model: independent trials with true ratio zero, and the estimate held fixed as the " +
       "record lengthens.";
     host.appendChild(chart); host.appendChild(out); host.appendChild(note);
@@ -127,12 +128,13 @@
         ann: ann
       });
       function item(lbl, val) { return "<div><span>" + lbl + "</span><b>" + val + "</b></div>"; }
+      var yrs = A === W.Aw ? " years of sessions" : " years of observations";   // sessions only at 243.57 a year
       out.innerHTML =
         item("E Z<sub>(n)</sub>, exact; approximation", fmt(ez, "n4") + "; " + (ap == null ? "—" : fmt(ap, "n4"))) +
         item("MinTRL after n trials", mt == null ? "none: the ratio is not positive" :
-          fmt(mt, "n0") + " observations, " + fmt(mt / A, "n2") + " years of observations") +
-        item("PSR(0) at 7.60 years of sessions", fmt(p0, "n3")) +
-        item("DSR at 7.60 years of sessions", fmt(d, "n3"));
+          fmt(mt, "n0") + " observations, " + fmt(mt / A, "n2") + yrs) +
+        item("PSR(0) at 7.60" + yrs, fmt(p0, "n3")) +
+        item("DSR at 7.60" + yrs, fmt(d, "n3"));
     }
     host.__redraw = function () { draw(ctl.values(), null); };
     ctl.fire();

@@ -219,9 +219,10 @@ has("lag rule values", "7 for 1,851 returns, 9 for TR23's 5,849 and 3 for 90 mon
 #      in Solution 2, and Holm's seven pairs in Solution 12
 chk("lag", K.L, "d", "7", count=29)
 #   8: n = 8 trials (17: E Z_(8), Phi^8, (1 - p)^8, Bonferroni's x 8, eq. (9) and X6 at 8 among them), the date
-#      8 October 2026 (3), Section 8, and Problem 8 with its solution number (2)
+#      8 October 2026 (3), Section 8 (3: the roadmap, Exhibit 1's note and Section 2's Holm sentence), Problem 8
+#      with its solution number (2), and Ledoit and Wolf's eq. (8)
 assert len(RULES) == 8 and K.dates[-1] == "2026-10-08"
-chk("trials", len(RULES), "d", "8", count=23)
+chk("trials", len(RULES), "d", "8", count=26)
 #   22: b = 22 (4) and E7's lag 22, the block size
 chk("block size b", K.b_rule, "d", "22", count=5)
 #   60: the largest lag in X3's note, E3's table, E7 and Problem 11, and Harvey and Liu's "approximately 60%"
@@ -264,7 +265,18 @@ chk("case: correlation R2-R1", K.r21, ".2f", "0.70", count=4)
 chk("case: LW p-value (HAC)", K.PAIR["R2"]["p_hac"], ".2f", "0.52", count=11)
 chk("case: LW p-value (bootstrap)", K.PAIR["R2"]["p_boot"], ".2f", "0.52")
 chk("case: best of eight under the null", K.SR0_8 * sqA, ".2f", "0.52")
-has("case: best of eight", "the best of their estimates would still average 0.52 a year over 1,851 daily returns")
+assert abs(K.SR0_8 * sqA - K.emax(8) * math.sqrt(Aw / (T - 1))) < 1e-12 and len(RULES) == 8
+has("case: best of eight", "If eight independent rules all had a true Sharpe ratio of zero, the best of their estimates "
+    f"would still average about {K.emax(8) * math.sqrt(Aw / (T - 1)):.2f} a year over {T:,} daily returns.")
+# R2's (20.9) interval, as the case box and the overview print it (the method named, item R5)
+se2y = SE9["R2"] * sqA
+lo2, hi2 = SRy["R2"] - Z975 * se2y, SRy["R2"] + Z975 * se2y
+assert abs(lo2 - K.CI9["R2"][0]) < 1e-12 and abs(hi2 - K.CI9["R2"][1]) < 1e-12
+has("case: R2 interval", f"Its standard error by (20.9) is {se2y:.3f}, so its 95% interval runs from {lo2:.2f} to "
+    f"{hi2:.2f} and holds all seven other estimates.")
+assert len({f"{SE9[k] * sqA:.2f}" for k in RULES}) == 1
+has("overview: R2 interval", f"Each standard error by (20.9) is about {se2y:.2f}, so R2's 95% interval, {lo2:.2f} to "
+    f"{hi2:.2f}, holds all seven other estimates.")
 kmin = min(mom[k][3] for k in RULES)
 kmax = max(mom[k][3] for k in RULES)
 chk("overview: raw kurtosis low", kmin, ".0f", "10", count=2, at="raw kurtosis of 10 to 23")   # other 10s: n, b, 10^6
@@ -277,11 +289,20 @@ chk("min SE (20.9)", min(SE9.values()) * sqA, ".3f", "0.367", count=7)
 ratio_h = {k: SEH[k] / SE9[k] for k in RULES}
 chk("overview: HAC move low (%)", 100 * (min(ratio_h.values()) - 1), "+.0f", "-8", count=2)
 chk("overview: HAC move high (%)", 100 * (max(ratio_h.values()) - 1), "+.0f", "+4", count=2)
-has("overview: HAC moves", "moves it by −8% to +4%")
+has("overview: HAC range", f"The HAC standard error (33.1) at the book's lag of {K.L} moves it by "
+    f"{100 * (min(ratio_h.values()) - 1):+.0f}% to {100 * (max(ratio_h.values()) - 1):+.0f}%, while the volatility's "
+    "standard error rises by half.")
 has("overview: months", "lowers R1's annual ratio from 1.06 to 0.92")
 has("overview: correction's noise", "0.38 on a ratio of 1.31")
 has("overview: PSR", "0.999 for R2. Against zero R2 needs 523 sessions, 2.15 years of sessions")
-has("overview: LW", "R2's lead of 0.16 over R1 within noise: a p-value of 0.52")
+assert f"{K.PAIR['R2']['p_hac']:.2f}" == f"{K.PAIR['R2']['p_boot']:.2f}"
+has("overview: LW", f"Ledoit and Wolf's test finds R2's lead of {SRy['R2'] - SRy['R1']:.2f} over R1 consistent with "
+    f"chance: a p-value of {K.PAIR['R2']['p_hac']:.2f} by HAC and by the circular block bootstrap.")
+for gone in ("within noise", "The HAC error", "volatility's error", "ratio's error", "equal errors", "with the HAC error",
+             "(20.9)'s errors", "fat tail", "set up as", "after the fact", "gross against net Sharpe",
+             "the block covariance", "Lag 0, (20.9)", "blocks of 145 | 0.233", "two-sided 檢定", "the normal error",
+             "would give about"):
+    assert gone not in RAW, gone          # Stage 3 round 1: R6, R11, R2/X3, R1, R4, U5, R7, C1; revision 2: V33-N2, N1
 has("overview: DSR", "R2's benchmark is 0.52 a year and its DSR 0.955")
 has("overview: correlation", "The rules correlate 0.82 on average, and their effective number of trials is 2.07.")
 has("overview: haircut", "cuts R2's ratio by 21%, to 0.90")
@@ -336,6 +357,9 @@ chk("E1 SE daily from printed", math.sqrt(1.0249 / 1851), ".4f", "0.0235", count
 chk("E1 SE a year from printed", 0.0235 * math.sqrt(243.57), ".3f", "0.367")
 chk("E1 t-stat from printed", 0.0729 * math.sqrt(1851), ".2f", "3.14")
 chk("E1 t-stat", SR["R2"] * math.sqrt(T), ".2f", "3.14")
+TT = f"{T:,}".replace(",", "{,}")                                  # 1{,}851, as TeX prints it
+has("E1 t-stat sentence", f"The ratio times $\\sqrt T$ is ${SR['R2']:.4f}\\times\\sqrt{{{TT}}}="
+    f"{SR['R2'] * math.sqrt(T):.2f}$, the t-stat of the mean excess return with divisor $T$, by [[LM21]]'s identity.")
 assert 1.8 < ((ku2 - 1) / 4 * SR["R2"] ** 2) / (-SR["R2"] * sk2) < 2.2
 has("E1 twice", "The kurtosis term is about twice the skewness term.")
 for k in RULES:
@@ -392,6 +416,15 @@ published("LM20's pitfall", "lm20.md", "$\\nu=3.065<4$ and $\\E R^4=\\infty$")
 has("moment flag", "[[LM20]]'s Student-t fit to TR23 has 3.065 degrees of freedom, below 4, so its fourth moment is "
     "infinite. The rules' raw kurtosis of 10 to 23 has no standard error.")
 has("moment flag for (33.1)", "which TR23 may lack (Section 2)")
+has("moment flag: the SEs", "(20.9)'s standard errors, and the tests built on them, may then be too small.")
+# the Section 2 box: the condition on the skewness term (R8) and the pair test instead of overlapping intervals (A1)
+assert all(SR[k] > 0 for k in RULES)                  # every ratio positive, so the box's condition holds for all eight
+has("zh: positive SR", "夏普比率為正時，負偏態與厚尾（heavy tail）都讓標準誤變大。")
+has("zh: pair test", "但估計值落在 R2 的區間裡，不表示兩者沒有差別：同一段日子上兩個夏普比率的差有自己的標準誤，"
+    "規則彼此相關時，這個標準誤常比兩條規則各自的標準誤小，有沒有差別要用第 6 節的檢定（test）判斷。")   # V33-N3
+for k in RULES[1:]:     # each pair's s(Delta), lag 7, lies below both rules' own (20.9) standard errors
+    assert K.PAIR[k]["se"] < min(SE9[k], SE9["R1"]) * sqA, (k, K.PAIR[k]["se"])
+has("subtitle: heavy tails", "An estimate's error bar under heavy tails and dependence")
 published("TR23 raw kurtosis 8.27", "lm20.md", "skewness −0.34 and kurtosis 8.27")
 published("TR23 excess kurtosis 5.27", "lm19.md", "excess kurtosis from 5.27")
 published("0050 excess kurtosis 8.12", "lm04.md", "excess kurtosis** of 8.12")
@@ -439,25 +472,33 @@ for scheme, v in (("Moving blocks", "0.247"), ("Circular blocks", "0.244"), ("St
     assert re.search(rf"\| {scheme} \|.*\| {v} \|", (ROOT / "src" / "lm22.md").read_text(encoding="utf-8"))
 for row in ("| (20.9), as [[LM20]] printed it | 0.207 |", "| (33.1) at the book's lag, 9 | 0.213 |",
             "| (33.1) at [[LM22]]'s block length, 145 | 0.243 |",
-            "| [[LM22]]'s stationary bootstrap, blocks of 145 | 0.233 |", "| [[LM22]]'s circular blocks of 145 | 0.244 |",
+            "| [[LM22]]'s stationary bootstrap, mean block length 145 | 0.233 |",
+            "| [[LM22]]'s circular blocks of 145 | 0.244 |",
             "| [[LM22]]'s moving blocks of 145 | 0.247 |"):
     has("E4 table row", row)
 # E3's table: (33.1) a year at lags 0, 7, 20, 60 for R1, R2, R4, and R1's volatility SE in percent
 for k in ("R1", "R2", "R4"):
     has(f"E3 table {k}", f"| Sharpe ratio, {k} | " + " | ".join(f"{lc[k][lg]:.3f}" for lg in (0, 7, 20, 60)) + " |")
-has("E3 table head", "| Standard error a year | Lag 0, (20.9) | Lag 7 | Lag 20 | Lag 60 |")
+has("E3 table head", "| Standard error a year | Lag 0 (iid) | Lag 7 | Lag 20 | Lag 60 |")
 has("X3 note lags", "(33.1) a year at lags $\\ell=0$ to 60 for R1, R2 and R4; $\\ell=0$ is (20.9)")
-has("P11 lags", "Compute (33.1) for R2 at $\\ell=0$, 7, 20 and 60, and check $\\ell=0$ against (20.9)")
+has("P11 lags", f"Compute R2's annual standard error by (33.1) at $\\ell=0$, {K.L}, 20 and 60, and check $\\ell=0$ "
+    "against (20.9).")
 vol_se = [se_v1] + [K.se_vol_hac(K.X["R1"], lg) * sqA for lg in (7, 20, 60)]
 has("E3 table R1 volatility", "| Volatility of R1, % | " + " | ".join(f"{100 * v:.3f}" for v in vol_se) + " |")
 for v in [lc[k][lg] for k in ("R1", "R2", "R4") for lg in (0, 7, 20, 60)] + [100 * v for v in vol_se]:
     assert not tie(v, ".3f"), v
 assert abs(K.se_vol_hac(K.X["R1"], 0) / (mom["R1"][1] * math.sqrt((mom["R1"][3] - 1) / (4 * T))) - 1) < 1e-12
-has("E3 HAC interval of R2", "R2's HAC interval is 0.39 to 1.89")
+has("E3 HAC interval of R2", f"R2's HAC interval is {K.CIH['R2'][0]:.2f} to {K.CIH['R2'][1]:.2f}.")
 assert f"{K.CIH['R2'][0]:.2f} to {K.CIH['R2'][1]:.2f}" == "0.39 to 1.89"
+rlo, rhi = min(ratio_h, key=lambda k: ratio_h[k]), max(ratio_h, key=lambda k: ratio_h[k])
+has("E3 HAC range", f"At the book's lag, HAC over (20.9) runs from {ratio_h[rlo]:.2f} ({rlo}) to {ratio_h[rhi]:.2f} "
+    f"({rhi}) across the eight rules.")
+has("E3 ratio's SE", "The ratio's standard error moves little ([[ex:haclag]]).")
 # "rises by half": HAC over iid for the volatility's SE, 1.51 to 1.60 at lag 7
 assert all(1.45 <= v < 1.65 for v in K.vr.values())
-has("by half", "The volatility's error rests on the squares, and it rises by half.")
+has("by half", "The volatility's standard error rests on the squares, and it rises by half.")
+has("large-T covariance", "With dependent days and large $T$, that covariance is about the long-run covariance that "
+    "[[LM23]]'s (23.7) estimates, divided by $T$.")
 published("LM19's 0.0517 and 0.81", "lm19.md", "| Sharpe ratio, $r_f=0$ | 0.0517 (0.0456) | $\\times\\sqrt A$ | 0.81 (0.715)")
 assert 0.233 <= K.se_sr_hac(K.Rt, 145) * math.sqrt(K.At) <= 0.247
 
@@ -543,6 +584,11 @@ has("E6 table years", "| MinTRL, years of sessions | " + " | ".join(f"{n / Aw:.2
 has("E6 table normal", "| The same, normal moments | "
     + " | ".join(f"{K.mintrl(SR[k], 0, 0, 3) / Aw:.2f}" for k in e6) + " | 4.12 |")
 has("E6 TR23 inputs", "TR23 uses the daily ratio 0.05173 and [[eg:tr23]]'s moments.")
+assert all(n < T for n in e6_mt) and len(K.X4_SR) == 3
+has("E6 fewer than observed", f"All three rules need fewer than the {T:,} sessions observed.")
+has("E6 X4 pointer", "[[ex:psrT]] draws PSR(0) against the record for normal returns at three annual ratios.")
+has("zh: two-sided test", "[[LM21]] 的 (21.4) 用的是雙邊檢定（two-sided test），又要求 80% 的檢定力，需要的紀錄長得多："
+    f"TR23 要 11.9 年的日資料，MinTRL 只要 {K.n_tr / K.At:.2f} 年份的交易日。")     # 11.9: LM21's, checked below
 chk("E6 TR23 annual", K.srt * math.sqrt(K.At), ".4f", "0.8115")
 chk("E6 (21.4) one-sided", (Z95 / (K.srt * math.sqrt(K.At))) ** 2, ".2f", "4.11")
 chk("E6 (21.4) from printed", (1.645 / 0.8115) ** 2, ".2f", "4.11")
@@ -617,9 +663,45 @@ st = K.stat_
 chk("block estimates low", min(st), ".2f", "16.66")
 chk("block estimates high", max(st), ".2f", "22.41")
 assert K.T == 84 * 22 + 3 and math.ceil(K.T / 22) == 85
-has("last block", "a resample draws 85 blocks, keeps the first 1,851 rows and takes its block covariance from the 84 "
-    "complete blocks")
+bq_, br_, bn_ = K.T // K.b_rule, K.T % K.b_rule, math.ceil(K.T / K.b_rule)
+has("last block", f"Here $T={TT}={bq_}\\times{K.b_rule}+{br_}$, so a resample draws {bn_} blocks, keeps the first "
+    f"{T:,} rows and takes $\\hat\\Psi_{{\\text{{boot}}}}$ from the {bq_} complete blocks.")
 has("T = 84 x 22 + 3", "$T=1{,}851=84\\times22+3$")
+has("P12 stem", f"Draw {bn_} blocks and cut them to {T:,} rows, with $\\hat\\Psi_{{\\text{{boot}}}}$ from the {bq_} "
+    "complete blocks.")
+# (33.6)'s gradient as displayed equals the code's at the data's theta, and a central difference of h agrees
+
+
+def h_lw(t: np.ndarray) -> float:
+    """(33.6)'s h at theta = (two means, two uncentred second moments)."""
+    return float(t[0] / math.sqrt(t[2] - t[0] ** 2) - t[1] / math.sqrt(t[3] - t[1] ** 2))
+
+
+for k in RULES[1:]:
+    xj, x1 = K.X[k], K.X["R1"]
+    th = np.array([xj.mean(), x1.mean(), (xj**2).mean(), (x1**2).mean()])
+    v1, v2 = th[2] - th[0] ** 2, th[3] - th[1] ** 2
+    shown = np.array([th[2] / v1**1.5, -th[3] / v2**1.5, -th[0] / (2 * v1**1.5), th[1] / (2 * v2**1.5)])
+    assert np.allclose(shown, K.lw_grad(*th), rtol=1e-14, atol=0), k
+    fd = np.array([(h_lw(th + e) - h_lw(th - e)) / (2 * e[i]) for i, e in enumerate(np.diag(th * 1e-6))])
+    assert np.allclose(fd, shown, rtol=1e-6), (k, fd, shown)
+    assert abs(h_lw(th) - K.lw_parts(xj, x1, 0)[0]) < 1e-15, k
+# the display of Psi_boot: b / floor(T / b) times the sum over the complete blocks of the block means' outer products
+# equals the code's Z'Z / floor(T / b), on one resample of fixed (not random) block starts
+XM_ = np.column_stack([K.X[k] for k in RULES])
+starts_ = (np.arange(bn_) * 997) % T
+Xs_ = XM_[((starts_[:, None] + np.arange(K.b_rule)) % T).ravel()[:T]]
+mu_, ga_, P_ = K.boot_psi(Xs_, K.b_rule)
+V_ = np.concatenate([Xs_ - Xs_.mean(axis=0), Xs_**2 - (Xs_**2).mean(axis=0)], axis=1)      # centred at its own means
+vb_ = V_[: bq_ * K.b_rule].reshape(bq_, K.b_rule, -1).mean(axis=1)                         # each complete block's mean
+P_disp = K.b_rule / bq_ * sum(np.outer(v, v) for v in vb_)
+assert np.allclose(P_, P_disp, rtol=1e-12, atol=1e-30) and np.allclose(mu_, Xs_.mean(axis=0), rtol=1e-15)
+has("Goetze-Kuensch", "Each resample's standard error, stated without proof, is Götze and Künsch's (1996), via Ledoit "
+    "and Wolf's eq. (8).")
+has("Psi_boot terms", "Its terms $\\mathbf v_t$ and its $\\nabla h$ use the resample's own means, and "
+    "$\\bar{\\mathbf v}_{\\text{blk}}$ is the terms' mean over one complete block:")
+has("LM34 pointer", "Testing rules fixed in advance on later data, a reality check of a whole search, and gross against "
+    "net growth are [[LM34]]'s.")
 assert max(p["end_se"] for p in K.PAIR.values()) <= 0.006
 has("X5 note", "Monte Carlo SE of the ends at most 0.006")
 ph = {k: K.PAIR[k]["p_hac"] for k in RULES[1:]}
@@ -631,6 +713,8 @@ has("pairs: Holm", "Holm (21.7) on either family of seven adjusts every p-value 
 chk("KC 6: independent SE", K.naive * sqA, ".3f", "0.521")
 chk("KC 6: sqrt(1 - rho)", math.sqrt(1 - K.r21), ".2f", "0.55")
 chk("KC 6: sqrt(1 - rho) from printed", math.sqrt(1 - 0.70), ".2f", "0.55")
+has("KC 6: equal SEs", f"With equal standard errors and no other term, (16.3) would give the ratio "
+    f"$\\sqrt{{1-\\hat\\rho}}={math.sqrt(1 - K.r21):.2f}$.")
 chk("KC 6: ratio at lag 0", K.lw_parts(K.X["R2"], K.X["R1"], 0)[1] / K.naive, ".2f", "0.54")
 chk("KC 6: ratio at lag 7", K.sd21 / K.naive, ".2f", "0.49")
 p4 = K.PAIR["R4"]
@@ -671,6 +755,14 @@ chk("E8 DSR from printed", float(stats.norm.cdf(1.691)), ".3f", "0.955")
 chk("E8 DSR", K.dsr_at(8), ".3f", "0.955")
 chk("E8 DSR approx", K.psr(SR["R2"], K.emax_bldp(8) * K.s0, T, sk2, ku2), ".3f", "0.951")
 chk("E8 DSR with HAC SE", K.dsr_at(8, SEH["R2"]), ".3f", "0.948", count=2)
+dsr_ap = K.psr(SR["R2"], K.emax_bldp(8) * K.s0, T, sk2, ku2)
+assert abs(K.dsr_at(8, SEH["R2"]) - float(stats.norm.cdf((SR["R2"] - K.emax(8) * K.s0) / SEH["R2"]))) < 1e-15
+has("pitfall: three DSRs", f"R2's DSR is {K.dsr_at(8):.3f} by the exact integral, {dsr_ap:.3f} by the approximation "
+    f"and {K.dsr_at(8, SEH['R2']):.3f} with (33.1)'s standard error at the same benchmark.")
+has("picked", "R2 is the best of eight, picked after the results were known.")
+has("widget lead-in", "The widget computes (33.5), PSR(0) and DSR from a rule's moments or from constructed inputs.")
+has("zh: best of eight", "假設八條規則彼此獨立（independent）、真實夏普比率（Sharpe ratio）都是零，最大估計值（estimate）"
+    f"的平均仍約為每年 {K.emax(8) * math.sqrt(Aw / (T - 1)):.2f}。")
 chk("E8 n at 0.95", K.nstar, ".1f", "8.8")
 assert 8.5 < K.nstar < 9.0
 has("from nine trials on", "from nine trials on, R2's DSR is below 0.95")
@@ -697,9 +789,22 @@ chk("eq. (9)", float(off.mean()) + (1 - float(off.mean())) * 8, ".2f", "2.25")
 chk("eq. (9) from printed", 0.821 + (1 - 0.821) * 8, ".2f", "2.25")
 chk("cross-section SD", K.cs_sd * sqA, ".3f", "0.141", count=2)
 chk("expected SD", K.exp_sd * sqA, ".3f", "0.144")
+# E8's null dispersion: eight estimates of variance 1/T each, correlated as C, have expected cross-sectional variance
+# (divisor 8) (1/T)(1 - 1'C1/64), by (16.3) (item U2)
+one8 = np.ones(len(RULES))
+assert abs(K.cs_sd - float(np.std([SR[k] for k in RULES]))) < 1e-15
+assert abs(K.exp_sd - math.sqrt((1 - float(one8 @ Cm @ one8) / len(RULES) ** 2) / T)) < 1e-15
+has("E8 dispersion", f"The eight estimates have a standard deviation of {K.cs_sd * sqA:.3f} a year.")
+# the expected variance, not the expected SD: E[SD] of eight such estimates is smaller (item V33-N1)
+has("E8 null dispersion", f"By (16.3), eight estimates with equal true ratios, variance $1/T$ each and correlations $C$ "
+    f"have an expected variance of $(1-\\mathbf 1^{{\\top}}C\\mathbf 1/{len(RULES) ** 2})/T$ a day, whose "
+    f"square root is about {K.exp_sd * sqA:.3f} a year.")
 chk("BLdP recipe SR_0", K.cs_sd * K.emax_bldp(8) * sqA, ".2f", "0.21")
 chk("BLdP recipe from printed", 0.141 * 1.459, ".2f", "0.21")
 chk("BLdP recipe DSR", K.psr(SR["R2"], K.cs_sd * K.emax_bldp(8), T, sk2, ku2), ".3f", "0.994")
+has("E8 BLdP recipe", f"Bailey and López de Prado's recipe, {K.cs_sd * sqA:.3f} times the approximation "
+    f"{K.emax_bldp(8):.3f}, gives $\\mathrm{{SR}}_0={K.cs_sd * K.emax_bldp(8) * sqA:.2f}$ and DSR "
+    f"{K.psr(SR['R2'], K.cs_sd * K.emax_bldp(8), T, sk2, ku2):.3f}.")
 sv = math.sqrt(1.0249)
 # each n with its own E Z_(n), printed (ez_p) and exact; the session count is printed at n = 8 only
 for n_, ez_p, sess, yrs in ((1, 0.0, None, "2.15"), (8, 1.4236, "1,796", "7.37"), (100, 2.508, None, "13.5")):
@@ -789,6 +894,11 @@ pct("KC 8: Holm haircut of R4", 1 - K.HSR_HOLM["R4"] / SRy["R4"], 0, "0", at="Ho
 pct("KC 8: Bonferroni haircut of R4", 1 - K.HSR_BON["R4"] / SRy["R4"], 0, "75")
 for k in ("R6", "R7", "R8"):
     chk(f"KC 8: Holm HSR {k}", K.HSR_HOLM[k], ".2f", "0.71")
+# R6, R7 and R8 share one Holm adjusted p-value, the running maximum, and so one HSR (item K1)
+assert K.hol["R6"] == K.hol["R7"] == K.hol["R8"] and K.HSR_HOLM["R6"] == K.HSR_HOLM["R7"] == K.HSR_HOLM["R8"]
+assert not tie(K.hol["R6"], ".3f") and K.hol["R1"] < K.hol["R6"]
+has("KC8 shared", "Holm's adjusted p-values cannot fall below their running maximum, so R6, R7 and R8 share the "
+    f"adjusted p-value {K.hol['R6']:.3f} and the HSR {K.HSR_HOLM['R6']:.2f} a year ([[ex:haircut]]).")
 assert max(RULES, key=lambda k: K.pS[k]) == "R4" and abs(K.HSR_HOLM["R4"] - SRy["R4"]) < 1e-12
 pct("sizing: same 21%", 1 - K.HSR_IND["R2"] / SRy["R2"], 0, "21")
 has("sizing", "the haircut cuts the fraction by the same 21%")
@@ -829,6 +939,7 @@ chk("P4 exact", K.emax(5), ".3f", "1.163", count=2)
 chk("P4 approximation", K.emax_bldp(5), ".3f", "1.193")
 chk("P4 median", float(stats.norm.ppf(0.5**0.2)), ".3f", "1.129")
 chk("P5", 12 / math.sqrt(12 + 2 * 11 * 0.1), ".3f", "3.184", count=2)
+chk("S5 as (19.9) prints it", math.sqrt(12 / (1 + 2 * (11 / 12) * 0.1)), ".3f", "3.184")
 chk("P5 reversed", 12 / math.sqrt(12 - 2 * 11 * 0.1), ".3f", "3.833")
 chk("P5 sqrt12", math.sqrt(12), ".3f", "3.464")
 chk("P6", 0.36 * math.sqrt(2 * 0.1), ".3f", "0.161", count=2)
@@ -861,10 +972,11 @@ pct("P9 Bonferroni haircut from printed", 1 - 1.537 / 2.5, 1, "38.5")
 assert 0.30**2 == 0.09 and 8 - 1 == 7 and 8 - 3 == 5 and 12 - 1 == 11
 has("S1", "$\\sqrt{(1+0.06^2/2)/1{,}851}=0.0233$ a day, times $\\sqrt{243.57}$ is 0.363")
 has("S2", "$\\hat V_{\\mathrm{SR}}=1+0.30+\\tfrac14\\times7\\times0.09=1.4575$, and $\\sqrt{1.4575/90}=0.127$. A types the "
-    "excess kurtosis 5 as raw.")
+    "excess kurtosis 5 as raw. B is the normal standard error.")   # V33-N2
 has("S3 V", "normal returns give $\\hat V_{\\mathrm{SR}}=1+0.05^2/2=1.00125$")
 has("S4", "B is (21.9)'s median, $\\Phi^{-1}(0.5^{1/5})$")
-has("S5", "$12/\\sqrt{12+2\\times11\\times0.1}=3.184$")
+has("S5", f"**B** is correct: (19.9) gives $\\sqrt{{12/(1+2\\times\\frac{{11}}{{12}}\\times0.1)}}="
+    f"{math.sqrt(12 / (1 + 2 * (11 / 12) * 0.1)):.3f}$.")
 has("S6", "$0.36\\sqrt{2(1-0.9)}=0.161$, so the t-stat of the gap 0.2 is 1.24. B treats the estimates as independent, "
     "$0.36\\sqrt2=0.509$, t-stat 0.39. C is $0.36\\times(1-0.9)$.")
 has("P8 (b) stem", "If $Z_1$ and $Z_2$ correlate 0.5, the same steps give $\\sqrt{0.5/\\pi}=0.3989$")
@@ -877,8 +989,12 @@ has("S11 (b)", "The lab gives 0.367, 0.382, 0.393 and 0.389 a year")
 has("S10", "The lab gives 0.305, 1.06 by $\\sqrt{12}$ and 0.92 by (19.9), from the ratio 1.31 with robust standard "
     "error 0.38")
 assert (K.den["R1"] - 1) / K.serob["R1"] < 1
-has("P12 stem", "Draw 85 blocks and cut them to 1,851 rows, with the block covariance from the 84 complete blocks.")
+has("S10 decision", "So report the annual ratio both ways rather than the corrected one alone.")
 has("S7 R2", "For R2, (33.5) gives 1,796 sessions, below 1,851, so DSR exceeds 0.95.")
+assert abs(K.emax(1)) < 1e-12
+has("S7 n = 1", "At $n=1$ the expected maximum is $\\E Z_{(1)}=0$, so (33.5) is (33.3).")
+has("S7 sign condition", "For $\\alpha<\\tfrac12$ the right side is positive, so a solution needs "
+    "$\\widehat{\\mathrm{SR}}>\\mathrm{SR}_0$. Squaring and adding 1 then gives (33.3).")
 
 # ---------------------------------------------------------------- inputs of stems, quoted values, rounded restatements
 has("P1 stem", "Sharpe ratio 0.06, $T=1{,}851$ and $A=243.57$ (constructed)")
@@ -888,7 +1004,7 @@ has("P5 stem", "Monthly log returns have $\\rho_1=0.1$ and no other autocorrelat
 has("P6 stem", "Two annual Sharpe ratio estimates are 1.0 and 0.8, each with standard error 0.36, and their "
     "estimation errors correlate 0.9")
 has("P9 stem", "A backtest's t-stat is 2.5 among ten independent tests")
-has("KC 4 stem", "with $\\rho_1=0.2$, so that $\\rho_k=0.2^k$")
+has("KC 4 stem", "Monthly returns follow an AR(1) with $\\rho_1=0.2$, so that $\\rho_k=0.2^k$ (constructed).")
 has("S3 quantile", "$1+1.00125\\times(1.644854/0.05)^2=1{,}085$")
 has("S3 two-sided", "B uses the two-sided quantile $\\Phi^{-1}(0.975)$")
 has("E6 1.645", "$(1.645/0.8115)^2=4.11$")
@@ -897,7 +1013,6 @@ has("E8 z", "z&=\\frac{0.621\\sqrt{1{,}850/243.57}}{\\sqrt{1.0249}}=1.691")
 has("E7 B", "Experiment 1 draws $B=9{,}999$ resamples")
 has("LW Remark", "(their Remark 3.2, eq. (9))")
 assert all(f"{SE9[k] * sqA:.2f}" == "0.37" for k in RULES)
-has("overview: about 0.37", "Each standard error is about 0.37")
 has("summary: about 0.37", "each rule's Sharpe ratio has a standard error of about 0.37 a year")
 has("zh: 0.37", "八條規則的標準誤都在 0.37 左右")
 assert f"{min(K.vr.values()):.1f}" == "1.5" and f"{max(K.vr.values()):.1f}" == "1.6"
@@ -912,16 +1027,18 @@ for term in ("夏普比率（Sharpe ratio）", "標準誤（standard error）", 
              "區塊自助重抽法（block bootstrap）", "Student化信賴區間（studentized confidence interval）",
              "選擇偏誤（selection bias）", "順序統計量（order statistic）", "多重假設檢定（multiple testing）",
              "變異數非齊一與自我相關一致估計量（HAC）", "相依性（dependence）", "基準（benchmark）",
-             "相關係數（correlation coefficient）", "彼此獨立（independent）"):
+             "相關係數（correlation coefficient）", "彼此獨立（independent）", "獨立同分布（iid）",
+             "雙邊檢定（two-sided test）", "厚尾（heavy tail）", "檢定（test）"):
     assert term in RAW, term
-# each box glosses its own first uses (lessons item 23); forms without a SOURCES row stay out (試驗, 標準化, 雙邊)
+# each box glosses its own first uses (lessons item 23); forms without a SOURCES row stay out (試驗, 標準化, 雙尾)
 boxes = re.findall(r"^> \[!zh\][^\n]*\n((?:>[^\n]*\n?)+)", RAW, flags=re.MULTILINE)
 assert len(boxes) == 5, len(boxes)
 for term, box_no in (("基準（benchmark）", 2), ("基準（benchmark）", 4), ("相關係數（correlation coefficient）", 3),
                      ("相關係數（correlation coefficient）", 4), ("彼此獨立（independent）", 4),
-                     ("相依性（dependence）", 3), ("two-sided", 2)):
+                     ("相依性（dependence）", 3), ("雙邊檢定（two-sided test）", 2), ("獨立同分布（iid）", 0),
+                     ("厚尾（heavy tail）", 0), ("檢定（test）", 0)):
     assert term in boxes[box_no], (term, box_no)
-for absent in ("試驗", "標準化", "雙邊", "雙尾"):
+for absent in ("試驗", "標準化", "雙尾"):
     assert all(absent not in b for b in boxes), absent
 has("zh: half", "差的標準誤（standard error）只有當成獨立樣本時的一半")
 assert f"{K.sd21 / K.naive:.1f}" == "0.5"                            # 0.49, printed as "half"
@@ -976,7 +1093,8 @@ note = RAW.split("> [!note] Notation for this module", 1)[1].split("\n\n", 1)[0]
 rest = RAW.replace(note, "")
 for sym in ("\\hat\\Delta", "\\hat V_{\\mathrm{SR}}", "\\mathbf v_t", "\\hat\\Psi", "\\hat\\Gamma_k", "Z_{(n)}",
             "n_{\\mathrm{eff}}", "\\bar\\rho", "\\gamma_{\\mathrm E}", "\\text{t-stat}_{\\text{adj}}",
-            "\\hat\\Delta_{\\text{boot},i}"):
+            "\\hat\\Delta_{\\text{boot},i}", "\\nabla h", "\\hat\\Psi_{\\text{boot}}", "\\bar{\\mathbf v}_{\\text{blk}}",
+            "h(\\boldsymbol\\theta)", "h(\\bar x,s^2)"):
     assert sym in rest, sym
 assert "\\widehat{\\mathrm{SR}}_j" not in RAW and "\\Delta=\\mathrm{SR}_j" not in RAW
 has("TR23 in the notation note", "TR23 is the TAIEX total-return index of Volumes III and IV, with $T=5{,}849$ "
@@ -1034,7 +1152,7 @@ ALLOW: dict[str, str] = {
     **{t: TAG for t in ("4.3", "16.3", "16.7", "18.2", "19.2", "19.3", "19.5", "19.7", "19.8", "19.9", "20.2", "20.8",
                         "20.9", "21.2", "21.3", "21.4", "21.6", "21.7", "21.9", "22.4", "23.7", "25.6")},
     **{f"33.{k}": TAG for k in range(1, 8)},
-    **{y: "year of a citation" for y in ("1987", "1996", "2002", "2008", "2012", "2014", "2015")},
+    **{y: "year of a citation" for y in ("1987", "2002", "2008", "2012", "2014", "2015")},
 }
 N_MULTI = 127       # checked strings that occur more than once on the page, each with its exact count
 

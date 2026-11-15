@@ -242,6 +242,8 @@ pc("TR23 on 7 April 2025 (lm26.md:32)", RT[TPOS["2025-04-07"]], 2, "9.70", loss=
 assert int((RT[np.isfinite(RT)] < RT[TPOS["2025-04-07"]] - K.EPS).sum()) == 0, "7 April 2025 is TR23's worst day"
 assert TD[TPOS["2025-04-07"] - 1] == "2025-04-02"
 assert (date(2025, 4, 7) - date(2025, 4, 2)).days == 5
+assert [d for d in TD if "2025-04-02" < d < "2025-04-07"] == [] and (date(2025, 4, 7) - date(2025, 4, 2)).days - 1 == 4, \
+    "four days without a session before 7 April 2025"
 has("case: the closure", "After its close on 2 April 2025, Taiwan's market did not trade again until 7 April")
 pc("worst 5 sessions 2025", WORST["2025-04-07"][5][0], 2, "15.96", loss=True, n=2)
 pc("worst 5 sessions 2020", WORST["2020"][5][0], 2, "16.51", loss=True)
@@ -266,9 +268,14 @@ pc("case R1 beta model", float(K.expo("R1", "2025-04-02") @ pred), 2, "3.62", lo
 pc("case R1 actual", day7["R1"], 2, "7.70", loss=True, n=4)
 assert float(K.expo("R1", "2025-04-02") @ pred) / day7["R1"] < 0.5, "under half"
 has("case box: the five sessions", "Its five sessions to 9 April lost 15.96%, second only to March 2020's 16.51%.")
-has("case box: the rules", "The through case's eight rules lost from 5.06% (R7) to 8.33% (R4). R8 had raised its "
-    "exposure to 1.319 at its trade of 3 March, and it lost 7.94%. A beta model fitted on 2,362 days, that day "
-    "included, gives R1 3.62%, under half the actual 7.70%.", 1)
+has("case box: the rules", f"The through case's eight rules lost from {-100 * day7['R7']:.2f}% (R7) to "
+    f"{-100 * day7['R4']:.2f}% (R4).", 1)          # overview bullet 1 repeats it (has_fm checks the bullet)
+has("case box: R8", f"R8 had raised its exposure to {float(K.expo('R8', '2025-03-03').sum()):.3f} on 3 March, held "
+    f"{float(K.expo('R8', '2025-04-02').sum()):.3f} at the close of 2 April and lost {-100 * day7['R8']:.2f}%.", 1)
+assert K.PRE["R8"] and max(d for d in K.PRE["R8"] if d <= "2025-04-02") == "2025-04-01", \
+    "R8's last trade before 7 April 2025 is that of 1 April, so its 2 April book is the drifted 1 April book"
+has("case box: the beta model", f"A beta model fitted on {len(fr.est_dates):,d} days, that day included, gives R1 "
+    f"{-100 * float(K.expo('R1', '2025-04-02') @ pred):.2f}%, under half the actual {-100 * day7['R1']:.2f}%.", 1)
 has("case box: no limit", "00646 and 00642U have no daily limit, and they fell 12.59% and 14.62% ([[ex:case]]).", 1)
 beta, r2 = K.beta, K.r2
 for j, (p_, n_) in enumerate(zip(["1.048", "0.527", "-0.071", "0.161", "0.198"], [2, 2, 1, 1, 1], strict=True)):
@@ -286,16 +293,25 @@ row("X1 R1", ["R1's book", "", "", s2(day7["R1"]).replace("-", "−"), "",
               s2(float(K.expo("R1", "2025-04-02") @ pred)).replace("-", "−")], 1)
 row("X1 rules", ["Loss, %"] + [f"{-100 * day7[k]:.2f}" for k in RULES], 1)
 assert f"{-100 * net7['R8']:.2f}" == f"{-100 * day7['R8']:.2f}", "R8's loss rounds alike with and without interest"
-chk("R8's exposure at the 2 April close", float(K.expo("R8", "2025-04-02").sum()), ".3f", "1.331")
+chk("R8's exposure at the 2 April close", float(K.expo("R8", "2025-04-02").sum()), ".3f", "1.331", n=2)
 chk("R8's interest, points", 100 * (day7["R8"] - net7["R8"]), ".3f", "0.005")
+# X1's note: R1's -3.62 from unrounded inputs, against 0.2 times the column's printed values
+s_ = sum(float(f"{100 * p:.2f}") for p in pred)
+chk("X1 note: column sum", s_, ".2f", "-18.07")
+chk("X1 note: from printed", 0.2 * s_, ".2f", "-3.61", n=2)       # and X3's R8 2024 frozen loss
+assert f"{100 * float(K.expo('R1', '2025-04-02') @ pred):.2f}" == "-3.62" != f"{0.2 * s_:.2f}"
+has("X1 note R1", f"R1's {100 * float(K.expo('R1', '2025-04-02') @ pred):.2f} uses unrounded inputs, while the "
+    f"column at exposures of 0.2 gives $0.2\\times({s_:.2f})={0.2 * s_:.2f}$.", 1)
 assert max(abs(net7[k] - day7[k]) for k in RULES if k != "R8") < 1e-12, "R1-R7 hold no cash"
 
 # ---------------------------------------------------------------- hygiene note
 has("hygiene: fixed", "The through case fixed its rules on 24 October 2026")
 has("hygiene: labels", "the windows, limits, intraday statistics and the 2022 illustration")
 has("hygiene: in-sample", "Betas, distances, the partial scenario, the (16.10) check and the reverse stress test")
-has("hygiene: hypothetical", "So are 2020 on proxies, the other shocks, ruin scalings, the TX position, presets and "
+has("hygiene: hypothetical", "So are 2020 on proxies, the factor shock, ruin scalings, the TX position, presets and "
     "problems.")
+has("hygiene: out-of-sample", "The growth and drawdowns of [[ex:failures]] and the lab's checkpoint are "
+    "**out-of-sample**.", 1)
 # the hygiene count: eight rules, five scenarios, one illustration (2022), four built shocks (the factor shock, the
 # partial scenario, the correlation break, the worst day of each fund), one reverse stress test per book
 assert len(K.RULES) == 8 and len(K.SCEN) == 5
@@ -304,7 +320,7 @@ assert len(built) == 4 and all(np.isfinite(v).all() and v.shape == (5,) for v in
 has("hygiene: count", "eight rules, none chosen by a scenario, five scenarios, one illustration, four built shocks and "
     "one reverse stress test per book")
 has("hygiene: 00635U", "GLD also for 00635U, traded from 15 April 2015")
-chk("break correlation", K.RHO_BRK, ".2f", "0.30", n=3)
+chk("break correlation", K.RHO_BRK, ".2f", "0.30", n=4)
 
 # ---------------------------------------------------------------- Section 2: the windows (X2, E1, pitfall, KC)
 NAMES = ["2008", "2015", "2020", "2024-08-05", "2025-04-07"]
@@ -321,6 +337,13 @@ for n, sn in zip(NAMES, SHORTN, strict=True):
     for k, x in enumerate(vals):
         assert not tie(100 * x, ".2f") and x < 0, (n, k)
 assert ranks == {"2008": 4, "2015": 17, "2020": 8, "2024-08-05": 2, "2025-04-07": 1}
+# the definition box names the 2024 and 2025 windows by their start days, which are their windows' worst days
+d24, d25 = (n for n, kind in K.SCEN if kind == "day")
+assert WIN[d24][2] == d24 and WIN[d25][2] == d25, "the 2024 and 2025 named days are their windows' worst days"
+has("window rule", f"the lowest close of the named year ({', '.join(n for n, kind in K.SCEN if kind == 'year')}) or "
+    f"of the 20 sessions from {iso(WIN[d24][2])} or {iso(WIN[d25][2])}.", 1)
+# the header of X2's losses table, whose rows the loop above checks in this column order (the code review's decision)
+row("X2 header", ["Scenario, %", "Worst day", "Worst 5 sessions", "Worst 20 sessions", "Peak to trough"], 1)
 has("X2: 2024's 20 sessions", "2024's worst 20 sessions start before its peak, at the close of 4 July")
 assert TD[WORST["2024-08-05"][20][1] - 20] == "2024-07-04" and "2024-07-04" < WIN["2024-08-05"][0]
 has("X2: the limit history", "TWSE's stock limit was 7% until 1 June 2015")
@@ -410,9 +433,15 @@ pc("X4 R6 total", day7["R6"], 2, "-5.96", n=2)
 pcs("X4 R6 three decimals", P14["R6"], 3, ["-1.351", "-2.733", "+0.556", "-0.684", "-1.752"])
 chk("X4 R6 three-decimal sum", sum(float(f"{100 * x:.3f}") for x in P14["R6"]), ".3f", "-5.964")
 pc("X4 R6 total, 3 dp", day7["R6"], 3, "-5.964")
+p6 = [f"{100 * x:+.3f}".replace("-", "−") for x in P14["R6"]]
+has("X4 note sentence", f"R6's two-decimal parts add to {sum(float(g) for g in r6_2):.2f}, not {100 * day7['R6']:.2f}, "
+    f"but {', '.join(p6[:4])} and {p6[4]} add to its {100 * day7['R6']:.3f}.", 1)
 assert K.R1_LAST_TRADE_0402 == "2025-04-01" and np.abs(K.E_R1_0402 - 0.2).max() < 0.002
 has("E2 trade", "After its trade of 1 April, R1's exposures on 2 April are near 0.2")
 pcs("E2 parts", P14["R1"], 2, ["-2.00", "-2.53", "+0.36", "-0.62", "-2.91"], n=[2, 2, 2, 2, 2])
+pt1 = [f"{100 * x:+.2f}".replace("-", "−") for x in P14["R1"]]
+has("E2 parts sentence", f"With [[ex:case]]'s returns it loses {-100 * day7['R1']:.2f}%: {pt1[0]} points from 0050, "
+    f"{pt1[1]} from 00646, {pt1[2]} from 00679B, {pt1[3]} from 00635U and {pt1[4]} from 00642U.", 1)
 pc("E2 R3", day7["R3"], 2, "5.40", loss=True, n=2)
 pc("E2 R3 from 00646", P14["R3"][1], 2, "4.07", loss=True)
 pc("E3 R8 frozen 2020", FZ["2020"]["R8"], 2, "17.04", loss=True, n=2)
@@ -439,8 +468,20 @@ assert f"{r8['2025-03-03'][0]:.3f}" == "1.005"
 pc("E3 book of 3 March", float(K.expo("R8", "2025-03-03") @ g25), 2, "13.35", loss=True)
 chk("E3 1 April (A31-32)", r8["2025-04-01"][1], ".2f", "1.33")
 pc("E3 book of 1 April", float(K.expo("R8", "2025-04-01") @ g25), 2, "13.42", loss=True)
+has("E3 2025", f"In 2025 the order reverses: {-100 * FZ['2025-04-07']['R8']:.2f}% frozen at exposure "
+    f"{float(K.expo('R8', WIN['2025-04-07'][0]).sum()):.3f}, {-100 * AC['2025-04-07']['R8']:.2f}% on the path.", 1)
+has("E3 3 March", f"The trade of 3 March raised the exposure to {r8['2025-03-03'][1]:.3f}, a book that loses "
+    f"{-100 * float(K.expo('R8', '2025-03-03') @ g25):.2f}% over the window.", 1)
+has("E3 1 April", f"The trade of 1 April took it only to {r8['2025-04-01'][1]:.2f} ([[LM31]]), a book that loses "
+    f"{-100 * float(K.expo('R8', '2025-04-01') @ g25):.2f}%.", 1)
+has("E3 ratio", "By (31.7), a ratio of 1.319 means that the EWMA forecast lay below the window volatility of R6's "
+    "book.", 1)
 assert max(r8["2025-03-03"][1], r8["2025-04-01"][1], r8["2020-02-03"][1], r8["2020-03-02"][1]) < 1.5 - 1e-6
-has("E3 cap", "and the cap of 1.5 bound at neither")
+tr25 = sorted(d for d in r8 if WIN["2025-04-07"][0] < d <= WIN["2025-04-07"][1])     # R8's trades in 2025's window
+assert tr25 == ["2025-03-03", "2025-04-01"] and all(r8[d][1] < K.vr.CAP - 1e-6 for d in tr25), "the cap bound at neither"
+up25 = max(tr25, key=lambda d: r8[d][1] - r8[d][0])                                  # the trade that added the leverage
+has("E3 cap", f"So the {iso(up25).rsplit(' ', 1)[0]} trade added the leverage, and the cap of {K.vr.CAP:g} bound at "
+    "neither trade.", 1)
 for n in ("2020", "2024-08-05", "2025-04-07"):
     s_, dev = K.SCALE[n]
     assert dev < 1e-12, (n, "R8's book is R6's scaled")
@@ -467,7 +508,12 @@ assert "valued on European and US futures" in l27
 # in 2008 none of E5's foreign funds existed; in the 2015 window only 00635U (listed 2015-04-15; 00642U listed
 # 2015-09-07, after the window's trough of 2015-08-24; listing dates from project/SOURCES.md)
 assert WIN["2015"][1] == "2015-08-24" and "2015-04-15" < WIN["2015"][1] < "2015-09-07"
-has("2015 window", "In 2008 none of E5's foreign funds existed, and in the 2015 window only 00635U.")
+has("2015 window", "In 2008 none of E5's foreign funds existed, and in the 2015 window only 00635U, which the replay "
+    "replaces too.", 1)
+has("adjusted closes", "Their adjusted closes are FinMind's, built backward from $t'$ as [[LM34]]'s (34.2) builds "
+    "$P^{\\mathrm{adj}}_{t\\mid t'}$, with $t'$ the latest session FinMind held on 24 October 2026.", 1)
+assert "\\tag{34.2}" in (ROOT / "src" / "lm34.md").read_text(encoding="utf-8")
+has("the mid rate", "The pairing rule gives a US close the mid rate of the first USD/TWD row dated after it", 1)
 a8, b8, nd8 = WIN["2008"]
 assert (a8, b8, nd8) == ("2007-10-29", "2008-11-20", "2008-01-22")
 R08 = K.PROXY_RET["2008"]
@@ -557,6 +603,8 @@ e20 = K.expo("R1", a20)
 pc("E5 R1 on proxies, USO", float(e20 @ uso), 1, "21.5", loss=True)
 chk("E5 R1 on proxies, DBO", -100 * float(e20 @ dbo), ".0f", "19")
 pc("E5 R1 on the funds", FZ["2020"]["R1"], 2, "19.84", loss=True)
+has("E5 R1 on proxies", f"On 0050 and the proxies, R1's book of {iso(a20)} loses {-100 * float(e20 @ uso):.1f}% with "
+    f"USO and {-100 * float(e20 @ dbo):.0f}% with DBO, against {-100 * FZ['2020']['R1']:.2f}% on the funds.", 1)
 gap08 = float(K.FIRST["R1"] @ (R08["DBO"] - R08["USO"]))
 gap20 = float(e20 @ (dbo - uso))
 assert round(100 * gap08) == 2 and round(100 * gap20) == 3, (gap08, gap20)
@@ -599,7 +647,10 @@ pc("E7 R7 full", float(CUR["R7"] @ full), 2, "1.40", loss=True)
 pc("E7 R7 break", float(CUR["R7"] @ brk), 2, "3.00", loss=True)
 a22, b22 = TD[K.p22], TD[K.k22]           # the 2022 illustration's peak and trough
 assert (a22, b22) == ("2022-01-17", "2022-10-25")
-has("E7 2022 dates", "an illustration outside the five scenarios, from 17 January to 25 October 2022:")
+has("E7 2022 dates", "an illustration outside the five scenarios, from TR23's 2022 high on 17 January to its low on "
+    "25 October:", 1)
+y22 = [i for i, d in enumerate(TD) if d.startswith("2022")]
+assert TD[max(y22, key=lambda i: LV[i])] == a22 and TD[min(y22, key=lambda i: LV[i])] == b22, "the 2022 high and low"
 row("E7 2022 table", ["Return"] + [s2(x).replace("-", "−") for x in (
     LV[TPOS[b22]] / LV[TPOS[a22]] - 1, K.g22[0], K.g22[2], float(K.expo("R2", a22) @ K.g22),
     float(K.expo("R4", a22) @ K.g22))], 1)
@@ -610,6 +661,10 @@ chk("E7 2022 weekly", float(np.corrcoef(K.we[:, 0], K.we[:, 2])[0, 1]), "+.3f", 
 chk("E7 2022 weeks", K.nwe, "d", "38")
 chk("E7 full weekly (A27-11)", float(np.corrcoef(K.wf[:, 0], K.wf[:, 2])[0, 1]), ".3f", "-0.022")
 assert K.nwf == 498
+has("E7 2022 correlations", f"Yet 0050 and 00679B correlated {float(np.corrcoef(K.X[K.ep, 0], K.X[K.ep, 2])[0, 1]):.3f} "
+    f"daily and {float(np.corrcoef(K.we[:, 0], K.we[:, 2])[0, 1]):+.3f} over {K.nwe} ISO weeks (first and last "
+    f"dropped), against {float(np.corrcoef(K.wf[:, 0], K.wf[:, 2])[0, 1]):.3f} over the full sample's {K.nwf} "
+    "([[LM27]]).", 1)
 chk("E7 tail days", K.nev, "d", "48", n=2)
 tail = re.search(r"00646: data ([\d.]+), \(16.10\) ([\d.]+), full ([\d.]+)", K.OUT[34])
 assert tail
@@ -621,7 +676,8 @@ chk("E7 SE", K.se646, ".2f", "0.10")
 chk("E7 gap in SEs", (K.model646 - K.r646) / K.se646, ".1f", "1.3")
 chk("E7 gap in SEs from printed", 0.13 / 0.10, ".1f", "1.3", in_md=False)
 assert round(K.model646 - K.r646, 2) == 0.13
-has("zh5", "它預測 R1 虧 3.62%，實際卻虧 7.70%")
+has("zh5", f"所以 2025 年 4 月 7 日它算出 R1 只虧 {-100 * float(K.expo('R1', '2025-04-02') @ pred):.2f}%，實際卻虧 "
+    f"{-100 * day7['R1']:.2f}%：00642U 的 R-squared 不到 1%，它的大跌幾乎全在殘差裡。", 1)
 pc("KC5 R4 break", float(CUR["R4"] @ brk), 2, "6.89", loss=True)
 assert abs(float(CUR["R4"] @ full) - float(CUR["R4"] @ brk)) < 1e-15 and CUR["R4"][2] == 0
 chk("KC5 R4 00679B", float(CUR["R4"][2]), ".3f", "0.000")
@@ -729,7 +785,9 @@ has("X8 00720B", "fell 11.25% on 19 March 2020, from 40.00 to 35.50")
 has("limits history", "items standing since 3 June 2016")
 has("TPEx listing notice", "and TPEx's listing notice gave 00679B no limit from its first day ([[ex:limits]])")
 has("X8 source", "with the checkpoint funds' `TaiwanStockPrice` files, retrieved 24 October 2026")
-has("proxies' rules", "For 2008 and 2015 the proxies are read under the current rules of their funds' markets")
+has("proxies' rules", "For 2008 and 2015 the proxies' returns carry no daily limit, since their funds have none under "
+    "today's rules, and 0050's returns carry the limit of their day ([[ex:windows]]).", 1)
+assert all(X8_RULE[s][1] == "none" for s in ("00646", "00679B", "00635U", "00642U")), "the proxied funds have no limit"
 t5 = re.findall(r"(\d{4}-\d\d-\d\d): gap (-[\d.]+)%, low (-[\d.]+)% at ([\d:]+).*?, close (-[\d.]+)%, gap / close "
                 r"([\d.]+)", K.OUT[44])
 assert len(t5) == 5
@@ -749,11 +807,19 @@ stale = re.search(r"09:00:05 \(the daily open\) (-[\d.]+)%", K.OUT[44])
 assert stale
 chk("KC7c stale open", float(stale.group(1)), ".2f", "-5.52")
 chk("KC7c 09:01:00", gl_unr["2025-04-07"][0], ".2f", "-10.28", n=2)
-has("KC7c", "(c) The open is the stale 09:00:05 value: −5.52%, against −10.28% by 09:01:00 ([[ex:gaps]]).")
-assert gl_unr["2025-04-07"][0] < 0 and float(stale.group(1)) < 0
-chk("zh7 to 09:01:00", -gl_unr["2025-04-07"][0], ".2f", "10.28")
-chk("zh7 stale open", -float(stale.group(1)), ".2f", "5.52")
-has("zh7 gap", "當天到 09:01:00 加權指數已跌 10.28%，每日資料的開盤價卻是 09:00:05 的舊值，只顯示 5.52%", 1)
+gap7, stale7 = gl_unr["2025-04-07"][0], float(stale.group(1))
+has("KC7c", f"(c) The open is the stale 09:00:05 value, a log change of {stale7:.2f}% against {gap7:.2f}% by 09:01:00 "
+    "([[ex:gaps]]).", 1)
+assert gap7 < 0 and stale7 < 0
+assert gap7 <= gl_unr["2025-04-07"][1], "on 7 April 2025 the change to 09:01:00 is at or below the close: 就完成"
+chk("zh7 to 09:01:00", -gap7, ".2f", "10.28")
+chk("zh7 stale open", -stale7, ".2f", "5.52")
+prev7 = date.fromisoformat(K.WD[K.WIDX["2025-04-07"] - 1])     # the session before 7 April 2025: 2 April
+assert prev7 == date(2025, 4, 2), "前一個交易日 of 7 April 2025 is 2 April"
+has("zh7 gap", f"前一天 4 月 7 日，隔夜（overnight）的跳空（gap）在開盤第一分鐘就完成：以對數報酬（log return）計，加權指數到 "
+    f"09:01:00 已比前一個交易日 {prev7.month} 月 {prev7.day} 日的收盤跌 {-gap7:.2f}%，每日資料的開盤價卻是 09:00:05 的舊值，"
+    f"只顯示跌 {-stale7:.2f}%。", 1)
+assert K.WD[K.WIDX["2025-04-08"] - 1] == "2025-04-07", "前一天 of 8 April 2025 is 7 April"
 # data/lm35_common.py stops unless each day's 09:00:00 value is the previous close
 has("X5 note 09:00:00", "log changes from the previous close, which the series prints at 09:00:00", 1)
 has("pitfall stale open", "FinMind's daily TAIEX open is the value at 09:00:05, before most stocks have traded.")
@@ -885,6 +951,13 @@ has("KC9b answer", "That drawdown limit, in March 2020 (10.24%). R1 grew fastest
     "and ruin over 2020's window needs $L\\ge5.04$.")
 chk("KC9 worst-of-each distance", K.maha(K.woe), ".2f", "19.07", n=2)
 chk("KC9 largest distance", float(K.dt.max()), ".2f", "15.02")
+# the companion-lab box: the T5S command names X5's five days, which the lab's Part 7 and its README fetch
+t5_days = [nd for nd, *_ in t5]
+assert t5_days == ["2008-01-22", "2015-08-24", "2020-01-30", "2024-08-05", "2025-04-07"]
+has("lab box: T5S days", "Part 7 also reads five named days of the 5-second TAIEX: run "
+    f"`uv run python data/fetch_intraday.py --series taiex5s --dates {','.join(t5_days)}` before `make_lab_data.py`.", 1)
+for f_ in (LAB, ROOT / "labs" / "LM35_lab" / "README.md"):
+    assert f"--dates {','.join(t5_days)}`" in f_.read_text(encoding="utf-8"), (f_, "the same five days")
 
 # ---------------------------------------------------------------- practice problems and solutions
 chk("P1", 0.6 * -10 + 0.4 * 1.81, ".2f", "-5.28", n=2)
@@ -906,6 +979,12 @@ chk("P5 A", (10 / 0.8) ** 2, ".2f", "156.25")
 chk("P5 B", math.sqrt(10 / 0.8), ".2f", "3.54")
 keys = re.findall(r"^(\d+)\. \*\*([A-C])\*\* is correct", RAW, flags=re.MULTILINE)
 assert keys == [("1", "B"), ("2", "A"), ("3", "C"), ("4", "B"), ("5", "C")], keys
+s679, s50 = float(sd[2]), float(sd[0])          # problem 8's unrounded SDs (A35-33), divisor T
+chk("S6 break beta", K.RHO_BRK * s679 / s50, ".2f", "0.20")
+has("S6 hedge", f"The hedge works through the beta, which a crash can change: [[eg:break]]'s correlation of "
+    f"{K.RHO_BRK:.2f} gives 00679B a beta of {K.RHO_BRK * s679 / s50:.2f} on 0050.", 1)
+assert abs(float(MU[2]) + K.RHO_BRK * s679 / s50 * (-0.10 - float(MU[0])) - float(brk[2])) < 1e-12, \
+    "eg:break's move of 00679B is its beta times 0050's shock from the mean"
 chk("S6 bond normal", -0.07 * -10, "+.2f", "+0.70")
 chk("S6 book normal", 0.4 * -10 + 0.6 * 0.70, ".2f", "-3.58")
 chk("S6 0050 part", 0.4 * -10, ".2f", "-4.00", n=2)
@@ -1006,7 +1085,7 @@ assert K.EQ12 == 1_402_000
 # ---------------------------------------------------------------- the overview (front matter), bullet by bullet
 # Each bullet is checked whole, so a changed digit fails; its numbers are the body's, checked above.
 OVERVIEW = [
-    ("On 7 April 2025, after five calendar days without trading, TR23 fell 9.70%, its worst day since 2003. The "
+    ("On 7 April 2025, after four days without trading, TR23 fell 9.70%, its worst day since 2003. The "
      "through case's eight rules lost from 5.06% (R7) to 8.33% (R4)."),
     ("Peak to trough, the five scenario windows cost TR23 from 18.31% (2024) to 56.02% (2008). The 2008 and 2015 "
      "windows are replayed hypothetically, on 0050 itself and US proxies."),
@@ -1170,7 +1249,9 @@ print(f"labels: {len(ex_labels)} exhibits, {len(eg_labels)} examples, tags (35.1
 EQ = "an equation reference"
 PINS: dict[str, tuple[int, str]] = {
     # signed and decimal values that only table rows and phrases check
-    "-3.62": (2, "R1 under the beta model: X1 and E6"),
+    "-3.62": (3, "R1 under the beta model: X1's row and note, and E6"),
+    "0.2": (3, "R1's exposures near 0.2: E2, and X1's note twice"),
+    "14 January 2020": (2, "the 2020 window's first close: E3, E5"),
     "-7.70": (4, "R1 on 7 April 2025: X1, X3, E6 and solution 9"),
     "-8.33": (2, "TR23's worst day of 2024 (X2) and R4 on 7 April 2025 (X3)"),
     "-11.09": (2, "00635U's worst day, in X6 and X8"),
@@ -1199,8 +1280,8 @@ PINS: dict[str, tuple[int, str]] = {
     "09:01:00": (5, "the gap's time: text, X5's header, pitfall, zh box, KC"),
     "16.10": (3, EQ), "27.5": (2, EQ), "35.2": (5, EQ), "35.4": (12, EQ),
     # dates and years
-    "7 April 2025": (16, "the case day"), "7 April": (4, "the case day"), "7 Apr 2025": (2, "the case day: X2, X5"),
-    "2 April 2025": (3, "the close before the case day"), "2 April": (6, "the close before the case day"),
+    "7 April 2025": (17, "the case day, the 2025 named day (definition box)"), "7 April": (4, "the case day"), "7 Apr 2025": (2, "the case day: X2, X5"),
+    "2 April 2025": (3, "the close before the case day"), "2 April": (7, "the close before the case day"),
     "8 April 2025": (2, "the next open (KC7, X7's text)"), "8 April": (2, "the next open (E9, problem 3)"),
     "9 April": (2, "2025's trough (case box, E1)"), "21 February 2025": (2, "2025's peak (E1, KC3)"),
     "3 March": (4, "R8's trade of 3 March 2025"), "1 April": (2, "R1's and R8's trades of 1 April 2025"),
@@ -1210,19 +1291,21 @@ PINS: dict[str, tuple[int, str]] = {
     "19 March 2020": (2, "the worst five-session span's end (E1); 00720B's fall (X8's note)"),
     "March 2020": (2, "2020's worst five sessions (case box); R1's DD0 at 10% (KC9)"),
     "22 Jan 2008": (2, "2008's worst day: X2, X5"), "24 Aug 2015": (3, "2015's trough and worst day (X2), X5"),
-    "5 Aug 2024": (3, "2024's trough and worst day (X2), X5"), "5 August 2024": (2, "the 2024 named day (E1, KC7)"),
+    "5 Aug 2024": (3, "2024's trough and worst day (X2), X5"), "5 August 2024": (3, "the 2024 named day (definition box, E1, KC7)"),
     "4 March 2019": (2, "the rules' first trade"), "18 January 2017": (2, "E5's first joint date"),
     "8 October 2026": (6, "the last date, the current books' date"),
     "24 October 2026": (5, "the rules' fixing date and a retrieval date"),
-    "2008": (16, "the year"), "2015": (8, "the year"), "2020": (22, "the year"), "2022": (3, "the year"),
-    "2024": (9, "the year"), "2025": (18, "the year (with 年 in the zh boxes)"),
+    "2008": (17, "the year (and the lab box's T5S dates)"), "2015": (9, "the year (and the lab box's T5S dates)"),
+    "2020": (23, "the year (and the lab box's T5S dates)"), "2022": (4, "the year"),
+    "2024": (9, "the year (and the lab box's T5S dates)"),
+    "2025": (18, "the year (with 年 in the zh boxes; the lab box's T5S dates)"),
     # small integers
     "0": (33, "zero: exact-zero returns, inequalities, (1,0,0,0,0), means 0, X8's day counts, the code's indices"),
     "1": (38, "one: constants in formulas, rank 1, Art. 8 ¶1 and item 1, L=1, 1/10, lo=1, problem 1, Proposition 1"),
-    "2": (31, "two: squares, Section 2, lo=2, item 2, X2's rank, X8's days, 2 days farther, problem 2"),
-    "4": (14, "four: Section 4, X2's rank, lo=4,7, Principle 4, L=4, problem 4, the zh boxes' 4 月"),
-    "5": (13, "five: worst 5 sessions, Sections 5-6, lo=5, L=5, ell=5%, problem 5"),
-    "7": (11, "seven: Sections 7-8, the 7% limit before 2015, Art. 7, lo=4,7 and 7,8, problem 7, a zh date"),
+    "2": (32, "two: squares, Section 2, lo=2, item 2, X2's rank, X8's days, 2 days farther, problem 2, zh7's 4 月 2 日"),
+    "4": (16, "four: Section 4, X2's rank, lo=4,7, Principle 4, L=4, problem 4, the zh boxes' 4 月"),
+    "5": (14, "five: worst 5 sessions, Sections 5-6, lo=5, L=5, ell=5%, problem 5, the lab box's 5-second TAIEX"),
+    "7": (13, "seven: Sections 7-8, the 7% limit before 2015, Art. 7, lo=4,7 and 7,8, problems 7, zh dates, Part 7"),
     "8": (17, "eight: X2's rank, Section 8, Art. 8, lo=5,8 and 7,8, problem 2's 8%, problem 8, zh dates"),
     "9": (4, "Section 9, E4's R3 9%, problem and solution 9"),
     "10": (31, "10%: the limit, the reverse test's loss, the limit day, 10^{-k} tolerances, problem 10"),
@@ -1231,7 +1314,7 @@ PINS: dict[str, tuple[int, str]] = {
 # pages, retrieval dates, structure, and constants of formulas.
 ALLOW: dict[str, tuple[int, str]] = {
     "+0.30": (2, "the constructed break: E7's correlation, problem 6's beta"),
-    "-1": (14, "minus one in formulas (-1, Sigma^{-1}, -1/R)"),
+    "-1": (15, "minus one in formulas (-1, Sigma^{-1}, -1/R)"),
     "-10.0": (1, "the Python block's limit (part 3 runs the block)"),
     "0.08": (2, "problem 2's loss, in solution 2"), "-0.08": (1, "problem 2's loss, in solution 2"),
     "-8": (1, "solution 2's -8%"),
@@ -1245,7 +1328,7 @@ ALLOW: dict[str, tuple[int, str]] = {
     "6": (6, "Sections 5-6, lo=1,6 and 5,6, BCBS p. 6, problem and solution 6"),
     "11": (2, "problem and solution 11"), "12": (2, "problem and solution 12"),
     "8.4": (1, EQ), "8.13": (1, EQ), "16.4": (1, EQ), "16.8": (3, EQ), "16.9": (2, EQ), "23.1": (1, EQ),
-    "27.8": (1, EQ), "28.1": (2, EQ), "29.4": (3, EQ), "30.4": (1, EQ), "31.7": (1, EQ), "32.9": (1, EQ),
+    "27.8": (1, EQ), "28.1": (2, EQ), "29.4": (3, EQ), "30.4": (1, EQ), "32.9": (1, EQ),
     "33.1": (1, EQ), "35.1": (2, EQ), "35.3": (8, EQ), "35.5": (5, EQ),
     "1998": (1, "citation year (Kupiec)"), "2009": (2, "citation year (Breuer et al.)"),
     "2018": (1, "citation year (BCBS)"), "2.1": (1, "Breuer et al.'s section"), "2.2": (1, "Breuer et al.'s section"),
