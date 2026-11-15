@@ -61,10 +61,10 @@
 <li><a href="lm/lm31.html"><span class="k">LM31</span><span>Risk Parity, HRP and Volatility Targeting</span></a></li>
 </ol>
 <h2>Vol VI · Measuring True Risk and Return</h2><ol>
-<li><span title="Planned"><span class="k">LM32</span><span>VaR, Expected Shortfall and Drawdown</span></span></li>
-<li><span title="Planned"><span class="k">LM33</span><span>The Statistics of the Sharpe Ratio</span></span></li>
-<li><span title="Planned"><span class="k">LM34</span><span>Backtesting Without Fooling Yourself</span></span></li>
-<li><span title="Planned"><span class="k">LM35</span><span>Stress Testing</span></span></li>
+<li><a href="lm/lm32.html"><span class="k">LM32</span><span>VaR, Expected Shortfall and Drawdown</span></a></li>
+<li><a href="lm/lm33.html"><span class="k">LM33</span><span>The Statistics of the Sharpe Ratio</span></a></li>
+<li><a href="lm/lm34.html"><span class="k">LM34</span><span>Backtesting Without Fooling Yourself</span></a></li>
+<li><a href="lm/lm35.html"><span class="k">LM35</span><span>Stress Testing</span></a></li>
 </ol>
 <h2>Vol VII · Stochastic Calculus</h2><ol>
 <li><span title="Planned"><span class="k">LM36</span><span>From Random Walk to Brownian Motion</span></span></li>
@@ -88,7 +88,7 @@
 <li><span title="Planned"><span class="k">LM50</span><span>Capstone C: Multi-Strategy Allocation and Monitoring</span></span></li>
 </ol></nav>
 <main class="page" id="main"><header class="lm-head"><h1 class="lm-title">Research hygiene</h1><p class="lm-sub">Six rules that keep a result from market data honest, and the labels that results carry from Volume II on.</p></header>
-<div class="co zh"><div class="co-h"><span class="tag">導讀</span><span class="t">這一頁講什麼</span></div><p>用市場資料算出來的數字，看起來很精確，卻可能誤導。下面六條規則讓結果站得住腳。從第二卷起，每個會估計、選模型或回測的模組，都會用一個短框說明它用了哪幾條規則，以及結果該怎麼解讀；更完整的處理在 <a href="lm/lm21.html">LM21</a>、<span class="coming" title="LM33 The Statistics of the Sharpe Ratio — coming in Volume VI">LM33</span> 和 <span class="coming" title="LM34 Backtesting Without Fooling Yourself — coming in Volume VI">LM34</span>。</p>
+<div class="co zh"><div class="co-h"><span class="tag">導讀</span><span class="t">這一頁講什麼</span></div><p>用市場資料算出來的數字，看起來很精確，卻可能誤導。下面六條規則讓結果站得住腳。從第二卷起，每個會估計、選模型或回測的模組，都會用一個短框說明它用了哪幾條規則，以及結果該怎麼解讀；更完整的處理在 <a href="lm/lm21.html">LM21</a>、<a href="lm/lm33.html">LM33</a> 和 <a href="lm/lm34.html">LM34</a>。</p>
 </div>
 <p>A number computed from market data can look precise and still mislead. The six rules below keep the book's results
 honest. From Volume II on, every module that estimates, selects or backtests carries a short note. The note says
@@ -101,10 +101,10 @@ the time.</p>
 the test window after it, as in <a href="lm/lm07.html">LM7</a>: weights estimated on 2017–2021 and tested on 2022–2026. Fit every input on
 the estimation window only. That includes means, covariance matrices, principal components and any rescaling.</p>
 </section><section class="sec unnum" id="keep-selection-apart-from-evaluation"><h2 class="plain"><span class="ttl">Keep selection apart from evaluation</span></h2><p>Choose a model or a parameter on one stretch of data, and judge it once on another. Count the versions you tried.
-The more versions you try, the more likely it is that the best one is only lucky. <a href="lm/lm21.html">LM21</a> and <span class="coming" title="LM33 The Statistics of the Sharpe Ratio — coming in Volume VI">LM33</span> measure that
+The more versions you try, the more likely it is that the best one is only lucky. <a href="lm/lm21.html">LM21</a> and <a href="lm/lm33.html">LM33</a> measure that
 risk.</p>
 </section><section class="sec unnum" id="put-costs-inside-the-strategy"><h2 class="plain"><span class="ttl">Put costs inside the strategy</span></h2><p>Taxes, broker fees, slippage, financing and delays belong in the strategy while it is built. A strategy that trades
-more pays more, so one constant subtracted at the end hides the difference. <span class="coming" title="LM34 Backtesting Without Fooling Yourself — coming in Volume VI">LM34</span> gives Taiwan's official rates.</p>
+more pays more, so one constant subtracted at the end hides the difference. <a href="lm/lm34.html">LM34</a> gives Taiwan's official rates.</p>
 </section><section class="sec unnum" id="fix-the-universe-and-the-data-policy-first"><h2 class="plain"><span class="ttl">Fix the universe and the data policy first</span></h2><p>Decide which assets and which dates you use before you look at any result. A list of today's stocks leaves out the
 companies that were delisted, so it makes past returns look better than they were. Write down how you treat
 dividends, splits, missing values and dates that two series do not share.</p>
@@ -148,9 +148,10 @@ the fifth, from Volume III on, marks the answer of a probability model:</p>
 </table></div>
 <p>A full-sample estimate describes the past. It is not a forecast.</p>
 <p>Volume III also marks invented bets, positions and records as <strong>hypothetical</strong>, and examples built to make a point as
-<strong>constructed</strong> (<a href="lm/lm13.html">LM13</a>, <a href="lm/lm16.html">LM16</a>).</p>
+<strong>constructed</strong> (<a href="lm/lm13.html">LM13</a>, <a href="lm/lm16.html">LM16</a>). Volume VI marks a result that uses information its decision could not have had
+as <strong>look-ahead, not achievable</strong> (<a href="lm/lm34.html">LM34</a>).</p>
 
-<div class="co note"><div class="co-h"><span class="tag">Note</span><span class="t">Where the book goes deeper</span></div><p><a href="lm/lm21.html">LM21</a> covers multiple testing. <span class="coming" title="LM33 The Statistics of the Sharpe Ratio — coming in Volume VI">LM33</span> covers the Probabilistic and Deflated Sharpe ratios. <span class="coming" title="LM34 Backtesting Without Fooling Yourself — coming in Volume VI">LM34</span> covers
+<div class="co note"><div class="co-h"><span class="tag">Note</span><span class="t">Where the book goes deeper</span></div><p><a href="lm/lm21.html">LM21</a> covers multiple testing. <a href="lm/lm33.html">LM33</a> covers the Probabilistic and Deflated Sharpe ratios. <a href="lm/lm34.html">LM34</a> covers
 look-ahead and survivorship bias, costs, walk-forward testing and the probability of backtest overfitting.</p>
 </div>
 </section></main>

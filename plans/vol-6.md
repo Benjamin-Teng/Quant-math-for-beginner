@@ -8,7 +8,9 @@ unchanged. Every number a brief quotes is an anchor in [`vol-6-anchors.md`](vol-
 cited by file and line. Until Stage 3 the briefs and anchors are
 the plan; from Stage 3 the module sources and their numbers scripts are authoritative.
 
-Status: revised three times and given a last pass on 2026-10-24/25, each revision verified by fresh agents; revised on 2026-10-31 to the fresh check of the whole of Stage 1 ("Decisions on the fresh check of the whole of Stage 1", `plans/vol-5.md`), whose fixes and changed anchors fresh agents verified the same day.
+Status: Volume VI published in edition 0.7 (2026-11-15) after Stages 2 and 3 (records in `reviews/lm32.md` …
+`lm35.md`); the briefs and anchors stay the plan, and the modules and their numbers scripts are authoritative. Stage 1:
+revised three times and given a last pass on 2026-10-24/25, each revision verified by fresh agents; revised on 2026-10-31 to the fresh check of the whole of Stage 1 ("Decisions on the fresh check of the whole of Stage 1", `plans/vol-5.md`), whose fixes and changed anchors fresh agents verified the same day.
 
 ## LM32 VaR, Expected Shortfall and Drawdown
 

@@ -168,8 +168,9 @@ check(0.0008712 / 0.012385**2, 5.68, 2, "mu/s^2 from the printed mu and s")
 
 code(r"""
 def max_drawdown(f, r=R):
+    # the largest fall from a running peak, 1 - W_t / max W_s: a positive number, as the module prints it
     w = np.concatenate([[1.0], np.cumprod(1 + f * r)])
-    return float((w / np.maximum.accumulate(w) - 1).min())
+    return float(1 - (w / np.maximum.accumulate(w)).min())
 
 levels = [("1 (0050 itself)", 1.0), ("2 (exact daily 2x)", 2.0), ("half Kelly", f_star / 2), ("full Kelly", f_star), ("zero growth", f_zero)]
 case = pl.DataFrame({
@@ -186,14 +187,14 @@ case   # [[ex:case]]
 
 code(r"""
 check(case["growth of 1 unit"][3], 1122.5, 1, "growth of 1 unit at f*")
-check(case["max drawdown"][3], -0.933, 3, "max drawdown at f*")
+check(case["max drawdown"][3], 0.933, 3, "max drawdown at f*")
 for i, vol in enumerate((0.193, 0.386, 0.523, 1.047, 1.880)):
     check(case["annualized vol"][i], vol, 3, f"annualized volatility, row {i + 1}")
 # the note's recipe f s sqrt(A) with the printed s and A: rows 3-5 need the unrounded leverages it names
 for f_row, vol in ((2.7107, 0.523), (5.4215, 1.047), (9.7365, 1.880)):
     check(f_row * 0.012385 * math.sqrt(243.11), vol, 3, f"volatility of f = {f_row} from the printed recipe")
 check(case["annual log growth"][2] / case["annual log growth"][3], 0.742, 3, "half-Kelly share of growth")
-check(case["max drawdown"][2], -0.701, 3, "max drawdown at half Kelly")
+check(case["max drawdown"][2], 0.701, 3, "max drawdown at half Kelly")
 
 # [[eg:quadkelly]] (1): the quadratic rule, and volatility drag at the optimum
 print(f"quadratic growth at mu/m2: {mu**2 / (2 * m2) * A:.2%} a year;  rule {mu / m2 / f_star - 1:.1%} above the exact f*")
@@ -639,7 +640,9 @@ check(rule, 11.8, 1, "PP13: quadratic rule for the counterexample"); check(f_bin
 md(r"""
 ### Extension: walk-forward Kelly
 
-The module's warning is that an in-sample optimum is not a recommendation. Test it. At each month-end from November 2017, estimate $f^*$ on the trailing 729 days, cap it to $[0,3]$, and hold that leverage for the next month. Compare the realized log growth with constant $f=1$ and with a constant half of the full-sample $f^*$ (which uses future data and is therefore not a fair benchmark either). The scaffold below builds the month-end schedule and the walk-forward leverage; complete the comparison and explain the result with Sections 4 and 7. LM22 (bootstrap intervals for the Kelly fraction), LM34 (walk-forward tests) and LM45 (Kelly under uncertainty) return to this question.
+The module's warning is that an in-sample optimum is not a recommendation. Test it. At each month-end from October 2017, estimate $f^*$ on the trailing 729 days and cap it to $[0,3]$. The month-end close is known only after 13:30, so trade to that leverage at the next session's close (LM34, Section 2). Hold it to the close after the next month-end.
+
+Compare the realized log growth with constant $f=1$ and with a constant half of the full-sample $f^*$ (which uses future data and is therefore not a fair benchmark either). The scaffold below builds the month-end schedule and the walk-forward leverage; complete the comparison and explain the result with Sections 4 and 7. LM22 (bootstrap intervals for the Kelly fraction), LM34 (walk-forward tests) and LM45 (Kelly under uncertainty) return to this question.
 """)
 
 code(r"""
@@ -649,11 +652,13 @@ month_end = (ret.with_row_index("i")
 lev = np.full(T, np.nan)
 ends = month_end["i"].to_list()
 for k, e in enumerate(ends):
-    f_hat = min(max(kelly(R[e - W + 1:e + 1], xtol=1e-10), 0.0), 3.0)
+    f_hat = min(max(kelly(R[e - W + 1:e + 1], xtol=1e-10), 0.0), 3.0)   # returns through the close of session e
     nxt = ends[k + 1] if k + 1 < len(ends) else T - 1
-    lev[e + 1:nxt + 1] = f_hat
+    lev[e + 2:min(nxt + 2, T)] = f_hat     # traded at the close of e + 1, held to the close of nxt + 1 (or the last)
 mask = ~np.isnan(lev)
-print(f"walk-forward days: {mask.sum()};  average leverage {np.nanmean(lev):.2f}")
+first = int(np.flatnonzero(mask)[0])
+assert first == ends[0] + 2 and mask[first:].all()   # traded at the next close, then held on every later session
+print(f"walk-forward days: {mask.sum()} ({ret['date'][first]} to {ret['date'][T - 1]});  average leverage {np.nanmean(lev):.2f}")
 # TODO: compute annual log growth of the walk-forward rule, of f = 1 and of f = f_star / 2 over the same days,
 #       e.g. np.log1p(lev[mask] * R[mask]).sum() / (mask.sum() / A), and compare their maximum drawdowns.
 """)

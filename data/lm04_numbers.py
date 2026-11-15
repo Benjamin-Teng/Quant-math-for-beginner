@@ -4,6 +4,7 @@ Data-based numbers come from processed/lm04_stats.json (run lm04_stats.py first)
 the rest are computed here from the stated assumptions. Exhibits and examples are named by their labels in
 src/lm04.md ([[eg:coin]], [[ex:psens]], ...), never by number. Binary bet: gain b and loss a per unit staked.
 Where the module prints rounded inputs next to a result, the result is recomputed here from those printed inputs too.
+The maximum drawdowns are asserted against src/lm04.md, sign included (AUTHORING 6: the MDD is a positive number).
 Run after lm04_stats.py:  uv run python data/lm04_numbers.py
 """
 import json
@@ -15,6 +16,7 @@ import polars as pl
 from scipy.optimize import brentq
 
 HERE = Path(__file__).resolve().parent
+MD = HERE.parent / "src" / "lm04.md"                               # the text the drawdown checks compare against
 st = json.loads((HERE / "processed" / "lm04_stats.json").read_text(encoding="utf-8"))
 P = print
 A_PRINTED, MU_PRINTED, S_PRINTED = 243.11, 0.0008712, 0.012385      # as printed in the module (A = 2,902 / 11.937)
@@ -54,6 +56,35 @@ for name in ("1", "2", "half", "full", "zero"):
 for f_print in (1, 2, 2.71, 5.42, 9.74, 2.7107, 5.4215, 9.7365):
     P(f"  printed recipe: vol at f={f_print} = f s sqrt(A) = {f_print * S_PRINTED * sqrt(A_PRINTED):.4%}"
       f"  (worst day {-0.1 * f_print:.2%})")
+
+# Maximum drawdowns, asserted against the text with their sign: each is formatted from the computed value, a negative
+# value with the Unicode minus the module prints, so a sign flip in the text or in max_drawdown fails here.
+TEXT = MD.read_text(encoding="utf-8")
+
+
+def pct(x, nd):
+    return f"{x:.{nd}%}".replace("-", "−")
+
+
+MDD_DP = {"1": 1, "2": 1, "half": 1, "full": 1, "zero": 2}         # 99.99%: one decimal would print 100.0%
+assert all(r["mdd"] > 0 for r in lv.values()), "MDD must be positive (AUTHORING 6)"
+blk = TEXT.split("{#case}", 1)[1].split("> Note:", 1)[0]
+tab = [[c.strip().strip("*") for c in ln[2:].strip().strip("|").split("|")] for ln in blk.splitlines() if ln.startswith("> |")]
+c_mdd, c_worst = tab[0].index("Maximum drawdown"), tab[0].index("Worst day (7 Apr 2025)")
+assert len(tab) == 7, f"[[ex:case]] has {len(tab) - 2} rows, not 5"
+for name, row in zip(("1", "2", "half", "full", "zero"), tab[2:], strict=True):
+    mdd_p, worst_p = pct(lv[name]["mdd"], MDD_DP[name]), pct(lv[name]["worst"], 1)
+    assert row[c_mdd] == mdd_p, f"[[ex:case]] row {row[0]}: maximum drawdown printed {row[c_mdd]!r}, computed {mdd_p!r}"
+    assert row[c_worst] == worst_p, f"[[ex:case]] row {row[0]}: worst day printed {row[c_worst]!r}, computed {worst_p!r}"
+    for minus in ("−", "-"):
+        assert minus + mdd_p not in TEXT, f"a signed maximum drawdown {minus + mdd_p!r} in src/lm04.md"
+    P(f"  [[ex:case]] row {row[0]}: maximum drawdown {mdd_p} ok, worst day {worst_p} ok")
+half_s = f"cut the maximum drawdown from {pct(lv['full']['mdd'], 1)} to {pct(lv['half']['mdd'], 1)}."
+assert TEXT.count(half_s) == 1, f"[[eg:half]]: {half_s!r} occurs {TEXT.count(half_s)} times in src/lm04.md, not once"
+# full Kelly's 93.3%: the overview, the case, the exhibit row, [[eg:half]], the case's resolution and the Summary
+n_full = TEXT.count(pct(lv["full"]["mdd"], 1))
+assert n_full == 6, f"{pct(lv['full']['mdd'], 1)} occurs {n_full} times in src/lm04.md, not 6"
+P(f"  [[eg:half]]: {half_s!r} once;  {pct(lv['full']['mdd'], 1)} {n_full} times, none signed")
 
 # ---------------------------------------------------------------- Section 2
 P("== Section 2")

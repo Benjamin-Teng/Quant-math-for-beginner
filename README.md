@@ -2,7 +2,7 @@
 
 **English** | [繁體中文](README.zh-TW.md)
 
-A personal self-study project that builds from first-year calculus, statistics and linear algebra toward statistical modeling, portfolio optimization and Kelly position sizing under uncertainty. The planned curriculum spans **9 volumes and 50 Learning Modules**; **Volumes I–V (LM1–LM31) are published**.
+A personal self-study project that builds from first-year calculus, statistics and linear algebra toward statistical modeling, portfolio optimization and Kelly position sizing under uncertainty. The planned curriculum spans **9 volumes and 50 Learning Modules**; **Volumes I–VI (LM1–LM35) are published**.
 
 The textbook is written in English with Traditional Chinese reading guides. Published modules include a web chapter, an A4 PDF and a Jupyter lab with saved outputs. Examples combine Taiwan and US market data with explicitly labeled models, simulations and constructed cases.
 
@@ -10,7 +10,7 @@ The textbook is written in English with Traditional Chinese reading guides. Publ
 
 ## Current progress
 
-README updated: **2026-11-07**. Latest textbook edition: **0.6 (2026-11-07)**, as recorded in [the syllabus](src/syllabus.yaml).
+README updated: **2026-11-15**. Latest textbook edition: **0.7 (2026-11-15)**, as recorded in [the syllabus](src/syllabus.yaml).
 
 | Volume | Topic | Modules | Status |
 |:--|:--|:--|:--|
@@ -19,12 +19,12 @@ README updated: **2026-11-07**. Latest textbook edition: **0.6 (2026-11-07)**, a
 | III | Probability | LM13–LM18 | Published |
 | IV | Statistical Inference and Econometrics | LM19–LM26 | Published |
 | V | Portfolio Optimization | LM27–LM31 | Published |
-| VI | Measuring True Risk and Return | LM32–LM35 | Planned |
+| VI | Measuring True Risk and Return | LM32–LM35 | Published |
 | VII | Stochastic Calculus | LM36–LM40 | Planned |
 | VIII | The Kelly Criterion and Optimal Leverage | LM41–LM46 | Planned |
 | IX | Capstone | LM47–LM50 | Planned |
 
-Edition 0.6 adds portfolio optimization: portfolio return and risk contributions, mean–variance optimization, convex optimization under portfolio limits, estimation error and robust portfolios, and risk parity, hierarchical risk parity and volatility targeting. The remaining risk-measurement, stochastic-calculus, advanced Kelly and capstone modules are roadmap items, not published chapters.
+Edition 0.7 adds risk and return measurement: value at risk, expected shortfall and drawdowns with their standard errors and backtests, the statistics of the Sharpe ratio, backtesting without fooling yourself, and stress testing with replays of Taiwan's crashes of 2008, 2015, 2020, 5 August 2024 and 7 April 2025. The remaining stochastic-calculus, advanced Kelly and capstone modules are roadmap items, not published chapters.
 
 See [the roadmap](plans/ROADMAP.md) for future volumes.
 
@@ -75,6 +75,10 @@ The following links point to the repository's built chapters, PDFs and lab folde
 | LM29 Convex Optimization in Practice | published | [`docs/lm/lm29.html`](docs/lm/lm29.html) | [`docs/pdf/LM29_…pdf`](docs/pdf/LM29_Convex_Optimization_in_Practice.pdf) | [`labs/LM29_lab`](labs/LM29_lab) |
 | LM30 Estimation Error and Robust Portfolios | published | [`docs/lm/lm30.html`](docs/lm/lm30.html) | [`docs/pdf/LM30_…pdf`](docs/pdf/LM30_Estimation_Error_and_Robust_Portfolios.pdf) | [`labs/LM30_lab`](labs/LM30_lab) |
 | LM31 Risk Parity, HRP and Volatility Targeting | published | [`docs/lm/lm31.html`](docs/lm/lm31.html) | [`docs/pdf/LM31_…pdf`](docs/pdf/LM31_Risk_Parity_HRP_and_Volatility_Targeting.pdf) | [`labs/LM31_lab`](labs/LM31_lab) |
+| LM32 VaR, Expected Shortfall and Drawdown | published | [`docs/lm/lm32.html`](docs/lm/lm32.html) | [`docs/pdf/LM32_…pdf`](docs/pdf/LM32_VaR_Expected_Shortfall_and_Drawdown.pdf) | [`labs/LM32_lab`](labs/LM32_lab) |
+| LM33 The Statistics of the Sharpe Ratio | published | [`docs/lm/lm33.html`](docs/lm/lm33.html) | [`docs/pdf/LM33_…pdf`](docs/pdf/LM33_The_Statistics_of_the_Sharpe_Ratio.pdf) | [`labs/LM33_lab`](labs/LM33_lab) |
+| LM34 Backtesting Without Fooling Yourself | published | [`docs/lm/lm34.html`](docs/lm/lm34.html) | [`docs/pdf/LM34_…pdf`](docs/pdf/LM34_Backtesting_Without_Fooling_Yourself.pdf) | [`labs/LM34_lab`](labs/LM34_lab) |
+| LM35 Stress Testing | published | [`docs/lm/lm35.html`](docs/lm/lm35.html) | [`docs/pdf/LM35_…pdf`](docs/pdf/LM35_Stress_Testing.pdf) | [`labs/LM35_lab`](labs/LM35_lab) |
 
 A module is published only after independent review and verified fixes under [AUTHORING.md](AUTHORING.md). The syllabus controls which modules appear in the published build; unpublished entries appear only in the preview.
 
@@ -99,7 +103,7 @@ Optional data and lab rebuilds require local source data:
 ./build.sh --labs                 # regenerate and execute lab notebooks
 ```
 
-Volume IV intraday downloads use `data/fetch_intraday.py` separately; `--fetch` does not fetch that entire history. Follow [data/README.md](data/README.md) for access requirements, reconstruction steps and verification. These commands may make substantial data requests or take time to execute.
+Intraday data use `data/fetch_intraday.py` separately: Volume IV's full 5-second history, and the named days that LM32's and LM35's labs read (`--dates`, as each lab box gives them), which `./build.sh --data` needs for LM35. `--fetch` fetches neither. Follow [data/README.md](data/README.md) for access requirements, reconstruction steps and verification. These commands may make substantial data requests or take time to execute.
 
 For an HTML-only build, run `uv run python build/build.py` after installing dependencies. Formulas are rendered with KaTeX at build time; interactive charts use JavaScript.
 

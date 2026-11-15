@@ -85,11 +85,17 @@ account.
 Run `uv run python data/fetch_finmind.py`, then `uv run python data/make_lab_data.py`. After that, every lab runs
 offline. The book ships no market data, because FinMind's licence does not allow the book to redistribute it.
 
+Three labs also read days of the 5-second TAIEX, which `data/fetch_intraday.py` downloads. LM32's lab reads three
+named days and LM35's five: run the `--dates` command that each lab box gives before `make_lab_data.py`, which copies
+the days it finds from `data/raw/intraday/taiex5s/` and names any missing one with its download command. LM26's
+Part 9 optionally reads the 243 days of 2025, which you copy by hand from `data/raw/intraday/taiex5s/2025/` into
+`labs/LM26_lab/data/taiex5s_2025/`.
+
 Volume I's files come from FinMind's free datasets, and so do Volume II's sector indices. Three groups of files need a
 paid plan. `data/raw/sectors_close/` holds 561 small files that repair FinMind's copied sector closes (see "Check, do
 not trust" below). `data/raw/vol4_settlement/` holds TX's final settlement prices, a cross-check of Volume IV that
-`vol4_series.py` skips when the file is absent. The two ETF snapshots `data/raw/vol6/etf_snapshot__…` serve one count
-in Volume VI.
+`vol4_series.py` skips when the file is absent. The two ETF snapshots `data/raw/vol6/etf_snapshot__…` serve two counts
+in one example of Volume VI.
 
 On the free plan, run
 `uv run python data/fetch_finmind.py --exclude sectors_close/ --exclude vol4_settlement/ --exclude vol6/etf_snapshot`.

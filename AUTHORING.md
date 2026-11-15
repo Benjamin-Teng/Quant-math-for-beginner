@@ -465,7 +465,11 @@ bundled):
   the book to redistribute the data. After that, the notebook runs offline." LM26's box adds two sentences: "The
   realized variances come with the repository (`data/derived/vol4_rv.csv`). Rebuilding them needs the 5-second TAIEX
   download, `uv run python data/fetch_intraday.py --series taiex5s` (5,351 requests, about nine hours on a free
-  registered FinMind account at 600 calls an hour, re-run after each hourly stop)."
+  registered FinMind account at 600 calls an hour, re-run after each hourly stop)." A lab that reads named days of
+  the 5-second TAIEX (LM32, LM35) adds one sentence in one form: "Part N also reads K named days of the 5-second
+  TAIEX: run `uv run python data/fetch_intraday.py --series taiex5s --dates …` before `make_lab_data.py`.", with N
+  the lab's part and K the count of days in words; `make_lab_data.py` copies the days it finds and skips a missing
+  one with that command.
 - The notebook's first cell: "**Environment.** From the repository root, `uv sync` installs the locked Python
   environment (`uv.lock`). Open this notebook with the `.venv` kernel, or run `uv run --with jupyterlab jupyter lab`."
 - The lab's README runs `uv sync` and `uv run --with jupyterlab jupyter lab labs/LMNN_lab/LMNN_lab.ipynb` from the

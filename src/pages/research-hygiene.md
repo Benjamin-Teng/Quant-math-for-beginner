@@ -56,7 +56,8 @@ the fifth, from Volume III on, marks the answer of a probability model:
 A full-sample estimate describes the past. It is not a forecast.
 
 Volume III also marks invented bets, positions and records as **hypothetical**, and examples built to make a point as
-**constructed** ([[LM13]], [[LM16]]).
+**constructed** ([[LM13]], [[LM16]]). Volume VI marks a result that uses information its decision could not have had
+as **look-ahead, not achievable** ([[LM34]]).
 
 > [!note] Where the book goes deeper
 > [[LM21]] covers multiple testing. [[LM33]] covers the Probabilistic and Deflated Sharpe ratios. [[LM34]] covers

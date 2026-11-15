@@ -2,7 +2,7 @@
 
 [English](README.md) | **繁體中文**
 
-這是個人自學量化金融的專案，從大一微積分、統計學與線性代數出發，逐步走向統計建模、投資組合最佳化，以及考量估計誤差的凱利部位配置。完整課程規劃為 **9 卷、50 個 Learning Modules**；目前已發布 **第 I–V 卷（LM1–LM31）**。
+這是個人自學量化金融的專案，從大一微積分、統計學與線性代數出發，逐步走向統計建模、投資組合最佳化，以及考量估計誤差的凱利部位配置。完整課程規劃為 **9 卷、50 個 Learning Modules**；目前已發布 **第 I–VI 卷（LM1–LM35）**。
 
 教材以英文撰寫，搭配繁體中文導讀。已發布的每個模組均有網頁章節、A4 PDF，以及保留執行輸出的 Jupyter Lab。範例結合台股與美股市場資料，並明確標示模型、模擬及建構案例。
 
@@ -10,7 +10,7 @@
 
 ## 目前進度
 
-README 更新日期：**2026-11-07**。教材最新版本：**Edition 0.6（2026-11-07）**，以[課程目錄](src/syllabus.yaml)的版本紀錄為準。
+README 更新日期：**2026-11-15**。教材最新版本：**Edition 0.7（2026-11-15）**，以[課程目錄](src/syllabus.yaml)的版本紀錄為準。
 
 | 卷 | 主題 | 模組 | 狀態 |
 |:--|:--|:--|:--|
@@ -19,12 +19,12 @@ README 更新日期：**2026-11-07**。教材最新版本：**Edition 0.6（2026
 | III | 機率 | LM13–LM18 | 已發布 |
 | IV | 統計推論與計量經濟學 | LM19–LM26 | 已發布 |
 | V | 投資組合最佳化 | LM27–LM31 | 已發布 |
-| VI | 衡量真實風險與報酬 | LM32–LM35 | 規劃中 |
+| VI | 衡量真實風險與報酬 | LM32–LM35 | 已發布 |
 | VII | 隨機微積分 | LM36–LM40 | 規劃中 |
 | VIII | 凱利準則與最適槓桿 | LM41–LM46 | 規劃中 |
 | IX | 整合專題 | LM47–LM50 | 規劃中 |
 
-Edition 0.6 新增投資組合最佳化：投資組合的報酬與風險貢獻、平均數-變異數最佳化、投資組合限制下的凸規劃、估計誤差與穩健投資組合，以及風險平價、層次風險平價（HRP）與波動率目標。後續風險衡量、隨機微積分、進階凱利與整合專題仍屬規劃，尚未發布。
+Edition 0.7 新增風險與報酬的衡量：風險值（VaR）、預期短缺（ES）與回撤，連同它們的標準誤與回測；夏普比率的統計性質；怎麼做回測才不會騙到自己；以及重演台股歷次崩跌（2008、2015、2020 年，2024 年 8 月 5 日與 2025 年 4 月 7 日）的壓力測試。隨機微積分、進階凱利與整合專題仍在規劃，尚未發布。
 
 後續卷別見[課程路線圖](plans/ROADMAP.md)。
 
@@ -75,6 +75,10 @@ Edition 0.6 新增投資組合最佳化：投資組合的報酬與風險貢獻�
 | LM29 Convex Optimization in Practice | 已發布 | [`docs/lm/lm29.html`](docs/lm/lm29.html) | [`docs/pdf/LM29_…pdf`](docs/pdf/LM29_Convex_Optimization_in_Practice.pdf) | [`labs/LM29_lab`](labs/LM29_lab) |
 | LM30 Estimation Error and Robust Portfolios | 已發布 | [`docs/lm/lm30.html`](docs/lm/lm30.html) | [`docs/pdf/LM30_…pdf`](docs/pdf/LM30_Estimation_Error_and_Robust_Portfolios.pdf) | [`labs/LM30_lab`](labs/LM30_lab) |
 | LM31 Risk Parity, HRP and Volatility Targeting | 已發布 | [`docs/lm/lm31.html`](docs/lm/lm31.html) | [`docs/pdf/LM31_…pdf`](docs/pdf/LM31_Risk_Parity_HRP_and_Volatility_Targeting.pdf) | [`labs/LM31_lab`](labs/LM31_lab) |
+| LM32 VaR, Expected Shortfall and Drawdown | 已發布 | [`docs/lm/lm32.html`](docs/lm/lm32.html) | [`docs/pdf/LM32_…pdf`](docs/pdf/LM32_VaR_Expected_Shortfall_and_Drawdown.pdf) | [`labs/LM32_lab`](labs/LM32_lab) |
+| LM33 The Statistics of the Sharpe Ratio | 已發布 | [`docs/lm/lm33.html`](docs/lm/lm33.html) | [`docs/pdf/LM33_…pdf`](docs/pdf/LM33_The_Statistics_of_the_Sharpe_Ratio.pdf) | [`labs/LM33_lab`](labs/LM33_lab) |
+| LM34 Backtesting Without Fooling Yourself | 已發布 | [`docs/lm/lm34.html`](docs/lm/lm34.html) | [`docs/pdf/LM34_…pdf`](docs/pdf/LM34_Backtesting_Without_Fooling_Yourself.pdf) | [`labs/LM34_lab`](labs/LM34_lab) |
+| LM35 Stress Testing | 已發布 | [`docs/lm/lm35.html`](docs/lm/lm35.html) | [`docs/pdf/LM35_…pdf`](docs/pdf/LM35_Stress_Testing.pdf) | [`labs/LM35_lab`](labs/LM35_lab) |
 
 模組須依 [AUTHORING.md](AUTHORING.md)完成獨立審查與修正驗證，才能發布。課程目錄控制正式建置納入的模組；未發布的項目只會出現在預覽版。
 
@@ -99,7 +103,7 @@ uv run playwright install chromium  # 產生 PDF 前須先安裝
 ./build.sh --labs                 # 重新產生並執行 Lab notebooks
 ```
 
-第 IV 卷的日內資料須另以 `data/fetch_intraday.py` 下載；`--fetch` 不會下載這整段日內歷史。資料權限、重建步驟與驗證方式見 [data/README.md](data/README.md)。這些指令可能需要大量資料請求或較長執行時間。
+日內資料須另以 `data/fetch_intraday.py` 下載：第 IV 卷的完整 5 秒資料，以及 LM32、LM35 的 Lab 讀取的指定交易日（`--dates`，指令見各 Lab 框）；`./build.sh --data` 跑到 LM35 時需要後者。`--fetch` 兩者都不下載。資料權限、重建步驟與驗證方式見 [data/README.md](data/README.md)。這些指令可能需要大量資料請求或較長執行時間。
 
 只建置 HTML 時，可在安裝相依套件後執行 `uv run python build/build.py`。公式透過 KaTeX 在建置時轉為 HTML；互動圖表則使用 JavaScript。
 

@@ -59,8 +59,9 @@ def kelly(r, xtol=1e-15):
 
 
 def max_drawdown(f, r):
+    """Maximum drawdown max_t DD_t with DD_t = 1 - W_t / max_{s<=t} W_s >= 0 (AUTHORING 6): a positive number."""
     w = np.concatenate([[1.0], np.cumprod(1 + f * r)])
-    return float((w / np.maximum.accumulate(w) - 1).min())
+    return float(1 - (w / np.maximum.accumulate(w)).min())
 
 
 res: dict[str, Any] = {"T": T, "years": YEARS, "A": A, "first": str(dates[0]), "last": str(dates[-1])}

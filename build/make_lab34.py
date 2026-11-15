@@ -658,7 +658,7 @@ print(f"in-sample best, out of sample: {abs(oos_mean):.2f} (SE {np.std(a_oos) / 
 md(r"""
 ## Part 7 — The Kelly walk-forward on TR23 (problem 9)
 
-LM4's lab exercise, on TR23's longer history: at each calendar month-end with 729 returns, the root of (4.5) on the trailing 729, capped to $[0, 3]$, is traded at the next close (Section 2's protocol, a session later than Lab 4's scaffold, which runs on 0050) and held to the close after the next month-end. Daily rebalancing to the month's leverage, no trading costs, borrowing at 0 or 3.5% a year on the exposure above 1: *hypothetical*. The full-sample root and half of it are *look-ahead, not achievable*.
+LM4's lab exercise, on TR23's longer history: at each calendar month-end with 729 returns, the root of (4.5) on the trailing 729, capped to $[0, 3]$, is traded at the next close (Section 2's protocol, as Lab 4's scaffold trades on 0050) and held to the close after the next month-end. Daily rebalancing to the month's leverage, no trading costs, borrowing at 0 or 3.5% a year on the exposure above 1: *hypothetical*. The full-sample root and half of it are *look-ahead, not achievable*.
 """)
 
 code(r"""

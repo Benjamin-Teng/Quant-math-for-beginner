@@ -61,10 +61,10 @@
 <li><a href="lm/lm31.html"><span class="k">LM31</span><span>Risk Parity, HRP and Volatility Targeting</span></a></li>
 </ol>
 <h2>Vol VI · Measuring True Risk and Return</h2><ol>
-<li><span title="Planned"><span class="k">LM32</span><span>VaR, Expected Shortfall and Drawdown</span></span></li>
-<li><span title="Planned"><span class="k">LM33</span><span>The Statistics of the Sharpe Ratio</span></span></li>
-<li><span title="Planned"><span class="k">LM34</span><span>Backtesting Without Fooling Yourself</span></span></li>
-<li><span title="Planned"><span class="k">LM35</span><span>Stress Testing</span></span></li>
+<li><a href="lm/lm32.html"><span class="k">LM32</span><span>VaR, Expected Shortfall and Drawdown</span></a></li>
+<li><a href="lm/lm33.html"><span class="k">LM33</span><span>The Statistics of the Sharpe Ratio</span></a></li>
+<li><a href="lm/lm34.html"><span class="k">LM34</span><span>Backtesting Without Fooling Yourself</span></a></li>
+<li><a href="lm/lm35.html"><span class="k">LM35</span><span>Stress Testing</span></a></li>
 </ol>
 <h2>Vol VII · Stochastic Calculus</h2><ol>
 <li><span title="Planned"><span class="k">LM36</span><span>From Random Walk to Brownian Motion</span></span></li>
@@ -149,11 +149,16 @@ explains. The third is in the second row: a fall from 176.00 to 158.40 is exactl
 account.</p>
 </section><section class="sec unnum" id="fetch-the-data"><h2 class="plain"><span class="ttl">Fetch the data</span></h2><p>Run <code>uv run python data/fetch_finmind.py</code>, then <code>uv run python data/make_lab_data.py</code>. After that, every lab runs
 offline. The book ships no market data, because FinMind's licence does not allow the book to redistribute it.</p>
+<p>Three labs also read days of the 5-second TAIEX, which <code>data/fetch_intraday.py</code> downloads. LM32's lab reads three
+named days and LM35's five: run the <code>--dates</code> command that each lab box gives before <code>make_lab_data.py</code>, which copies
+the days it finds from <code>data/raw/intraday/taiex5s/</code> and names any missing one with its download command. LM26's
+Part 9 optionally reads the 243 days of 2025, which you copy by hand from <code>data/raw/intraday/taiex5s/2025/</code> into
+<code>labs/LM26_lab/data/taiex5s_2025/</code>.</p>
 <p>Volume I's files come from FinMind's free datasets, and so do Volume II's sector indices. Three groups of files need a
 paid plan. <code>data/raw/sectors_close/</code> holds 561 small files that repair FinMind's copied sector closes (see &quot;Check, do
 not trust&quot; below). <code>data/raw/vol4_settlement/</code> holds TX's final settlement prices, a cross-check of Volume IV that
-<code>vol4_series.py</code> skips when the file is absent. The two ETF snapshots <code>data/raw/vol6/etf_snapshot__…</code> serve one count
-in Volume VI.</p>
+<code>vol4_series.py</code> skips when the file is absent. The two ETF snapshots <code>data/raw/vol6/etf_snapshot__…</code> serve two counts
+in one example of Volume VI.</p>
 <p>On the free plan, run
 <code>uv run python data/fetch_finmind.py --exclude sectors_close/ --exclude vol4_settlement/ --exclude vol6/etf_snapshot</code>.
 <code>make_lab_data.py</code> does not need those files, and Volume II's labs say what changes without the repairs. The fetch

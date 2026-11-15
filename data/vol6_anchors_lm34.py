@@ -404,7 +404,7 @@ def kelly_root(x: Vec) -> float:
 
 def kelly_walk(R: Vec, TD: list[str]) -> None:
     """LM4's lab exercise on TR23: the root of (4.5) on the trailing 729 returns at a month-end, capped to [0, 3],
-    traded at the next close (section 2's protocol, a session later than Lab 4's scaffold) and held to the close after
+    traded at the next close (section 2's protocol, as Lab 4's scaffold trades on 0050) and held to the close after
     the next month-end."""
     T, W = len(R), 729
     ends = [i for i in range(T - 1) if TD[i][:7] != TD[i + 1][:7] and i >= W - 1]
